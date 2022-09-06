@@ -109,7 +109,11 @@ void MainWindow::on_pb_run_clicked()
             m_cmd = "iperf3";
 #endif
         }
-        QString args="-s -i 1 --forceflush";
+        QString args="-s -i 1";
+        if (ver==3){
+            args=args + " --forceflush";
+        }
+
         port = ui->sb_port->value();
         iperf_th = new QThread();
 //        onLog("cmd: " + m_cmd);
@@ -123,8 +127,9 @@ void MainWindow::on_pb_run_clicked()
         connect(iperf_th, SIGNAL(started()), iperfer, SLOT(work()));
         iperf_th->start();
     } else{
-        onLog("Stop iperf");
+//        onLog("Stop iperf");
         iperfer->setStop();
+        ui->pb_run->setText("Run");
     }
 
 }
