@@ -33,6 +33,9 @@ android {
         android/build.gradle \
         android/res/values/libs.xml
 
+    RESOURCES += \
+            android.qrc
+
 }
 
 RESOURCES += \

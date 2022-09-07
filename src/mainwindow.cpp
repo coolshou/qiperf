@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
         QFile::remove(m_iperfexe3);
     }
     //iperf2
-    QFile i2File(":/"+arch+"/iperf");
+    QFile i2File(":/android/"+arch+"/iperf");
 //    onLog("iperf2: " + i2File.fileName());
     if (!i2File.open(QIODevice::ReadOnly)){
         onLog("could not open " + i2File.fileName()) ;
@@ -60,7 +60,7 @@ MainWindow::MainWindow(QWidget *parent)
         }
     }
     //iperf3
-    QFile i3File(":/"+arch+"/iperf3");
+    QFile i3File(":/android/"+arch+"/iperf3");
 //    onLog("iperf2: " + i3File.fileName());
     if (!i3File.open(QIODevice::ReadOnly)){
         onLog("could not open " + i3File.fileName()) ;
