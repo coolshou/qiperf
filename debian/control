@@ -1,0 +1,18 @@
+Source: qiperf
+Section: network
+Priority: optional
+Maintainer: coolshou <coolshou2060@gmail.com>
+Build-Depends: debhelper-compat (= 13), qtbase5-dev, make, qt5-qmake
+Standards-Version: 4.6.0
+Homepage: https://github.com/coolshou/qiperf.git
+#Vcs-Browser: https://salsa.debian.org/debian/qiperf
+#Vcs-Git: https://github.com/coolshou/qiperf.git
+Rules-Requires-Root: no
+
+Package: qiperf
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: qt base app to lunch iperf2/3 in server mode
+ qt base app to lunch iperf2/3 in server mode
+ iperf2
+ iperf3
