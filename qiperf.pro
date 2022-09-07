@@ -38,6 +38,33 @@ android {
 
 }
 
+win32:VERSION = 1.0.2022.09 # major.minor.patch.build
+else:VERSION = 1.0.0    # major.minor.patch
+
+win32 {
+# windows resources
+    CONFIG += embed_manifest_exe
+
+    RC_ICONS=$$PWD/images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
+    #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
+
+    QMAKE_TARGET_COMPANY="coolshou.idv.tw" #：指定項目目標的公司名稱，僅適用於Windows
+    QMAKE_TARGET_PRODUCT=$${TARGET} #：指定項目目標的產品名稱，僅適用於Windows
+    QMAKE_TARGET_DESCRIPTION="qt base iperf server launcher" #：指定項目目標的描述資訊，僅適用於Windows
+    QMAKE_TARGET_COPYRIGHT="Copyright © 2022 coolshou.idv.tw" #：指定項目目標的版權資訊，僅適用於Windows
+    #PACKAGE_DOMAIN：
+    #PACKAGE_VERSION：
+    RC_CODEPAGE=0x04b0 #unicode：指定應該被包含進一個.rc檔案中的字碼頁，僅適用於Windows
+    RC_LANG=0x0409 #en_US：指定應該被包含進一個.rc檔案中的語言，僅適用於Windows
+
+    DISTFILES += $$PWD/images/qiperf.icon
+}
+macx {
+# Mac OS
+    ICON = $$PWD/images/qiperf.icns
+}
+
 RESOURCES += \
+    linux.qrc \
     qiperf.qrc
 

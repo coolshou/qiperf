@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/linux">
+        <file>linux/x86/iperf</file>
+        <file>linux/x86/iperf3</file>
+        <file>linux/x86_64/iperf</file>
+        <file>linux/x86_64/iperf3</file>
+    </qresource>
+</RCC>
