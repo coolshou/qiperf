@@ -1,0 +1,15 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Name=qiperf
+Name[zh_TW]=qiperf
+Comment=qt base iperf server launcher
+Type=Application
+Exec=qiperf
+Icon=qiperf
+Terminal=false
+StartupNotify=true
+Categories=Application;Network;
+Keywords=QT;
+
