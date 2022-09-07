@@ -20,18 +20,23 @@ MainWindow::MainWindow(QWidget *parent)
     QString ipaddr("");
     //localhost, exclude
     const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
+    const QHostAddress &localhost6 = QHostAddress(QHostAddress::LocalHostIPv6);
     foreach (const QNetworkInterface &netInterface, QNetworkInterface::allInterfaces()) {
         QString name = netInterface.name();
         foreach (const QNetworkAddressEntry &address, netInterface.addressEntries()) {
-            if (QString::compare(address.ip().toString() , localhost.toString(), Qt::CaseInsensitive)!=0){
+            if ((QString::compare(address.ip().toString() , localhost.toString(), Qt::CaseInsensitive)==0)||
+                (QString::compare(address.ip().toString() , localhost6.toString(), Qt::CaseInsensitive)==0)){
+                //ignore
+            }else{
 //                onLog(name + ": " +address.ip().toString());
                 ipaddr=ipaddr+ name + ":" +address.ip().toString()+"\n";
             }
         }
     }
     int idx = ipaddr.lastIndexOf("\n");
-    ui->lb_info->setText(ipaddr.left(idx));
-
+//    ui->lb_info->setText(ipaddr.left(idx));
+    ui->te_info->setPlainText(ipaddr.left(idx));
+//    ui->te_info->
 #if defined (Q_OS_ANDROID)
     // android path
 //    m_path = "/data/local/tmp";
