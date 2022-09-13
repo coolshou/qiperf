@@ -80,7 +80,23 @@ MainWindow::MainWindow(QWidget *parent)
                                       QFileDevice::ReadOther | QFileDevice::WriteOther| QFileDevice::ExeOther);
         }
     }
+#endif
+#if defined (Q_OS_ANDROID)
+#else
+    #if defined (Q_OS_LINUX)
 
+    //Linux iperf binary
+        //iperf2
+        QFile i2File(":/linux/"+arch+"/iperf");
+        QFile i3File(":/linux/"+arch+"/iperf3");
+
+    #endif
+#endif
+#if defined (Q_OS_WIN32)
+//windows, multi files
+    QString apppath = qApp->applicationDirPath();
+    m_iperfexe2 =
+    m_iperfexe3
 #endif
 }
 
