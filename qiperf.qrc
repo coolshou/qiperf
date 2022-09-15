@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file alias="qiperf">images/qiperf.png</file>
+        <file alias="config">images/config.png</file>
     </qresource>
 </RCC>

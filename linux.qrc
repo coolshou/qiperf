@@ -3,6 +3,6 @@
         <file alias="i686/iperf">linux/x86/iperf</file>
         <file alias="i686/iperf3">linux/x86/iperf3</file>
         <file alias="x86_64/iperf">linux/x86_64/iperf</file>
-        <file alias="x86_64/iperf">linux/x86_64/iperf3</file>
+        <file alias="x86_64/iperf3">linux/x86_64/iperf3</file>
     </qresource>
 </RCC>

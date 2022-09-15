@@ -5,6 +5,7 @@
 #include <QThread>
 #include <signal.h>
 #include <QFileInfo>
+//#include <QOverload>
 
 #include <QDebug>
 
@@ -43,7 +44,8 @@ void IperfWorker::work()
     connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
     connect(m_iperf, SIGNAL(readyRead()), this, SLOT(readyReadStdOut()));
     connect(m_iperf, SIGNAL(started()), this, SLOT(onStarted()));
-    connect(m_iperf, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(onFinished(int,QProcess::ExitStatus)));
+//    connect(m_iperf, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(onFinished(int,QProcess::ExitStatus)));
+    connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
     //errorOccurred(QProcess::ProcessError error)
 
     m_iperf->start(m_cmd, m_arguments, QProcess::Unbuffered | QProcess::ReadWrite);
@@ -59,7 +61,7 @@ void IperfWorker::work()
         emit log("iperf not started!!" + m_cmd + " " + m_arguments.join(" "));
         emit log(m_iperf->readAllStandardError());
     }
-    emit finished(m_iperf->exitCode(), m_iperf->exitStatus());
+//    emit finished(m_iperf->exitCode(), m_iperf->exitStatus());
 }
 void IperfWorker::setStop()
 {
@@ -104,6 +106,6 @@ void IperfWorker::readyReadStdErr()
 
 void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    emit finished(exitCode, int(exitStatus));
     m_stop = true;
-    emit finished(exitCode, exitStatus);
 }

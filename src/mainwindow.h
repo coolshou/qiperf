@@ -4,8 +4,10 @@
 #include <QMainWindow>
 #include <QThread>
 #include <QProcess>
+#include <QSettings>
 
 #include "iperfworker.h"
+#include "formoption.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -33,16 +35,27 @@ private slots:
 
     void on_pb_copy_clicked();
 
+    void on_rb_v2_clicked();
+
+    void on_rb_v3_clicked();
+
+    void on_rb_v21_clicked();
+
+    void on_pb_cfg_clicked();
+
+    void on_cb_client_stateChanged(int arg1);
+
 private:
-#if defined (Q_OS_ANDROID)
+//#if defined (Q_OS_ANDROID)
+#if defined (Q_OS_LINUX)
     QString m_path;
     QString m_iperfexe2;
     QString m_iperfexe3;
 #endif
-
     Ui::MainWindow *ui;
     QThread *iperf_th;
     IperfWorker *iperfer;
-
+//    FormOption *option;
+    QSettings *cfg;
 };
 #endif // MAINWINDOW_H

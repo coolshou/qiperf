@@ -15,7 +15,7 @@ public:
     void setStop();
 signals:
     void started();
-    void finished(int exitCode, QProcess::ExitStatus exitStatus);
+    void finished(int exitCode, int exitStatus);
     void log(QString msg);
     void onStdout(QString text);
     void onStderr(QString text);
