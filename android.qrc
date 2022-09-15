@@ -4,5 +4,6 @@
         <file alias="arm/iperf">android/res/raw/arm/iperf</file>
         <file alias="i386/iperf">android/res/raw/x86/iperf</file>
         <file alias="i386/iperf3">android/res/raw/x86/iperf3</file>
+        <file alias="arm64/iperf">android/res/raw/arm64/iperf</file>
     </qresource>
 </RCC>
