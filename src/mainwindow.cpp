@@ -135,6 +135,9 @@ void MainWindow::on_pb_run_clicked()
                 QHostAddress address(ui->le_host->text());
                 if ((QAbstractSocket::IPv4Protocol == address.protocol()) ||
                     (QAbstractSocket::IPv6Protocol == address.protocol())){
+                    if (address.isLinkLocal()) {
+                        onLog("ipv6 link local must include interface name!!");
+                    }
                 }else{
                     onLog("Wrong Target Host Address!!");
                     ui->le_host->setFocus();
