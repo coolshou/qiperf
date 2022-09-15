@@ -1,5 +1,5 @@
 # qiperf
-qt base app to lunch iperf2/3 in server mode
+qt base app to lunch iperf2/3 in client/server mode
 
 
 # Requirement
@@ -13,4 +13,7 @@ qt base app to lunch iperf2/3 in server mode
 # TODO
  * get new apk from internet and update it
  * when ip address changed => update UI
+ * add Windows support
+ * add Mac OS support
+ * add iOS support
  
