@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.0'
+        classpath 'com.android.tools.build:gradle:4.2.2'
     }
 }
 
@@ -36,7 +36,7 @@ android {
 
     compileSdkVersion androidCompileSdkVersion.toInteger()
 
-    buildToolsVersion '28.0.3'
+    //buildToolsVersion '28.0.3'
 
     sourceSets {
         main {
@@ -72,6 +72,7 @@ android {
     defaultConfig {
         resConfig "en"
         minSdkVersion = qtMinSdkVersion
-        targetSdkVersion = qtTargetSdkVersion
+        //targetSdkVersion = qtTargetSdkVersion
+        targetSdkVersion = 31
     }
 }
