@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    ui->rb_v21->setVisible(false);
 #ifndef Q_OS_ANDROID
     move(screen()->geometry().center() - frameGeometry().center());
 #endif
@@ -70,9 +70,9 @@ MainWindow::MainWindow(QWidget *parent)
         } else {
             // make file execuable
             QFile iperf2File(m_iperfexe2);
-            iperf2File.setPermissions(QFileDevice::ReadOwner | QFileDevice::ExeOwner|
-                                      QFileDevice::ReadGroup | QFileDevice::ExeGroup|
-                                      QFileDevice::ReadOther | QFileDevice::ExeOther);
+            iperf2File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner| QFileDevice::ExeOwner|
+                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup| QFileDevice::ExeGroup|
+                                      QFileDevice::ReadOther | QFileDevice::WriteOther| QFileDevice::ExeOther);
     // QFileDevice::WriteOwner|QFileDevice::WriteGroup|QFileDevice::WriteOther
         }
     }
@@ -91,9 +91,9 @@ MainWindow::MainWindow(QWidget *parent)
         } else {
             // make file execuable
             QFile iperf3File(m_iperfexe3);
-            iperf3File.setPermissions(QFileDevice::ReadOwner | QFileDevice::ExeOwner|
-                                      QFileDevice::ReadGroup | QFileDevice::ExeGroup|
-                                      QFileDevice::ReadOther | QFileDevice::ExeOther);
+            iperf3File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner| QFileDevice::ExeOwner|
+                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup| QFileDevice::ExeGroup|
+                                      QFileDevice::ReadOther | QFileDevice::WriteOther| QFileDevice::ExeOther);
         }
     }
 #endif
@@ -168,17 +168,18 @@ void MainWindow::on_pb_run_clicked()
 #endif
         }
         QString args;
-        if (ver==3){
-            args= " --forceflush ";
-            args =args + " -i 1 ";
-        }
         if (ui->cb_client->isChecked()){
             args =args + cfg->value("args").toString();
             args =args + " -c " + ui->le_host->text();
+            if (ver==3){
+                args =args + " -i 1 ";
+            }
         }else{
             args =args +"-s";
         }
-
+//        if (ver==3){
+//            args= args+" --forceflush ";
+//        }
 
         port = ui->sb_port->value();
         iperf_th = new QThread();

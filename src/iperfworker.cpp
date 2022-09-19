@@ -21,7 +21,9 @@ IperfWorker::IperfWorker(int ver, QString cmd, QString arg, uint port, QObject *
     m_port = port;
     m_arguments.append("-p");
     m_arguments.append(QString::number(m_port));
-
+    if (ver>=3){
+        m_arguments.append("--forceflush");
+    }
 }
 
 IperfWorker::~IperfWorker()
