@@ -30,7 +30,12 @@ IperfWorker::~IperfWorker()
 {
     if (!m_iperf->atEnd()){
         emit log("force kill iperf procress");
-        kill(m_iperf->processId(), SIGTERM);
+//        m_iperf->terminate();
+        m_iperf->kill();
+//#if defined (Q_OS_LINUX)
+//        kill(m_iperf->processId(), SIGTERM);
+
+//#endif
     }
 }
 

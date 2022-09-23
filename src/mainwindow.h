@@ -49,9 +49,10 @@ private:
 //#if defined (Q_OS_ANDROID)
 #if defined (Q_OS_LINUX)
     QString m_path;
+#endif
     QString m_iperfexe2;
     QString m_iperfexe3;
-#endif
+
     Ui::MainWindow *ui;
     QThread *iperf_th;
     IperfWorker *iperfer;
