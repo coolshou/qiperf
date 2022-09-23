@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file alias="qiperf">images/qiperf.png</file>
         <file alias="config">images/config.png</file>
+        <file alias="help">images/help.png</file>
+        <file alias="console">images/console.png</file>
     </qresource>
 </RCC>

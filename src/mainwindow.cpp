@@ -8,6 +8,11 @@
 #include <QNetworkInterface>
 #include <QClipboard>
 #include <QScreen>
+#include <QMenu>
+#include <QAction>
+#include <QScreen>
+#include <QRect>
+#include <QtMath>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -15,6 +20,29 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     ui->rb_v21->setVisible(false);
+
+    QMenu *menucfg = new QMenu();
+    QAction *actCfg = new QAction(QIcon(":/config"), "Option");
+    connect(actCfg, &QAction::triggered, this, &MainWindow::onShowCfg);
+
+    QAction *actConsole = new QAction(QIcon(":/console"), "Console");
+    connect(actConsole, &QAction::triggered, this, &MainWindow::onShowConsole);
+    actConsole->setVisible(isBigScreen());
+
+    QAction *actHelp = new QAction(QIcon(":/help"), "Help");
+    connect(actHelp, &QAction::triggered, this, &MainWindow::onShowHelp);
+
+
+    QList<QAction*> list;
+    list.append(actCfg);
+    list.append(actConsole);
+    list.append(actHelp);
+    menucfg->addActions(list);
+//    menucfg->addAction(actCfg);
+//    menucfg->addAction(actConsole);
+//    menucfg->addAction(actHelp);
+    ui->pb_cfg->setMenu(menucfg);
+
 #ifndef Q_OS_ANDROID
     move(screen()->geometry().center() - frameGeometry().center());
 #endif
@@ -118,6 +146,25 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+bool MainWindow::isBigScreen()
+{
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect  screenGeometry = screen->geometry();
+    qreal dpi = screen->physicalDotsPerInch();
+    int height = screenGeometry.height();
+    int width = screenGeometry.width();
+//    qDebug() << "height:" << QString::number(height)
+//             << " width:" << QString::number(width)
+//             << " dpi:" << QString::number(dpi)
+//             << Qt::endl;
+    if ((qSqrt(qPow(height, 2) + qPow(width, 2)) / dpi) > 10){
+        qDebug() << "screen over 10' size" << Qt::endl;
+        return true;
+    }else{
+        return false;
+    }
 }
 
 
@@ -273,15 +320,36 @@ void MainWindow::on_rb_v21_clicked()
 
 
 void MainWindow::on_pb_cfg_clicked()
+{   //When menu assign to QButton, this will not trigger!
+
+//    QRect rect = this->geometry();
+//    qDebug() << "rect:" <<rect << Qt::endl;
+//    FormOption *option;
+//    option =new FormOption(cfg);
+//    option->setGeometry(rect);
+////    option->deleteLater();
+//    option->show();
+}
+
+void MainWindow::onShowCfg()
 {
-    //TODO; show config
     QRect rect = this->geometry();
     qDebug() << "rect:" <<rect << Qt::endl;
     FormOption *option;
     option =new FormOption(cfg);
     option->setGeometry(rect);
-//    option->deleteLater();
+    //    option->deleteLater();
     option->show();
+}
+
+void MainWindow::onShowConsole()
+{
+    //TODO: show Console
+}
+
+void MainWindow::onShowHelp()
+{
+    //TODO: show help
 }
 
 

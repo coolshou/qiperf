@@ -20,6 +20,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+private:
+    bool isBigScreen();
 
 private slots:
     void on_pb_run_clicked();
@@ -42,6 +44,9 @@ private slots:
     void on_rb_v21_clicked();
 
     void on_pb_cfg_clicked();
+    void onShowCfg();
+    void onShowConsole();
+    void onShowHelp();
 
     void on_cb_client_stateChanged(int arg1);
 
@@ -58,5 +63,9 @@ private:
     IperfWorker *iperfer;
 //    FormOption *option;
     QSettings *cfg;
+    QMenu *menucfg;
+    QAction *actCfg;
+    QAction *actConsole;
+    QAction *actHelp;
 };
 #endif // MAINWINDOW_H
