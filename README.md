@@ -8,7 +8,7 @@ A simple qt base app to lunch iperf2/3 in client/server mode
 
 # Screenshot
 
-[![qiperf on android](images/Screenshot_2.jpg | width=500)]
+[<img src="images/Screenshot_2.jpg" width="500" alt="qiperf on android">]("images/Screenshot_2.jpg")
 
 # Support
  * Linux
