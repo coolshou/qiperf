@@ -28,6 +28,8 @@ FORMS += \
     src/formoption.ui \
     src/mainwindow.ui
 
+ROOT_DIRECTORY = $$PWD
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
@@ -64,13 +66,31 @@ win32 {
     QMAKE_TARGET_COMPANY="coolshou.idv.tw" #：指定項目目標的公司名稱，僅適用於Windows
     QMAKE_TARGET_PRODUCT=$${TARGET} #：指定項目目標的產品名稱，僅適用於Windows
     QMAKE_TARGET_DESCRIPTION="qt base iperf server launcher" #：指定項目目標的描述資訊，僅適用於Windows
-    QMAKE_TARGET_COPYRIGHT="Copyright © 2022 coolshou.idv.tw" #：指定項目目標的版權資訊，僅適用於Windows
+    QMAKE_TARGET_COPYRIGHT="Copyright 2022 coolshou.idv.tw" #：指定項目目標的版權資訊，僅適用於Windows
     #PACKAGE_DOMAIN：
     #PACKAGE_VERSION：
     RC_CODEPAGE=0x04b0 #unicode：指定應該被包含進一個.rc檔案中的字碼頁，僅適用於Windows
     RC_LANG=0x0409 #en_US：指定應該被包含進一個.rc檔案中的語言，僅適用於Windows
 
     DISTFILES += $$PWD/images/qiperf.icon
+
+    DIST_DIRECTORY =  $$shell_quote($$shell_path($${ROOT_DIRECTORY}/../$${TARGET}_$${QT_ARCH}-$${VERSION}))
+
+    DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
+    iperfdata.commands = \
+        $$sprintf($$QMAKE_MKDIR_CMD, $$DIST_DIRECTORY) $$escape_expand(\\n\\t) \
+        $$QMAKE_COPY_DIR $$shell_quote($$shell_path($$PWD/windows/)) $$shell_quote($$shell_path($$DIST_DIRECTORY/windows/))
+    iperfbin.commands = \
+        $$QMAKE_COPY $$shell_quote($$shell_path($${OUT_PWD}/release/$${TARGET}.exe)) $$DIST_FILE
+    deploy.commands = \
+        windeployqt $$DIST_FILE
+
+    first.depends = $(first) iperfdata iperfbin deploy
+    export(first.depends)
+    export(iperfdata.commands)
+    export(iperfbin.commands)
+    QMAKE_EXTRA_TARGETS += first iperfdata iperfbin deploy
+
 }
 macx {
 # Mac OS
