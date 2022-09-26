@@ -21,5 +21,5 @@ A simple qt base app to lunch iperf2/3 in client/server mode
  * add Mac OS support
  * add iOS support
  * add Control UI to control multi-iperf at once (like IxChariot)
- * add Control UI with throughout chart
+ * add Control UI with throughput chart
  
