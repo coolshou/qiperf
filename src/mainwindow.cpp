@@ -138,8 +138,8 @@ MainWindow::MainWindow(QWidget *parent)
 #if defined (Q_OS_WIN32)
 //windows, multi files
     QString apppath = qApp->applicationDirPath();
-    m_iperfexe2 = apppath + "/Windows/x86/iperf.exe"
-    m_iperfexe3 = apppath + "/Windows/" +arch+ "/iperf3.exe"
+    m_iperfexe2 = apppath + "/windows/x86/iperf.exe";
+    m_iperfexe3 = apppath + "/windows/" +arch+ "/iperf3.exe";
 #endif
 }
 
@@ -198,21 +198,21 @@ void MainWindow::on_pb_run_clicked()
         if (ui->rb_v2->isChecked()){
             ver=2;
             port= 5001;
-#if defined (Q_OS_LINUX)
+//#if defined (Q_OS_LINUX)
             m_cmd = m_iperfexe2;
-#else
-            m_cmd = "iperf2";
-#endif
+//#else
+//            m_cmd = "iperf2";
+//#endif
         }
         //TODO iperf2.1
         if (ui->rb_v3->isChecked()){
             ver=3;
             port=5201;
-#if defined (Q_OS_LINUX)
+//#if defined (Q_OS_LINUX)
             m_cmd = m_iperfexe3;
-#else
-            m_cmd = "iperf3";
-#endif
+//#else
+//            m_cmd = "iperf3";
+//#endif
         }
         QString args;
         if (ui->cb_client->isChecked()){
