@@ -6,6 +6,10 @@ A simple qt base app to lunch iperf2/3 in client/server mode
  * qtbase5-dev
  * Qt MaintenanceTool to install android support
 
+# Screenshot
+
+[![qiperf on android](images/Screenshot_2.jpg | width=500)]
+
 # Support
  * Linux
  * Android
