@@ -8,6 +8,7 @@
 
 #include "iperfworker.h"
 #include "formoption.h"
+#include "formconsole.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -67,5 +68,7 @@ private:
     QAction *actCfg;
     QAction *actConsole;
     QAction *actHelp;
+    FormConsole *console;
+
 };
 #endif // MAINWINDOW_H

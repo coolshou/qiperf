@@ -4,5 +4,11 @@
         <file alias="config">images/config.png</file>
         <file alias="help">images/help.png</file>
         <file alias="console">images/console.png</file>
+        <file alias="start">images/start.png</file>
+        <file alias="stop">images/stop.png</file>
+        <file alias="save">images/save.png</file>
+        <file alias="load">images/load.png</file>
+        <file alias="left">images/left.png</file>
+        <file alias="right">images/right.png</file>
     </qresource>
 </RCC>

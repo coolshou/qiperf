@@ -335,8 +335,9 @@ void MainWindow::onShowCfg()
 {
     QRect rect = this->geometry();
     qDebug() << "rect:" <<rect << Qt::endl;
-    FormOption *option;
-    option =new FormOption(cfg);
+//    FormOption *option;
+//    option =new FormOption(cfg);
+    FormOption *option = new FormOption(cfg);
     option->setGeometry(rect);
     //    option->deleteLater();
     option->show();
@@ -344,7 +345,11 @@ void MainWindow::onShowCfg()
 
 void MainWindow::onShowConsole()
 {
+//    QRect rect = this->geometry();
     //TODO: show Console
+    FormConsole *console = new FormConsole(cfg);
+//    console->setGeometry(rect);
+    console->show();
 }
 
 void MainWindow::onShowHelp()
