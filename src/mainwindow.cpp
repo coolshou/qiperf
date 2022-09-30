@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->rb_v21->setVisible(false);
+    ui->pb_iperf21->setVisible(false);
 
     QMenu *menucfg = new QMenu();
     QAction *actCfg = new QAction(QIcon(":/config"), "Option");
@@ -181,7 +181,7 @@ void MainWindow::on_pb_run_clicked()
         int ver=0;
         uint port;
         QString m_cmd;
-        if (ui->rb_v2->isChecked()){
+        if (ui->pb_iperf2->isChecked()){
             ver=2;
             port= 5001;
 //#if defined (Q_OS_LINUX)
@@ -191,7 +191,8 @@ void MainWindow::on_pb_run_clicked()
 //#endif
         }
         //TODO iperf2.1
-        if (ui->rb_v3->isChecked()){
+//        if (ui->rb_v3->isChecked()){
+        if (ui->pb_iperf3->isChecked()){
             ver=3;
             port=5201;
 //#if defined (Q_OS_LINUX)
@@ -320,6 +321,7 @@ void MainWindow::onShowCfg()
 {
     QRect rect = this->geometry();
     option->setGeometry(rect);
+    //TODO: handle android back button press!! Can not show option again
     option->show();
 }
 
