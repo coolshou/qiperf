@@ -38,9 +38,6 @@ MainWindow::MainWindow(QWidget *parent)
     list.append(actConsole);
     list.append(actHelp);
     menucfg->addActions(list);
-//    menucfg->addAction(actCfg);
-//    menucfg->addAction(actConsole);
-//    menucfg->addAction(actHelp);
     ui->pb_cfg->setMenu(menucfg);
 
 #ifndef Q_OS_ANDROID
@@ -48,28 +45,18 @@ MainWindow::MainWindow(QWidget *parent)
 #endif
 
     cfg=new QSettings(this);
+    loadcfg();
+
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 
     QString arch = QSysInfo::buildCpuArchitecture();
 //    onLog("arch: " + arch);
-    QString ipaddr("");
-    //localhost, exclude
-    const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
-    const QHostAddress &localhost6 = QHostAddress(QHostAddress::LocalHostIPv6);
-    foreach (const QNetworkInterface &netInterface, QNetworkInterface::allInterfaces()) {
-        QString name = netInterface.name();
-        foreach (const QNetworkAddressEntry &address, netInterface.addressEntries()) {
-            if ((QString::compare(address.ip().toString() , localhost.toString(), Qt::CaseInsensitive)==0)||
-                (QString::compare(address.ip().toString() , localhost6.toString(), Qt::CaseInsensitive)==0)){
-                //ignore
-            }else{
-//                onLog(name + ": " +address.ip().toString());
-                ipaddr=ipaddr+ name + ":" +address.ip().toString()+"\n";
-            }
-        }
-    }
-    int idx = ipaddr.lastIndexOf("\n");
-    ui->te_info->setPlainText(ipaddr.left(idx));
+    update_ipaddrs();
+//    FormOption *option = new FormOption(cfg, m_interfaces);
+    option = new FormOption(cfg, m_interfaces);
+    m_agent= new Agent(this, QHostAddress(m_ip), m_port, true);
+    QObject::connect(option, &FormOption::ipaddressUpdated, m_agent, &Agent::updateIpaddress);
+    QObject::connect(m_agent, &Agent::receivedMessage, this, &MainWindow::onReceivedMessage);
 
 //#if defined (Q_OS_ANDROID)
 #if defined (Q_OS_LINUX)
@@ -125,22 +112,16 @@ MainWindow::MainWindow(QWidget *parent)
         }
     }
 #endif
-//#if defined (Q_OS_ANDROID)
-//#else
-//    #if defined (Q_OS_LINUX)
-//        //Linux iperf binary
-//        //iperf2
-//        QFile i2File(":/linux/"+arch+"/iperf");
-//        QFile i3File(":/linux/"+arch+"/iperf3");
-
-//    #endif
-//#endif
 #if defined (Q_OS_WIN32)
 //windows, multi files
     QString apppath = qApp->applicationDirPath();
     m_iperfexe2 = apppath + "/windows/x86/iperf.exe";
     m_iperfexe3 = apppath + "/windows/" +arch+ "/iperf3.exe";
 #endif
+    // agent server;
+//    m_server = new MaiaXmlRpcServer(58014, this);
+    //register method
+
 }
 
 MainWindow::~MainWindow()
@@ -165,6 +146,11 @@ bool MainWindow::isBigScreen()
     }else{
         return false;
     }
+}
+
+void MainWindow::onReceivedMessage(QString message)
+{
+    qDebug() << "message:" << message << Qt::endl;
 }
 
 
@@ -245,7 +231,6 @@ void MainWindow::on_pb_run_clicked()
         iperfer->setStop();
         ui->pb_run->setText("Run");
     }
-
 }
 
 void MainWindow::readStdOut(QString text)
@@ -334,22 +319,16 @@ void MainWindow::on_pb_cfg_clicked()
 void MainWindow::onShowCfg()
 {
     QRect rect = this->geometry();
-    qDebug() << "rect:" <<rect << Qt::endl;
-//    FormOption *option;
-//    option =new FormOption(cfg);
-    FormOption *option = new FormOption(cfg);
     option->setGeometry(rect);
-    //    option->deleteLater();
     option->show();
 }
 
 void MainWindow::onShowConsole()
 {
-//    QRect rect = this->geometry();
-    //TODO: show Console
+#if !defined (Q_OS_ANDROID)
     FormConsole *console = new FormConsole(cfg);
-//    console->setGeometry(rect);
     console->show();
+#endif
 }
 
 void MainWindow::onShowHelp()
@@ -368,5 +347,58 @@ void MainWindow::on_cb_client_stateChanged(int arg1)
     }
     ui->w_client->setEnabled(state);
     ui->w_info->setVisible(!state);
+}
+
+void MainWindow::update_ipaddrs()
+{
+    QString ipaddr("");
+    //localhost, exclude
+    const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
+    const QHostAddress &localhost6 = QHostAddress(QHostAddress::LocalHostIPv6);
+    foreach (const QNetworkInterface &netInterface, QNetworkInterface::allInterfaces()) {
+        QString name = netInterface.name();
+//        qDebug() << "type: " << netInterface.type() <<" : " << netInterface.humanReadableName().toUpper() << Qt::endl;
+        //filter some interface
+        if (name.toUpper().contains("LXCB")||name.toUpper().contains("VIRBR")
+            ||name.toUpper().contains("DOCKER")||name.toUpper().contains("VBOXNET")){
+            continue;
+        }
+        foreach (const QNetworkAddressEntry &address, netInterface.addressEntries()) {
+            if ((QString::compare(address.ip().toString() , localhost.toString(), Qt::CaseInsensitive)==0)||
+                (QString::compare(address.ip().toString() , localhost6.toString(), Qt::CaseInsensitive)==0)){
+                //ignore
+            }else{
+                //onLog(name + ": " +address.ip().toString());
+                ipaddr=ipaddr+ name + ":" +address.ip().toString()+"\n";
+                if (netInterface.type() == QNetworkInterface::Ethernet){
+                    if (address.ip().protocol() == QAbstractSocket::IPv4Protocol){
+                        if (m_interfaces.indexOf(name+": "+address.ip().toString())<0){
+                            //not duplicate
+                            m_interfaces.append(name+": "+address.ip().toString());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    int idx = ipaddr.lastIndexOf("\n");
+    ui->te_info->setPlainText(ipaddr.left(idx));
+}
+
+void MainWindow::loadcfg()
+{
+    cfg->beginGroup("main");
+    QString ifname = cfg->value("managerifname", QHostAddress(QHostAddress::LocalHost).toIPv4Address()).toString();
+    if (!ifname.isEmpty()){
+        if (ifname.contains(":")){
+            QStringList qs = ifname.split(":");
+            qDebug() << " if: " << qs[0] << "ip: " << qs[1] << Qt::endl;
+            m_ip = qs[1];
+        }else{
+            m_ip = ifname;
+        }
+    }
+    m_port = cfg->value("managerport", 45454).toInt();
+    cfg->endGroup();
 }
 

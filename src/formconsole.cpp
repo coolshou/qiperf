@@ -5,9 +5,9 @@
 #include <QScreen>
 #include <QAction>
 #include <QIcon>
-
+#if !defined (Q_OS_ANDROID)
 QT_CHARTS_USE_NAMESPACE
-
+#endif
 FormConsole::FormConsole(QSettings *cfg, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FormConsole)

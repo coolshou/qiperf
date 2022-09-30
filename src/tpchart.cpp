@@ -38,7 +38,12 @@ TPChart::~TPChart()
 
 }
 void TPChart::add_series(QString idx, QColor pencolor){
-    QSplineSeries *series = new QSplineSeries(this);
+    QSplineSeries *series;
+    if (m_dict_series.contains(idx)){
+        series = m_dict_series.value(idx);
+    }else{
+        series = new QSplineSeries(this);
+    }
     m_dict_series[idx] = series;
     series->setName(idx);
     QPen pen(pencolor);

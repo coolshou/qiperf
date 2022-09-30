@@ -3,10 +3,11 @@
 
 #include <QWidget>
 #include <QSettings>
-#include <QtCharts/QChartView>
 #include <QMenu>
+#if !defined (Q_OS_ANDROID)
+#include <QtCharts/QChartView>
 #include "tpchart.h"
-
+#endif
 
 namespace Ui {
 class FormConsole;
@@ -30,8 +31,10 @@ private:
     Ui::FormConsole *ui;
     QMenu *m_menufile;
     QSettings *m_cfg;
+#if !defined (Q_OS_ANDROID)
     TPChart *m_chart;
     QChartView *chartView;
+#endif
 };
 
 #endif // FORMCONSOLE_H

@@ -44,7 +44,7 @@ void IperfWorker::work()
     //this code run in thread
     m_stop = false;
 
-    // TODO create iperf procress
+    //create iperf procress
     m_iperf =  new QProcess(m_parent);
     m_iperf->start();
     connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
