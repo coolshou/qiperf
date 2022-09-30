@@ -72,6 +72,7 @@ android {
     defaultConfig {
         resConfig "en"
         minSdkVersion = qtMinSdkVersion
-        targetSdkVersion = qtTargetSdkVersion
+        //targetSdkVersion = qtTargetSdkVersion
+        targetSdkVersion = 31
     }
 }
