@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Console</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../qiperf.qrc">
+    <normaloff>:/console</normaloff>:/console</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
     <number>6</number>
@@ -58,7 +62,7 @@
          <string>Start</string>
         </property>
         <property name="icon">
-         <iconset resource="../qiperf.qrc">
+         <iconset resource="../../qiperf.qrc">
           <normaloff>:/start</normaloff>:/start</iconset>
         </property>
        </widget>
@@ -72,7 +76,7 @@
          <string>Stop</string>
         </property>
         <property name="icon">
-         <iconset resource="../qiperf.qrc">
+         <iconset resource="../../qiperf.qrc">
           <normaloff>:/stop</normaloff>:/stop</iconset>
         </property>
        </widget>
@@ -157,7 +161,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../qiperf.qrc"/>
+  <include location="../../qiperf.qrc"/>
  </resources>
  <connections/>
 </ui>
