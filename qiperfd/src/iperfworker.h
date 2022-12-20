@@ -10,15 +10,15 @@ class IperfWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit IperfWorker(int ver, QString cmd, QString arg="-s", uint port=5201, QObject *parent = nullptr);
+    explicit IperfWorker(int idx, int version, QString cmd, QString arg="-s", uint port=5201, QObject *parent = nullptr);
     ~IperfWorker();
     void setStop();
 signals:
-    void started();
-    void finished(int exitCode, int exitStatus);
-    void log(QString msg);
-    void onStdout(QString text);
-    void onStderr(QString text);
+    void started(int idx);
+    void finished(int idx, int exitCode, int exitStatus);
+    void log(int idx, QString msg);
+    void onStdout(int idx, QString text);
+    void onStderr(int idx, QString text);
 
 public slots:
     void work();
@@ -30,6 +30,7 @@ private slots:
     void onFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
+    int m_idx;
     int m_version; // iperf version 2 or 3
     QObject *m_parent;
     bool m_stop;

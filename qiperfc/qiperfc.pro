@@ -15,6 +15,7 @@ SOURCES += \
     src/pipeclient.cpp
 
 HEADERS += \
+    ../src/comm.h \
     src/mainwindow.h \
     src/pipeclient.h
     ../src/comm.h

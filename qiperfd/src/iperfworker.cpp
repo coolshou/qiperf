@@ -9,19 +9,20 @@
 
 #include <QDebug>
 
-IperfWorker::IperfWorker(int ver, QString cmd, QString arg, uint port, QObject *parent)
+IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg, uint port, QObject *parent)
     : QObject{parent}
 {
+    m_idx = idx;
 //    this->deleteLater(); //this will cause stdout not flush??
     m_parent = parent;
-    m_version = ver;
+    m_version = version;
 //    emit log(QString("arg:"+arg));
     m_cmd = cmd;
     m_arguments = arg.split(" ");
     m_port = port;
     m_arguments.append("-p");
     m_arguments.append(QString::number(m_port));
-    if (ver>=3){
+    if (version>=3){
         m_arguments.append("--forceflush");
     }
 }
@@ -29,13 +30,8 @@ IperfWorker::IperfWorker(int ver, QString cmd, QString arg, uint port, QObject *
 IperfWorker::~IperfWorker()
 {
     if (!m_iperf->atEnd()){
-        emit log("force kill iperf procress");
-//        m_iperf->terminate();
+        emit log(m_idx, "force kill iperf procress");
         m_iperf->kill();
-//#if defined (Q_OS_LINUX)
-//        kill(m_iperf->processId(), SIGTERM);
-
-//#endif
     }
 }
 
@@ -57,16 +53,16 @@ void IperfWorker::work()
 
     m_iperf->start(m_cmd, m_arguments, QProcess::Unbuffered | QProcess::ReadWrite);
     if (m_iperf->waitForStarted()){
-        emit log("start iperf (pid:"+ QString::number(m_iperf->processId())+")");
-        emit log("iperf: " + m_cmd + " "+  m_arguments.join(" "));
+        emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
+        emit log(m_idx, "iperf: " + m_cmd + " "+  m_arguments.join(" "));
         while (!m_stop){
             //procress iperf output
             QThread::msleep(500);
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }else{
-        emit log("iperf not started!!" + m_cmd + " " + m_arguments.join(" "));
-        emit log(m_iperf->readAllStandardError());
+        emit log(m_idx, "iperf not started!!" + m_cmd + " " + m_arguments.join(" "));
+        emit log(m_idx, m_iperf->readAllStandardError());
     }
 //    emit finished(m_iperf->exitCode(), m_iperf->exitStatus());
 }
@@ -74,19 +70,19 @@ void IperfWorker::setStop()
 {
     m_stop = true;
     if (m_iperf->waitForFinished(1000)){
-        emit log("iperf killed");
+        emit log(m_idx, "iperf killed");
     }else{
 //        emit log("kill iperf ");
         m_iperf->terminate();
 
     }
 //    emit log("setStop");
-    emit finished(0, QProcess::NormalExit);
+    emit finished(m_idx, 0, QProcess::NormalExit);
 }
 
 void IperfWorker::onStarted()
 {
-    emit started();
+    emit started(m_idx);
 }
 
 void IperfWorker::readyReadStdOut()
@@ -96,7 +92,7 @@ void IperfWorker::readyReadStdOut()
 
     if (processOutput.length()>0){
         qDebug() << "Output was " << QString(processOutput);
-        emit onStdout(QString(processOutput));
+        emit onStdout(m_idx, QString(processOutput));
     }
 }
 
@@ -107,12 +103,12 @@ void IperfWorker::readyReadStdErr()
 
     qDebug() << "Error was " << QString(processOutput);
 
-    emit onStderr(QString(processOutput));
+    emit onStderr(m_idx, QString(processOutput));
 
 }
 
 void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    emit finished(exitCode, int(exitStatus));
+    emit finished(m_idx, exitCode, int(exitStatus));
     m_stop = true;
 }
