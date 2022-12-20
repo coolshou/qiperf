@@ -10,17 +10,23 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/formconsole.cpp \
+    src/formoption.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/pipeclient.cpp
 
 HEADERS += \
     ../src/comm.h \
+    src/formconsole.h \
+    src/formoption.h \
     src/mainwindow.h \
     src/pipeclient.h
     ../src/comm.h
 
 FORMS += \
+    src/formconsole.ui \
+    src/formoption.ui \
     src/mainwindow.ui
 
 # Default rules for deployment.
