@@ -19,8 +19,7 @@ PipeServer::~PipeServer()
 
 int PipeServer::isServerRun()
 {
-    // 用一個localsocket去連一下,如果能連上就說明
-    // 有一個在運行了
+    // 用一個localsocket去連一下,如果能連上就說明 有一個在運行了
     QLocalSocket ls;
     ls.connectToServer(m_servername);
     if (ls.waitForConnected(1000)){
@@ -85,20 +84,13 @@ void PipeServer::send_MessageBack(int idx, QString message)
 {
     if (m_locals.count()> idx){
         QLocalSocket *socket = m_locals[idx];
-        //m_socket->abort();
-        //m_message = message;
-        //m_socket->connectToServer(m_serverName);
-
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
         out.setVersion(QDataStream::Qt_5_15);
         out << message;
         out.device()->seek(0);
-        qDebug() << "TODO: send_Message back: " << message<< Qt::endl;
         socket->write(block);
         socket->flush();
-//        m_socket->write(block);
-//        m_socket->flush();
     } else{
         qDebug() << "send_MessageBack: idx " << idx << " out of range: " << m_locals.count() << Qt::endl;
     }
