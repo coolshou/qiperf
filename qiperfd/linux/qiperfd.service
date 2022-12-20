@@ -1,0 +1,11 @@
+[Unit]
+Description=qt iperf daemon service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/qiperfd
+
+[Install]
+WantedBy=multi-user.target
