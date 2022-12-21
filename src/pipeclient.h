@@ -18,6 +18,7 @@ public:
 
 signals:
     void newMessage(const QString &msg);
+    void sigError(QString msg);
 
 public slots:
     void send_MessageToServer(QString message);

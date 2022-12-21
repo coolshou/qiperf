@@ -68,5 +68,9 @@ void PipeClient::socket_readReady()
 
 void PipeClient::socket_error(QLocalSocket::LocalSocketError err)
 {
-    qDebug() << "socket_error:" << err << Qt::endl;
+    if (err == QLocalSocket::ConnectionRefusedError){
+        emit sigError(QString("Can not connect to %1, check %1 process is running!!").arg(m_serverName));
+    } else {
+        qDebug() << "socket_error:" << err << Qt::endl;
+    }
 }
