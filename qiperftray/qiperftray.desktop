@@ -1,0 +1,13 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Exec=qiperftray
+Name=Qt Iperf daemon tray
+GenericName=Qt Iperf daemon tray
+Comment=Tool to monitor Qt Iperf daemon
+Icon=qiperftray
+Terminal=false
+Categories=Network;Qt;
+StartupNotify=true
+StartupWMClass=qiperftray
