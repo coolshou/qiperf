@@ -12,10 +12,12 @@ int main(int argc, char *argv[])
     app.setOrganizationDomain(QIPERF_DOMAIN);
     app.setApplicationName(QIPERFC_NAME);
 
-    MainWindow w;
     MyTray * mytray = new MyTray();
-    QObject::connect(mytray, &MyTray::sigShow, &w, &QMainWindow::show);
+    MainWindow w(mytray);
 
+    QObject::connect(mytray, &MyTray::sigShow, &w, &QMainWindow::show);
+    QObject::connect(mytray, &MyTray::sigQuit, &w, &QApplication::quit);
+    QObject::connect(mytray, &MyTray::sigIconActivated, &w, &MainWindow::onTrayIconActivated);
 //    w.show();
     return app.exec();
 }

@@ -50,7 +50,7 @@ win32 {
 # windows resources
     CONFIG += embed_manifest_exe
 
-    RC_ICONS=$$PWD/images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
+    RC_ICONS=$$PWD/../images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
 
     QMAKE_TARGET_COMPANY="coolshou.idv.tw" #：指定項目目標的公司名稱，僅適用於Windows
@@ -62,7 +62,7 @@ win32 {
     RC_CODEPAGE=0x04b0 #unicode：指定應該被包含進一個.rc檔案中的字碼頁，僅適用於Windows
     RC_LANG=0x0409 #en_US：指定應該被包含進一個.rc檔案中的語言，僅適用於Windows
 
-    DISTFILES += $$PWD/images/qiperf.icon
+    DISTFILES += $$PWD/../images/qiperf.icon
 
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${ROOT_DIRECTORY}/../$${TARGET}_$${QT_ARCH}-$${VERSION}))
 

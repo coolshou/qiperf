@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QThread>
+#include <QSettings>
 
 #include "pipeserver.h"
 #include "iperfworker.h"
@@ -30,6 +31,7 @@ public slots:
 
 signals:
 private:
+    QSettings *cfg;
     PipeServer *m_pserver;
     QString m_iperfexe2;
     QString m_iperfexe3;

@@ -2,6 +2,7 @@
 #include "../src/comm.h"
 
 #include <QString>
+#include <QCoreApplication>
 #include <QStandardPaths>
 #include <QFileInfo>
 #include <QFile>
@@ -12,9 +13,18 @@
 QIperfd::QIperfd(QObject *parent)
     : QObject{parent}
 {
+    //TODO: setting
+    QSettings *cfg = new QSettings(QSettings::NativeFormat, QSettings::UserScope,
+        QIPERF_ORG, QIPERFD_NAME);
+    QString apppath = qApp->applicationDirPath();
+    cfg->beginGroup("main");
+    cfg->setValue("Path", apppath);
+    cfg->endGroup();
+    cfg->sync();
+
     //GUI interaction interface
     m_pserver=new PipeServer(QIPERFD_NAME, NULL);
-    connect(m_pserver, SIGNAL(newMessage(int, QString)), this, SLOT(onNewMessage(int, QString)));
+    connect(m_pserver, SIGNAL(newMessage(int,QString)), this, SLOT(onNewMessage(int,QString)));
     if (m_pserver->init()){
         qDebug() << "PipeServer start fail" << Qt::endl;
     }
@@ -75,7 +85,7 @@ QIperfd::QIperfd(QObject *parent)
 #endif
 #if defined (Q_OS_WIN32)
     //windows, multi files
-    QString apppath = qApp->applicationDirPath();
+
     m_iperfexe2 = apppath + "/windows/x86/iperf.exe";
     m_iperfexe3 = apppath + "/windows/" +arch+ "/iperf3.exe";
 #endif

@@ -5,9 +5,11 @@
 #include <QMenu>
 #include <QAction>
 
+#include <QDebug>
+
 MyTray::MyTray(QObject *parent):QObject(parent)
 {
-    QIcon icon(":/images/qiperftray");
+    QIcon icon(":/qiperf");
     QMenu *trayIconMenu = new QMenu();
     QAction *viewWindow = new QAction("Show", this);
     connect(viewWindow, &QAction::triggered, this, &MyTray::sigShow);
@@ -40,6 +42,8 @@ void MyTray::iconActivated(QSystemTrayIcon::ActivationReason reason)
     switch(reason){
     case QSystemTrayIcon::Trigger:
         emit sigIconActivated();
+        break;
+
     default:
         break;
     }

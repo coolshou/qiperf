@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     // control local qiperfd?
     pclient = new PipeClient(QIPERFD_NAME);
     connect(pclient, SIGNAL(newMessage(QString)), this, SLOT(onNewMessage(QString)));

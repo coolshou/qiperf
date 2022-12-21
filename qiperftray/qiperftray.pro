@@ -1,8 +1,10 @@
-QT       += core gui
-
+QT += core gui
+QT += network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
+
+include(../qiperf.pri)
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -11,11 +13,14 @@ CONFIG += c++17
 SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
-    src/mytray.cpp
+    src/mytray.cpp \
+    $$PWD/../src/pipeclient.cpp
 
 HEADERS += \
     src/mainwindow.h \
-    src/mytray.h
+    src/mytray.h \
+    $$PWD/../src/comm.h \
+    $$PWD/../src/pipeclient.h
 
 FORMS += \
     src/mainwindow.ui

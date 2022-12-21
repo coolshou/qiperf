@@ -1,10 +1,15 @@
 TEMPLATE = subdirs
 
-INCLUDEPATH += \
-    src
+SUBDIRS += \
+    qiperfd \
+    qiperftray
 
-SUBDIRS += qiperfd
-SUBDIRS += qiperfc
+SUBDIRS += \
+    qiperfc \
 
-#include(qiperfd/qiperfd.pro)
-#include(qiperfc/qiperfc.pro)
+qiperftray.subdir = qiperftray
+qiperfd.subdir = qiperfd
+qiperfc.subdir = qiperfc
+
+qiperfc.depends = qiperfd
+qiperftray.depends = qiperfd
