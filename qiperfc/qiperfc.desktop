@@ -1,0 +1,13 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=1.0
+Type=Application
+Exec=qiperfc
+Name=Qt Iperf Console Manager
+GenericName=Qt Iperf Console Manager
+Comment=Tool to manager Iperf client/server
+Icon=qiperfc
+Terminal=false
+Categories=Network;Qt;
+StartupNotify=true
+StartupWMClass=qiperfc
