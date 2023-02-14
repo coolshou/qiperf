@@ -1,3 +1,6 @@
 [submodule "libmaia"]
 	path = libmaia
 	url = https://github.com/wiedi/libmaia.git
+[submodule "jcon-cpp"]
+	path = jcon-cpp
+	url = https://github.com/joncol/jcon-cpp.git
