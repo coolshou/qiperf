@@ -12,18 +12,18 @@ include(../qiperf.pri)
 
 SOURCES += \
     src/main.cpp \
-    src/mainwindow.cpp \
     src/mytray.cpp \
-    $$PWD/../src/pipeclient.cpp
+    $$PWD/../src/pipeclient.cpp \
+    src/qiperftray.cpp
 
 HEADERS += \
-    src/mainwindow.h \
     src/mytray.h \
     $$PWD/../src/comm.h \
-    $$PWD/../src/pipeclient.h
+    $$PWD/../src/pipeclient.h \
+    src/qiperftray.h
 
 FORMS += \
-    src/mainwindow.ui
+    src/qiperftray.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
