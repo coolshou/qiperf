@@ -4,6 +4,10 @@ QT += network
 CONFIG += c++17 console
 CONFIG -= app_bundle
 
+include(../jcon-cpp.pri)
+include(../qiperf.pri)
+
+
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
@@ -11,6 +15,7 @@ CONFIG -= app_bundle
 SOURCES += \
         src/iperfworker.cpp \
         src/main.cpp \
+        src/myservice.cpp \
         src/pipeserver.cpp \
         src/qiperfd.cpp
 
@@ -21,6 +26,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     src/iperfworker.h \
+    src/myservice.h \
     src/pipeserver.h \
     src/qiperfd.h \
     ../src/comm.h
@@ -43,20 +49,16 @@ android {
 
 }
 
-win32:VERSION = 1.2022.12.20 # major.minor.patch.build
+win32:VERSION = 1.2023.2.14 # major.minor.patch.build
 else:VERSION = 1.0.0    # major.minor.patch
 
 win32 {
 # windows resources
-    CONFIG += embed_manifest_exe
-
     RC_ICONS=$$PWD/../images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
 
-    QMAKE_TARGET_COMPANY="coolshou.idv.tw" #：指定項目目標的公司名稱，僅適用於Windows
     QMAKE_TARGET_PRODUCT=$${TARGET} #：指定項目目標的產品名稱，僅適用於Windows
-    QMAKE_TARGET_DESCRIPTION="qt base iperf client/server launcher" #：指定項目目標的描述資訊，僅適用於Windows
-    QMAKE_TARGET_COPYRIGHT="Copyright 2022 coolshou.idv.tw" #：指定項目目標的版權資訊，僅適用於Windows
+    QMAKE_TARGET_DESCRIPTION="qiperfd daemon of iperf client/server launcher" #：指定項目目標的描述資訊，僅適用於Windows
     #PACKAGE_DOMAIN：
     #PACKAGE_VERSION：
     RC_CODEPAGE=0x04b0 #unicode：指定應該被包含進一個.rc檔案中的字碼頁，僅適用於Windows

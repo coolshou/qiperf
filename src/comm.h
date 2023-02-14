@@ -1,10 +1,11 @@
 #ifndef COMM_H
 #define COMM_H
 
-#define QIPERF_DOMAIN "coolshou.idv"
-#define QIPERF_ORG "coolshou"
+#define QIPERF_DOMAIN "alphanetworks.com"
+#define QIPERF_ORG "alphanetworks"
 #define QIPERFD_NAME  "qiperfd"
 #define QIPERFD_PORT 47014
+#define RPC_PORT 57025
 
 #define QIPERFC_NAME  "qiperfconsole"
 

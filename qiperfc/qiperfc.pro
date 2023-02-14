@@ -10,6 +10,8 @@ win32:unix:!android:{
 CONFIG += c++17
 
 include(../qiperf.pri)
+include(../jcon-cpp.pri)
+
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -56,15 +58,13 @@ else:VERSION = 1.0.0    # major.minor.patch
 
 win32 {
 # windows resources
-    CONFIG += embed_manifest_exe
+#    CONFIG += embed_manifest_exe
 
     RC_ICONS=$$PWD/../images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
 
-    QMAKE_TARGET_COMPANY="coolshou.idv.tw" #：指定項目目標的公司名稱，僅適用於Windows
     QMAKE_TARGET_PRODUCT=$${TARGET} #：指定項目目標的產品名稱，僅適用於Windows
-    QMAKE_TARGET_DESCRIPTION="qt base iperf client/server launcher" #：指定項目目標的描述資訊，僅適用於Windows
-    QMAKE_TARGET_COPYRIGHT="Copyright 2022 coolshou.idv.tw" #：指定項目目標的版權資訊，僅適用於Windows
+    QMAKE_TARGET_DESCRIPTION="qiperfc console of iperf " #：指定項目目標的描述資訊，僅適用於Windows
     #PACKAGE_DOMAIN：
     #PACKAGE_VERSION：
     RC_CODEPAGE=0x04b0 #unicode：指定應該被包含進一個.rc檔案中的字碼頁，僅適用於Windows
