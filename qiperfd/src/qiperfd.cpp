@@ -1,12 +1,12 @@
 #include "qiperfd.h"
 #include "../src/comm.h"
 
-#include <QString>
 #include <QCoreApplication>
 #include <QStandardPaths>
 #include <QFileInfo>
 #include <QFile>
 #include <QJsonDocument>
+#include <QNetworkInterface>
 
 #include <QDebug>
 
@@ -14,14 +14,10 @@ QIperfd::QIperfd(QObject *parent)
     : QObject{parent}
 {
     //TODO: setting
-    QSettings *cfg = new QSettings(QSettings::NativeFormat, QSettings::UserScope,
+    QSettings cfg = QSettings(QSettings::NativeFormat, QSettings::UserScope,
         QIPERF_ORG, QIPERFD_NAME);
     QString apppath = qApp->applicationDirPath();
-    cfg->beginGroup("main");
-    cfg->setValue("Path", apppath);
-    cfg->endGroup();
-    cfg->sync();
-
+    loadcfg(apppath);
     //GUI interaction interface
     m_pserver=new PipeServer(QIPERFD_NAME, NULL);
     connect(m_pserver, SIGNAL(newMessage(int,QString)), this, SLOT(onNewMessage(int,QString)));
@@ -34,9 +30,13 @@ QIperfd::QIperfd(QObject *parent)
     QString arch = QSysInfo::buildCpuArchitecture();
 #if defined (Q_OS_LINUX)
     // linux/android path
-    m_iperfexe2 = tmp +"/iperf";
+    m_iperfexe2 = tmp +"/iperf2";
     if (QFileInfo::exists(m_iperfexe2)){
         QFile::remove(m_iperfexe2);
+    }
+    m_iperfexe21 = tmp +"/iperf21";
+    if (QFileInfo::exists(m_iperfexe21)){
+        QFile::remove(m_iperfexe21);
     }
     m_iperfexe3 = tmp +"/iperf3";
     if (QFileInfo::exists(m_iperfexe3)){
@@ -46,7 +46,7 @@ QIperfd::QIperfd(QObject *parent)
 #if defined (Q_OS_ANDROID)
     QFile i2File(":/android/"+arch+"/iperf");
 #else
-    QFile i2File(":/linux/"+arch+"/iperf");
+    QFile i2File(":/linux/"+arch+"/iperf2");
 #endif
     //    onLog("iperf2: " + i2File.fileName());
     if (!i2File.open(QIODevice::ReadOnly)){
@@ -86,7 +86,8 @@ QIperfd::QIperfd(QObject *parent)
 #if defined (Q_OS_WIN32)
     //windows, multi files
 
-    m_iperfexe2 = apppath + "/windows/x86/iperf.exe";
+    m_iperfexe2 = apppath + "/windows/x86/iperf2.exe";
+    m_iperfexe21 = apppath + "/windows/x86/iperf21.exe";
     m_iperfexe3 = apppath + "/windows/" +arch+ "/iperf3.exe";
 #endif
 
@@ -96,6 +97,56 @@ QIperfd::QIperfd(QObject *parent)
 void QIperfd::onLog(QString text)
 {
     qDebug() << "log:" << text << Qt::endl;
+}
+
+void QIperfd::loadcfg(QString apppath)
+{
+    cfg.beginGroup("main");
+    cfg.setValue("Path", apppath);
+    cfg.endGroup();
+    cfg.sync();
+
+    listInterfaces();
+    //load config setting
+    cfg.beginGroup("manager");
+    mgr_ifname = cfg.value("ifname", "eth0").toString();
+    mgr_port = cfg.value("port", QIPERFD_PORT).toInt();
+    cfg.endGroup();
+}
+
+void QIperfd::savecfg()
+{
+    cfg.beginGroup("manager");
+    cfg.setValue("ifname", mgr_ifname);
+    cfg.setValue("port", mgr_port);
+    cfg.endGroup();
+    cfg.sync();
+}
+
+QList<QString> QIperfd::listInterfaces()
+{
+    QList<QString> nslist;
+
+    QList<QNetworkInterface> ns = QNetworkInterface::allInterfaces();
+    int iMax = ns.count();
+
+    if (iMax>0){
+//        qDebug() << "Max: " << iMax << Qt::endl;
+        for (int i=0 ; i<iMax; i++){
+//            if (ns.at(i).type() != QNetworkInterface::Loopback){
+            if (ns.at(i).type() == QNetworkInterface::Ethernet){
+                qDebug() << "(" << iMax <<")"<< i << ":" << ns.at(i).name() << " => type: " <<  ns.at(i).type() << Qt::endl;
+                nslist << ns.at(i).name();
+            }
+        }
+    }
+
+    return nslist;
+}
+
+void QIperfd::setMgr_ifname(QString ifname)
+{
+    mgr_ifname = ifname;
 }
 
 void QIperfd::add(int version, QString m_cmd, QString args, int port)
@@ -164,7 +215,7 @@ void QIperfd::onNewMessage(int idx, const QString msg)
                 QVariantMap iperf_args = result["iperf"].toMap();
                 int ver = iperf_args["version"].toInt();
                 QString cmd;
-                if (ver==3){
+                if (ver==(int)IPERF_VER::V3){
                     cmd = m_iperfexe3;
                 }else{
                     cmd = m_iperfexe2;

@@ -20,4 +20,11 @@
 #define CMD_IPERF_STOP   "IPERF_STOP"
 #define CMD_IPERF_ADD "IPERF_ADD"
 
+enum class IPERF_VER {
+    V1=0,  //1.7.0
+    V2=1,  //2.0.14
+    V21=2, //2.1.8
+    V3=3   //3.12
+};
+
 #endif // COMM_H

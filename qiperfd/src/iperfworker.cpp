@@ -8,6 +8,7 @@
 //#include <QOverload>
 
 #include <QDebug>
+#include "../src/comm.h"
 
 IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg, uint port, QObject *parent)
     : QObject{parent}
@@ -22,7 +23,7 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg, uint po
     m_port = port;
     m_arguments.append("-p");
     m_arguments.append(QString::number(m_port));
-    if (version>=3){
+    if (m_version>=(int)IPERF_VER::V3){
         m_arguments.append("--forceflush");
     }
 }
@@ -42,7 +43,10 @@ void IperfWorker::work()
 
     //create iperf procress
     m_iperf =  new QProcess(m_parent);
-    m_iperf->start();
+    m_iperf->setProgram(m_cmd);
+    m_iperf->setArguments(m_arguments);
+
+//    m_iperf->start();
     connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
     connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
     connect(m_iperf, SIGNAL(readyRead()), this, SLOT(readyReadStdOut()));
@@ -51,7 +55,8 @@ void IperfWorker::work()
     connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
     //errorOccurred(QProcess::ProcessError error)
 
-    m_iperf->start(m_cmd, m_arguments, QProcess::Unbuffered | QProcess::ReadWrite);
+//    m_iperf->start(m_cmd, m_arguments, QProcess::Unbuffered | QProcess::ReadWrite);
+    m_iperf->start();
     if (m_iperf->waitForStarted()){
         emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
         emit log(m_idx, "iperf: " + m_cmd + " "+  m_arguments.join(" "));
