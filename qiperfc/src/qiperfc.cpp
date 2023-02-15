@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "qiperfc.h"
 #include "ui_mainwindow.h"
 #include "../src/comm.h"
 
@@ -6,9 +6,10 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+#include <QDebug>
+
+QIperfC::QIperfC(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -18,27 +19,43 @@ MainWindow::MainWindow(QWidget *parent)
     pclient->SetAppHandle(qApp);
 
     // control remote qiperfd?
-
+    qDebug() << "test jcon rpc server" << Qt::endl;
+    rpc_client = new jcon::JsonRpcWebSocketClient(parent);
+    rpc_client->connectToServer("127.0.0.1", RPC_PORT);
+    auto req = rpc_client->callAsync("getOS");
+    req->connect(req.get(), &jcon::JsonRpcRequest::result,
+                 [](const QVariant& result) {
+                     qDebug() << "result of RPC call:" << result;
+//                     qApp->exit();
+                 });
+//    req->connect(req.get(), &jcon::JsonRpcRequest::error,
+//                 [](int code, const QString& message, const QVariant& data) {
+//                     qDebug() << "RPC error: " << message << " (" << code << ")";
+//                     qApp->exit();
+//                 });
+//    if (result->isSuccess()) {
+//        qDebug() << "OS: " << result->result() << Qt::endl;
+//    }
 }
 
-MainWindow::~MainWindow()
+QIperfC::~QIperfC()
 {
     delete ui;
 }
 
-void MainWindow::onNewMessage(const QString msg)
+void QIperfC::onNewMessage(const QString msg)
 {
     ui->textEdit->append(msg);
 }
 
 
-void MainWindow::on_pushButton_clicked()
+void QIperfC::on_pushButton_clicked()
 {
     pclient->send_MessageToServer(CMD_STATUS);
 }
 
 
-void MainWindow::on_pb_add_server_clicked()
+void QIperfC::on_pb_add_server_clicked()
 {
     /*'''
     { "Action" : CMD_IPERF_ADD,
@@ -69,7 +86,7 @@ void MainWindow::on_pb_add_server_clicked()
 }
 
 
-void MainWindow::on_pb_start_clicked()
+void QIperfC::on_pb_start_clicked()
 {
     QJsonObject mainObj;
     mainObj.insert("Action", CMD_IPERF_START);
@@ -79,7 +96,7 @@ void MainWindow::on_pb_start_clicked()
 }
 
 
-void MainWindow::on_pb_stop_clicked()
+void QIperfC::on_pb_stop_clicked()
 {
     QJsonObject mainObj;
     mainObj.insert("Action", CMD_IPERF_STOP);

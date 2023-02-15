@@ -20,8 +20,8 @@ include(../jcon-cpp.pri)
 SOURCES += \
     src/formoption.cpp \
     src/main.cpp \
-    src/mainwindow.cpp \
-    $$PWD/../src/pipeclient.cpp
+    $$PWD/../src/pipeclient.cpp \
+    src/qiperfc.cpp
 
 #!android:{
 #    SOURCES += \
@@ -30,9 +30,9 @@ SOURCES += \
 #}
 HEADERS += \
     src/formoption.h \
-    src/mainwindow.h \
     $$PWD/../src/pipeclient.h \
-    $$PWD/../src/comm.h
+    $$PWD/../src/comm.h \
+    src/qiperfc.h
 #!android:{
 #    HEADERS += \
 #        src/formconsole.h \
@@ -40,7 +40,7 @@ HEADERS += \
 #}
 FORMS += \
     src/formoption.ui \
-    src/mainwindow.ui
+    src/qiperfc.ui
 
 #!android:{
 #    src/formconsole.ui \

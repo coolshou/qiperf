@@ -1,20 +1,21 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef QIPERFC_H
+#define QIPERFC_H
 
 #include <QMainWindow>
 #include "pipeclient.h"
+#include "jcon/json_rpc_websocket_client.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
+class QIperfC : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    QIperfC(QWidget *parent = nullptr);
+    ~QIperfC();
 public slots:
     void onNewMessage(const QString msg);
 private slots:
@@ -26,5 +27,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
     PipeClient *pclient;
+    jcon::JsonRpcWebSocketClient *rpc_client;
 };
-#endif // MAINWINDOW_H
+#endif // QIPERFC_H
