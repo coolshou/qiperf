@@ -18,13 +18,21 @@ QIperfd::QIperfd(QObject *parent)
         QIPERF_ORG, QIPERFD_NAME);
     QString apppath = qApp->applicationDirPath();
     loadcfg(apppath);
-    //GUI interaction interface
+//    qDebug() << "start UdpSrv" << Qt::endl;
+    //
+    m_udpsrv = new UdpSrv(QIPERFD_BPORT, mgr_ifname);
+    m_udpsrv->collectInfo();
+
+//    qDebug() << "start PipeServer" << Qt::endl;
+    //tray GUI interaction interface
     m_pserver=new PipeServer(QIPERFD_NAME, NULL);
     connect(m_pserver, SIGNAL(newMessage(int,QString)), this, SLOT(onNewMessage(int,QString)));
     if (m_pserver->init()){
         qDebug() << "PipeServer start fail" << Qt::endl;
     }
     //iperf control interface, accept add/del iperf setting from remote
+
+    qDebug() << "init path" << Qt::endl;
 
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
     QString arch = QSysInfo::buildCpuArchitecture();
@@ -92,6 +100,7 @@ QIperfd::QIperfd(QObject *parent)
 #endif
 
     //system service manager
+//    qDebug() << "finish contrust" << Qt::endl;
 }
 
 void QIperfd::onLog(QString text)
@@ -127,21 +136,39 @@ QList<QString> QIperfd::listInterfaces()
 {
     QList<QString> nslist;
 
-    QList<QNetworkInterface> ns = QNetworkInterface::allInterfaces();
-    int iMax = ns.count();
+    QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
+    foreach(QNetworkInterface interface,list) //遍歷每一個網路介面
+    {
+        if ((interface.type() == QNetworkInterface::Ethernet) ||
+                (interface.type() == QNetworkInterface::Wifi)) {
+            nslist << interface.name();
+        }
+    }
+    return nslist;
+}
 
-    if (iMax>0){
-//        qDebug() << "Max: " << iMax << Qt::endl;
-        for (int i=0 ; i<iMax; i++){
-//            if (ns.at(i).type() != QNetworkInterface::Loopback){
-            if (ns.at(i).type() == QNetworkInterface::Ethernet){
-                qDebug() << "(" << iMax <<")"<< i << ":" << ns.at(i).name() << " => type: " <<  ns.at(i).type() << Qt::endl;
-                nslist << ns.at(i).name();
+QString QIperfd::getInterfaceAddr(QString ifname)
+{
+    QString tmp="";
+    //get first addr of an interface
+    QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
+    foreach(QNetworkInterface interface,list) //遍歷每一個網路介面
+    {
+        if (ifname.compare(interface.name())==0) {
+            if ((interface.type() == QNetworkInterface::Ethernet) ||
+                    (interface.type() == QNetworkInterface::Wifi)) {
+    //            nslist << interface.name();
+                QList<QNetworkAddressEntry> entryList= interface.addressEntries();
+                //only return first address
+                if (entryList.length()>0){
+                    QNetworkAddressEntry entry= entryList.at(0);
+                    tmp = entry.ip().toString();
+                }
+                break;
             }
         }
     }
-
-    return nslist;
+    return tmp;
 }
 
 void QIperfd::setMgr_ifname(QString ifname)

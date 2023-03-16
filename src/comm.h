@@ -6,6 +6,7 @@
 #define QIPERFD_NAME  "qiperfd"
 #define QIPERFTRAY_NAME  "qiperftray"
 #define QIPERFD_PORT 47014
+#define QIPERFD_BPORT 47015  //broadcast
 #define RPC_PORT 57025
 
 #define QIPERFC_NAME  "qiperfconsole"

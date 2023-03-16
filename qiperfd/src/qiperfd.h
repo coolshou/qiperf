@@ -10,6 +10,8 @@
 
 #include "pipeserver.h"
 #include "iperfworker.h"
+#include "myservice.h"
+#include "udpsrv.h"
 
 class QIperfd : public QObject
 {
@@ -20,6 +22,7 @@ public:
     void loadcfg(QString apppath);
     void savecfg();
     QList<QString> listInterfaces();
+    QString getInterfaceAddr(QString ifname);
     void setMgr_ifname(QString ifname);
     void add(int version,QString m_cmd,QString args, int port);
     void start();
@@ -38,6 +41,7 @@ public slots:
 signals:
 private:
     QSettings cfg;
+    UdpSrv *m_udpsrv;
     PipeServer *m_pserver;
     //TODO: iperf1
     QString m_iperfexe2; //iperf2

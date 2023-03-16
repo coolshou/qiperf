@@ -1,5 +1,5 @@
 #include "qiperftray.h"
-#include "ui_mainwindow.h"
+#include "ui_qiperftray.h"
 
 #include "comm.h"
 #include <QDebug>

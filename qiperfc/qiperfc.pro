@@ -1,5 +1,6 @@
 QT += core gui
 QT += network
+QT += printsupport # require by qcustomplot
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,10 +19,15 @@ include(../jcon-cpp.pri)
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    $$PWD/../src/pipeclient.cpp \
+    lib/axistag.cpp \
+    lib/qcustomplot.cpp \
+    src/dlgiperf.cpp \
     src/formoption.cpp \
     src/main.cpp \
-    $$PWD/../src/pipeclient.cpp \
-    src/qiperfc.cpp
+    src/qiperfc.cpp \
+    src/tpchart.cpp \
+    src/udpreceiver.cpp
 
 #!android:{
 #    SOURCES += \
@@ -29,16 +35,23 @@ SOURCES += \
 #        src/tpchart.cpp
 #}
 HEADERS += \
-    src/formoption.h \
     $$PWD/../src/pipeclient.h \
     $$PWD/../src/comm.h \
-    src/qiperfc.h
+    lib/axistag.h \
+    lib/qcustomplot.h \
+    src/dlgiperf.h \
+    src/formoption.h \
+    src/qiperfc.h \
+    src/tpchart.h \
+    src/udpreceiver.h
+
 #!android:{
 #    HEADERS += \
 #        src/formconsole.h \
 #        src/tpchart.h
 #}
 FORMS += \
+    src/dlgiperf.ui \
     src/formoption.ui \
     src/qiperfc.ui
 

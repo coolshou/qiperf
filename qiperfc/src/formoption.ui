@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>251</width>
-    <height>341</height>
+    <width>431</width>
+    <height>416</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,9 +26,9 @@
      <property name="currentIndex">
       <number>1</number>
      </property>
-     <widget class="QWidget" name="tab_iperf">
+     <widget class="QWidget" name="tab_iperf_old">
       <attribute name="title">
-       <string>iperf</string>
+       <string>iperf_old</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <property name="spacing">
@@ -209,6 +209,11 @@
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="tab_iperf">
+      <attribute name="title">
+       <string>iperf</string>
+      </attribute>
      </widget>
      <widget class="QWidget" name="tab_main">
       <attribute name="title">

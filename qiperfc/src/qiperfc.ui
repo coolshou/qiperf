@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -103,16 +106,19 @@
             </property>
            </column>
           </widget>
-          <widget class="QWidget" name="widget_2" native="true">
+          <widget class="QWidget" name="w_chart" native="true">
            <property name="minimumSize">
             <size>
              <width>0</width>
              <height>200</height>
             </size>
            </property>
-           <layout class="QHBoxLayout" name="horizontalLayout">
+           <layout class="QHBoxLayout" name="l_chart">
             <property name="spacing">
              <number>2</number>
+            </property>
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMaximumSize</enum>
             </property>
             <property name="leftMargin">
              <number>2</number>
@@ -126,9 +132,6 @@
             <property name="bottomMargin">
              <number>2</number>
             </property>
-            <item>
-             <widget class="QtCharts::QChartView" name="cv_throughput"/>
-            </item>
            </layout>
           </widget>
          </widget>
@@ -433,14 +436,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QtCharts::QChartView</class>
-   <extends>QGraphicsView</extends>
-   <header location="global">QtCharts/QChartView&gt;
-#include &lt;QtCharts/chartsnamespace.h</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="../../qiperf.qrc"/>
  </resources>

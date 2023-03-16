@@ -1,5 +1,5 @@
 QT -= gui
-QT += network
+QT += core network
 
 CONFIG += c++17 console
 CONFIG -= app_bundle
@@ -17,7 +17,8 @@ SOURCES += \
         src/main.cpp \
         src/myservice.cpp \
         src/pipeserver.cpp \
-        src/qiperfd.cpp
+        src/qiperfd.cpp \
+        src/udpsrv.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -29,7 +30,8 @@ HEADERS += \
     src/myservice.h \
     src/pipeserver.h \
     src/qiperfd.h \
-    ../src/comm.h
+    ../src/comm.h \
+    src/udpsrv.h
 
 android {
     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
