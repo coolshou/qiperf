@@ -21,10 +21,12 @@ QIperfd::QIperfd(QObject *parent)
     loadcfg(apppath);
 //    qDebug() << "start UdpSrv" << Qt::endl;
     //
-    m_udpsrv = new UdpSrv(QIPERFD_BPORT, mgr_ifname);
-//    m_udpsrv->collectInfo();
     m_myinfo = new MyInfo(mgr_ifname);
-    m_myinfo->collectInfo();
+    QString info = m_myinfo->collectInfo();
+
+    m_udpsrv = new UdpSrv(QIPERFD_BPORT, mgr_ifname, m_myinfo);
+//    m_udpsrv->collectInfo();
+    m_udpsrv->setSendMsg(info); //broadcast
 
 //    qDebug() << "start PipeServer" << Qt::endl;
     //tray GUI interaction interface
@@ -144,14 +146,14 @@ void QIperfd::loadcfg(QString apppath)
 
 void QIperfd::savecfg()
 {
-    qDebug()<< "savecfg" << Qt::endl;
+//    qDebug()<< "savecfg" << Qt::endl;
 
     cfg.beginGroup("manager");
     cfg.setValue("ifname", mgr_ifname);
     cfg.setValue("port", mgr_port);
     cfg.endGroup();
     cfg.sync();
-    qDebug()<< "savecfg end" << Qt::endl;
+//    qDebug()<< "savecfg end" << Qt::endl;
 }
 
 QList<QString> QIperfd::listInterfaces()

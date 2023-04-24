@@ -13,11 +13,6 @@ MyInfo::MyInfo(QString mgr_ifname, QObject *parent)
     m_ifname = mgr_ifname;
 }
 
-MyInfo::~MyInfo()
-{
-    //
-}
-
 QString MyInfo::collectInfo()
 {
     //collect Info for use , in json format string
@@ -50,7 +45,7 @@ QString MyInfo::collectInfo()
     jsonDoc.setObject(mainObject);
     //conver to QString
     QString strJson(jsonDoc.toJson(QJsonDocument::Indented));
-    qDebug().noquote() << "JSON:" << strJson << Qt::endl;
+//    qDebug().noquote() << "JSON:" << strJson << Qt::endl;
     return strJson;
 }
 
@@ -82,4 +77,31 @@ QJsonObject MyInfo::collectNetInfo()
         }
     }
     return netObjects;
+}
+
+QList<QHostAddress> MyInfo::getIPfromIfname(QString ifname)
+{
+    QList<QHostAddress> addrs;
+    QHostAddress ipAddress=QHostAddress("0.0.0.0");
+    QHostAddress bAddress=QHostAddress("255.255.255.255");
+
+    QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
+
+    foreach (QNetworkInterface interface, interfaces) {
+        if (interface.name() == ifname) {
+            QList<QNetworkAddressEntry> addresses = interface.addressEntries();
+            foreach (QNetworkAddressEntry address, addresses) {
+                if (address.ip().protocol() == QAbstractSocket::IPv4Protocol) {
+                    ipAddress = address.ip();
+                    addrs.append(ipAddress);
+                    bAddress = address.broadcast();
+                    addrs.append(bAddress);
+                    break;
+                }
+            }
+            break;
+        }
+    }
+//    return ipAddress;
+    return addrs;
 }
