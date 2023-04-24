@@ -1,0 +1,16 @@
+Source: qiperftray
+Section: network
+Priority: optional
+Maintainer: coolshou <coolshou2060@gmail.com>
+Build-Depends: debhelper-compat (= 13), qtbase5-dev
+Standards-Version: 4.6.0
+Homepage: https://github.com/coolshou/qiperf.git
+#Vcs-Browser: https://github.com/coolshou/qiperf.git
+#Vcs-Git: https://github.com/coolshou/qiperf.git
+Rules-Requires-Root: no
+
+Package: qiperftray
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: quick iperf tray
+ a quick iperf tray to monitor qiperfd
