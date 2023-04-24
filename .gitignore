@@ -1,2 +1,6 @@
 /Debug/*
 /Release/*
+/*.buildinfo
+/*.changes
+/*.deb
+/*.ddeb
