@@ -9,7 +9,7 @@ class UdpReceiver : public QObject
 {
     Q_OBJECT
 public:
-    explicit UdpReceiver(int port, QObject *parent = nullptr);
+    explicit UdpReceiver(quint16 port, QObject *parent = nullptr);
 signals:
     void notice(QString msg);
 

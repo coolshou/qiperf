@@ -1,6 +1,6 @@
 #include "udpreceiver.h"
 
-UdpReceiver::UdpReceiver(int port, QObject *parent)
+UdpReceiver::UdpReceiver(quint16 port, QObject *parent)
     : QObject{parent}
 {
     m_socket = new QUdpSocket(this);
