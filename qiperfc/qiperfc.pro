@@ -66,8 +66,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     ../qiperf.qrc
 
-win32:VERSION = 1.2022.12.20 # major.minor.patch.build
-else:VERSION = 1.0.0    # major.minor.patch
+#win32:VERSION = 1.2022.12.20 # major.minor.patch.build
+#else:VERSION = 1.0.0    # major.minor.patch
 
 win32 {
 # windows resources

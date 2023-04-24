@@ -54,7 +54,7 @@ QIperfd::QIperfd(QObject *parent)
 #if defined (Q_OS_ANDROID)
     QFile i2File(":/android/"+arch+"/iperf");
 #else
-    QFile i2File(":/linux/"+arch+"/iperf2");
+    QFile i2File(":/linux/iperf2");
 #endif
     //    onLog("iperf2: " + i2File.fileName());
     if (!i2File.open(QIODevice::ReadOnly)){
@@ -75,7 +75,7 @@ QIperfd::QIperfd(QObject *parent)
 #if defined (Q_OS_ANDROID)
     QFile i3File(":/android/"+arch+"/iperf3");
 #else
-    QFile i3File(":/linux/"+arch+"/iperf3");
+    QFile i3File(":/linux/iperf3");
 #endif
     if (!i3File.open(QIODevice::ReadOnly)){
         onLog("could not open " + i3File.fileName()) ;

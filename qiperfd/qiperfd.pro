@@ -1,5 +1,5 @@
 QT -= gui
-QT += core network
+QT += core network websockets
 
 CONFIG += c++17 console
 CONFIG -= app_bundle
@@ -31,7 +31,8 @@ HEADERS += \
     src/pipeserver.h \
     src/qiperfd.h \
     ../src/comm.h \
-    src/udpsrv.h
+    src/udpsrv.h \
+    src/version.h
 
 android {
     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
@@ -45,14 +46,13 @@ android {
         android/gradle/wrapper/gradle-wrapper.properties \
         android/gradlew \
         android/gradlew.bat
-
     RESOURCES += \
             android.qrc
 
 }
 
-win32:VERSION = 1.2023.2.14 # major.minor.patch.build
-else:VERSION = 1.0.0    # major.minor.patch
+#win32:VERSION = 1.2023.2.14 # major.minor.patch.build
+#else:VERSION = 1.0.0    # major.minor.patch
 
 win32 {
 # windows resources
@@ -101,10 +101,15 @@ unix:!android {
     IMAGES_FILES.path += /usr/share/pixmaps/
     #
     INSTALLS += SERVICE_FILES IMAGES_FILES
-
+    contains(QT_ARCH, x86_64) {
     RESOURCES += \
         linux.qrc
+    }else{
+    RESOURCES += \
+        linux-i686.qrc
+    }
 }
 
 RESOURCES += \
-    ../qiperf.qrc
+    ../qiperf.qrc \
+    linux-i686.qrc
