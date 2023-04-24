@@ -3,10 +3,11 @@
 
 #include <QDebug>
 
-MyService::MyService(QObject *parent)
+MyService::MyService(QIperfd *qiperfd, QObject *parent)
     : QObject{parent}
 {
-    m_interface="";
+    m_qiperfd = qiperfd;
+//    m_interface="";
 }
 
 QString MyService::getOS()
@@ -17,10 +18,12 @@ QString MyService::getOS()
 
 void MyService::setManagerInterface(QString interface)
 {
-    m_interface = interface;
+//    m_interface = interface;
+   emit sig_setManagerInterface(interface);
 }
 
 QString MyService::getManagerInterface()
 {
-    return m_interface;
+   return m_qiperfd->getManagerInterface();
+//    return m_interface;
 }

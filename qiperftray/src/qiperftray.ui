@@ -21,7 +21,7 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QWidget" name="widget" native="true">
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,0">
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
@@ -31,6 +31,20 @@
        </item>
        <item>
         <widget class="QComboBox" name="cb_mgr_ifnames"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pb_setMgrIfname">
+         <property name="text">
+          <string>Set</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pb_getMgrIfname">
+         <property name="text">
+          <string>Get</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -53,6 +67,7 @@
     </item>
    </layout>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <resources>
   <include location="../../qiperf.qrc"/>

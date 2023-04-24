@@ -1,16 +1,18 @@
 #include <QCoreApplication>
+#include <QObject>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
 #include <jcon/json_rpc_websocket_server.h>
 #include "myservice.h"
+#include "sigwatch.h"
 
 #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
 #include <systemd/sd-daemon.h>
 #endif
 
 jcon::JsonRpcServer* startServer(QObject* parent,
-                                 bool allow_notifications = false)
+                                 bool allow_notifications = false, QIperfd* qiperfd=nullptr)
 {
     jcon::JsonRpcServer* rpc_server;
     qDebug() << "Starting WebSocket server";
@@ -19,7 +21,8 @@ jcon::JsonRpcServer* startServer(QObject* parent,
     if (allow_notifications)
         rpc_server->enableSendNotification(true);
 
-    auto service1 = new MyService;
+    auto service1 = new MyService(qiperfd);
+    QObject::connect(service1, SIGNAL(sig_setManagerInterface(QString)), qiperfd, SLOT(setManagerInterface(QString)));
 //    auto service2 = new NotificationService;
     rpc_server->registerServices({ service1 });
 //    rpc_server->registerServices({ service1, service2 });
@@ -31,11 +34,19 @@ int main(int argc, char *argv[])
 {
     int rc;
     QCoreApplication app(argc, argv);
+    UnixSignalWatcher sigwatch;
+    sigwatch.watchForSignal(SIGINT);
+    QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &app, SLOT(quit()));
+
     app.setOrganizationName(QIPERF_ORG);
     app.setOrganizationDomain(QIPERF_DOMAIN);
     app.setApplicationName(QIPERFD_NAME);
-    auto server = startServer(nullptr, true);
+
     QIperfd qiperfd = QIperfd();
+    QObject::connect(&app, SIGNAL(aboutToQuit()), &qiperfd , SLOT(onQuit()));
+
+    auto server = startServer(nullptr, true, &qiperfd);
+
 #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
     sd_notify(0, "READY=1");
 #endif

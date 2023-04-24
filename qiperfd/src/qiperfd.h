@@ -10,19 +10,22 @@
 
 #include "pipeserver.h"
 #include "iperfworker.h"
-#include "myservice.h"
+//#include "myservice.h"
 #include "udpsrv.h"
+#include "myinfo.h"
 
 class QIperfd : public QObject
 {
     Q_OBJECT
 public:
     explicit QIperfd(QObject *parent = nullptr);
+//    ~QIperfd();
     void onLog(QString text);
     void loadcfg(QString apppath);
     void savecfg();
     QList<QString> listInterfaces();
     QString getInterfaceAddr(QString ifname);
+    QString getManagerInterface();
     void setMgr_ifname(QString ifname);
     void add(int version,QString m_cmd,QString args, uint port);
     void start();
@@ -31,17 +34,20 @@ public:
     //TODO: stop all iperfs
 
 public slots:
+    void setManagerInterface(QString interface);
     void onNewMessage(int idx, const QString msg);
     void readStdOut(int idx, QString text);
     void readStdErr(int idx, QString text);
     void onIperfLog(int idx, QString text);
     void onStarted(int idx);
     void onFinished(int idx, int exitCode, int exitStatus);
-
+    void onQuit();
 signals:
 private:
     QSettings cfg;
     UdpSrv *m_udpsrv;
+    MyInfo *m_myinfo;
+
     PipeServer *m_pserver;
     //TODO: iperf1
     QString m_iperfexe2; //iperf2

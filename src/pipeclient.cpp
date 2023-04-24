@@ -35,20 +35,22 @@ void PipeClient::send_MessageToServer(QString message)
 
 void PipeClient::socket_connected()
 {   //when socket connected, send m_message to server
-    QByteArray block;
-    QDataStream out(&block, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_15);
-    out << m_message;
-    out.device()->seek(0);
-    m_socket->write(block);
-    m_socket->flush();
-
-    qDebug() << "socket connetcted";
+    if (!m_message.isEmpty()){
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_5_15);
+        out << m_message;
+        out.device()->seek(0);
+        m_socket->write(block);
+        m_socket->flush();
+        m_message="";
+    }
+    //qDebug() << "socket connetcted";
 }
 
 void PipeClient::socket_disconnected()
 {
-    qDebug() << "socket_disconnected";
+    //qDebug() << "socket_disconnected";
 }
 
 void PipeClient::socket_readReady()
@@ -61,7 +63,7 @@ void PipeClient::socket_readReady()
     }
     QString message;
     in >> message;
-    qDebug() << "Client got Msg : " << message;
+//    qDebug() << "Client got Msg : " << message;
     emit newMessage(message);
     send_MessageToServer("OK");
 }
@@ -69,8 +71,11 @@ void PipeClient::socket_readReady()
 void PipeClient::socket_error(QLocalSocket::LocalSocketError err)
 {
     if (err == QLocalSocket::ConnectionRefusedError){
-        emit sigError(QString("Can not connect to %1, check %1 process is running!!").arg(m_serverName));
+        QString t = QString("Can not connect to %1, check %1 process is running!!").arg(m_serverName);
+        qDebug() << "ConnectionRefusedError: " << t << Qt::endl;
+        emit sigError(t);
     } else {
         qDebug() << "socket_error:" << err << Qt::endl;
+        emit sigError(QString(err));
     }
 }

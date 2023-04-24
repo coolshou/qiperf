@@ -5,6 +5,8 @@
 #include <QTimer>
 #include <QSettings>
 #include <QRect>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include "src/mytray.h"
 #include "pipeclient.h"
@@ -23,9 +25,12 @@ public:
     ~QIperfTray();
     void loadcfg();
     void savecfg();
+    void statusmsg(QString msg);
 
 public slots:
     void onTrayIconActivated();
+    void onSetMgrIfname();
+    void onGetMgrIfname();
 
 protected:
     void closeEvent(QCloseEvent *event);

@@ -18,19 +18,25 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
 //    setWindowFlags(Qt::SplashScreen);
     setWindowFlags(Qt::WindowTitleHint|Qt::Dialog);
 #if defined (Q_OS_LINUX)
-    setFixedSize(300,300);
+    setFixedSize(500,300);
 #endif
     ui->te_error->setVisible(false);
     m_tray = tray;
 
     pclient = new PipeClient(QIPERFD_NAME);
-    connect(pclient, SIGNAL(newMessage(QString)), this, SLOT(onNewMessage(QString)));
-    connect(pclient, SIGNAL(sigError(QString)), this, SLOT(onError(QString)));
+    QObject::connect(pclient, SIGNAL(newMessage(QString)), this, SLOT(onNewMessage(QString)));
+    QObject::connect(pclient, SIGNAL(sigError(QString)), this, SLOT(onError(QString)));
     pclient->SetAppHandle(qApp);
 
+    onGetMgrIfname();
+    QObject::connect(ui->pb_setMgrIfname, SIGNAL(clicked()), this, SLOT(onSetMgrIfname()));
+    QObject::connect(ui->pb_getMgrIfname, SIGNAL(clicked()), this, SLOT(onGetMgrIfname()));
+
     statuser = new QTimer();
-    connect (statuser, SIGNAL(timeout()), this, SLOT(onTimeout()));
+    QObject::connect(statuser, SIGNAL(timeout()), this, SLOT(onTimeout()));
     statuser->start(5000);
+
+
 
 }
 
@@ -52,14 +58,48 @@ void QIperfTray::savecfg()
     cfg.beginGroup("main");
     cfg.setValue("geometry", this->geometry());
     cfg.endGroup();
+
     cfg.sync();
 
 }
+
+void QIperfTray::statusmsg(QString msg)
+{
+    ui->statusBar->showMessage(msg);
+}
+
 void QIperfTray::onNewMessage(const QString msg)
 {
-//    ui->textEdit->append(msg);
-    qDebug() << "onNewMessage:" << msg << Qt::endl;
-    ui->te_msg->setText(msg);
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError){
+        onError("");
+        // handle return message
+        QVariantMap result = doc.toVariant().toMap();
+        QString act = result["CMD"].toString();
+        if (QString::compare(act, CMD_IFNAMES, Qt::CaseInsensitive)==0){
+            QVariantMap ifnameMap = result[CMD_IFNAMES].toMap();
+            QStringList ifnames = ifnameMap["ifnames"].toStringList();
+            ui->cb_mgr_ifnames->clear();
+            ui->cb_mgr_ifnames->addItems(ifnames);
+            QString ifname =  result["ifname"].toString();
+            qDebug() << "current ifname:" << ifname << Qt::endl;
+            int curidx = ui->cb_mgr_ifnames->currentIndex();
+            int fidx =ui->cb_mgr_ifnames->findText(ifname);
+            if (curidx != fidx){
+                ui->cb_mgr_ifnames->setCurrentIndex(fidx);
+            }
+        }else if (QString::compare(act, CMD_STATUS, Qt::CaseInsensitive)==0){
+            QVariantMap status = result[CMD_STATUS].toMap();
+            QString works = status["iperfworkers"].toString();
+            qDebug() << "CMD_STATUS:" << status << Qt::endl;
+            statusmsg("iperf: " + works);
+
+        }else {
+            qDebug() << "onNewMessage:" << msg << Qt::endl;
+            ui->te_msg->setText(msg.toUtf8());
+        }
+    }
 }
 
 void QIperfTray::onError(QString msg)
@@ -81,8 +121,28 @@ void QIperfTray::onTrayIconActivated()
         this->show();
     }
 }
+
+void QIperfTray::onSetMgrIfname()
+{    //Set Mgr_Ifname
+    QString ifname = ui->cb_mgr_ifnames->currentText();
+//    qDebug()<< "onSetMgrIfname ifname:" << ifname << Qt::endl;
+    QJsonObject jobj;
+    jobj.insert("Action", CMD_SET_IFNAME);
+    jobj.insert(CMD_SET_IFNAME, ifname);
+    QJsonDocument doc;
+    doc.setObject(jobj);
+    QString strjson(doc.toJson(QJsonDocument::Compact));
+//    qDebug()<< "onSetMgrIfname:" << strjson << Qt::endl;
+    pclient->send_MessageToServer(strjson);
+}
+
+void QIperfTray::onGetMgrIfname()
+{
+    pclient->send_MessageToServer(CMD_IFNAMES);
+}
 void QIperfTray::closeEvent(QCloseEvent *event)
 {
+    Q_UNUSED(event)
     //TODO: close app check
 //    event.
     savecfg();

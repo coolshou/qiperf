@@ -9,15 +9,14 @@ class UdpSrv : public QObject
 {
     Q_OBJECT
 public:
-    explicit UdpSrv(int port, QString mgr_ifname, QObject *parent = nullptr);
-    QString collectInfo();
+    explicit UdpSrv(quint16 port, QString mgr_ifname, QObject *parent = nullptr);
 
 public slots:
     void readyRead();
     void onTimeout();
 signals:
 private:
-    int m_port;
+    quint16 m_port;
     QUdpSocket *socket;
     QTimer *infomer;
     QString sendMsg="";

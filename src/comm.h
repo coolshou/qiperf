@@ -14,8 +14,10 @@
 #define CMD_OK     "OK"
 #define CMD_FAIL   "FAIL"
 
-#define CMD_STATUS "status"
+#define CMD_STATUS "STATUS"
 #define CMD_IFNAMES "IFNAMES"  //Get all interfaces
+#define CMD_SET_IFNAME "SET_IFNAME"  //Get all interfaces
+#define CMD_RUNNING "RUNNING"  //get any iperf running status
 //iperf control
 #define CMD_IPERF_START  "IPERF_START"
 #define CMD_IPERF_STOP   "IPERF_STOP"

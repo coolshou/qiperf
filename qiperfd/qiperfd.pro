@@ -6,6 +6,7 @@ CONFIG -= app_bundle
 
 include(../jcon-cpp.pri)
 include(../qiperf.pri)
+include(../sigwatch.pri)
 
 #LIBS += -lsystemd
 CONFIG += link_pkgconfig
@@ -19,6 +20,7 @@ LIBS += $$system(pkg-config --libs libsystemd)
 SOURCES += \
         src/iperfworker.cpp \
         src/main.cpp \
+        src/myinfo.cpp \
         src/myservice.cpp \
         src/pipeserver.cpp \
         src/qiperfd.cpp \
@@ -31,6 +33,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     src/iperfworker.h \
+    src/myinfo.h \
     src/myservice.h \
     src/pipeserver.h \
     src/qiperfd.h \
