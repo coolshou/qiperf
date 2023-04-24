@@ -7,6 +7,10 @@ CONFIG -= app_bundle
 include(../jcon-cpp.pri)
 include(../qiperf.pri)
 
+#LIBS += -lsystemd
+CONFIG += link_pkgconfig
+PKGCONFIG += libsystemd
+LIBS += $$system(pkg-config --libs libsystemd)
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -92,6 +96,17 @@ macx {
 }
 
 unix:!android {
+    DEBIAN_FILES.files += \
+        debian/copyright \
+        debian/changelog \
+        debian/source \
+        debian/source/format \
+        debian/qiperfd-docs.docs \
+        debian/rules \
+        debian/control \
+        debian/README.source \
+        debian/README.Debian
+
     SERVICE_FILES.files +=\
         linux/qiperfd.service
     SERVICE_FILES.path += /lib/systemd/system/

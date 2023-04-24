@@ -5,6 +5,10 @@
 #include <jcon/json_rpc_websocket_server.h>
 #include "myservice.h"
 
+#if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
+#include <systemd/sd-daemon.h>
+#endif
+
 jcon::JsonRpcServer* startServer(QObject* parent,
                                  bool allow_notifications = false)
 {
@@ -32,7 +36,13 @@ int main(int argc, char *argv[])
     app.setApplicationName(QIPERFD_NAME);
     auto server = startServer(nullptr, true);
     QIperfd qiperfd = QIperfd();
+#if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
+    sd_notify(0, "READY=1");
+#endif
     rc = app.exec();
     delete server;
+#if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
+    sd_notify(0, "STOPPING=1");
+#endif
     return rc;
 }
