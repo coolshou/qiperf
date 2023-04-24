@@ -1,0 +1,16 @@
+Source: qiperfd
+Section: network
+Priority: optional
+Maintainer: coolshou <coolshou2060@gmail.com>
+Build-Depends: debhelper-compat (= 13), qtbase5-dev, libqt5websockets5-dev, libsystemd-dev
+Standards-Version: 4.6.0
+Homepage: https://github.com/coolshou/qiperf.git
+#Vcs-Browser: https://github.com/coolshou/qiperf.git
+#Vcs-Git: https://github.com/coolshou/qiperf.git
+Rules-Requires-Root: no
+
+Package: qiperfd
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: quick iperf daemon
+ a quick iperf daemon
