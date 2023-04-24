@@ -3,7 +3,7 @@
 	url = https://github.com/wiedi/libmaia.git
 [submodule "jcon-cpp"]
 	path = jcon-cpp
-	url = https://github.com/joncol/jcon-cpp.git
+	url = https://github.com/coolshou/jcon-cpp.git
 [submodule "qt-unix-signals"]
 	path = qt-unix-signals
-	url = https://github.com/sijk/qt-unix-signals.git
+	url = https://github.com/coolshou/qt-unix-signals.git
