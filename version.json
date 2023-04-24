@@ -1,0 +1,30 @@
+{
+    "qiperfc":{
+        "Winows":{},
+        "Linux":{
+            "x86_64": {
+                "version":"0.1.202304.24",
+                "url":""
+            }
+        }
+    },
+    "qiperfd":{
+        "Winows":{},
+        "Android":{},
+        "Linux":{
+            "x86_64": {
+                "version":"0.1.202304.24",
+                "url":""
+            }
+        },
+    },
+    "qiperftray":{
+        "Winows":{},
+        "Linux":{
+            "x86_64": {
+                "version":"0.1.202304.24",
+                "url":""
+            }
+        },
+    }
+}
