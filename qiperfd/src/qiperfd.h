@@ -24,7 +24,7 @@ public:
     QList<QString> listInterfaces();
     QString getInterfaceAddr(QString ifname);
     void setMgr_ifname(QString ifname);
-    void add(int version,QString m_cmd,QString args, int port);
+    void add(int version,QString m_cmd,QString args, uint port);
     void start();
     void stop();
     //TODO: start all iperfs

@@ -61,7 +61,7 @@ QIperfd::QIperfd(QObject *parent)
         onLog("could not open " + i2File.fileName()) ;
     }else{
         if (!i2File.copy(m_iperfexe2)){
-            onLog("copy iperf3 "+ i2File.fileName()+ " to "+ m_iperfexe2 + " fail");
+            onLog("copy iperf2 "+ i2File.fileName()+ " to "+ m_iperfexe2 + " fail");
         } else {
             // make file execuable
             QFile iperf2File(m_iperfexe2);
@@ -172,12 +172,12 @@ QString QIperfd::getInterfaceAddr(QString ifname)
 }
 
 void QIperfd::setMgr_ifname(QString ifname)
-{
+{   //set manager interface name
     mgr_ifname = ifname;
 }
 
-void QIperfd::add(int version, QString m_cmd, QString args, int port)
-{
+void QIperfd::add(int version, QString m_cmd, QString args, uint port)
+{   // add a IperfWorker to run iperf server/client
     //TODO: check port used?
     QThread *iperf_th = new QThread();
     int idx = m_threads.count();
@@ -247,7 +247,7 @@ void QIperfd::onNewMessage(int idx, const QString msg)
                 }else{
                     cmd = m_iperfexe2;
                 }
-                int port = iperf_args["port"].toInt();
+                uint port = iperf_args["port"].toUInt();
                 QString args;
                 foreach (QVariant arg, iperf_args["cmd_args"].toList()){
                     qDebug() << "arg: " <<arg.toString() << Qt::endl;
