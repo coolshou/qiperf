@@ -5,7 +5,7 @@ Wants=network.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/qiperfd
+ExecStart=/opt/qiperfd/bin/qiperfd
 
 [Install]
 WantedBy=multi-user.target
