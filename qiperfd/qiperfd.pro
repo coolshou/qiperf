@@ -102,14 +102,13 @@ unix:!android {
     #
     INSTALLS += SERVICE_FILES IMAGES_FILES
     contains(QT_ARCH, x86_64) {
-    RESOURCES += \
-        linux.qrc
+        RESOURCES += \
+            linux.qrc
     }else{
-    RESOURCES += \
-        linux-i686.qrc
+        RESOURCES += \
+            linux-i686.qrc
     }
 }
 
 RESOURCES += \
-    ../qiperf.qrc \
-    linux-i686.qrc
+    ../qiperf.qrc
