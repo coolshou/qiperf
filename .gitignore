@@ -4,3 +4,14 @@
 /*.changes
 /*.deb
 /*.ddeb
+/debian/tmp/*
+/debian/qiperfc/*
+/debian/qiperfd/*
+/debian/qiperftray/*
+/qiperftray/*.o
+/qiperftray/moc_*.cpp
+/debian/.debhelper/*
+/qiperfc/moc_*.h
+/qiperfd/moc_*.h
+/qiperftray/moc_*.h
+/qiperftray/ui_*.h
