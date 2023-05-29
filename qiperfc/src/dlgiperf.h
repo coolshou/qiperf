@@ -15,6 +15,7 @@ public:
     explicit DlgIperf(QWidget *parent = nullptr);
     ~DlgIperf();
     QString getJsonCfg();
+    void loadJsonCfg(QString jsoncfg);
 
 protected:
     void changeEvent(QEvent *e);
