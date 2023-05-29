@@ -16,6 +16,10 @@
   <property name="windowTitle">
    <string>Iperf Pair config</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../qiperf.qrc">
+    <normaloff>:/pair-add</normaloff>:/pair-add</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QWidget" name="widget_4" native="true">
@@ -728,12 +732,14 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../qiperf.qrc"/>
+ </resources>
  <connections/>
 </ui>

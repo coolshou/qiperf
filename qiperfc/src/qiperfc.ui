@@ -40,7 +40,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_console">
        <attribute name="title">
@@ -222,7 +222,7 @@
      <x>0</x>
      <y>0</y>
      <width>984</width>
-     <height>29</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -283,14 +283,15 @@
    </attribute>
    <addaction name="actionAdd"/>
    <addaction name="actionEdit"/>
+   <addaction name="actionDelete"/>
    <addaction name="separator"/>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset theme="document-open">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/load</normaloff>:/load</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -301,8 +302,8 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset theme="application-exit">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/exit</normaloff>:/exit</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
@@ -313,8 +314,8 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset theme="document-save">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/save</normaloff>:/save</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -412,14 +413,18 @@
   </action>
   <action name="actionConfig">
    <property name="icon">
-    <iconset theme="configure">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/config</normaloff>:/config</iconset>
    </property>
    <property name="text">
     <string>Config</string>
    </property>
   </action>
   <action name="actionCopy">
+   <property name="icon">
+    <iconset theme="edit-copy">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
    <property name="text">
     <string>Copy</string>
    </property>
@@ -428,6 +433,10 @@
    </property>
   </action>
   <action name="actionPaste">
+   <property name="icon">
+    <iconset theme="edit-paste">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
    <property name="text">
     <string>Paste</string>
    </property>

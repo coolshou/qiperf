@@ -10,11 +10,12 @@ UdpSrv::UdpSrv(quint16 port, QString mgr_ifname, MyInfo *myinfo, QObject *parent
     m_ifname = mgr_ifname;
     m_myinfo = myinfo;
 
+    socket = new QUdpSocket(this);
+
     update_addr();
 
-    socket = new QUdpSocket(this);
     //We need to bind the UDP socket to an address and a port
-    socket->bind(m_addr);
+//    socket->bind(m_addr);
     //sendMsg = "Test";
 
 //    connect(socket,SIGNAL(readyRead()),this,SLOT(readyRead()));
@@ -63,9 +64,11 @@ void UdpSrv::update_addr()
 //        socket->unbind();
         m_addr = addrs[0];
         m_baddr = addrs[1];
-//        qDebug() << "m_addr:" << m_addr.toString() << Qt::endl;
 //        qDebug() << "m_baddr:" << m_baddr.toString() << Qt::endl;
-        socket->bind(m_addr); // now interface
+//        if (!(socket->ConnectedState == QAbstractSocket::UnconnectedState)) {
+            qDebug() << "update_addr: m_addr:" << m_addr.toString() << Qt::endl;
+            socket->bind(m_addr); // now interface
+//        }
     }
 }
 

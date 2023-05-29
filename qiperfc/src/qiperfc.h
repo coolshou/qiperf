@@ -31,6 +31,7 @@ private slots:
     void on_pb_add_server_clicked();
     void on_pb_start_clicked();
     void on_pb_stop_clicked();
+    void On_itemSelectionChanged();
 
 private:
     Ui::MainWindow *ui;

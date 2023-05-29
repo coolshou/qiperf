@@ -50,6 +50,8 @@ QIperfC::QIperfC(QWidget *parent)
     //        qDebug() << "OS: " << result->result() << Qt::endl;
     //    }
     }
+    connect(ui->treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(On_itemSelectionChanged()));
+
 }
 
 QIperfC::~QIperfC()
@@ -65,7 +67,10 @@ void QIperfC::onNewMessage(const QString msg)
 void QIperfC::on_pairAdd()
 {
     //TODO: on_pair_add
-    dlgiperf->show();
+    int rc = dlgiperf->exec();//>show();
+    if (rc == QDialog::Accepted){
+        qDebug() << "TODO: on_pairAdd Accepted" << Qt::endl;
+    }
 }
 
 void QIperfC::on_pairEdit()
@@ -148,5 +153,16 @@ void QIperfC::on_pb_stop_clicked()
     QString strJson(doc.toJson(QJsonDocument::Compact));
     pclient->send_MessageToServer(strJson);
 
+}
+
+void QIperfC::On_itemSelectionChanged()
+{
+    if (ui->treeWidget->selectedItems().count()>0){
+        ui->actionDelete->setEnabled(true);
+        ui->actionEdit->setEnabled(true);
+    } else {
+        ui->actionDelete->setEnabled(false);
+        ui->actionEdit->setEnabled(false);
+    }
 }
 

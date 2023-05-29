@@ -119,6 +119,11 @@ QIperfd::QIperfd(QObject *parent)
     //    qDebug() << "finish contrust" << Qt::endl;
 }
 
+QIperfd::~QIperfd()
+{
+
+}
+
 //QIperfd::~QIperfd()
 //{
 //    //savecfg();
@@ -277,8 +282,8 @@ void QIperfd::onNewMessage(int idx, const QString msg)
         status.insert("ifname", mgr_ifname); //current manager ifname
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
         m_pserver->send_MessageBack(idx, jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str());
+
     } else {
-        qDebug() << "TODO: handle new json message:("<<idx<<")" <<  (msg) << Qt::endl;
         //json format message
         QJsonParseError error;
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
@@ -287,7 +292,6 @@ void QIperfd::onNewMessage(int idx, const QString msg)
             QString act = result["Action"].toString();
             if (QString::compare(act, CMD_SET_IFNAME, Qt::CaseInsensitive)==0){
                 QString ifname =  result[CMD_SET_IFNAME].toString();
-//                qDebug() << "TODO: set manager interface: " << ifname << Qt::endl;
                 setManagerInterface(ifname);
             } else if (QString::compare(act, CMD_IPERF_ADD, Qt::CaseInsensitive)==0){
                 QVariantMap iperf_args = result["iperf"].toMap();
@@ -306,12 +310,14 @@ void QIperfd::onNewMessage(int idx, const QString msg)
                 }
                 qDebug() << "add iperf: "<< args << Qt::endl;
                 add(ver, cmd, args, port);
-            }else if (QString::compare(act, CMD_IPERF_START, Qt::CaseInsensitive)==0){
+            } else if (QString::compare(act, CMD_IPERF_START, Qt::CaseInsensitive)==0){
                 qDebug() << "Start all iperfs" << Qt::endl;
                 start();
-            }else if (QString::compare(act, CMD_IPERF_STOP, Qt::CaseInsensitive)==0){
+            } else if (QString::compare(act, CMD_IPERF_STOP, Qt::CaseInsensitive)==0){
                 qDebug() << "Stop all iperfs" << Qt::endl;
                 stop();
+            } else {
+                qDebug() << "TODO: handle new json message:("<<idx<<")" <<  (msg) << Qt::endl;
             }
 
         } else {

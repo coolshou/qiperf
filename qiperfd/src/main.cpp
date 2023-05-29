@@ -1,3 +1,7 @@
+/*
+ * Require run as root
+ *
+*/
 #include <QCoreApplication>
 #include <QObject>
 
@@ -5,7 +9,7 @@
 #include "../src/comm.h"
 #include <jcon/json_rpc_websocket_server.h>
 #include "myservice.h"
-#include "sigwatch.h"
+//#include "sigwatch.h"
 
 #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
 #include <systemd/sd-daemon.h>
@@ -34,9 +38,9 @@ int main(int argc, char *argv[])
 {
     int rc;
     QCoreApplication app(argc, argv);
-    UnixSignalWatcher sigwatch;
-    sigwatch.watchForSignal(SIGINT);
-    QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &app, SLOT(quit()));
+//    UnixSignalWatcher sigwatch;
+//    sigwatch.watchForSignal(SIGINT);
+//    QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &app, SLOT(quit()));
 
     app.setOrganizationName(QIPERF_ORG);
     app.setOrganizationDomain(QIPERF_DOMAIN);

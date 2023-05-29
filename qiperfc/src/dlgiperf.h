@@ -14,6 +14,7 @@ class DlgIperf : public QDialog
 public:
     explicit DlgIperf(QWidget *parent = nullptr);
     ~DlgIperf();
+    QString getJsonCfg();
 
 protected:
     void changeEvent(QEvent *e);

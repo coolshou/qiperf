@@ -6,7 +6,7 @@ CONFIG -= app_bundle
 
 include(../jcon-cpp.pri)
 include(../qiperf.pri)
-include(../sigwatch.pri)
+#include(../sigwatch.pri)
 
 #LIBS += -lsystemd
 CONFIG += link_pkgconfig

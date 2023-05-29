@@ -19,7 +19,7 @@ class QIperfd : public QObject
     Q_OBJECT
 public:
     explicit QIperfd(QObject *parent = nullptr);
-//    ~QIperfd();
+    ~QIperfd() override;
     void onLog(QString text);
     void loadcfg(QString apppath);
     void savecfg();

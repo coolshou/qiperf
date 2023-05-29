@@ -6,11 +6,22 @@ DlgIperf::DlgIperf(QWidget *parent) :
     ui(new Ui::DlgIperf)
 {
     ui->setupUi(this);
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
 }
 
 DlgIperf::~DlgIperf()
 {
     delete ui;
+}
+
+QString DlgIperf::getJsonCfg()
+{
+    //return Json config of iperf pair
+    //server
+    //client
+
 }
 
 void DlgIperf::changeEvent(QEvent *e)
