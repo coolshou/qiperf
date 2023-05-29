@@ -1,4 +1,4 @@
-Source: qiperf
+Source: qiperfd
 Section: network
 Priority: optional
 Maintainer: coolshou <coolshou2060@gmail.com>
@@ -17,14 +17,3 @@ Description: qt base daemon to launch iperf2/3
  iperf2
  iperf3
 
-Package: qiperftray
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: qt base systray to monitor qiperfd
- qt base systray to monitor qiperfd
-
-Package: qiperfc
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: qt base quick iperf console
- quick iperf console GUI to control qiperfd

@@ -76,7 +76,7 @@ unix:!android {
         "/usr/share/applications/"
 
     IMAGES.files += \
-        ../images/qiperf.png
+        ../images/qiperftray.png
     IMAGES.path += \
         "/usr/share/pixmaps/"
     INSTALLS += DESKTOP IMAGES

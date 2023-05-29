@@ -1,0 +1,3 @@
+debian/tmp/usr/share/applications/qiperftray.desktop  /usr/share/applications/
+debian/tmp/usr/share/pixmaps/qiperftray.png  /usr/share/pixmaps/
+debian/tmp/opt/qiperfd/bin/qiperftray /opt/qiperf/bin/

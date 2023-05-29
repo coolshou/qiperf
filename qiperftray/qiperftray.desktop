@@ -2,10 +2,10 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Exec=/opt/qiperfd/bin/qiperftray
-Name=Qt Iperf daemon tray
-GenericName=Qt Iperf daemon tray
-Comment=Tool to monitor Qt Iperf daemon
+Exec=/opt/qiperf/bin/qiperftray
+Name=quick Iperf system tray
+GenericName=quick Iperf system tray
+Comment=Tool to monitor quick Iperf daemon
 Icon=qiperftray
 Terminal=false
 Categories=Network;Qt;

@@ -2,10 +2,10 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Exec=qiperfc
-Name=Qt Iperf Console Manager
-GenericName=Qt Iperf Console Manager
-Comment=Tool to manager Iperf client/server
+Exec=/opt/qiperf/bin/qiperfc
+Name=quick Iperf Console
+GenericName=quick Iperf Console
+Comment=Tool to manager quick Iperf daemon
 Icon=qiperfc
 Terminal=false
 Categories=Network;Qt;

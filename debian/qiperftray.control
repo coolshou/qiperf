@@ -1,4 +1,4 @@
-Source: qiperf
+Source: qiperftray
 Section: network
 Priority: optional
 Maintainer: coolshou <coolshou2060@gmail.com>
@@ -9,22 +9,9 @@ Homepage: https://github.com/coolshou/qiperf.git
 #Vcs-Git: https://github.com/coolshou/qiperf.git
 Rules-Requires-Root: no
 
-Package: qiperfd
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: qt base daemon to launch iperf2/3 
- qt base app to lunch iperf2/3 in server mode
- iperf2
- iperf3
 
 Package: qiperftray
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, qiperfd
 Description: qt base systray to monitor qiperfd
  qt base systray to monitor qiperfd
-
-Package: qiperfc
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: qt base quick iperf console
- quick iperf console GUI to control qiperfd

@@ -1,0 +1,3 @@
+debian/tmp/usr/share/applications/qiperfc.desktop  /usr/share/applications/
+images/qiperfc.png  /usr/share/pixmaps/
+debian/tmp/opt/qiperfc/bin/qiperfc /opt/qiperf/bin/

@@ -1,12 +1,12 @@
 [Unit]
-Description=qt iperf daemon service
+Description=quick iperf daemon service
 After=network.target
 Wants=network.target
 
 [Service]
 Type=notify
 ;Type=simple
-ExecStart=/opt/qiperfd/bin/qiperfd
+ExecStart=/opt/qiperf/bin/qiperfd
 Restart=always
 RestartSec=3s
 

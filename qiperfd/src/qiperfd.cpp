@@ -29,7 +29,7 @@ QIperfd::QIperfd(QObject *parent)
     m_udpsrv->setSendMsg(info); //broadcast
 
 //    qDebug() << "start PipeServer" << Qt::endl;
-    //tray GUI interaction interface
+    //systemtray GUI interaction interface
     m_pserver=new PipeServer(QIPERFD_NAME, nullptr);
     connect(m_pserver, SIGNAL(newMessage(int,QString)), this, SLOT(onNewMessage(int,QString)));
     if (m_pserver->init()){
