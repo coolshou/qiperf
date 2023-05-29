@@ -15,3 +15,8 @@
 /qiperfd/moc_*.h
 /qiperftray/moc_*.h
 /qiperftray/ui_*.h
+/debian/qiperf*.log
+/debian/qiperf*.substvars
+/debian/debhelper-build-stamp
+/debian/files
+/.qmake.stash
