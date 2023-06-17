@@ -32,6 +32,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    ../src/endpoint.h \
     src/iperfworker.h \
     src/myinfo.h \
     src/myservice.h \
@@ -128,5 +129,5 @@ unix:!android {
     }
 }
 
-RESOURCES += \
-    ../qiperf.qrc
+#RESOURCES += \
+#    ../qiperf.qrc

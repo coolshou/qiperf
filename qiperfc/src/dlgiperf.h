@@ -13,12 +13,12 @@ class DlgIperf : public QDialog
 
 public:
     explicit DlgIperf(QWidget *parent = nullptr);
-    ~DlgIperf();
+    ~DlgIperf() override;
     QString getJsonCfg();
     void loadJsonCfg(QString jsoncfg);
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
 
 private:
     Ui::DlgIperf *ui;

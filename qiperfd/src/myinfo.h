@@ -5,6 +5,9 @@
 #include <QObject>
 #include <QHostAddress>
 
+#include "endpoint.h"
+
+
 class MyInfo : public QObject
 {
     Q_OBJECT
@@ -15,6 +18,9 @@ public:
     QJsonObject collectNetInfo();
 //    QHostAddress getIPfromIfname(QString ifname);
     QList<QHostAddress> getIPfromIfname(QString ifname);
+
+    int getEndpointType();
+
 signals:
 
 private:

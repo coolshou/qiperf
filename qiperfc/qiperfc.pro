@@ -20,9 +20,12 @@ include(../jcon-cpp.pri)
 
 SOURCES += \
     $$PWD/../src/pipeclient.cpp \
+    $$PWD/../src/endpoint.cpp \
     lib/axistag.cpp \
     lib/qcustomplot.cpp \
     src/dlgiperf.cpp \
+    src/endpointmgr.cpp \
+    src/formendpoints.cpp \
     src/formoption.cpp \
     src/main.cpp \
     src/qiperfc.cpp \
@@ -37,9 +40,12 @@ SOURCES += \
 HEADERS += \
     $$PWD/../src/pipeclient.h \
     $$PWD/../src/comm.h \
+    $$PWD/../src/endpoint.h \
     lib/axistag.h \
     lib/qcustomplot.h \
     src/dlgiperf.h \
+    src/endpointmgr.h \
+    src/formendpoints.h \
     src/formoption.h \
     src/qiperfc.h \
     src/tpchart.h \
@@ -52,6 +58,7 @@ HEADERS += \
 #}
 FORMS += \
     src/dlgiperf.ui \
+    src/formendpoints.ui \
     src/formoption.ui \
     src/qiperfc.ui
 

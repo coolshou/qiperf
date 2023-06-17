@@ -7,6 +7,7 @@
 
 #include <QDebug>
 
+
 MyInfo::MyInfo(QString mgr_ifname, QObject *parent)
     : QObject{parent}
 {
@@ -28,15 +29,17 @@ QString MyInfo::collectInfo()
             "HW":"",
             "Addrs":[["ip", "Mask", "BCast"],["ip2", "Mask2", "BCast2"]]
    },
-
+   "update":0
  }
 */
 
     QJsonObject mainObject;
+    mainObject.insert("Type", getEndpointType());
     mainObject.insert("HostName", QHostInfo::localHostName());
     mainObject.insert("OS", QSysInfo::prettyProductName());
     mainObject.insert("OSVer", QSysInfo::kernelVersion());
     mainObject.insert("Manager", m_ifname);
+    mainObject.insert("update", 0);
 
     QJsonObject netObject=collectNetInfo();
 
@@ -44,7 +47,8 @@ QString MyInfo::collectInfo()
     QJsonDocument jsonDoc;
     jsonDoc.setObject(mainObject);
     //conver to QString
-    QString strJson(jsonDoc.toJson(QJsonDocument::Indented));
+//    QString strJson(jsonDoc.toJson(QJsonDocument::Indented));
+    QString strJson(jsonDoc.toJson(QJsonDocument::Compact));
 //    qDebug().noquote() << "JSON:" << strJson << Qt::endl;
     return strJson;
 }
@@ -104,4 +108,44 @@ QList<QHostAddress> MyInfo::getIPfromIfname(QString ifname)
     }
 //    return ipAddress;
     return addrs;
+}
+
+int MyInfo::getEndpointType()
+{
+//    EndPoint::Type rc = EndPoint::Unknown;
+    int rc = static_cast<int>(EndPoint::Unknown);
+    QStringList myOptions;
+    myOptions << "windows" << "android" << "macos" << "osx" << "ios" << "debian" << "unknown" ;
+
+    switch(myOptions.indexOf(QSysInfo::productType())){
+    case 0: //windows
+        rc = static_cast<int>(EndPoint::Windows);
+        break;
+    case 1: //android
+        rc = static_cast<int>(EndPoint::Android);
+        break;
+
+    case 2: //macos
+    case 3: //osx
+        rc = static_cast<int>(EndPoint::MacOS);
+        break;
+    case 4: //ios
+        rc = static_cast<int>(EndPoint::iOS);
+        break;
+    case 5: //debian/FreeBSD
+        rc = static_cast<int>(EndPoint::FreeBSD);
+        break;
+    case 6:
+        rc = static_cast<int>(EndPoint::Unknown);
+        break;
+    default:// Linux
+        rc = static_cast<int>(EndPoint::Linux);
+        break;
+    }
+    return rc;
+
+//    QString tpy =QSysInfo::productType();
+//    if (QString::compare(tpy, "android", Qt::CaseInsensitive)==0){
+//    }else if (QString::compare(tpy, "macos", Qt::CaseInsensitive)==0){
+//    }
 }

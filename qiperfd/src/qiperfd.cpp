@@ -106,13 +106,14 @@ QIperfd::QIperfd(QObject *parent)
                                       QFileDevice::ReadOther | QFileDevice::WriteOther| QFileDevice::ExeOther);
         }
     }
-#endif
-#if defined (Q_OS_WIN32)
+#elif defined (Q_OS_WIN32)
     //windows, multi files
 
     m_iperfexe2 = apppath + "/windows/x86/iperf2.exe";
     m_iperfexe21 = apppath + "/windows/x86/iperf21.exe";
     m_iperfexe3 = apppath + "/windows/" +arch+ "/iperf3.exe";
+#else
+    qDebug() << " Not Support platform!!" << Qt::endl;
 #endif
 
     //system service manager

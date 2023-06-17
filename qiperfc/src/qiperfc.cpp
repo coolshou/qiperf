@@ -19,7 +19,9 @@ QIperfC::QIperfC(QWidget *parent)
     ui->l_chart->setSizeConstraint(QLayout::SetMaximumSize);
     init_actions();
 
+    m_endpointmgr = new EndPointMgr();
     dlgiperf = new DlgIperf();
+    formEndpoits = new FormEndPoints();
     //
     m_receiver = new UdpReceiver(QIPERFD_BPORT,this);
 //    connect(m_receiver, SIGNAL(notice()), this, SLOT(on_notice()));
@@ -52,6 +54,7 @@ QIperfC::QIperfC(QWidget *parent)
     }
     connect(ui->treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(On_itemSelectionChanged()));
 
+    initStatusbar();
 }
 
 QIperfC::~QIperfC()
@@ -83,9 +86,12 @@ void QIperfC::on_pairDelete()
     // TODO: delete
 }
 
-void QIperfC::on_notice(QString msg)
+void QIperfC::on_notice(QString send_addr, QString msg)
 {
-    qDebug() << "TODO on_notice: " << msg << Qt::endl;
+//    qDebug() << "TODO on_notice: (" << send_addr << ") " << msg << Qt::endl;
+    if (m_endpointmgr->add(send_addr, msg)){
+        emit updateEndpointNum(m_endpointmgr->getTotalEndpoints());
+    }
 }
 
 void QIperfC::init_actions()
@@ -95,6 +101,20 @@ void QIperfC::init_actions()
     connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(on_pairAdd()));
     connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(on_pairEdit()));
     connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(on_pairDelete()));
+}
+
+void QIperfC::initStatusbar()
+{
+    // statusbar of endpints
+    m_endpoint_label = new QLabel(this);
+//TODO: double click
+    m_endpoint_label->setText("endpoints:0");
+    m_endpoint_label->setFrameStyle(QFrame::Box | QFrame::Sunken);
+//    m_endpoint_label->setTextFormat(Qt::RichText);
+//    m_endpoint_label->setOpenExternalLinks(true);
+    ui->statusbar->addPermanentWidget(m_endpoint_label);
+
+    connect(this , SIGNAL(updateEndpointNum(int)), this, SLOT(on_updateEndpointNum(int)));
 }
 
 
@@ -164,5 +184,11 @@ void QIperfC::On_itemSelectionChanged()
         ui->actionDelete->setEnabled(false);
         ui->actionEdit->setEnabled(false);
     }
+}
+
+void QIperfC::on_updateEndpointNum(int n)
+{
+    qDebug() << "on_updateEndpointNum: " << n << Qt::endl;
+    m_endpoint_label->setText("endpoints:" + QString::number(n));
 }
 

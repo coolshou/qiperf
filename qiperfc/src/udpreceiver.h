@@ -11,7 +11,7 @@ class UdpReceiver : public QObject
 public:
     explicit UdpReceiver(quint16 port, QObject *parent = nullptr);
 signals:
-    void notice(QString msg);
+    void notice(QString send_addr, QString msg); //send_addr, msg: json format info
 
 public slots:
     void dataReceived();

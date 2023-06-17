@@ -13,14 +13,14 @@ class FormOption : public QWidget
 
 public:
     explicit FormOption(QSettings *cfg, QStringList interfaces, QWidget *parent = nullptr);
-    ~FormOption();
+    ~FormOption() override;
     void loadcfg(QSettings *cfg);
     void updatecfg();
 signals:
     void ipaddressUpdated(QString ipaddress, int port);
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
 
 private slots:
     void on_pb_cancel_clicked();
