@@ -18,13 +18,14 @@ LIBS += $$system(pkg-config --libs libsystemd)
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        src/iperfworker.cpp \
-        src/main.cpp \
-        src/myinfo.cpp \
-        src/myservice.cpp \
-        src/pipeserver.cpp \
-        src/qiperfd.cpp \
-        src/udpsrv.cpp
+    $$PWD/../src/endpointype.cpp \
+    src/iperfworker.cpp \
+    src/main.cpp \
+    src/myinfo.cpp \
+    src/myservice.cpp \
+    src/pipeserver.cpp \
+    src/qiperfd.cpp \
+    src/udpsrv.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -32,13 +33,14 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    ../src/endpoint.h \
+    $$PWD/../src/endpointype.h \
+    $$PWD/../src/comm.h \
+    $$PWD/../src/versions.h \
     src/iperfworker.h \
     src/myinfo.h \
     src/myservice.h \
     src/pipeserver.h \
     src/qiperfd.h \
-    ../src/comm.h \
     src/udpsrv.h \
     src/version.h
 
@@ -55,7 +57,7 @@ android {
         android/gradlew \
         android/gradlew.bat
     RESOURCES += \
-            android.qrc
+        android.qrc
 
 }
 
@@ -100,16 +102,6 @@ macx {
 }
 
 unix:!android {
-    DEBIAN_FILES.files += \
-        debian/copyright \
-        debian/changelog \
-        debian/source \
-        debian/source/format \
-        debian/qiperfd-docs.docs \
-        debian/rules \
-        debian/control \
-        debian/README.source \
-        debian/README.Debian
 
     SERVICE_FILES.files +=\
         linux/qiperfd.service

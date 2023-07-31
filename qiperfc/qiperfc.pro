@@ -13,6 +13,9 @@ CONFIG += c++17
 include(../qiperf.pri)
 include(../jcon-cpp.pri)
 
+# debug
+#CONFIG += sanitizer
+#CONFIG += sanitize_address
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -21,6 +24,7 @@ include(../jcon-cpp.pri)
 SOURCES += \
     $$PWD/../src/pipeclient.cpp \
     $$PWD/../src/endpoint.cpp \
+    $$PWD/../src/endpointtype.cpp \
     lib/axistag.cpp \
     lib/qcustomplot.cpp \
     src/dlgiperf.cpp \
@@ -41,6 +45,8 @@ HEADERS += \
     $$PWD/../src/pipeclient.h \
     $$PWD/../src/comm.h \
     $$PWD/../src/endpoint.h \
+    $$PWD/../src/endpointtype.h \
+    $$PWD/../src/versions.h \
     lib/axistag.h \
     lib/qcustomplot.h \
     src/dlgiperf.h \
@@ -84,7 +90,7 @@ win32 {
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
 
     QMAKE_TARGET_PRODUCT=$${TARGET} #：指定項目目標的產品名稱，僅適用於Windows
-    QMAKE_TARGET_DESCRIPTION="qiperfc console of iperf " #：指定項目目標的描述資訊，僅適用於Windows
+    QMAKE_TARGET_DESCRIPTION="qiperfc console of iperf" #：指定項目目標的描述資訊，僅適用於Windows
     #PACKAGE_DOMAIN：
     #PACKAGE_VERSION：
     RC_CODEPAGE=0x04b0 #unicode：指定應該被包含進一個.rc檔案中的字碼頁，僅適用於Windows

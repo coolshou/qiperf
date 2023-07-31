@@ -11,15 +11,16 @@ include(../qiperf.pri)
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    $$PWD/../src/pipeclient.cpp \
     src/main.cpp \
     src/mytray.cpp \
-    $$PWD/../src/pipeclient.cpp \
     src/qiperftray.cpp
 
 HEADERS += \
-    src/mytray.h \
     $$PWD/../src/comm.h \
     $$PWD/../src/pipeclient.h \
+    $$PWD/../src/versions.h \
+    src/mytray.h \
     src/qiperftray.h
 
 FORMS += \
@@ -31,7 +32,7 @@ else: unix:!android: target.path = /opt/qiperfd/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    ../qiperf.qrc
+    $$PWD/../qiperf.qrc
 
 #win32:VERSION = 1.2023.2.14 # major.minor.patch.build
 #else:VERSION = 1.0.0    # major.minor.patch
