@@ -24,9 +24,20 @@ void UdpReceiver::dataReceived()
             qDebug() << "UdpReceiver::dataReceived error!!" << Qt::endl;
         } else{
             QString s_addr="";
-            if (!send_addr.isNull()) {
+            bool conversionOK = false;
+            QHostAddress ip4Address(send_addr.toIPv4Address(&conversionOK));
+//            QString ip4String;
+            if (conversionOK)
+            {
+                s_addr = ip4Address.toString();
+            }else{
                 s_addr = send_addr.toString();
+                qDebug() << s_addr << " convert to ipv4 fail" << Qt::endl;
             }
+//            if (!send_addr.isNull()) {
+////                s_addr = send_addr.toString();
+//                s_addr = send_addr.toIPv4Address();
+//            }
             QString msg = datagram.data();
             emit notice(s_addr, msg);
         }

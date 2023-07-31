@@ -6,7 +6,7 @@
 #include <QHostAddress>
 
 #include "endpoint.h"
-
+#include "endpointtype.h"
 
 class MyInfo : public QObject
 {

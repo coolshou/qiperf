@@ -113,33 +113,33 @@ QList<QHostAddress> MyInfo::getIPfromIfname(QString ifname)
 int MyInfo::getEndpointType()
 {
 //    EndPoint::Type rc = EndPoint::Unknown;
-    int rc = static_cast<int>(EndPoint::Unknown);
+    int rc = static_cast<int>(EndPointType::Unknown);
     QStringList myOptions;
     myOptions << "windows" << "android" << "macos" << "osx" << "ios" << "debian" << "unknown" ;
 
     switch(myOptions.indexOf(QSysInfo::productType())){
     case 0: //windows
-        rc = static_cast<int>(EndPoint::Windows);
+        rc = static_cast<int>(EndPointType::Windows);
         break;
     case 1: //android
-        rc = static_cast<int>(EndPoint::Android);
+        rc = static_cast<int>(EndPointType::Android);
         break;
 
     case 2: //macos
     case 3: //osx
-        rc = static_cast<int>(EndPoint::MacOS);
+        rc = static_cast<int>(EndPointType::MacOS);
         break;
     case 4: //ios
-        rc = static_cast<int>(EndPoint::iOS);
+        rc = static_cast<int>(EndPointType::iOS);
         break;
     case 5: //debian/FreeBSD
-        rc = static_cast<int>(EndPoint::FreeBSD);
+        rc = static_cast<int>(EndPointType::FreeBSD);
         break;
     case 6:
-        rc = static_cast<int>(EndPoint::Unknown);
+        rc = static_cast<int>(EndPointType::Unknown);
         break;
     default:// Linux
-        rc = static_cast<int>(EndPoint::Linux);
+        rc = static_cast<int>(EndPointType::Linux);
         break;
     }
     return rc;

@@ -40,11 +40,11 @@
     <item>
      <widget class="QTabWidget" name="tw_qiperfd">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_console">
        <attribute name="title">
-        <string>Console</string>
+        <string>Throughput</string>
        </attribute>
        <layout class="QVBoxLayout" name="vl_console">
         <property name="spacing">
@@ -138,7 +138,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="tab_qiperfd">
        <attribute name="title">
         <string>qiperfd</string>
        </attribute>
@@ -147,7 +147,11 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTableView" name="tv_qiperfd"/>
+         <widget class="QTreeView" name="tv_qiperfd">
+          <property name="horizontalScrollMode">
+           <enum>QAbstractItemView::ScrollPerPixel</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -235,7 +239,7 @@
      <x>0</x>
      <y>0</y>
      <width>984</width>
-     <height>29</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

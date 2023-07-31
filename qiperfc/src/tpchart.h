@@ -25,6 +25,7 @@ class TPChart : public QWidget
     Q_OBJECT
 public:
     explicit TPChart(QWidget *parent = nullptr);
+    ~TPChart();
 //    enum DirColor{
 //        UP=QColor(40, 110, 255) //blue
 //           QColor(255, 110, 40) //red

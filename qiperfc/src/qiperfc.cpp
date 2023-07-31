@@ -15,11 +15,16 @@ QIperfC::QIperfC(QWidget *parent)
 {
     ui->setupUi(this);
     m_tpchart= new TPChart(this);
+    //TODO: check following double free or corruption (!prev)?
     ui->l_chart->addWidget(m_tpchart);
     ui->l_chart->setSizeConstraint(QLayout::SetMaximumSize);
     init_actions();
 
     m_endpointmgr = new EndPointMgr();
+    ui->tv_qiperfd->setModel(m_endpointmgr);
+    ui->tv_qiperfd->setColumnWidth(0, 130);
+    ui->tv_qiperfd->setColumnWidth(1, 130);
+//    ui->tv_qiperfd->show();
     dlgiperf = new DlgIperf();
     formEndpoits = new FormEndPoints();
     //
@@ -59,7 +64,7 @@ QIperfC::QIperfC(QWidget *parent)
 
 QIperfC::~QIperfC()
 {
-    delete ui;
+//    delete ui;
 }
 
 void QIperfC::onNewMessage(const QString msg)

@@ -13,7 +13,7 @@
 //TPChart::TPChart(QWidget *parent):QCustomPlot(parent)
   TPChart::TPChart(QWidget *parent):QWidget(parent)
 {
-    mPlot = new QCustomPlot(this);
+    mPlot = new QCustomPlot();
 //    mPlot->setMinimumSize(QSize(500,500));
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(mPlot);
@@ -65,6 +65,11 @@
     testDynamicData();
 #endif
 
+}
+
+TPChart::~TPChart()
+{
+    //delete mPlot;
 }
 
 void TPChart::realtimeDataSlot()
