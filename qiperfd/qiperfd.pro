@@ -18,7 +18,7 @@ LIBS += $$system(pkg-config --libs libsystemd)
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    $$PWD/../src/endpointype.cpp \
+    $$PWD/../src/endpointtype.cpp \
     src/iperfworker.cpp \
     src/main.cpp \
     src/myinfo.cpp \
@@ -33,7 +33,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    $$PWD/../src/endpointype.h \
+    $$PWD/../src/endpointtype.h \
     $$PWD/../src/comm.h \
     $$PWD/../src/versions.h \
     src/iperfworker.h \
