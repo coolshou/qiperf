@@ -64,6 +64,8 @@ android {
 #win32:VERSION = 1.2023.2.14 # major.minor.patch.build
 #else:VERSION = 1.0.0    # major.minor.patch
 
+VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFD_VERSION\"" | awk -F\' \'  \'{print $3}\' )
+
 win32 {
 # windows resources
     RC_ICONS=$$PWD/../images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows

@@ -81,6 +81,7 @@ RESOURCES += \
 
 #win32:VERSION = 1.2022.12.20 # major.minor.patch.build
 #else:VERSION = 1.0.0    # major.minor.patch
+VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFC_VERSION\"" | awk -F\' \'  \'{print $3}\' )
 
 win32 {
 # windows resources
