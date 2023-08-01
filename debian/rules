@@ -16,10 +16,10 @@
 #QIPERFD_VERSION = 0.1.11207.31
 #QIPERFC_VERSION = 0.1.11207.31
 #QIPERFTRAY_VERSION = 0.1.11207.31
-VERSION_QIPERF := $(sed -n -e "s/^#define QIPERF_VERSION //p" src/versions.h)
-VERSION_QIPERFD := $(sed -n -e "s/^#define QIPERFD_VERSION //p" src/versions.h)
-VERSION_QIPERFC := $(sed -n -e "s/^#define QIPERFC_VERSION //p" src/versions.h)
-VERSION_QIPERFTRAY := $(sed -n -e "s/^#define QIPERFTRAY_VERSION //p" src/versions.h)
+VERSION_QIPERF := $(shell sed -n -e "s/^#define QIPERF_VERSION //p" src/versions.h)
+VERSION_QIPERFD := $(shell sed -n -e "s/^#define QIPERFD_VERSION //p" src/versions.h)
+VERSION_QIPERFC := $(shell sed -n -e "s/^#define QIPERFC_VERSION //p" src/versions.h)
+VERSION_QIPERFTRAY := $(shell sed -n -e "s/^#define QIPERFTRAY_VERSION //p" src/versions.h)
 
 %:
 	dh $@
