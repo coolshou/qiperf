@@ -14,6 +14,7 @@
   TPChart::TPChart(QWidget *parent):QWidget(parent)
 {
     mPlot = new QCustomPlot();
+//    mPlot->setAttribute(Qt::WA_DeleteOnClose);
 //    mPlot->setMinimumSize(QSize(500,500));
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addWidget(mPlot);

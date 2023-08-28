@@ -1,14 +1,19 @@
 QT += core gui
 QT += network
 QT += printsupport # require by qcustomplot
+DEFINES += QCUSTOMPLOT_USE_OPENGL # qcustomplot use OPENGL
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): CONFIG += c++11
+lessThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -std=c++11
+
 
 win32:unix:!android:{
     QT += charts
 }
 
-CONFIG += c++17
+# following will cause QCustomPlot double free on APP exit!!
+#CONFIG += c++17
 
 include(../qiperf.pri)
 include(../jcon-cpp.pri)
@@ -33,9 +38,11 @@ SOURCES += \
     src/formoption.cpp \
     src/main.cpp \
     src/qiperfc.cpp \
-    src/tpchart.cpp \
+    src/tp.cpp \
+    src/tpmgr.cpp \
     src/udpreceiver.cpp
 
+#    src/tpchart.cpp
 #!android:{
 #    SOURCES += \
 #        src/formconsole.cpp \
@@ -54,9 +61,11 @@ HEADERS += \
     src/formendpoints.h \
     src/formoption.h \
     src/qiperfc.h \
-    src/tpchart.h \
+    src/tp.h \
+    src/tpmgr.h \
     src/udpreceiver.h
 
+#    src/tpchart.h
 #!android:{
 #    HEADERS += \
 #        src/formconsole.h \

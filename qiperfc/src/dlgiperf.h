@@ -2,6 +2,9 @@
 #define DLGIPERF_H
 
 #include <QDialog>
+#include <QStringList>
+#include <QCloseEvent>
+#include <QEvent>
 
 namespace Ui {
 class DlgIperf;
@@ -16,12 +19,20 @@ public:
     ~DlgIperf() override;
     QString getJsonCfg();
     void loadJsonCfg(QString jsoncfg);
+    bool add(QString mgr);
+    void updateUI();
+
+public slots:
+    void ChangeVersion(const QString ver);
+    void onAccepted();
 
 protected:
     void changeEvent(QEvent *e) override;
+    void closeEvent(QCloseEvent *event) override;
 
 private:
     Ui::DlgIperf *ui;
+    QStringList mgrls; //manager ip address list
 };
 
 #endif // DLGIPERF_H

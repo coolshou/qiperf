@@ -1,7 +1,7 @@
 #include "endpointtype.h"
 
 EndPointType::EndPointType(QObject *parent)
-//    : QObject(parent)
+    : QObject(parent)
 {
     m_types << "Unknown" << "Windows" << "Linux" << "MacOS" << "Android" << "iOS" << "FreeBSD";
 

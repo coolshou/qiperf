@@ -14,11 +14,16 @@ QIperfC::QIperfC(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    m_tpchart= new TPChart(this);
+//    m_tpchart= new TPChart();
+//    m_tpchart->setAttribute(Qt::WA_DeleteOnClose);
     //TODO: check following double free or corruption (!prev)?
-    ui->l_chart->addWidget(m_tpchart);
-    ui->l_chart->setSizeConstraint(QLayout::SetMaximumSize);
+//    ui->l_chart->addWidget(m_tpchart, 1);
+//    ui->l_chart->setSizeConstraint(QLayout::SetMaximumSize);
     init_actions();
+
+    m_tpmgr = new TPMgr();
+    ui->tv_throughput->setModel(m_tpmgr);
+//    ui->tv_throughput->header()->setVisible(true);
 
     m_endpointmgr = new EndPointMgr();
     ui->tv_qiperfd->setModel(m_endpointmgr);
@@ -57,14 +62,14 @@ QIperfC::QIperfC(QWidget *parent)
     //        qDebug() << "OS: " << result->result() << Qt::endl;
     //    }
     }
-    connect(ui->treeWidget, SIGNAL(itemSelectionChanged()), this, SLOT(On_itemSelectionChanged()));
+    connect(ui->tw_throughput, SIGNAL(itemSelectionChanged()), this, SLOT(On_itemSelectionChanged()));
 
     initStatusbar();
 }
 
 QIperfC::~QIperfC()
 {
-//    delete ui;
+    delete ui;
 }
 
 void QIperfC::onNewMessage(const QString msg)
@@ -75,9 +80,12 @@ void QIperfC::onNewMessage(const QString msg)
 void QIperfC::on_pairAdd()
 {
     //TODO: on_pair_add
+    dlgiperf->updateUI();
     int rc = dlgiperf->exec();//>show();
     if (rc == QDialog::Accepted){
-        qDebug() << "TODO: on_pairAdd Accepted" << Qt::endl;
+//        qDebug() << "TODO: on_pairAdd Accepted" << Qt::endl;
+        QString rs= dlgiperf->getJsonCfg();
+        qDebug() << "iperf json config: " << rs << Qt::endl;
     }
 }
 
@@ -95,6 +103,11 @@ void QIperfC::on_notice(QString send_addr, QString msg)
 {
 //    qDebug() << "TODO on_notice: (" << send_addr << ") " << msg << Qt::endl;
     if (m_endpointmgr->add(send_addr, msg)){
+        if (dlgiperf){
+            if (dlgiperf->add(send_addr)){
+                dlgiperf->updateUI();
+            }
+        }
         emit updateEndpointNum(m_endpointmgr->getTotalEndpoints());
     }
 }
@@ -181,8 +194,8 @@ void QIperfC::on_pb_stop_clicked()
 }
 
 void QIperfC::On_itemSelectionChanged()
-{
-    if (ui->treeWidget->selectedItems().count()>0){
+{   //set action Delete/Edit enable/diable
+    if (ui->tw_throughput->selectedItems().count()>0){
         ui->actionDelete->setEnabled(true);
         ui->actionEdit->setEnabled(true);
     } else {
@@ -193,7 +206,7 @@ void QIperfC::On_itemSelectionChanged()
 
 void QIperfC::on_updateEndpointNum(int n)
 {
-    qDebug() << "on_updateEndpointNum: " << n << Qt::endl;
+//    qDebug() << "on_updateEndpointNum: " << n << Qt::endl;
     m_endpoint_label->setText("endpoints:" + QString::number(n));
 }
 

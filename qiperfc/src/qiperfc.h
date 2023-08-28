@@ -2,13 +2,16 @@
 #define QIPERFC_H
 
 #include <QMainWindow>
+#include <QLabel>
+
 #include "pipeclient.h"
 #include "jcon/json_rpc_websocket_client.h"
 #include "dlgiperf.h"
 #include "udpreceiver.h"
-#include "tpchart.h"
+//#include "tpchart.h"
 #include "endpointmgr.h"
 #include "formendpoints.h"
+#include "tpmgr.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -50,8 +53,10 @@ private:
     jcon::JsonRpcWebSocketClient *rpc_client;
     UdpReceiver *m_receiver;
 //    QChartView *m_tpchart;
-    TPChart *m_tpchart;
+//    TPChart *m_tpchart;
     EndPointMgr *m_endpointmgr;
     QLabel *m_endpoint_label;
+    TPMgr *m_tpmgr;
+
 };
 #endif // QIPERFC_H

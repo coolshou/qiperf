@@ -8,6 +8,7 @@
 #include <QVariant>
 #include "../src/endpoint.h"
 
+//class to manager all EndPoint
 //class EndPointMgr : public QObject
 class EndPointMgr : public QAbstractItemModel
 {

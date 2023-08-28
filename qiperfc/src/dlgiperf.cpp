@@ -4,15 +4,29 @@
 
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QHostAddress>
+#include <QMessageBox>
+#include <QStandardItemModel>
+#include <QComboBox>
 
 DlgIperf::DlgIperf(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DlgIperf)
 {
     ui->setupUi(this);
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(ui->cb_version, &QComboBox::currentTextChanged, this, &DlgIperf::ChangeVersion);
+
+//    connect(ui, &QDialog::accepted, this, &QDialog::onAccepted);
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DlgIperf::onAccepted);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
+    // TODD: temp disable item of UDP/SCTP
+    auto * model = qobject_cast<QStandardItemModel*>(ui->cb_protocal->model());
+    auto * itemUTP = model->item(1);
+    itemUTP->setEnabled(false);
+    auto * itemSCTP = model->item(2);
+    itemSCTP->setEnabled(false);
+//    ui->cb_protocal->model()->item(1);
 }
 
 DlgIperf::~DlgIperf()
@@ -22,7 +36,7 @@ DlgIperf::~DlgIperf()
 
 QString DlgIperf::getJsonCfg()
 {
-    //return Json config of iperf pair
+    //return Json config of iperf pair from UI's value
     QJsonObject mainObj;
     mainObj.insert("Action", CMD_IPERF_ADD);
 
@@ -71,6 +85,16 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
     //TODO
 }
 
+bool DlgIperf::add(QString mgr)
+{
+    // add manager ip address
+    if (mgrls.indexOf(mgr)<0){
+        mgrls.append(mgr);
+        return true;
+    }
+    return false;
+}
+
 void DlgIperf::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
@@ -80,5 +104,49 @@ void DlgIperf::changeEvent(QEvent *e)
         break;
     default:
         break;
+    }
+}
+
+void DlgIperf::closeEvent(QCloseEvent *event)
+{
+
+
+
+}
+
+void DlgIperf::updateUI()
+{
+    //update UI of manager ip address
+    ui->cb_mserver_ip->clear();
+    ui->cb_mserver_ip->addItems(mgrls);
+    ui->cb_mclient_ip->clear();
+    ui->cb_mclient_ip->addItems(mgrls);
+}
+
+void DlgIperf::ChangeVersion(const QString ver)
+{
+    int port=5201;
+    if (ver.indexOf("2")==0){
+        port=5001;
+    }
+    ui->sb_port->setValue(port);
+}
+
+void DlgIperf::onAccepted()
+{
+    bool close=true;
+    //check require fields value
+    QHostAddress addr;
+    if (!addr.setAddress(ui->le_target_ip->text())){
+        QMessageBox::warning(this, tr("WARNING!!"),
+                             tr("Please specify iperf server ip address!!"),
+                             QMessageBox::Ok);
+        ui->le_target_ip->setFocus();
+//        event->ignore();
+//        abort();
+        close = false;
+    }
+    if (close){
+        accept();
     }
 }

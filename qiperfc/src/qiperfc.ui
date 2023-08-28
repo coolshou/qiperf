@@ -73,7 +73,7 @@
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
-          <widget class="QTreeWidget" name="treeWidget">
+          <widget class="QTreeWidget" name="tw_throughput">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -106,33 +106,18 @@
             </property>
            </column>
           </widget>
-          <widget class="QWidget" name="w_chart" native="true">
+          <widget class="QCustomPlot" name="cplot_throughput" native="true">
            <property name="minimumSize">
             <size>
              <width>0</width>
              <height>200</height>
             </size>
            </property>
-           <layout class="QHBoxLayout" name="l_chart">
-            <property name="spacing">
-             <number>2</number>
-            </property>
-            <property name="sizeConstraint">
-             <enum>QLayout::SetMaximumSize</enum>
-            </property>
-            <property name="leftMargin">
-             <number>2</number>
-            </property>
-            <property name="topMargin">
-             <number>2</number>
-            </property>
-            <property name="rightMargin">
-             <number>2</number>
-            </property>
-            <property name="bottomMargin">
-             <number>2</number>
-            </property>
-           </layout>
+          </widget>
+          <widget class="QTreeView" name="tv_throughput">
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
           </widget>
          </widget>
         </item>
@@ -462,6 +447,14 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../qiperf.qrc"/>
  </resources>
