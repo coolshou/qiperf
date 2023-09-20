@@ -18,6 +18,9 @@ win32:unix:!android:{
 include(../qiperf.pri)
 include(../jcon-cpp.pri)
 
+INCLUDEPATH += \
+    $$PWD/lib
+
 # debug
 #CONFIG += sanitizer
 #CONFIG += sanitize_address
