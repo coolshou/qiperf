@@ -5,6 +5,9 @@ CONFIG += c++17 console
 CONFIG -= app_bundle
 
 #include(../jcon-cpp.pri)
+INCLUDEPATH += \
+    $$PWD/jcon-cpp/src/
+    
 include(../qiperf.pri)
 #include(../sigwatch.pri)
 
