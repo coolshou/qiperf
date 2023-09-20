@@ -4,9 +4,12 @@ QT += core network websockets
 CONFIG += c++17 console
 CONFIG -= app_bundle
 
-#include(../jcon-cpp.pri)
-INCLUDEPATH += \
-    ../jcon-cpp/src/
+unix {
+    include(../jcon-cpp.pri)
+} else {
+    INCLUDEPATH += \
+        ../jcon-cpp/src/
+}
 
 include(../qiperf.pri)
 #include(../sigwatch.pri)
