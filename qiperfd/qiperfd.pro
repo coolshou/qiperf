@@ -4,14 +4,16 @@ QT += core network websockets
 CONFIG += c++17 console
 CONFIG -= app_bundle
 
-include(../jcon-cpp.pri)
+#include(../jcon-cpp.pri)
 include(../qiperf.pri)
 #include(../sigwatch.pri)
 
-#LIBS += -lsystemd
-CONFIG += link_pkgconfig
-PKGCONFIG += libsystemd
-LIBS += $$system(pkg-config --libs libsystemd)
+unix:!android {
+    #LIBS += -lsystemd
+    CONFIG += link_pkgconfig
+    PKGCONFIG += libsystemd
+    LIBS += $$system(pkg-config --libs libsystemd)
+}
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
