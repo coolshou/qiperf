@@ -2,7 +2,11 @@ QT += core gui
 QT += network
 QT += printsupport # require by qcustomplot
 DEFINES += QCUSTOMPLOT_USE_OPENGL # qcustomplot use OPENGL
-
+win32: {
+    LIBS += \
+        -lOpengl32 \
+        -lglu32
+}
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 greaterThan(QT_MAJOR_VERSION, 4): CONFIG += c++11
 lessThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -std=c++11
