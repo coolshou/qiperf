@@ -17,5 +17,8 @@
         <file alias="Tx">images/Tx.png</file>
         <file alias="Rx">images/Rx.png</file>
         <file alias="TR">images/TR.png</file>
+        <file alias="copy">images/copy.png</file>
+        <file alias="paste">images/paste.png</file>
+        <file alias="about">images/about.png</file>
     </qresource>
 </RCC>
