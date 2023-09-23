@@ -65,32 +65,23 @@ void EndPoint::loadData(QString data)
 //    QList<EndPoint *> parents;
     qDebug() << "loadData:" << m_parentItem << Qt::endl;
     //TODO: parser data
-//    if (m_parentItem==0x0) {
-        QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
-        QJsonObject jsonRoot = doc.object();
-        m_type = static_cast<EndPointType::Type>(jsonRoot["Type"].toInt());
-        EndPointType *ept = new EndPointType();
-        QString sType = ept->getTypeString(m_type);
-        m_Manager = jsonRoot["Manager"].toString();
-    //    bool update = jsonRoot["update"].toBool();
-        OS_name = jsonRoot["OS"].toString();
-        OS_version = jsonRoot["OSVer"].toString();
-        m_itemDatas << m_id << m_Manager << sType << OS_name << OS_version;
-        //    parents.last()->appendChild(new EndPoint(m_id, data, parents.last()));
-        //TODO: get address of each interface....
-        if (!jsonRoot["Net"].isNull()){
-            oNet = jsonRoot["Net"].toObject();
-            qDebug() << "oNet:" << oNet << Qt::endl;
-        }
-        /*
-        QJsonObject oNet = jsonRoot["Net"].toObject();
-        QStringList oNets = oNet.keys();
-        foreach(QString sNet, oNets){
-            QJsonValue jv = oNet.value(sNet);
-            qDebug() << "if:" << sNet << " = " << jv["HW"].toString() << Qt::endl;
-            qDebug() << "\taddress: " <<  jv["address"].toString() << Qt::endl;
-        }*/
-//    }
+    QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
+    QJsonObject jsonRoot = doc.object();
+    m_type = static_cast<EndPointType::Type>(jsonRoot["Type"].toInt());
+    EndPointType *ept = new EndPointType();
+    QString sType = ept->getTypeString(m_type);
+    m_Manager = jsonRoot["Manager"].toString();
+//    bool update = jsonRoot["update"].toBool();
+    OS_name = jsonRoot["OS"].toString();
+    OS_version = jsonRoot["OSVer"].toString();
+    m_itemDatas << m_id << m_Manager << sType << OS_name << OS_version;
+    //    parents.last()->appendChild(new EndPoint(m_id, data, parents.last()));
+    //TODO: get address of each interface....
+    if (!jsonRoot["Net"].isNull()){
+        oNet = jsonRoot["Net"].toObject();
+        qDebug() << "TODO: oNet:" << oNet << Qt::endl;
+    }
+
 }
 
 void EndPoint::updateTimeStemp()

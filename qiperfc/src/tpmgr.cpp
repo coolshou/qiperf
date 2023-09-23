@@ -1,4 +1,6 @@
 #include "tpmgr.h"
+#include <QJsonDocument>
+#include <QJsonObject>
 
 TPMgr::TPMgr(QObject *parent)
     : QAbstractItemModel(parent)
@@ -45,6 +47,8 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
         case 3:
             return QString("Client");
         case 4:
+            return QString("Avg TP");
+        case 5:
             return QString("comment");
         default:
             return QVariant();
@@ -103,4 +107,45 @@ int TPMgr::rowCount(const QModelIndex &parent) const
         parentItem = static_cast<TP*>(parent.internalPointer());
 
     return parentItem->childCount();
+}
+
+bool TPMgr::add(QString data)
+{
+    //json data
+    qDebug() << "TPMgr::add" << data << Qt::endl;
+//    QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
+//    QJsonObject jsonObject = doc.object();
+//    qDebug() << "client:" << jsonObject["client"] << Qt::endl;
+//    qDebug() << "server:" << jsonObject["server"] << Qt::endl;
+//    indexof
+//    QModelIndex midx = indexFromItem(rootItem);
+    int idx = rootItem->childCount();
+//    midx = this->index(0,0);
+//    idx = rowCount(this->rootItem);
+    TP *tp = new TP(QString::number(idx), data, rootItem);
+    rootItem->appendChild(tp);
+
+}
+QModelIndex TPMgr::indexFromItem(TP *item){
+    if(item == rootItem || item == nullptr)
+        return QModelIndex();
+    TP *parent = item->parentItem();
+
+    QList<TP *> parents;
+
+    while (parent && parent!=rootItem) {
+        parents<<parent;
+        parent = parent->parentItem();
+    }
+    QModelIndex ix;
+    parent = rootItem;
+    /*for(auto ch: parents){
+        ix = index(ch->row(), 0, ix);
+    }*/
+
+    for(int i=0; i < parents.count(); i++){
+        ix = index(parents[i]->row(), 0, ix);
+    }
+    ix = index(ix.row(), 0, ix);
+    return ix;
 }

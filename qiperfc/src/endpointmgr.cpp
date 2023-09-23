@@ -161,6 +161,7 @@ bool EndPointMgr::add(QString id, QString data)
         }
         return false;
     } else {
+        //new endpoint
         qDebug() << "EndPointMgr::add: (" << id << ") " << data << Qt::endl;
         //EndPoint* ep = new EndPoint(id, data, this);
         EndPoint* ep = new EndPoint(id, data, rootItem);

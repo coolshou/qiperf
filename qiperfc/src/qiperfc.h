@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QLabel>
+#include <QItemSelection>
 
 #include "pipeclient.h"
 #include "jcon/json_rpc_websocket_client.h"
@@ -41,9 +42,9 @@ private slots:
     void on_pb_add_server_clicked();
     void on_pb_start_clicked();
     void on_pb_stop_clicked();
-    void On_itemSelectionChanged();
+//    void On_itemSelectionChanged();
     void on_updateEndpointNum(int n);
-
+    void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
 private:
     Ui::MainWindow *ui;

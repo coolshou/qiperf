@@ -15,7 +15,19 @@ public:
 //    explicit EndPoint(const QList<QVariant> &data, EndPoint *parentItem = nullptr);
     explicit TP(QString id, QString data, TP *parentItem = nullptr);
     ~TP() ;//override
-
+    enum DirType{
+        Tx=0,
+        Rx=1,
+        TR=2
+    };
+    enum cols{
+        id=0,
+        server=1,
+        dir=2,
+        client=3,
+        tp=4,
+        comment=5
+    };
     void appendChild(TP *child);
 
     TP *child(int row);
@@ -38,20 +50,16 @@ private:
     QList<QVariant> m_itemDatas;
     TP *m_parentItem;
 //    EndPointType::Type m_type;
+    QString m_jsondata;
     QString m_id; // reference id
     QString m_server; // target server ip
-    QString m_direction; //direction: up/down
+//    QString m_direction; //direction: up/down
     QString m_client; // client ip
     QString m_tp; // throughput value
     QString m_comment; // comment
 
-    QString OS_version; // store OS version
-    QString OS_name; // store OS name
-    QString m_Manager; // manager interface
-    // net (eth/wifi) inerfaces:
-    // (TODO)mobile interfaces
     QString m_lastnoticetime; // last get notice time string, eq: 2023.17.06.12:22:07.905
-    QJsonObject oNet;
+
 };
 
 #endif // TP_H

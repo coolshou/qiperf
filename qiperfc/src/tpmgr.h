@@ -19,6 +19,8 @@ public:
     QModelIndex index(int row, int column, const QModelIndex &parent) const override;
     QModelIndex parent(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent) const override;
+    bool add(QString data);
+    QModelIndex indexFromItem(TP *item);
 
 private:
     TP *rootItem;

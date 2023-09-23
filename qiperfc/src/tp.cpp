@@ -1,10 +1,13 @@
 #include "tp.h"
 #include <QJsonDocument>
-
+#include <QPixmap>
 
 TP::TP(QString id, QString data, TP *parent)
     :m_parentItem(parent), m_id(id)
 {
+    m_id=id;
+    m_itemDatas << id;
+    m_jsondata = data;
     this->loadData(data);
 }
 
@@ -39,7 +42,21 @@ QVariant TP::data(int column) const
 {
     if (column < 0 || column >= m_itemDatas.size())
         return QVariant();
-    return m_itemDatas.at(column);
+    if (column==TP::cols::dir){
+        int dir = m_itemDatas.at(column).toInt();
+        if (dir==TP::DirType::Tx){
+            QPixmap img(":/images/Tx");
+            return img;
+        }else if (dir==TP::DirType::Rx){
+            QPixmap img(":/images/Rx");
+            return img;
+        }else{
+            QPixmap img(":/images/TR");
+            return img;
+        }
+    } else{
+        return m_itemDatas.at(column);
+    }
 }
 
 TP *TP::parentItem()
@@ -62,35 +79,33 @@ QString TP::getID()
 
 void TP::loadData(QString data)
 {
-//    QList<EndPoint *> parents;
     qDebug() << "loadData:" << m_parentItem << Qt::endl;
-    //TODO: parser data
-//    if (m_parentItem==0x0) {
-        QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
-        QJsonObject jsonRoot = doc.object();
-//        m_type = static_cast<EndPointType::Type>(jsonRoot["Type"].toInt());
-//        EndPointType ept = EndPointType();
-//        QString sType = ept.getTypeString(m_type);
-        m_Manager = jsonRoot["Manager"].toString();
-    //    bool update = jsonRoot["update"].toBool();
-        OS_name = jsonRoot["OS"].toString();
-        OS_version = jsonRoot["OSVer"].toString();
-//        m_itemDatas << m_id << m_Manager << sType << OS_name << OS_version;
-        //    parents.last()->appendChild(new EndPoint(m_id, data, parents.last()));
-        //TODO: get address of each interface....
-        if (!jsonRoot["Net"].isNull()){
-            oNet = jsonRoot["Net"].toObject();
-            qDebug() << "oNet:" << oNet << Qt::endl;
-        }
-        /*
-        QJsonObject oNet = jsonRoot["Net"].toObject();
-        QStringList oNets = oNet.keys();
-        foreach(QString sNet, oNets){
-            QJsonValue jv = oNet.value(sNet);
-            qDebug() << "if:" << sNet << " = " << jv["HW"].toString() << Qt::endl;
-            qDebug() << "\taddress: " <<  jv["address"].toString() << Qt::endl;
-        }*/
-//    }
+    QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
+    QJsonObject jsonRoot = doc.object();
+
+    QJsonObject o_client = jsonRoot["client"].toObject();
+    m_client = o_client["bind"].toString();
+//    QString m_mclient = o_client["manager"].toString();
+    int dir=DirType::Tx;
+    if (o_client["bidir"].toBool()){
+        dir=DirType::TR;
+    }
+    if (o_client["reverse"].toBool()){
+        dir=DirType::Rx;
+    }
+
+    QJsonObject o_server = jsonRoot["server"].toObject();
+    m_server = o_client["target"].toString();
+//    QString m_mserver = o_server["manager"].toString();
+//    m_itemDatas.append(m_mserver+"("+m_server+")");
+    m_itemDatas.append(m_server);
+    m_itemDatas.append(dir);
+//    m_itemDatas.append(m_mclient+"("+m_client+")");
+    m_itemDatas.append(m_client);
+    m_itemDatas.append(""); //throughput
+    m_itemDatas.append(""); //comment
+
+
 }
 
 void TP::updateTimeStemp()

@@ -146,6 +146,13 @@ void DlgIperf::onAccepted()
 //        abort();
         close = false;
     }
+    if (!addr.setAddress(ui->cb_client_bind_ip->currentText())){
+        QMessageBox::warning(this, tr("WARNING!!"),
+                             tr("Please specify iperf client bind ip address!!"),
+                             QMessageBox::Ok);
+        ui->cb_client_bind_ip->setFocus();
+        close = false;
+    }
     if (close){
         accept();
     }
