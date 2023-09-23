@@ -6,20 +6,22 @@
 #include <QList>
 #include <QJsonObject>
 
+
 //TP store each throughput config
 //class TP : public QObject
 class TP
 {
-//    Q_OBJECT
+    Q_GADGET
 public:
 //    explicit EndPoint(const QList<QVariant> &data, EndPoint *parentItem = nullptr);
     explicit TP(QString id, QString data, TP *parentItem = nullptr);
-    ~TP() ;//override
+//    ~TP() ;//override
     enum DirType{
         Tx=0,
         Rx=1,
         TR=2
     };
+    Q_ENUM(DirType)
     enum cols{
         id=0,
         server=1,
@@ -28,6 +30,7 @@ public:
         tp=4,
         comment=5
     };
+    Q_ENUM(cols)
     void appendChild(TP *child);
 
     TP *child(int row);
@@ -53,7 +56,7 @@ private:
     QString m_jsondata;
     QString m_id; // reference id
     QString m_server; // target server ip
-//    QString m_direction; //direction: up/down
+    QString m_direction; //direction: up/down
     QString m_client; // client ip
     QString m_tp; // throughput value
     QString m_comment; // comment

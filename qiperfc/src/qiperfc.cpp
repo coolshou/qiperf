@@ -5,8 +5,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
-
-
+#include "tpdirdelegate.h"
+#include "tp.h"
 #include <QDebug>
 #define TEST_JSONRPC 0
 
@@ -18,9 +18,12 @@ QIperfC::QIperfC(QWidget *parent)
 
     m_tpmgr = new TPMgr();
     ui->tv_throughput->setModel(m_tpmgr);
-    ui->tv_throughput->setColumnWidth(0, 30);
-    ui->tv_throughput->setColumnWidth(1, 200);
-    ui->tv_throughput->setColumnWidth(3, 200);
+    ui->tv_throughput->setColumnWidth(TP::cols::id, 35);
+    ui->tv_throughput->setColumnWidth(TP::cols::server, 200);
+    ui->tv_throughput->setColumnWidth(TP::cols::client, 200);
+    //following will cause problem!!
+//    TPDirDelegate tpdrdelegate;
+//    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, &tpdrdelegate);
     QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
     connect(ism, &QItemSelectionModel::selectionChanged, this, &QIperfC::onTPselectionChanged);
 //    ui->tv_throughput->header()->setVisible(true);
@@ -96,6 +99,28 @@ void QIperfC::on_pairEdit()
 void QIperfC::on_pairDelete()
 {
     // TODO: delete
+    QModelIndex cur = ui->tv_throughput->currentIndex();
+    QModelIndex index_current;
+    index_current = ui->tv_throughput->model()->sibling(cur.row(), 0, cur);
+    if (ui->tv_throughput->model()->removeRow(index_current.row(), index_current.parent())){
+        qDebug() << "on_pairDelete: " << index_current << Qt::endl;
+    }
+
+//    QModelIndex idx = ui->tv_throughput->currentIndex();
+//    bool rc = ui->tv_throughput->model()->removeRow(idx.row(), idx.parent());
+//    qDebug() << "on_pairDelete: " << rc << Qt::endl;
+
+//    while(! ui->tv_throughput->selectionModel()->selectedIndexes().isEmpty()) {
+//        auto idx =  ui->tv_throughput->selectionModel()->selectedIndexes().first();
+//         ui->tv_throughput->model()->removeRow(idx.row(), idx.parent());
+//    }
+
+//    QModelIndexList indexes = ui->tv_throughput->selectionModel()->selectedIndexes();
+//    if (indexes.size() > 0) {
+//        for (int i = 0; i < indexes.size(); i++){
+//            qDebug() << indexes[i].data().toString();
+//        }
+//    }
 }
 
 void QIperfC::on_notice(QString send_addr, QString msg)

@@ -47,6 +47,7 @@ SOURCES += \
     src/qiperfc.cpp \
     src/tp.cpp \
     src/tpmgr.cpp \
+    src/tpdirdelegate.cpp \
     src/udpreceiver.cpp
 
 #    src/tpchart.cpp
@@ -70,6 +71,7 @@ HEADERS += \
     src/qiperfc.h \
     src/tp.h \
     src/tpmgr.h \
+    src/tpdirdelegate.h \
     src/udpreceiver.h
 
 #    src/tpchart.h

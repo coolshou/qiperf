@@ -295,8 +295,8 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset theme="help-about">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/about</normaloff>:/about</iconset>
    </property>
    <property name="text">
     <string>About</string>
@@ -391,8 +391,8 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset theme="edit-copy">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/copy</normaloff>:/copy</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -403,8 +403,8 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset theme="edit-paste">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/paste</normaloff>:/paste</iconset>
    </property>
    <property name="text">
     <string>Paste</string>

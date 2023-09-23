@@ -11,10 +11,10 @@ TP::TP(QString id, QString data, TP *parent)
     this->loadData(data);
 }
 
-TP::~TP()
-{
-//    qDeleteAll(m_childItems);
-}
+//TP::~TP()
+//{
+////    qDeleteAll(m_childItems);
+//}
 
 void TP::appendChild(TP *item)
 {
@@ -40,23 +40,27 @@ int TP::columnCount() const
 
 QVariant TP::data(int column) const
 {
-    if (column < 0 || column >= m_itemDatas.size())
+    if (column < 0 || column >= m_itemDatas.size()){
         return QVariant();
-    if (column==TP::cols::dir){
-        int dir = m_itemDatas.at(column).toInt();
-        if (dir==TP::DirType::Tx){
-            QPixmap img(":/images/Tx");
-            return img;
-        }else if (dir==TP::DirType::Rx){
-            QPixmap img(":/images/Rx");
-            return img;
-        }else{
-            QPixmap img(":/images/TR");
-            return img;
-        }
-    } else{
-        return m_itemDatas.at(column);
     }
+//    if (column==TP::cols::dir){
+//        int dir = m_itemDatas.at(column).toInt();
+//        if (dir==TP::DirType::Tx){
+//            return QVariant(":/images/Tx");
+//            //QPixmap img(":/images/Tx");
+//            //return img;
+//        }else if (dir==TP::DirType::Rx){
+//            return QVariant(":/images/Rx");
+//            //QPixmap img(":/images/Rx");
+//            //return img;
+//        }else{
+//            return QVariant(":/images/TR");
+//            //QPixmap img(":/images/TR");
+//            //return img;
+//        }
+//    } else{
+        return m_itemDatas.at(column);
+//    }
 }
 
 TP *TP::parentItem()
@@ -86,12 +90,15 @@ void TP::loadData(QString data)
     QJsonObject o_client = jsonRoot["client"].toObject();
     m_client = o_client["bind"].toString();
 //    QString m_mclient = o_client["manager"].toString();
-    int dir=DirType::Tx;
+//    int dir=DirType::Tx;
+    m_direction = QVariant::fromValue(DirType::Tx).toString();
     if (o_client["bidir"].toBool()){
-        dir=DirType::TR;
+//        dir=DirType::TR;
+        m_direction=QVariant::fromValue(DirType::TR).toString();
     }
     if (o_client["reverse"].toBool()){
-        dir=DirType::Rx;
+//        dir=DirType::Rx;
+        m_direction=QVariant::fromValue(DirType::Rx).toString();
     }
 
     QJsonObject o_server = jsonRoot["server"].toObject();
@@ -99,7 +106,7 @@ void TP::loadData(QString data)
 //    QString m_mserver = o_server["manager"].toString();
 //    m_itemDatas.append(m_mserver+"("+m_server+")");
     m_itemDatas.append(m_server);
-    m_itemDatas.append(dir);
+    m_itemDatas.append(m_direction);
 //    m_itemDatas.append(m_mclient+"("+m_client+")");
     m_itemDatas.append(m_client);
     m_itemDatas.append(""); //throughput

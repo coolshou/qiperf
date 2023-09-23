@@ -2,6 +2,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include "tp.h"
+
 TPMgr::TPMgr(QObject *parent)
     : QAbstractItemModel(parent)
 {
@@ -17,15 +19,18 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
         qDebug() << "data index.isValid:" << index << Qt::endl;
         return QVariant();
     }
-
     if (role != Qt::DisplayRole) {
         //        qDebug() << "data not DisplayRole:" << index << Qt::endl;
         return QVariant();
     }
-
+//    if (role == Qt::DisplayRole || role == Qt::EditRole) {
+//        TP* item = getItem(index);
+//        return item->data(role);
+//    }
+//    return QVariant();
     //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
     TP *item = static_cast<TP*>(index.internalPointer());
-    //    EndPoint *item = itemFromIndex(index);
+//    //    EndPoint *item = itemFromIndex(index);
     return item->data(index.column());
 }
 
@@ -38,17 +43,17 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole){
         switch (section)
         {
-        case 0:
+        case TP::cols::id:
             return QString("idx");
-        case 1:
+        case TP::cols::server:
             return QString("Server");
-        case 2:
+        case TP::cols::dir:
             return QString("Direction");
-        case 3:
+        case TP::cols::client:
             return QString("Client");
-        case 4:
+        case TP::cols::tp:
             return QString("Avg TP");
-        case 5:
+        case TP::cols::comment:
             return QString("comment");
         default:
             return QVariant();
@@ -113,18 +118,12 @@ bool TPMgr::add(QString data)
 {
     //json data
     qDebug() << "TPMgr::add" << data << Qt::endl;
-//    QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
-//    QJsonObject jsonObject = doc.object();
-//    qDebug() << "client:" << jsonObject["client"] << Qt::endl;
-//    qDebug() << "server:" << jsonObject["server"] << Qt::endl;
-//    indexof
-//    QModelIndex midx = indexFromItem(rootItem);
     int idx = rootItem->childCount();
-//    midx = this->index(0,0);
-//    idx = rowCount(this->rootItem);
+    beginInsertRows(QModelIndex(), idx, idx);
     TP *tp = new TP(QString::number(idx), data, rootItem);
     rootItem->appendChild(tp);
-
+    endInsertRows();
+    return true;
 }
 QModelIndex TPMgr::indexFromItem(TP *item){
     if(item == rootItem || item == nullptr)
@@ -148,4 +147,24 @@ QModelIndex TPMgr::indexFromItem(TP *item){
     }
     ix = index(ix.row(), 0, ix);
     return ix;
+}
+
+//TP *TPMgr::itemFromIndex(const QModelIndex &index) const
+//{
+//    if (index.isValid())
+//    {
+//        TP *item = static_cast<TP*>(index.internalPointer());
+//        return item;
+//    }
+//    return rootItem;
+//}
+
+TP *TPMgr::getItem(const QModelIndex &index) const
+{
+    if (index.isValid()) {
+        TP* item = static_cast<TP*>(index.internalPointer());
+        if (item)
+            return item;
+    }
+    return rootItem;
 }

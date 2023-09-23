@@ -21,6 +21,9 @@ public:
     int rowCount(const QModelIndex &parent) const override;
     bool add(QString data);
     QModelIndex indexFromItem(TP *item);
+private:
+//    TP *itemFromIndex(const QModelIndex &index) const;
+    TP *getItem(const QModelIndex& index) const;
 
 private:
     TP *rootItem;

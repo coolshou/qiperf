@@ -83,6 +83,7 @@ QString DlgIperf::getJsonCfg()
 void DlgIperf::loadJsonCfg(QString jsoncfg)
 {
     //TODO
+    Q_UNUSED(jsoncfg)
 }
 
 bool DlgIperf::add(QString mgr)
@@ -107,12 +108,12 @@ void DlgIperf::changeEvent(QEvent *e)
     }
 }
 
-void DlgIperf::closeEvent(QCloseEvent *event)
-{
+//void DlgIperf::closeEvent(QCloseEvent *event)
+//{
 
 
 
-}
+//}
 
 void DlgIperf::updateUI()
 {
