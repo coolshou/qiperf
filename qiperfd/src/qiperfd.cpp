@@ -61,7 +61,7 @@ QIperfd::QIperfd(QObject *parent)
     {
         QFile::remove(m_iperfexe2);
     }
-    m_iperfexe21 = tmp + tmp_path + "/iperf21";
+    m_iperfexe21 = tmp + tmp_path + "/iperf2.1";
     if (QFileInfo::exists(m_iperfexe21))
     {
         QFile::remove(m_iperfexe21);
@@ -127,7 +127,7 @@ QIperfd::QIperfd(QObject *parent)
     // windows, multi files
 
     m_iperfexe2 = apppath + "/windows/x86/iperf2.exe";
-    m_iperfexe21 = apppath + "/windows/x86/iperf21.exe";
+    m_iperfexe21 = apppath + "/windows/x86/iperf2.1.exe";
     m_iperfexe3 = apppath + "/windows/" + arch + "/iperf3.exe";
 #else
     qDebug() << " Not Support platform!!" << Qt::endl;
