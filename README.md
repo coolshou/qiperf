@@ -1,15 +1,34 @@
 # qiperf
 
-A quick iperf console/daemon to run iperf2/iperf3 with pretty control GUI.
+Quick iperf control tool
 
 # Requirement
+ * qtbase5-dev
+ * libqt5websockets5-dev
+ * libsystemd-dev
+ * QCustomPlot
+ * Qt MaintenanceTool to install android support
 
-* qtbase5-dev
-* Qt MaintenanceTool to install android support
+# qiperfd
+Quick iperf daemon
 
-# Screenshot
+# qiperftray
+Quick iperf tray
 
-[`<img src="images/Screenshot_2.jpg" width="500" alt="qiperf on android">`]()
+[<img src="images/Screenshot_2.jpg" width="500" alt="qiperf on android">]("images/Screenshot_2.jpg")
+# qiperfc
+Quick iperf console
+
+# Build
+	sbuild
+# cross-compile for Raspberry 3 (aarch64)
+	sudo dpkg --add-architecture arm64
+	sudo apt update
+	sudo apt-get install build-essential crossbuild-essential-arm64
+	cd qiperf
+	dpkg-buildpackage -us -uc -b --host-arch arm64
+	
+sbuild --host=armhf
 
 # Support
 

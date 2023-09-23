@@ -14,5 +14,8 @@
         <file alias="pair-add">images/iperf-add.png</file>
         <file alias="pair-del">images/iperf-del.png</file>
         <file alias="pair-edit">images/iperf-edit.png</file>
+        <file alias="Tx">images/Tx.png</file>
+        <file alias="Rx">images/Rx.png</file>
+        <file alias="TR">images/TR.png</file>
     </qresource>
 </RCC>
