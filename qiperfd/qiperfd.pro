@@ -128,14 +128,17 @@ unix:!android {
     IMAGES_FILES.path += /usr/share/pixmaps/
     #
     INSTALLS += SERVICE_FILES IMAGES_FILES
-    contains(QT_ARCH, x86_64) {
+    contains(QT_ARCH, arm64) {
         RESOURCES += \
-            linux.qrc
+            linux-arm64.qrc
     }else{
-        RESOURCES += \
-            linux-i686.qrc
+        contains(QT_ARCH, x86_64) {
+            RESOURCES += \
+                linux.qrc
+        }else{
+            RESOURCES += \
+                linux-i686.qrc
+        }
     }
 }
 
-#RESOURCES += \
-#    ../qiperf.qrc

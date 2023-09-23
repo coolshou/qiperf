@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/linux">
+        <file alias="iperf2">linux/arm64/iperf2</file>
+        <file alias="iperf2.1">linux/arm64/iperf2.1</file>
+        <file alias="iperf3">linux/arm64/iperf3</file>
+    </qresource>
+</RCC>
