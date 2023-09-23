@@ -31,12 +31,15 @@ VERSION_QIPERFTRAY := $(shell sed -n -e "s/^#define QIPERFTRAY_VERSION //p" src/
 #	dh_auto_configure -- \
 #	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
 
-override_dh_gencontrol:
-	dh_gencontrol -pqiperfc -- -v$(VERSION_QIPERFC) -cdebian/qiperfc.control
-	dh_gencontrol -pqiperfd -- -v$(VERSION_QIPERFD) -cdebian/qiperfd.control
-	dh_gencontrol -pqiperftray -- -v$(VERSION_QIPERFTRAY) -cdebian/qiperftray.control
+# override_dh_gencontrol:
+# 	dh_gencontrol -pqiperfc -- -v$(VERSION_QIPERFC)
+	#-cdebian/qiperfc.control
+# 	dh_gencontrol -pqiperfd -- -v$(VERSION_QIPERFD)
+# 	#-cdebian/qiperfd.control
+# 	dh_gencontrol -pqiperftray -- -v$(VERSION_QIPERFTRAY)
+# 	#-cdebian/qiperftray.control
 
-override_dh_builddeb:
-	dh_builddeb -pqiperfd
-	dh_builddeb -pqiperftray
-	dh_builddeb -pqiperfc
+# override_dh_builddeb:
+# 	dh_builddeb -pqiperfd
+# 	dh_builddeb -pqiperftray
+# 	dh_builddeb -pqiperfc

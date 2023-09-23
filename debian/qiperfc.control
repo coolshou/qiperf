@@ -11,6 +11,6 @@ Rules-Requires-Root: no
 
 Package: qiperfc
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: qiperfd, ${shlibs:Depends}, ${misc:Depends}
 Description: qt base quick iperf console
  quick iperf console GUI to control qiperfd
