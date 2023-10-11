@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QMessageBox>
 #include "tpdirdelegate.h"
 #include "endpointact.h"
 #include "tp.h"
@@ -99,38 +100,32 @@ void QIperfC::on_pairEdit()
 
 void QIperfC::on_pairDelete()
 {
-    // TODO: delete
-    QModelIndex cur = ui->tv_throughput->currentIndex();
-    QModelIndex index_current;
-    index_current = ui->tv_throughput->model()->sibling(cur.row(), 0, cur);
-    if (ui->tv_throughput->model()->removeRow(index_current.row(), index_current.parent())){
-        qDebug() << "on_pairDelete: " << index_current << Qt::endl;
+    QModelIndex cur = ui->tv_throughput->selectionModel()->currentIndex();
+    QAbstractItemModel *model = ui->tv_throughput->model();
+    qDebug() << "on_pairDelete: " << cur << Qt::endl;
+    if (!model->removeRow(cur.row(), cur.parent())){
+        QMessageBox::information(this, "ERROR", "Can not remove test pair: " + cur.data().toString());
     }
-
-//    QModelIndex idx = ui->tv_throughput->currentIndex();
-//    bool rc = ui->tv_throughput->model()->removeRow(idx.row(), idx.parent());
-//    qDebug() << "on_pairDelete: " << rc << Qt::endl;
-
-//    while(! ui->tv_throughput->selectionModel()->selectedIndexes().isEmpty()) {
-//        auto idx =  ui->tv_throughput->selectionModel()->selectedIndexes().first();
-//         ui->tv_throughput->model()->removeRow(idx.row(), idx.parent());
-//    }
-
-//    QModelIndexList indexes = ui->tv_throughput->selectionModel()->selectedIndexes();
-//    if (indexes.size() > 0) {
-//        for (int i = 0; i < indexes.size(); i++){
-//            qDebug() << indexes[i].data().toString();
-//        }
-    //    }
 }
 
 void QIperfC::onStart()
 {
-    updateRunStatus(true);
-    //start test
-//    m_tpmgr->start();
-    m_tpmgr->rowCount();
-
+    if (m_tpmgr->rootChildCount()>0) {
+        updateRunStatus(true);
+        //start test
+    //    m_tpmgr->start();
+        qDebug() << "ChildCount: " << m_tpmgr->rootChildCount() << Qt::endl;
+        QList<TP *> tps = m_tpmgr->getChilds();
+        TP *tp;
+        foreach (tp, tps) {
+            qDebug() << "MServer:" << tp->getManagerServer() << " MClient:" << tp->getManagerClient() << Qt::endl;
+        }
+        // control all server endpoint init iperf server
+        // wait server ready
+        // control all client endpoint init iperf -c
+    } else {
+        QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");
+    }
 }
 
 void QIperfC::onStop()
@@ -138,6 +133,8 @@ void QIperfC::onStop()
     updateRunStatus(false);
     //stop test
 //    m_tpmgr->stop();
+    // check all client endpoint stop
+    // force stop all client endpoint
 }
 
 void QIperfC::on_notice(QString send_addr, QString msg)

@@ -149,6 +149,34 @@ QModelIndex TPMgr::indexFromItem(TP *item){
     return ix;
 }
 
+int TPMgr::rootChildCount()
+{
+    return this->rootItem->childCount();
+}
+
+QList<TP *> TPMgr::getChilds()
+{
+//    QList<TP *> tps;
+    m_tps.clear();
+    for(int i = 0; i<this->rootItem->childCount();i++){
+        m_tps.append(this->rootItem->child(i));
+    }
+
+    return m_tps;
+}
+
+bool TPMgr::removeRows(int position, int rows, const QModelIndex &parent)
+{
+    TP *parentItem = getItem(parent);
+    bool success = true;
+
+    beginRemoveRows(parent, position, position + rows - 1);
+    success = parentItem->removeChildren(position, rows);
+    endRemoveRows();
+
+    return success;
+}
+
 //TP *TPMgr::itemFromIndex(const QModelIndex &index) const
 //{
 //    if (index.isValid())

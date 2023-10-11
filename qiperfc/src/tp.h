@@ -31,6 +31,13 @@ public:
         comment=5
     };
     Q_ENUM(cols)
+//    enum DataField{
+//        MServer=0,
+//        Dir,
+//        MClient,
+//        Throughput
+//    };
+//    Q_ENUM(DataField)
     void appendChild(TP *child);
 
     TP *child(int row);
@@ -39,11 +46,13 @@ public:
     QVariant data(int column) const;
     int row() const;
     TP *parentItem();
-
+    bool removeChildren(int position, int count);
     //explicit EndPoint(QString id, QString data, QObject *parent = nullptr);
 
     QString getID();
     void loadData(QString data);
+    QString getManagerServer();
+    QString getManagerClient();
     void updateTimeStemp();
     QString getLastNoticeTime();
 signals:

@@ -65,7 +65,18 @@ QVariant TP::data(int column) const
 
 TP *TP::parentItem()
 {
-    return m_parentItem;
+        return m_parentItem;
+}
+
+bool TP::removeChildren(int position, int count)
+{
+        if (position < 0 || position + count > m_childItems.size())
+        return false;
+
+        for (int row = 0; row < count; ++row)
+        delete m_childItems.takeAt(position);
+
+        return true;
 }
 
 int TP::row() const
@@ -113,6 +124,16 @@ void TP::loadData(QString data)
     m_itemDatas.append(""); //comment
 
 
+}
+
+QString TP::getManagerServer()
+{
+    return m_itemDatas[TP::server].toString();
+}
+
+QString TP::getManagerClient()
+{
+    return m_itemDatas[TP::client].toString();
 }
 
 void TP::updateTimeStemp()
