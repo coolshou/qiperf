@@ -37,6 +37,7 @@ SOURCES += \
     $$PWD/../src/pipeclient.cpp \
     $$PWD/../src/endpoint.cpp \
     $$PWD/../src/endpointtype.cpp \
+    $$PWD/../src/endpointact.cpp \
     lib/axistag.cpp \
     lib/qcustomplot.cpp \
     src/dlgiperf.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
     $$PWD/../src/endpoint.h \
     $$PWD/../src/endpointtype.h \
     $$PWD/../src/versions.h \
+    $$PWD/../src/endpointact.h \
     lib/axistag.h \
     lib/qcustomplot.h \
     src/dlgiperf.h \
