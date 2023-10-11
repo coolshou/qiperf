@@ -5,6 +5,10 @@
 #include <QHostInfo>
 #include <QNetworkInterface>
 
+#include "endpoint.h"
+#include "endpointtype.h"
+#include "endpointact.h"
+
 #include <QDebug>
 
 
@@ -34,6 +38,8 @@ QString MyInfo::collectInfo()
 */
 
     QJsonObject mainObject;
+    mainObject.insert("ACT", EndPointAct::Add);
+    mainObject.insert("Type", getEndpointType());
     mainObject.insert("Type", getEndpointType());
     mainObject.insert("HostName", QHostInfo::localHostName());
     mainObject.insert("OS", QSysInfo::prettyProductName());
@@ -81,6 +87,27 @@ QJsonObject MyInfo::collectNetInfo()
         }
     }
     return netObjects;
+}
+
+QString MyInfo::disableInfo()
+{
+    QJsonObject mainObject;
+    mainObject.insert("ACT", EndPointAct::Disable);
+    QJsonDocument jsonDoc;
+    jsonDoc.setObject(mainObject);
+    QString strJson(jsonDoc.toJson(QJsonDocument::Compact));
+    return strJson;
+}
+
+QString MyInfo::updateInfo()
+{
+    QJsonObject mainObject;
+    mainObject.insert("ACT", EndPointAct::Update);
+    //TODO: other update info
+    QJsonDocument jsonDoc;
+    jsonDoc.setObject(mainObject);
+    QString strJson(jsonDoc.toJson(QJsonDocument::Compact));
+    return strJson;
 }
 
 QList<QHostAddress> MyInfo::getIPfromIfname(QString ifname)

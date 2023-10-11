@@ -139,12 +139,9 @@ QIperfd::QIperfd(QObject *parent)
 
 QIperfd::~QIperfd()
 {
+    QString info = m_myinfo->disableInfo();
+    m_udpsrv->setSendMsg(info);
 }
-
-// QIperfd::~QIperfd()
-//{
-//     //savecfg();
-// }
 
 void QIperfd::onLog(QString text)
 {
@@ -235,11 +232,11 @@ void QIperfd::add(int version, QString m_cmd, QString args, uint port)
     //    m_threads.append(iperf_th);
     //    int idx = m_threads.count()-1;
     IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port);
-    connect(iperfer, SIGNAL(onStdout(int, QString)), this, SLOT(readStdOut(int, QString)));
-    connect(iperfer, SIGNAL(onStderr(int, QString)), this, SLOT(readStdErr(int, QString)));
-    connect(iperfer, SIGNAL(log(int, QString)), this, SLOT(onIperfLog(int, QString)));
+    connect(iperfer, SIGNAL(onStdout(int,QString)), this, SLOT(readStdOut(int,QString)));
+    connect(iperfer, SIGNAL(onStderr(int,QString)), this, SLOT(readStdErr(int,QString)));
+    connect(iperfer, SIGNAL(log(int,QString)), this, SLOT(onIperfLog(int,QString)));
     connect(iperfer, SIGNAL(started(int)), this, SLOT(onStarted(int)));
-    connect(iperfer, SIGNAL(finished(int, int, int)), this, SLOT(onFinished(int, int, int)));
+    connect(iperfer, SIGNAL(finished(int,int,int)), this, SLOT(onFinished(int,int,int)));
     iperfer->moveToThread(iperf_th);
     connect(iperf_th, SIGNAL(started()), iperfer, SLOT(work()));
 
