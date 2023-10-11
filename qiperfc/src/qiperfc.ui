@@ -157,7 +157,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="pb_status">
              <property name="text">
               <string>Status</string>
              </property>
@@ -354,6 +354,9 @@
    </property>
   </action>
   <action name="actionStart">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="../../qiperf.qrc">
      <normaloff>:/start</normaloff>:/start</iconset>

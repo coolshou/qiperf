@@ -6,6 +6,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include "tpdirdelegate.h"
+#include "endpointact.h"
 #include "tp.h"
 #include <QDebug>
 #define TEST_JSONRPC 0
@@ -120,20 +121,63 @@ void QIperfC::on_pairDelete()
 //        for (int i = 0; i < indexes.size(); i++){
 //            qDebug() << indexes[i].data().toString();
 //        }
-//    }
+    //    }
+}
+
+void QIperfC::onStart()
+{
+    updateRunStatus(true);
+    //start test
+//    m_tpmgr->start();
+    m_tpmgr->rowCount();
+
+}
+
+void QIperfC::onStop()
+{
+    updateRunStatus(false);
+    //stop test
+//    m_tpmgr->stop();
 }
 
 void QIperfC::on_notice(QString send_addr, QString msg)
 {
-//    qDebug() << "TODO on_notice: (" << send_addr << ") " << msg << Qt::endl;
-    if (m_endpointmgr->add(send_addr, msg)){
-        if (dlgiperf){
-            if (dlgiperf->add(send_addr)){
-                dlgiperf->updateUI();
-            }
+    QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8());
+    // check validity of the document
+    if(!doc.isNull())
+    {
+        QJsonObject obj = doc.object();
+        int act = obj["ACT"].toInt();
+        switch (act){
+            case EndPointAct::Add:
+                if (m_endpointmgr->add(send_addr, msg)){
+                    if (dlgiperf){
+                        if (dlgiperf->add(send_addr)){
+                            dlgiperf->updateUI();
+                        }
+                    }
+                    emit updateEndpointNum(m_endpointmgr->getTotalEndpoints());
+                }
+                break;
+            case EndPointAct::Update:
+                qDebug() << "TODO EndPoint Update: (" << send_addr << ") " << msg << Qt::endl;
+                break;
+            case EndPointAct::Del:
+                qDebug() << "TODO EndPoint Del: (" << send_addr << ") " << msg << Qt::endl;
+                break;
+            case EndPointAct::Disable:
+                qDebug() << "TODO EndPoint Disable: (" << send_addr << ") " << msg << Qt::endl;
+                break;
         }
-        emit updateEndpointNum(m_endpointmgr->getTotalEndpoints());
+    } else {
+        qDebug() << "TODO on_notice invalid message: (" << send_addr << ") " << msg << Qt::endl;
     }
+}
+
+void QIperfC::updateRunStatus(bool bStart)
+{
+    ui->actionStart->setEnabled(!bStart);
+    ui->actionStop->setEnabled(bStart);
 }
 
 void QIperfC::init_actions()
@@ -143,6 +187,10 @@ void QIperfC::init_actions()
     connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(on_pairAdd()));
     connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(on_pairEdit()));
     connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(on_pairDelete()));
+
+    //start/stop
+    connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
+    connect(ui->actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
 }
 
 void QIperfC::initStatusbar()
@@ -160,7 +208,7 @@ void QIperfC::initStatusbar()
 }
 
 
-void QIperfC::on_pushButton_clicked()
+void QIperfC::on_pb_status_clicked()
 {
     pclient->send_MessageToServer(CMD_STATUS);
 }

@@ -25,20 +25,28 @@ class QIperfC : public QMainWindow
 public:
     QIperfC(QWidget *parent = nullptr);
     ~QIperfC() override;
+    void start();
+    void stop();
+
 public slots:
     void onNewMessage(const QString msg);
     void on_pairAdd();
     void on_pairEdit();
     void on_pairDelete();
+    void onStart();
+    void onStop();
     void on_notice(QString send_addr, QString msg);
 
 signals:
     void updateEndpointNum(int n);
 
+private:
+    void updateRunStatus(bool bStart);
+
 private slots:
     void init_actions();
     void initStatusbar();
-    void on_pushButton_clicked();
+    void on_pb_status_clicked();
     void on_pb_add_server_clicked();
     void on_pb_start_clicked();
     void on_pb_stop_clicked();
