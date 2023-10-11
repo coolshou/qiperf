@@ -83,7 +83,7 @@ QString TP::getID()
 
 void TP::loadData(QString data)
 {
-    qDebug() << "loadData:" << m_parentItem << Qt::endl;
+//    qDebug() << "loadData:" << m_parentItem << Qt::endl;
     QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
     QJsonObject jsonRoot = doc.object();
 

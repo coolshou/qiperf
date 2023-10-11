@@ -7,6 +7,7 @@
 
 #include "tp.h"
 
+//class to manager all Throughput data
 class TPMgr : public QAbstractItemModel
 {
     Q_OBJECT

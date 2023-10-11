@@ -37,7 +37,7 @@ signals:
 private:
     QList<EndPoint *> m_childItems;
     QList<QVariant> m_itemDatas;
-    EndPoint *m_parentItem;
+    EndPoint *m_parentItem; //parent item
     EndPointType::Type m_type;
     QString m_id; // reference id, Win/Linux/MacOS: manager IP, android: adb devices id, (TODO: iOS:?)
     QString OS_version; // store OS version

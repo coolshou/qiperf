@@ -63,7 +63,7 @@ QString EndPoint::getID()
 void EndPoint::loadData(QString data)
 {
 //    QList<EndPoint *> parents;
-    qDebug() << "loadData:" << m_parentItem << Qt::endl;
+//    qDebug() << "loadData:" << m_parentItem << Qt::endl;
     //TODO: parser data
     QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
     QJsonObject jsonRoot = doc.object();
@@ -79,7 +79,7 @@ void EndPoint::loadData(QString data)
     //TODO: get address of each interface....
     if (!jsonRoot["Net"].isNull()){
         oNet = jsonRoot["Net"].toObject();
-        qDebug() << "TODO: oNet:" << oNet << Qt::endl;
+//        qDebug() << "TODO: oNet:" << oNet << Qt::endl;
     }
 
 }
