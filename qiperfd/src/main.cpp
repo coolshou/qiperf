@@ -15,6 +15,29 @@
 #include <systemd/sd-daemon.h>
 #endif
 
+void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    QByteArray localMsg = msg.toLocal8Bit();
+    const char *file = context.file ? context.file : "";
+    const char *function = context.function ? context.function : "";
+    switch (type) {
+    case QtDebugMsg:
+        fprintf(stderr, "DEBUG: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtInfoMsg:
+        fprintf(stderr, "INFO: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtWarningMsg:
+        fprintf(stderr, "WARN: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtCriticalMsg:
+        fprintf(stderr, "CRITICAL: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtFatalMsg:
+        fprintf(stderr, "FATAL: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    }
+}
 jcon::JsonRpcServer* startServer(QObject* parent,
                                  bool allow_notifications = false, QIperfd* qiperfd=nullptr)
 {
@@ -37,6 +60,9 @@ jcon::JsonRpcServer* startServer(QObject* parent,
 int main(int argc, char *argv[])
 {
     int rc;
+    //TODO: log file
+    qInstallMessageHandler(myMessageOutput);
+
     QCoreApplication app(argc, argv);
 //    UnixSignalWatcher sigwatch;
 //    sigwatch.watchForSignal(SIGINT);
