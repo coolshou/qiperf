@@ -129,16 +129,23 @@ unix:!android {
     #
     INSTALLS += SERVICE_FILES IMAGES_FILES
     contains(QT_ARCH, arm64) {
+        B_ARCH="arm64"
         RESOURCES += \
             linux-arm64.qrc
     }else{
         contains(QT_ARCH, x86_64) {
+            B_ARCH="x86_64"
             RESOURCES += \
                 linux.qrc
         }else{
+            B_ARCH="i686"
             RESOURCES += \
                 linux-i686.qrc
         }
+    }
+    if (contains($$B_ARCH,"")) {
+        message("NOT support platform: " QT_ARCH)
+
     }
 }
 
