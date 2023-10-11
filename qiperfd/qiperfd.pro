@@ -133,6 +133,11 @@ unix:!android {
         RESOURCES += \
             linux-arm64.qrc
     }
+    contains(QT_ARCH, armhf) {
+        B_ARCH="armhf"
+        RESOURCES += \
+            linux-armhf.qrc
+    }
     contains(QT_ARCH, x86_64) {
         B_ARCH="x86_64"
         RESOURCES += \
@@ -146,7 +151,6 @@ unix:!android {
 
     if (contains($$B_ARCH,"")) {
         message("NOT support platform: " QT_ARCH)
-
     }
 }
 
