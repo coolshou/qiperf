@@ -29,6 +29,7 @@ public:
     QModelIndex indexFromItem(EndPoint *item);
 
     bool add(QString id, QString data); //add endpoint
+    void disable(QString id); //disable endpoint
     bool isExist(QString id);
     int getTotalEndpoints();
 

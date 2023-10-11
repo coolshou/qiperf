@@ -178,6 +178,15 @@ bool EndPointMgr::add(QString id, QString data)
     }
 }
 
+void EndPointMgr::disable(QString id)
+{
+    if (isExist(id)){
+        EndPoint* ep = getEndPoint(id);
+        qDebug() << "disable: " << ep->getID() << Qt::endl;
+
+    }
+}
+
 bool EndPointMgr::isExist(QString id)
 {
     foreach(EndPoint *ep, m_endpoints){
