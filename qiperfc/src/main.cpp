@@ -29,8 +29,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
 int main(int argc, char *argv[])
 {
-    //log file
-
+    //TODO: log file
     qInstallMessageHandler(myMessageOutput);
     QApplication app(argc, argv);
     app.setOrganizationName(QIPERF_ORG);

@@ -120,9 +120,9 @@ void QIperfC::onStart()
         foreach (tp, tps) {
             qDebug() << "MServer:" << tp->getManagerServer() << " MClient:" << tp->getManagerClient() << Qt::endl;
         }
-        // control all server endpoint init iperf server
-        // wait server ready
-        // control all client endpoint init iperf -c
+        //TODO: control all server endpoint init iperf server
+        //TODO: wait server ready
+        //TODO: control all client endpoint init iperf -c
     } else {
         QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");
     }
