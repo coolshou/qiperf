@@ -5,15 +5,15 @@ CONFIG += c++17 console
 CONFIG -= app_bundle
 
 #unix {
-    include(../jcon-cpp.pri)
-#} else {
-#    INCLUDEPATH += \
-#        ../jcon-cpp/src/
+#INCLUDEPATH += \
+#    ../qt-unix-signals/
 #}
 
+include(../jcon-cpp.pri)
 include(../qiperf.pri)
-#include(../sigwatch.pri)
-
+unix {
+include(../sigwatch.pri)
+}
 unix:!android {
     #LIBS += -lsystemd
     CONFIG += link_pkgconfig
