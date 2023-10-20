@@ -12,10 +12,6 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
                               QIPERF_ORG, QIPERFTRAY_NAME);
     ui->setupUi(this);
     loadcfg();
-//    Qt::WindowFlags flags = 0;
-//    flags |= Qt::FramelessWindowHint;
-//    setWindowFlags(Qt::FramelessWindowHint);
-//    setWindowFlags(Qt::SplashScreen);
     setWindowFlags(Qt::WindowTitleHint|Qt::Dialog);
 #if defined (Q_OS_LINUX)
     setFixedSize(500,300);
@@ -125,14 +121,13 @@ void QIperfTray::onTrayIconActivated()
 void QIperfTray::onSetMgrIfname()
 {    //Set Mgr_Ifname
     QString ifname = ui->cb_mgr_ifnames->currentText();
-//    qDebug()<< "onSetMgrIfname ifname:" << ifname << Qt::endl;
     QJsonObject jobj;
     jobj.insert("Action", CMD_SET_IFNAME);
     jobj.insert(CMD_SET_IFNAME, ifname);
     QJsonDocument doc;
     doc.setObject(jobj);
     QString strjson(doc.toJson(QJsonDocument::Compact));
-//    qDebug()<< "onSetMgrIfname:" << strjson << Qt::endl;
+    qDebug()<< "onSetMgrIfname:" << strjson << Qt::endl;
     pclient->send_MessageToServer(strjson);
 }
 
