@@ -174,5 +174,10 @@ int MyInfo::getEndpointType()
 //    QString tpy =QSysInfo::productType();
 //    if (QString::compare(tpy, "android", Qt::CaseInsensitive)==0){
 //    }else if (QString::compare(tpy, "macos", Qt::CaseInsensitive)==0){
-//    }
+    //    }
+}
+
+void MyInfo::setIfname(QString mgr_ifname)
+{
+    m_ifname = mgr_ifname;
 }

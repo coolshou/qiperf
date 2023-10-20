@@ -15,16 +15,28 @@ QIperfd::QIperfd(QObject *parent)
     : QObject{parent}
 {
     // TODO: setting
-    QSettings cfg = QSettings(QSettings::NativeFormat, QSettings::UserScope,
+    cfg = new QSettings(QSettings::NativeFormat, QSettings::SystemScope,
                               QIPERF_ORG, QIPERFD_NAME);
+    qInfo() << "cfg filename:" << cfg->fileName() << Qt::endl;
+    //SystemScope: /etc/xdg/xdg-lxqt/alphanetworks/qiperfd.conf
+        //sudo =>      /etc/xdg/alphanetworks/qiperfd.conf
+    //UserScope: /home/jimmy/.config/alphanetworks/qiperfd.conf
+        //sudo =>       /root/.config/alphanetworks/qiperfd.conf
+
+    QFileInfo fi(cfg->fileName());
+    if (!QDir(fi.absolutePath()).exists()){
+        QDir().mkdir(fi.absolutePath());
+    }
     QString apppath = qApp->applicationDirPath();
     loadcfg(apppath);
     //    qDebug() << "start UdpSrv" << Qt::endl;
     //
     m_myinfo = new MyInfo(mgr_ifname);
+    connect(this, SIGNAL(setMgrIfname(QString)), m_myinfo, SLOT(setIfname(Qstring)));
     QString info = m_myinfo->collectInfo();
 
     m_udpsrv = new UdpSrv(QIPERFD_BPORT, mgr_ifname, m_myinfo);
+    connect(this, SIGNAL(setMgrIfname(QString)), m_udpsrv, SLOT(setIfname(Qstring)));
     //    m_udpsrv->collectInfo();
     m_udpsrv->setSendMsg(info); // broadcast
 
@@ -150,28 +162,30 @@ void QIperfd::onLog(QString text)
 
 void QIperfd::loadcfg(QString apppath)
 {
-    cfg.beginGroup("main");
-    cfg.setValue("Path", apppath);
-    cfg.endGroup();
-    cfg.sync();
+    qInfo() << "loadcfg: (apppath:" << apppath << ")" << Qt::endl;
+    cfg->beginGroup("main");
+    cfg->setValue("Path", apppath);
+    cfg->endGroup();
+    cfg->sync();
 
     listInterfaces();
     // load config setting
-    cfg.beginGroup("manager");
-    setManagerInterface(cfg.value("ifname", "eth0").toString());
-    mgr_port = cfg.value("port", QIPERFD_PORT).toInt();
-    cfg.endGroup();
+    cfg->beginGroup("manager");
+    setManagerInterface(cfg->value("ifname", "eth0").toString());
+    mgr_port = cfg->value("port", QIPERFD_PORT).toInt();
+    cfg->endGroup();
 }
 
 void QIperfd::savecfg()
 {
     //    qDebug()<< "savecfg" << Qt::endl;
 
-    cfg.beginGroup("manager");
-    cfg.setValue("ifname", mgr_ifname);
-    cfg.setValue("port", mgr_port);
-    cfg.endGroup();
-    cfg.sync();
+    cfg->beginGroup("manager");
+    cfg->setValue("ifname", mgr_ifname);
+    cfg->setValue("port", mgr_port);
+    cfg->endGroup();
+    cfg->sync();
+    qInfo() << "savecfg:" << cfg->status() << Qt::endl;
     //    qDebug()<< "savecfg end" << Qt::endl;
 }
 
@@ -270,12 +284,16 @@ void QIperfd::stop()
 void QIperfd::setManagerInterface(QString interface)
 {
     mgr_ifname = interface;
+//    savecfg();
+    emit setMgrIfname(interface);
 }
 
 void QIperfd::onNewMessage(int idx, const QString msg)
 {
+    qInfo() << "onNewMessage: = " << msg << Qt::endl;
     if (QString::compare(msg, CMD_OK, Qt::CaseInsensitive) == 0)
     {
+
         return;
     }
 
@@ -405,5 +423,7 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus)
 
 void QIperfd::onQuit()
 {
+    qInfo() << "onQuit" << Qt::endl;
     savecfg();
+    qApp->quit();
 }

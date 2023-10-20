@@ -20,6 +20,8 @@ public:
     QList<QHostAddress> getIPfromIfname(QString ifname);
 
     int getEndpointType();
+public slots:
+    void setIfname(QString mgr_ifname);
 
 signals:
 

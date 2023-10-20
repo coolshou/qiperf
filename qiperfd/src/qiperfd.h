@@ -7,7 +7,9 @@
 #include <QSettings>
 #include <QList>
 #include <QString>
-
+#if defined(Q_OS_LINUX)
+#include <QSocketNotifier>
+#endif
 #include "pipeserver.h"
 #include "iperfworker.h"
 //#include "myservice.h"
@@ -20,13 +22,17 @@ class QIperfd : public QObject
 public:
     explicit QIperfd(QObject *parent = nullptr);
     ~QIperfd() override;
+#if defined(Q_OS_LINUX)
+//    // Unix signal handlers.
+//    static void hupSignalHandler(int unused);
+//    static void termSignalHandler(int unused);
+#endif
     void onLog(QString text);
     void loadcfg(QString apppath);
     void savecfg();
     QList<QString> listInterfaces();
     QString getInterfaceAddr(QString ifname);
     QString getManagerInterface();
-    void setMgr_ifname(QString ifname);
     void add(int version,QString m_cmd,QString args, uint port);
     void start();
     void stop();
@@ -34,6 +40,11 @@ public:
     //TODO: stop all iperfs
 
 public slots:
+#if defined(Q_OS_LINUX)
+//    // Qt signal handlers.
+//    void handleSigHup();
+//    void handleSigTerm();
+#endif
     void setManagerInterface(QString interface);
     void onNewMessage(int idx, const QString msg);
     void readStdOut(int idx, QString text);
@@ -43,8 +54,17 @@ public slots:
     void onFinished(int idx, int exitCode, int exitStatus);
     void onQuit();
 signals:
+    void setMgrIfname(QString interface);
+
 private:
-    QSettings cfg;
+#if defined(Q_OS_LINUX)
+//    static int sighupFd[2];
+//    static int sigtermFd[2];
+
+//    QSocketNotifier *snHup;
+//    QSocketNotifier *snTerm;
+#endif
+    QSettings *cfg;
     UdpSrv *m_udpsrv;
     MyInfo *m_myinfo;
 

@@ -24,6 +24,13 @@ UdpSrv::UdpSrv(quint16 port, QString mgr_ifname, MyInfo *myinfo, QObject *parent
     infomer->start(5*1000); // 5 sec
 }
 
+void UdpSrv::setIfname(QString mgr_ifname)
+{
+    m_ifname = mgr_ifname;
+    update_addr();
+    qDebug() << "setIfname:" << mgr_ifname << Qt::endl;
+}
+
 void UdpSrv::readyRead()
 {
     QByteArray Buffer;

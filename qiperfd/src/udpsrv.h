@@ -17,6 +17,7 @@ public slots:
     void onTimeout();
     void update_addr();
     void setSendMsg(QString msg);
+    void setIfname(QString mgr_ifname);
 
 signals:
 private:
