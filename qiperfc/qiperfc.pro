@@ -21,7 +21,9 @@ win32:unix:!android:{
 
 include(../qiperf.pri)
 include(../jcon-cpp.pri)
-
+unix {
+include(../sigwatch.pri)
+}
 INCLUDEPATH += \
     $$PWD/lib
 
@@ -51,12 +53,6 @@ SOURCES += \
     src/tpdirdelegate.cpp \
     src/udpreceiver.cpp
 
-#    src/tpchart.cpp
-#!android:{
-#    SOURCES += \
-#        src/formconsole.cpp \
-#        src/tpchart.cpp
-#}
 HEADERS += \
     $$PWD/../src/pipeclient.h \
     $$PWD/../src/comm.h \
@@ -76,21 +72,12 @@ HEADERS += \
     src/tpdirdelegate.h \
     src/udpreceiver.h
 
-#    src/tpchart.h
-#!android:{
-#    HEADERS += \
-#        src/formconsole.h \
-#        src/tpchart.h
-#}
 FORMS += \
     src/dlgiperf.ui \
     src/formendpoints.ui \
     src/formoption.ui \
     src/qiperfc.ui
 
-#!android:{
-#    src/formconsole.ui \
-#}
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

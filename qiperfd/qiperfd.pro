@@ -4,11 +4,6 @@ QT += core network websockets
 CONFIG += c++17 console
 CONFIG -= app_bundle
 
-#unix {
-#INCLUDEPATH += \
-#    ../qt-unix-signals/
-#}
-
 include(../jcon-cpp.pri)
 include(../qiperf.pri)
 unix {
