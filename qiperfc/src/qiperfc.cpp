@@ -16,6 +16,7 @@ QIperfC::QIperfC(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    //UI actions
     init_actions();
 
     m_tpmgr = new TPMgr();
@@ -171,6 +172,13 @@ void QIperfC::on_notice(QString send_addr, QString msg)
     }
 }
 
+void QIperfC::onQuit()
+{
+    qInfo() << "onQuit" << Qt::endl;
+    // TODO: do any thing before quit!
+    qApp->quit();
+}
+
 void QIperfC::updateRunStatus(bool bStart)
 {
     ui->actionStart->setEnabled(!bStart);
@@ -180,7 +188,6 @@ void QIperfC::updateRunStatus(bool bStart)
 void QIperfC::init_actions()
 {
     // init actions
-
     connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(on_pairAdd()));
     connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(on_pairEdit()));
     connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(on_pairDelete()));

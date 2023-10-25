@@ -36,6 +36,7 @@ public slots:
     void onStart();
     void onStop();
     void on_notice(QString send_addr, QString msg);
+    void onQuit();
 
 signals:
     void updateEndpointNum(int n);
