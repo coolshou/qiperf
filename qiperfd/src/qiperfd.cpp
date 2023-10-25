@@ -32,11 +32,11 @@ QIperfd::QIperfd(QObject *parent)
     //    qDebug() << "start UdpSrv" << Qt::endl;
     //
     m_myinfo = new MyInfo(mgr_ifname);
-    connect(this, SIGNAL(setMgrIfname(QString)), m_myinfo, SLOT(setIfname(Qstring)));
+    connect(this, SIGNAL(setMgrIfname(QString)), m_myinfo, SLOT(setIfname(QString)));
     QString info = m_myinfo->collectInfo();
 
     m_udpsrv = new UdpSrv(QIPERFD_BPORT, mgr_ifname, m_myinfo);
-    connect(this, SIGNAL(setMgrIfname(QString)), m_udpsrv, SLOT(setIfname(Qstring)));
+    connect(this, SIGNAL(setMgrIfname(QString)), m_udpsrv, SLOT(setIfname(QString)));
     //    m_udpsrv->collectInfo();
     m_udpsrv->setSendMsg(info); // broadcast
 
