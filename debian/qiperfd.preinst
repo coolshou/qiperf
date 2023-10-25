@@ -7,13 +7,14 @@ set -e
 # Define the service name
 SERVICE_NAME="qiperfd"
 
-# Check if the systemd service is running and stop it
-if systemctl is-active --quiet $SERVICE_NAME; then
-    systemctl stop $SERVICE_NAME
+if systemctl list-units --type=service --all | grep -q "$SERVICE_NAME.service"; then
+    # Check if the systemd service is running and stop it
+    if systemctl is-active --quiet $SERVICE_NAME; then
+        systemctl stop $SERVICE_NAME
+    fi
+    # Disable the service to prevent it from starting at boot
+    systemctl disable $SERVICE_NAME
 fi
-
-# Disable the service to prevent it from starting at boot
-systemctl disable $SERVICE_NAME
 
 # End of the preinst script
 
