@@ -45,10 +45,6 @@ void UdpSrv::onTimeout()
 {
     qint64 length=0;
     if (m_sendMsg.length()>0){
-//        qDebug() << "("<< QString::number(m_sendMsg.length()) <<")"<<"onTimeout=" <<QString(m_sendMsg) << "." << Qt::endl;
-        //should not use endpoint's datatime , which may not same as console's datatime
-//        QDateTime t=QDateTime::currentDateTime();
-//        QString tmp= t.toString("yyyy.dd.MM.hh:mm:ss.zzz")+":"+ m_sendMsg;
         QString tmp=m_sendMsg;
         length = socket->writeDatagram(tmp.toLatin1(),tmp.length(),
                                        m_baddr, m_port);
