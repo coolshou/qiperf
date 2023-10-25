@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+# Pre-installation script for qiperfd
+
+# Define the service name
+SERVICE_NAME="qiperfd"
+
+# Check if the systemd service is running and stop it
+if systemctl is-active --quiet $SERVICE_NAME; then
+    systemctl stop $SERVICE_NAME
+fi
+
+# Disable the service to prevent it from starting at boot
+systemctl disable $SERVICE_NAME
+
+# End of the preinst script
+
+exit 0

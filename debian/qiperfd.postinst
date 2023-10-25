@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -e
+
+# Post-installation script for your Debian package
+# This script will be executed after the package is installed on the system
+
+# Define the service name
+SERVICE_NAME="qiperfd"
+
+# Check if the systemd service is not running and start it
+if ! systemctl is-active --quiet $SERVICE_NAME; then
+    # Enable the service to start at boot
+    systemctl enable $SERVICE_NAME
+    systemctl start $SERVICE_NAME
+fi
+
+
+# End of the postinst script
+
+exit 0
