@@ -45,7 +45,7 @@ QString MyInfo::collectInfo()
     mainObject.insert("OS", QSysInfo::prettyProductName());
     mainObject.insert("OSVer", QSysInfo::kernelVersion());
     mainObject.insert("Manager", m_ifname);
-    mainObject.insert("update", 0);
+    mainObject.insert("update", update);
 
     QJsonObject netObject=collectNetInfo();
 
@@ -56,6 +56,7 @@ QString MyInfo::collectInfo()
 //    QString strJson(jsonDoc.toJson(QJsonDocument::Indented));
     QString strJson(jsonDoc.toJson(QJsonDocument::Compact));
 //    qDebug().noquote() << "JSON:" << strJson << Qt::endl;
+    update = 0;
     return strJson;
 }
 
@@ -180,4 +181,5 @@ int MyInfo::getEndpointType()
 void MyInfo::setIfname(QString mgr_ifname)
 {
     m_ifname = mgr_ifname;
+    update = 1;
 }

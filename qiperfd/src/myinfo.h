@@ -27,6 +27,7 @@ signals:
 
 private:
     QString m_ifname;
+    int update=0;
 };
 
 #endif // MYINFO_H
