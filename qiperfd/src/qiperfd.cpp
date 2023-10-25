@@ -284,7 +284,7 @@ void QIperfd::stop()
 void QIperfd::setManagerInterface(QString interface)
 {
     mgr_ifname = interface;
-//    savecfg();
+    savecfg();
     emit setMgrIfname(interface);
 }
 
