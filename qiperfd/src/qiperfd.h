@@ -22,11 +22,7 @@ class QIperfd : public QObject
 public:
     explicit QIperfd(QObject *parent = nullptr);
     ~QIperfd() override;
-#if defined(Q_OS_LINUX)
-//    // Unix signal handlers.
-//    static void hupSignalHandler(int unused);
-//    static void termSignalHandler(int unused);
-#endif
+
     void onLog(QString text);
     void loadcfg(QString apppath);
     void savecfg();
@@ -40,11 +36,6 @@ public:
     //TODO: stop all iperfs
 
 public slots:
-#if defined(Q_OS_LINUX)
-//    // Qt signal handlers.
-//    void handleSigHup();
-//    void handleSigTerm();
-#endif
     void setManagerInterface(QString interface);
     void onNewMessage(int idx, const QString msg);
     void readStdOut(int idx, QString text);
@@ -57,13 +48,6 @@ signals:
     void setMgrIfname(QString interface);
 
 private:
-#if defined(Q_OS_LINUX)
-//    static int sighupFd[2];
-//    static int sigtermFd[2];
-
-//    QSocketNotifier *snHup;
-//    QSocketNotifier *snTerm;
-#endif
     QSettings *cfg;
     UdpSrv *m_udpsrv;
     MyInfo *m_myinfo;
