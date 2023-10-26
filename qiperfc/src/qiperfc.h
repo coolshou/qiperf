@@ -13,6 +13,7 @@
 #include "endpointmgr.h"
 #include "formendpoints.h"
 #include "tpmgr.h"
+#include "tpdirdelegate.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -54,7 +55,7 @@ private slots:
 //    void On_itemSelectionChanged();
     void on_updateEndpointNum(int n);
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-
+    void onTPDataUpdate(const QModelIndex &parent, int first, int last);
 private:
     Ui::MainWindow *ui;
     DlgIperf * dlgiperf;  // dialog of iperf config
@@ -67,6 +68,7 @@ private:
     EndPointMgr *m_endpointmgr;
     QLabel *m_endpoint_label;
     TPMgr *m_tpmgr;
+    TPDirDelegate *tpdrdelegate;
 
 };
 #endif // QIPERFC_H

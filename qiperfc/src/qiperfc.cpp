@@ -19,24 +19,26 @@ QIperfC::QIperfC(QWidget *parent)
     //UI actions
     init_actions();
 
-    m_tpmgr = new TPMgr();
+    m_tpmgr = new TPMgr(this);
+    connect(m_tpmgr, &TPMgr::rowsInserted, this, &QIperfC::onTPDataUpdate);
+    connect(m_tpmgr, &TPMgr::rowsRemoved, this, &QIperfC::onTPDataUpdate);
     ui->tv_throughput->setModel(m_tpmgr);
     ui->tv_throughput->setColumnWidth(TP::cols::id, 35);
     ui->tv_throughput->setColumnWidth(TP::cols::server, 200);
     ui->tv_throughput->setColumnWidth(TP::cols::client, 200);
     //following will cause problem!!
-//    TPDirDelegate tpdrdelegate;
+    tpdrdelegate = new TPDirDelegate(this);
 //    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, &tpdrdelegate);
     QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
     connect(ism, &QItemSelectionModel::selectionChanged, this, &QIperfC::onTPselectionChanged);
 //    ui->tv_throughput->header()->setVisible(true);
 
-    m_endpointmgr = new EndPointMgr();
+    m_endpointmgr = new EndPointMgr(this);
     ui->tv_qiperfd->setModel(m_endpointmgr);
     ui->tv_qiperfd->setColumnWidth(0, 130);
     ui->tv_qiperfd->setColumnWidth(1, 130);
 
-    dlgiperf = new DlgIperf();
+    dlgiperf = new DlgIperf(this);
     formEndpoits = new FormEndPoints();
     //
     m_receiver = new UdpReceiver(QIPERFD_BPORT,this);
@@ -286,5 +288,21 @@ void QIperfC::onTPselectionChanged(const QItemSelection &selected, const QItemSe
     ui->actionDelete->setEnabled(bAct);
     ui->actionEdit->setEnabled(bAct);
 
+}
+
+void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
+{
+    qDebug() << "onTPDataUpdate" << Qt::endl;
+    Q_UNUSED(parent)
+    Q_UNUSED(first)
+    Q_UNUSED(last)
+    //TODO: when throughput is running, add new TP item?
+    bool bStart;
+    if (m_tpmgr->rowCount()>0) {
+        bStart=false;
+    } else {
+        bStart=true;
+    }
+    updateRunStatus(bStart);
 }
 
