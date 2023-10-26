@@ -625,7 +625,7 @@
          <item row="7" column="3">
           <widget class="QComboBox" name="cb_unit_windowsize">
            <property name="currentText">
-            <string>K</string>
+            <string>M</string>
            </property>
            <item>
             <property name="text">
@@ -648,6 +648,9 @@
           <widget class="QSpinBox" name="sb_interval">
            <property name="alignment">
             <set>Qt::AlignCenter</set>
+           </property>
+           <property name="minimum">
+            <number>1</number>
            </property>
           </widget>
          </item>
