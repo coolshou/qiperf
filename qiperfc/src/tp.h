@@ -51,8 +51,8 @@ public:
 
     QString getID();
     void loadData(QString data);
-    QString getManagerServer();
-    QString getManagerClient();
+    QString getServer();
+    QString getClient();
     void updateTimeStemp();
     QString getLastNoticeTime();
 signals:

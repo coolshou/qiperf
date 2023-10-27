@@ -121,11 +121,15 @@ void QIperfC::onStart()
         QList<TP *> tps = m_tpmgr->getChilds();
         TP *tp;
         foreach (tp, tps) {
-            qDebug() << "MServer:" << tp->getManagerServer() << " MClient:" << tp->getManagerClient() << Qt::endl;
+            qDebug() << "Server:" << tp->getServer() << " Client:" << tp->getClient() << Qt::endl;
         }
+        //TODO: check client ping server first
         //TODO: control all server endpoint init iperf server
         //TODO: wait server ready
         //TODO: control all client endpoint init iperf -c
+
+        //TODO: wait all test done!!
+
     } else {
         QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");
     }
@@ -292,7 +296,6 @@ void QIperfC::onTPselectionChanged(const QItemSelection &selected, const QItemSe
 
 void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
 {
-    qDebug() << "onTPDataUpdate" << Qt::endl;
     Q_UNUSED(parent)
     Q_UNUSED(first)
     Q_UNUSED(last)

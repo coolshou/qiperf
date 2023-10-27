@@ -126,12 +126,12 @@ void TP::loadData(QString data)
 
 }
 
-QString TP::getManagerServer()
+QString TP::getServer()
 {
     return m_itemDatas[TP::server].toString();
 }
 
-QString TP::getManagerClient()
+QString TP::getClient()
 {
     return m_itemDatas[TP::client].toString();
 }

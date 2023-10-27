@@ -103,8 +103,8 @@ QModelIndex TPMgr::parent(const QModelIndex &index) const
 int TPMgr::rowCount(const QModelIndex &parent) const
 {
     TP *parentItem;
-    if (parent.column() > 0)
-        return 0;
+//    if (parent.column() > 0)
+//        return 0;
 
     if (!parent.isValid())
         parentItem = rootItem;
@@ -123,6 +123,7 @@ bool TPMgr::add(QString data)
     TP *tp = new TP(QString::number(idx), data, rootItem);
     rootItem->appendChild(tp);
     endInsertRows();
+
     return true;
 }
 QModelIndex TPMgr::indexFromItem(TP *item){
