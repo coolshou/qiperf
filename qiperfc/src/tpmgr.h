@@ -19,12 +19,12 @@ public:
     int columnCount(const QModelIndex &parent) const override;
     QModelIndex index(int row, int column, const QModelIndex &parent) const override;
     QModelIndex parent(const QModelIndex &index) const override;
-    int rowCount(const QModelIndex &parent) const override;
+    int rowCount(const QModelIndex &parent=QModelIndex()) const override;
     bool add(QString data);
     QModelIndex indexFromItem(TP *item);
     int rootChildCount();
     QList<TP*> getChilds();
-    bool removeRows(int position, int rows, const QModelIndex &parent);
+    bool removeRows(int position, int rows, const QModelIndex &parent) override;
 private:
 //    TP *itemFromIndex(const QModelIndex &index) const;
     TP *getItem(const QModelIndex& index) const;
