@@ -100,6 +100,8 @@ void TP::loadData(QString data)
 
     QJsonObject o_client = jsonRoot["client"].toObject();
     m_client = o_client["bind"].toString();
+    m_mgrclient = o_client["manager"].toString();
+
 //    QString m_mclient = o_client["manager"].toString();
 //    int dir=DirType::Tx;
     m_direction = QVariant::fromValue(DirType::Tx).toString();
@@ -114,6 +116,8 @@ void TP::loadData(QString data)
 
     QJsonObject o_server = jsonRoot["server"].toObject();
     m_server = o_client["target"].toString();
+    m_mgrserver = o_server["manager"].toString();
+
 //    QString m_mserver = o_server["manager"].toString();
 //    m_itemDatas.append(m_mserver+"("+m_server+")");
     m_itemDatas.append(m_server);
@@ -134,6 +138,21 @@ QString TP::getServer()
 QString TP::getClient()
 {
     return m_itemDatas[TP::client].toString();
+}
+
+QString TP::getMgrServer()
+{
+    return m_mgrserver;
+}
+
+QString TP::getMgrClient()
+{
+    return m_mgrclient;
+}
+
+int TP::getPort()
+{
+
 }
 
 void TP::updateTimeStemp()

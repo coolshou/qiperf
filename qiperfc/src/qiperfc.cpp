@@ -10,7 +10,8 @@
 #include "endpointact.h"
 #include "tp.h"
 #include <QDebug>
-#define TEST_JSONRPC 0
+
+
 
 QIperfC::QIperfC(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -50,26 +51,26 @@ QIperfC::QIperfC(QWidget *parent)
     pclient->SetAppHandle(qApp);
 
     // control remote qiperfd?
-    if (TEST_JSONRPC){
-        qDebug() << "test jcon rpc server" << Qt::endl;
-        rpc_client = new jcon::JsonRpcWebSocketClient(parent);
-        rpc_client->connectToServer("127.0.0.1", RPC_PORT);
-        auto req = rpc_client->callAsync("getOS");
-        req->connect(req.get(), &jcon::JsonRpcRequest::result,
-                     [](const QVariant& result) {
-                         qDebug() << "result of RPC call:" << result << Qt::endl;
-                         qApp->exit();
-                     });
-        req->connect(req.get(), &jcon::JsonRpcRequest::error,
-                     [](int code, const QString& message, const QVariant& data) {
-                         qDebug() << "RPC error: " << message << " (" << code << ")" << data << Qt::endl;
-                         qApp->exit();
-                     });
-    //    if (result->isSuccess()) {
-    //        qDebug() << "OS: " << result->result() << Qt::endl;
-    //    }
-    }
+#if (TEST_JSONRPC==1)
+    qDebug() << "test jcon rpc server" << Qt::endl;
+    rpc_client = new jcon::JsonRpcWebSocketClient(parent);
+    rpc_client->connectToServer("127.0.0.1", RPC_PORT);
+    auto req = rpc_client->callAsync("getOS");
+    req->connect(req.get(), &jcon::JsonRpcRequest::result,
+                 [](const QVariant& result) {
+                     qDebug() << "result of RPC call:" << result << Qt::endl;
+                     qApp->exit();
+                 });
+    req->connect(req.get(), &jcon::JsonRpcRequest::error,
+                 [](int code, const QString& message, const QVariant& data) {
+                     qDebug() << "RPC error: " << message << " (" << code << ")" << data << Qt::endl;
+                     qApp->exit();
+                 });
+//    if (result->isSuccess()) {
+//        qDebug() << "OS: " << result->result() << Qt::endl;
+//    }
 
+#endif
     initStatusbar();
 }
 
@@ -117,18 +118,49 @@ void QIperfC::onStart()
         updateRunStatus(true);
         //start test
     //    m_tpmgr->start();
-        qDebug() << "ChildCount: " << m_tpmgr->rootChildCount() << Qt::endl;
+//        qDebug() << "ChildCount: " << m_tpmgr->rootChildCount() << Qt::endl;
         QList<TP *> tps = m_tpmgr->getChilds();
         TP *tp;
         foreach (tp, tps) {
             qDebug() << "Server:" << tp->getServer() << " Client:" << tp->getClient() << Qt::endl;
-        }
-        //TODO: check client ping server first
-        //TODO: control all server endpoint init iperf server
-        //TODO: wait server ready
-        //TODO: control all client endpoint init iperf -c
+            qDebug() << "Mgr Server:" << tp->getMgrServer() << "Mgr Client:" << tp->getMgrClient() << Qt::endl;
+            //TODO: check client ping server first
 
+            //TODO: control all server endpoint init iperf server
+            if (createRPC_Server( tp->getMgrServer())==-1){
+                qDebug() << "createRPC_Server fail: " << tp->getMgrServer() << Qt::endl;
+            }
+            //TODO: control all client endpoint init iperf -c
+            if (createRPC_Client( tp->getMgrClient())==-1){
+                qDebug() << "createRPC_Client fail: " << tp->getMgrClient() << Qt::endl;
+            }
+
+        }
+
+        foreach (QString h, map_qiperfds_server.keys()) {
+            //TODO: wait server ready/start
+            qDebug() <<" Start iperf server: "<< h << Qt::endl;
+            auto rpc = map_qiperfds_server.value(h);
+            // Add Iperf server
+            auto result = rpc->call("getOS");
+            if (result->isSuccess()) {
+                qDebug() <<" getOS:" << result->result() << Qt::endl;
+            } else {
+                qDebug() <<" ERROR: " << result->toString();
+            }
+//            rpc.start();
+        }
+
+
+        foreach (QString h, map_qiperfds_client.keys()) {
+            //TODO: wait client ready/start
+            qDebug() <<" Start iperf client: "<< h << Qt::endl;
+            // Add Iperf client
+//            map_qiperfds_client.value(h);
+        }
         //TODO: wait all test done!!
+
+        //TODO: check all test down!!
 
     } else {
         QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");
@@ -185,6 +217,59 @@ void QIperfC::onQuit()
     qApp->quit();
 }
 
+int QIperfC::createRPC_Server(QString host, int port)
+{
+    jcon::JsonRpcWebSocketClient *rpcclient = new jcon::JsonRpcWebSocketClient();
+    if (rpcclient->connectToServer(host, port)){
+        map_qiperfds_server[host] = rpcclient;  //qiperfd of iperf server
+        QObject::connect(rpcclient, &jcon::JsonRpcClient::notificationReceived,
+                    this, &QIperfC::notificationReceived);
+//        auto req = rpc_client->callAsync("getOS");
+//        req->connect(req.get(), &jcon::JsonRpcRequest::result,
+//                     [](const QVariant& result) {
+//                         qDebug() << "result of RPC call:" << result << Qt::endl;
+//                         qApp->exit();
+//                     });
+//        req->connect(req.get(), &jcon::JsonRpcRequest::error,
+//                     [](int code, const QString& message, const QVariant& data) {
+//                         qDebug() << "RPC error: " << message << " (" << code << ")" << data << Qt::endl;
+//                         qApp->exit();
+//                     });
+        return 0;
+    } else {
+        qDebug() << "createRPC_Server connect to " << host << " : " << port << " Fail" << Qt::endl;
+        return -1;
+    }
+}
+int QIperfC::createRPC_Client(QString host, int port)
+{
+    jcon::JsonRpcWebSocketClient *rpcclient = new jcon::JsonRpcWebSocketClient();
+    if (rpcclient->connectToServer(host, port)){
+        map_qiperfds_client[host] = rpcclient;  //qiperfd of iperf client
+//        auto req = rpc_client->callAsync("getOS");
+//        req->connect(req.get(), &jcon::JsonRpcRequest::result,
+//                     [](const QVariant& result) {
+//                         qDebug() << "result of RPC call:" << result << Qt::endl;
+//                         qApp->exit();
+//                     });
+//        req->connect(req.get(), &jcon::JsonRpcRequest::error,
+//                     [](int code, const QString& message, const QVariant& data) {
+//                         qDebug() << "RPC error: " << message << " (" << code << ")" << data << Qt::endl;
+//                         qApp->exit();
+//                     });
+        return 0;
+    } else {
+        qDebug() << "connect to " << host << " : " << port << " Fail" << Qt::endl;
+        return -1;
+    }
+}
+
+void QIperfC::notificationReceived(const QString key, const QVariant value)
+{
+    qDebug() << "RPC Received notification:"
+                     << "Key:" << key
+                     << "Value:" << value << Qt::endl;
+}
 void QIperfC::updateRunStatus(bool bStart)
 {
     ui->actionStart->setEnabled(!bStart);

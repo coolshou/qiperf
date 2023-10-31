@@ -30,10 +30,9 @@ public:
     QString getInterfaceAddr(QString ifname);
     QString getManagerInterface();
     void add(int version,QString m_cmd,QString args, uint port);
-    void start();
-    void stop();
-    //TODO: start all iperfs
-    //TODO: stop all iperfs
+    int addIperfServer(int version, uint port, QString bindHost="");
+    void start(); //TODO: start all iperfs
+    void stop();  //TODO: stop all iperfs
 
 public slots:
     void setManagerInterface(QString interface);

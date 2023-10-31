@@ -191,7 +191,7 @@
      <x>0</x>
      <y>0</y>
      <width>984</width>
-     <height>23</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -263,7 +263,7 @@
      <normaloff>:/load</normaloff>:/load</iconset>
    </property>
    <property name="text">
-    <string>Open</string>
+    <string>Open (TODO)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -287,7 +287,7 @@
      <normaloff>:/save</normaloff>:/save</iconset>
    </property>
    <property name="text">
-    <string>Save</string>
+    <string>Save (TODO)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -299,7 +299,7 @@
      <normaloff>:/about</normaloff>:/about</iconset>
    </property>
    <property name="text">
-    <string>About</string>
+    <string>About (TODO)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+/</string>
@@ -329,7 +329,7 @@
      <normaloff>:/pair-edit</normaloff>:/pair-edit</iconset>
    </property>
    <property name="text">
-    <string>Edit</string>
+    <string>Edit (TODO)</string>
    </property>
    <property name="toolTip">
     <string>Edit Iperf Pair</string>
@@ -347,7 +347,7 @@
      <normaloff>:/pair-del</normaloff>:/pair-del</iconset>
    </property>
    <property name="text">
-    <string>Delete</string>
+    <string>Delete (TODO)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
@@ -362,7 +362,7 @@
      <normaloff>:/start</normaloff>:/start</iconset>
    </property>
    <property name="text">
-    <string>Start</string>
+    <string>Start (TODO)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -377,7 +377,7 @@
      <normaloff>:/stop</normaloff>:/stop</iconset>
    </property>
    <property name="text">
-    <string>Stop</string>
+    <string>Stop (TODO)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
@@ -389,7 +389,7 @@
      <normaloff>:/config</normaloff>:/config</iconset>
    </property>
    <property name="text">
-    <string>Config</string>
+    <string>Config (TODO)</string>
    </property>
   </action>
   <action name="actionCopy">
@@ -398,7 +398,7 @@
      <normaloff>:/copy</normaloff>:/copy</iconset>
    </property>
    <property name="text">
-    <string>Copy</string>
+    <string>Copy (TODO)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
@@ -410,7 +410,7 @@
      <normaloff>:/paste</normaloff>:/paste</iconset>
    </property>
    <property name="text">
-    <string>Paste</string>
+    <string>Paste (TODO)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>

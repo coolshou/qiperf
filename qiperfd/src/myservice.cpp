@@ -16,6 +16,21 @@ QString MyService::getOS()
     return QSysInfo::productType();
 }
 
+int MyService::addIperfServer(int version, uint port, QString bindHost)
+{
+    return m_qiperfd->addIperfServer(version, port, bindHost);
+}
+
+void MyService::start()
+{
+    return m_qiperfd->start();
+}
+
+void MyService::stop()
+{
+    return m_qiperfd->stop();
+}
+
 void MyService::setManagerInterface(QString interface)
 {
 //    m_interface = interface;

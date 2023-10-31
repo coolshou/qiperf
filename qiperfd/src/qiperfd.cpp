@@ -258,6 +258,29 @@ void QIperfd::add(int version, QString m_cmd, QString args, uint port)
     m_iperfworkers.insert(idx, iperfer);
 }
 
+int QIperfd::addIperfServer(int version, uint port, QString bindHost)
+{
+    qDebug() << "addIperfServer:" << bindHost << ":" << port << Qt::endl;
+
+    QString cmd;
+    // add a iperf server
+    if (version==(int)IPERF_VER::V3){
+        cmd = m_iperfexe3;
+    }else if (version==(int)IPERF_VER::V2){
+        cmd = m_iperfexe2;
+    }else{
+        qDebug() << "Not support Iperf version:" << version << Qt::endl;
+        return -1;
+    }
+    QString args="-s";
+    if (!(bindHost=="")) {
+        args.append("--bind");
+        args.append(bindHost);
+    }
+    add(version, cmd, args, port);
+    return 0;
+}
+
 void QIperfd::start()
 {
     // start all thread
@@ -293,7 +316,6 @@ void QIperfd::onNewMessage(int idx, const QString msg)
     qInfo() << "onNewMessage: = " << msg << Qt::endl;
     if (QString::compare(msg, CMD_OK, Qt::CaseInsensitive) == 0)
     {
-
         return;
     }
 

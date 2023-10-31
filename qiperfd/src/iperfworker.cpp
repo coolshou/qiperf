@@ -18,7 +18,7 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg, uint po
     m_parent = parent;
     m_version = version;
 //    emit log(QString("arg:"+arg));
-    m_cmd = cmd;
+    m_cmd = cmd; //iperf exec fullpath
     m_arguments = arg.split(" ");
     m_port = port;
     m_arguments.append("-p");

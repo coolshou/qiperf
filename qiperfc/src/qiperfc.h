@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QLabel>
 #include <QItemSelection>
+#include <QMap>
+#include <QList>
 
 #include "pipeclient.h"
 #include "jcon/json_rpc_websocket_client.h"
@@ -14,6 +16,8 @@
 #include "formendpoints.h"
 #include "tpmgr.h"
 #include "tpdirdelegate.h"
+
+#define TEST_JSONRPC 0
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -38,6 +42,9 @@ public slots:
     void onStop();
     void on_notice(QString send_addr, QString msg);
     void onQuit();
+    int createRPC_Server(QString host="127.0.0.1", int port=RPC_PORT);
+    int createRPC_Client(QString host="127.0.0.1", int port=RPC_PORT);
+    void notificationReceived(const QString key, const QVariant value);
 
 signals:
     void updateEndpointNum(int n);
@@ -56,12 +63,17 @@ private slots:
     void on_updateEndpointNum(int n);
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onTPDataUpdate(const QModelIndex &parent, int first, int last);
+
 private:
     Ui::MainWindow *ui;
     DlgIperf * dlgiperf;  // dialog of iperf config
     FormEndPoints * formEndpoits;
     PipeClient *pclient;
+#if (TEST_JSONRPC==1)
     jcon::JsonRpcWebSocketClient *rpc_client;
+#endif
+    QMap<QString, jcon::JsonRpcWebSocketClient *> map_qiperfds_server; // manager all qiperfd <manager ip, rpc_client> for iperf server
+    QMap<QString, jcon::JsonRpcWebSocketClient *> map_qiperfds_client; // manager all qiperfd <manager ip, rpc_client> for iperf client
     UdpReceiver *m_receiver;
 //    QChartView *m_tpchart;
 //    TPChart *m_tpchart;

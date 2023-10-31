@@ -58,7 +58,7 @@ jcon::JsonRpcServer* startServer(QObject* parent,
                                  bool allow_notifications = false, QIperfd* qiperfd=nullptr)
 {
     jcon::JsonRpcServer* rpc_server;
-    qDebug() << "Starting WebSocket server";
+    qDebug() << "Starting JsonRpc WebSocket server";
     rpc_server = new jcon::JsonRpcWebSocketServer(parent);
 
     if (allow_notifications)
@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
     #if defined(Q_OS_LINUX)
         QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &qiperfd, SLOT(onQuit()));
     #endif
+
         auto server = startServer(nullptr, true, &qiperfd);
 
     #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)

@@ -53,6 +53,9 @@ public:
     void loadData(QString data);
     QString getServer();
     QString getClient();
+    QString getMgrServer();
+    QString getMgrClient();
+    int getPort();
     void updateTimeStemp();
     QString getLastNoticeTime();
 signals:
@@ -65,8 +68,11 @@ private:
     QString m_jsondata;
     QString m_id; // reference id
     QString m_server; // target server ip
+    QString m_mgrserver; // target manger server ip
     QString m_direction; //direction: up/down
     QString m_client; // client ip
+    QString m_mgrclient; // manager client ip
+    int m_port; //port number
     QString m_tp; // throughput value
     QString m_comment; // comment
 
