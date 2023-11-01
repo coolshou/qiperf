@@ -101,7 +101,7 @@ void TP::loadData(QString data)
     QJsonObject o_client = jsonRoot["client"].toObject();
     m_client = o_client["bind"].toString();
     m_mgrclient = o_client["manager"].toString();
-
+    m_port = o_client["port"].toInt();
 //    QString m_mclient = o_client["manager"].toString();
 //    int dir=DirType::Tx;
     m_direction = QVariant::fromValue(DirType::Tx).toString();
@@ -152,7 +152,7 @@ QString TP::getMgrClient()
 
 int TP::getPort()
 {
-
+    return m_port;
 }
 
 void TP::updateTimeStemp()
