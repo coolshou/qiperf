@@ -6,6 +6,8 @@
 #include <QItemSelection>
 #include <QMap>
 #include <QList>
+#include <QTimer>
+#include <QPen>
 
 #include "pipeclient.h"
 #include "jcon/json_rpc_websocket_client.h"
@@ -18,6 +20,7 @@
 #include "tpdirdelegate.h"
 
 #define TEST_JSONRPC 0
+#define TEST_PLOT_DATA 0
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -51,6 +54,9 @@ signals:
 
 private:
     void updateRunStatus(bool bStart);
+    void initCustomPlote();
+    void addRandomGraph();
+    QPen newColorPen(int r, int g, int b, int width);
 
 private slots:
     void init_actions();
@@ -63,6 +69,7 @@ private slots:
     void on_updateEndpointNum(int n);
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onTPDataUpdate(const QModelIndex &parent, int first, int last);
+    void realtimeDataSlot(QPrivateSignal sig);
 
 private:
     Ui::MainWindow *ui;
@@ -81,6 +88,7 @@ private:
     QLabel *m_endpoint_label;
     TPMgr *m_tpmgr;
     TPDirDelegate *tpdrdelegate;
+    QTimer dataTimer;
 
 };
 #endif // QIPERFC_H
