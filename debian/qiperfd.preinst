@@ -11,9 +11,12 @@ if systemctl list-units --type=service --all | grep -q "$SERVICE_NAME.service"; 
     # Check if the systemd service is running and stop it
     if systemctl is-active --quiet $SERVICE_NAME; then
         systemctl stop $SERVICE_NAME
+        # Disable the service to prevent it from starting at boot
+
     fi
-    # Disable the service to prevent it from starting at boot
-    systemctl disable $SERVICE_NAME
+    if [ -e /etc/systemd/system/multi-user.target.wants/$SERVICE_NAME.service ]; then
+        systemctl disable $SERVICE_NAME
+    fi
 fi
 
 # End of the preinst script
