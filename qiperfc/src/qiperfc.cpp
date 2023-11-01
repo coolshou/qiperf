@@ -32,7 +32,7 @@ QIperfC::QIperfC(QWidget *parent)
     ui->tv_throughput->setColumnWidth(TP::cols::client, 200);
     //following will cause problem!!
     tpdrdelegate = new TPDirDelegate(this);
-//    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, &tpdrdelegate);
+    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdrdelegate);
     QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
     connect(ism, &QItemSelectionModel::selectionChanged, this, &QIperfC::onTPselectionChanged);
 //    ui->tv_throughput->header()->setVisible(true);
