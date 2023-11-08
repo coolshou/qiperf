@@ -570,12 +570,18 @@
               <property name="text">
                <string>reverse(-R)</string>
               </property>
+              <property name="tristate">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QCheckBox" name="chk_bidir">
               <property name="text">
                <string>bidirectional(--bidir)</string>
+              </property>
+              <property name="tristate">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -634,7 +640,7 @@
          <item row="7" column="3">
           <widget class="QComboBox" name="cb_unit_windowsize">
            <property name="currentText">
-            <string>K</string>
+            <string>M</string>
            </property>
            <item>
             <property name="text">

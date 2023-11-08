@@ -25,7 +25,8 @@ public:
 public slots:
     void ChangeVersion(const QString ver);
     void onAccepted();
-
+    void on_chk_bidir_statech(int state);
+    void on_chk_reverse_statech(int state);
 protected:
     void changeEvent(QEvent *e) override;
 //    void closeEvent(QCloseEvent *event) override;

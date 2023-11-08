@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QStandardItemModel>
 #include <QComboBox>
+#include <QCheckBox>
 
 DlgIperf::DlgIperf(QWidget *parent) :
     QDialog(parent),
@@ -15,6 +16,8 @@ DlgIperf::DlgIperf(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->cb_version, &QComboBox::currentTextChanged, this, &DlgIperf::ChangeVersion);
+    connect(ui->chk_bidir, &QCheckBox::stateChanged, this, &DlgIperf::on_chk_bidir_statech);
+    connect(ui->chk_reverse, &QCheckBox::stateChanged, this, &DlgIperf::on_chk_reverse_statech);
 
 //    connect(ui, &QDialog::accepted, this, &QDialog::onAccepted);
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DlgIperf::onAccepted);
@@ -158,5 +161,19 @@ void DlgIperf::onAccepted()
     }
     if (close){
         accept();
+    }
+}
+
+void DlgIperf::on_chk_bidir_statech(int state)
+{
+    if (state==Qt::Checked){
+        ui->chk_reverse->setCheckState(Qt::Unchecked);
+    }
+}
+
+void DlgIperf::on_chk_reverse_statech(int state)
+{
+    if (state==Qt::Checked){
+        ui->chk_bidir->setCheckState(Qt::Unchecked);
     }
 }
