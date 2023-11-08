@@ -21,24 +21,24 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     switch (type) {
     case QtDebugMsg:
 //        fprintf(stderr, "DEBUG: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        output_ts << QString("DEBUG: %1 (%2:%3)\n").arg(msg).arg(file).arg(context.line) << Qt::endl;
+        output_ts << QString("DEBUG: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
         break;
     case QtInfoMsg:
         //fprintf(stderr, "INFO: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
 //        fprintf(stderr, "INFO: %s \n", localMsg.constData());
-        output_ts << QString("INFO: %1 (%2:%3)\n").arg(msg).arg(file).arg(context.line) << Qt::endl;
+        output_ts << QString("INFO: %1 ").arg(msg) << Qt::endl;
         break;
     case QtWarningMsg:
 //        fprintf(stderr, "WARN: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        output_ts << QString("WARN: %1 (%2:%3)\n").arg(msg).arg(file).arg(context.line) << Qt::endl;
+        output_ts << QString("WARN: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
         break;
     case QtCriticalMsg:
 //        fprintf(stderr, "CRITICAL: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        output_ts << QString("CRITICAL: %1 (%2:%3)\n").arg(msg).arg(file).arg(context.line) << Qt::endl;
+        output_ts << QString("CRITICAL: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
         break;
     case QtFatalMsg:
 //        fprintf(stderr, "FATAL: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        output_ts << QString("FATAL: %1 (%2:%3)\n").arg(msg).arg(file).arg(context.line) << Qt::endl;
+        output_ts << QString("FATAL: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
         break;
     }
 }
