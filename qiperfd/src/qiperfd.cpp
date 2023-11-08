@@ -237,9 +237,9 @@ QString QIperfd::getManagerInterface()
     return mgr_ifname;
 }
 
-void QIperfd::add(int version, QString m_cmd, QString args, uint port)
+int QIperfd::add(int version, QString m_cmd, QString args, uint port)
 { // add a IperfWorker to run iperf server/client
-    // TODO: check port used?
+    // TODO: check host/port used?
     QThread *iperf_th = new QThread();
     int idx = m_threads.count();
     m_threads.insert(idx, iperf_th);
@@ -256,6 +256,7 @@ void QIperfd::add(int version, QString m_cmd, QString args, uint port)
 
     //    m_iperfworkers.append(iperfer);
     m_iperfworkers.insert(idx, iperfer);
+    return idx;
 }
 
 int QIperfd::addIperfServer(int version, uint port, QString bindHost)
@@ -281,26 +282,61 @@ int QIperfd::addIperfServer(int version, uint port, QString bindHost)
     return 0;
 }
 
-void QIperfd::start()
+int QIperfd::addIperfClient(int version, uint port, QString Host, QString iperfargs)
+{
+    qDebug() << "addIperfClient:" << Host << ":" << port << Qt::endl;
+    QString cmd;
+    // add a iperf server
+    if (version==(int)IPERF_VER::V3){
+        cmd = m_iperfexe3;
+    }else if (version==(int)IPERF_VER::V2){
+        cmd = m_iperfexe2;
+    }else{
+        qDebug() << "Not support Iperf version:" << version << Qt::endl;
+        return -1;
+    }
+    QString args = iperfargs;
+    add(version, cmd, args, port);
+    return 0;
+}
+
+void QIperfd::start(int idx)
+{
+    QThread *th = m_threads.value(idx);
+    // QString id= QString( "%1" ).arg(reinterpret_cast<long>(th->currentThreadId()), 16);
+    QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
+    qDebug() << "run thread id:" << id << Qt::endl;
+    th->start();
+
+//    for (int i = 0; i < m_threads.count(); ++i)
+//    {
+//        QThread *th = m_threads.value(i);
+//        // QString id= QString( "%1" ).arg(reinterpret_cast<long>(th->currentThreadId()), 16);
+//        QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
+//        qDebug() << "run :" << id << Qt::endl;
+//        th->start();
+//    }
+}
+void QIperfd::startAll()
 {
     // start all thread
     for (int i = 0; i < m_threads.count(); ++i)
     {
-        QThread *th = m_threads.value(i);
-        // QString id= QString( "%1" ).arg(reinterpret_cast<long>(th->currentThreadId()), 16);
-        QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
-        qDebug() << "run :" << id << Qt::endl;
-        th->start();
+        start(i);
     }
 }
+void QIperfd::stop(int idx)
+{
+    IperfWorker *iperfwork = m_iperfworkers.value(idx);
+    iperfwork->setStop();
+}
 
-void QIperfd::stop()
+void QIperfd::stopAll()
 {
     // stop all iperfworker
     for (int i = 0; i < m_iperfworkers.count(); ++i)
     {
-        IperfWorker *iperfwork = m_iperfworkers.value(i);
-        iperfwork->setStop();
+        stop(i);
     }
 }
 
@@ -386,12 +422,12 @@ void QIperfd::onNewMessage(int idx, const QString msg)
             else if (QString::compare(act, CMD_IPERF_START, Qt::CaseInsensitive) == 0)
             {
                 qDebug() << "Start all iperfs" << Qt::endl;
-                start();
+                startAll();
             }
             else if (QString::compare(act, CMD_IPERF_STOP, Qt::CaseInsensitive) == 0)
             {
                 qDebug() << "Stop all iperfs" << Qt::endl;
-                stop();
+                stopAll();
             }
             else
             {

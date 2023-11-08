@@ -27,9 +27,10 @@ QIperfC::QIperfC(QWidget *parent)
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &QIperfC::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::rowsRemoved, this, &QIperfC::onTPDataUpdate);
     ui->tv_throughput->setModel(m_tpmgr);
-    ui->tv_throughput->setColumnWidth(TP::cols::id, 35);
-    ui->tv_throughput->setColumnWidth(TP::cols::server, 200);
-    ui->tv_throughput->setColumnWidth(TP::cols::client, 200);
+    ui->tv_throughput->setColumnWidth(TP::cols::id, 30);
+    ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
+    ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
+    ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
     //following will cause problem!!
     tpdrdelegate = new TPDirDelegate(this);
     ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdrdelegate);
@@ -117,6 +118,7 @@ void QIperfC::on_pairDelete()
 
 void QIperfC::onStart()
 {
+    m_TestStartTime = QDateTime::currentDateTime();
     if (m_tpmgr->rootChildCount()>0) {
         updateRunStatus(true);
         //start test
@@ -124,43 +126,74 @@ void QIperfC::onStart()
 //        qDebug() << "ChildCount: " << m_tpmgr->rootChildCount() << Qt::endl;
         QList<TP *> tps = m_tpmgr->getChilds();
         TP *tp;
+
+        //create RPC list for ipserf server and client
         foreach (tp, tps) {
-            qDebug() << "Server:" << tp->getServer() << " Client:" << tp->getClient() << Qt::endl;
-            qDebug() << "Mgr Server:" << tp->getMgrServer() << "Mgr Client:" << tp->getMgrClient() << Qt::endl;
             //TODO: check client ping server first
-
-            //TODO: control all server endpoint init iperf server
-            if (createRPC_Server( tp->getMgrServer())==-1){
-                qDebug() << "createRPC_Server fail: " << tp->getMgrServer() << Qt::endl;
+            //RPC to control all server endpoint init iperf server
+            if (createRPC_Server(tp, tp->getMgrServer())==-1){
+                emit errorStop(-1, "createRPC_Server at " + tp->getMgrServer() + " fail");
+                return;
             }
-            //TODO: control all client endpoint init iperf -c
-            if (createRPC_Client( tp->getMgrClient())==-1){
-                qDebug() << "createRPC_Client fail: " << tp->getMgrClient() << Qt::endl;
+            //RPC to control all client endpoint init iperf client
+            if (createRPC_Client(tp, tp->getMgrClient())==-1){
+                emit errorStop(-1, "createRPC_Client at " + tp->getMgrClient()+ " fail");
+                return;
             }
 
         }
 
-        foreach (QString h, map_qiperfds_server.keys()) {
+        foreach (QString mhost, map_qiperfds_server.keys()) {
             //TODO: wait server ready/start
-            qDebug() <<" Start iperf server: "<< h << Qt::endl;
-            auto rpc = map_qiperfds_server.value(h);
+            qDebug() <<" Start iperf server: "<< mhost << Qt::endl;
+            auto rpc_tp = map_qiperfds_server.value(mhost);
             // Add Iperf server
-            auto result = rpc->call("getOS");
-            if (result->isSuccess()) {
-                qDebug() <<" getOS:" << result->result() << Qt::endl;
-            } else {
-                qDebug() <<" ERROR: " << result->toString();
+            auto result = rpc_tp->rpc->callNamedParams("addIperfServer",
+                                            QVariantMap{{"version",rpc_tp->tp->getVersion()},
+                                                        {"port",rpc_tp->tp->getPort()},
+                                                        {"bindHost", rpc_tp->tp->getServer()}});
+            if (!result->isSuccess()){
+                emit errorStop(-1, "addIperfServer at " + mhost +
+                               " with " +rpc_tp->tp->getServer()+ ":" + rpc_tp->tp->getPort() +
+                               " fail");
+                return;
             }
-//            rpc.start();
+            //start the Iperf server,
+            auto req = rpc_tp->rpc->callAsyncNamedParams("start", QVariantMap{{"idx", result->result()}});
+            req->connect(req.get(), &jcon::JsonRpcRequest::result, this, &QIperfC::onRPC_result);
+            req->connect(req.get(), &jcon::JsonRpcRequest::error, this, &QIperfC::onRPC_error);
+//            auto rs = rpc_tp->rpc->callNamedParams("start", QVariantMap{{"idx", result->result()}});
+//            if (!rs->isSuccess()){
+//                emit errorStop(-1, "start Iperf server at " + mhost +
+//                               " with " +rpc_tp->tp->getServer()+ ":" + rpc_tp->tp->getPort() +
+//                               " fail");
+//                return;
+//            }
+
         }
 
 
-        foreach (QString h, map_qiperfds_client.keys()) {
+        foreach (QString mhost, map_qiperfds_client.keys()) {
             //TODO: wait client ready/start
-            qDebug() <<" Start iperf client: "<< h << Qt::endl;
+            qDebug() <<" Start iperf client: "<< mhost << Qt::endl;
+            auto rpc_tp = map_qiperfds_client.value(mhost);
             // Add Iperf client
-//            map_qiperfds_client.value(h);
+            auto result = rpc_tp->rpc->callNamedParams("addIperfClient",
+                                            QVariantMap{{"version",rpc_tp->tp->getVersion()},
+                                                        {"port",rpc_tp->tp->getPort()},
+                                                        {"Host", rpc_tp->tp->getServer()},
+                                                        {"iperfargs",rpc_tp->tp->getClientArgs()}});
+            if (!result->isSuccess()){
+                emit errorStop(-1, "addIperfClient at " + mhost + " with: " +rpc_tp->tp->getClientArgs());
+                return;
+            }
         }
+        //TODO: start all Iperf client
+        foreach (QString mhost, map_qiperfds_client.keys()) {
+            auto rpc_tp = map_qiperfds_client.value(mhost);
+            auto rs = rpc_tp->rpc->callAsync("startAll");
+        }
+
         //TODO: wait all test done!!
 
         //TODO: check all test down!!
@@ -220,46 +253,30 @@ void QIperfC::onQuit()
     qApp->quit();
 }
 
-int QIperfC::createRPC_Server(QString host, int port)
+int QIperfC::createRPC_Server(TP *tp, QString host, int port)
 {
     jcon::JsonRpcWebSocketClient *rpcclient = new jcon::JsonRpcWebSocketClient();
     if (rpcclient->connectToServer(host, port)){
-        map_qiperfds_server[host] = rpcclient;  //qiperfd of iperf server
+        RPC_TP rpc_tp ;// = nullptr;
+        rpc_tp.rpc = rpcclient;
+        rpc_tp.tp = tp;
+        map_qiperfds_server[host] = &rpc_tp;  //qiperfd of iperf server
         QObject::connect(rpcclient, &jcon::JsonRpcClient::notificationReceived,
                     this, &QIperfC::notificationReceived);
-//        auto req = rpc_client->callAsync("getOS");
-//        req->connect(req.get(), &jcon::JsonRpcRequest::result,
-//                     [](const QVariant& result) {
-//                         qDebug() << "result of RPC call:" << result << Qt::endl;
-//                         qApp->exit();
-//                     });
-//        req->connect(req.get(), &jcon::JsonRpcRequest::error,
-//                     [](int code, const QString& message, const QVariant& data) {
-//                         qDebug() << "RPC error: " << message << " (" << code << ")" << data << Qt::endl;
-//                         qApp->exit();
-//                     });
         return 0;
     } else {
         qDebug() << "createRPC_Server connect to " << host << " : " << port << " Fail" << Qt::endl;
         return -1;
     }
 }
-int QIperfC::createRPC_Client(QString host, int port)
+int QIperfC::createRPC_Client(TP *tp, QString host, int port)
 {
     jcon::JsonRpcWebSocketClient *rpcclient = new jcon::JsonRpcWebSocketClient();
     if (rpcclient->connectToServer(host, port)){
-        map_qiperfds_client[host] = rpcclient;  //qiperfd of iperf client
-//        auto req = rpc_client->callAsync("getOS");
-//        req->connect(req.get(), &jcon::JsonRpcRequest::result,
-//                     [](const QVariant& result) {
-//                         qDebug() << "result of RPC call:" << result << Qt::endl;
-//                         qApp->exit();
-//                     });
-//        req->connect(req.get(), &jcon::JsonRpcRequest::error,
-//                     [](int code, const QString& message, const QVariant& data) {
-//                         qDebug() << "RPC error: " << message << " (" << code << ")" << data << Qt::endl;
-//                         qApp->exit();
-//                     });
+        RPC_TP rpc_tp;
+        rpc_tp.rpc = rpcclient;
+        rpc_tp.tp = tp;
+        map_qiperfds_client[host] = &rpc_tp;  //qiperfd of iperf client
         return 0;
     } else {
         qDebug() << "connect to " << host << " : " << port << " Fail" << Qt::endl;
@@ -400,6 +417,16 @@ void QIperfC::realtimeDataSlot(QPrivateSignal sig)
 
     ui->cplot_tp->xAxis->setRange(time, 120, Qt::AlignRight);
     ui->cplot_tp->replot();
+}
+
+void QIperfC::onRPC_result(const QVariant &result)
+{
+    qDebug() << "onRPC_result: " << result << Qt::endl;
+}
+
+void QIperfC::onRPC_error(int code, const QString &message)
+{
+    qDebug() << "onRPC_error: (" << code << ")" << message << Qt::endl;
 }
 
 void QIperfC::init_actions()

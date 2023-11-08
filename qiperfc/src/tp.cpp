@@ -43,24 +43,8 @@ QVariant TP::data(int column) const
     if (column < 0 || column >= m_itemDatas.size()){
         return QVariant();
     }
-//    if (column==TP::cols::dir){
-//        int dir = m_itemDatas.at(column).toInt();
-//        if (dir==TP::DirType::Tx){
-//            return QVariant(":/images/Tx");
-//            //QPixmap img(":/images/Tx");
-//            //return img;
-//        }else if (dir==TP::DirType::Rx){
-//            return QVariant(":/images/Rx");
-//            //QPixmap img(":/images/Rx");
-//            //return img;
-//        }else{
-//            return QVariant(":/images/TR");
-//            //QPixmap img(":/images/TR");
-//            //return img;
-//        }
-//    } else{
-        return m_itemDatas.at(column);
-//    }
+    return m_itemDatas.at(column);
+
 }
 
 TP *TP::parentItem()
@@ -99,6 +83,7 @@ void TP::loadData(QString data)
     QJsonObject jsonRoot = doc.object();
 
     QJsonObject o_client = jsonRoot["client"].toObject();
+    m_version = o_client["version"].toInt();
     m_client = o_client["bind"].toString();
     m_mgrclient = o_client["manager"].toString();
     m_port = o_client["port"].toInt();
@@ -130,6 +115,11 @@ void TP::loadData(QString data)
 
 }
 
+int TP::getVersion()
+{
+    return m_version;
+}
+
 QString TP::getServer()
 {
     return m_itemDatas[TP::server].toString();
@@ -138,6 +128,74 @@ QString TP::getServer()
 QString TP::getClient()
 {
     return m_itemDatas[TP::client].toString();
+}
+
+QString TP::getClientArgs()
+{
+    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8());
+    QJsonObject jsonRoot = doc.object();
+
+    QJsonObject o_client = jsonRoot["client"].toObject();
+    QString args;
+//    m_version = o_client["version"].toInt();
+    args.append("-B");
+    args.append(o_client["bind"].toString());
+    args.append("-p");
+    args.append(o_client["port"].toString());
+    if (o_client["protocal"].toString()=="UDP"){
+        args.append("-u");
+    }
+    if (o_client["protocal"].toString()=="SCTP"){
+        args.append("--sctp");
+    }
+    args.append("-c");
+    args.append(o_client["target"].toString());
+    args.append("-t");
+    args.append(o_client["duration"].toString());
+    args.append("-O");
+    args.append(o_client["omit"].toString());
+    args.append("-P");
+    args.append(o_client["parallel"].toString());
+    if (o_client["bitrate"].toInt()>=0) {
+        args.append("-b");
+        if (o_client["bitrate"].toInt()>0) {
+            args.append(o_client["bitrate"].toString()+o_client["unit_bitrate"].toString());
+        }else if(o_client["bitrate"].toInt()==0) {
+            args.append(o_client["bitrate"].toString());
+        }
+    }
+    if (o_client["windowsize"].toInt()>0) {
+        args.append("-w");
+        args.append(o_client["windowsize"].toString()+o_client["unit_windowsize"].toString());
+    }
+    if (o_client["buffer"].toInt()>0) {
+        args.append("-l");
+        args.append(o_client["buffer"].toString()+o_client["unit_buffer"].toString());
+    }
+    if (o_client["dscp"].toInt()>=0) {
+        args.append("--dscp");
+        args.append(o_client["dscp"].toString());
+    }
+    if (o_client["tos"].toInt()>=0) {
+        args.append("--tos");
+        args.append(o_client["tos"].toString());
+    }
+    if (o_client["mss"].toInt()>0) {
+        args.append("--set-mss");
+        args.append(o_client["mss"].toString());
+    }
+    args.append("-i");
+    args.append(o_client["interval"].toString());
+    args.append("--format");
+    args.append(o_client["fmtreport"].toString());
+
+    if (o_client["reverse"].toInt()>0) {
+        args.append("-R");
+    }
+    if (o_client["bidir"].toInt()>0) {
+        args.append("--bidir");
+    }
+    return args;
 }
 
 QString TP::getMgrServer()

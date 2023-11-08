@@ -21,14 +21,29 @@ int MyService::addIperfServer(int version, uint port, QString bindHost)
     return m_qiperfd->addIperfServer(version, port, bindHost);
 }
 
-void MyService::start()
+int MyService::addIperfClient(int version, uint port, QString Host, QString iperfargs)
 {
-    return m_qiperfd->start();
+    return m_qiperfd->addIperfClient(version, port, Host, iperfargs);
 }
 
-void MyService::stop()
+void MyService::start(int idx)
 {
-    return m_qiperfd->stop();
+    return m_qiperfd->start(idx);
+}
+
+void MyService::startAll()
+{
+    return m_qiperfd->startAll();
+}
+
+void MyService::stop(int idx)
+{
+    return m_qiperfd->stop(idx);
+}
+
+void MyService::stopAll()
+{
+    return m_qiperfd->stopAll();
 }
 
 void MyService::setManagerInterface(QString interface)

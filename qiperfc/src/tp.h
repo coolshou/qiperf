@@ -51,8 +51,10 @@ public:
 
     QString getID();
     void loadData(QString data);
+    int getVersion();
     QString getServer();
     QString getClient();
+    QString getClientArgs();
     QString getMgrServer();
     QString getMgrClient();
     int getPort();
@@ -67,6 +69,7 @@ private:
 //    EndPointType::Type m_type;
     QString m_jsondata;
     QString m_id; // reference id
+    int m_version; //iperf version
     QString m_server; // target server ip
     QString m_mgrserver; // target manger server ip
     QString m_direction; //direction: up/down

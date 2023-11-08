@@ -12,8 +12,11 @@ public:
     explicit MyService(QIperfd* qiperfd, QObject *parent = nullptr);
     Q_INVOKABLE QString getOS();
     Q_INVOKABLE int addIperfServer(int version, uint port, QString bindHost="");
-    Q_INVOKABLE void start();
-    Q_INVOKABLE void stop();
+    Q_INVOKABLE int addIperfClient(int version, uint port, QString Host, QString iperfargs);
+    Q_INVOKABLE void start(int idx);
+    Q_INVOKABLE void startAll();
+    Q_INVOKABLE void stop(int idx);
+    Q_INVOKABLE void stopAll();
 
     void setManagerInterface(QString interface);
     QString getManagerInterface();

@@ -26,6 +26,11 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+struct RPC_TP{
+    jcon::JsonRpcWebSocketClient *rpc;
+    TP *tp;
+};
+
 class QIperfC : public QMainWindow
 {
     Q_OBJECT
@@ -45,12 +50,15 @@ public slots:
     void onStop();
     void on_notice(QString send_addr, QString msg);
     void onQuit();
-    int createRPC_Server(QString host="127.0.0.1", int port=RPC_PORT);
-    int createRPC_Client(QString host="127.0.0.1", int port=RPC_PORT);
+    int createRPC_Server(TP *tp, QString host="127.0.0.1", int port=RPC_PORT);
+    int createRPC_Client(TP *tp, QString host="127.0.0.1", int port=RPC_PORT);
     void notificationReceived(const QString key, const QVariant value);
 
 signals:
     void updateEndpointNum(int n);
+    void errorStop(int err, QString msg); // signal when test error
+    void testStarted(); // signal when test started
+    void testStoped(int err); // signal when test stoped, 0: no error
 
 private:
     void updateRunStatus(bool bStart);
@@ -70,6 +78,8 @@ private slots:
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onTPDataUpdate(const QModelIndex &parent, int first, int last);
     void realtimeDataSlot(QPrivateSignal sig);
+    void onRPC_result(const QVariant& result);
+    void onRPC_error(int code, const QString& message);
 
 private:
     Ui::MainWindow *ui;
@@ -79,8 +89,8 @@ private:
 #if (TEST_JSONRPC==1)
     jcon::JsonRpcWebSocketClient *rpc_client;
 #endif
-    QMap<QString, jcon::JsonRpcWebSocketClient *> map_qiperfds_server; // manager all qiperfd <manager ip, rpc_client> for iperf server
-    QMap<QString, jcon::JsonRpcWebSocketClient *> map_qiperfds_client; // manager all qiperfd <manager ip, rpc_client> for iperf client
+    QMap<QString, RPC_TP *> map_qiperfds_server; // manager all qiperfd <manager ip, rpc_client> for iperf server
+    QMap<QString, RPC_TP *> map_qiperfds_client; // manager all qiperfd <manager ip, rpc_client> for iperf client
     UdpReceiver *m_receiver;
 //    QChartView *m_tpchart;
 //    TPChart *m_tpchart;
@@ -89,6 +99,7 @@ private:
     TPMgr *m_tpmgr;
     TPDirDelegate *tpdrdelegate;
     QTimer dataTimer;
+    QDateTime m_TestStartTime;
 
 };
 #endif // QIPERFC_H

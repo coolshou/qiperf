@@ -332,7 +332,7 @@
     <string>Edit (TODO)</string>
    </property>
    <property name="toolTip">
-    <string>Edit Iperf Pair</string>
+    <string>Edit Iperf Pair (TODO)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
