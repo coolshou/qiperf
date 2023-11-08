@@ -9,7 +9,7 @@
 
 //TP store each throughput config
 //class TP : public QObject
-class TP
+class TP: public QObject
 {
     Q_GADGET
 public:
