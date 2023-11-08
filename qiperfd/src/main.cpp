@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
         QDir dir(logfilePath);
         if (!dir.exists())
             dir.mkpath(".");
-        QString logfile = logfilePath + "qiperfc.log";
+        QString logfile = logfilePath + "qiperfd.log";
         QFile outFile(logfile);
         if (! outFile.open(QIODevice::WriteOnly | QIODevice::Append)){
             qDebug() << "open file " << logfile << " Fail" << Qt::endl;
