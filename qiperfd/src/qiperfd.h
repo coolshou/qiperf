@@ -7,6 +7,7 @@
 #include <QSettings>
 #include <QList>
 #include <QString>
+#include <QDateTime>
 #if defined(Q_OS_LINUX)
 #include <QSocketNotifier>
 #endif
@@ -65,7 +66,8 @@ private:
 //    QList<QThread*> m_threads;
     QString mgr_ifname; //manager interface name
     int mgr_port; //manager port number
-
+    QDateTime starttime;  //Test Start time
+    QMap<int, int> m_runstatus; //record thread idx run status, 0: stop , 1: running
 };
 
 #endif // QIPERFD_H

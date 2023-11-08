@@ -462,6 +462,7 @@ void QIperfd::onIperfLog(int idx, QString text)
 void QIperfd::onStarted(int idx)
 {
     qDebug() << "TODO: onStarted(" << idx << "):" << Qt::endl;
+    m_runstatus[idx]=1;
 }
 
 void QIperfd::onFinished(int idx, int exitCode, int exitStatus)
@@ -477,6 +478,7 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus)
     }
     //    m_threads.removeAt(idx);
     //    m_iperfworkers.removeAt(idx);
+    m_runstatus[idx]=0;
 }
 
 void QIperfd::onQuit()
