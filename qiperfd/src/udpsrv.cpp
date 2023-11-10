@@ -28,7 +28,7 @@ void UdpSrv::setIfname(QString mgr_ifname)
 {
     m_ifname = mgr_ifname;
     update_addr();
-    qDebug() << "setIfname:" << mgr_ifname << Qt::endl;
+    qInfo() << "setIfname:" << mgr_ifname << Qt::endl;
 }
 
 void UdpSrv::readyRead()

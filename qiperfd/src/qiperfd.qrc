@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ws.cert</file>
+        <file>ws.key</file>
+    </qresource>
+</RCC>

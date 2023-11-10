@@ -33,7 +33,8 @@ SOURCES += \
     src/myservice.cpp \
     src/pipeserver.cpp \
     src/qiperfd.cpp \
-    src/udpsrv.cpp
+    src/udpsrv.cpp \
+    src/wsserver.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -51,7 +52,8 @@ HEADERS += \
     src/pipeserver.h \
     src/qiperfd.h \
     src/udpsrv.h \
-    src/version.h
+    src/version.h \
+    src/wsserver.h
 
 android {
     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
@@ -154,4 +156,11 @@ unix:!android {
         message("NOT support platform: " QT_ARCH)
     }
 }
+
+DISTFILES += \
+    src/ws.cert \
+    src/ws.key
+
+RESOURCES += \
+    src/qiperfd.qrc
 

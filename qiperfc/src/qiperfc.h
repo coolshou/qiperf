@@ -8,7 +8,9 @@
 #include <QList>
 #include <QTimer>
 #include <QPen>
+#include <QObject>
 
+#include "comm.h"
 #include "pipeclient.h"
 #include "jcon/json_rpc_websocket_client.h"
 #include "dlgiperf.h"
@@ -19,17 +21,17 @@
 #include "tpmgr.h"
 #include "tpdirdelegate.h"
 
-#define TEST_JSONRPC 0
-#define TEST_PLOT_DATA 0
+
+#if (TEST_WS==1)
+#include "wsclient.h"
+#endif
+#if (TEST_JSONRPC==1)
+#include "rpctp.h"
+#endif
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-
-struct RPC_TP{
-    jcon::JsonRpcWebSocketClient *rpc;
-    TP *tp;
-};
 
 class QIperfC : public QMainWindow
 {
@@ -50,8 +52,10 @@ public slots:
     void onStop();
     void on_notice(QString send_addr, QString msg);
     void onQuit();
-    int createRPC_Server(TP *tp, QString host="127.0.0.1", int port=RPC_PORT);
-    int createRPC_Client(TP *tp, QString host="127.0.0.1", int port=RPC_PORT);
+#if (TEST_JSONRPC==1)
+    int createRPC_Server(TP tp, QString host="127.0.0.1", int rpc_port=RPC_PORT);
+    int createRPC_Client(TP tp, QString host="127.0.0.1", int rpc_port=RPC_PORT);
+#endif
     void notificationReceived(const QString key, const QVariant value);
 
 signals:
@@ -86,11 +90,15 @@ private:
     DlgIperf * dlgiperf;  // dialog of iperf config
     FormEndPoints * formEndpoits;
     PipeClient *pclient;
+#if (TEST_WS==1)
+    QMap<QString, WSClient *> m_wss; // websocket client list for manager iperf server
+    QMap<QString, WSClient *> m_wsc; // websocket client list for manager iperf client
+#endif
 #if (TEST_JSONRPC==1)
     jcon::JsonRpcWebSocketClient *rpc_client;
+    QMap<QString, RpcTp *> map_qiperfds_server; // manager all qiperfd <manager ip, rpc_client> for iperf server
+    QMap<QString, RpcTp *> map_qiperfds_client; // manager all qiperfd <manager ip, rpc_client> for iperf client
 #endif
-    QMap<QString, RPC_TP *> map_qiperfds_server; // manager all qiperfd <manager ip, rpc_client> for iperf server
-    QMap<QString, RPC_TP *> map_qiperfds_client; // manager all qiperfd <manager ip, rpc_client> for iperf client
     UdpReceiver *m_receiver;
 //    QChartView *m_tpchart;
 //    TPChart *m_tpchart;

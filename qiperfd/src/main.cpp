@@ -20,6 +20,8 @@
 #include <QDir>
 #include <QStandardPaths>
 
+#define USE_JSONRPC 0
+
 static QTextStream output_ts;
 
 int isNotRoot()
@@ -66,6 +68,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
         break;
     }
 }
+#if (USE_JSONRPC==1)
 jcon::JsonRpcServer* startServer(QObject* parent,
                                  bool allow_notifications = false, QIperfd* qiperfd=nullptr)
 {
@@ -84,7 +87,7 @@ jcon::JsonRpcServer* startServer(QObject* parent,
     rpc_server->listen(RPC_PORT);
     return rpc_server;
 }
-
+#endif
 int main(int argc, char *argv[])
 {
     int rc;
@@ -98,13 +101,17 @@ int main(int argc, char *argv[])
         if (!dir.exists())
             dir.mkpath(".");
         QString logfile = logfilePath + "qiperfd.log";
+// TODO: check log file exist, backup it
         QFile outFile(logfile);
         if (! outFile.open(QIODevice::WriteOnly | QIODevice::Append)){
             qDebug() << "open file " << logfile << " Fail" << Qt::endl;
         }
         output_ts.setDevice(&outFile);
         qInstallMessageHandler(myMessageOutput);
-
+//TODO: send argv to exist running qiperfd
+// -k => kill qiperfd
+// -s args => pass command to do qiperfd
+// -g args => get info from  qiperfd
         QCoreApplication app(argc, argv);
     #if defined(Q_OS_LINUX)
         UnixSignalWatcher sigwatch;
@@ -120,13 +127,16 @@ int main(int argc, char *argv[])
         QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &qiperfd, SLOT(onQuit()));
     #endif
 
+#if (USE_JSONRPC==1)
         auto server = startServer(nullptr, true, &qiperfd);
-
+#endif
     #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
         sd_notify(0, "READY=1");
     #endif
         rc = app.exec();
+#if (USE_JSONRPC==1)
         delete server;
+#endif
     #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
         sd_notify(0, "STOPPING=1");
     #endif

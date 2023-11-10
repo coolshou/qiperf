@@ -42,7 +42,7 @@ int PipeServer::init()
     // servername已經存在就會listen失敗
     QLocalServer::removeServer(m_servername);
     // 進行監聽
-    qDebug() << "start PipeServer listen on: " << m_servername << Qt::endl;
+    qInfo() << "start PipeServer listen on: " << m_servername;
     m_server->setSocketOptions(QLocalServer::WorldAccessOption);
     m_server->listen(m_servername);
     connect(m_server, SIGNAL(newConnection()), this, SLOT(socket_new_connection()));

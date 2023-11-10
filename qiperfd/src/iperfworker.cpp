@@ -69,7 +69,12 @@ void IperfWorker::work()
         emit log(m_idx, "iperf not started!!" + m_cmd + " " + m_arguments.join(" "));
         emit log(m_idx, m_iperf->readAllStandardError());
     }
-//    emit finished(m_iperf->exitCode(), m_iperf->exitStatus());
+    //    emit finished(m_iperf->exitCode(), m_iperf->exitStatus());
+}
+
+bool IperfWorker::isRunning()
+{
+    return m_running;
 }
 void IperfWorker::setStop()
 {
@@ -87,6 +92,7 @@ void IperfWorker::setStop()
 
 void IperfWorker::onStarted()
 {
+    m_running = true;
     emit started(m_idx);
 }
 
@@ -114,6 +120,7 @@ void IperfWorker::readyReadStdErr()
 
 void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    m_running = false;
     emit finished(m_idx, exitCode, int(exitStatus));
     m_stop = true;
 }

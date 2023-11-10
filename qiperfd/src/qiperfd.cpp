@@ -17,7 +17,7 @@ QIperfd::QIperfd(QObject *parent)
     // TODO: setting
     cfg = new QSettings(QSettings::NativeFormat, QSettings::SystemScope,
                               QIPERF_ORG, QIPERFD_NAME);
-    qInfo() << "cfg filename:" << cfg->fileName() << Qt::endl;
+    qInfo() << "cfg filename:" << cfg->fileName();
     //SystemScope: /etc/xdg/xdg-lxqt/alphanetworks/qiperfd.conf
         //sudo =>      /etc/xdg/alphanetworks/qiperfd.conf
     //UserScope: /home/jimmy/.config/alphanetworks/qiperfd.conf
@@ -40,17 +40,23 @@ QIperfd::QIperfd(QObject *parent)
     //    m_udpsrv->collectInfo();
     m_udpsrv->setSendMsg(info); // broadcast
 
+#if (TEST_WS==1)
+    //
+    m_wsserver = new WSServer(QIPERFD_WSPORT); // websocket listen
+    connect(m_wsserver, SIGNAL(actMessage(QString)), this ,SLOT(onWSactMessage(QString)));
+
+#endif
     //    qDebug() << "start PipeServer" << Qt::endl;
     // systemtray GUI interaction interface
     m_pserver = new PipeServer(QIPERFD_NAME, nullptr);
     connect(m_pserver, SIGNAL(newMessage(int, QString)), this, SLOT(onNewMessage(int, QString)));
     if (m_pserver->init())
     {
-        qDebug() << "PipeServer start fail" << Qt::endl;
+        qInfo() << "PipeServer start fail";
     }
     // iperf control interface, accept add/del iperf setting from remote
 
-    qDebug() << "init path & files" << Qt::endl;
+    qInfo() << "init path & files";
 
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 #if defined(Q_OS_ANDROID) || defined(Q_OS_WIN32)
@@ -162,7 +168,7 @@ void QIperfd::onLog(QString text)
 
 void QIperfd::loadcfg(QString apppath)
 {
-    qInfo() << "loadcfg: (apppath:" << apppath << ")" << Qt::endl;
+    qInfo() << "loadcfg: (apppath:" << apppath << ")";
     cfg->beginGroup("main");
     cfg->setValue("Path", apppath);
     cfg->endGroup();
@@ -185,7 +191,7 @@ void QIperfd::savecfg()
     cfg->setValue("port", mgr_port);
     cfg->endGroup();
     cfg->sync();
-    qInfo() << "savecfg:" << cfg->status() << Qt::endl;
+    qInfo() << "savecfg:" << cfg->status();
     //    qDebug()<< "savecfg end" << Qt::endl;
 }
 
@@ -319,6 +325,7 @@ void QIperfd::start(int idx)
 }
 void QIperfd::startAll()
 {
+    m_starttime = QDateTime().currentDateTime();
     // start all thread
     for (int i = 0; i < m_threads.count(); ++i)
     {
@@ -327,8 +334,10 @@ void QIperfd::startAll()
 }
 void QIperfd::stop(int idx)
 {
-    IperfWorker *iperfwork = m_iperfworkers.value(idx);
-    iperfwork->setStop();
+    if (isRunning(idx)){
+        m_iperfworkers.value(idx)->setStop();
+        //    iperfwork->setStop();
+    }
 }
 
 void QIperfd::stopAll()
@@ -340,6 +349,14 @@ void QIperfd::stopAll()
     }
 }
 
+bool QIperfd::isRunning(int idx)
+{
+    if (m_iperfworkers.contains(idx)) {
+        return m_iperfworkers.value(idx)->isRunning();
+    }
+    return false;
+}
+
 void QIperfd::setManagerInterface(QString interface)
 {
     mgr_ifname = interface;
@@ -349,7 +366,7 @@ void QIperfd::setManagerInterface(QString interface)
 
 void QIperfd::onNewMessage(int idx, const QString msg)
 {
-    qInfo() << "onNewMessage: = " << msg << Qt::endl;
+    qInfo() << "(" << idx <<")onNewMessage: = " << msg;
     if (QString::compare(msg, CMD_OK, Qt::CaseInsensitive) == 0)
     {
         return;
@@ -413,20 +430,20 @@ void QIperfd::onNewMessage(int idx, const QString msg)
                 QString args;
                 foreach (QVariant arg, iperf_args["cmd_args"].toList())
                 {
-                    qDebug() << "arg: " << arg.toString() << Qt::endl;
+                    qInfo() << "arg: " << arg.toString();
                     args = " " + arg.toString();
                 }
-                qDebug() << "add iperf: " << args << Qt::endl;
+                qInfo() << "add iperf: " << args;
                 add(ver, cmd, args, port);
             }
             else if (QString::compare(act, CMD_IPERF_START, Qt::CaseInsensitive) == 0)
             {
-                qDebug() << "Start all iperfs" << Qt::endl;
+                qInfo() << "Start all iperfs";
                 startAll();
             }
             else if (QString::compare(act, CMD_IPERF_STOP, Qt::CaseInsensitive) == 0)
             {
-                qDebug() << "Stop all iperfs" << Qt::endl;
+                qInfo() << "Stop all iperfs";
                 stopAll();
             }
             else
@@ -483,7 +500,15 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus)
 
 void QIperfd::onQuit()
 {
-    qInfo() << "onQuit" << Qt::endl;
+    qInfo() << "onQuit";
     savecfg();
     qApp->quit();
+}
+
+void QIperfd::onWSactMessage(QString msg)
+{
+    //handle act message from websocket
+    // expect in json format
+    qInfo() << "TODO: onWSactMessage:" << msg;
+
 }

@@ -13,7 +13,6 @@ class TP: public QObject
 {
     Q_GADGET
 public:
-//    explicit EndPoint(const QList<QVariant> &data, EndPoint *parentItem = nullptr);
     explicit TP(QString id, QString data, TP *parentItem = nullptr);
 //    ~TP() ;//override
     enum DirType{
@@ -31,13 +30,6 @@ public:
         comment=5
     };
     Q_ENUM(cols)
-//    enum DataField{
-//        MServer=0,
-//        Dir,
-//        MClient,
-//        Throughput
-//    };
-//    Q_ENUM(DataField)
     void appendChild(TP *child);
 
     TP *child(int row);

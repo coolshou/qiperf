@@ -22,6 +22,7 @@ signals:
 
 public slots:
     void work();
+    bool isRunning();
 
 private slots:
     void onStarted();
@@ -33,7 +34,8 @@ private:
     int m_idx;
     int m_version; // iperf version 2 or 3
     QObject *m_parent;
-    bool m_stop;
+    bool m_stop;  //user stop;
+    bool m_running; // is running
     QString m_iperfexe; // iperf exec name
     uint m_port;  //iperf port
     QString m_cmd; //iperf exec full path

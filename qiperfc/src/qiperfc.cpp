@@ -7,6 +7,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMessageBox>
+#include <QStringLiteral>
+#include <QUrl>
 #include "tpdirdelegate.h"
 #include "endpointact.h"
 #include "tp.h"
@@ -126,9 +128,24 @@ void QIperfC::onStart()
 //        qDebug() << "ChildCount: " << m_tpmgr->rootChildCount() << Qt::endl;
         QList<TP *> tps = m_tpmgr->getChilds();
         TP *tp;
+        QString s;
+        foreach (TP *tp, tps) {
+            //RPC to control all server endpoint init iperf server
+            if (!m_wss.contains(tp->getMgrServer())) {
+                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrServer()).arg(QIPERFD_WSPORT);
+                m_wss[tp->getMgrServer()]=new WSClient(QUrl(s));
+            }
+            //RPC to control all client endpoint init iperf client
+            if (!m_wss.contains(tp->getMgrClient())) {
+                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrClient()).arg(QIPERFD_WSPORT);
+                m_wss[tp->getMgrClient()]=new WSClient(QUrl(s));
+            }
+        }
 
+
+#if (TEST_JSONRPC==1)
         //create RPC list for ipserf server and client
-        foreach (tp, tps) {
+        foreach (TP *tp, tps) {
             //TODO: check client ping server first
             //RPC to control all server endpoint init iperf server
             if (createRPC_Server(tp, tp->getMgrServer())==-1){
@@ -169,10 +186,7 @@ void QIperfC::onStart()
 //                               " fail");
 //                return;
 //            }
-
         }
-
-
         foreach (QString mhost, map_qiperfds_client.keys()) {
             //TODO: wait client ready/start
             qDebug() <<" Start iperf client: "<< mhost << Qt::endl;
@@ -193,7 +207,7 @@ void QIperfC::onStart()
             auto rpc_tp = map_qiperfds_client.value(mhost);
             auto rs = rpc_tp->rpc->callAsync("startAll");
         }
-
+#endif
         //TODO: wait all test done!!
 
         //TODO: check all test down!!
@@ -252,38 +266,38 @@ void QIperfC::onQuit()
     // TODO: do any thing before quit!
     qApp->quit();
 }
-
-int QIperfC::createRPC_Server(TP *tp, QString host, int port)
+#if (TEST_JSONRPC==1)
+int QIperfC::createRPC_Server(TP tp, QString host, int rpc_port)
 {
     jcon::JsonRpcWebSocketClient *rpcclient = new jcon::JsonRpcWebSocketClient();
-    if (rpcclient->connectToServer(host, port)){
-        RPC_TP rpc_tp ;// = nullptr;
-        rpc_tp.rpc = rpcclient;
-        rpc_tp.tp = tp;
-        map_qiperfds_server[host] = &rpc_tp;  //qiperfd of iperf server
+    if (rpcclient->connectToServer(host, rpc_port)){
+        RpcTp *rpc_tp = new RpcTp() ;// = nullptr;
+        rpc_tp->setRPC(rpcclient);
+        rpc_tp->setTP(tp);
+        map_qiperfds_server[host] = rpc_tp;  //qiperfd of iperf server
         QObject::connect(rpcclient, &jcon::JsonRpcClient::notificationReceived,
                     this, &QIperfC::notificationReceived);
         return 0;
     } else {
-        qDebug() << "createRPC_Server connect to " << host << " : " << port << " Fail" << Qt::endl;
+        qDebug() << "createRPC_Server connect to " << host << " : " << rpc_port << " Fail" << Qt::endl;
         return -1;
     }
 }
-int QIperfC::createRPC_Client(TP *tp, QString host, int port)
+int QIperfC::createRPC_Client(TP tp, QString host, int rpc_port)
 {
     jcon::JsonRpcWebSocketClient *rpcclient = new jcon::JsonRpcWebSocketClient();
-    if (rpcclient->connectToServer(host, port)){
-        RPC_TP rpc_tp;
-        rpc_tp.rpc = rpcclient;
-        rpc_tp.tp = tp;
-        map_qiperfds_client[host] = &rpc_tp;  //qiperfd of iperf client
+    if (rpcclient->connectToServer(host, rpc_port)){
+        RpcTp *rpc_tp= new RpcTp() ;
+        rpc_tp->setRPC(rpcclient);
+        rpc_tp->setTP(tp);
+        map_qiperfds_client[host] = rpc_tp;  //qiperfd of iperf client
         return 0;
     } else {
-        qDebug() << "connect to " << host << " : " << port << " Fail" << Qt::endl;
+        qDebug() << "connect to " << host << " : " << rpc_port << " Fail" << Qt::endl;
         return -1;
     }
 }
-
+#endif
 void QIperfC::notificationReceived(const QString key, const QVariant value)
 {
     qDebug() << "RPC Received notification:"
@@ -546,5 +560,3 @@ void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
     }
     updateRunStatus(bStart);
 }
-
-

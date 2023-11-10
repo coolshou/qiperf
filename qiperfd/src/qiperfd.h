@@ -11,11 +11,13 @@
 #if defined(Q_OS_LINUX)
 #include <QSocketNotifier>
 #endif
+#include "comm.h"
 #include "pipeserver.h"
 #include "iperfworker.h"
 //#include "myservice.h"
 #include "udpsrv.h"
 #include "myinfo.h"
+#include "wsserver.h"
 
 class QIperfd : public QObject
 {
@@ -34,9 +36,10 @@ public:
     int addIperfServer(int version, uint port, QString bindHost="");
     int addIperfClient(int version, uint port, QString Host, QString iperfargs);
     void start(int idx); //TODO: start idx of iperf
-    void startAll(); //TODO: start all of iperfs
+    void startAll(); // start all of iperfs
     void stop(int idx);  //TODO: stop idx of iperfs
     void stopAll();  //TODO: stop all iperfs
+    bool isRunning(int idx); //check if iperf is running
 
 public slots:
     void setManagerInterface(QString interface);
@@ -49,12 +52,16 @@ public slots:
     void onQuit();
 signals:
     void setMgrIfname(QString interface);
+private slots:
+    void onWSactMessage(QString msg);
 
 private:
     QSettings *cfg;
     UdpSrv *m_udpsrv;
     MyInfo *m_myinfo;
-
+#if (TEST_WS==1)
+    WSServer *m_wsserver;
+#endif
     PipeServer *m_pserver;
     //TODO: iperf1
     QString m_iperfexe2; //iperf2
@@ -66,7 +73,7 @@ private:
 //    QList<QThread*> m_threads;
     QString mgr_ifname; //manager interface name
     int mgr_port; //manager port number
-    QDateTime starttime;  //Test Start time
+    QDateTime m_starttime;  //Test Start time
     QMap<int, int> m_runstatus; //record thread idx run status, 0: stop , 1: running
 };
 

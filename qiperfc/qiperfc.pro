@@ -40,6 +40,7 @@ SOURCES += \
     $$PWD/../src/endpoint.cpp \
     $$PWD/../src/endpointtype.cpp \
     $$PWD/../src/endpointact.cpp \
+    ../qiperfd/src/wsserver.cpp \
     lib/axistag.cpp \
     lib/qcustomplot.cpp \
     src/dlgiperf.cpp \
@@ -48,10 +49,12 @@ SOURCES += \
     src/formoption.cpp \
     src/main.cpp \
     src/qiperfc.cpp \
+    src/rpctp.cpp \
     src/tp.cpp \
     src/tpmgr.cpp \
     src/tpdirdelegate.cpp \
-    src/udpreceiver.cpp
+    src/udpreceiver.cpp \
+    src/wsclient.cpp
 
 HEADERS += \
     $$PWD/../src/pipeclient.h \
@@ -60,6 +63,7 @@ HEADERS += \
     $$PWD/../src/endpointtype.h \
     $$PWD/../src/versions.h \
     $$PWD/../src/endpointact.h \
+    ../qiperfd/src/wsserver.h \
     lib/axistag.h \
     lib/qcustomplot.h \
     src/dlgiperf.h \
@@ -67,10 +71,12 @@ HEADERS += \
     src/formendpoints.h \
     src/formoption.h \
     src/qiperfc.h \
+    src/rpctp.h \
     src/tp.h \
     src/tpmgr.h \
     src/tpdirdelegate.h \
-    src/udpreceiver.h
+    src/udpreceiver.h \
+    src/wsclient.h
 
 FORMS += \
     src/dlgiperf.ui \
