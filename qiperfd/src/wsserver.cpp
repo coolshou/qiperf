@@ -64,11 +64,12 @@ WSServer::WSServer(quint16 port, QObject *parent) :
     QObject(parent),
     m_pWebSocketServer(nullptr)
 {
+    /*
     m_pWebSocketServer = new QWebSocketServer(QStringLiteral("WS Server"),
                                               QWebSocketServer::SecureMode,
                                               this);
     QSslConfiguration sslConfiguration;
-    QFile certFile(QStringLiteral(":/ws.cert"));
+    QFile certFile(QStringLiteral(":/ws.cert")); //TODO: create cert file automatic!!
     QFile keyFile(QStringLiteral(":/ws.key"));
     certFile.open(QIODevice::ReadOnly);
     keyFile.open(QIODevice::ReadOnly);
@@ -80,6 +81,10 @@ WSServer::WSServer(quint16 port, QObject *parent) :
     sslConfiguration.setLocalCertificate(certificate);
     sslConfiguration.setPrivateKey(sslKey);
     m_pWebSocketServer->setSslConfiguration(sslConfiguration);
+    */
+    m_pWebSocketServer = new QWebSocketServer(QStringLiteral("WS Server"),
+                                              QWebSocketServer::NonSecureMode,
+                                              this);
 
     if (m_pWebSocketServer->listen(QHostAddress::Any, port))
     {

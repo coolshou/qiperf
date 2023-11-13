@@ -5,19 +5,22 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QDataStream>
+#include <QStringList>
 
 class PipeServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit PipeServer(QString servername, QObject *parent = nullptr);
+    explicit PipeServer(QString servername, qint64 pid, QObject *parent = nullptr);
     ~PipeServer();
     int isServerRun();
     int init();
+    void sendARGS(QStringList args);
+    inline void delay(int millisecondsWait);
 
 signals:
     void messageReceived(QString);
-    void newMessage(int idx, const QString &msg);
+    void pipeMessage(int idx, const QString msg);
 
 public slots:
     void socket_new_connection();
@@ -26,6 +29,7 @@ public slots:
     void send_MessageBack(int idx, QString message);
 
 private:
+    qint64 m_pid;
     QString m_servername;
     QLocalServer *m_server;
     QLocalSocket *m_socket;

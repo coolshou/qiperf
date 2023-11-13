@@ -125,6 +125,18 @@ QString TP::getServer()
     return m_itemDatas[TP::server].toString();
 }
 
+QString TP::getServerArgs()
+{
+    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8());
+    QJsonObject jsonRoot = fulldoc.object();
+
+    QJsonObject o_server = jsonRoot["server"].toObject();
+
+    QJsonDocument doc(o_server);
+    QString strJson(doc.toJson(QJsonDocument::Compact));
+    return strJson;
+}
+
 QString TP::getClient()
 {
     return m_itemDatas[TP::client].toString();
@@ -132,12 +144,17 @@ QString TP::getClient()
 
 QString TP::getClientArgs()
 {
-    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8());
-    QJsonObject jsonRoot = doc.object();
+    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8());
+    QJsonObject jsonRoot = fulldoc.object();
 
     QJsonObject o_client = jsonRoot["client"].toObject();
+    QJsonDocument doc(o_client);
+    QString strJson(doc.toJson(QJsonDocument::Compact));
+    return strJson;
+
+/*
     QString args;
-//    m_version = o_client["version"].toInt();
+
     args.append("-B");
     args.append(o_client["bind"].toString());
     args.append("-p");
@@ -196,6 +213,7 @@ QString TP::getClientArgs()
         args.append("--bidir");
     }
     return args;
+*/
 }
 
 QString TP::getMgrServer()

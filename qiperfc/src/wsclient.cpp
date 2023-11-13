@@ -63,6 +63,13 @@ WSClient::WSClient(const QUrl &url, QObject *parent) :
             this, &WSClient::onSslErrors);
     m_webSocket.open(QUrl(url));
 }
+
+qint64 WSClient::sendText(QString message)
+{
+    qint64 rc = m_webSocket.sendTextMessage(message);
+    qDebug() << "sendText:(" << rc << ")" << message;
+    return rc;
+}
 //! [constructor]
 
 //! [onConnected]
@@ -71,7 +78,7 @@ void WSClient::onConnected()
     qDebug() << "WebSocket connected";
     connect(&m_webSocket, &QWebSocket::textMessageReceived,
             this, &WSClient::onTextMessageReceived);
-    m_webSocket.sendTextMessage(QStringLiteral("Hello, world!"));
+//    m_webSocket.sendTextMessage(QStringLiteral("Hello, world!"));
 }
 //! [onConnected]
 
@@ -79,13 +86,13 @@ void WSClient::onConnected()
 void WSClient::onTextMessageReceived(QString message)
 {
     qDebug() << "Message received:" << message;
-    qApp->quit();
+//    qApp->quit();
 }
 
 void WSClient::onSslErrors(const QList<QSslError> &errors)
 {
-    Q_UNUSED(errors);
-
+//    Q_UNUSED(errors)
+    qDebug() << "onSslErrors:" << errors;
     // WARNING: Never ignore SSL errors in production code.
     // The proper way to handle self-signed certificates is to add a custom root
     // to the CA store.

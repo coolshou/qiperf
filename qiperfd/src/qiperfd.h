@@ -23,7 +23,8 @@ class QIperfd : public QObject
 {
     Q_OBJECT
 public:
-    explicit QIperfd(QObject *parent = nullptr);
+//    explicit QIperfd(QObject *parent = nullptr);
+    explicit QIperfd(PipeServer *pserver, QObject *parent = nullptr);
     ~QIperfd() override;
 
     void onLog(QString text);
@@ -43,7 +44,7 @@ public:
 
 public slots:
     void setManagerInterface(QString interface);
-    void onNewMessage(int idx, const QString msg);
+    void onPipeMessage(int idx, const QString msg);
     void readStdOut(int idx, QString text);
     void readStdErr(int idx, QString text);
     void onIperfLog(int idx, QString text);

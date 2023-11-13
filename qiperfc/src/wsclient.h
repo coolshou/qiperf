@@ -64,6 +64,7 @@ class WSClient : public QObject
     Q_OBJECT
 public:
     explicit WSClient(const QUrl &url, QObject *parent = nullptr);
+    qint64 sendText(QString message);
 
 private Q_SLOTS:
     void onConnected();

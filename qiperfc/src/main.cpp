@@ -15,7 +15,7 @@
 static QTextStream output_ts;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    QByteArray localMsg = msg.toLocal8Bit();
+//    QByteArray localMsg = msg.toLocal8Bit();
     const char *file = context.file ? context.file : "";
 //    const char *function = context.function ? context.function : "";
     switch (type) {
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     //TODO: log file
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 
-    QString logfilePath = tmp + "/qiperf/";
+    QString logfilePath = tmp + "/"; // + "/qiperf/";
     QDir dir(logfilePath);
     if (!dir.exists())
         dir.mkpath(".");

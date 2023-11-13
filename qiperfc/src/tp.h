@@ -45,6 +45,7 @@ public:
     void loadData(QString data);
     int getVersion();
     QString getServer();
+    QString getServerArgs();
     QString getClient();
     QString getClientArgs();
     QString getMgrServer();

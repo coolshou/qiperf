@@ -4,11 +4,14 @@
 */
 #include <QCoreApplication>
 #include <QObject>
+#include <QString>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
 #include <jcon/json_rpc_websocket_server.h>
+#if (USE_JSONRPC==1)
 #include "myservice.h"
+#endif
 #if defined(Q_OS_LINUX)
 #include "../qt-unix-signals/sigwatch.h"
 #endif
@@ -19,8 +22,6 @@
 #include <QFile>
 #include <QDir>
 #include <QStandardPaths>
-
-#define USE_JSONRPC 0
 
 static QTextStream output_ts;
 
@@ -41,29 +42,22 @@ int isNotRoot()
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-//    QByteArray localMsg = msg.toLocal8Bit();
     const char *file = context.file ? context.file : "";
 //    const char *function = context.function ? context.function : "";
     switch (type) {
     case QtDebugMsg:
-//        fprintf(stderr, "DEBUG: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
         output_ts << QString("DEBUG: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
         break;
     case QtInfoMsg:
-        //fprintf(stderr, "INFO: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-//        fprintf(stderr, "INFO: %s", localMsg.constData());
         output_ts << QString("INFO: %1 ").arg(msg) << Qt::endl;
         break;
     case QtWarningMsg:
-//        fprintf(stderr, "WARN: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
         output_ts << QString("WARN: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
         break;
     case QtCriticalMsg:
-//        fprintf(stderr, "CRITICAL: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
         output_ts << QString("CRITICAL: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
         break;
     case QtFatalMsg:
-//        fprintf(stderr, "FATAL: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
         output_ts << QString("FATAL: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
         break;
     }
@@ -108,10 +102,7 @@ int main(int argc, char *argv[])
         }
         output_ts.setDevice(&outFile);
         qInstallMessageHandler(myMessageOutput);
-//TODO: send argv to exist running qiperfd
-// -k => kill qiperfd
-// -s args => pass command to do qiperfd
-// -g args => get info from  qiperfd
+
         QCoreApplication app(argc, argv);
     #if defined(Q_OS_LINUX)
         UnixSignalWatcher sigwatch;
@@ -121,11 +112,22 @@ int main(int argc, char *argv[])
         app.setOrganizationDomain(QIPERF_DOMAIN);
         app.setApplicationName(QIPERFD_NAME);
 
-        QIperfd qiperfd = QIperfd();
-    //    QObject::connect(&app, SIGNAL(aboutToQuit()), &qiperfd , SLOT(onQuit()));
-    #if defined(Q_OS_LINUX)
-        QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &qiperfd, SLOT(onQuit()));
-    #endif
+        PipeServer *m_pserver = new PipeServer(QIPERFD_NAME, app.applicationPid(), nullptr);
+        if (m_pserver->init())
+        {
+            //trying to get the arguments into a list
+            QStringList cmdline_args = app.arguments();
+            cmdline_args.removeFirst();
+            m_pserver->sendARGS(cmdline_args);
+            return -1;
+        } else
+        {
+            QIperfd qiperfd = QIperfd(m_pserver);
+//            connect(m_pserver, SIGNAL(newMessage(int, QString)), this, SLOT(onPipeMessage(int, QString)));
+        }
+#if defined(Q_OS_LINUX)
+    QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &app, SLOT(quit()));
+#endif
 
 #if (USE_JSONRPC==1)
         auto server = startServer(nullptr, true, &qiperfd);

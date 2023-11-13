@@ -66,6 +66,7 @@ void QIperfTray::statusmsg(QString msg)
 
 void QIperfTray::onNewMessage(const QString msg)
 {
+    qInfo() << "onNewMessage:" << msg;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError){

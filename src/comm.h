@@ -14,7 +14,7 @@
 
 #define CMD_OK     "OK"
 #define CMD_FAIL   "FAIL"
-
+#define CMD_ARGS   "ARGS"   // send args: eq: -k: kill qiperfd
 #define CMD_STATUS "STATUS"
 #define CMD_IFNAMES "IFNAMES"  //Get all interfaces
 #define CMD_SET_IFNAME "SET_IFNAME"  //Get all interfaces
@@ -35,6 +35,7 @@ enum class IPERF_VER {
 #define TEST_JSONRPC 0
 #define TEST_PLOT_DATA 0
 #define TEST_WS 1
+#define USE_JSONRPC 0
 
 
 #endif // COMM_H

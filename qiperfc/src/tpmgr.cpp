@@ -117,7 +117,7 @@ int TPMgr::rowCount(const QModelIndex &parent) const
 bool TPMgr::add(QString data)
 {
     //json data
-    qDebug() << "TPMgr::add" << data << Qt::endl;
+    //qDebug() << "TPMgr::add" << data << ;
     int idx = rootItem->childCount();
     beginInsertRows(QModelIndex(), idx, idx);
     TP *tp = new TP(QString::number(idx), data, rootItem);

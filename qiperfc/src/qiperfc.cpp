@@ -92,13 +92,11 @@ void QIperfC::onNewMessage(const QString msg)
 
 void QIperfC::on_pairAdd()
 {
-    //TODO: on_pair_add
+    // on_pair_add
     dlgiperf->updateUI();
-    int rc = dlgiperf->exec();//>show();
+    int rc = dlgiperf->exec();// show dlgiperf
     if (rc == QDialog::Accepted){
-//        qDebug() << "TODO: on_pairAdd Accepted" << Qt::endl;
         QString rs= dlgiperf->getJsonCfg();
-//        qDebug() << "iperf json config: " << rs << Qt::endl;
         m_tpmgr->add(rs);
     }
 }
@@ -106,14 +104,15 @@ void QIperfC::on_pairAdd()
 void QIperfC::on_pairEdit()
 {
     // TODO: edit
+    QModelIndex cur = ui->tv_throughput->selectionModel()->currentIndex();
+    qDebug() << "on_pairEdit: " << cur;
 }
 
 void QIperfC::on_pairDelete()
 {
     QModelIndex cur = ui->tv_throughput->selectionModel()->currentIndex();
-    QAbstractItemModel *model = ui->tv_throughput->model();
-    qDebug() << "on_pairDelete: " << cur << Qt::endl;
-    if (!model->removeRow(cur.row(), cur.parent())){
+//    qDebug() << "on_pairDelete: " << cur << Qt::endl;
+    if (!m_tpmgr->removeRow(cur.row(), cur.parent())){
         QMessageBox::information(this, "ERROR", "Can not remove test pair: " + cur.data().toString());
     }
 }
@@ -121,27 +120,45 @@ void QIperfC::on_pairDelete()
 void QIperfC::onStart()
 {
     m_TestStartTime = QDateTime::currentDateTime();
+    //if (m_tpmgr->children().count()>0) {
     if (m_tpmgr->rootChildCount()>0) {
         updateRunStatus(true);
         //start test
     //    m_tpmgr->start();
 //        qDebug() << "ChildCount: " << m_tpmgr->rootChildCount() << Qt::endl;
         QList<TP *> tps = m_tpmgr->getChilds();
-        TP *tp;
+//        TP *tp;
         QString s;
         foreach (TP *tp, tps) {
-            //RPC to control all server endpoint init iperf server
+            //RPC to control all server endpoint (iperf server)
             if (!m_wss.contains(tp->getMgrServer())) {
-                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrServer()).arg(QIPERFD_WSPORT);
+                s = QStringLiteral("ws://%1:%2").arg(tp->getMgrServer()).arg(QIPERFD_WSPORT);
+//                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrServer()).arg(QIPERFD_WSPORT);  //ssl
                 m_wss[tp->getMgrServer()]=new WSClient(QUrl(s));
+                //tell server add iperf server
+                m_wss[tp->getMgrServer()]->sendText(tp->getServerArgs());
             }
-            //RPC to control all client endpoint init iperf client
-            if (!m_wss.contains(tp->getMgrClient())) {
-                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrClient()).arg(QIPERFD_WSPORT);
-                m_wss[tp->getMgrClient()]=new WSClient(QUrl(s));
+            //RPC to control all client endpoint (iperf client)
+            if (!m_wsc.contains(tp->getMgrClient())) {
+                s = QStringLiteral("ws://%1:%2").arg(tp->getMgrClient()).arg(QIPERFD_WSPORT);
+//                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrClient()).arg(QIPERFD_WSPORT); //ssl
+                m_wsc[tp->getMgrClient()]=new WSClient(QUrl(s));
+                //tell client add iperf client
+                m_wsc[tp->getMgrServer()]->sendText(tp->getClientArgs());
             }
         }
-
+        qint64 rs=0;
+        QString key;
+        //Start server
+        foreach (key, m_wss.keys()){
+            rs = m_wss[key]->sendText("Start");
+            qDebug() << "rs: " << rs << " key:" << key;
+        }
+        //Start client
+        foreach (key, m_wsc.keys()){
+            rs = m_wsc[key]->sendText("Start");
+            qDebug() << "rs: " << rs << " key:" << key;
+        }
 
 #if (TEST_JSONRPC==1)
         //create RPC list for ipserf server and client
@@ -236,6 +253,7 @@ void QIperfC::on_notice(QString send_addr, QString msg)
         int act = obj["ACT"].toInt();
         switch (act){
             case EndPointAct::Add:
+//                qInfo() << "EndPointAct::Add: " << send_addr << " msg: " << msg;
                 if (m_endpointmgr->add(send_addr, msg)){
                     if (dlgiperf){
                         if (dlgiperf->add(send_addr)){
@@ -246,17 +264,17 @@ void QIperfC::on_notice(QString send_addr, QString msg)
                 }
                 break;
             case EndPointAct::Update:
-                qDebug() << "TODO EndPoint Update: (" << send_addr << ") " << msg << Qt::endl;
+                qDebug() << "TODO EndPoint Update: from(" << send_addr << ") " << msg << Qt::endl;
                 break;
             case EndPointAct::Del:
-                qDebug() << "TODO EndPoint Del: (" << send_addr << ") " << msg << Qt::endl;
+                qDebug() << "TODO EndPoint Del: from(" << send_addr << ") " << msg << Qt::endl;
                 break;
             case EndPointAct::Disable:
-                qDebug() << "TODO EndPoint Disable: (" << send_addr << ") " << msg << Qt::endl;
+                qDebug() << "TODO EndPoint Disable: from(" << send_addr << ") " << msg << Qt::endl;
                 break;
         }
     } else {
-        qDebug() << "TODO on_notice invalid message: (" << send_addr << ") " << msg << Qt::endl;
+        qDebug() << "TODO on_notice invalid message: from(" << send_addr << ") " << msg << Qt::endl;
     }
 }
 
@@ -381,18 +399,18 @@ void QIperfC::initCustomPlote()
 void QIperfC::addRandomGraph()
 { // Test QCustomPlot
   int n = 50; // number of points in graph
-  double xScale = (rand()/(double)RAND_MAX + 0.5)*2;
-  double yScale = (rand()/(double)RAND_MAX + 0.5)*2;
-  double xOffset = (rand()/(double)RAND_MAX - 0.5)*4;
-  double yOffset = (rand()/(double)RAND_MAX - 0.5)*10;
-  double r1 = (rand()/(double)RAND_MAX - 0.5)*2;
-  double r2 = (rand()/(double)RAND_MAX - 0.5)*2;
-  double r3 = (rand()/(double)RAND_MAX - 0.5)*2;
-  double r4 = (rand()/(double)RAND_MAX - 0.5)*2;
+    double xScale = (rand()/static_cast<double>(RAND_MAX) + 0.5)*2;
+  double yScale = (rand()/static_cast<double>(RAND_MAX) + 0.5)*2;
+    double xOffset = (rand()/static_cast<double>(RAND_MAX) - 0.5)*4;
+  double yOffset = (rand()/static_cast<double>(RAND_MAX) - 0.5)*10;
+    double r1 = (rand()/static_cast<double>(RAND_MAX) - 0.5)*2;
+  double r2 = (rand()/static_cast<double>(RAND_MAX) - 0.5)*2;
+    double r3 = (rand()/static_cast<double>(RAND_MAX) - 0.5)*2;
+  double r4 = (rand()/static_cast<double>(RAND_MAX) - 0.5)*2;
   QVector<double> x(n), y(n);
   for (int i=0; i<n; i++)
   {
-    x[i] = (i/(double)n-0.5)*10.0*xScale + xOffset;
+        x[i] = (i/static_cast<double>(n)-0.5)*10.0*xScale + xOffset;
     y[i] = (qSin(x[i]*r1*5)*qSin(qCos(x[i]*r2)*r4*3)+r3*qCos(qSin(x[i])*r4*2))*yScale + yOffset;
   }
 
@@ -461,7 +479,7 @@ void QIperfC::initStatusbar()
     m_endpoint_label = new QLabel(this);
 //TODO: double click
     m_endpoint_label->setText("endpoints:0");
-    m_endpoint_label->setFrameStyle(QFrame::Box | QFrame::Sunken);
+    m_endpoint_label->setFrameStyle(static_cast<int>(QFrame::Box) | static_cast<int>(QFrame::Sunken));
 //    m_endpoint_label->setTextFormat(Qt::RichText);
 //    m_endpoint_label->setOpenExternalLinks(true);
     ui->statusbar->addPermanentWidget(m_endpoint_label);
@@ -555,8 +573,11 @@ void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
     bool bStart;
     if (m_tpmgr->rowCount()>0) {
         bStart=false;
+        ui->actionStart->setEnabled(!bStart);
+        ui->actionStop->setEnabled(bStart);
     } else {
-        bStart=true;
+        ui->actionStart->setEnabled(false);
+        ui->actionStop->setEnabled(false);
     }
-    updateRunStatus(bStart);
+//    updateRunStatus(bStart);
 }

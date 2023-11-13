@@ -1,11 +1,15 @@
 #include "pipeserver.h"
+#include "comm.h"
 
+#include <QEventLoop>
+#include <QTimer>
 #include <QDebug>
 
-PipeServer::PipeServer(QString servername, QObject *parent)
+PipeServer::PipeServer(QString servername, qint64 pid, QObject *parent)
     : QObject{parent}
 {
-    m_server = 0;
+    m_pid = pid;
+    m_server = nullptr;
     m_servername = servername;
 }
 
@@ -32,9 +36,9 @@ int PipeServer::isServerRun()
 
 int PipeServer::init()
 {
-    // 如果已經有一個實例在運行了就返回0
+    // 如果已經有一個實例在運行了就返回1
     if (isServerRun()) {
-        qDebug() << "another server running" << Qt::endl;
+        qInfo() << m_pid << ",another server running";
         return 1;
     }
     m_server = new QLocalServer;
@@ -42,11 +46,46 @@ int PipeServer::init()
     // servername已經存在就會listen失敗
     QLocalServer::removeServer(m_servername);
     // 進行監聽
-    qInfo() << "start PipeServer listen on: " << m_servername;
+    qInfo() << m_pid <<",start PipeServer listen on: " << m_servername;
     m_server->setSocketOptions(QLocalServer::WorldAccessOption);
     m_server->listen(m_servername);
     connect(m_server, SIGNAL(newConnection()), this, SLOT(socket_new_connection()));
     return 0;
+}
+
+void PipeServer::sendARGS(QStringList args)
+{
+    if(args.length()>0){
+        QLocalSocket ls;
+        ls.connectToServer(m_servername);
+        if (ls.waitForConnected(3000)){
+            qInfo() << m_pid << ",sendARGS";
+            QString msg = CMD_ARGS;
+            msg = msg + " " + args.join(" ");
+            QByteArray block;
+            QDataStream out(&block, QIODevice::WriteOnly);
+            out.setVersion(QDataStream::Qt_5_15);
+            out << msg;
+            out.device()->seek(0);
+            qint64 rs = ls.write(block);
+            qInfo() << m_pid << "(" << rs << "):" << msg;
+            ls.flush();
+            delay(1000);
+        }else {
+            qDebug() << m_pid << ",sendARGS: connect to " << m_servername << " timeout(3sec)";
+        }
+    }else {
+        qInfo() << m_pid << ",PipeServer::sendARGS: No args";
+    }
+}
+
+void PipeServer::delay(int millisecondsWait)
+{
+    QEventLoop loop;
+    QTimer t;
+    t.connect(&t, &QTimer::timeout, &loop, &QEventLoop::quit);
+    t.start(millisecondsWait);
+    loop.exec();
 }
 
 void PipeServer::socket_new_connection()
@@ -67,8 +106,8 @@ void PipeServer::readyRead()
     QDataStream in(local);
     QString     readMsg;
     in >> readMsg;// 讀出數據
-
-    emit newMessage(idx, readMsg);// 發送收到數據信號
+    emit pipeMessage(idx, readMsg);// 發送收到數據信號
+    qInfo() << m_pid << "("<<idx<<")readyRead:" << readMsg;
 }
 
 void PipeServer::on_disconnected()
@@ -83,6 +122,7 @@ void PipeServer::on_disconnected()
 
 void PipeServer::send_MessageBack(int idx, QString message)
 {
+    qDebug() << "send_MessageBack";
     if (m_locals.count()> idx){
         QLocalSocket *socket = m_locals[idx];
         QByteArray block;
@@ -90,7 +130,10 @@ void PipeServer::send_MessageBack(int idx, QString message)
         out.setVersion(QDataStream::Qt_5_15);
         out << message;
         out.device()->seek(0);
-        socket->write(block);
+        qint64 rs = socket->write(block);
+        if (rs==-1){
+            qDebug() << "ERROR: send_MessageBack:" << message;
+        }
         socket->flush();
     } else{
         qDebug() << "send_MessageBack: idx " << idx << " out of range: " << m_locals.count() << Qt::endl;

@@ -1,6 +1,3 @@
-#include "qiperfd.h"
-#include "../src/comm.h"
-
 #include <QCoreApplication>
 #include <QStandardPaths>
 #include <QFileInfo>
@@ -9,15 +6,18 @@
 #include <QNetworkInterface>
 #include <QDir>
 
+#include "qiperfd.h"
+#include "../src/comm.h"
+
 #include <QDebug>
 
-QIperfd::QIperfd(QObject *parent)
+QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     : QObject{parent}
 {
     // TODO: setting
     cfg = new QSettings(QSettings::NativeFormat, QSettings::SystemScope,
                               QIPERF_ORG, QIPERFD_NAME);
-    qInfo() << "cfg filename:" << cfg->fileName();
+    qInfo() << qApp->applicationPid() <<",cfg filename:" << cfg->fileName();
     //SystemScope: /etc/xdg/xdg-lxqt/alphanetworks/qiperfd.conf
         //sudo =>      /etc/xdg/alphanetworks/qiperfd.conf
     //UserScope: /home/jimmy/.config/alphanetworks/qiperfd.conf
@@ -32,31 +32,31 @@ QIperfd::QIperfd(QObject *parent)
     //    qDebug() << "start UdpSrv" << Qt::endl;
     //
     m_myinfo = new MyInfo(mgr_ifname);
-    connect(this, SIGNAL(setMgrIfname(QString)), m_myinfo, SLOT(setIfname(QString)));
+    connect(this, &QIperfd::setMgrIfname, m_myinfo, &MyInfo::setIfname);
     QString info = m_myinfo->collectInfo();
 
     m_udpsrv = new UdpSrv(QIPERFD_BPORT, mgr_ifname, m_myinfo);
-    connect(this, SIGNAL(setMgrIfname(QString)), m_udpsrv, SLOT(setIfname(QString)));
-    //    m_udpsrv->collectInfo();
+    connect(this, &QIperfd::setMgrIfname, m_udpsrv, &UdpSrv::setIfname);
     m_udpsrv->setSendMsg(info); // broadcast
 
 #if (TEST_WS==1)
     //
     m_wsserver = new WSServer(QIPERFD_WSPORT); // websocket listen
-    connect(m_wsserver, SIGNAL(actMessage(QString)), this ,SLOT(onWSactMessage(QString)));
+    connect(m_wsserver, &WSServer::actMessage, this ,&QIperfd::onWSactMessage);
 
 #endif
     //    qDebug() << "start PipeServer" << Qt::endl;
-    // systemtray GUI interaction interface
-    m_pserver = new PipeServer(QIPERFD_NAME, nullptr);
-    connect(m_pserver, SIGNAL(newMessage(int, QString)), this, SLOT(onNewMessage(int, QString)));
-    if (m_pserver->init())
-    {
-        qInfo() << "PipeServer start fail";
+//    m_pserver = new PipeServer(QIPERFD_NAME, qApp->applicationPid(), nullptr);
+    m_pserver=pserver;
+//    //TODO: why following did not work??
+    if (!connect(m_pserver, &PipeServer::pipeMessage, this, &QIperfd::onPipeMessage)){
+        qDebug() << "connect pipeMessage fail";
     }
+
+    // systemtray GUI interaction interface
     // iperf control interface, accept add/del iperf setting from remote
 
-    qInfo() << "init path & files";
+    qInfo() << qApp->applicationPid() <<",init path & files";
 
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 #if defined(Q_OS_ANDROID) || defined(Q_OS_WIN32)
@@ -157,18 +157,18 @@ QIperfd::QIperfd(QObject *parent)
 
 QIperfd::~QIperfd()
 {
-    QString info = m_myinfo->disableInfo();
-    m_udpsrv->setSendMsg(info);
+//    QString info = m_myinfo->disableInfo();
+//    m_udpsrv->setSendMsg(info);
 }
 
 void QIperfd::onLog(QString text)
 {
-    qDebug() << "log:" << text << Qt::endl;
+    qInfo() << qApp->applicationPid() <<", log:" << text;
 }
 
 void QIperfd::loadcfg(QString apppath)
 {
-    qInfo() << "loadcfg: (apppath:" << apppath << ")";
+    onLog(",loadcfg: (apppath:" + apppath + ")");
     cfg->beginGroup("main");
     cfg->setValue("Path", apppath);
     cfg->endGroup();
@@ -191,7 +191,7 @@ void QIperfd::savecfg()
     cfg->setValue("port", mgr_port);
     cfg->endGroup();
     cfg->sync();
-    qInfo() << "savecfg:" << cfg->status();
+    qInfo() <<qApp->applicationPid() << ",savecfg:" << cfg->status();
     //    qDebug()<< "savecfg end" << Qt::endl;
 }
 
@@ -252,13 +252,13 @@ int QIperfd::add(int version, QString m_cmd, QString args, uint port)
     //    m_threads.append(iperf_th);
     //    int idx = m_threads.count()-1;
     IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port);
-    connect(iperfer, SIGNAL(onStdout(int,QString)), this, SLOT(readStdOut(int,QString)));
-    connect(iperfer, SIGNAL(onStderr(int,QString)), this, SLOT(readStdErr(int,QString)));
-    connect(iperfer, SIGNAL(log(int,QString)), this, SLOT(onIperfLog(int,QString)));
-    connect(iperfer, SIGNAL(started(int)), this, SLOT(onStarted(int)));
-    connect(iperfer, SIGNAL(finished(int,int,int)), this, SLOT(onFinished(int,int,int)));
+    connect(iperfer, &IperfWorker::onStdout, this, &QIperfd::readStdOut);
+    connect(iperfer, &IperfWorker::onStderr, this, &QIperfd::readStdErr);
+    connect(iperfer, &IperfWorker::log, this, &QIperfd::onIperfLog);
+    connect(iperfer, &IperfWorker::started, this, &QIperfd::onStarted);
+    connect(iperfer, &IperfWorker::finished, this, &QIperfd::onFinished);
     iperfer->moveToThread(iperf_th);
-    connect(iperf_th, SIGNAL(started()), iperfer, SLOT(work()));
+    connect(iperf_th, &QThread::started, iperfer, &IperfWorker::work);
 
     //    m_iperfworkers.append(iperfer);
     m_iperfworkers.insert(idx, iperfer);
@@ -271,9 +271,9 @@ int QIperfd::addIperfServer(int version, uint port, QString bindHost)
 
     QString cmd;
     // add a iperf server
-    if (version==(int)IPERF_VER::V3){
+    if (version==static_cast<int>(IPERF_VER::V3)){
         cmd = m_iperfexe3;
-    }else if (version==(int)IPERF_VER::V2){
+    }else if (version==static_cast<int>(IPERF_VER::V2)){
         cmd = m_iperfexe2;
     }else{
         qDebug() << "Not support Iperf version:" << version << Qt::endl;
@@ -293,9 +293,9 @@ int QIperfd::addIperfClient(int version, uint port, QString Host, QString iperfa
     qDebug() << "addIperfClient:" << Host << ":" << port << Qt::endl;
     QString cmd;
     // add a iperf server
-    if (version==(int)IPERF_VER::V3){
+    if (version==static_cast<int>(IPERF_VER::V3)){
         cmd = m_iperfexe3;
-    }else if (version==(int)IPERF_VER::V2){
+    }else if (version==static_cast<int>(IPERF_VER::V2)){
         cmd = m_iperfexe2;
     }else{
         qDebug() << "Not support Iperf version:" << version << Qt::endl;
@@ -314,14 +314,6 @@ void QIperfd::start(int idx)
     qDebug() << "run thread id:" << id << Qt::endl;
     th->start();
 
-//    for (int i = 0; i < m_threads.count(); ++i)
-//    {
-//        QThread *th = m_threads.value(i);
-//        // QString id= QString( "%1" ).arg(reinterpret_cast<long>(th->currentThreadId()), 16);
-//        QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
-//        qDebug() << "run :" << id << Qt::endl;
-//        th->start();
-//    }
 }
 void QIperfd::startAll()
 {
@@ -364,14 +356,19 @@ void QIperfd::setManagerInterface(QString interface)
     emit setMgrIfname(interface);
 }
 
-void QIperfd::onNewMessage(int idx, const QString msg)
+void QIperfd::onPipeMessage(int idx, const QString msg)
 {
-    qInfo() << "(" << idx <<")onNewMessage: = " << msg;
+//    qInfo() << "(" << idx <<")onNewMessage: = " << msg;
+    onLog("(" + QString(idx) + ")onNewMessage: = " + msg);
     if (QString::compare(msg, CMD_OK, Qt::CaseInsensitive) == 0)
     {
         return;
     }
-
+    if (QString::compare(msg, CMD_ARGS, Qt::CaseInsensitive) == 0)
+    {
+        onLog("accept args from anther qiperd");
+        return;
+    }
     if (QString::compare(msg, CMD_STATUS, Qt::CaseInsensitive) == 0)
     {
         // get current all iperf status
@@ -418,7 +415,7 @@ void QIperfd::onNewMessage(int idx, const QString msg)
                 QVariantMap iperf_args = result["iperf"].toMap();
                 int ver = iperf_args["version"].toInt();
                 QString cmd;
-                if (ver == (int)IPERF_VER::V3)
+                if (ver == static_cast<int>(IPERF_VER::V3))
                 {
                     cmd = m_iperfexe3;
                 }
@@ -430,31 +427,31 @@ void QIperfd::onNewMessage(int idx, const QString msg)
                 QString args;
                 foreach (QVariant arg, iperf_args["cmd_args"].toList())
                 {
-                    qInfo() << "arg: " << arg.toString();
+                    onLog("arg: " + arg.toString());
                     args = " " + arg.toString();
                 }
-                qInfo() << "add iperf: " << args;
+                onLog("add iperf: " + args);
                 add(ver, cmd, args, port);
             }
             else if (QString::compare(act, CMD_IPERF_START, Qt::CaseInsensitive) == 0)
             {
-                qInfo() << "Start all iperfs";
+                onLog("Start all iperfs");
                 startAll();
             }
             else if (QString::compare(act, CMD_IPERF_STOP, Qt::CaseInsensitive) == 0)
             {
-                qInfo() << "Stop all iperfs";
+                onLog("Stop all iperfs");
                 stopAll();
             }
             else
             {
-                qDebug() << "TODO: handle new json message:(" << idx << ")" << (msg) << Qt::endl;
+                onLog("TODO: handle new json message:(" + QString(idx) + ")" + (msg));
             }
         }
         else
         {
             //            qFatal(error.errorString().toUtf8().constData());
-            qDebug() << "onNewMessage: ERROR: " << error.errorString() << "\nparser json: " << msg.toUtf8() << Qt::endl;
+            onLog("onNewMessage: ERROR: " + error.errorString() + "\nparser json: " + msg.toUtf8());
             exit(1);
         }
     }
@@ -462,12 +459,12 @@ void QIperfd::onNewMessage(int idx, const QString msg)
 
 void QIperfd::readStdOut(int idx, QString text)
 {
-    qDebug() << "TODO: readStdOut(" << idx << "):" << text << Qt::endl;
+    onLog("TODO: readStdOut(" + QString(idx) + "):" + text);
 }
 
 void QIperfd::readStdErr(int idx, QString text)
 {
-    qDebug() << "TODO: readStdErr(" << idx << "):" << text << Qt::endl;
+    onLog("TODO: readStdErr(" + QString(idx)+ "):" + text);
 }
 
 void QIperfd::onIperfLog(int idx, QString text)
@@ -478,13 +475,13 @@ void QIperfd::onIperfLog(int idx, QString text)
 
 void QIperfd::onStarted(int idx)
 {
-    qDebug() << "TODO: onStarted(" << idx << "):" << Qt::endl;
+    onLog("TODO: onStarted(" + QString(idx) + "):");
     m_runstatus[idx]=1;
 }
 
 void QIperfd::onFinished(int idx, int exitCode, int exitStatus)
 {
-    qDebug() << "TODO: onFinished(" << idx << "):" << exitCode << ":" << exitStatus << Qt::endl;
+    onLog("TODO: onFinished(" + QString(idx) + "):" +QString(exitCode)+  ":" + QString(exitStatus));
     if (m_threads.contains(idx))
     {
         m_threads.remove(idx);
@@ -500,7 +497,7 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus)
 
 void QIperfd::onQuit()
 {
-    qInfo() << "onQuit";
+    onLog("onQuit");
     savecfg();
     qApp->quit();
 }
@@ -509,6 +506,6 @@ void QIperfd::onWSactMessage(QString msg)
 {
     //handle act message from websocket
     // expect in json format
-    qInfo() << "TODO: onWSactMessage:" << msg;
+    onLog("TODO: onWSactMessage:" + msg);
 
 }
