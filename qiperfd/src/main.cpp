@@ -2,6 +2,8 @@
  * Require run as root
  *
 */
+
+#include <qglobal.h>
 #if defined(Q_OS_LINUX)
 #include <unistd.h>
 #include <sys/types.h>
