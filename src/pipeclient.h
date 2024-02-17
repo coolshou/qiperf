@@ -13,7 +13,7 @@ class PipeClient : public QObject
     Q_OBJECT
 public:
     explicit PipeClient(QString remoteServername, QObject *parent = nullptr);
-    ~PipeClient();
+    ~PipeClient() override;
     void SetAppHandle( QCoreApplication *app);
 
 signals:
