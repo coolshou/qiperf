@@ -8,6 +8,8 @@
 #include <QList>
 #include <QString>
 #include <QDateTime>
+#include <QCloseEvent>
+
 #if defined(Q_OS_LINUX)
 #include <QSocketNotifier>
 #endif
@@ -53,6 +55,8 @@ public slots:
     void onQuit();
 signals:
     void setMgrIfname(QString interface);
+protected:
+    void closeEvent(QCloseEvent *event);
 private slots:
     void onWSactMessage(QString msg);
 
