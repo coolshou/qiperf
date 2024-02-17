@@ -59,6 +59,8 @@
 
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 
+// class to connect remote QWebSocketServer,
+//  send message by sendText() to remote
 class WSClient : public QObject
 {
     Q_OBJECT

@@ -6,6 +6,7 @@
 #include <QTimer>
 #include "myinfo.h"
 
+// class to broadcast endpoint info
 class UdpSrv : public QObject
 {
     Q_OBJECT

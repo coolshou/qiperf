@@ -7,7 +7,7 @@
 #define QIPERFTRAY_NAME  "qiperftray"
 #define QIPERFD_PORT 47014
 #define QIPERFD_BPORT 47015  //broadcast
-#define QIPERFD_WSPORT 47016  //websocket
+#define QIPERFD_WSPORT 47016  //websocket port
 #define RPC_PORT 57025
 
 #define QIPERFC_NAME  "qiperfconsole"
@@ -28,7 +28,7 @@ enum class IPERF_VER {
     V1=0,  //1.7.0
     V2=1,  //2.0.14
     V21=2, //2.1.9
-    V3=3   //3.15
+    V3=3   //3.14
 };
 
 //TEST
