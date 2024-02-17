@@ -59,6 +59,7 @@ void PipeClient::send_MessageToServer(QString message)
 void PipeClient::socket_connected()
 {   //when socket connected, send m_message to server
     qDebug() << "socket connetcted";
+    emit sigError("");
 //    if (!m_message.isEmpty()){
 //        QByteArray block;
 //        QDataStream out(&block, QIODevice::WriteOnly);
