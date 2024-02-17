@@ -10,6 +10,7 @@ namespace Ui {
 class DlgIperf;
 }
 
+// class of iperf args config dialog
 class DlgIperf : public QDialog
 {
     Q_OBJECT

@@ -7,6 +7,7 @@ namespace Ui {
 class FormEndPoints;
 }
 
+// class to show endpoint list
 class FormEndPoints : public QWidget
 {
     Q_OBJECT
