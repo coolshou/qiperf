@@ -23,7 +23,7 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg, uint po
     m_port = port;
     m_arguments.append("-p");
     m_arguments.append(QString::number(m_port));
-    if (m_version>=(int)IPERF_VER::V3){
+    if (m_version>=static_cast<int>(IPERF_VER::V3)){
         m_arguments.append("--forceflush");
     }
 }
