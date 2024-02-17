@@ -2,6 +2,9 @@
  * Require run as root
  *
 */
+#include <unistd.h>
+#include <sys/types.h>
+
 #include <QCoreApplication>
 #include <QObject>
 #include <QString>
