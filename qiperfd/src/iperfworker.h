@@ -11,7 +11,7 @@ class IperfWorker : public QObject
     Q_OBJECT
 public:
     explicit IperfWorker(int idx, int version, QString cmd, QString arg="-s", uint port=5201, QObject *parent = nullptr);
-    ~IperfWorker();
+    ~IperfWorker() override;
     void setStop();
 signals:
     void started(int idx);
