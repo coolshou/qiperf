@@ -2,8 +2,10 @@
  * Require run as root
  *
 */
+#if defined(Q_OS_LINUX)
 #include <unistd.h>
 #include <sys/types.h>
+#endif
 
 #include <QCoreApplication>
 #include <QObject>
