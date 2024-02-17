@@ -8,7 +8,7 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    QSettings cfg= QSettings(QSettings::NativeFormat, QSettings::UserScope,
+    QSettings cfg= QSettings(QSettings::IniFormat, QSettings::UserScope,
                               QIPERF_ORG, QIPERFTRAY_NAME);
     ui->setupUi(this);
     loadcfg();
@@ -110,8 +110,7 @@ void QIperfTray::onError(QString msg)
 }
 
 void QIperfTray::onTrayIconActivated()
-{   qDebug() << "onTrayIconActivated" << Qt::endl;
-
+{
     if (this->isVisible()){
         this->hide();
     }else{
