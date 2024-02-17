@@ -15,7 +15,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     : QObject{parent}
 {
     // TODO: setting
-    cfg = new QSettings(QSettings::NativeFormat, QSettings::SystemScope,
+    cfg = new QSettings(QSettings::IniFormat, QSettings::SystemScope,
                               QIPERF_ORG, QIPERFD_NAME);
     qInfo() << qApp->applicationPid() <<",cfg filename:" << cfg->fileName();
     //SystemScope: /etc/xdg/xdg-lxqt/alphanetworks/qiperfd.conf
@@ -45,8 +45,6 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     connect(m_wsserver, &WSServer::actMessage, this ,&QIperfd::onWSactMessage);
 
 #endif
-    //    qDebug() << "start PipeServer" << Qt::endl;
-//    m_pserver = new PipeServer(QIPERFD_NAME, qApp->applicationPid(), nullptr);
     m_pserver=pserver;
 //    //TODO: why following did not work??
     if (!connect(m_pserver, &PipeServer::pipeMessage, this, &QIperfd::onPipeMessage)){
@@ -284,8 +282,7 @@ int QIperfd::addIperfServer(int version, uint port, QString bindHost)
         args.append("--bind");
         args.append(bindHost);
     }
-    add(version, cmd, args, port);
-    return 0;
+    return add(version, cmd, args, port);
 }
 
 int QIperfd::addIperfClient(int version, uint port, QString Host, QString iperfargs)
@@ -302,8 +299,7 @@ int QIperfd::addIperfClient(int version, uint port, QString Host, QString iperfa
         return -1;
     }
     QString args = iperfargs;
-    add(version, cmd, args, port);
-    return 0;
+    return add(version, cmd, args, port);
 }
 
 void QIperfd::start(int idx)
@@ -366,7 +362,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
     }
     if (QString::compare(msg, CMD_ARGS, Qt::CaseInsensitive) == 0)
     {
-        onLog("accept args from anther qiperd");
+        onLog("accept args from anther qiperd: " + msg );
         return;
     }
     if (QString::compare(msg, CMD_STATUS, Qt::CaseInsensitive) == 0)
