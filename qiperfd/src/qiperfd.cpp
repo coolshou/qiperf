@@ -161,7 +161,7 @@ QIperfd::~QIperfd()
 
 void QIperfd::onLog(QString text)
 {
-    qInfo() << qApp->applicationPid() <<", log:" << text;
+    qInfo() << qApp->applicationPid() <<", " << text;
 }
 
 void QIperfd::loadcfg(QString apppath)
