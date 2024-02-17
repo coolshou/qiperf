@@ -22,7 +22,7 @@ class QIperfTray : public QMainWindow
 
 public:
     QIperfTray(MyTray *tray, QWidget *parent = nullptr);
-    ~QIperfTray();
+    ~QIperfTray() override;
     void loadcfg();
     void savecfg();
     void statusmsg(QString msg);
@@ -33,7 +33,7 @@ public slots:
     void onGetMgrIfname();
 
 protected:
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
 private slots:
     void onTimeout();
     void onNewMessage(const QString msg);
