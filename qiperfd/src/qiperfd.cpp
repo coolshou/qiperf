@@ -157,8 +157,16 @@ QIperfd::~QIperfd()
 {
 //    QString info = m_myinfo->disableInfo();
 //    m_udpsrv->setSendMsg(info);
+    savecfg();
 }
 
+void QIperfd::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event)
+    //TODO: close app check
+    qInfo() << "closeEvent";
+    savecfg();
+}
 void QIperfd::onLog(QString text)
 {
     qInfo() << qApp->applicationPid() <<", " << text;
@@ -175,9 +183,11 @@ void QIperfd::loadcfg(QString apppath)
     listInterfaces();
     // load config setting
     cfg->beginGroup("manager");
-    setManagerInterface(cfg->value("ifname", "eth0").toString());
+    mgr_ifname = cfg->value("ifname", "eth0").toString();
     mgr_port = cfg->value("port", QIPERFD_PORT).toInt();
+    qInfo() << "mgr_ifname: " << mgr_ifname << ", mgr_port: " <<mgr_port ;
     cfg->endGroup();
+//    setManagerInterface(mgr_ifname);
 }
 
 void QIperfd::savecfg()
@@ -348,7 +358,7 @@ bool QIperfd::isRunning(int idx)
 void QIperfd::setManagerInterface(QString interface)
 {
     mgr_ifname = interface;
-    savecfg();
+//    savecfg();
     emit setMgrIfname(interface);
 }
 
