@@ -131,31 +131,33 @@ void QIperfC::onStart()
         QString s;
         foreach (TP *tp, tps) {
             //RPC to control all server endpoint (iperf server)
-            if (!m_wss.contains(tp->getMgrServer())) {
-                s = QStringLiteral("ws://%1:%2").arg(tp->getMgrServer()).arg(QIPERFD_WSPORT);
+            QString serverIP = tp->getMgrServer();
+            if (!m_wss.contains(serverIP)) {
+                s = QStringLiteral("ws://%1:%2").arg(serverIP, QIPERFD_WSPORT);
 //                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrServer()).arg(QIPERFD_WSPORT);  //ssl
-                m_wss[tp->getMgrServer()]=new WSClient(QUrl(s));
+                m_wss[serverIP]=new WSClient(QUrl(s));
                 //tell server add iperf server
-                m_wss[tp->getMgrServer()]->sendText(tp->getServerArgs());
+                m_wss[serverIP]->sendText(tp->getServerArgs());
             }
             //RPC to control all client endpoint (iperf client)
-            if (!m_wsc.contains(tp->getMgrClient())) {
-                s = QStringLiteral("ws://%1:%2").arg(tp->getMgrClient()).arg(QIPERFD_WSPORT);
+            QString clientIP = tp->getMgrClient();
+            if (!m_wsc.contains(clientIP)) {
+                s = QStringLiteral("ws://%1:%2").arg(clientIP, QIPERFD_WSPORT);
 //                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrClient()).arg(QIPERFD_WSPORT); //ssl
-                m_wsc[tp->getMgrClient()]=new WSClient(QUrl(s));
+                m_wsc[clientIP]=new WSClient(QUrl(s));
                 //tell client add iperf client
-                m_wsc[tp->getMgrServer()]->sendText(tp->getClientArgs());
+                m_wsc[clientIP]->sendText(tp->getClientArgs());
             }
         }
         qint64 rs=0;
-        QString key;
+//        QString key;
         //Start server
-        foreach (key, m_wss.keys()){
+        for (auto key: m_wss.keys()){
             rs = m_wss[key]->sendText("Start");
             qDebug() << "rs: " << rs << " key:" << key;
         }
         //Start client
-        foreach (key, m_wsc.keys()){
+        for (auto key: m_wsc.keys()){
             rs = m_wsc[key]->sendText("Start");
             qDebug() << "rs: " << rs << " key:" << key;
         }

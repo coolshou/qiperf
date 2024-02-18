@@ -117,7 +117,7 @@ void WSServer::sendTextMessage(QString msg, QString target)
     }else{
         ts = m_clients.keys();
     }
-    for(QString t: ts) {
+    for(auto &t: qAsConst(ts)) {
         if (m_clients.contains(t)) {
             qInfo() <<"TODO: send:" << msg << " to " << t << Qt::endl;
             m_clients.value(t)->sendTextMessage(msg);

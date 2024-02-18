@@ -36,6 +36,7 @@ private:
     QObject *m_parent;
     bool m_stop;  //user stop;
     bool m_running; // is running
+    bool m_servermode=false;
     QString m_iperfexe; // iperf exec name
     uint m_port;  //iperf port
     QString m_cmd; //iperf exec full path

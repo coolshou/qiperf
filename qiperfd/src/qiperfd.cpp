@@ -48,7 +48,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     m_pserver=pserver;
 //    //TODO: why following did not work??
     if (!connect(m_pserver, &PipeServer::pipeMessage, this, &QIperfd::onPipeMessage)){
-        qDebug() << "connect pipeMessage fail";
+        qInfo() << "connect pipeMessage fail";
     }
 
     // systemtray GUI interaction interface

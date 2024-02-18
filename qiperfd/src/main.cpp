@@ -12,6 +12,12 @@
 #include <QCoreApplication>
 #include <QObject>
 #include <QString>
+#include <QTextStream>
+#include <QFile>
+#include <QDir>
+#include <QStandardPaths>
+#include <QMessageLogContext>
+#include <qlogging.h>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
@@ -19,18 +25,19 @@
 #if (USE_JSONRPC==1)
 #include "myservice.h"
 #endif
+#define USE_SIGNALS 0
+#if (USE_SIGNALS==1)
 #if defined(Q_OS_LINUX)
 #include "../qt-unix-signals/sigwatch.h"
 #endif
 #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
 #include <systemd/sd-daemon.h>
 #endif
-#include <QTextStream>
-#include <QFile>
-#include <QDir>
-#include <QStandardPaths>
+#endif
 
-static QTextStream output_ts;
+#include "../src/sighandler.h"
+
+//#include "../src/mylog.h"
 
 int isNotRoot()
 { //check if we run as root or administrator
@@ -47,28 +54,7 @@ int isNotRoot()
     return 0;
 }
 
-void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
-{
-    const char *file = context.file ? context.file : "";
-//    const char *function = context.function ? context.function : "";
-    switch (type) {
-    case QtDebugMsg:
-        output_ts << QString("DEBUG: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
-        break;
-    case QtInfoMsg:
-        output_ts << QString("INFO: %1 ").arg(msg) << Qt::endl;
-        break;
-    case QtWarningMsg:
-        output_ts << QString("WARN: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
-        break;
-    case QtCriticalMsg:
-        output_ts << QString("CRITICAL: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
-        break;
-    case QtFatalMsg:
-        output_ts << QString("FATAL: %1 (%2:%3)").arg(msg).arg(file).arg(context.line) << Qt::endl;
-        break;
-    }
-}
+
 #if (USE_JSONRPC==1)
 jcon::JsonRpcServer* startServer(QObject* parent,
                                  bool allow_notifications = false, QIperfd* qiperfd=nullptr)
@@ -89,6 +75,31 @@ jcon::JsonRpcServer* startServer(QObject* parent,
     return rpc_server;
 }
 #endif
+static QTextStream output_ts;
+void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    qDebug() << "myMessageOutput: " << msg << Qt::endl;
+    const char *file = context.file ? context.file : "";
+    //    const char *function = context.function ? context.function : "";
+    switch (type) {
+    case QtDebugMsg:
+        output_ts << QString("DEBUG: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
+        break;
+    case QtInfoMsg:
+        output_ts << QString("INFO: %1 ").arg(msg) << Qt::endl;
+        break;
+    case QtWarningMsg:
+        output_ts << QString("WARN: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
+        break;
+    case QtCriticalMsg:
+        output_ts << QString("CRITICAL: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
+        break;
+    case QtFatalMsg:
+        output_ts << QString("FATAL: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
+        break;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     int rc;
@@ -102,19 +113,23 @@ int main(int argc, char *argv[])
         if (!dir.exists())
             dir.mkpath(".");
         QString logfile = logfilePath + "qiperfd.log";
-// TODO: check log file exist, backup it
+        // TODO: check log file exist, backup it
+        qDebug() << "logfile: " << logfile <<  Qt::endl;
         QFile outFile(logfile);
         if (! outFile.open(QIODevice::WriteOnly | QIODevice::Append)){
             qDebug() << "open file " << logfile << " Fail" << Qt::endl;
+        } else {
+            output_ts.setDevice(&outFile);
         }
-        output_ts.setDevice(&outFile);
         qInstallMessageHandler(myMessageOutput);
 
         QCoreApplication app(argc, argv);
+#if (USE_SIGNALS==1)
     #if defined(Q_OS_LINUX)
         UnixSignalWatcher sigwatch;
         sigwatch.watchForSignal(SIGINT);
     #endif
+#endif
         app.setOrganizationName(QIPERF_ORG);
         app.setOrganizationDomain(QIPERF_DOMAIN);
         app.setApplicationName(QIPERFD_NAME);
@@ -122,6 +137,7 @@ int main(int argc, char *argv[])
         PipeServer *m_pserver = new PipeServer(QIPERFD_NAME, app.applicationPid(), nullptr);
         if (m_pserver->init())
         {
+            printf("%s", "Another server is running! Get args and send to the server\n");
             //trying to get the arguments into a list
             QStringList cmdline_args = app.arguments();
             cmdline_args.removeFirst();
@@ -131,24 +147,39 @@ int main(int argc, char *argv[])
         {
             QIperfd qiperfd = QIperfd(m_pserver);
 //            connect(m_pserver, SIGNAL(newMessage(int, QString)), this, SLOT(onPipeMessage(int, QString)));
+#if defined(Q_OS_LINUX)
+            SigHandler  sighandler(nullptr);
+            QObject::connect(&sighandler, SIGNAL(sigINT()), &app, SLOT(quit()));
+            if (setup_unix_signal_handlers()!= 0){
+                qFatal("setup_unix_signal_handlers couldn't install the signal handles properly");
+                return 1;
+            }
+
+#endif
         }
+
+#if (USE_SIGNALS==1)
 #if defined(Q_OS_LINUX)
     QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &app, SLOT(quit()));
 #endif
-
+#endif
 #if (USE_JSONRPC==1)
         auto server = startServer(nullptr, true, &qiperfd);
 #endif
+#if (USE_SIGNALS==1)
     #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
         sd_notify(0, "READY=1");
     #endif
+#endif
         rc = app.exec();
 #if (USE_JSONRPC==1)
         delete server;
 #endif
+#if (USE_SIGNALS==1)
     #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
         sd_notify(0, "STOPPING=1");
     #endif
+#endif
     }
     return rc;
 }

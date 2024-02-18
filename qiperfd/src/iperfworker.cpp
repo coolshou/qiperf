@@ -20,6 +20,9 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg, uint po
 //    emit log(QString("arg:"+arg));
     m_cmd = cmd; //iperf exec fullpath
     m_arguments = arg.split(" ");
+    if (m_arguments.contains("-s")){
+        m_servermode=true;
+    }
     m_port = port;
     m_arguments.append("-p");
     m_arguments.append(QString::number(m_port));

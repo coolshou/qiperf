@@ -132,10 +132,10 @@ void PipeServer::send_MessageBack(int idx, QString message)
         out.device()->seek(0);
         qint64 rs = socket->write(block);
         if (rs==-1){
-            qDebug() << "ERROR: send_MessageBack:" << message;
+            qInfo() << "ERROR: send_MessageBack:" << message;
         }
         socket->flush();
     } else{
-        qDebug() << "send_MessageBack: idx " << idx << " out of range: " << m_locals.count() << Qt::endl;
+        qInfo() << "send_MessageBack: idx " << idx << " out of range: " << m_locals.count() << Qt::endl;
     }
 }

@@ -10,6 +10,11 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
 {
     QSettings cfg= QSettings(QSettings::IniFormat, QSettings::UserScope,
                               QIPERF_ORG, QIPERFTRAY_NAME);
+    //SystemScope: /etc/xdg/xdg-lxqt/alphanetworks/qiperftray.conf
+    //  sudo =>      /etc/xdg/alphanetworks/qiperftray.conf
+    //UserScope: /home/jimmy/.config/alphanetworks/qiperftray.conf
+    //  sudo =>       /root/.config/alphanetworks/qiperftray.conf
+
     ui->setupUi(this);
     loadcfg();
     setWindowFlags(Qt::WindowTitleHint|Qt::Dialog);
@@ -31,9 +36,6 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     statuser = new QTimer();
     QObject::connect(statuser, SIGNAL(timeout()), this, SLOT(onTimeout()));
     statuser->start(5000);
-
-
-
 }
 
 QIperfTray::~QIperfTray()
@@ -54,9 +56,7 @@ void QIperfTray::savecfg()
     cfg.beginGroup("main");
     cfg.setValue("geometry", this->geometry());
     cfg.endGroup();
-
     cfg.sync();
-
 }
 
 void QIperfTray::statusmsg(QString msg)

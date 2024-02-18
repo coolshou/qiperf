@@ -7,7 +7,7 @@ CONFIG -= app_bundle
 include(../jcon-cpp.pri)
 include(../qiperf.pri)
 unix {
-include(../sigwatch.pri)
+#include(../sigwatch.pri)
 include(../oping.pri)
 }
 unix:!android {
@@ -27,6 +27,7 @@ win32:{
 SOURCES += \
     $$PWD/../src/endpointtype.cpp \
     $$PWD/../src/icmpping.cpp \
+    $$PWD/../src/sighandler.cpp \
     src/iperfworker.cpp \
     src/main.cpp \
     src/myinfo.cpp \
@@ -46,6 +47,7 @@ HEADERS += \
     $$PWD/../src/icmpping.h \
     $$PWD/../src/comm.h \
     $$PWD/../src/versions.h \
+    $$PWD/../src/sighandler.h \
     src/iperfworker.h \
     src/myinfo.h \
     src/myservice.h \
