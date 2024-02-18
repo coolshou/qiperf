@@ -3,6 +3,8 @@
 # output every command that modifies files on the build system.
 #export DH_VERBOSE = 1
 
+DEB_BUILD_OPTIONS=noddebs
+
 #include /usr/share/cdbs/1/rules/debhelper.mk
 # see FEATURE AREAS in dpkg-buildflags(1)
 #export DEB_BUILD_MAINT_OPTIONS = hardening=+all
@@ -12,10 +14,7 @@
 #export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
 # package maintainers to append LDFLAGS
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
-#QIPERF_VERSION = 0.1
-#QIPERFD_VERSION = 0.1.11207.31
-#QIPERFC_VERSION = 0.1.11207.31
-#QIPERFTRAY_VERSION = 0.1.11207.31
+
 VERSION_QIPERF := $(shell sed -n -e "s/^#define QIPERF_VERSION //p" src/versions.h)
 VERSION_QIPERFD := $(shell sed -n -e "s/^#define QIPERFD_VERSION //p" src/versions.h)
 VERSION_QIPERFC := $(shell sed -n -e "s/^#define QIPERFC_VERSION //p" src/versions.h)
@@ -30,18 +29,17 @@ VERSION_QIPERFTRAY := $(shell sed -n -e "s/^#define QIPERFTRAY_VERSION //p" src/
 #override_dh_auto_configure:
 #	dh_auto_configure -- \
 #	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
+
 #override_dh_genchangelog:
 #	debchange -c debian/qiperfc.changelog -v $(VERSION_QIPERFC)
-#	debchange -c debian/qiperfd.changelog -v $(VERSION_QIPERFD)
+#	dh_genchangelog -- -pqiperfd -v$(VERSION_QIPERFD) -cdebian/qiperfd.changelog 
 #	debchange -c debian/qiperftray.changelog -v $(VERSION_QIPERFTRAY)
 
 #override_dh_gencontrol:
-#	dh_gencontrol -pqiperfc -- -v$(VERSION_QIPERFC)
-	#-cdebian/qiperfc.control
-#	dh_gencontrol -pqiperfd -- -v$(VERSION_QIPERFD)
-	#-cdebian/qiperfd.control
-#	dh_gencontrol -pqiperftray -- -v$(VERSION_QIPERFTRAY)
-	#-cdebian/qiperftray.control
+#	dh_gencontrol -pqiperfc -- -v$(VERSION_QIPERFC) -cdebian/qiperfc.control
+#	dh_gencontrol -- -pqiperfd -v$(VERSION_QIPERFD) -cdebian/qiperfd.changelog -cdebian/qiperfd.control
+#	dpkg-gencontrol -pqiperfd -v$(VERSION_QIPERFD) -cdebian/qiperfd.changelog -cdebian/qiperfd.control
+#	dh_gencontrol -pqiperftray -- -v$(VERSION_QIPERFTRAY) -cdebian/qiperftray.control
 
 #override_dh_builddeb:
 #	dh_builddeb -pqiperfd
