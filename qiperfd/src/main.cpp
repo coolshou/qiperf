@@ -25,7 +25,7 @@
 #if (USE_JSONRPC==1)
 #include "myservice.h"
 #endif
-#define USE_SIGNALS 0
+#define USE_SIGNALS 1
 #if (USE_SIGNALS==1)
 #if defined(Q_OS_LINUX)
 #include "../qt-unix-signals/sigwatch.h"
@@ -33,9 +33,11 @@
 #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
 #include <systemd/sd-daemon.h>
 #endif
+#else
+#include "../src/sighandler.h"
 #endif
 
-#include "../src/sighandler.h"
+
 
 //#include "../src/mylog.h"
 
@@ -147,14 +149,13 @@ int main(int argc, char *argv[])
         {
             QIperfd qiperfd = QIperfd(m_pserver);
 //            connect(m_pserver, SIGNAL(newMessage(int, QString)), this, SLOT(onPipeMessage(int, QString)));
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) & (USE_SIGNALS!=1)
             SigHandler  sighandler(nullptr);
             QObject::connect(&sighandler, SIGNAL(sigINT()), &app, SLOT(quit()));
             if (setup_unix_signal_handlers()!= 0){
                 qFatal("setup_unix_signal_handlers couldn't install the signal handles properly");
                 return 1;
             }
-
 #endif
         }
 

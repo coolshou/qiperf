@@ -7,7 +7,7 @@ CONFIG -= app_bundle
 include(../jcon-cpp.pri)
 include(../qiperf.pri)
 unix {
-#include(../sigwatch.pri)
+include(../sigwatch.pri)
 include(../oping.pri)
 }
 unix:!android {
@@ -27,7 +27,6 @@ win32:{
 SOURCES += \
     $$PWD/../src/endpointtype.cpp \
     $$PWD/../src/icmpping.cpp \
-    $$PWD/../src/sighandler.cpp \
     src/iperfworker.cpp \
     src/main.cpp \
     src/myinfo.cpp \
@@ -36,6 +35,7 @@ SOURCES += \
     src/qiperfd.cpp \
     src/udpsrv.cpp \
     src/wsserver.cpp
+    #$$PWD/../src/sighandler.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -47,7 +47,6 @@ HEADERS += \
     $$PWD/../src/icmpping.h \
     $$PWD/../src/comm.h \
     $$PWD/../src/versions.h \
-    $$PWD/../src/sighandler.h \
     src/iperfworker.h \
     src/myinfo.h \
     src/myservice.h \
@@ -56,6 +55,8 @@ HEADERS += \
     src/udpsrv.h \
     src/version.h \
     src/wsserver.h
+
+    #$$PWD/../src/sighandler.h
 
 android {
     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
@@ -74,17 +75,9 @@ android {
 
 }
 
-#win32:VERSION = 1.2023.2.14 # major.minor.patch.build
-#else:VERSION = 1.0.0    # major.minor.patch
-
 win32 {
     #VER = $$system(findstr /c:"\"define QIPERFD_VERSION\"" $$PWD/../src/versions.h)
-    VERSION = 0.2.11209.20
-} else{
-    VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFD_VERSION\"" | awk -F\' \'  \'{print $3}\' )
-}
-
-win32 {
+    VERSION = 0.2.11209.20 # major.minor.patch.build
 # windows resources
     RC_ICONS=$$PWD/../images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
@@ -116,6 +109,8 @@ win32 {
     export(iperfbin.commands)
     QMAKE_EXTRA_TARGETS += first iperfdata iperfbin deploy
 
+}else{
+   VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFD_VERSION\"" | awk -F\' \'  \'{print $3}\' )
 }
 macx {
 # Mac OS
