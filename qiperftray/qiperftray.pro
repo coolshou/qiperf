@@ -34,18 +34,10 @@ else: unix:!android: target.path = /opt/qiperfd/bin
 RESOURCES += \
     $$PWD/../qiperf.qrc
 
-#win32:VERSION = 1.2023.2.14 # major.minor.patch.build
-#else:VERSION = 1.0.0    # major.minor.patch
 win32 {
     #VER = $$system(findstr /c:"\"define QIPERFD_VERSION\"" $$PWD/../src/versions.h)
-    VERSION = 0.2.11209.20
-} else{
-    VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFTRAY_VERSION\"" | awk -F\' \'  \'{print $3}\' )
-}
-
-win32 {
-# windows resources
-
+    VERSION = 0.2.11209.20  # major.minor.patch.build
+    # windows resources
     RC_ICONS=$$PWD/../images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
 
@@ -62,7 +54,7 @@ win32 {
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/../$${TARGET}_$${QT_ARCH}))
 
     DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
-    
+
     iperfbin.commands = \
         $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../release/$${TARGET}.exe)) $$DIST_FILE
     deploy.commands = \
@@ -73,6 +65,8 @@ win32 {
     export(iperfbin.commands)
     QMAKE_EXTRA_TARGETS += first iperfbin deploy
 
+} else{
+    VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFTRAY_VERSION\"" | awk -F\' \'  \'{print $3}\' )
 }
 unix:!android {
     DESKTOP.files += \
@@ -86,6 +80,3 @@ unix:!android {
         "/usr/share/pixmaps/"
     INSTALLS += DESKTOP IMAGES
 }
-
-#DISTFILES += \
-#    qiperftray.desktop
