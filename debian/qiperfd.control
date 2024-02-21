@@ -1,4 +1,4 @@
-Source: qiperfd
+Source: qiperf
 Section: network
 Priority: optional
 Maintainer: coolshou <coolshou2060@gmail.com>
@@ -12,7 +12,7 @@ Rules-Requires-Root: no
 Package: qiperfd
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: qt base daemon to launch iperf2/3 
+Description: qt base daemon to launch iperf2/3
  qt base app to lunch iperf2/3 in server mode
  iperf2
  iperf3
