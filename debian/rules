@@ -23,25 +23,12 @@ VERSION_QIPERFTRAY := $(shell sed -n -e "s/^#define QIPERFTRAY_VERSION //p" src/
 %:
 	dh $@
 
+override_dh_gencontrol:
+	dh_gencontrol -- -pqiperfd -v$(VERSION_QIPERFD) -cdebian/qiperfd.control -DPackage=qiperfd
+	dh_gencontrol -- -pqiperftray -v$(VERSION_QIPERFTRAY) -cdebian/qiperftray.control -DPackage=qiperftray
+	dh_gencontrol -- -pqiperfc -v$(VERSION_QIPERFC) -cdebian/qiperfc.control -DPackage=qiperfc
 
-# dh_make generated override targets
-# This is example for Cmake (See https://bugs.debian.org/641051 )
-#override_dh_auto_configure:
-#	dh_auto_configure -- \
-#	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
-
-#override_dh_genchangelog:
-#	debchange -c debian/qiperfc.changelog -v $(VERSION_QIPERFC)
-#	dh_genchangelog -- -pqiperfd -v$(VERSION_QIPERFD) -cdebian/qiperfd.changelog 
-#	debchange -c debian/qiperftray.changelog -v $(VERSION_QIPERFTRAY)
-
-#override_dh_gencontrol:
-#	dh_gencontrol -pqiperfc -- -v$(VERSION_QIPERFC) -cdebian/qiperfc.control
-#	dh_gencontrol -- -pqiperfd -v$(VERSION_QIPERFD) -cdebian/qiperfd.changelog -cdebian/qiperfd.control
-#	dpkg-gencontrol -pqiperfd -v$(VERSION_QIPERFD) -cdebian/qiperfd.changelog -cdebian/qiperfd.control
-#	dh_gencontrol -pqiperftray -- -v$(VERSION_QIPERFTRAY) -cdebian/qiperftray.control
-
-#override_dh_builddeb:
-#	dh_builddeb -pqiperfd
-#	dh_builddeb -pqiperftray
-#	dh_builddeb -pqiperfc
+override_dh_builddeb:
+	dh_builddeb -pqiperfd --filename=qiperfd_$(VERSION_QIPERFD)_$(DEB_BUILD_ARCH).deb
+	dh_builddeb -pqiperftray --filename=qiperftray_$(VERSION_QIPERFTRAY)_$(DEB_BUILD_ARCH).deb
+	dh_builddeb -pqiperfc --filename=qiperfc_$(VERSION_QIPERFC)_$(DEB_BUILD_ARCH).deb
