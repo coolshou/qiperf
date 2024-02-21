@@ -3,21 +3,3 @@ qiperf (0.2.11302.17-1) unstable; urgency=medium
   * Initial release
 
  -- coolshou <coolshou2060@gmail.com>  Thu, 01 Nov 2023 00:00:00 +0800
- 
-qiperfc (0.2.11302.17-1) unstable; urgency=medium
-
-  * Initial release
-
- -- coolshou <coolshou2060@gmail.com>  Thu, 01 Nov 2023 00:00:00 +0800
-
-qiperfd (0.2.11302.17-1) unstable; urgency=medium
-
-  * Initial release
-
- -- coolshou <coolshou2060@gmail.com>  Thu, 01 Nov 2023 00:00:00 +0800
-
-qiperftray (0.2.11302.17-1) unstable; urgency=medium
-
-  * Initial release
-
- -- coolshou <coolshou2060@gmail.com>  Thu, 01 Nov 2023 00:00:00 +0800
