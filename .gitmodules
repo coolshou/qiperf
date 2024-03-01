@@ -7,3 +7,6 @@
 [submodule "qt-unix-signals"]
 	path = qt-unix-signals
 	url = git@github.com:coolshou/qt-unix-signals.git
+[submodule "QCtrlSignals"]
+	path = QCtrlSignals
+	url = https://github.com/coolshou/QCtrlSignals.git
