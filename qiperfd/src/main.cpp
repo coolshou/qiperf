@@ -25,19 +25,7 @@
 #if (USE_JSONRPC==1)
 #include "myservice.h"
 #endif
-#define USE_SIGNALS 1
-#if (USE_SIGNALS==1)
-#if defined(Q_OS_LINUX)
-#include "../qt-unix-signals/sigwatch.h"
-#endif
-#if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
-#include <systemd/sd-daemon.h>
-#endif
-#else
-#include "../src/sighandler.h"
-#endif
-
-
+#include <QCtrlSignals>
 
 //#include "../src/mylog.h"
 
@@ -126,12 +114,14 @@ int main(int argc, char *argv[])
         qInstallMessageHandler(myMessageOutput);
 
         QCoreApplication app(argc, argv);
-#if (USE_SIGNALS==1)
-    #if defined(Q_OS_LINUX)
-        UnixSignalWatcher sigwatch;
-        sigwatch.watchForSignal(SIGINT);
-    #endif
-#endif
+        // handle ctrl+c
+        auto handler = QCtrlSignalHandler::instance();
+        QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [](){
+                qDebug() << "App about to quit!";
+                QThread::sleep(1);
+            }, Qt::DirectConnection);
+        handler->setAutoQuitActive(true);
+
         app.setOrganizationName(QIPERF_ORG);
         app.setOrganizationDomain(QIPERF_DOMAIN);
         app.setApplicationName(QIPERFD_NAME);
@@ -149,37 +139,14 @@ int main(int argc, char *argv[])
         {
             QIperfd qiperfd = QIperfd(m_pserver);
 //            connect(m_pserver, SIGNAL(newMessage(int, QString)), this, SLOT(onPipeMessage(int, QString)));
-#if defined(Q_OS_LINUX) & (USE_SIGNALS!=1)
-            SigHandler  sighandler(nullptr);
-            QObject::connect(&sighandler, SIGNAL(sigINT()), &app, SLOT(quit()));
-            if (setup_unix_signal_handlers()!= 0){
-                qFatal("setup_unix_signal_handlers couldn't install the signal handles properly");
-                return 1;
-            }
-#endif
         }
 
-#if (USE_SIGNALS==1)
-#if defined(Q_OS_LINUX)
-    QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &app, SLOT(quit()));
-#endif
-#endif
 #if (USE_JSONRPC==1)
         auto server = startServer(nullptr, true, &qiperfd);
-#endif
-#if (USE_SIGNALS==1)
-    #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
-        sd_notify(0, "READY=1");
-    #endif
 #endif
         rc = app.exec();
 #if (USE_JSONRPC==1)
         delete server;
-#endif
-#if (USE_SIGNALS==1)
-    #if defined (Q_OS_LINUX)&& !defined(Q_OS_ANDROID)
-        sd_notify(0, "STOPPING=1");
-    #endif
 #endif
     }
     return rc;

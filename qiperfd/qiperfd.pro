@@ -6,8 +6,9 @@ CONFIG -= app_bundle
 
 include(../jcon-cpp.pri)
 include(../qiperf.pri)
+include(../QCtrlSignals/qctrlsignals.pri)
 unix {
-include(../sigwatch.pri)
+#include(../sigwatch.pri)
 include(../oping.pri)
 }
 unix:!android {
