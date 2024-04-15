@@ -85,7 +85,7 @@ void PipeClient::socket_readReady()
     //qDebug() << "socket_readReady";
     QDataStream in(m_socket);
     in.setVersion(QDataStream::Qt_5_15);
-    if (m_socket->bytesAvailable() < (int)sizeof(quint16)) {
+    if (m_socket->bytesAvailable() < static_cast<int>(sizeof(quint16))) {
         return;
     }
     QString message;

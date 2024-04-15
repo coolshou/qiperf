@@ -19,7 +19,9 @@
 //#include "myservice.h"
 #include "udpsrv.h"
 #include "myinfo.h"
+#if (TEST_WS==1)
 #include "wsserver.h"
+#endif
 
 class QIperfd : public QObject
 {

@@ -29,9 +29,9 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     QObject::connect(pclient, SIGNAL(sigError(QString)), this, SLOT(onError(QString)));
     pclient->SetAppHandle(qApp);
 
-    onGetMgrIfname();
     QObject::connect(ui->pb_setMgrIfname, SIGNAL(clicked()), this, SLOT(onSetMgrIfname()));
     QObject::connect(ui->pb_getMgrIfname, SIGNAL(clicked()), this, SLOT(onGetMgrIfname()));
+    onGetMgrIfname();
 
     statuser = new QTimer();
     QObject::connect(statuser, SIGNAL(timeout()), this, SLOT(onTimeout()));
@@ -96,6 +96,8 @@ void QIperfTray::onNewMessage(const QString msg)
             qDebug() << "onNewMessage:" << msg << Qt::endl;
             ui->te_msg->setText(msg.toUtf8());
         }
+    }else {
+        qDebug() << "onNewMessage: ERROR :" << error.errorString() << Qt::endl;
     }
 }
 

@@ -45,11 +45,12 @@ void UdpSrv::onTimeout()
 {
     qint64 length=0;
     if (m_sendMsg.length()>0){
-//        qInfo() << "onTimeout:" << m_sendMsg;
+        //qInfo() << "onTimeout: send to : " << m_baddr << " port:" << m_port << " MSG:" << m_sendMsg;
         QString tmp=m_sendMsg;
         length = socket->writeDatagram(tmp.toLatin1(),tmp.length(),
-                                       m_baddr, m_port);
-//                                       QHostAddress::Broadcast, m_port);
+                                       QHostAddress::Broadcast, m_port);
+                                       //m_baddr, m_port);
+
         if (length<0){
             qInfo() << "ERROR writeDatagram ("<< QString(socket->error()) <<"):" << socket->errorString();
             return;
@@ -80,6 +81,6 @@ void UdpSrv::update_addr()
 
 void UdpSrv::setSendMsg(QString msg)
 {
-    qInfo() << "setSendMsg:" << msg;
+    //qInfo() << "setSendMsg:" << msg;
     m_sendMsg = msg;
 }

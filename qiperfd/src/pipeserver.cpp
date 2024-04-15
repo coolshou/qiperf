@@ -101,8 +101,11 @@ void PipeServer::readyRead()
     // 取得是哪個 localsocket 可以讀數據了
     QLocalSocket *local = static_cast<QLocalSocket *>(sender());
     if (!local) return;
-    m_locals.append(local);
-    int idx = m_locals.count()-1;
+    if (m_locals.indexOf(local)<0){
+        m_locals.append(local);
+    }
+    //int idx = m_locals.count()-1;
+    int idx = m_locals.indexOf(local);
     QDataStream in(local);
     QString     readMsg;
     in >> readMsg;// 讀出數據

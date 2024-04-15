@@ -17,7 +17,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     // TODO: setting
     cfg = new QSettings(QSettings::IniFormat, QSettings::SystemScope,
                               QIPERF_ORG, QIPERFD_NAME);
-    qInfo() << qApp->applicationPid() <<",cfg filename:" << cfg->fileName();
+    qInfo() << qApp->applicationPid() <<",cfg filename:" << cfg->fileName(); // /etc/xdg/alphanetworks/qiperfd.ini
     //SystemScope: /etc/xdg/xdg-lxqt/alphanetworks/qiperfd.conf
         //sudo =>      /etc/xdg/alphanetworks/qiperfd.conf
     //UserScope: /home/jimmy/.config/alphanetworks/qiperfd.conf
@@ -27,14 +27,14 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     if (!QDir(fi.absolutePath()).exists()){
         QDir().mkdir(fi.absolutePath());
     }
-    QString apppath = qApp->applicationDirPath();
+    QString apppath = qApp->applicationDirPath(); // app run time path:/home/coolshou/sdb/download/work/qiperf/Debug
     loadcfg(apppath);
     //    qDebug() << "start UdpSrv" << Qt::endl;
     //
     m_myinfo = new MyInfo(mgr_ifname);
     connect(this, &QIperfd::setMgrIfname, m_myinfo, &MyInfo::setIfname);
     QString info = m_myinfo->collectInfo();
-
+    // notice qiperfc info
     m_udpsrv = new UdpSrv(QIPERFD_BPORT, mgr_ifname, m_myinfo);
     connect(this, &QIperfd::setMgrIfname, m_udpsrv, &UdpSrv::setIfname);
     m_udpsrv->setSendMsg(info); // broadcast
@@ -47,8 +47,11 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 #endif
     m_pserver=pserver;
 //    //TODO: why following did not work??
-    if (!connect(m_pserver, &PipeServer::pipeMessage, this, &QIperfd::onPipeMessage)){
-        qInfo() << "connect pipeMessage fail";
+    QMetaObject::Connection rc =connect(m_pserver, &PipeServer::pipeMessage, this, &QIperfd::onPipeMessage);
+    if (!rc){
+        qDebug() << "connect pipeMessage fail" << Qt::endl;
+    }else {
+        qDebug() << "Connection: " << rc << Qt::endl;
     }
 
     // systemtray GUI interaction interface
@@ -185,7 +188,8 @@ void QIperfd::loadcfg(QString apppath)
     cfg->beginGroup("manager");
     mgr_ifname = cfg->value("ifname", "eth0").toString();
     mgr_port = cfg->value("port", QIPERFD_PORT).toInt();
-    qInfo() << "mgr_ifname: " << mgr_ifname << ", mgr_port: " <<mgr_port ;
+    //qInfo() << "mgr_ifname: " << mgr_ifname << ", mgr_port: " <<mgr_port ;
+    onLog("mgr_ifname: " + mgr_ifname + ", mgr_port: " + QString::number(mgr_port));
     cfg->endGroup();
 //    setManagerInterface(mgr_ifname);
 }
@@ -365,7 +369,7 @@ void QIperfd::setManagerInterface(QString interface)
 void QIperfd::onPipeMessage(int idx, const QString msg)
 {
 //    qInfo() << "(" << idx <<")onNewMessage: = " << msg;
-    onLog("(" + QString(idx) + ")onNewMessage: = " + msg);
+    onLog("(" + QString(idx) + ")onPipeMessage: = " + msg);
     if (QString::compare(msg, CMD_OK, Qt::CaseInsensitive) == 0)
     {
         return;
@@ -404,6 +408,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
     }
     else
     {
+        qDebug() << "handle json: " << msg << Qt::endl;
         // json format message
         QJsonParseError error;
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
