@@ -38,7 +38,7 @@ private:
     QString m_servername;
     QLocalServer *m_server;
     QLocalSocket *m_socket;
-    QList<QLocalSocket*> m_locals; //client sockets list
+    QList<QLocalSocket*> *m_locals; //client sockets list
 
 };
 

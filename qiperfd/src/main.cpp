@@ -13,6 +13,7 @@
 #include <QObject>
 #include <QString>
 #include <QTextStream>
+#include <QDateTime>
 #include <QFile>
 #include <QDir>
 #include <QStandardPaths>
@@ -68,24 +69,26 @@ jcon::JsonRpcServer* startServer(QObject* parent,
 static QTextStream output_ts;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    qDebug() << "myMessageOutput: " << msg << Qt::endl;
+    QString sMsg = QDateTime::currentDateTime().toString(Qt::ISODateWithMs);
+    sMsg = "[" + sMsg + "]: " + msg;
+    qDebug() << sMsg << Qt::endl;
     const char *file = context.file ? context.file : "";
     //    const char *function = context.function ? context.function : "";
     switch (type) {
     case QtDebugMsg:
-        output_ts << QString("DEBUG: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
+        output_ts << QString("DEBUG: %1 (%2:%3)").arg(sMsg, file).arg(context.line) << Qt::endl;
         break;
     case QtInfoMsg:
-        output_ts << QString("INFO: %1 ").arg(msg) << Qt::endl;
+        output_ts << QString("INFO: %1 ").arg(sMsg) << Qt::endl;
         break;
     case QtWarningMsg:
-        output_ts << QString("WARN: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
+        output_ts << QString("WARN: %1 (%2:%3)").arg(sMsg, file).arg(context.line) << Qt::endl;
         break;
     case QtCriticalMsg:
-        output_ts << QString("CRITICAL: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
+        output_ts << QString("CRITICAL: %1 (%2:%3)").arg(sMsg, file).arg(context.line) << Qt::endl;
         break;
     case QtFatalMsg:
-        output_ts << QString("FATAL: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
+        output_ts << QString("FATAL: %1 (%2:%3)").arg(sMsg, file).arg(context.line) << Qt::endl;
         break;
     }
 }
@@ -137,8 +140,11 @@ int main(int argc, char *argv[])
             return -1;
         } else
         {
-            QIperfd qiperfd = QIperfd(m_pserver);
-//            connect(m_pserver, SIGNAL(newMessage(int, QString)), this, SLOT(onPipeMessage(int, QString)));
+            QIperfd *qiperfd = new QIperfd(m_pserver);
+            QMetaObject::Connection rc = QObject::connect(m_pserver, SIGNAL(pipeMessage(int,QString)), qiperfd, SLOT(onPipeMessage(int,QString)));
+            if (!rc){
+                qDebug() << "connect pipeMessage fail" << Qt::endl;
+            }
         }
 
 #if (USE_JSONRPC==1)

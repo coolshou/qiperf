@@ -11,6 +11,7 @@ PipeServer::PipeServer(QString servername, qint64 pid, QObject *parent)
     m_pid = pid;
     m_server = nullptr;
     m_servername = servername;
+    m_locals = new QList<QLocalSocket*>();
 }
 
 PipeServer::~PipeServer()
@@ -101,11 +102,11 @@ void PipeServer::readyRead()
     // 取得是哪個 localsocket 可以讀數據了
     QLocalSocket *local = static_cast<QLocalSocket *>(sender());
     if (!local) return;
-    if (m_locals.indexOf(local)<0){
-        m_locals.append(local);
+    if (m_locals->indexOf(local)<0){
+        m_locals->append(local);
     }
     //int idx = m_locals.count()-1;
-    int idx = m_locals.indexOf(local);
+    int idx = m_locals->indexOf(local);
     QDataStream in(local);
     QString     readMsg;
     in >> readMsg;// 讀出數據
@@ -117,28 +118,34 @@ void PipeServer::on_disconnected()
 {
     QLocalSocket *local = static_cast<QLocalSocket *>(sender());
     if (!local) return;
-    int idx = m_locals.indexOf(local);
+    int idx = m_locals->indexOf(local);
     if ( idx !=-1){
-        m_locals.removeAt(idx);
+        qInfo() << "on_disconnected : " << idx ;
+        m_locals->removeAt(idx);
     }
 }
 
 void PipeServer::send_MessageBack(int idx, QString message)
 {
-    qDebug() << "send_MessageBack";
-    if (m_locals.count()> idx){
-        QLocalSocket *socket = m_locals[idx];
-        QByteArray block;
-        QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_5_15);
-        out << message;
-        out.device()->seek(0);
-        qint64 rs = socket->write(block);
-        if (rs==-1){
-            qInfo() << "ERROR: send_MessageBack:" << message;
+    qDebug() << "send_MessageBack count: " << Qt::endl;
+    //TODO why following will cause APP crash
+    if (!m_locals->isEmpty()){
+
+        //qDebug() << m_locals.count() << Qt::endl;
+        if (m_locals->count()> idx){
+            QLocalSocket *socket = m_locals->at(idx);
+            QByteArray block;
+            QDataStream out(&block, QIODevice::WriteOnly);
+            out.setVersion(QDataStream::Qt_5_15);
+            out << message;
+            out.device()->seek(0);
+            qint64 rs = socket->write(block);
+            if (rs==-1){
+                qInfo() << "ERROR: send_MessageBack:" << message;
+            }
+            socket->flush();
         }
-        socket->flush();
     } else{
-        qInfo() << "send_MessageBack: idx " << idx << " out of range: " << m_locals.count() << Qt::endl;
+        qInfo() << "send_MessageBack: idx " << idx << " out of range: " << m_locals->count() << Qt::endl;
     }
 }

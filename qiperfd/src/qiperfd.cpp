@@ -45,15 +45,18 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     connect(m_wsserver, &WSServer::actMessage, this ,&QIperfd::onWSactMessage);
 
 #endif
+    Q_UNUSED(pserver)
+    /*
     m_pserver=pserver;
 //    //TODO: why following did not work??
+
     QMetaObject::Connection rc =connect(m_pserver, &PipeServer::pipeMessage, this, &QIperfd::onPipeMessage);
     if (!rc){
         qDebug() << "connect pipeMessage fail" << Qt::endl;
     }else {
         qDebug() << "Connection: " << rc << Qt::endl;
     }
-
+*/
     // systemtray GUI interaction interface
     // iperf control interface, accept add/del iperf setting from remote
 
@@ -391,7 +394,9 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         // TODO: any iperf running
         status.insert(CMD_RUNNING, QString::number(m_iperfworkers.count()));
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
-        m_pserver->send_MessageBack(idx, jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str());
+        QString backmsg = jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str();
+        qDebug() << "send status (" << idx << "): " << backmsg  << Qt::endl;
+        m_pserver->send_MessageBack(idx, backmsg);
     }
     else if (QString::compare(msg, CMD_IFNAMES, Qt::CaseInsensitive) == 0)
     {
@@ -404,7 +409,9 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         status.insert(CMD_IFNAMES, ifname);
         status.insert("ifname", mgr_ifname); // current manager ifname
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
-        m_pserver->send_MessageBack(idx, jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str());
+        QString backmsg = jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str();
+        qDebug() << "send ifnames: (" << idx << "): " << backmsg  << Qt::endl;
+        m_pserver->send_MessageBack(idx, backmsg);
     }
     else
     {
