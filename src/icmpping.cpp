@@ -59,7 +59,7 @@ bool IcmpPing::pingHost(const QString &hostname, int count)
             strMessage += "Received from ";
             strMessage += inet_ntoa( ReplyAddr );
             strMessage += "\n";
-            strMessage += "Status = " + pEchoReply->Status;
+            strMessage += "Status = " + QString::number(pEchoReply->Status);
             strMessage += "Roundtrip time = " + QString::number(pEchoReply->RoundTripTime) + " milliseconds \n";
     } else {
         strMessage += "Call to IcmpSendEcho failed.\n";
