@@ -98,10 +98,13 @@ win32 {
     iperfdata.commands = \
         $$sprintf($$QMAKE_MKDIR_CMD, $$DIST_DIRECTORY) $$escape_expand(\\n\\t) \
         $$QMAKE_COPY_DIR $$shell_quote($$shell_path($$PWD/windows/)) $$shell_quote($$shell_path($$DIST_DIRECTORY/windows/))
+CONFIG(release, debug|release) {
     release: iperfbin.commands = \
         $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Release/$${TARGET}.exe)) $$DIST_FILE
+} else {
     debug: iperfbin.commands = \
             $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Debug/$${TARGET}.exe)) $$DIST_FILE
+}
     deploy.commands = \
         windeployqt $$DIST_FILE
 
