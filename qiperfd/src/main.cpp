@@ -26,8 +26,9 @@
 #if (USE_JSONRPC==1)
 #include "myservice.h"
 #endif
+#if defined(Q_OS_LINUX)
 #include "../QCtrlSignals/src/QCtrlSignals"
-
+#endif
 //#include "../src/mylog.h"
 
 int isNotRoot()
@@ -118,13 +119,14 @@ int main(int argc, char *argv[])
 
         QCoreApplication app(argc, argv);
         // handle ctrl+c
+    #if defined(Q_OS_LINUX)
         auto handler = QCtrlSignalHandler::instance();
         QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [](){
                 qDebug() << "App about to quit!";
                 QThread::sleep(1);
             }, Qt::DirectConnection);
         handler->setAutoQuitActive(true);
-
+    #endif
         app.setOrganizationName(QIPERF_ORG);
         app.setOrganizationDomain(QIPERF_DOMAIN);
         app.setApplicationName(QIPERFD_NAME);

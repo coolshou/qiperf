@@ -6,8 +6,8 @@ CONFIG -= app_bundle
 
 include(../jcon-cpp.pri)
 include(../qiperf.pri)
-include(../QCtrlSignals/qctrlsignals.pri)
 unix {
+include(../QCtrlSignals/qctrlsignals.pri)
 #include(../sigwatch.pri)
 include(../oping.pri)
 }
