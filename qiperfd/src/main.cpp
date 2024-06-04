@@ -26,7 +26,7 @@
 #if (USE_JSONRPC==1)
 #include "myservice.h"
 #endif
-#include <QCtrlSignals>
+#include "../QCtrlSignals/src/QCtrlSignals"
 
 //#include "../src/mylog.h"
 
