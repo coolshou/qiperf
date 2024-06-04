@@ -84,7 +84,9 @@ QJsonObject MyInfo::collectNetInfo()
                 addrsObject.push_back(addrObject);
             }
             ifObject.insert("address", addrsObject);
-            netObjects.insert(interface.name(), ifObject);
+//            netObjects.insert(interface.name(), ifObject);
+            netObjects.insert(interface.humanReadableName(), ifObject);
+
         }
     }
     return netObjects;
