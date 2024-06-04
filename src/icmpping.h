@@ -2,7 +2,9 @@
 #define ICMPPING_H
 
 #include <QObject>
+#if defined(Q_OS_LINUX)
 #include <oping.h>
+#endif
 
 class IcmpPing : public QObject
 {
