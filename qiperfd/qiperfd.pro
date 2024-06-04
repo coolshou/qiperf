@@ -92,15 +92,16 @@ win32 {
 
     DISTFILES += $$PWD/../images/qiperf.icon
 
-    #DIST_DIRECTORY =  $$shell_quote($$shell_path($${ROOT_DIRECTORY}/../$${TARGET}_$${QT_ARCH}-$${VERSION}))
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/../$${TARGET}_$${QT_ARCH}))
 
     DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
     iperfdata.commands = \
         $$sprintf($$QMAKE_MKDIR_CMD, $$DIST_DIRECTORY) $$escape_expand(\\n\\t) \
         $$QMAKE_COPY_DIR $$shell_quote($$shell_path($$PWD/windows/)) $$shell_quote($$shell_path($$DIST_DIRECTORY/windows/))
-    iperfbin.commands = \
-        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../release/$${TARGET}.exe)) $$DIST_FILE
+    release: iperfbin.commands = \
+        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Release/$${TARGET}.exe)) $$DIST_FILE
+    debug: iperfbin.commands = \
+            $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Debug/$${TARGET}.exe)) $$DIST_FILE
     deploy.commands = \
         windeployqt $$DIST_FILE
 
