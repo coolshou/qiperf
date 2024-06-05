@@ -33,11 +33,11 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     loadcfg(apppath);
     //    qDebug() << "start UdpSrv" << Qt::endl;
     //
-    m_myinfo = new MyInfo(mgr_ifname);
+    m_myinfo = new MyInfo(getManagerInterface());
     connect(this, &QIperfd::setMgrIfname, m_myinfo, &MyInfo::setIfname);
     QString info = m_myinfo->collectInfo();
     // notice qiperfc info
-    m_udpsrv = new UdpSrv(QIPERFD_BPORT, mgr_ifname, m_myinfo);
+    m_udpsrv = new UdpSrv(QIPERFD_BPORT, getManagerInterface(), m_myinfo);
     connect(this, &QIperfd::setMgrIfname, m_udpsrv, &UdpSrv::setIfname);
     m_udpsrv->setSendMsg(info); // broadcast
 
@@ -263,7 +263,27 @@ QString QIperfd::getInterfaceAddr(QString ifname)
 
 QString QIperfd::getManagerInterface()
 {
-    return mgr_ifname;
+    QString ifname;
+    ifname = mgr_ifname;
+#if defined(Q_OS_WIN32)
+    ifname = getIfNameByHumanReadableName(mgr_ifname);
+#endif
+    return ifname;
+}
+
+QString QIperfd::getIfNameByHumanReadableName(QString name)
+{
+    QString ifname="";
+    QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
+    foreach (QNetworkInterface interface, list) // 遍歷每一個網路介面
+    {
+        if (name.compare(interface.humanReadableName()) == 0)
+        {
+            ifname = interface.name();
+            break;
+        }
+    }
+    return ifname;
 }
 
 int QIperfd::add(int version, QString m_cmd, QString args, uint port)

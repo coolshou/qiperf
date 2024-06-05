@@ -38,6 +38,7 @@ public:
     QStringList listInterfaces();
     QString getInterfaceAddr(QString ifname);
     QString getManagerInterface();
+    QString getIfNameByHumanReadableName(QString name);
     int add(int version,QString m_cmd,QString args, uint port);
     int addIperfServer(int version, uint port, QString bindHost="");
     int addIperfClient(int version, uint port, QString Host, QString iperfargs);
