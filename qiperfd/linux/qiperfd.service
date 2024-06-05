@@ -4,8 +4,8 @@ After=network.target
 Wants=network.target
 
 [Service]
-Type=notify
-;Type=simple
+;Type=notify ; require service sends a "READY=1" notification message via sd_notify(3)
+Type=simple
 ExecStart=/opt/qiperf/bin/qiperfd
 Restart=always
 RestartSec=3s
