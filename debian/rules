@@ -23,12 +23,13 @@ VERSION_QIPERFTRAY := $(shell sed -n -e "s/^#define QIPERFTRAY_VERSION //p" src/
 %:
 	dh $@
 
-override_dh_gencontrol:
-	dh_gencontrol -- -pqiperfd -v$(VERSION_QIPERFD) -cdebian/qiperfd.control -DPackage=qiperfd
-	dh_gencontrol -- -pqiperftray -v$(VERSION_QIPERFTRAY) -cdebian/qiperftray.control -DPackage=qiperftray
-	dh_gencontrol -- -pqiperfc -v$(VERSION_QIPERFC) -cdebian/qiperfc.control -DPackage=qiperfc
-
 override_dh_builddeb:
+	dh_gencontrol -- -pqiperfd -v$(VERSION_QIPERFD) -cdebian/qiperfd.control -DPackage=qiperfd
 	dh_builddeb -pqiperfd --filename=qiperfd_$(VERSION_QIPERFD)_$(DEB_BUILD_ARCH).deb
+
+	dh_gencontrol -- -pqiperftray -v$(VERSION_QIPERFTRAY) -cdebian/qiperftray.control -DPackage=qiperftray
 	dh_builddeb -pqiperftray --filename=qiperftray_$(VERSION_QIPERFTRAY)_$(DEB_BUILD_ARCH).deb
+
+	dh_gencontrol -- -pqiperfc -v$(VERSION_QIPERFC) -cdebian/qiperfc.control -DPackage=qiperfc
 	dh_builddeb -pqiperfc --filename=qiperfc_$(VERSION_QIPERFC)_$(DEB_BUILD_ARCH).deb
+
