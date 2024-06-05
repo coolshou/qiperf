@@ -33,7 +33,8 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     loadcfg(apppath);
     //    qDebug() << "start UdpSrv" << Qt::endl;
     //
-    m_myinfo = new MyInfo(getManagerInterface());
+//    m_myinfo = new MyInfo(getManagerInterface());
+    m_myinfo = new MyInfo(mgr_ifname);
     connect(this, &QIperfd::setMgrIfname, m_myinfo, &MyInfo::setIfname);
     QString info = m_myinfo->collectInfo();
     // notice qiperfc info
