@@ -20,6 +20,8 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     qInfo() << qApp->applicationPid() <<",cfg filename:" << cfg->fileName(); // /etc/xdg/alphanetworks/qiperfd.ini
     //SystemScope: /etc/xdg/xdg-lxqt/alphanetworks/qiperfd.conf
         //sudo =>      /etc/xdg/alphanetworks/qiperfd.conf
+        //windows: C:\ProgramData\alphanetworks\qiperfd.conf
+
     //UserScope: /home/jimmy/.config/alphanetworks/qiperfd.conf
         //sudo =>       /root/.config/alphanetworks/qiperfd.conf
 
@@ -45,11 +47,11 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     connect(m_wsserver, &WSServer::actMessage, this ,&QIperfd::onWSactMessage);
 
 #endif
-    Q_UNUSED(pserver)
-    /*
+    //Q_UNUSED(pserver)
+
     m_pserver=pserver;
 //    //TODO: why following did not work??
-
+/*
     QMetaObject::Connection rc =connect(m_pserver, &PipeServer::pipeMessage, this, &QIperfd::onPipeMessage);
     if (!rc){
         qDebug() << "connect pipeMessage fail" << Qt::endl;
@@ -186,15 +188,18 @@ void QIperfd::loadcfg(QString apppath)
     cfg->endGroup();
     cfg->sync();
 
-    listInterfaces();
+    QStringList nls = listInterfaces();
+    onLog("net interface list:" + nls.join(" ") );
     // load config setting
     cfg->beginGroup("manager");
-    mgr_ifname = cfg->value("ifname", "eth0").toString();
+    QString default_ifname = "";
+    if (!cfg->childKeys().contains("ifname")){
+        default_ifname = nls[0];
+    }
+    mgr_ifname = cfg->value("ifname", default_ifname).toString();
     mgr_port = cfg->value("port", QIPERFD_PORT).toInt();
-    //qInfo() << "mgr_ifname: " << mgr_ifname << ", mgr_port: " <<mgr_port ;
     onLog("mgr_ifname: " + mgr_ifname + ", mgr_port: " + QString::number(mgr_port));
     cfg->endGroup();
-//    setManagerInterface(mgr_ifname);
 }
 
 void QIperfd::savecfg()
@@ -206,13 +211,15 @@ void QIperfd::savecfg()
     cfg->setValue("port", mgr_port);
     cfg->endGroup();
     cfg->sync();
-    qInfo() <<qApp->applicationPid() << ",savecfg:" << cfg->status();
-    //    qDebug()<< "savecfg end" << Qt::endl;
+    qInfo() <<qApp->applicationPid() << ",savecfg:" << cfg->status() << Qt::endl;
+
 }
 
-QList<QString> QIperfd::listInterfaces()
+//QList<QString> QIperfd::listInterfaces()
+QStringList QIperfd::listInterfaces()
 {
-    QList<QString> nslist;
+    //QList<QString> nslist;
+    QStringList nslist;
 
     QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
     foreach (QNetworkInterface interface, list) // 遍歷每一個網路介面
@@ -220,7 +227,8 @@ QList<QString> QIperfd::listInterfaces()
         if ((interface.type() == QNetworkInterface::Ethernet) ||
             (interface.type() == QNetworkInterface::Wifi))
         {
-            nslist << interface.name();
+//            nslist << interface.name();
+            nslist << interface.humanReadableName(); //for windows
         }
     }
     return nslist;
@@ -365,7 +373,8 @@ bool QIperfd::isRunning(int idx)
 void QIperfd::setManagerInterface(QString interface)
 {
     mgr_ifname = interface;
-//    savecfg();
+//    qDebug() << "setManagerInterface:" << mgr_ifname << Qt::endl;
+    savecfg();
     emit setMgrIfname(interface);
 }
 

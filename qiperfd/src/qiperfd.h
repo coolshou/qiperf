@@ -34,7 +34,8 @@ public:
     void onLog(QString text);
     void loadcfg(QString apppath);
     void savecfg();
-    QList<QString> listInterfaces();
+    //QList<QString> listInterfaces();
+    QStringList listInterfaces();
     QString getInterfaceAddr(QString ifname);
     QString getManagerInterface();
     int add(int version,QString m_cmd,QString args, uint port);
