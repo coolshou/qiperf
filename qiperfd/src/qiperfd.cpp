@@ -280,6 +280,7 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
         if (name.compare(interface.humanReadableName()) == 0)
         {
             ifname = interface.name();
+            qDebug() << "getIfNameByHumanReadableName:" << ifname << " from: " <<name << Qt::endl;
             break;
         }
     }
