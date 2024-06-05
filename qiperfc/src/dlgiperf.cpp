@@ -49,7 +49,10 @@ QString DlgIperf::getJsonCfg()
         serverObj.insert("version", ui->cb_version->currentText());
         serverObj.insert("port", ui->sb_port->value());
         serverObj.insert("manager", ui->cb_mserver_ip->currentText());
-        serverObj.insert("bind", ui->cb_server_bind_ip->currentText());
+//        serverObj.insert("bind", ui->cb_server_bind_ip->currentText());
+        if (ui->chk_server_bind_ip->isChecked()){
+            serverObj.insert("bind", ui->le_target_ip->text());
+        }
         mainObj.insert("server", serverObj);
     }
     //client
@@ -57,7 +60,10 @@ QString DlgIperf::getJsonCfg()
     clientObj.insert("version", ui->cb_version->currentText());
     clientObj.insert("port", ui->sb_port->value());
     clientObj.insert("manager", ui->cb_mclient_ip->currentText());
-    clientObj.insert("bind", ui->cb_client_bind_ip->currentText());
+    if (!ui->cb_client_bind_ip->currentText().isEmpty()) {
+        //TODO: check IPv4/IPv6format
+        clientObj.insert("bind", ui->cb_client_bind_ip->currentText());
+    }
     clientObj.insert("protocal", ui->cb_protocal->currentText());
     clientObj.insert("target", ui->le_target_ip->text());
     clientObj.insert("duration", ui->sb_duration->value());
@@ -151,6 +157,8 @@ void DlgIperf::onAccepted()
 //        close = false;
         return;
     }
+    //TODO: check le_target_ip IPv4/IPv6 format
+    //TODO: check cb_client_bind_ip IPv4/IPv6 format
     if (!addr.setAddress(ui->cb_client_bind_ip->currentText())){
         QMessageBox::warning(this, tr("WARNING!!"),
                              tr("Please specify iperf client bind ip address!!"),

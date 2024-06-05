@@ -55,9 +55,9 @@ QVariant EndPointMgr::headerData(int section, Qt::Orientation orientation,
         switch (section)
         {
             case 0:
-                return QString("Manager");
+                return QString("Endpoint");
             case 1:
-                return QString("Interface");
+                return QString("Manager Interface");
             case 2:
                 return QString("Type");
             case 3:
@@ -163,12 +163,10 @@ bool EndPointMgr::add(QString id, QString data)
     } else {
         //new endpoint
         qDebug() << "EndPointMgr::add: (" << id << ") " << data << Qt::endl;
-        //EndPoint* ep = new EndPoint(id, data, this);
         EndPoint* ep = new EndPoint(id, data, rootItem);
         int ibegin = rootItem->childCount();
         int iend = rootItem->childCount()+1;
         QModelIndex midx = indexFromItem(rootItem);
-//        qDebug() << "midx:" << midx << " ,begin:" << ibegin << " ,end:" << iend  << Qt::endl;
         beginInsertRows(midx, ibegin, iend);
         rootItem->appendChild(ep);
         endInsertRows();

@@ -331,7 +331,7 @@
               <property name="checked">
                <bool>true</bool>
               </property>
-              <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,1">
+              <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0">
                <property name="spacing">
                 <number>2</number>
                </property>
@@ -374,28 +374,10 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="label_37">
+                <widget class="QCheckBox" name="chk_server_bind_ip">
                  <property name="text">
-                  <string>bind to  ip:</string>
+                  <string>bind to  target server ip</string>
                  </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QComboBox" name="cb_server_bind_ip">
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="editable">
-                  <bool>true</bool>
-                 </property>
-                 <item>
-                  <property name="text">
-                   <string>0.0.0.0</string>
-                  </property>
-                 </item>
                 </widget>
                </item>
               </layout>
@@ -425,30 +407,10 @@
                <item row="0" column="3">
                 <widget class="QLineEdit" name="le_target_ip"/>
                </item>
-               <item row="1" column="2">
-                <widget class="QLabel" name="label_32">
-                 <property name="text">
-                  <string>client bind to ip(-B):</string>
-                 </property>
-                </widget>
-               </item>
                <item row="0" column="2">
                 <widget class="QLabel" name="label_31">
                  <property name="text">
                   <string>target server ip(-c):</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="3">
-                <widget class="QComboBox" name="cb_client_bind_ip">
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="editable">
-                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -471,6 +433,26 @@
                   <size>
                    <width>16777215</width>
                    <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="editable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_32">
+                 <property name="text">
+                  <string>client bind to ip(-B):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QComboBox" name="cb_client_bind_ip">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
                   </size>
                  </property>
                  <property name="editable">
@@ -640,7 +622,7 @@
          <item row="7" column="3">
           <widget class="QComboBox" name="cb_unit_windowsize">
            <property name="currentText">
-            <string>M</string>
+            <string>K</string>
            </property>
            <item>
             <property name="text">
@@ -761,6 +743,34 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cb_version</tabstop>
+  <tabstop>sb_port</tabstop>
+  <tabstop>cb_protocal</tabstop>
+  <tabstop>gb_control_server</tabstop>
+  <tabstop>cb_mserver_ip</tabstop>
+  <tabstop>chk_server_bind_ip</tabstop>
+  <tabstop>cb_mclient_ip</tabstop>
+  <tabstop>le_target_ip</tabstop>
+  <tabstop>cb_client_bind_ip</tabstop>
+  <tabstop>sb_duration</tabstop>
+  <tabstop>sb_omit</tabstop>
+  <tabstop>sb_parallel</tabstop>
+  <tabstop>chk_reverse</tabstop>
+  <tabstop>chk_bidir</tabstop>
+  <tabstop>sb_bitrate</tabstop>
+  <tabstop>cb_unit_bitrate</tabstop>
+  <tabstop>sb_windowsize</tabstop>
+  <tabstop>cb_unit_windowsize</tabstop>
+  <tabstop>sb_buffer</tabstop>
+  <tabstop>cb_unit_buffer</tabstop>
+  <tabstop>sb_dscp</tabstop>
+  <tabstop>sb_tos</tabstop>
+  <tabstop>sb_mss</tabstop>
+  <tabstop>sb_interval</tabstop>
+  <tabstop>cb_fmtreport</tabstop>
+  <tabstop>tw_iperf</tabstop>
+ </tabstops>
  <resources>
   <include location="../../qiperf.qrc"/>
  </resources>
