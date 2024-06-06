@@ -133,7 +133,7 @@ unix:!android {
     MIME.files += \
         qiperfc.xml
     MIME.path += \
-        "/usr/share/applications/"
+        "/usr/share/mime/packages/"
     DESKTOP.files += \
         qiperfc.desktop
     DESKTOP.path += \
