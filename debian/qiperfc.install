@@ -1,3 +1,5 @@
 debian/tmp/usr/share/applications/qiperfc.desktop  /usr/share/applications/
 images/qiperfc.png  /usr/share/pixmaps/
 debian/tmp/opt/qiperfc/bin/qiperfc /opt/qiperf/bin/
+debian/tmp/usr/share/mime/packages//qiperfc.xml /usr/share/mime/packages/
+images/qiperfc.png /usr/share/icons/

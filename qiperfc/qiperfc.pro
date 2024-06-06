@@ -134,6 +134,12 @@ unix:!android {
         qiperfc.xml
     MIME.path += \
         "/usr/share/mime/packages/"
+
+    ICONS.files += \
+        ../images/qiperf.png
+    ICONS.path += \
+        "/usr/share/icons/"
+
     DESKTOP.files += \
         qiperfc.desktop
     DESKTOP.path += \
@@ -143,5 +149,5 @@ unix:!android {
         ../images/qiperf.png
     IMAGES.path += \
         "/usr/share/pixmaps/"
-    INSTALLS += MIME DESKTOP IMAGES
+    INSTALLS += MIME ICONS DESKTOP IMAGES
 }
