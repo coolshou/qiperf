@@ -130,6 +130,10 @@ win32 {
     VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFC_VERSION\"" | awk -F\' \'  \'{print $3}\' )
 }
 unix:!android {
+    MIME.files += \
+        qiperfc.xml
+    MIME.path += \
+        "/usr/share/applications/"
     DESKTOP.files += \
         qiperfc.desktop
     DESKTOP.path += \
@@ -139,5 +143,5 @@ unix:!android {
         ../images/qiperf.png
     IMAGES.path += \
         "/usr/share/pixmaps/"
-    INSTALLS += DESKTOP IMAGES
+    INSTALLS += MIME DESKTOP IMAGES
 }

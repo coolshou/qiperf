@@ -6,7 +6,7 @@
 #define QIPERFD_NAME  "qiperfd"
 #define QIPERFTRAY_NAME  "qiperftray"
 #define QIPERF_EXT "qiperf"
-#define QIPERF_EXT_FILTER "qiperf (*.qiperf)"
+#define QIPERF_EXT_FILTER "qiperf (*.qip)"
 
 #define QIPERFD_PORT 47014
 #define QIPERFD_BPORT 47015  //broadcast
