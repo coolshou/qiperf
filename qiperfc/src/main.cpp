@@ -18,7 +18,7 @@
 static QTextStream output_ts;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    qDebug() << "myMessageOutput: " << msg << Qt::endl;
+    //qDebug() << "myMessageOutput: " << msg << Qt::endl;
     const char *file = context.file ? context.file : "";
     //    const char *function = context.function ? context.function : "";
     switch (type) {
@@ -72,6 +72,12 @@ int main(int argc, char *argv[])
     QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &main, SLOT(onQuit()));
 #endif
 
+    if (argc >=2) {
+        QFileInfo fi(argv[1]);
+        if (fi.suffix().compare(QIPERF_EXT)==0){
+            qDebug() << "TODO load: " << argv[1] ;
+        }
+    }
     main.show();
     rc = app.exec();
 

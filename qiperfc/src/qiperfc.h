@@ -42,11 +42,14 @@ public:
     ~QIperfC() override;
     void start();
     void stop();
+    bool load(QString filename); // load tp config
+    bool save(QString filename); // save tp config
 
 public slots:
     void onNewMessage(const QString msg);
     void on_Open();
     void on_Save();
+    void on_Clear();
     void on_pairAdd();
     void on_pairEdit();
     void on_pairDelete();

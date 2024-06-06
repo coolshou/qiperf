@@ -12,6 +12,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QSaveFile>
+#include <QMessageBox>
 
 #include "tpdirdelegate.h"
 #include "endpointact.h"
@@ -89,6 +90,58 @@ QIperfC::~QIperfC()
     delete ui;
 }
 
+bool QIperfC::load(QString filename)
+{
+    if (m_tpmgr->rootChildCount()>0) {
+        QMessageBox msgBox;
+        msgBox.setText("Clear data before load config");
+        msgBox.setInformativeText("Do you want to save your changes?");
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+        switch (ret) {
+          case QMessageBox::Save:
+              // Save was clicked
+              on_Save();
+              break;
+          case QMessageBox::Discard:
+              // Don't Save was clicked
+              on_Clear();
+              break;
+          case QMessageBox::Cancel:
+              // Cancel was clicked
+              return false;
+              //break;
+          default:
+              // should never be reached
+              break;
+        }
+    }
+    QFile f(filename);
+    f.open(QIODevice::ReadOnly);
+    QByteArray b = f.readAll();
+    f.close();
+    m_tpmgr->loaddata(b);
+    return true;
+
+}
+
+bool QIperfC::save(QString filename)
+{
+    //prepare throughput config data
+    if (m_tpmgr->rootChildCount()>0) {
+        QByteArray b = m_tpmgr->savedata();
+        QSaveFile file(filename);
+        file.open(QIODevice::WriteOnly);
+        file.write(b);
+        file.commit();
+        return true;
+    }else {
+        qDebug() << "NO throughput config to save" << Qt::endl;
+        return false;
+    }
+}
+
 void QIperfC::onNewMessage(const QString msg)
 {
     ui->textEdit->append(msg);
@@ -97,13 +150,24 @@ void QIperfC::onNewMessage(const QString msg)
 void QIperfC::on_Open()
 {
     //TODO: load test config file
+    QString fileName = QFileDialog::getOpenFileName(this,
+             tr("Open QIperf file"),
+            QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
+            tr(QIPERF_EXT_FILTER));
+    QFileInfo fi(fileName);
+    QString ext = fi.suffix();
+    if (ext.compare(QIPERF_EXT)!=0){
+        qDebug() << "Not support file format: " << fileName;
+        return;
+    }
+    load(fileName);
 }
 
 void QIperfC::on_Save()
 {
     //TODO: save test config file
     QString fileName = QFileDialog::getSaveFileName(this,
-             tr("Open QIperf File"),
+             tr("Save QIperf "),
             QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
             tr(QIPERF_EXT_FILTER));
     //TODO: zip/tar file to save all data include throughput result...
@@ -114,16 +178,14 @@ void QIperfC::on_Save()
         fileName = fi.path() + fi.baseName() + "."+ QIPERF_EXT;
     }
     qDebug() << "save file: " << fileName << Qt::endl;
+    save(fileName);
 
-    //prepare throughput config data
+}
+
+void QIperfC::on_Clear()
+{
     if (m_tpmgr->rootChildCount()>0) {
-        QByteArray b = m_tpmgr->savedata();
-        QSaveFile file(fileName);
-        file.open(QIODevice::WriteOnly);
-        file.write(b);
-        file.commit();
-    }else {
-        qDebug() << "NO throughput config to save" << Qt::endl;
+        m_tpmgr->clear();
     }
 }
 
@@ -161,10 +223,7 @@ void QIperfC::onStart()
     if (m_tpmgr->rootChildCount()>0) {
         updateRunStatus(true);
         //start test
-    //    m_tpmgr->start();
-//        qDebug() << "ChildCount: " << m_tpmgr->rootChildCount() << Qt::endl;
         QList<TP *> tps = m_tpmgr->getChilds();
-//        TP *tp;
         QString s;
         foreach (TP *tp, tps) {
             //RPC to control all server endpoint (iperf server)
@@ -189,7 +248,6 @@ void QIperfC::onStart()
             }
         }
         qint64 rs=0;
-//        QString key;
         //Start server
         for (auto key: m_wss.keys()){
             rs = m_wss[key]->sendText("Start");
@@ -268,7 +326,7 @@ void QIperfC::onStart()
 #endif
         //TODO: wait all test done!!
 
-        //TODO: check all test down!!
+        //TODO: check all test done!!
 
     } else {
         QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");

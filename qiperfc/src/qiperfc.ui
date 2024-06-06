@@ -254,6 +254,8 @@
    <addaction name="actionEdit"/>
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
+   <addaction name="actionSwap"/>
+   <addaction name="separator"/>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
   </widget>
@@ -414,6 +416,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionSwap">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/pair-swap</normaloff>:/pair-swap</iconset>
+   </property>
+   <property name="text">
+    <string>Swap</string>
+   </property>
+   <property name="toolTip">
+    <string>Swap Traffic direction</string>
    </property>
   </action>
  </widget>

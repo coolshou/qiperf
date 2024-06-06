@@ -27,6 +27,8 @@ public:
     QList<TP*> getChilds();
     bool removeRows(int position, int rows, const QModelIndex &parent) override;
     QByteArray savedata();
+    bool loaddata(QByteArray data);
+    void clear();
 private:
 //    TP *itemFromIndex(const QModelIndex &index) const;
     TP *getItem(const QModelIndex& index) const;
