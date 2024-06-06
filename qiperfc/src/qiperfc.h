@@ -53,6 +53,7 @@ public slots:
     void on_pairAdd();
     void on_pairEdit();
     void on_pairDelete();
+    void onPairSwap();
     void onStart();
     void onStop();
     void on_notice(QString send_addr, QString msg);

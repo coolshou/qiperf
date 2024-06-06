@@ -419,12 +419,15 @@
    </property>
   </action>
   <action name="actionSwap">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="../../qiperf.qrc">
      <normaloff>:/pair-swap</normaloff>:/pair-swap</iconset>
    </property>
    <property name="text">
-    <string>Swap</string>
+    <string>Swap(TODO)</string>
    </property>
    <property name="toolTip">
     <string>Swap Traffic direction</string>

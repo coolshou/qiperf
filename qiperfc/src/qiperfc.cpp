@@ -216,6 +216,11 @@ void QIperfC::on_pairDelete()
     }
 }
 
+void QIperfC::onPairSwap()
+{
+    qDebug() << "TODO: on_pairSwap";
+}
+
 void QIperfC::onStart()
 {
     m_TestStartTime = QDateTime::currentDateTime();
@@ -570,6 +575,7 @@ void QIperfC::init_actions()
     connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(on_pairAdd()));
     connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(on_pairEdit()));
     connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(on_pairDelete()));
+    connect(ui->actionSwap, SIGNAL(triggered()), this, SLOT(onPairSwap()));
 
     //start/stop
     connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
@@ -664,7 +670,7 @@ void QIperfC::onTPselectionChanged(const QItemSelection &selected, const QItemSe
     }
     ui->actionDelete->setEnabled(bAct);
     ui->actionEdit->setEnabled(bAct);
-
+    ui->actionSwap->setEnabled(bAct);
 }
 
 void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
