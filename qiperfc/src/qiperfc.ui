@@ -191,7 +191,7 @@
      <x>0</x>
      <y>0</y>
      <width>984</width>
-     <height>23</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -287,7 +287,7 @@
      <normaloff>:/save</normaloff>:/save</iconset>
    </property>
    <property name="text">
-    <string>Save (TODO)</string>
+    <string>Save</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>

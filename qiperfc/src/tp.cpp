@@ -115,6 +115,11 @@ void TP::loadData(QString data)
 
 }
 
+QString TP::saveData()
+{
+    return m_jsondata;
+}
+
 int TP::getVersion()
 {
     return m_version;

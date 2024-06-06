@@ -45,6 +45,8 @@ public:
 
 public slots:
     void onNewMessage(const QString msg);
+    void on_Open();
+    void on_Save();
     void on_pairAdd();
     void on_pairEdit();
     void on_pairDelete();
@@ -108,6 +110,7 @@ private:
     TPDirDelegate *tpdrdelegate;
     QTimer dataTimer;
     QDateTime m_TestStartTime;
+    QString m_tpcfgname; //tp config file name
 
 };
 #endif // QIPERFC_H

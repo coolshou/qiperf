@@ -5,6 +5,9 @@
 #define QIPERF_ORG "alphanetworks"
 #define QIPERFD_NAME  "qiperfd"
 #define QIPERFTRAY_NAME  "qiperftray"
+#define QIPERF_EXT "qiperf"
+#define QIPERF_EXT_FILTER "qiperf (*.qiperf)"
+
 #define QIPERFD_PORT 47014
 #define QIPERFD_BPORT 47015  //broadcast
 #define QIPERFD_WSPORT 47016  //websocket port

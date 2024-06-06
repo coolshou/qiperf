@@ -9,6 +9,10 @@
 #include <QMessageBox>
 #include <QStringLiteral>
 #include <QUrl>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include <QSaveFile>
+
 #include "tpdirdelegate.h"
 #include "endpointact.h"
 #include "tp.h"
@@ -90,6 +94,39 @@ void QIperfC::onNewMessage(const QString msg)
     ui->textEdit->append(msg);
 }
 
+void QIperfC::on_Open()
+{
+    //TODO: load test config file
+}
+
+void QIperfC::on_Save()
+{
+    //TODO: save test config file
+    QString fileName = QFileDialog::getSaveFileName(this,
+             tr("Open QIperf File"),
+            QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
+            tr(QIPERF_EXT_FILTER));
+    //TODO: zip/tar file to save all data include throughput result...
+    QFileInfo fi(fileName);
+    QString ext = fi.suffix();
+    if (ext.compare(QIPERF_EXT)!=0){
+//        fileName = fileName + QIPERF_EXT
+        fileName = fi.path() + fi.baseName() + "."+ QIPERF_EXT;
+    }
+    qDebug() << "save file: " << fileName << Qt::endl;
+
+    //prepare throughput config data
+    if (m_tpmgr->rootChildCount()>0) {
+        QByteArray b = m_tpmgr->savedata();
+        QSaveFile file(fileName);
+        file.open(QIODevice::WriteOnly);
+        file.write(b);
+        file.commit();
+    }else {
+        qDebug() << "NO throughput config to save" << Qt::endl;
+    }
+}
+
 void QIperfC::on_pairAdd()
 {
     // on_pair_add
@@ -135,6 +172,7 @@ void QIperfC::onStart()
             if (!m_wss.contains(serverIP)) {
                 s = QStringLiteral("ws://%1:%2").arg(serverIP, QIPERFD_WSPORT);
 //                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrServer()).arg(QIPERFD_WSPORT);  //ssl
+                qDebug() << "server websocket url: " << s << Qt::endl;
                 m_wss[serverIP]=new WSClient(QUrl(s));
                 //tell server add iperf server
                 m_wss[serverIP]->sendText(tp->getServerArgs());
@@ -144,6 +182,7 @@ void QIperfC::onStart()
             if (!m_wsc.contains(clientIP)) {
                 s = QStringLiteral("ws://%1:%2").arg(clientIP, QIPERFD_WSPORT);
 //                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrClient()).arg(QIPERFD_WSPORT); //ssl
+                qDebug() << "client websocket url: " << s << Qt::endl;
                 m_wsc[clientIP]=new WSClient(QUrl(s));
                 //tell client add iperf client
                 m_wsc[clientIP]->sendText(tp->getClientArgs());
@@ -466,6 +505,10 @@ void QIperfC::onRPC_error(int code, const QString &message)
 void QIperfC::init_actions()
 {
     // init actions
+    // file
+    connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(on_Open()));
+    connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(on_Save()));
+    //
     connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(on_pairAdd()));
     connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(on_pairEdit()));
     connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(on_pairDelete()));

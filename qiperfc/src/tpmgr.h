@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QAbstractItemModel>
 #include <QList>
+#include <QJsonObject>
 
 #include "tp.h"
 
@@ -25,6 +26,7 @@ public:
     int rootChildCount();
     QList<TP*> getChilds();
     bool removeRows(int position, int rows, const QModelIndex &parent) override;
+    QByteArray savedata();
 private:
 //    TP *itemFromIndex(const QModelIndex &index) const;
     TP *getItem(const QModelIndex& index) const;

@@ -43,6 +43,7 @@ public:
 
     QString getID();
     void loadData(QString data);
+    QString saveData();
     int getVersion();
     QString getServer();
     QString getServerArgs();

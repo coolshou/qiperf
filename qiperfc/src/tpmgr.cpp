@@ -1,6 +1,7 @@
 #include "tpmgr.h"
 #include <QJsonDocument>
-#include <QJsonObject>
+#include <QJsonArray>
+
 
 #include "tp.h"
 
@@ -176,6 +177,24 @@ bool TPMgr::removeRows(int position, int rows, const QModelIndex &parent)
     endRemoveRows();
 
     return success;
+}
+
+QByteArray TPMgr::savedata()
+{
+    QJsonArray jsonarr;
+    //save all data in json string
+    if(this->rootChildCount() > 0){
+        for (int row = 0; row < rootItem->childCount(); ++row){
+            TP *tp = rootItem->child(row);
+            QJsonDocument jsonDoc= QJsonDocument::fromJson(tp->saveData().toUtf8());
+            QJsonObject jsonObj = jsonDoc.object();
+            jsonarr.append(jsonObj);
+        }
+    }else {
+        qDebug() << "TPMgr::savedata: No data to save" << Qt::endl;
+    }
+    QJsonDocument doc(jsonarr);
+    return doc.toJson(QJsonDocument::Compact);
 }
 
 //TP *TPMgr::itemFromIndex(const QModelIndex &index) const
