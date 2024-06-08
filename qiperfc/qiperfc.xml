@@ -3,6 +3,9 @@
   <mime-type type="application/x-qip">
     <comment xml:lang="en">qiperf config</comment>
     <generic-icon name="qiperf"/>
+    <magic priority="50">
+        <match type="string" value=".QIP" offset="0"/>
+    </magic>
     <glob pattern="*.qip"/>
   </mime-type>
 </mime-info>
