@@ -378,6 +378,9 @@
                  <property name="text">
                   <string>bind to  target server ip</string>
                  </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
                 </widget>
                </item>
               </layout>
