@@ -22,7 +22,9 @@ QString MyInfo::collectInfo()
 {
     //collect Info for use , in json format string
     /*
- { "HostName": "Test"
+ { "ACT":,
+   "Type":,
+    "HostName": "Test",
    "OS":"", ""OSVer",
    "Manager": "ifname1",
    "Net": {
@@ -40,7 +42,7 @@ QString MyInfo::collectInfo()
     QJsonObject mainObject;
     mainObject.insert("ACT", EndPointAct::Add);
     mainObject.insert("Type", getEndpointType());
-    mainObject.insert("Type", getEndpointType());
+//    mainObject.insert("Type", getEndpointType());
     mainObject.insert("HostName", QHostInfo::localHostName());
     mainObject.insert("OS", QSysInfo::prettyProductName());
     mainObject.insert("OSVer", QSysInfo::kernelVersion());

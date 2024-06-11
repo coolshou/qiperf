@@ -164,6 +164,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 
 QIperfd::~QIperfd()
 {
+    qDebug() << "~QIperfd" << Qt::endl;
 //    QString info = m_myinfo->disableInfo();
 //    m_udpsrv->setSendMsg(info);
     savecfg();
@@ -173,7 +174,7 @@ void QIperfd::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event)
     //TODO: close app check
-    qInfo() << "closeEvent";
+    qDebug() << "closeEvent" <<  Qt::endl;
     savecfg();
 }
 void QIperfd::onLog(QString text)

@@ -197,7 +197,6 @@ QByteArray TPMgr::savedata()
 
 bool TPMgr::loaddata(QByteArray data)
 {
-    qDebug() << "TODO: loaddata: " << data ;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(data);
     QJsonArray jsonarr = jsonDoc.array();
     foreach (const QJsonValue &value, jsonarr) {
@@ -206,7 +205,6 @@ bool TPMgr::loaddata(QByteArray data)
         QString strJson(doc.toJson(QJsonDocument::Compact));
         add(strJson);
     }
-
     return true;
 }
 

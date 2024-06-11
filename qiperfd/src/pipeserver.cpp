@@ -127,7 +127,7 @@ void PipeServer::on_disconnected()
 
 void PipeServer::send_MessageBack(int idx, QString message)
 {
-    qDebug() << "send_MessageBack count: " << Qt::endl;
+    qDebug() << "send_MessageBack count: " << idx << Qt::endl;
     //TODO why following will cause APP crash
     if (!m_locals->isEmpty()){
 
