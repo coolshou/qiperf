@@ -49,6 +49,7 @@ public:
     QString getServerArgs();
     QString getClient();
     QString getClientArgs();
+    QString getDirection();
     QString getMgrServer();
     QString getMgrClient();
     int getPort();

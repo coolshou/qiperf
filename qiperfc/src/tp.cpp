@@ -221,6 +221,11 @@ QString TP::getClientArgs()
 */
 }
 
+QString TP::getDirection()
+{
+    return m_direction;
+}
+
 QString TP::getMgrServer()
 {
     return m_mgrserver;

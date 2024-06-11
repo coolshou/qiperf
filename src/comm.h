@@ -23,9 +23,13 @@
 #define CMD_SET_IFNAME "SET_IFNAME"  //Get all interfaces
 #define CMD_RUNNING "RUNNING"  //get any iperf running status
 //iperf control
-#define CMD_IPERF_START  "IPERF_START"
-#define CMD_IPERF_STOP   "IPERF_STOP"
-#define CMD_IPERF_ADD "IPERF_ADD"
+#define CMD_IPERF_START  "IPERF_START" // start iperf
+#define CMD_IPERF_STOP   "IPERF_STOP"  // stop iperf
+#define CMD_IPERF_ADD    "IPERF_ADD"   // add iperf setting
+#define CMD_IPERF_REG    "IPERF_REG" // reg iperf endpoint to report throughput result
+#define CMD_IPERF_DEL    "IPERF_DEL" // del iperf setting
+#define CMD_IPERF_CLEAR    "IPERF_CLEAR" // clear all iperf setting
+
 
 enum class IPERF_VER {
     V1=0,  //1.7.0

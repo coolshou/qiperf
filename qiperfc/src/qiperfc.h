@@ -47,6 +47,7 @@ public:
 
 public slots:
     void onNewMessage(const QString msg);
+    void on_New();
     void on_Open();
     void on_Save();
     void on_Clear();
@@ -56,6 +57,7 @@ public slots:
     void onPairSwap();
     void onStart();
     void onStop();
+    void onErrorStop(int err, QString msg);
     void on_notice(QString send_addr, QString msg);
     void onQuit();
 #if (TEST_JSONRPC==1)
@@ -75,6 +77,7 @@ private:
     void initCustomPlote();
     void addRandomGraph();
     QPen newColorPen(int r, int g, int b, int width);
+    void resetError();
 
 private slots:
     void init_actions();
@@ -114,6 +117,8 @@ private:
     TPDirDelegate *tpdrdelegate;
     QTimer dataTimer;
     QDateTime m_TestStartTime;
+    int bErrorStop;
+    QString m_ErrorMSG;
     QString m_tpcfgname; //tp config file name
     QIPConfig *m_qipconfig;
 

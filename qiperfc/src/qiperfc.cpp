@@ -13,6 +13,9 @@
 #include <QStandardPaths>
 #include <QSaveFile>
 #include <QMessageBox>
+#include <QThread>
+#include <QCoreApplication>
+#include <QEventLoop>
 
 #include "tpdirdelegate.h"
 #include "endpointact.h"
@@ -30,6 +33,8 @@ QIperfC::QIperfC(QWidget *parent)
     init_actions();
     //dataTimer = QTimer();
     initCustomPlote();
+    connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
+
     //
     m_tpmgr = new TPMgr(this);
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &QIperfC::onTPDataUpdate);
@@ -122,6 +127,8 @@ bool QIperfC::load(QString filename)
         QByteArray b = m_qipconfig->getTPCfg();
         m_tpmgr->loaddata(b);
         return true;
+    }else{
+        qDebug() << "load file " << filename << " Fail!!";
     }
     return false;
 
@@ -135,10 +142,6 @@ bool QIperfC::save(QString filename)
         m_qipconfig->setTPCfg(b);
 
         m_qipconfig->saveToFile(filename);
-//        QSaveFile file(filename);
-//        file.open(QIODevice::WriteOnly);
-//        file.write(b);
-//        file.commit();
         return true;
     }else {
         qDebug() << "NO throughput config to save" << Qt::endl;
@@ -149,6 +152,12 @@ bool QIperfC::save(QString filename)
 void QIperfC::onNewMessage(const QString msg)
 {
     ui->textEdit->append(msg);
+}
+
+void QIperfC::on_New()
+{
+    //TODO: check tp config exist?
+    on_Clear();
 }
 
 void QIperfC::on_Open()
@@ -228,6 +237,7 @@ void QIperfC::onPairSwap()
 
 void QIperfC::onStart()
 {
+    resetError();
     m_TestStartTime = QDateTime::currentDateTime();
     //if (m_tpmgr->children().count()>0) {
     if (m_tpmgr->rootChildCount()>0) {
@@ -235,39 +245,90 @@ void QIperfC::onStart()
         //start test
         QList<TP *> tps = m_tpmgr->getChilds();
         QString s;
+        qint64 rs=0;
         foreach (TP *tp, tps) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
             //RPC to control all server endpoint (iperf server)
             QString serverIP = tp->getMgrServer();
             if (!m_wss.contains(serverIP)) {
-                s = QStringLiteral("ws://%1:%2").arg(serverIP, QIPERFD_WSPORT);
-//                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrServer()).arg(QIPERFD_WSPORT);  //ssl
+                s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
                 qDebug() << "server websocket url: " << s << Qt::endl;
                 m_wss[serverIP]=new WSClient(QUrl(s));
+                while (! m_wss[serverIP]->isConnected()){
+//                    qDebug() << "wait WSClient:" << s << " connected";
+                    QThread::msleep(10);
+                    QCoreApplication::processEvents(QEventLoop::AllEvents);
+                }
                 //tell server add iperf server
-                m_wss[serverIP]->sendText(tp->getServerArgs());
+                QString cmd = QString(CMD_IPERF_ADD)+":"+tp->getServerArgs();
+                rs = m_wss[serverIP]->sendText(cmd);
+                if (rs<=0){
+                    emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
+                    break;
+                }
             }
             //RPC to control all client endpoint (iperf client)
             QString clientIP = tp->getMgrClient();
             if (!m_wsc.contains(clientIP)) {
-                s = QStringLiteral("ws://%1:%2").arg(clientIP, QIPERFD_WSPORT);
-//                s = QStringLiteral("wss://%1:%2").arg(tp->getMgrClient()).arg(QIPERFD_WSPORT); //ssl
+                s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
                 qDebug() << "client websocket url: " << s << Qt::endl;
                 m_wsc[clientIP]=new WSClient(QUrl(s));
+                while (! m_wsc[clientIP]->isConnected()){
+//                    qDebug() << "wait WSClient:" << s << " connected";
+                    QThread::msleep(10);
+                    QCoreApplication::processEvents(QEventLoop::AllEvents);
+                }
                 //tell client add iperf client
-                m_wsc[clientIP]->sendText(tp->getClientArgs());
+                QString cmd = QString(CMD_IPERF_ADD)+":"+tp->getClientArgs();
+                rs = m_wsc[clientIP]->sendText(tp->getClientArgs());
+                if (rs<=0){
+                    emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
+                    break;
+                }
+            }
+            QString di = tp->getDirection();
+            if (di== QVariant::fromValue(TP::DirType::Tx).toString()){
+                m_wss[serverIP]->sendText(CMD_IPERF_REG);
+            }else if (di== QVariant::fromValue(TP::DirType::Rx).toString()){
+                m_wsc[clientIP]->sendText(CMD_IPERF_REG);
+            }else if (di== QVariant::fromValue(TP::DirType::TR).toString()){
+                qDebug()<<"TODO: bidir monitor";
+            }else {
+                emit errorStop(3, "Wrong setting of iperf direction: "+ di);
             }
         }
-        qint64 rs=0;
+        //TODO: record which should report iperf throughput value
+
+        if(bErrorStop>0){
+            return;
+        }
         //Start server
         for (auto key: m_wss.keys()){
-            rs = m_wss[key]->sendText("Start");
-            qDebug() << "rs: " << rs << " key:" << key;
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            rs = m_wss[key]->sendText(CMD_IPERF_START);
+            if (rs<=0){
+                emit errorStop(3, "Start iperf server fail:" + key);
+                qDebug() << "rs: " << rs << " key:" << key;
+            }
+        }
+        if(bErrorStop>0){
+            return;
         }
         //Start client
         for (auto key: m_wsc.keys()){
-            rs = m_wsc[key]->sendText("Start");
-            qDebug() << "rs: " << rs << " key:" << key;
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            rs = m_wsc[key]->sendText(CMD_IPERF_START);
+            if (rs<=0){
+                emit errorStop(4, "Start iperf client fail:" + key);
+                qDebug() << "rs: " << rs << " key:" << key;
+            }
         }
+        if(bErrorStop>0){
+            return;
+        }
+        //TODO: wait all test done!!
+
+        //TODO: check all test done!!
 
 #if (TEST_JSONRPC==1)
         //create RPC list for ipserf server and client
@@ -334,9 +395,7 @@ void QIperfC::onStart()
             auto rs = rpc_tp->rpc->callAsync("startAll");
         }
 #endif
-        //TODO: wait all test done!!
 
-        //TODO: check all test done!!
 
     } else {
         QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");
@@ -350,6 +409,12 @@ void QIperfC::onStop()
 //    m_tpmgr->stop();
     // check all client endpoint stop
     // force stop all client endpoint
+}
+
+void QIperfC::onErrorStop(int err, QString msg)
+{
+    bErrorStop = err;
+    m_ErrorMSG = msg;
 }
 
 void QIperfC::on_notice(QString send_addr, QString msg)
@@ -545,6 +610,12 @@ QPen QIperfC::newColorPen(int r, int g, int b, int width)
     graphPen.setWidthF(width);
     return graphPen;
 }
+
+void QIperfC::resetError()
+{
+    bErrorStop = 0;
+    m_ErrorMSG = "";
+}
 void QIperfC::realtimeDataSlot(QPrivateSignal sig)
 { //test live data
     Q_UNUSED(sig)
@@ -574,6 +645,7 @@ void QIperfC::init_actions()
 {
     // init actions
     // file
+    connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(on_New()));
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(on_Open()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(on_Save()));
     //

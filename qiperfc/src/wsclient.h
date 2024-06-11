@@ -52,6 +52,7 @@
 
 #include <QtCore/QObject>
 #include <QtWebSockets/QWebSocket>
+#include <QAbstractSocket>
 #include <QtNetwork/QSslError>
 #include <QtCore/QList>
 #include <QtCore/QString>
@@ -67,14 +68,20 @@ class WSClient : public QObject
 public:
     explicit WSClient(const QUrl &url, QObject *parent = nullptr);
     qint64 sendText(QString message);
+    bool isConnected();
 
 private Q_SLOTS:
     void onConnected();
+    void onDisconnected();
+    void onErrorOccurred(QAbstractSocket::SocketError socketError);
+    void onAboutToClose();
+    void onStateChanged(QAbstractSocket::SocketState state);
     void onTextMessageReceived(QString message);
     void onSslErrors(const QList<QSslError> &errors);
 
 private:
     QWebSocket m_webSocket;
+    QUrl m_url;
 };
 
 #endif // WSCLIENT_H

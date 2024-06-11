@@ -50,7 +50,7 @@
 #include "wsclient.h"
 #include <QtCore/QDebug>
 #include <QtWebSockets/QWebSocket>
-#include <QCoreApplication>
+
 
 QT_USE_NAMESPACE
 
@@ -59,33 +59,71 @@ WSClient::WSClient(const QUrl &url, QObject *parent) :
     QObject(parent)
 {
     connect(&m_webSocket, &QWebSocket::connected, this, &WSClient::onConnected);
+    connect(&m_webSocket, &QWebSocket::disconnected, this, &WSClient::onDisconnected);
+    //connect(&m_webSocket, &QWebSocket::errorOccurred, this, &WSClient::onErrorOccurred); // QT6.5
+    connect(&m_webSocket, &QWebSocket::aboutToClose, this, &WSClient::onAboutToClose);
+    connect(&m_webSocket, &QWebSocket::stateChanged, this, &WSClient::onStateChanged);
     connect(&m_webSocket, QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
             this, &WSClient::onSslErrors);
-    m_webSocket.open(QUrl(url));
+    qDebug() << "WSClient open websocket:" << url << Qt::endl;
+    m_url = url;
+    m_webSocket.open(m_url);
+
 }
 
 qint64 WSClient::sendText(QString message)
 {
     qint64 rc = m_webSocket.sendTextMessage(message);
-    qDebug() << "sendText:(" << rc << ")" << message;
+    if (rc <=0){
+        qDebug() << "error sendText size=" << rc << ", " << message;
+    }
     return rc;
+}
+
+bool WSClient::isConnected()
+{
+    return m_webSocket.isValid();
 }
 //! [constructor]
 
 //! [onConnected]
 void WSClient::onConnected()
 {
-    qDebug() << "WebSocket connected";
+    qDebug() << "WebSocket connected: " << m_url;
     connect(&m_webSocket, &QWebSocket::textMessageReceived,
             this, &WSClient::onTextMessageReceived);
-//    m_webSocket.sendTextMessage(QStringLiteral("Hello, world!"));
+    //    m_webSocket.sendTextMessage(QStringLiteral("Hello, world!"));
 }
 //! [onConnected]
+//!
+void WSClient::onDisconnected()
+{
+    qDebug() << "WebSocket Disconnected: " << m_url;
+}
+
+void WSClient::onErrorOccurred(QAbstractSocket::SocketError socketError)
+{
+    qDebug() << "WebSocket onErrorOccurred: " << m_url << " : " << socketError;
+}
+
+void WSClient::onAboutToClose()
+{
+    qDebug() << "WebSocket onAboutToClose";
+
+}
+
+void WSClient::onStateChanged(QAbstractSocket::SocketState state)
+{
+    qDebug() << "WebSocket onStateChanged: "  << m_url << " : " << state;
+}
+
 
 //! [onTextMessageReceived]
 void WSClient::onTextMessageReceived(QString message)
 {
-    qDebug() << "Message received:" << message;
+    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    qDebug() << "Message received:" << message << ": "<< pClient->peerAddress();
+
 //    qApp->quit();
 }
 
