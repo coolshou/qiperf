@@ -42,6 +42,7 @@ SOURCES += \
     $$PWD/../src/endpointact.cpp \
     lib/axistag.cpp \
     lib/qcustomplot.cpp \
+    src/QIPConfig.cpp \
     src/dlgiperf.cpp \
     src/endpointmgr.cpp \
     src/formendpoints.cpp \
@@ -66,6 +67,7 @@ HEADERS += \
     $$PWD/../src/endpointact.h \
     lib/axistag.h \
     lib/qcustomplot.h \
+    src/QIPConfig.h \
     src/dlgiperf.h \
     src/endpointmgr.h \
     src/formendpoints.h \

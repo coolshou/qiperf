@@ -20,7 +20,7 @@
 #include "formendpoints.h"
 #include "tpmgr.h"
 #include "tpdirdelegate.h"
-
+#include "QIPConfig.h"
 
 #if (TEST_WS==1)
 #include "wsclient.h"
@@ -115,6 +115,7 @@ private:
     QTimer dataTimer;
     QDateTime m_TestStartTime;
     QString m_tpcfgname; //tp config file name
+    QIPConfig *m_qipconfig;
 
 };
 #endif // QIPERFC_H

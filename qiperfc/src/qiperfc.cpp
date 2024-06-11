@@ -25,6 +25,7 @@ QIperfC::QIperfC(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    m_qipconfig = new QIPConfig();
     //UI actions
     init_actions();
     //dataTimer = QTimer();
@@ -117,12 +118,12 @@ bool QIperfC::load(QString filename)
               break;
         }
     }
-    QFile f(filename);
-    f.open(QIODevice::ReadOnly);
-    QByteArray b = f.readAll();
-    f.close();
-    m_tpmgr->loaddata(b);
-    return true;
+    if (m_qipconfig->loadFromFile(filename)){
+        QByteArray b = m_qipconfig->getTPCfg();
+        m_tpmgr->loaddata(b);
+        return true;
+    }
+    return false;
 
 }
 
@@ -131,10 +132,13 @@ bool QIperfC::save(QString filename)
     //prepare throughput config data
     if (m_tpmgr->rootChildCount()>0) {
         QByteArray b = m_tpmgr->savedata();
-        QSaveFile file(filename);
-        file.open(QIODevice::WriteOnly);
-        file.write(b);
-        file.commit();
+        m_qipconfig->setTPCfg(b);
+
+        m_qipconfig->saveToFile(filename);
+//        QSaveFile file(filename);
+//        file.open(QIODevice::WriteOnly);
+//        file.write(b);
+//        file.commit();
         return true;
     }else {
         qDebug() << "NO throughput config to save" << Qt::endl;
@@ -187,6 +191,7 @@ void QIperfC::on_Clear()
     if (m_tpmgr->rootChildCount()>0) {
         m_tpmgr->clear();
     }
+    // TODO: clear chart!!
 }
 
 void QIperfC::on_pairAdd()
