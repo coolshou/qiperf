@@ -3,7 +3,7 @@
 #include <QDebug>
 
 const QByteArray QIPConfig::MAGIC_VALUE = ".QIP";
-const QByteArray QIPConfig::VERSION = "1";
+const qint32 QIPConfig::VERSION = 1;
 
 QIPConfig::QIPConfig(QObject *parent):
     QObject(parent)
@@ -20,8 +20,9 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
     if (!file.open(QIODevice::ReadOnly)) {
         return false;
     }
-    QDataStream in(file.readAll());
-    file.close();
+//    QDataStream in(file.readAll());
+    QDataStream in(&file);
+//    file.close();
     // QByteArray fdata = file.readAll();
     in >> m_magic;
     in >> m_version;
@@ -34,8 +35,12 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
             qDebug() << "ERROR: Wrong format of the config file: " << filePath;
             return false;
         }
+        file.close();
         return deserialize(data);
+
     } else {
+        file.close();
+        qDebug() << "Wrong format of " << filePath;
         return false;
     }
 }
@@ -48,8 +53,11 @@ bool QIPConfig::saveToFile(const QString &filePath) const {
     if (!file.open(QIODevice::WriteOnly)) {
         return false;
     }
-
-    file.write(MAGIC_VALUE+VERSION+compressedData);
+    QDataStream out(&file);
+    out << (QByteArray)MAGIC_VALUE;
+    out << (qint32)VERSION;
+    out << (QByteArray)compressedData;
+    //file.write(MAGIC_VALUE+VERSION+compressedData);
     file.flush();
     file.close();
 
@@ -68,7 +76,7 @@ QByteArray QIPConfig::getTPCfg()
 
 void QIPConfig::setTPCfg(QByteArray tpcfg)
 {
-    m_data->tpcfg.fromUtf8(tpcfg);
+    m_data->tpcfg= QString::fromUtf8(tpcfg);
 }
 
 QByteArray QIPConfig::serialize() const {

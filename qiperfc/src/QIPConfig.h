@@ -25,13 +25,13 @@ public:
 
 private:
     static const QByteArray MAGIC_VALUE;
-    static const QByteArray VERSION;
+    static const qint32 VERSION;
 
     QByteArray serialize() const;
     bool deserialize(const QByteArray &data);
     // Configuration data
     QByteArray m_magic;
-    uint32_t m_version;
+    qint32 m_version;
     QIPConfigData *m_data; //compress zip/tar ?
 
 
