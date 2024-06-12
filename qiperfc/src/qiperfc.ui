@@ -302,7 +302,7 @@
      <normaloff>:/about</normaloff>:/about</iconset>
    </property>
    <property name="text">
-    <string>About (TODO)</string>
+    <string>About</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+/</string>

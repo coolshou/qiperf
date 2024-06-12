@@ -57,6 +57,7 @@ public slots:
     void onPairSwap();
     void onStart();
     void onStop();
+    void onAbout();
     void onErrorStop(int err, QString msg);
     void on_notice(QString send_addr, QString msg);
     void onQuit();
@@ -93,7 +94,8 @@ private slots:
     void realtimeDataSlot(QPrivateSignal sig);
     void onRPC_result(const QVariant& result);
     void onRPC_error(int code, const QString& message);
-
+    void onIperfStarted(QString ipport);
+    void onIperfStoped(QString ipport);
 private:
     Ui::MainWindow *ui;
     DlgIperf * dlgiperf;  // dialog of iperf config
@@ -102,6 +104,7 @@ private:
 #if (TEST_WS==1)
     QMap<QString, WSClient *> m_wss; // websocket client list for manager iperf server
     QMap<QString, WSClient *> m_wsc; // websocket client list for manager iperf client
+
 #endif
 #if (TEST_JSONRPC==1)
     jcon::JsonRpcWebSocketClient *rpc_client;

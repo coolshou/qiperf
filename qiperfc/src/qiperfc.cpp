@@ -20,6 +20,8 @@
 #include "tpdirdelegate.h"
 #include "endpointact.h"
 #include "tp.h"
+#include "versions.h"
+
 #include <QDebug>
 
 
@@ -239,6 +241,7 @@ void QIperfC::onStart()
 {
     resetError();
     m_TestStartTime = QDateTime::currentDateTime();
+    QString startTime = m_TestStartTime.toString("yyyy-MM-dd_hhmmss.zzz");
     //if (m_tpmgr->children().count()>0) {
     if (m_tpmgr->rootChildCount()>0) {
         updateRunStatus(true);
@@ -254,6 +257,7 @@ void QIperfC::onStart()
                 s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
                 qDebug() << "server websocket url: " << s << Qt::endl;
                 m_wss[serverIP]=new WSClient(QUrl(s));
+                connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                 while (! m_wss[serverIP]->isConnected()){
 //                    qDebug() << "wait WSClient:" << s << " connected";
                     QThread::msleep(10);
@@ -305,10 +309,10 @@ void QIperfC::onStart()
         //Start server
         for (auto key: m_wss.keys()){
             QCoreApplication::processEvents(QEventLoop::AllEvents);
-            rs = m_wss[key]->sendText(CMD_IPERF_START);
+            rs = m_wss[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
             if (rs<=0){
                 emit errorStop(3, "Start iperf server fail:" + key);
-                qDebug() << "rs: " << rs << " key:" << key;
+//                qDebug() << "rs: " << rs << " key:" << key;
             }
         }
         if(bErrorStop>0){
@@ -317,10 +321,10 @@ void QIperfC::onStart()
         //Start client
         for (auto key: m_wsc.keys()){
             QCoreApplication::processEvents(QEventLoop::AllEvents);
-            rs = m_wsc[key]->sendText(CMD_IPERF_START);
+            rs = m_wsc[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
             if (rs<=0){
                 emit errorStop(4, "Start iperf client fail:" + key);
-                qDebug() << "rs: " << rs << " key:" << key;
+//                qDebug() << "rs: " << rs << " key:" << key;
             }
         }
         if(bErrorStop>0){
@@ -329,6 +333,28 @@ void QIperfC::onStart()
         //TODO: wait all test done!!
 
         //TODO: check all test done!!
+
+        //clear all websocket
+        for (auto key: m_wss.keys()){
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            rs = m_wss[key]->sendText(CMD_IPERF_CLEAR);
+            if (rs<=0){
+                emit errorStop(4, "clear iperf server config:" + key);
+//                qDebug() << "rs: " << rs << " key:" << key;
+            }
+            m_wss.remove(key);
+        }
+        for (auto key: m_wsc.keys()){
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            rs = m_wsc[key]->sendText(CMD_IPERF_CLEAR);
+            if (rs<=0){
+                emit errorStop(4, "clear iperf client config:" + key);
+//                qDebug() << "rs: " << rs << " key:" << key;
+            }
+            m_wsc.remove(key);
+        }
+
+        onStop();
 
 #if (TEST_JSONRPC==1)
         //create RPC list for ipserf server and client
@@ -411,10 +437,18 @@ void QIperfC::onStop()
     // force stop all client endpoint
 }
 
+void QIperfC::onAbout()
+{
+    QMessageBox::about(this, "About", QString(QIPERFC_NAME)+"\n"+
+                       "Auther: Jimmy Yeh\n"+
+                       "URL: https://github.com/coolshou/qiperf");
+}
+
 void QIperfC::onErrorStop(int err, QString msg)
 {
     bErrorStop = err;
     m_ErrorMSG = msg;
+    onStop();
 }
 
 void QIperfC::on_notice(QString send_addr, QString msg)
@@ -641,6 +675,16 @@ void QIperfC::onRPC_error(int code, const QString &message)
     qDebug() << "onRPC_error: (" << code << ")" << message << Qt::endl;
 }
 
+void QIperfC::onIperfStarted(QString ipport)
+{
+    qDebug() << "onIperfStarted:" << ipport;
+}
+
+void QIperfC::onIperfStoped(QString ipport)
+{
+    qDebug() << "onIperfStoped:" << ipport;
+}
+
 void QIperfC::init_actions()
 {
     // init actions
@@ -657,6 +701,8 @@ void QIperfC::init_actions()
     //start/stop
     connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
     connect(ui->actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
+    //help
+    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
 }
 
 void QIperfC::initStatusbar()
