@@ -24,7 +24,9 @@
 #define CMD_RUNNING "RUNNING"  //get any iperf running status
 //iperf control
 #define CMD_IPERF_START  "IPERF_START" // start iperf
+#define CMD_IPERF_STARTED  "IPERF_STARTED" // iperf is running
 #define CMD_IPERF_STOP   "IPERF_STOP"  // stop iperf
+#define CMD_IPERF_STOPED   "IPERF_STOPED"  // iperf is stop
 #define CMD_IPERF_ADD    "IPERF_ADD"   // add iperf setting
 #define CMD_IPERF_REG    "IPERF_REG" // reg iperf endpoint to report throughput result
 #define CMD_IPERF_DEL    "IPERF_DEL" // del iperf setting
