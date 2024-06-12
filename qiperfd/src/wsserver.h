@@ -56,6 +56,7 @@
 #include <QtNetwork/QSslError>
 #include <QMap>
 #include <QWebSocket>
+#include <QWebSocketProtocol>
 #include <QList>
 
 QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
@@ -70,6 +71,8 @@ public:
     QList<QString> getClients(); //return current connected client list
     void sendTextMessage(QString msg, QString target=nullptr); // send message to client
 
+public slots:
+    void sendTextResult(QString msg);
 signals:
     void actMessage(QString msg);
 
@@ -79,6 +82,7 @@ private Q_SLOTS:
     void processBinaryMessage(QByteArray message);
     void socketDisconnected();
     void onSslErrors(const QList<QSslError> &errors);
+    void onServerError(QWebSocketProtocol::CloseCode closeCode);
 
 private:
     QWebSocketServer *m_pWebSocketServer;

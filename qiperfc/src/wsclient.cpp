@@ -50,6 +50,7 @@
 #include "wsclient.h"
 #include <QtCore/QDebug>
 #include <QtWebSockets/QWebSocket>
+#include "comm.h"
 
 
 QT_USE_NAMESPACE
@@ -123,6 +124,12 @@ void WSClient::onTextMessageReceived(QString message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     qDebug() << "Message received:" << message << ": "<< pClient->peerAddress();
+    if (message.startsWith(CMD_IPERF_STARTED)){
+//        emit iperfStarted();
+    }
+    if (message.startsWith(CMD_IPERF_STOPED)){
+//        emit iperfStoped();
+    }
 
 //    qApp->quit();
 }

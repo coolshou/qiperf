@@ -93,6 +93,7 @@ WSServer::WSServer(quint16 port, QObject *parent) :
                 this, &WSServer::onNewConnection);
         connect(m_pWebSocketServer, &QWebSocketServer::sslErrors,
                 this, &WSServer::onSslErrors);
+        connect(m_pWebSocketServer, &QWebSocketServer::serverError, this, &WSServer::onServerError);
     }
 }
 //! [constructor]
@@ -134,8 +135,7 @@ void WSServer::onNewConnection()
     qInfo() << "Client  " << sfrom << " connected";
     if (!m_clients.contains(sfrom)) {
         connect(pSocket, &QWebSocket::textMessageReceived, this, &WSServer::processTextMessage);
-        connect(pSocket, &QWebSocket::binaryMessageReceived,
-                this, &WSServer::processBinaryMessage);
+        connect(pSocket, &QWebSocket::binaryMessageReceived, this, &WSServer::processBinaryMessage);
         connect(pSocket, &QWebSocket::disconnected, this, &WSServer::socketDisconnected);
         m_clients[sfrom] =  pSocket;
     }
@@ -150,6 +150,7 @@ void WSServer::processTextMessage(QString message)
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     emit actMessage(message);
 
+    //TODO: response msg back
     if (pClient)
     {
         pClient->sendTextMessage(message);
@@ -184,9 +185,21 @@ void WSServer::socketDisconnected()
         pClient->deleteLater();
     }
 }
+//! [socketDisconnected]
 
 void WSServer::onSslErrors(const QList<QSslError> &errors)
 {
     qDebug() << "Ssl errors occurred" << errors << Qt::endl;
 }
-//! [socketDisconnected]
+
+void WSServer::onServerError(QWebSocketProtocol::CloseCode closeCode)
+{
+    qDebug() << "Server Error occurred:" << closeCode << Qt::endl;
+}
+
+void WSServer::sendTextResult(QString msg)
+{
+    //send Test back to client
+    sendTextMessage(msg);
+}
+

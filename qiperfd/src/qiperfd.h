@@ -42,10 +42,11 @@ public:
     int add(int version,QString m_cmd,QString args, uint port);
     int addIperfServer(int version, uint port, QString bindHost="");
     int addIperfClient(int version, uint port, QString Host, QString iperfargs);
-    void start(int idx); //TODO: start idx of iperf
+    void start(int idx); // start idx of iperf
     void startAll(); // start all of iperfs
-    void stop(int idx);  //TODO: stop idx of iperfs
-    void stopAll();  //TODO: stop all iperfs
+    void stop(int idx);  // stop idx of iperfs
+    void stopAll();  // stop all iperfs
+    void clear(); //clear all iperf setting
     bool isRunning(int idx); //check if iperf is running
 
 public slots:
@@ -59,6 +60,8 @@ public slots:
     void onQuit();
 signals:
     void setMgrIfname(QString interface);
+    void iperfStarted(QString bindkey); // iperf thrad started
+
 protected:
     void closeEvent(QCloseEvent *event);
 private slots:

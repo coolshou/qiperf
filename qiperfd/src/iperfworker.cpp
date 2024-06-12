@@ -10,7 +10,8 @@
 #include <QDebug>
 #include "../src/comm.h"
 
-IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg, uint port, QObject *parent)
+IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
+                         uint port, QString bindaddr, QObject *parent)
     : QObject{parent}
 {
     m_idx = idx;
@@ -24,6 +25,7 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg, uint po
         m_servermode=true;
     }
     m_port = port;
+    m_bindaddr = bindaddr;
     m_arguments.append("-p");
     m_arguments.append(QString::number(m_port));
     if (m_version>=static_cast<int>(IPERF_VER::V3)){
@@ -91,6 +93,11 @@ void IperfWorker::setStop()
     }
 //    emit log("setStop");
     emit finished(m_idx, 0, QProcess::NormalExit);
+}
+
+QString IperfWorker::getBindKey()
+{
+    return m_bindaddr+":"+m_port;
 }
 
 void IperfWorker::onStarted()

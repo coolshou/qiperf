@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 #include <QNetworkInterface>
 #include <QDir>
+#include <QEventLoop>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
@@ -46,7 +47,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     //
     m_wsserver = new WSServer(QIPERFD_WSPORT); // websocket listen
     connect(m_wsserver, &WSServer::actMessage, this ,&QIperfd::onWSactMessage);
-
+    connect(this, &QIperfd::iperfStarted, m_wsserver, &WSServer::sendTextResult);
 #endif
     //Q_UNUSED(pserver)
 
@@ -232,6 +233,7 @@ QStringList QIperfd::listInterfaces()
 //            nslist << interface.name();
             nslist << interface.humanReadableName(); //for windows
         }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     return nslist;
 }
@@ -259,6 +261,7 @@ QString QIperfd::getInterfaceAddr(QString ifname)
                 break;
             }
         }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     return tmp;
 }
@@ -285,6 +288,7 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
             qDebug() << "getIfNameByHumanReadableName:" << ifname << " from: " <<name << Qt::endl;
             break;
         }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     return ifname;
 }
@@ -357,15 +361,17 @@ void QIperfd::start(int idx)
     QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
     qDebug() << "run thread id:" << id << Qt::endl;
     th->start();
-
+    emit iperfStarted(QString(CMD_IPERF_STARTED)+":"
+                      + m_iperfworkers.value(idx)->getBindKey());
 }
 void QIperfd::startAll()
 {
-    m_starttime = QDateTime().currentDateTime();
+//    m_starttime = QDateTime().currentDateTime();
     // start all thread
     for (int i = 0; i < m_threads.count(); ++i)
     {
         start(i);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
 void QIperfd::stop(int idx)
@@ -382,6 +388,21 @@ void QIperfd::stopAll()
     for (int i = 0; i < m_iperfworkers.count(); ++i)
     {
         stop(i);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+}
+
+void QIperfd::clear()
+{
+    for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end();)
+    {
+        m_iperfworkers.erase(it);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    for (auto it = m_threads.begin(); it != m_threads.end();)
+    {
+        m_threads.erase(it);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
 
@@ -403,8 +424,7 @@ void QIperfd::setManagerInterface(QString interface)
 
 void QIperfd::onPipeMessage(int idx, const QString msg)
 {
-//    qInfo() << "(" << idx <<")onNewMessage: = " << msg;
-    onLog("(" + QString(idx) + ")onPipeMessage: = " + msg);
+//    onLog("(" + QString(idx) + ")onPipeMessage: = " + msg);
     if (QString::compare(msg, CMD_OK, Qt::CaseInsensitive) == 0)
     {
         return;
@@ -427,7 +447,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         status.insert(CMD_RUNNING, QString::number(m_iperfworkers.count()));
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
         QString backmsg = jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str();
-        qDebug() << "send status (" << idx << "): " << backmsg  << Qt::endl;
+//        qDebug() << "send status (" << idx << "): " << backmsg  << Qt::endl;
         m_pserver->send_MessageBack(idx, backmsg);
     }
     else if (QString::compare(msg, CMD_IFNAMES, Qt::CaseInsensitive) == 0)
@@ -442,7 +462,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         status.insert("ifname", mgr_ifname); // current manager ifname
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
         QString backmsg = jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str();
-        qDebug() << "send ifnames: (" << idx << "): " << backmsg  << Qt::endl;
+//        qDebug() << "send ifnames: (" << idx << "): " << backmsg  << Qt::endl;
         m_pserver->send_MessageBack(idx, backmsg);
     }
     else
@@ -556,6 +576,32 @@ void QIperfd::onWSactMessage(QString msg)
 {
     //handle act message from websocket
     // expect in json format
-    onLog("TODO: onWSactMessage:" + msg);
 
+    if (msg.startsWith(CMD_IPERF_ADD)){
+        QJsonParseError error;
+        msg = msg.replace(0, QString(QString(CMD_IPERF_ADD)+":").length());
+        QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
+        if (error.error == QJsonParseError::NoError){
+            QVariantMap result = doc.toVariant().toMap();
+            //onLog("onWSactMessage: CMD_IPERF_ADD: " + QVariantList{QVariant(result)});
+            qDebug() << CMD_IPERF_ADD << ": " << result;
+
+        }else{
+            onLog("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + msg.toUtf8());
+        }
+    }else if (msg.startsWith(CMD_IPERF_DEL)){
+        onLog("TODO: onWSactMessage: CMD_IPERF_DEL:" + msg);
+    }else if (msg.startsWith(CMD_IPERF_REG)){
+        onLog("TODO: onWSactMessage: CMD_IPERF_REG:" + msg);
+    }else if (msg.startsWith(CMD_IPERF_CLEAR)){
+        clear();
+    }else if (msg.startsWith(CMD_IPERF_START)){
+        QString t = msg.remove(0, (QString(CMD_IPERF_START).length()+1));
+        qDebug() << "onWSactMessage: start time:" << t;
+        qDebug() << "onWSactMessage:system time:" << QDateTime::currentDateTime().toString("yyyy-MM-dd_hhmmss.zzz");
+        m_starttime =QDateTime::fromString(t, "yyyy-MM-dd_hhmmss.zzz");
+        startAll();
+    }else if (msg.startsWith(CMD_IPERF_STOP)){
+        stopAll();
+    }
 }

@@ -69,6 +69,9 @@ public:
     explicit WSClient(const QUrl &url, QObject *parent = nullptr);
     qint64 sendText(QString message);
     bool isConnected();
+signals:
+    void iperfStarted(QString ipport);  //ip:port
+    void iperfStoped(QString ipport);  //ip:port
 
 private Q_SLOTS:
     void onConnected();

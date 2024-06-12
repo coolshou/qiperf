@@ -10,15 +10,19 @@ class IperfWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit IperfWorker(int idx, int version, QString cmd, QString arg="-s", uint port=5201, QObject *parent = nullptr);
+    explicit IperfWorker(int idx, int version, QString cmd, QString arg="-s",
+                         uint port=5201, QString bindaddr="0.0.0.0", QObject *parent = nullptr);
     ~IperfWorker() override;
     void setStop();
+    QString getBindKey(); // return  bind_addr:port
+
 signals:
     void started(int idx);
     void finished(int idx, int exitCode, int exitStatus);
     void log(int idx, QString msg);
     void onStdout(int idx, QString text);
     void onStderr(int idx, QString text);
+
 
 public slots:
     void work();
@@ -39,6 +43,7 @@ private:
     bool m_servermode=false;
     QString m_iperfexe; // iperf exec name
     uint m_port;  //iperf port
+    QString m_bindaddr; // iperf bind address
     QString m_cmd; //iperf exec full path
     QStringList m_arguments;  //iperf args
     QProcess *m_iperf; // iperf procress
