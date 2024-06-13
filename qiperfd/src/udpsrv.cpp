@@ -24,6 +24,11 @@ UdpSrv::UdpSrv(quint16 port, QString mgr_ifname, MyInfo *myinfo, QObject *parent
     infomer->start(5*1000); // 5 sec
 }
 
+void UdpSrv::onLog(QString text)
+{
+    qInfo() << "UdpSrv:" << text;
+}
+
 void UdpSrv::setIfname(QString mgr_ifname)
 {
     m_ifname = mgr_ifname;
@@ -73,7 +78,7 @@ void UdpSrv::update_addr()
         m_baddr = addrs[1]; // broadcast address
 //        qDebug() << "m_baddr:" << m_baddr.toString() << Qt::endl;
 //        if (!(socket->ConnectedState == QAbstractSocket::UnconnectedState)) {
-            qInfo() << "update_addr: m_addr:" << m_addr.toString();
+            onLog("update_addr: m_addr:" + m_addr.toString());
             socket->bind(m_addr); // now interface
 //        }
     }

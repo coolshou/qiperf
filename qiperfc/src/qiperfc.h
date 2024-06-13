@@ -69,6 +69,8 @@ public slots:
 
 signals:
     void updateEndpointNum(int n);
+    void updateStarttime(QString stime);
+    void updateStatus(QString msg);
     void errorStop(int err, QString msg); // signal when test error
     void testStarted(); // signal when test started
     void testStoped(int err); // signal when test stoped, 0: no error
@@ -83,6 +85,8 @@ private:
 private slots:
     void init_actions();
     void initStatusbar();
+    void onUpdateStarttime(QString stime);
+    void onUpdateStatus(QString msg);
     void on_pb_status_clicked();
     void on_pb_add_server_clicked();
     void on_pb_start_clicked();
@@ -98,6 +102,7 @@ private slots:
     void onIperfStoped(QString ipport);
 private:
     Ui::MainWindow *ui;
+
     DlgIperf * dlgiperf;  // dialog of iperf config
     FormEndPoints * formEndpoits;
     PipeClient *pclient;
@@ -115,12 +120,15 @@ private:
 //    QChartView *m_tpchart;
 //    TPChart *m_tpchart;
     EndPointMgr *m_endpointmgr;
+    QLabel *m_start_label;
+    QLabel *m_status_label;
     QLabel *m_endpoint_label;
     TPMgr *m_tpmgr;
     TPDirDelegate *tpdrdelegate;
     QTimer dataTimer;
     QDateTime m_TestStartTime;
     int bErrorStop;
+    int iTimeout; // default wait websocket timeout 10
     QString m_ErrorMSG;
     QString m_tpcfgname; //tp config file name
     QIPConfig *m_qipconfig;

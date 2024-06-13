@@ -119,6 +119,7 @@ bool TPMgr::add(QString data)
 {
     //json data
     int idx = rootItem->childCount();
+    qDebug()<< "TPMgr::add:" << idx;
     beginInsertRows(QModelIndex(), idx, idx);
     TP *tp = new TP(QString::number(idx), data, rootItem);
     rootItem->appendChild(tp);
@@ -208,13 +209,12 @@ bool TPMgr::loaddata(QByteArray data)
     return true;
 }
 
-void TPMgr::clear()
+void TPMgr::reset()
 {
+
     beginResetModel();
-
-    qDebug() << "clear: " << this->rootItem->childCount();
-
-
+    m_tps.clear();
+    this->rootItem = new TP(("Root"), ("Root"));
     endResetModel();
 }
 

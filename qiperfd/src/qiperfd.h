@@ -39,7 +39,10 @@ public:
     QString getInterfaceAddr(QString ifname);
     QString getManagerInterface();
     QString getIfNameByHumanReadableName(QString name);
-    int add(int version,QString m_cmd,QString args, uint port);
+    int add(int version,QString m_cmd,QString args, uint port, QString bndaddr="0.0.0.0");
+    int add(QVariantMap jsondata);
+    QString toIperf3args(QVariantMap jsondata);
+    QString toIperf2args(QVariantMap jsondata);
     int addIperfServer(int version, uint port, QString bindHost="");
     int addIperfClient(int version, uint port, QString Host, QString iperfargs);
     void start(int idx); // start idx of iperf

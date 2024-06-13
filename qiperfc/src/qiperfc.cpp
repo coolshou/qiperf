@@ -30,13 +30,14 @@ QIperfC::QIperfC(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    initStatusbar();
     m_qipconfig = new QIPConfig();
     //UI actions
     init_actions();
     //dataTimer = QTimer();
     initCustomPlote();
     connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
-
+    iTimeout = 10*100;
     //
     m_tpmgr = new TPMgr(this);
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &QIperfC::onTPDataUpdate);
@@ -90,7 +91,7 @@ QIperfC::QIperfC(QWidget *parent)
 //    }
 
 #endif
-    initStatusbar();
+
 }
 
 QIperfC::~QIperfC()
@@ -200,7 +201,9 @@ void QIperfC::on_Save()
 void QIperfC::on_Clear()
 {
     if (m_tpmgr->rootChildCount()>0) {
-        m_tpmgr->clear();
+        m_tpmgr->reset();
+    }else{
+        qDebug() << "on_Clear No child";
     }
     // TODO: clear chart!!
 }
@@ -234,7 +237,18 @@ void QIperfC::on_pairDelete()
 
 void QIperfC::onPairSwap()
 {
-    qDebug() << "TODO: on_pairSwap";
+    QModelIndexList mls= ui->tv_throughput->selectionModel()->selectedRows();
+    foreach (QModelIndex midx, mls) {
+        TP *tp= m_tpmgr->getItem(midx);
+        // TODO: swap Direction
+        qDebug() << "tp->data:" << tp->data(0) << "dir:"<< tp->getDirection();
+        if (tp->getDirection().contains("Tx")){
+            tp->setDirection(TP::DirType::Rx);
+        }
+        if (tp->getDirection().contains("Rx")){
+            tp->setDirection(TP::DirType::Tx);
+        }
+    }
 }
 
 void QIperfC::onStart()
@@ -242,6 +256,7 @@ void QIperfC::onStart()
     resetError();
     m_TestStartTime = QDateTime::currentDateTime();
     QString startTime = m_TestStartTime.toString("yyyy-MM-dd_hhmmss.zzz");
+    emit updateStarttime(startTime);
     //if (m_tpmgr->children().count()>0) {
     if (m_tpmgr->rootChildCount()>0) {
         updateRunStatus(true);
@@ -249,19 +264,32 @@ void QIperfC::onStart()
         QList<TP *> tps = m_tpmgr->getChilds();
         QString s;
         qint64 rs=0;
+        int maxtestduration=0;
+        int iwait=0;
+        int itimeout;
         foreach (TP *tp, tps) {
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             //RPC to control all server endpoint (iperf server)
+            iwait = tp->getWaitTime();
+            if (iwait> maxtestduration){
+                maxtestduration = iwait;
+            }
             QString serverIP = tp->getMgrServer();
             if (!m_wss.contains(serverIP)) {
                 s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
                 qDebug() << "server websocket url: " << s << Qt::endl;
                 m_wss[serverIP]=new WSClient(QUrl(s));
                 connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
-                while (! m_wss[serverIP]->isConnected()){
+                itimeout = iTimeout;
+                while (! m_wss[serverIP]->isConnected() && itimeout>0){
 //                    qDebug() << "wait WSClient:" << s << " connected";
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
+                    itimeout--;
+                }
+                if (itimeout<=0){
+                    emit errorStop(1,"Wait connect to " +s+ " timeout");
+                    break;
                 }
                 //tell server add iperf server
                 QString cmd = QString(CMD_IPERF_ADD)+":"+tp->getServerArgs();
@@ -277,14 +305,19 @@ void QIperfC::onStart()
                 s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
                 qDebug() << "client websocket url: " << s << Qt::endl;
                 m_wsc[clientIP]=new WSClient(QUrl(s));
-                while (! m_wsc[clientIP]->isConnected()){
+                itimeout = iTimeout;
+                while (! m_wsc[clientIP]->isConnected()&& itimeout>0){
 //                    qDebug() << "wait WSClient:" << s << " connected";
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                 }
+                if (itimeout<=0){
+                    emit errorStop(1,"Wait connect to " +s+ "timeout");
+                    break;
+                }
                 //tell client add iperf client
                 QString cmd = QString(CMD_IPERF_ADD)+":"+tp->getClientArgs();
-                rs = m_wsc[clientIP]->sendText(tp->getClientArgs());
+                rs = m_wsc[clientIP]->sendText(cmd);
                 if (rs<=0){
                     emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
                     break;
@@ -312,7 +345,7 @@ void QIperfC::onStart()
             rs = m_wss[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
             if (rs<=0){
                 emit errorStop(3, "Start iperf server fail:" + key);
-//                qDebug() << "rs: " << rs << " key:" << key;
+                break;
             }
         }
         if(bErrorStop>0){
@@ -324,14 +357,19 @@ void QIperfC::onStart()
             rs = m_wsc[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
             if (rs<=0){
                 emit errorStop(4, "Start iperf client fail:" + key);
-//                qDebug() << "rs: " << rs << " key:" << key;
+                break;
             }
         }
         if(bErrorStop>0){
             return;
         }
         //TODO: wait all test done!!
-
+        while (maxtestduration>0){
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            QThread::msleep(1000);
+            maxtestduration --;
+            emit updateStatus("Remain "+ QString::number(maxtestduration) + " sec");
+        }
         //TODO: check all test done!!
 
         //clear all websocket
@@ -448,6 +486,8 @@ void QIperfC::onErrorStop(int err, QString msg)
 {
     bErrorStop = err;
     m_ErrorMSG = msg;
+    emit updateStarttime("");
+    emit updateStatus(msg);
     onStop();
 }
 
@@ -707,6 +747,16 @@ void QIperfC::init_actions()
 
 void QIperfC::initStatusbar()
 {
+    m_start_label = new QLabel();
+    m_start_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
+    ui->statusbar->addWidget(m_start_label, 1);
+    connect(this , &QIperfC::updateStarttime, this,  &QIperfC::onUpdateStarttime);
+
+    m_status_label = new QLabel();
+    m_status_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
+    ui->statusbar->addWidget(m_status_label, 2);
+    connect(this , &QIperfC::updateStatus, this,  &QIperfC::onUpdateStatus);
+
     // statusbar of endpints
     m_endpoint_label = new QLabel(this);
 //TODO: double click
@@ -716,7 +766,17 @@ void QIperfC::initStatusbar()
 //    m_endpoint_label->setOpenExternalLinks(true);
     ui->statusbar->addPermanentWidget(m_endpoint_label);
 
-    connect(this , SIGNAL(updateEndpointNum(int)), this, SLOT(on_updateEndpointNum(int)));
+    connect(this , &QIperfC::updateEndpointNum, this, &QIperfC::on_updateEndpointNum);
+}
+
+void QIperfC::onUpdateStarttime(QString stime)
+{
+    m_start_label->setText(stime);
+}
+
+void QIperfC::onUpdateStatus(QString msg)
+{
+    m_status_label->setText(msg);
 }
 
 

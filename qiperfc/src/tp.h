@@ -52,6 +52,8 @@ public:
     QString getDirection();
     QString getMgrServer();
     QString getMgrClient();
+    int getWaitTime();
+    int setDirection(DirType direction);
     int getPort();
     void updateTimeStemp();
     QString getLastNoticeTime();
@@ -71,6 +73,8 @@ private:
     QString m_client; // client ip
     QString m_mgrclient; // manager client ip
     int m_port; //port number
+    int m_duration; //test duration in sec
+    int m_omit; //test omit time in sec
     QString m_tp; // throughput value
     QString m_comment; // comment
 

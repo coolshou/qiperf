@@ -9,16 +9,18 @@
 
 #include "qiperfd.h"
 #include "../src/comm.h"
+#include "../src/versions.h"
 
 #include <QDebug>
 
 QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     : QObject{parent}
 {
+    onLog(QString(QIPERFD_NAME) + ":" + QIPERFD_VERSION);
     // TODO: setting
     cfg = new QSettings(QSettings::IniFormat, QSettings::SystemScope,
                               QIPERF_ORG, QIPERFD_NAME);
-    qInfo() << qApp->applicationPid() <<",cfg filename:" << cfg->fileName(); // /etc/xdg/alphanetworks/qiperfd.ini
+    onLog("cfg filename:" + cfg->fileName());
     //SystemScope: /etc/xdg/xdg-lxqt/alphanetworks/qiperfd.conf
         //sudo =>      /etc/xdg/alphanetworks/qiperfd.conf
         //windows: C:\ProgramData\alphanetworks\qiperfd.conf
@@ -63,9 +65,6 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 */
     // systemtray GUI interaction interface
     // iperf control interface, accept add/del iperf setting from remote
-
-    qInfo() << qApp->applicationPid() <<",init path & files";
-
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 #if defined(Q_OS_ANDROID) || defined(Q_OS_WIN32)
     QString arch = QSysInfo::buildCpuArchitecture();
@@ -180,7 +179,7 @@ void QIperfd::closeEvent(QCloseEvent *event)
 }
 void QIperfd::onLog(QString text)
 {
-    qInfo() << qApp->applicationPid() <<", " << text;
+    qInfo() << qApp->applicationPid() <<"," << text;
 }
 
 void QIperfd::loadcfg(QString apppath)
@@ -293,7 +292,7 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
     return ifname;
 }
 
-int QIperfd::add(int version, QString m_cmd, QString args, uint port)
+int QIperfd::add(int version, QString m_cmd, QString args, uint port, QString bndaddr)
 { // add a IperfWorker to run iperf server/client
     // TODO: check host/port used?
     QThread *iperf_th = new QThread();
@@ -301,7 +300,7 @@ int QIperfd::add(int version, QString m_cmd, QString args, uint port)
     m_threads.insert(idx, iperf_th);
     //    m_threads.append(iperf_th);
     //    int idx = m_threads.count()-1;
-    IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port);
+    IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port, bndaddr);
     connect(iperfer, &IperfWorker::onStdout, this, &QIperfd::readStdOut);
     connect(iperfer, &IperfWorker::onStderr, this, &QIperfd::readStdErr);
     connect(iperfer, &IperfWorker::log, this, &QIperfd::onIperfLog);
@@ -313,6 +312,121 @@ int QIperfd::add(int version, QString m_cmd, QString args, uint port)
     //    m_iperfworkers.append(iperfer);
     m_iperfworkers.insert(idx, iperfer);
     return idx;
+}
+
+int QIperfd::add(QVariantMap jsondata)
+{
+    int ver = jsondata["version"].toInt();
+    QString cmd;
+    if (ver == static_cast<int>(IPERF_VER::V3)){
+        cmd = m_iperfexe3;
+    }else if (ver==static_cast<int>(IPERF_VER::V2)){
+        cmd = m_iperfexe2;
+    }else{
+        qDebug() << "Not support Iperf version:" << ver << Qt::endl;
+        return -1;
+    }
+    uint port = jsondata["port"].toUInt();
+    QString binaddr = jsondata["bind"].toString();
+    //conver json data format to iperf args
+    QString args;
+    if (ver == static_cast<int>(IPERF_VER::V3)){
+        args = toIperf3args(jsondata);
+    }else if (ver==static_cast<int>(IPERF_VER::V2)){
+        qDebug() << "TODO convert json format to Iperf2 args";
+    }else {
+        qDebug() << "Not support Iperf version:" << ver;
+        return -1;
+    }
+//    QString args;
+//    foreach (QVariant arg, iperf_args["cmd_args"].toList())
+//    {
+//        onLog("arg: " + arg.toString());
+//        args = " " + arg.toString();
+//    }
+//    onLog("add iperf: " + args);
+    return add(ver, cmd, args, port, binaddr);
+}
+
+QString QIperfd::toIperf3args(QVariantMap jsondata)
+{
+    QString args;
+    bool bServer = jsondata["server"].toBool();
+    if (bServer){
+        args = args + " -s ";
+    }
+    uint port = jsondata["port"].toUInt();
+    if (port>0){
+        args = args + " -p " + QString::number(port);
+    }
+    QString target = jsondata["target"].toString();
+    if (!target.isEmpty()){
+        args = args + " -c " + target;
+    }
+    QString bindaddr = jsondata["bind"].toString();
+    if (!bindaddr.isEmpty()){
+        args = args + " --bind " + bindaddr;
+    }
+    bool bidir = jsondata["bidir"].toBool();
+    if (bidir){
+        args = args + " --bidir";
+    }
+    bool reverse = jsondata["reverse"].toBool();
+    if (reverse){
+        args = args + " -R";
+    }
+    uint duration = jsondata["duration"].toUInt();
+    if (duration>0){
+        args = args + " -t " + QString::number(duration);
+    }
+    uint interval = jsondata["interval"].toUInt();
+    if (interval>0){
+        args = args + " -i " + QString::number(interval);
+    }
+    uint omit = jsondata["omit"].toUInt();
+    if (omit>0){
+        args = args + " -O " + QString::number(omit);
+    }
+    uint parallel = jsondata["parallel"].toUInt();
+    if (parallel>1){
+        args = args + " -P " + QString::number(parallel);
+    }
+    QString protocal = jsondata["protocal"].toString();
+    if (protocal.contains("UDP")){
+        args = args + " -u ";
+    }
+    uint windowsize = jsondata["windowsize"].toUInt();
+    if (windowsize>0){
+        QString unit_windowsize = jsondata["unit_windowsize"].toString();
+        args = args + " -w " +QString::number(windowsize)+ unit_windowsize;
+    }
+    uint bitrate = jsondata["bitrate"].toUInt();
+    if (bitrate>0){
+        QString unit_bitrate = jsondata["unit_bitrate"].toString();
+        args = args + " -b " +QString::number(bitrate)+ unit_bitrate;
+    }
+    uint buffer = jsondata["buffer"].toUInt();
+    if (buffer>0){
+        QString unit_buffer = jsondata["unit_buffer"].toString();
+        args = args + " -l " +QString::number(buffer)+ unit_buffer;
+    }
+    int dscp = jsondata["dscp"].toUInt();
+    if ((dscp>=0)&&(dscp<=64)){
+        args = args + " --dscp " +QString::number(dscp);
+    }
+    uint mss = jsondata["mss"].toUInt();
+    if (mss>0){
+        args = args + " -M " +QString::number(mss);
+    }
+    int tos = jsondata["tos"].toUInt();
+    if ((tos>=0)&&(tos<=255)){
+        args = args + " --tos " +QString::number(tos);
+    }
+    QString fmtreport = jsondata["fmtreport"].toString();
+    if (!fmtreport.isEmpty()){
+        args = args + " -f " + fmtreport;
+    }
+    return args;
 }
 
 int QIperfd::addIperfServer(int version, uint port, QString bindHost)
@@ -334,7 +448,7 @@ int QIperfd::addIperfServer(int version, uint port, QString bindHost)
         args.append("--bind");
         args.append(bindHost);
     }
-    return add(version, cmd, args, port);
+    return add(version, cmd, args, port, bindHost);
 }
 
 int QIperfd::addIperfClient(int version, uint port, QString Host, QString iperfargs)
@@ -394,15 +508,19 @@ void QIperfd::stopAll()
 
 void QIperfd::clear()
 {
-    for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end();)
-    {
-        m_iperfworkers.erase(it);
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    //qDebug() << __FILE__ << __LINE__ ;
+
+    if (!m_iperfworkers.isEmpty()){
+        for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end();) {
+            m_iperfworkers.erase(it);
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+        }
     }
-    for (auto it = m_threads.begin(); it != m_threads.end();)
-    {
-        m_threads.erase(it);
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    if (!m_threads.isEmpty()){
+        for (auto it = m_threads.begin(); it != m_threads.end();) {
+            m_threads.erase(it);
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+        }
     }
 }
 
@@ -482,15 +600,14 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
             }
             else if (QString::compare(act, CMD_IPERF_ADD, Qt::CaseInsensitive) == 0)
             {
+                //iperf_args is in iperf native args format
                 QVariantMap iperf_args = result["iperf"].toMap();
+//                add(result["iperf"].toMap());
                 int ver = iperf_args["version"].toInt();
                 QString cmd;
-                if (ver == static_cast<int>(IPERF_VER::V3))
-                {
+                if (ver == static_cast<int>(IPERF_VER::V3)) {
                     cmd = m_iperfexe3;
-                }
-                else
-                {
+                } else {
                     cmd = m_iperfexe2;
                 }
                 uint port = iperf_args["port"].toUInt();
@@ -576,16 +693,12 @@ void QIperfd::onWSactMessage(QString msg)
 {
     //handle act message from websocket
     // expect in json format
-
     if (msg.startsWith(CMD_IPERF_ADD)){
         QJsonParseError error;
-        msg = msg.replace(0, QString(QString(CMD_IPERF_ADD)+":").length());
+        msg = msg.remove(0, QString(QString(CMD_IPERF_ADD)+":").length());
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
-            QVariantMap result = doc.toVariant().toMap();
-            //onLog("onWSactMessage: CMD_IPERF_ADD: " + QVariantList{QVariant(result)});
-            qDebug() << CMD_IPERF_ADD << ": " << result;
-
+            add(doc.toVariant().toMap());
         }else{
             onLog("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + msg.toUtf8());
         }

@@ -97,7 +97,7 @@ void IperfWorker::setStop()
 
 QString IperfWorker::getBindKey()
 {
-    return m_bindaddr+":"+m_port;
+    return m_bindaddr+":"+QString::number(m_port);
 }
 
 void IperfWorker::onStarted()

@@ -202,6 +202,8 @@
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="separator"/>
+    <addaction name="actionSavePDF"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuOption">
@@ -266,7 +268,7 @@
      <normaloff>:/load</normaloff>:/load</iconset>
    </property>
    <property name="text">
-    <string>Open (TODO)</string>
+    <string>Open</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -318,9 +320,6 @@
    </property>
    <property name="toolTip">
     <string>Add Iperf pair</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+A</string>
    </property>
   </action>
   <action name="actionEdit">
@@ -437,6 +436,11 @@
   <action name="actionNew">
    <property name="text">
     <string>New</string>
+   </property>
+  </action>
+  <action name="actionSavePDF">
+   <property name="text">
+    <string>Save as PDF(TODO)</string>
    </property>
   </action>
  </widget>

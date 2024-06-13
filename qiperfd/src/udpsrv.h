@@ -12,6 +12,7 @@ class UdpSrv : public QObject
     Q_OBJECT
 public:
     explicit UdpSrv(quint16 port, QString mgr_ifname, MyInfo *myinfo,  QObject *parent = nullptr);
+    void onLog(QString text);
 
 public slots:
     void readyRead();

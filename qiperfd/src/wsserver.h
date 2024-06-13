@@ -70,7 +70,7 @@ public:
     ~WSServer() override;
     QList<QString> getClients(); //return current connected client list
     void sendTextMessage(QString msg, QString target=nullptr); // send message to client
-
+    void onLog(QString text);
 public slots:
     void sendTextResult(QString msg);
 signals:

@@ -28,14 +28,16 @@ public:
     bool removeRows(int position, int rows, const QModelIndex &parent) override;
     QByteArray savedata();
     bool loaddata(QByteArray data);
-    void clear();
-private:
-//    TP *itemFromIndex(const QModelIndex &index) const;
+    void reset();
     TP *getItem(const QModelIndex& index) const;
 
 private:
+//    TP *itemFromIndex(const QModelIndex &index) const;
+
+
+private:
     TP *rootItem;
-    QList<TP*> m_tps; //QList of tp
+    QList<TP*> m_tps; //QList of tp, data
 
 
 };

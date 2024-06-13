@@ -87,6 +87,9 @@ void TP::loadData(QString data)
     m_client = o_client["bind"].toString();
     m_mgrclient = o_client["manager"].toString();
     m_port = o_client["port"].toInt();
+    m_duration = o_client["duration"].toInt();
+    m_omit = o_client["omit"].toInt();
+
 //    QString m_mclient = o_client["manager"].toString();
 //    int dir=DirType::Tx;
     m_direction = QVariant::fromValue(DirType::Tx).toString();
@@ -112,7 +115,6 @@ void TP::loadData(QString data)
     m_itemDatas.append(""); //throughput
     m_itemDatas.append(""); //comment
 
-
 }
 
 QString TP::saveData()
@@ -136,7 +138,7 @@ QString TP::getServerArgs()
     QJsonObject jsonRoot = fulldoc.object();
 
     QJsonObject o_server = jsonRoot["server"].toObject();
-
+    o_server["server"]=true;
     QJsonDocument doc(o_server);
     QString strJson(doc.toJson(QJsonDocument::Compact));
     return strJson;
@@ -153,6 +155,7 @@ QString TP::getClientArgs()
     QJsonObject jsonRoot = fulldoc.object();
 
     QJsonObject o_client = jsonRoot["client"].toObject();
+    o_client["server"]=false;
     QJsonDocument doc(o_client);
     QString strJson(doc.toJson(QJsonDocument::Compact));
     return strJson;
@@ -234,6 +237,34 @@ QString TP::getMgrServer()
 QString TP::getMgrClient()
 {
     return m_mgrclient;
+}
+
+int TP::getWaitTime()
+{
+    //omit time + test duration
+    return m_omit + m_duration;
+}
+
+int TP::setDirection(DirType direction)
+{
+    m_direction = QVariant::fromValue(direction).toString();
+
+    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8());
+    QJsonObject jsonRoot = doc.object();
+
+    QJsonObject o_client = jsonRoot["client"].toObject();
+    if (direction == DirType::Tx){
+        o_client["bidir"]=false;
+        o_client["reverse"]=false;
+    }else if (direction == DirType::Rx){
+        o_client["bidir"]=false;
+        o_client["reverse"]=true;
+    }else {
+        o_client["bidir"]=true;
+        o_client["reverse"]=false;
+    }
+    m_jsondata =doc.toJson(QJsonDocument::Compact);
+    return 0;
 }
 
 int TP::getPort()

@@ -120,11 +120,17 @@ void WSServer::sendTextMessage(QString msg, QString target)
     }
     for(auto &t: qAsConst(ts)) {
         if (m_clients.contains(t)) {
-            qInfo() <<"TODO: send:" << msg << " to " << t << Qt::endl;
+//            qInfo() <<"TODO: send:" << msg << " to " << t << Qt::endl;
+            onLog("TODO: send:" + msg + " to " + t);
             m_clients.value(t)->sendTextMessage(msg);
         }
     }
 
+}
+
+void WSServer::onLog(QString text)
+{
+    qInfo() << "WSServer:" << text;
 }
 
 //! [onNewConnection]
@@ -132,7 +138,7 @@ void WSServer::onNewConnection()
 {
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
     QString sfrom = pSocket->peerAddress().toString();
-    qInfo() << "Client  " << sfrom << " connected";
+    onLog("Client  " + sfrom + " connected");
     if (!m_clients.contains(sfrom)) {
         connect(pSocket, &QWebSocket::textMessageReceived, this, &WSServer::processTextMessage);
         connect(pSocket, &QWebSocket::binaryMessageReceived, this, &WSServer::processBinaryMessage);
@@ -147,14 +153,14 @@ void WSServer::onNewConnection()
 void WSServer::processTextMessage(QString message)
 {
     qDebug() << "processTextMessage:" << message << Qt::endl;
-    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+//    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     emit actMessage(message);
 
     //TODO: response msg back
-    if (pClient)
-    {
-        pClient->sendTextMessage(message);
-    }
+//    if (pClient)
+//    {
+//        pClient->sendTextMessage(message);
+//    }
 }
 //! [processTextMessage]
 
@@ -173,7 +179,7 @@ void WSServer::processBinaryMessage(QByteArray message)
 //! [socketDisconnected]
 void WSServer::socketDisconnected()
 {
-    qInfo() << "Client disconnected";
+    onLog("Client disconnected");
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient)
     {
