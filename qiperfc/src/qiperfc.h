@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QPen>
 #include <QObject>
+#include <QSettings>
 
 #include "comm.h"
 #include "pipeclient.h"
@@ -76,12 +77,16 @@ signals:
     void testStarted(); // signal when test started
     void testStoped(int err); // signal when test stoped, 0: no error
 
+protected:
+     void closeEvent(QCloseEvent *event)override;
 private:
     void updateRunStatus(bool bStart);
     void initCustomPlote();
     void addRandomGraph();
     QPen newColorPen(int r, int g, int b, int width);
     void resetError();
+    void saveSettings();
+    void loadSettings();
 
 private slots:
     void init_actions();
@@ -103,7 +108,7 @@ private slots:
     void onIperfStoped(QString ipport);
 private:
     Ui::MainWindow *ui;
-
+    QSettings *m_settings;
     DlgIperf * dlgiperf;  // dialog of iperf config
     FormEndPoints * formEndpoits;
     PipeClient *pclient;

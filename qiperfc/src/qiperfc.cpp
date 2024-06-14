@@ -29,14 +29,23 @@
 QIperfC::QIperfC(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
+    QString settingfilepath =  QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    QDir d{settingfilepath};
+    if (!d.exists()){
+        d.mkpath(settingfilepath);
+    }
+    QString settingfilename = settingfilepath + "/" + QIPERFC_NAME + ".ini";
+    m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     ui->setupUi(this);
     initStatusbar();
+    loadSettings();
     m_qipconfig = new QIPConfig();
     //UI actions
     init_actions();
     //dataTimer = QTimer();
     initCustomPlote();
     connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
+
     iTimeout = 10*100;
     //
     m_tpmgr = new TPMgr(this);
@@ -96,6 +105,8 @@ QIperfC::QIperfC(QWidget *parent)
 
 QIperfC::~QIperfC()
 {
+    qDebug() << "~QIperfC";
+
     delete ui;
 }
 
@@ -561,6 +572,11 @@ void QIperfC::notificationReceived(const QString key, const QVariant value)
                      << "Key:" << key
                      << "Value:" << value << Qt::endl;
 }
+
+void QIperfC::closeEvent(QCloseEvent *event)
+{
+    saveSettings();
+}
 void QIperfC::updateRunStatus(bool bStart)
 {
     ui->actionStart->setEnabled(!bStart);
@@ -681,6 +697,30 @@ void QIperfC::resetError()
     bErrorStop = 0;
     m_ErrorMSG = "";
 }
+
+void QIperfC::saveSettings()
+{
+    m_settings->beginGroup("MainWindow");
+    m_settings->setValue("geometry", saveGeometry());
+    m_settings->setValue("windowState", saveState());
+    m_settings->sync(); // forces to write the settings to storage
+    m_settings->endGroup();
+}
+
+void QIperfC::loadSettings()
+{
+    m_settings->beginGroup("MainWindow");
+    // default to screen center
+    QRect screen = QGuiApplication::primaryScreen()->geometry();
+    int x = (screen.width()-rect().width())/2;
+    int y = (screen.height()-rect().height())/2;
+    QRect newrect = QRect(x, y, rect().width(), rect().height());
+    move(x,y);
+    restoreGeometry(m_settings->value("geometry", newrect).toByteArray());
+    restoreState(m_settings->value("windowState").toByteArray());
+    m_settings->endGroup();
+}
+
 void QIperfC::realtimeDataSlot(QPrivateSignal sig)
 { //test live data
     Q_UNUSED(sig)
