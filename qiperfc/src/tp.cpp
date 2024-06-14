@@ -200,7 +200,6 @@ int TP::getWaitTime()
 int TP::setDirection(DirType direction)
 {
     m_direction = QVariant::fromValue(direction).toString();
-    setData(TP::cols::dir, m_direction);
 
     QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8());
     QJsonObject jsonRoot = doc.object();
@@ -218,6 +217,7 @@ int TP::setDirection(DirType direction)
     jsonRoot["client"]=o_client;
     doc.setObject(jsonRoot);
     m_jsondata =doc.toJson(QJsonDocument::Compact);
+    setData(TP::cols::dir, m_direction);
 
     return 0;
 }

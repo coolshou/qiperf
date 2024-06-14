@@ -119,7 +119,6 @@ bool TPMgr::add(QString data)
 {
     //json data
     int idx = rootItem->childCount();
-    qDebug()<< "TPMgr::add:" << idx;
     beginInsertRows(QModelIndex(), idx, idx);
     TP *tp = new TP(QString::number(idx), data, rootItem);
     rootItem->appendChild(tp);
@@ -243,8 +242,6 @@ TP *TPMgr::getItem(const QModelIndex &index) const
 int TPMgr::swapDirection(QModelIndex midx)
 {
     TP *tp= getItem(midx);
-//    rootItem->findChild(tp);
-    //    qDebug() << "swapDirection tp: " << tp;
     if (tp->getDirection().contains("Tx")){
 //        qDebug() << "to Rx";
         tp->setDirection(TP::DirType::Rx);
@@ -253,9 +250,6 @@ int TPMgr::swapDirection(QModelIndex midx)
         tp->setDirection(TP::DirType::Tx);
     }
     qDebug() << "after: " << tp->data(TP::cols::dir);
-//    QModelIndex idx = indexFromItem(tp);
-//    qDebug() << "midx: " << midx << " , idx: " <<idx;
-//    rootItem->child(->getClient();
     emit dataChanged(midx,midx);
     return 0;
 }

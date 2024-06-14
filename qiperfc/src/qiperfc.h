@@ -106,6 +106,7 @@ private slots:
     void onRPC_error(int code, const QString& message);
     void onIperfStarted(QString ipport);
     void onIperfStoped(QString ipport);
+    void onDisconnected(QString serverip);
 private:
     Ui::MainWindow *ui;
     QSettings *m_settings;

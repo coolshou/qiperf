@@ -17,6 +17,14 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     : QObject{parent}
 {
     onLog(QString(QIPERFD_NAME) + ":" + QIPERFD_VERSION);
+    tmpfilepath =  QStandardPaths::writableLocation(QStandardPaths::TempLocation)+"/"+ QIPERF_NAME + "/data";
+    QDir d(tmpfilepath);
+    if (!d.exists()){
+        if(!d.mkpath(tmpfilepath)){
+            onLog("ERROR: mkdir "+ tmpfilepath+ " Fail");
+        }
+    }
+    onLog("tmpfilepath: "+ tmpfilepath);
     // TODO: setting
     cfg = new QSettings(QSettings::IniFormat, QSettings::SystemScope,
                               QIPERF_ORG, QIPERFD_NAME);
@@ -292,7 +300,8 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
     return ifname;
 }
 
-int QIperfd::add(int version, QString m_cmd, QString args, uint port, QString bndaddr)
+int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint port,
+                 QString bndaddr, QString target)
 { // add a IperfWorker to run iperf server/client
     // TODO: check host/port used?
     QThread *iperf_th = new QThread();
@@ -300,8 +309,9 @@ int QIperfd::add(int version, QString m_cmd, QString args, uint port, QString bn
     m_threads.insert(idx, iperf_th);
     //    m_threads.append(iperf_th);
     //    int idx = m_threads.count()-1;
-    IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port, bndaddr);
-    connect(iperfer, &IperfWorker::onStdout, this, &QIperfd::readStdOut);
+    IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port, bndaddr, target);
+    iperfer->setRefRow(refrow);
+//    connect(iperfer, &IperfWorker::onStdout, this, &QIperfd::readStdOut);
     connect(iperfer, &IperfWorker::onStderr, this, &QIperfd::readStdErr);
     connect(iperfer, &IperfWorker::log, this, &QIperfd::onIperfLog);
     connect(iperfer, &IperfWorker::started, this, &QIperfd::onStarted);
@@ -314,7 +324,7 @@ int QIperfd::add(int version, QString m_cmd, QString args, uint port, QString bn
     return idx;
 }
 
-int QIperfd::add(QVariantMap jsondata)
+int QIperfd::add(QString refrow, QVariantMap jsondata)
 {
     int ver = jsondata["version"].toInt();
     QString cmd;
@@ -328,6 +338,7 @@ int QIperfd::add(QVariantMap jsondata)
     }
     uint port = jsondata["port"].toUInt();
     QString binaddr = jsondata["bind"].toString();
+    QString target = jsondata["target"].toString();
     //conver json data format to iperf args
     QString args;
     if (ver == static_cast<int>(IPERF_VER::V3)){
@@ -338,14 +349,7 @@ int QIperfd::add(QVariantMap jsondata)
         qDebug() << "Not support Iperf version:" << ver;
         return -1;
     }
-//    QString args;
-//    foreach (QVariant arg, iperf_args["cmd_args"].toList())
-//    {
-//        onLog("arg: " + arg.toString());
-//        args = " " + arg.toString();
-//    }
-//    onLog("add iperf: " + args);
-    return add(ver, cmd, args, port, binaddr);
+    return add(refrow, ver, cmd, args, port, binaddr);
 }
 
 QString QIperfd::toIperf3args(QVariantMap jsondata)
@@ -435,7 +439,7 @@ QString QIperfd::toIperf3args(QVariantMap jsondata)
     return args;
 }
 
-int QIperfd::addIperfServer(int version, uint port, QString bindHost)
+int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bindHost)
 {
     qDebug() << "addIperfServer:" << bindHost << ":" << port << Qt::endl;
 
@@ -454,10 +458,10 @@ int QIperfd::addIperfServer(int version, uint port, QString bindHost)
         args.append("--bind");
         args.append(bindHost);
     }
-    return add(version, cmd, args, port, bindHost);
+    return add(refrow, version, cmd, args, port, bindHost);
 }
 
-int QIperfd::addIperfClient(int version, uint port, QString Host, QString iperfargs)
+int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs)
 {
     qDebug() << "addIperfClient:" << Host << ":" << port << Qt::endl;
     QString cmd;
@@ -471,22 +475,27 @@ int QIperfd::addIperfClient(int version, uint port, QString Host, QString iperfa
         return -1;
     }
     QString args = iperfargs;
-    return add(version, cmd, args, port);
+    return add(refrow, version, cmd, args, port);
 }
 
 void QIperfd::start(int idx)
 {
     QThread *th = m_threads.value(idx);
+    m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath+"/"+s_starttime);
     // QString id= QString( "%1" ).arg(reinterpret_cast<long>(th->currentThreadId()), 16);
-    QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
-    qDebug() << "run thread id:" << id << Qt::endl;
+//    QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
+//    qDebug() << "run thread id:" << id << Qt::endl;
     th->start();
     emit iperfStarted(QString(CMD_IPERF_STARTED)+":"
                       + m_iperfworkers.value(idx)->getBindKey());
 }
 void QIperfd::startAll()
 {
-//    m_starttime = QDateTime().currentDateTime();
+    QString tmp = tmpfilepath+"/"+s_starttime;
+    QDir d(tmp);
+    if (!d.exists()){
+        d.mkpath(tmp);
+    }
     // start all thread
     for (int i = 0; i < m_threads.count(); ++i)
     {
@@ -624,7 +633,8 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
                     args = " " + arg.toString();
                 }
                 onLog("add iperf: " + args);
-                add(ver, cmd, args, port);
+                // TODO: refrow
+                add("0", ver, cmd, args, port);
             }
             else if (QString::compare(act, CMD_IPERF_START, Qt::CaseInsensitive) == 0)
             {
@@ -652,29 +662,29 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
 
 void QIperfd::readStdOut(int idx, QString text)
 {
-    onLog("TODO: readStdOut(" + QString(idx) + "):" + text);
+    onLog("TODO: readStdOut(" + QString::number(idx) + "):" + text);
 }
 
 void QIperfd::readStdErr(int idx, QString text)
 {
-    onLog("TODO: readStdErr(" + QString(idx)+ "):" + text);
+    onLog("TODO: readStdErr(" + QString::number(idx)+ "):" + text);
 }
 
 void QIperfd::onIperfLog(int idx, QString text)
 {
-    qDebug() << "TODO: onIperfLog(" << idx << "):" << text << Qt::endl;
-    onLog("(" + QString(idx) + ")" + text + "");
+    qDebug() << "TODO: onIperfLog(" << QString::number(idx) << "):" << text << Qt::endl;
+    onLog("(" + QString::number(idx) + ")" + text + "");
 }
 
 void QIperfd::onStarted(int idx)
 {
-    onLog("TODO: onStarted(" + QString(idx) + "):");
+    onLog("TODO: onStarted(" + QString::number(idx) + "):");
     m_runstatus[idx]=1;
 }
 
 void QIperfd::onFinished(int idx, int exitCode, int exitStatus)
 {
-    onLog("TODO: onFinished(" + QString(idx) + "):" +QString(exitCode)+  ":" + QString(exitStatus));
+    onLog("TODO: onFinished(" + QString::number(idx) + "):" +QString::number(exitCode)+  ":" + QString::number(exitStatus));
     if (m_threads.contains(idx))
     {
         m_threads.remove(idx);
@@ -702,9 +712,16 @@ void QIperfd::onWSactMessage(QString msg)
     if (msg.startsWith(CMD_IPERF_ADD)){
         QJsonParseError error;
         msg = msg.remove(0, QString(QString(CMD_IPERF_ADD)+":").length());
+        qDebug() << "msg:"  << msg;
+
+        int cut = msg.indexOf(':', 0);
+        QString refrow = msg.left(cut);
+        msg = msg.right(msg.length()-cut-1);
+        qDebug() << "cut: " + QString::number(cut) + " refrow: " << refrow << " ,msg: " << msg;
+
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
-            add(doc.toVariant().toMap());
+            add(refrow, doc.toVariant().toMap());
         }else{
             onLog("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + msg.toUtf8());
         }
@@ -715,10 +732,8 @@ void QIperfd::onWSactMessage(QString msg)
     }else if (msg.startsWith(CMD_IPERF_CLEAR)){
         clear();
     }else if (msg.startsWith(CMD_IPERF_START)){
-        QString t = msg.remove(0, (QString(CMD_IPERF_START).length()+1));
-        qDebug() << "onWSactMessage: start time:" << t;
-        qDebug() << "onWSactMessage:system time:" << QDateTime::currentDateTime().toString("yyyy-MM-dd_hhmmss.zzz");
-        m_starttime =QDateTime::fromString(t, "yyyy-MM-dd_hhmmss.zzz");
+        s_starttime = msg.remove(0, (QString(CMD_IPERF_START).length()+1));
+        m_starttime =QDateTime::fromString(s_starttime, "yyyy-MM-dd_hhmmss.zzz");
         startAll();
     }else if (msg.startsWith(CMD_IPERF_STOP)){
         stopAll();

@@ -56,7 +56,7 @@
 QT_USE_NAMESPACE
 
 //! [constructor]
-WSClient::WSClient(const QUrl &url, QObject *parent) :
+WSClient::WSClient(QString serverip, const QUrl &url, QObject *parent) :
     QObject(parent)
 {
     connect(&m_webSocket, &QWebSocket::connected, this, &WSClient::onConnected);
@@ -67,6 +67,7 @@ WSClient::WSClient(const QUrl &url, QObject *parent) :
     connect(&m_webSocket, QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
             this, &WSClient::onSslErrors);
     qDebug() << "WSClient open websocket:" << url << Qt::endl;
+    m_serverip = serverip;
     m_url = url;
     m_webSocket.open(m_url);
 
@@ -74,10 +75,16 @@ WSClient::WSClient(const QUrl &url, QObject *parent) :
 
 qint64 WSClient::sendText(QString message)
 {
-    qint64 rc = m_webSocket.sendTextMessage(message);
-    if (rc <=0){
-        qDebug() << "error sendText size=" << rc << ", " << message;
-    }
+    qint64 rc=0;
+//    if (m_webSocket.isValid()){
+        rc = m_webSocket.sendTextMessage(message);
+        if (rc <=0){
+            qDebug() << "error sendText size=" << rc << ", " << message;
+        }
+//    }else{
+//        rc = -1;
+//        qDebug() << "m_webSocket not availabled " ;
+//    }
     return rc;
 }
 
@@ -100,6 +107,7 @@ void WSClient::onConnected()
 void WSClient::onDisconnected()
 {
     qDebug() << "WebSocket Disconnected: " << m_url;
+    emit disconnected(m_serverip);
 }
 
 void WSClient::onErrorOccurred(QAbstractSocket::SocketError socketError)

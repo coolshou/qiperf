@@ -32,7 +32,9 @@ QIperfC::QIperfC(QWidget *parent)
     QString settingfilepath =  QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     QDir d{settingfilepath};
     if (!d.exists()){
-        d.mkpath(settingfilepath);
+        if(!d.mkpath(settingfilepath)){
+            qDebug() << "ERROR: mkdir " + settingfilepath + " Fail";
+        }
     }
     QString settingfilename = settingfilepath + "/" + QIPERFC_NAME + ".ini";
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
@@ -250,7 +252,9 @@ void QIperfC::onPairSwap()
     QModelIndexList mls= ui->tv_throughput->selectionModel()->selectedRows();
     foreach (QModelIndex midx, mls) {
         m_tpmgr->swapDirection(midx);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
+    ui->tv_throughput->update();
 }
 
 void QIperfC::onStart()
@@ -269,6 +273,7 @@ void QIperfC::onStart()
         int maxtestduration=0;
         int iwait=0;
         int itimeout;
+        int refrow;
         foreach (TP *tp, tps) {
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             //RPC to control all server endpoint (iperf server)
@@ -276,12 +281,14 @@ void QIperfC::onStart()
             if (iwait> maxtestduration){
                 maxtestduration = iwait;
             }
+            refrow = tp->row();
             QString serverIP = tp->getMgrServer();
             if (!m_wss.contains(serverIP)) {
                 s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
                 qDebug() << "server websocket url: " << s << Qt::endl;
-                m_wss[serverIP]=new WSClient(QUrl(s));
+                m_wss[serverIP]=new WSClient(serverIP, QUrl(s));
                 connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
+                connect(m_wss[serverIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
                 itimeout = iTimeout;
                 while (! m_wss[serverIP]->isConnected() && itimeout>0){
 //                    qDebug() << "wait WSClient:" << s << " connected";
@@ -294,7 +301,7 @@ void QIperfC::onStart()
                     break;
                 }
                 //tell server add iperf server
-                QString cmd = QString(CMD_IPERF_ADD)+":"+tp->getServerArgs();
+                QString cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
                 rs = m_wss[serverIP]->sendText(cmd);
                 if (rs<=0){
                     emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
@@ -306,7 +313,9 @@ void QIperfC::onStart()
             if (!m_wsc.contains(clientIP)) {
                 s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
                 qDebug() << "client websocket url: " << s << Qt::endl;
-                m_wsc[clientIP]=new WSClient(QUrl(s));
+                m_wsc[clientIP]=new WSClient(clientIP, QUrl(s));
+                connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
+                connect(m_wsc[clientIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
                 itimeout = iTimeout;
                 while (! m_wsc[clientIP]->isConnected()&& itimeout>0){
 //                    qDebug() << "wait WSClient:" << s << " connected";
@@ -318,13 +327,14 @@ void QIperfC::onStart()
                     break;
                 }
                 //tell client add iperf client
-                QString cmd = QString(CMD_IPERF_ADD)+":"+tp->getClientArgs();
+                QString cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
                 rs = m_wsc[clientIP]->sendText(cmd);
                 if (rs<=0){
                     emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
                     break;
                 }
             }
+            // TODO. set report ??
             QString di = tp->getDirection();
             if (di== QVariant::fromValue(TP::DirType::Tx).toString()){
                 m_wss[serverIP]->sendText(CMD_IPERF_REG);
@@ -375,24 +385,24 @@ void QIperfC::onStart()
         //TODO: check all test done!!
 
         //clear all websocket
-        for (auto key: m_wss.keys()){
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
-            rs = m_wss[key]->sendText(CMD_IPERF_CLEAR);
-            if (rs<=0){
-                emit errorStop(4, "clear iperf server config:" + key);
-//                qDebug() << "rs: " << rs << " key:" << key;
-            }
-            m_wss.remove(key);
-        }
-        for (auto key: m_wsc.keys()){
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
-            rs = m_wsc[key]->sendText(CMD_IPERF_CLEAR);
-            if (rs<=0){
-                emit errorStop(4, "clear iperf client config:" + key);
-//                qDebug() << "rs: " << rs << " key:" << key;
-            }
-            m_wsc.remove(key);
-        }
+//        for (auto key: m_wss.keys()){
+//            QCoreApplication::processEvents(QEventLoop::AllEvents);
+//            rs = m_wss[key]->sendText(CMD_IPERF_CLEAR);
+//            if (rs<=0){
+//                emit errorStop(4, "clear iperf server config:" + key);
+////                qDebug() << "rs: " << rs << " key:" << key;
+//            }
+//            m_wss.remove(key);
+//        }
+//        for (auto key: m_wsc.keys()){
+//            QCoreApplication::processEvents(QEventLoop::AllEvents);
+//            rs = m_wsc[key]->sendText(CMD_IPERF_CLEAR);
+//            if (rs<=0){
+//                emit errorStop(4, "clear iperf client config:" + key);
+////                qDebug() << "rs: " << rs << " key:" << key;
+//            }
+//            m_wsc.remove(key);
+//        }
 
         onStop();
 
@@ -419,9 +429,10 @@ void QIperfC::onStart()
             auto rpc_tp = map_qiperfds_server.value(mhost);
             // Add Iperf server
             auto result = rpc_tp->rpc->callNamedParams("addIperfServer",
-                                            QVariantMap{{"version",rpc_tp->tp->getVersion()},
-                                                        {"port",rpc_tp->tp->getPort()},
-                                                        {"bindHost", rpc_tp->tp->getServer()}});
+                                        QVariantMap{{"refrow",0},
+                                                    {"version",rpc_tp->tp->getVersion()},
+                                                    {"port",rpc_tp->tp->getPort()},
+                                                    {"bindHost", rpc_tp->tp->getServer()}});
             if (!result->isSuccess()){
                 emit errorStop(-1, "addIperfServer at " + mhost +
                                " with " +rpc_tp->tp->getServer()+ ":" + rpc_tp->tp->getPort() +
@@ -575,6 +586,9 @@ void QIperfC::notificationReceived(const QString key, const QVariant value)
 
 void QIperfC::closeEvent(QCloseEvent *event)
 {
+    //TODO: check config edit.
+    Q_UNUSED(event);
+
     saveSettings();
 }
 void QIperfC::updateRunStatus(bool bStart)
@@ -754,6 +768,16 @@ void QIperfC::onIperfStarted(QString ipport)
 void QIperfC::onIperfStoped(QString ipport)
 {
     qDebug() << "onIperfStoped:" << ipport;
+}
+
+void QIperfC::onDisconnected(QString serverip)
+{
+    if (m_wss.contains(serverip)){
+        m_wss.remove(serverip);
+    }
+    if (m_wsc.contains(serverip)){
+        m_wsc.remove(serverip);
+    }
 }
 
 void QIperfC::init_actions()

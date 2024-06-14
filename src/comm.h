@@ -3,6 +3,7 @@
 
 #define QIPERF_DOMAIN "alphanetworks.com"
 #define QIPERF_ORG "alphanetworks"
+#define QIPERF_NAME  "qiperf"
 #define QIPERFD_NAME  "qiperfd"
 #define QIPERFTRAY_NAME  "qiperftray"
 #define QIPERF_EXT "qip"

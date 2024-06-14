@@ -66,12 +66,13 @@ class WSClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit WSClient(const QUrl &url, QObject *parent = nullptr);
+    explicit WSClient(QString serverip, const QUrl &url, QObject *parent = nullptr);
     qint64 sendText(QString message);
     bool isConnected();
 signals:
     void iperfStarted(QString ipport);  //ip:port
     void iperfStoped(QString ipport);  //ip:port
+    void disconnected(QString serverip);
 
 private Q_SLOTS:
     void onConnected();
@@ -83,6 +84,7 @@ private Q_SLOTS:
     void onSslErrors(const QList<QSslError> &errors);
 
 private:
+    QString m_serverip;
     QWebSocket m_webSocket;
     QUrl m_url;
 };

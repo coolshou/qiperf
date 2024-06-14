@@ -1,4 +1,5 @@
 #include "iperfworker.h"
+#include "iperfworker.h"
 
 #include <QCoreApplication>
 #include <QEventLoop>
@@ -11,9 +12,13 @@
 #include "../src/comm.h"
 
 IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
-                         uint port, QString bindaddr, QObject *parent)
+                         uint port, QString bindaddr, QString target,
+                         QObject *parent)
     : QObject{parent}
 {
+    m_logfile = nullptr;
+    m_logtextstream = nullptr;
+    m_iperflogpath = "";
     m_idx = idx;
 //    this->deleteLater(); //this will cause stdout not flush??
     m_parent = parent;
@@ -24,10 +29,14 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
     if (m_arguments.contains("-s")){
         m_servermode=true;
     }
+    if (m_arguments.contains("-u")){
+        m_servermode=true;
+    }
     m_port = port;
     m_bindaddr = bindaddr;
-    m_arguments.append("-p");
-    m_arguments.append(QString::number(m_port));
+    m_target = target;
+//    m_arguments.append("-p");
+//    m_arguments.append(QString::number(m_port));
     if (m_version>=static_cast<int>(IPERF_VER::V3)){
         m_arguments.append("--forceflush");
     }
@@ -97,11 +106,44 @@ void IperfWorker::setStop()
 
 QString IperfWorker::getBindKey()
 {
-    return m_bindaddr+":"+QString::number(m_port);
+    if (m_servermode){
+        return m_bindaddr + "_" + QString::number(m_port);
+    }else{
+        return m_bindaddr + "-" + m_target + "_" + QString::number(m_port);
+    }
+}
+
+void IperfWorker::setIperfLogPath(QString filepath)
+{
+    m_iperflogpath = filepath;
+}
+
+void IperfWorker::setRefRow(QString refrow)
+{
+    m_refrow = refrow;
+}
+
+void IperfWorker::toLogFile(QString msg)
+{
+    if(m_logtextstream!=nullptr){
+        *m_logtextstream << msg;
+        m_logtextstream->flush();
+    }else{
+        qDebug() << "toLogFile: m_logtextstream not exist";
+    }
 }
 
 void IperfWorker::onStarted()
 {
+    QString tmp = m_iperflogpath+"/"+getBindKey();
+    m_logfile=new QFile(tmp);
+    qDebug() << "m_logfile: " << m_logfile->fileName();
+
+    if(m_logfile->open(QIODevice::WriteOnly|QIODevice::Append)){
+        m_logtextstream = new QTextStream(m_logfile);
+    }else{
+        emit onStderr(m_idx, "ERROR: open file '"+ tmp +"' Fail");
+    }
     m_running = true;
     emit started(m_idx);
 }
@@ -113,6 +155,7 @@ void IperfWorker::readyReadStdOut()
 
     if (processOutput.length()>0){
         qDebug() << "Output was " << QString(processOutput);
+        toLogFile(processOutput);
         emit onStdout(m_idx, QString(processOutput));
     }
 }
@@ -130,6 +173,16 @@ void IperfWorker::readyReadStdErr()
 
 void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    if(m_logfile !=nullptr){
+        m_logfile->close();
+        delete m_logfile;
+        m_logfile = nullptr;
+    }
+    if(m_logtextstream !=nullptr){
+        delete m_logtextstream;
+        m_logtextstream = nullptr;
+    }
+
     m_running = false;
     emit finished(m_idx, exitCode, int(exitStatus));
     m_stop = true;

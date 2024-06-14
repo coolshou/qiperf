@@ -39,12 +39,13 @@ public:
     QString getInterfaceAddr(QString ifname);
     QString getManagerInterface();
     QString getIfNameByHumanReadableName(QString name);
-    int add(int version,QString m_cmd,QString args, uint port, QString bndaddr="0.0.0.0");
-    int add(QVariantMap jsondata);
+    int add(QString refrow, int version,QString m_cmd,QString args, uint port,
+            QString bndaddr="0.0.0.0", QString target="");
+    int add(QString refrow, QVariantMap jsondata);
     QString toIperf3args(QVariantMap jsondata);
     QString toIperf2args(QVariantMap jsondata);
-    int addIperfServer(int version, uint port, QString bindHost="");
-    int addIperfClient(int version, uint port, QString Host, QString iperfargs);
+    int addIperfServer(QString refrow, int version, uint port, QString bindHost="");
+    int addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs);
     void start(int idx); // start idx of iperf
     void startAll(); // start all of iperfs
     void stop(int idx);  // stop idx of iperfs
@@ -68,9 +69,10 @@ signals:
 protected:
     void closeEvent(QCloseEvent *event);
 private slots:
-    void onWSactMessage(QString msg);
+    void onWSactMessage(QString msg); //procress websocket action message
 
 private:
+    QString tmpfilepath;
     QSettings *cfg;
     UdpSrv *m_udpsrv;
     MyInfo *m_myinfo;
@@ -89,6 +91,7 @@ private:
     QString mgr_ifname; //manager interface name
     int mgr_port; //manager port number
     QDateTime m_starttime;  //Test Start time
+    QString s_starttime;   // Test Start time in string;
     QMap<int, int> m_runstatus; //record thread idx run status, 0: stop , 1: running
 };
 
