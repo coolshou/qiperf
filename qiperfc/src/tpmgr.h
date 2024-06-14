@@ -30,6 +30,7 @@ public:
     bool loaddata(QByteArray data);
     void reset();
     TP *getItem(const QModelIndex& index) const;
+    int swapDirection(QModelIndex midx);
 
 private:
 //    TP *itemFromIndex(const QModelIndex &index) const;

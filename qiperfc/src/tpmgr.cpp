@@ -211,7 +211,6 @@ bool TPMgr::loaddata(QByteArray data)
 
 void TPMgr::reset()
 {
-
     beginResetModel();
     m_tps.clear();
     this->rootItem = new TP(("Root"), ("Root"));
@@ -232,8 +231,31 @@ TP *TPMgr::getItem(const QModelIndex &index) const
 {
     if (index.isValid()) {
         TP* item = static_cast<TP*>(index.internalPointer());
-        if (item)
+        if (item){
             return item;
+        }else{
+            qDebug() << "getItem: no item??";
+        }
     }
     return rootItem;
+}
+
+int TPMgr::swapDirection(QModelIndex midx)
+{
+    TP *tp= getItem(midx);
+//    rootItem->findChild(tp);
+    //    qDebug() << "swapDirection tp: " << tp;
+    if (tp->getDirection().contains("Tx")){
+//        qDebug() << "to Rx";
+        tp->setDirection(TP::DirType::Rx);
+    }else if (tp->getDirection().contains("Rx")){
+//        qDebug() << "to Tx";
+        tp->setDirection(TP::DirType::Tx);
+    }
+    qDebug() << "after: " << tp->data(TP::cols::dir);
+//    QModelIndex idx = indexFromItem(tp);
+//    qDebug() << "midx: " << midx << " , idx: " <<idx;
+//    rootItem->child(->getClient();
+    emit dataChanged(midx,midx);
+    return 0;
 }

@@ -229,7 +229,6 @@ void QIperfC::on_pairEdit()
 void QIperfC::on_pairDelete()
 {
     QModelIndex cur = ui->tv_throughput->selectionModel()->currentIndex();
-//    qDebug() << "on_pairDelete: " << cur << Qt::endl;
     if (!m_tpmgr->removeRow(cur.row(), cur.parent())){
         QMessageBox::information(this, "ERROR", "Can not remove test pair: " + cur.data().toString());
     }
@@ -239,15 +238,7 @@ void QIperfC::onPairSwap()
 {
     QModelIndexList mls= ui->tv_throughput->selectionModel()->selectedRows();
     foreach (QModelIndex midx, mls) {
-        TP *tp= m_tpmgr->getItem(midx);
-        // TODO: swap Direction
-        qDebug() << "tp->data:" << tp->data(0) << "dir:"<< tp->getDirection();
-        if (tp->getDirection().contains("Tx")){
-            tp->setDirection(TP::DirType::Rx);
-        }
-        if (tp->getDirection().contains("Rx")){
-            tp->setDirection(TP::DirType::Tx);
-        }
+        m_tpmgr->swapDirection(midx);
     }
 }
 

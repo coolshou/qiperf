@@ -11,14 +11,20 @@ TP::TP(QString id, QString data, TP *parent)
     this->loadData(data);
 }
 
-//TP::~TP()
-//{
-////    qDeleteAll(m_childItems);
-//}
-
 void TP::appendChild(TP *item)
 {
     m_childItems.append(item);
+}
+
+int TP::findChild(TP *child)
+{
+    foreach(auto itm, m_childItems ){
+        if (itm==child){
+            qDebug() << "findChild FOUND:" << child ;
+            break;
+        }
+    }
+    return 0;
 }
 
 TP *TP::child(int row)
@@ -45,6 +51,15 @@ QVariant TP::data(int column) const
     }
     return m_itemDatas.at(column);
 
+}
+
+int TP::setData(int column, QVariant var)
+{
+    if (column < 0 || column >= m_itemDatas.size()){
+        return -1;
+    }
+    m_itemDatas[column]=var;
+    return 0;
 }
 
 TP *TP::parentItem()
@@ -159,69 +174,6 @@ QString TP::getClientArgs()
     QJsonDocument doc(o_client);
     QString strJson(doc.toJson(QJsonDocument::Compact));
     return strJson;
-
-/*
-    QString args;
-
-    args.append("-B");
-    args.append(o_client["bind"].toString());
-    args.append("-p");
-    args.append(o_client["port"].toString());
-    if (o_client["protocal"].toString()=="UDP"){
-        args.append("-u");
-    }
-    if (o_client["protocal"].toString()=="SCTP"){
-        args.append("--sctp");
-    }
-    args.append("-c");
-    args.append(o_client["target"].toString());
-    args.append("-t");
-    args.append(o_client["duration"].toString());
-    args.append("-O");
-    args.append(o_client["omit"].toString());
-    args.append("-P");
-    args.append(o_client["parallel"].toString());
-    if (o_client["bitrate"].toInt()>=0) {
-        args.append("-b");
-        if (o_client["bitrate"].toInt()>0) {
-            args.append(o_client["bitrate"].toString()+o_client["unit_bitrate"].toString());
-        }else if(o_client["bitrate"].toInt()==0) {
-            args.append(o_client["bitrate"].toString());
-        }
-    }
-    if (o_client["windowsize"].toInt()>0) {
-        args.append("-w");
-        args.append(o_client["windowsize"].toString()+o_client["unit_windowsize"].toString());
-    }
-    if (o_client["buffer"].toInt()>0) {
-        args.append("-l");
-        args.append(o_client["buffer"].toString()+o_client["unit_buffer"].toString());
-    }
-    if (o_client["dscp"].toInt()>=0) {
-        args.append("--dscp");
-        args.append(o_client["dscp"].toString());
-    }
-    if (o_client["tos"].toInt()>=0) {
-        args.append("--tos");
-        args.append(o_client["tos"].toString());
-    }
-    if (o_client["mss"].toInt()>0) {
-        args.append("--set-mss");
-        args.append(o_client["mss"].toString());
-    }
-    args.append("-i");
-    args.append(o_client["interval"].toString());
-    args.append("--format");
-    args.append(o_client["fmtreport"].toString());
-
-    if (o_client["reverse"].toInt()>0) {
-        args.append("-R");
-    }
-    if (o_client["bidir"].toInt()>0) {
-        args.append("--bidir");
-    }
-    return args;
-*/
 }
 
 QString TP::getDirection()
@@ -248,10 +200,10 @@ int TP::getWaitTime()
 int TP::setDirection(DirType direction)
 {
     m_direction = QVariant::fromValue(direction).toString();
+    setData(TP::cols::dir, m_direction);
 
     QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8());
     QJsonObject jsonRoot = doc.object();
-
     QJsonObject o_client = jsonRoot["client"].toObject();
     if (direction == DirType::Tx){
         o_client["bidir"]=false;
@@ -263,7 +215,10 @@ int TP::setDirection(DirType direction)
         o_client["bidir"]=true;
         o_client["reverse"]=false;
     }
+    jsonRoot["client"]=o_client;
+    doc.setObject(jsonRoot);
     m_jsondata =doc.toJson(QJsonDocument::Compact);
+
     return 0;
 }
 

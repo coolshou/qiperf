@@ -14,7 +14,6 @@ class TP: public QObject
     Q_GADGET
 public:
     explicit TP(QString id, QString data, TP *parentItem = nullptr);
-//    ~TP() ;//override
     enum DirType{
         Tx=0,
         Rx=1,
@@ -31,11 +30,13 @@ public:
     };
     Q_ENUM(cols)
     void appendChild(TP *child);
+    int findChild(TP *child);
 
     TP *child(int row);
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;
+    int setData(int column, QVariant var);
     int row() const;
     TP *parentItem();
     bool removeChildren(int position, int count);

@@ -45,6 +45,7 @@ public:
     bool load(QString filename); // load tp config
     bool save(QString filename); // save tp config
 
+
 public slots:
     void onNewMessage(const QString msg);
     void on_New();
