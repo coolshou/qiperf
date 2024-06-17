@@ -962,16 +962,11 @@ void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
 
 void QIperfC::onItemClicked(QModelIndex idx)
 {
-//    qDebug() << "onItemClicked: " << idx;
     TP *tp = m_tpmgr->getItem(idx);
     dlgiperf->loadJsonCfg(tp->saveData());
     int rc = dlgiperf->exec();// show dlgiperf
     if (rc == QDialog::Accepted){
         QString rs= dlgiperf->getJsonCfg();
-        //m_tpmgr->add(rs);
-        qDebug() << "onItemClicked rs:" << rs;
         tp->loadData(rs);
-//        tp->setData()
-//        tp->set
     }
 }
