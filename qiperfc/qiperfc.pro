@@ -53,6 +53,7 @@ SOURCES += \
     src/tp.cpp \
     src/tpmgr.cpp \
     src/tpdirdelegate.cpp \
+    src/tpplot.cpp \
     src/udpreceiver.cpp \
     src/wsclient.cpp
 
@@ -77,6 +78,7 @@ HEADERS += \
     src/tp.h \
     src/tpmgr.h \
     src/tpdirdelegate.h \
+    src/tpplot.h \
     src/udpreceiver.h \
     src/wsclient.h
 

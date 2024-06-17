@@ -22,6 +22,7 @@
 #include "tpmgr.h"
 #include "tpdirdelegate.h"
 #include "QIPConfig.h"
+#include "tpplot.h"
 
 #if (TEST_WS==1)
 #include "wsclient.h"
@@ -82,8 +83,7 @@ protected:
 private:
     void updateRunStatus(bool bStart);
     void initCustomPlote();
-    void addRandomGraph();
-    QPen newColorPen(int r, int g, int b, int width);
+//    QPen newColorPen(int r, int g, int b, int width);
     void resetError();
     void saveSettings();
     void loadSettings();
@@ -97,12 +97,10 @@ private slots:
     void on_pb_add_server_clicked();
     void on_pb_start_clicked();
     void on_pb_stop_clicked();
-//    void On_itemSelectionChanged();
     void on_updateEndpointNum(int n);
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onTPDataUpdate(const QModelIndex &parent, int first, int last);
     void onItemClicked(QModelIndex idx);
-    void realtimeDataSlot(QPrivateSignal sig);
     void onRPC_result(const QVariant& result);
     void onRPC_error(int code, const QString& message);
     void onIperfStarted(QString ipport);
@@ -111,6 +109,7 @@ private slots:
     void onDisconnected(QString serverip);
 private:
     Ui::MainWindow *ui;
+    TPPlot *m_tpplot;
     QSettings *m_settings;
     DlgIperf * dlgiperf;  // dialog of iperf config
     FormEndPoints * formEndpoits;
@@ -134,7 +133,7 @@ private:
     QLabel *m_endpoint_label;
     TPMgr *m_tpmgr;
     TPDirDelegate *tpdrdelegate;
-    QTimer dataTimer;
+
     QDateTime m_TestStartTime;
     int bErrorStop;
     int iTimeout; // default wait websocket timeout 10
