@@ -32,7 +32,7 @@
 #define CMD_IPERF_REG    "IPERF_REG" // reg iperf endpoint to report throughput result
 #define CMD_IPERF_DEL    "IPERF_DEL" // del iperf setting
 #define CMD_IPERF_CLEAR    "IPERF_CLEAR" // clear all iperf setting
-
+#define CMD_IPERF_TP_DATA  "IPERF_TP_DATA"  // iperf throughput data
 
 enum class IPERF_VER {
     V1=0,  //1.7.0

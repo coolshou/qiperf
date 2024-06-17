@@ -118,11 +118,14 @@ void WSServer::sendTextMessage(QString msg, QString target)
     }else{
         ts = m_clients.keys();
     }
+    qint64 rc=0;
     for(auto &t: qAsConst(ts)) {
         if (m_clients.contains(t)) {
-//            qInfo() <<"TODO: send:" << msg << " to " << t << Qt::endl;
-            onLog("TODO: send:" + msg + " to " + t);
-            m_clients.value(t)->sendTextMessage(msg);
+//            onLog("TODO: send:" + msg + " back to " + t);
+            rc= m_clients.value(t)->sendTextMessage(msg);
+            if (rc<=0){
+                qDebug() << "error sendText size=" << rc << " : " << msg;
+            }
         }
     }
 
@@ -130,7 +133,7 @@ void WSServer::sendTextMessage(QString msg, QString target)
 
 void WSServer::onLog(QString text)
 {
-    qInfo() << "WSServer:" << text;
+    qInfo() << "WSServer::onLog: " << text;
 }
 
 //! [onNewConnection]
@@ -152,7 +155,7 @@ void WSServer::onNewConnection()
 //! [processTextMessage]
 void WSServer::processTextMessage(QString message)
 {
-    qDebug() << "processTextMessage:" << message << Qt::endl;
+//    qDebug() << "processTextMessage:" << message << Qt::endl;
 //    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     emit actMessage(message);
 

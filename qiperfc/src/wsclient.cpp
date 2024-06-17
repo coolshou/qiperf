@@ -51,7 +51,8 @@
 #include <QtCore/QDebug>
 #include <QtWebSockets/QWebSocket>
 #include "comm.h"
-
+#include <QJsonParseError>
+#include <QJsonDocument>
 
 QT_USE_NAMESPACE
 
@@ -131,13 +132,39 @@ void WSClient::onStateChanged(QAbstractSocket::SocketState state)
 void WSClient::onTextMessageReceived(QString message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    qDebug() << "Message received:" << message << ": "<< pClient->peerAddress();
-    if (message.startsWith(CMD_IPERF_STARTED)){
+    int cut = message.indexOf(':', 0);
+    QString act = message.left(cut);
+    message = message.right(message.length()-cut-1);
+
+    if (act.startsWith(CMD_IPERF_STARTED)){
+//        emit iperfStarted(refrow);
+    }else if (act.startsWith(CMD_IPERF_STOPED)){
+//        emit iperfStoped(refrow);
+    } else if (act.startsWith(CMD_IPERF_TP_DATA)){
+        QJsonParseError error;
+        int cut2 = message.indexOf(':', 0);
+        QString refrow = message.left(cut2);
+        message = message.right(message.length()-cut2-1);
+        int cut3 = message.indexOf(':', 0);
+        QString sInterval = message.left(cut3);
+        message = message.right(message.length()-cut3-1);
+
+        QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8(), &error);
+        if (error.error == QJsonParseError::NoError){
+//            add(refrow, doc.toVariant().toMap());
+//            qDebug() << "refrow: " << refrow;
+//            qDebug() << "IPERF_TP_DATA: " << message;
+
+            emit iperfTPdata(refrow, sInterval, message);
+        }else{
+            qDebug() << "onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + message.toUtf8();
+        }
 //        emit iperfStarted();
+    } else {
+        qDebug() << "Message received:" << message << ": "<< pClient->peerAddress();
     }
-    if (message.startsWith(CMD_IPERF_STOPED)){
-//        emit iperfStoped();
-    }
+
+
 
 //    qApp->quit();
 }

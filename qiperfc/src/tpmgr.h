@@ -31,6 +31,8 @@ public:
     void reset();
     TP *getItem(const QModelIndex& index) const;
     int swapDirection(QModelIndex midx);
+    void addTPdata(QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir=nullptr);
+    TP *getItemByIdx(QString midx, TP *item=nullptr);
 
 private:
 //    TP *itemFromIndex(const QModelIndex &index) const;

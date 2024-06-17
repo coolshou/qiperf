@@ -49,6 +49,10 @@ QString DlgIperf::getJsonCfg()
         serverObj.insert("version", ui->cb_version->currentText());
         serverObj.insert("port", ui->sb_port->value());
         serverObj.insert("manager", ui->cb_mserver_ip->currentText());
+        serverObj.insert("protocal", ui->cb_protocal->currentText());
+        serverObj.insert("parallel", ui->sb_parallel->value());
+        serverObj.insert("bidir", ui->chk_bidir->isChecked());
+        serverObj.insert("interval", ui->sb_interval->value());
 //        serverObj.insert("bind", ui->cb_server_bind_ip->currentText());
         if (ui->chk_server_bind_ip->isChecked()){
             serverObj.insert("bind", ui->le_target_ip->text());
@@ -91,8 +95,37 @@ QString DlgIperf::getJsonCfg()
 
 void DlgIperf::loadJsonCfg(QString jsoncfg)
 {
-    //TODO
-    Q_UNUSED(jsoncfg)
+    QJsonDocument doc=QJsonDocument::fromJson(jsoncfg.toUtf8());
+    QJsonObject mainObj = doc.object();
+    QJsonObject serverObj = mainObj["server"].toObject();
+    ui->cb_version->setCurrentText(serverObj["version"].toString());
+    ui->sb_port->setValue(serverObj["port"].toInt());
+    ui->cb_mserver_ip->setCurrentText(serverObj["manager"].toString());
+    if (!serverObj["bind"].toString().isEmpty()){
+        ui->chk_server_bind_ip->setChecked(true);
+    }
+    ui->cb_protocal->setCurrentText(serverObj["protocal"].toString());
+    ui->sb_parallel->setValue(serverObj["parallel"].toInt());
+    ui->chk_bidir->setChecked(serverObj["bidir"].toBool());
+    ui->sb_interval->setValue(serverObj["interval"].toInt());
+
+    QJsonObject clientObj = mainObj["client"].toObject();
+    ui->cb_mclient_ip->setCurrentText(clientObj["manager"].toString());
+    ui->cb_client_bind_ip->setCurrentText(clientObj["bind"].toString());
+    ui->le_target_ip->setText(clientObj["target"].toString());
+    ui->sb_duration->setValue(clientObj["duration"].toInt());
+    ui->sb_omit->setValue(clientObj["omit"].toInt());
+    ui->sb_bitrate->setValue(clientObj["bitrate"].toInt());
+    ui->cb_unit_bitrate->setCurrentText(clientObj["unit_bitrate"].toString());
+    ui->sb_windowsize->setValue(clientObj["windowsize"].toInt());
+    ui->cb_unit_windowsize->setCurrentText(clientObj["unit_windowsize"].toString());
+    ui->sb_buffer->setValue(clientObj["buffer"].toInt());
+    ui->cb_unit_buffer->setCurrentText(clientObj["unit_buffer"].toString());
+    ui->sb_dscp->setValue(clientObj["dscp"].toInt());
+    ui->sb_tos->setValue(clientObj["tos"].toInt());
+    ui->sb_mss->setValue(clientObj["mss"].toInt());
+    ui->cb_fmtreport->setCurrentText(clientObj["fmtreport"].toString());
+    ui->chk_reverse->setChecked(clientObj["reverse"].toBool());
 }
 
 bool DlgIperf::add(QString mgr)

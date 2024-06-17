@@ -6,9 +6,11 @@ TP::TP(QString id, QString data, TP *parent)
     :m_parentItem(parent), m_id(id)
 {
     m_id=id;
-    m_itemDatas << id;
-    m_jsondata = data;
-    this->loadData(data);
+//    m_itemDatas << id;
+    m_jsondata = "";
+    if (data!=""){
+        this->loadData(data);
+    }
 }
 
 void TP::appendChild(TP *item)
@@ -34,9 +36,25 @@ TP *TP::child(int row)
     return m_childItems.at(row);
 }
 
+QList<TP *> TP::getChilds()
+{
+    return m_childItems;
+
+}
+
 int TP::childCount() const
 {
     return m_childItems.count();
+}
+
+bool TP::haveChilds()
+{
+    if (m_childItems.count()>0){
+        return true;
+    }else{
+        return false;
+    }
+
 }
 
 int TP::columnCount() const
@@ -123,6 +141,8 @@ void TP::loadData(QString data)
 
 //    QString m_mserver = o_server["manager"].toString();
 //    m_itemDatas.append(m_mserver+"("+m_server+")");
+    m_itemDatas.clear();
+    m_itemDatas.append(m_id);
     m_itemDatas.append(m_server);
     m_itemDatas.append(m_direction);
 //    m_itemDatas.append(m_mclient+"("+m_client+")");
@@ -130,6 +150,7 @@ void TP::loadData(QString data)
     m_itemDatas.append(""); //throughput
     m_itemDatas.append(""); //comment
 
+    m_jsondata = data;
 }
 
 QString TP::saveData()
@@ -225,6 +246,11 @@ int TP::setDirection(DirType direction)
 int TP::getPort()
 {
     return m_port;
+}
+
+void TP::setThroughput(QString value)
+{
+    m_itemDatas[TP::cols::throughput] = value;
 }
 
 void TP::updateTimeStemp()

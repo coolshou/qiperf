@@ -7,6 +7,10 @@
 #include <QStringList>
 #include <QFile>
 #include <QTextStream>
+#include <QMap>
+#include <QJsonArray>
+
+#include "iperfrecord.h"
 
 class IperfWorker : public QObject
 {
@@ -20,14 +24,16 @@ public:
     QString getBindKey(); // return  bind_addr:port
     void setIperfLogPath(QString filepath); //full path of iperf log filename
     void setRefRow(QString refrow);
+    void setExtra(QString parallel, QString protocal,bool bidir);
     void toLogFile(QString msg);
 
 signals:
-    void started(int idx);
-    void finished(int idx, int exitCode, int exitStatus);
-    void log(int idx, QString msg);
-    void onStdout(int idx, QString text);
-    void onStderr(int idx, QString text);
+    void started(int idx); // refrow
+    void finished(int idx, int exitCode, int exitStatus); // refrow
+    void log(int idx, QString msg); // refrow
+    void onStdout(int idx, QString text); // refrow
+    void onStderr(int idx, QString text); // refrow
+    void onThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
 
 
 public slots:
@@ -39,26 +45,33 @@ private slots:
     void readyReadStdOut();
     void readyReadStdErr();
     void onFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void parserStdOut(QString msg);
+    void parserIperf3(QString msg);
 
 private:
     QString m_refrow;
-    int m_idx;
+    int m_idx;  // refrow
     int m_version; // iperf version 2 or 3
     QObject *m_parent;
     bool m_stop;  //user stop;
     bool m_running; // is running
     bool m_servermode=false;
+    QString m_parallel="0";
+    QString m_protocal="TCP";
+    bool m_bidir=false;
     QString m_iperfexe; // iperf exec name
     QString m_iperflogpath;
     QFile *m_logfile;
     QTextStream *m_logtextstream;
-
     uint m_port;  //iperf port
     QString m_bindaddr; // iperf bind address
     QString m_target; //target address
     QString m_cmd; //iperf exec full path
     QStringList m_arguments;  //iperf args
     QProcess *m_iperf; // iperf procress
+//    QMap<QString, QList<IperfRecord *>> m_tpdatas;
+    QMap<QString, QJsonArray> m_tpdatas;
+
 };
 
 #endif // IPERFWORKER_H

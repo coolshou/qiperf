@@ -331,10 +331,10 @@
      <normaloff>:/pair-edit</normaloff>:/pair-edit</iconset>
    </property>
    <property name="text">
-    <string>Edit (TODO)</string>
+    <string>Edit</string>
    </property>
    <property name="toolTip">
-    <string>Edit Iperf Pair (TODO)</string>
+    <string>Edit Iperf Pair</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>

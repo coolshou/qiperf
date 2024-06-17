@@ -25,7 +25,7 @@ public:
         server=1,
         dir=2,
         client=3,
-        tp=4,
+        throughput=4,
         comment=5
     };
     Q_ENUM(cols)
@@ -33,7 +33,9 @@ public:
     int findChild(TP *child);
 
     TP *child(int row);
+    QList<TP*> getChilds();
     int childCount() const;
+    bool haveChilds();
     int columnCount() const;
     QVariant data(int column) const;
     int setData(int column, QVariant var);
@@ -56,6 +58,7 @@ public:
     int getWaitTime();
     int setDirection(DirType direction);
     int getPort();
+    void setThroughput(QString value);
     void updateTimeStemp();
     QString getLastNoticeTime();
 signals:

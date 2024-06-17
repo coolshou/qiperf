@@ -40,7 +40,8 @@ public:
     QString getManagerInterface();
     QString getIfNameByHumanReadableName(QString name);
     int add(QString refrow, int version,QString m_cmd,QString args, uint port,
-            QString bndaddr="0.0.0.0", QString target="");
+            QString bndaddr="0.0.0.0", QString target="",
+            QString parallel="0", QString protocal="TCP", bool bidir=false);
     int add(QString refrow, QVariantMap jsondata);
     QString toIperf3args(QVariantMap jsondata);
     QString toIperf2args(QVariantMap jsondata);
@@ -61,6 +62,7 @@ public slots:
     void onIperfLog(int idx, QString text);
     void onStarted(int idx);
     void onFinished(int idx, int exitCode, int exitStatus);
+    void onThroughput(int idx, QString sInterval, QString data); // refrow, throughput data
     void onQuit();
 signals:
     void setMgrIfname(QString interface);
@@ -93,6 +95,7 @@ private:
     QDateTime m_starttime;  //Test Start time
     QString s_starttime;   // Test Start time in string;
     QMap<int, int> m_runstatus; //record thread idx run status, 0: stop , 1: running
+    bool bReportTPData; // report throughput data
 };
 
 #endif // QIPERFD_H

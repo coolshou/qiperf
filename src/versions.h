@@ -5,7 +5,7 @@
 #define QIPERF_VERSION "0.2"
 #endif
 #ifndef QIPERFD_VERSION
-#define QIPERFD_VERSION "0.2.11306.14"
+#define QIPERFD_VERSION "0.2.11306.17"
 #endif
 #ifndef QIPERFC_VERSION
 #define QIPERFC_VERSION "0.2.11306.14"

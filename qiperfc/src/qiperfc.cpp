@@ -16,6 +16,7 @@
 #include <QThread>
 #include <QCoreApplication>
 #include <QEventLoop>
+#include <QTreeView>
 
 #include "tpdirdelegate.h"
 #include "endpointact.h"
@@ -53,14 +54,19 @@ QIperfC::QIperfC(QWidget *parent)
     m_tpmgr = new TPMgr(this);
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &QIperfC::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::rowsRemoved, this, &QIperfC::onTPDataUpdate);
+
+
     ui->tv_throughput->setModel(m_tpmgr);
     ui->tv_throughput->setColumnWidth(TP::cols::id, 30);
     ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
     ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
     ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
-    //following will cause problem!!
-    tpdrdelegate = new TPDirDelegate(this);
-    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdrdelegate);
+    connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemClicked);
+
+    //following will cause problem!! slow update image?
+//    tpdrdelegate = new TPDirDelegate(this);
+//    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdrdelegate);
+
     QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
     connect(ism, &QItemSelectionModel::selectionChanged, this, &QIperfC::onTPselectionChanged);
 //    ui->tv_throughput->header()->setVisible(true);
@@ -235,8 +241,9 @@ void QIperfC::on_pairAdd()
 void QIperfC::on_pairEdit()
 {
     // TODO: edit
-    QModelIndex cur = ui->tv_throughput->selectionModel()->currentIndex();
-    qDebug() << "on_pairEdit: " << cur;
+    QModelIndex idx = ui->tv_throughput->selectionModel()->currentIndex();
+//    qDebug() << "on_pairEdit: " << cur;
+    onItemClicked(idx);
 }
 
 void QIperfC::on_pairDelete()
@@ -289,6 +296,7 @@ void QIperfC::onStart()
                 m_wss[serverIP]=new WSClient(serverIP, QUrl(s));
                 connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                 connect(m_wss[serverIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
+                connect(m_wss[serverIP], &WSClient::iperfTPdata, this, &QIperfC::onIperfTPdata);
                 itimeout = iTimeout;
                 while (! m_wss[serverIP]->isConnected() && itimeout>0){
 //                    qDebug() << "wait WSClient:" << s << " connected";
@@ -316,6 +324,7 @@ void QIperfC::onStart()
                 m_wsc[clientIP]=new WSClient(clientIP, QUrl(s));
                 connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                 connect(m_wsc[clientIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
+                connect(m_wsc[clientIP], &WSClient::iperfTPdata, this, &QIperfC::onIperfTPdata);
                 itimeout = iTimeout;
                 while (! m_wsc[clientIP]->isConnected()&& itimeout>0){
 //                    qDebug() << "wait WSClient:" << s << " connected";
@@ -770,6 +779,28 @@ void QIperfC::onIperfStoped(QString ipport)
     qDebug() << "onIperfStoped:" << ipport;
 }
 
+void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString data)
+{
+//    qDebug() << "onIperfTPdata:" << refrow << " : " << data;
+    QJsonDocument doc=QJsonDocument::fromJson(data.toUtf8());
+    QJsonArray jArr = doc.array();//.object();
+    foreach (auto jObj, jArr){
+//        qDebug() << "idx: " << jObj["idx"] << " value: " << jObj["value"]
+//                 << "unit: " << jObj["unit"] << " dir: " << jObj["dir"];
+        QString dir=nullptr;
+        if (!jObj["dir"].isUndefined()){
+            dir=jObj["dir"].toString();
+        }
+        //TODO treeview data
+        m_tpmgr->addTPdata(refrow, sInterval,
+                           jObj["idx"].toString(),
+                jObj["value"].toString(), jObj["unit"].toString(),
+                dir);
+        //TODO chart data
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+}
+
 void QIperfC::onDisconnected(QString serverip)
 {
     if (m_wss.contains(serverip)){
@@ -926,5 +957,21 @@ void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
         ui->actionStart->setEnabled(false);
         ui->actionStop->setEnabled(false);
     }
-//    updateRunStatus(bStart);
+    //    updateRunStatus(bStart);
+}
+
+void QIperfC::onItemClicked(QModelIndex idx)
+{
+//    qDebug() << "onItemClicked: " << idx;
+    TP *tp = m_tpmgr->getItem(idx);
+    dlgiperf->loadJsonCfg(tp->saveData());
+    int rc = dlgiperf->exec();// show dlgiperf
+    if (rc == QDialog::Accepted){
+        QString rs= dlgiperf->getJsonCfg();
+        //m_tpmgr->add(rs);
+        qDebug() << "onItemClicked rs:" << rs;
+        tp->loadData(rs);
+//        tp->setData()
+//        tp->set
+    }
 }

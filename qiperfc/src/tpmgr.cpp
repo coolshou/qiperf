@@ -1,7 +1,8 @@
 #include "tpmgr.h"
 #include <QJsonDocument>
 #include <QJsonArray>
-
+#include <QCoreApplication>
+#include <QEventLoop>
 
 #include "tp.h"
 
@@ -52,7 +53,7 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
             return QString("Direction");
         case TP::cols::client:
             return QString("Client");
-        case TP::cols::tp:
+        case TP::cols::throughput:
             return QString("Avg TP");
         case TP::cols::comment:
             return QString("comment");
@@ -121,6 +122,7 @@ bool TPMgr::add(QString data)
     int idx = rootItem->childCount();
     beginInsertRows(QModelIndex(), idx, idx);
     TP *tp = new TP(QString::number(idx), data, rootItem);
+    qDebug() << "=========> add:" << tp;
     rootItem->appendChild(tp);
     endInsertRows();
     return true;
@@ -252,4 +254,75 @@ int TPMgr::swapDirection(QModelIndex midx)
     qDebug() << "after: " << tp->data(TP::cols::dir);
     emit dataChanged(midx,midx);
     return 0;
+}
+
+void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir)
+{
+
+    TP *tp = getItemByIdx(midx);
+    if (tp==nullptr){
+        qDebug() << "no parrent iperf pair??";
+        return;
+    }
+    qDebug() << "idx: " << idx << " TP:" << tp;
+    TP *c = getItemByIdx(idx, tp);
+    if (c==nullptr){
+        qDebug() << "NEW:" << midx << "Interval: "<< sInterval << "idx:" << idx << "value:" << value << "unit:" << unit << "dir:" << dir;
+//        c = new TP(idx, "", tp);
+//        c->setThroughput(value);
+//        tp->appendChild(c);
+    }else{
+        qDebug() << "UPDATE:" << midx << "Interval: "<< sInterval << "idx:" << idx << "value:" << value;
+        c->setThroughput(value);
+    }
+
+    // get rootItem by midx;
+    //qDebug() << "this->rootItem:" << this->rootItem << " count:" << this->rootItem->childCount();
+
+//    if (this->rootItem->childCount()<=0){
+//        TP *c = new TP(idx, "", this->rootItem);
+//        c->setThroughput(value);
+//        this->rootItem->appendChild(c);
+//    }else{
+//        TP *tp = this->rootItem->child(midx.toInt());
+//        if (tp){
+//            qDebug()<< "TODO: tp:" << tp->getID();
+//            // TODO: unit check?
+
+//            //
+////            tp->appendChild(c);
+//        }else{
+//            qDebug()<< "unknown midx:" << midx;
+//        }
+//    }
+    //tp->appendChild();
+}
+
+TP *TPMgr::getItemByIdx(QString midx, TP *item)
+{
+    QList<TP*> lst;
+    if (item==nullptr){
+        lst = getChilds();
+    }else{
+        qDebug() << "getItemByIdx:" << midx << " item:" << item;
+        if (item->haveChilds()){
+            if (item->childCount()>0){
+                lst = item->getChilds();
+            }else{
+                return nullptr;
+            }
+        }else{
+            qDebug() << "item: " << item << " DO NOT have child";
+            return nullptr;
+        }
+    }
+    if(lst.count()>0){
+        foreach (auto tp, lst){
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            if (tp->getID() == midx){
+                return tp;
+            }
+        }
+    }
+    return nullptr;
 }
