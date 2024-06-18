@@ -162,11 +162,6 @@
                 <string extracomment="User Datagram Protocol">UDP</string>
                </property>
               </item>
-              <item>
-               <property name="text">
-                <string extracomment="Stream Control Transmission Protocol">SCTP</string>
-               </property>
-              </item>
              </widget>
             </item>
            </layout>
