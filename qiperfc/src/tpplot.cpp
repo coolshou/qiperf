@@ -5,6 +5,67 @@ TPPlot::TPPlot(QWidget *parent):QCustomPlot(parent)
     initCustomPlote();
 }
 
+void TPPlot::setStartTime(QDateTime startTime)
+{
+    m_starttime = startTime;
+
+}
+
+void TPPlot::addTPDatas(QString sInterval, QString idx, QString datas)
+{
+    //TODO:
+//    foreach (auto data, datas){
+
+//    }
+}
+
+void TPPlot::addTPData(QString sInterval, QString idx, QString data)
+{
+    double x = sInterval.toDouble();
+    double y = data.toDouble();
+    addTPData(idx, x, y);
+}
+
+void TPPlot::addTPData(QString idx, double xdata, double ydata)
+{
+    // TODO: add single x/y data to graphic
+    QCPGraph *graph = getGraph(idx);
+    if (ydata> this->yAxis->range().upper){
+        this->yAxis->setRange(0, ydata+50);
+    }
+    graph->addData(xdata, ydata);
+    this->replot();
+}
+
+QCPGraph *TPPlot::getGraph(QString idx)
+{
+    QPen graphPen;
+    QCPGraph *g;
+    if (!m_graphs.contains(idx)){
+        g = this->addGraph();
+    }else{
+        g = m_graphs.value(idx);
+    }
+//    qDebug() << "getGraph: " << idx << " g:" << g;
+    g->setName(idx);
+    graphPen = newColorPen(rand()%245+10, rand()%245+10, rand()%245+10, 1);
+    g->setPen(graphPen);
+    g->setLineStyle(QCPGraph::lsLine);
+    m_graphs.insert(idx,g);
+    return g;
+}
+
+void TPPlot::clear()
+{
+    for( int g=0; g<this->graphCount(); g++ )
+    {
+        this->graph(g)->data()->clear();
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        this->removeGraph(g);
+    }
+    this->replot();
+}
+
 void TPPlot::initCustomPlote()
 {
     this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
@@ -20,30 +81,32 @@ void TPPlot::initCustomPlote()
     this->yAxis->setLabel("Mbps");
     //set axis range
     // TODO: update range by throughput/time
-    this->xAxis->setRange(0, 120);
-    this->yAxis->setRange(0, 1000);
+    this->xAxis->setRange(0, 30);
+    this->yAxis->setRange(0, 100);
 //    this->replot();
     // legend
     this->legend->setVisible(true);
-    QCPLayoutGrid *subLayout = new QCPLayoutGrid;
-    //TODO: position the legend outside of the graph
-    //
-    this->plotLayout()->addElement(0, 1, subLayout);
-    this->plotLayout()->setColumnStretchFactor(1, 0.1); // col 1
-    this->plotLayout()->setRowStretchFactor(0, 1); // row 0
-
+    if (0){//TODO: not good on layout
+        // Add the QCustomPlot legend to the container
+        QCPLayoutGrid *subLayout = new QCPLayoutGrid;
+        //TODO: position the legend outside of the graph!!
+        //
+        this->plotLayout()->addElement(0, 1, subLayout);
+        this->plotLayout()->setColumnStretchFactor(0, 1);
+        this->plotLayout()->setColumnStretchFactor(1, 0.1); // col 1
+        this->plotLayout()->setRowStretchFactor(0, 1); // row 0
     //    subLayout->addElement(0, 0, new QCPLayoutElement); // row 0
-    subLayout->addElement(0, 0, this->legend); // row 0
-    subLayout->addElement(1, 0, new QCPLayoutElement); // row 1
-    subLayout->setRowStretchFactor(1, 0.001);
-//    this->plotLayout()->setRowStretchFactor(2, 0.001);
+        subLayout->addElement(0, 0, this->legend); // row 0
+        subLayout->addElement(1, 0, new QCPLayoutElement); // row 1
+        subLayout->setRowStretchFactor(1, 0.001);
+    //    this->plotLayout()->setRowStretchFactor(2, 0.001);
 
-    QFont legendFont = font();
-    legendFont.setPointSize(10);
-    this->legend->setFont(legendFont);
-    this->legend->setSelectedFont(legendFont);
-    this->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
-
+        QFont legendFont = font();
+        legendFont.setPointSize(10);
+        this->legend->setFont(legendFont);
+        this->legend->setSelectedFont(legendFont);
+        this->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
+    }
     // make left and bottom axes transfer their ranges to right and top axes:
     connect(this->xAxis, SIGNAL(rangeChanged(QCPRange)), this->xAxis2, SLOT(setRange(QCPRange)));
     connect(this->yAxis, SIGNAL(rangeChanged(QCPRange)), this->yAxis2, SLOT(setRange(QCPRange)));

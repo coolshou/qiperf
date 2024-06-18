@@ -46,7 +46,7 @@ public:
     void stop();
     bool load(QString filename); // load tp config
     bool save(QString filename); // save tp config
-
+    QString getNowString();
 
 public slots:
     void onNewMessage(const QString msg);
@@ -60,7 +60,9 @@ public slots:
     void onPairSwap();
     void onStart();
     void onStop();
+    void onClear();
     void onAbout();
+    void aboutQCustomPlot();
     void onErrorStop(int err, QString msg);
     void on_notice(QString send_addr, QString msg);
     void onQuit();
@@ -107,6 +109,7 @@ private slots:
     void onIperfStoped(QString ipport);
     void onIperfTPdata(QString refrow, QString sInterval, QString data);
     void onDisconnected(QString serverip);
+    void onPlotContextMenuRequest(QPoint pos);
 private:
     Ui::MainWindow *ui;
     TPPlot *m_tpplot;

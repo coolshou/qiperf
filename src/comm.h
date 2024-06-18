@@ -34,6 +34,8 @@
 #define CMD_IPERF_CLEAR    "IPERF_CLEAR" // clear all iperf setting
 #define CMD_IPERF_TP_DATA  "IPERF_TP_DATA"  // iperf throughput data
 
+#define DATETIME_NOW_FORMAT "yyyy-MM-dd_hhmmss.zzz"
+
 enum class IPERF_VER {
     V1=0,  //1.7.0
     V2=1,  //2.0.14

@@ -171,6 +171,11 @@ bool QIperfC::save(QString filename)
     }
 }
 
+QString QIperfC::getNowString()
+{
+    return QDateTime::currentDateTime().toString(DATETIME_NOW_FORMAT);
+}
+
 void QIperfC::onNewMessage(const QString msg)
 {
     ui->textEdit->append(msg);
@@ -268,7 +273,8 @@ void QIperfC::onStart()
 {
     resetError();
     m_TestStartTime = QDateTime::currentDateTime();
-    QString startTime = m_TestStartTime.toString("yyyy-MM-dd_hhmmss.zzz");
+    m_tpplot->setStartTime(m_TestStartTime);
+    QString startTime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
     emit updateStarttime(startTime);
     //if (m_tpmgr->children().count()>0) {
     if (m_tpmgr->rootChildCount()>0) {
@@ -491,17 +497,37 @@ void QIperfC::onStart()
 void QIperfC::onStop()
 {
     updateRunStatus(false);
+    QString e = getNowString();
+    QDateTime enddatetime = QDateTime::fromString(e,DATETIME_NOW_FORMAT);
+    emit updateStatus("Finish at  "+ e +" (Runtime: "+enddatetime.secsTo(m_TestStartTime)+" sec)");
     //stop test
 //    m_tpmgr->stop();
     // check all client endpoint stop
     // force stop all client endpoint
 }
 
+void QIperfC::onClear()
+{
+//    on_Clear();
+    //TODO: clear  m_tpmgr throughput data
+//    m_tpplot->clearGraphs();
+    m_tpplot->clear();
+    emit updateStatus("");
+    emit updateStarttime("");
+}
+
 void QIperfC::onAbout()
 {
-    QMessageBox::about(this, "About", QString(QIPERFC_NAME)+"\n"+
-                       "Auther: Jimmy Yeh\n"+
+    QMessageBox::about(this, "About", QString(QIPERFC_NAME)+"\n"
+                       "Auther: Jimmy Yeh\n"
                        "URL: https://github.com/coolshou/qiperf");
+}
+
+void QIperfC::aboutQCustomPlot()
+{
+    QMessageBox::about(this, "About QCustomPlot", "QCustomPlot\n"
+                       "Ver: "+ QString(QCUSTOMPLOT_VERSION_STR) + "\n"
+                       "URL: https://www.qcustomplot.com/index.php/introduction");
 }
 
 void QIperfC::onErrorStop(int err, QString msg)
@@ -604,62 +630,15 @@ void QIperfC::updateRunStatus(bool bStart)
 {
     ui->actionStart->setEnabled(!bStart);
     ui->actionStop->setEnabled(bStart);
+    ui->actionClear->setEnabled(!bStart);
 }
 
 void QIperfC::initCustomPlote()
 {
-    m_tpplot=new TPPlot(ui->tab_console);
-
-//    ui->vl_console->addWidget(m_tpplot);
-
-//    delete(ui->cplot_tp);
-    ui->splitter->addWidget(m_tpplot);
-//    ui->splitter->replaceWidget(1,m_tpplot);
-//    ui->cplot_tp =m_tpplot;
-//    //init qcustomplot
-//    ui->cplot_tp->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
-//                                  QCP::iSelectLegend | QCP::iSelectPlottables);
-//    ui->cplot_tp->axisRect()->setupFullAxesBox();
-//    //x Axis
-//    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
-//    timeTicker->setTimeFormat("%h:%m:%s");
-//    ui->cplot_tp->xAxis->setTicker(timeTicker);
-
-//    //set axis Label
-//    ui->cplot_tp->xAxis->setLabel("Time(Sec)");
-//    ui->cplot_tp->yAxis->setLabel("Mbps");
-//    //set axis range
-//    // TODO: update range by throughput/time
-//    ui->cplot_tp->xAxis->setRange(0, 120);
-//    ui->cplot_tp->yAxis->setRange(0, 1000);
-////    ui->cplot_tp->replot();
-//    // legend
-//    ui->cplot_tp->legend->setVisible(true);
-//    QCPLayoutGrid *subLayout = new QCPLayoutGrid;
-//    //TODO: position the legend outside of the graph
-//    //
-//    ui->cplot_tp->plotLayout()->addElement(0, 1, subLayout);
-//    ui->cplot_tp->plotLayout()->setColumnStretchFactor(1, 0.1); // col 1
-//    ui->cplot_tp->plotLayout()->setRowStretchFactor(0, 1); // row 0
-
-//    //    subLayout->addElement(0, 0, new QCPLayoutElement); // row 0
-//    subLayout->addElement(0, 0, ui->cplot_tp->legend); // row 0
-//    subLayout->addElement(1, 0, new QCPLayoutElement); // row 1
-//    subLayout->setRowStretchFactor(1, 0.001);
-////    ui->cplot_tp->plotLayout()->setRowStretchFactor(2, 0.001);
-
-//    QFont legendFont = font();
-//    legendFont.setPointSize(10);
-//    ui->cplot_tp->legend->setFont(legendFont);
-//    ui->cplot_tp->legend->setSelectedFont(legendFont);
-//    ui->cplot_tp->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
-
-//    // make left and bottom axes transfer their ranges to right and top axes:
-//    connect(ui->cplot_tp->xAxis, SIGNAL(rangeChanged(QCPRange)), ui->cplot_tp->xAxis2, SLOT(setRange(QCPRange)));
-//    connect(ui->cplot_tp->yAxis, SIGNAL(rangeChanged(QCPRange)), ui->cplot_tp->yAxis2, SLOT(setRange(QCPRange)));
-
-
-
+    m_tpplot=new TPPlot(ui->widget_console);
+    m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &QIperfC::onPlotContextMenuRequest);
+    ui->hl_console->addWidget(m_tpplot);
 }
 
 void QIperfC::resetError()
@@ -725,14 +704,19 @@ void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString data)
         }
 
         Q_UNUSED(refrow)
-        Q_UNUSED(sInterval)
+        //Q_UNUSED(sInterval)
         //TODO treeview data
 //        m_tpmgr->addTPdata(refrow, sInterval,
 //                           jObj["idx"].toString(),
 //                jObj["value"].toString(), jObj["unit"].toString(),
 //                dir);
         //TODO chart data
-
+        // iperf sInterval = 0.00-1.00 format
+        if (sInterval.contains("-")){
+            sInterval = sInterval.right(sInterval.indexOf("-"));
+        }
+//        qDebug()<< "sInterval: " << sInterval;
+        m_tpplot->addTPData(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
@@ -745,6 +729,32 @@ void QIperfC::onDisconnected(QString serverip)
     if (m_wsc.contains(serverip)){
         m_wsc.remove(serverip);
     }
+}
+
+void QIperfC::onPlotContextMenuRequest(QPoint pos)
+{
+    QMenu *menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
+//    if (ui->customPlot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
+//    {
+//        menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignLeft));
+//        menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignHCenter));
+//        menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignRight));
+//        menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom | Qt::AlignRight));
+//        menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom | Qt::AlignLeft));
+//    }
+//    else  // general context menu on graphs requested
+    {
+//        menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
+//        if (ui->customPlot->selectedGraphs().size() > 0)
+//            menu->addAction("Remove selected graph", this, SLOT(removeSelectedGraph()));
+//        if (ui->customPlot->graphCount() > 0)
+//            menu->addAction("Remove all graphs", this, SLOT(removeAllGraphs()));
+        menu->addAction("About", this, &QIperfC::aboutQCustomPlot);
+    }
+
+    menu->popup(m_tpplot->mapToGlobal(pos));
+
 }
 
 void QIperfC::init_actions()
@@ -763,6 +773,8 @@ void QIperfC::init_actions()
     //start/stop
     connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
     connect(ui->actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
+    connect(ui->actionClear, SIGNAL(triggered()), this, SLOT(onClear()));
+
     //help
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
 }

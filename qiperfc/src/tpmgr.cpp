@@ -54,7 +54,7 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
         case TP::cols::client:
             return QString("Client");
         case TP::cols::throughput:
-            return QString("Avg TP");
+            return QString("TPUT");
         case TP::cols::comment:
             return QString("comment");
         default:

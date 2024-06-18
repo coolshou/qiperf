@@ -21,5 +21,6 @@
         <file alias="paste">images/paste.png</file>
         <file alias="about">images/about.png</file>
         <file alias="pair-swap">images/iperf-swap.png</file>
+        <file alias="clear">images/clear.png</file>
     </qresource>
 </RCC>
