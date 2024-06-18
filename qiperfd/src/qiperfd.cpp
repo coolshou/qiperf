@@ -730,13 +730,9 @@ void QIperfd::onWSactMessage(QString msg)
     if (msg.startsWith(CMD_IPERF_ADD)){
         QJsonParseError error;
         msg = msg.remove(0, QString(QString(CMD_IPERF_ADD)+":").length());
-//        qDebug() << "msg:"  << msg;
-
         int cut = msg.indexOf(':', 0);
         QString refrow = msg.left(cut);
         msg = msg.right(msg.length()-cut-1);
-//        qDebug() << "cut: " + QString::number(cut) + " refrow: " << refrow << " ,msg: " << msg;
-
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
             add(refrow, doc.toVariant().toMap());
@@ -746,11 +742,13 @@ void QIperfd::onWSactMessage(QString msg)
     }else if (msg.startsWith(CMD_IPERF_DEL)){
         onLog("TODO: onWSactMessage: CMD_IPERF_DEL:" + msg);
     }else if (msg.startsWith(CMD_IPERF_REG)){
-//        msg = msg.remove(0, QString(QString(CMD_IPERF_ADD)+":").length());
+        msg = msg.remove(0, QString(QString(CMD_IPERF_REG)+":").length());
+        // TODO: tag for bidir
         bReportTPData = true;
-        if (bReportTPData){
-            qDebug() << "Reg to report throughput data";
-        }
+        qDebug() << "SET to Report throughput data";
+    }else if (msg.startsWith(CMD_IPERF_UNREG)){
+        bReportTPData = false;
+        qDebug() << "SET to NOT Report throughput data";
     }else if (msg.startsWith(CMD_IPERF_CLEAR)){
         clear();
     }else if (msg.startsWith(CMD_IPERF_START)){

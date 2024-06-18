@@ -30,6 +30,7 @@
 #define CMD_IPERF_STOPED   "IPERF_STOPED"  // iperf is stop
 #define CMD_IPERF_ADD    "IPERF_ADD"   // add iperf setting
 #define CMD_IPERF_REG    "IPERF_REG" // reg iperf endpoint to report throughput result
+#define CMD_IPERF_UNREG  "IPERF_UNREG" // reg iperf endpoint not to report throughput result
 #define CMD_IPERF_DEL    "IPERF_DEL" // del iperf setting
 #define CMD_IPERF_CLEAR    "IPERF_CLEAR" // clear all iperf setting
 #define CMD_IPERF_TP_DATA  "IPERF_TP_DATA"  // iperf throughput data

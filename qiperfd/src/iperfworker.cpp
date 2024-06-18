@@ -279,6 +279,9 @@ void IperfWorker::parserIperf3(QString msg)
                 QJsonDocument doc;
                 doc.setArray(arr);
 //                qDebug() << "m_tpdatas: " << doc.toJson(QJsonDocument::Compact);
+                if (sInterval.contains("-")){
+                    sInterval = sInterval.right(sInterval.indexOf("-"));
+                }
                 emit onThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
 
             }

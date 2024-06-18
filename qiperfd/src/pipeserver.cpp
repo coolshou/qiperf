@@ -111,7 +111,7 @@ void PipeServer::readyRead()
     QString     readMsg;
     in >> readMsg;// 讀出數據
     emit pipeMessage(idx, readMsg);// 發送收到數據信號
-    qInfo() << m_pid << "("<<idx<<")readyRead:" << readMsg;
+//    qInfo() << m_pid << "("<<idx<<")readyRead:" << readMsg;
 }
 
 void PipeServer::on_disconnected()
@@ -120,14 +120,14 @@ void PipeServer::on_disconnected()
     if (!local) return;
     int idx = m_locals->indexOf(local);
     if ( idx !=-1){
-        qInfo() << "on_disconnected : " << idx ;
+//        qInfo() << "on_disconnected : " << idx ;
         m_locals->removeAt(idx);
     }
 }
 
 void PipeServer::send_MessageBack(int idx, QString message)
 {
-    qDebug() << "send_MessageBack count: " << idx << Qt::endl;
+//    qDebug() << "send_MessageBack count: " << idx << Qt::endl;
     //TODO why following will cause APP crash
     if (!m_locals->isEmpty()){
 

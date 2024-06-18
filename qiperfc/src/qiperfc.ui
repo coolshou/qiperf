@@ -77,6 +77,9 @@
            <property name="sizeAdjustPolicy">
             <enum>QAbstractScrollArea::AdjustToContents</enum>
            </property>
+           <property name="uniformRowHeights">
+            <bool>false</bool>
+           </property>
           </widget>
           <widget class="QWidget" name="widget_console" native="true">
            <property name="minimumSize">
@@ -148,9 +151,9 @@
          <widget class="QWidget" name="widget" native="true">
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
-            <widget class="QPushButton" name="pb_start">
+            <widget class="QPushButton" name="pb_test">
              <property name="text">
-              <string>Start</string>
+              <string>test</string>
              </property>
             </widget>
            </item>
@@ -371,7 +374,7 @@
      <normaloff>:/start</normaloff>:/start</iconset>
    </property>
    <property name="text">
-    <string>Start (TODO)</string>
+    <string>Start</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -452,7 +455,7 @@
   </action>
   <action name="actionClear">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="../../qiperf.qrc">

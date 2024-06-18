@@ -16,14 +16,14 @@ QString MyService::getOS()
     return QSysInfo::productType();
 }
 
-int MyService::addIperfServer(int version, uint port, QString bindHost)
+int MyService::addIperfServer(QString refrow, int version, uint port, QString bindHost)
 {
-    return m_qiperfd->addIperfServer(version, port, bindHost);
+    return m_qiperfd->addIperfServer(refrow, version, port, bindHost);
 }
 
-int MyService::addIperfClient(int version, uint port, QString Host, QString iperfargs)
+int MyService::addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs)
 {
-    return m_qiperfd->addIperfClient(version, port, Host, iperfargs);
+    return m_qiperfd->addIperfClient(refrow, version, port, Host, iperfargs);
 }
 
 void MyService::start(int idx)

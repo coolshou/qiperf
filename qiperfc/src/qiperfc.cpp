@@ -54,18 +54,19 @@ QIperfC::QIperfC(QWidget *parent)
     m_tpmgr = new TPMgr(this);
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &QIperfC::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::rowsRemoved, this, &QIperfC::onTPDataUpdate);
-
+    connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
 
     ui->tv_throughput->setModel(m_tpmgr);
-    ui->tv_throughput->setColumnWidth(TP::cols::id, 30);
+    ui->tv_throughput->setColumnWidth(TP::cols::id, 100);
     ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
     ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
     ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
+//    ui->tv_throughput->expandAll();
     connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemClicked);
 
-    //following will cause problem!! slow update image?
-//    tpdrdelegate = new TPDirDelegate(this);
-//    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdrdelegate);
+    //TODO: slow update text/image?
+    tpdrdelegate = new TPDirDelegate(this);
+    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdrdelegate);
 
     QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
     connect(ism, &QItemSelectionModel::selectionChanged, this, &QIperfC::onTPselectionChanged);
@@ -113,8 +114,7 @@ QIperfC::QIperfC(QWidget *parent)
 
 QIperfC::~QIperfC()
 {
-    qDebug() << "~QIperfC";
-
+//    qDebug() << "~QIperfC";
     delete ui;
 }
 
@@ -225,11 +225,12 @@ void QIperfC::on_Save()
 void QIperfC::on_Clear()
 {
     if (m_tpmgr->rootChildCount()>0) {
+        //this will clear all item include root!!
         m_tpmgr->reset();
     }else{
         qDebug() << "on_Clear No child";
     }
-    // TODO: clear chart!!
+    onClear();
 }
 
 void QIperfC::on_pairAdd()
@@ -266,7 +267,7 @@ void QIperfC::onPairSwap()
         m_tpmgr->swapDirection(midx);
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
-    ui->tv_throughput->update();
+//    ui->tv_throughput->update();
 }
 
 void QIperfC::onStart()
@@ -298,14 +299,14 @@ void QIperfC::onStart()
             QString serverIP = tp->getMgrServer();
             if (!m_wss.contains(serverIP)) {
                 s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
-                qDebug() << "server websocket url: " << s << Qt::endl;
+//                qDebug() << "server websocket url: " << s << Qt::endl;
                 m_wss[serverIP]=new WSClient(serverIP, QUrl(s));
                 connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                 connect(m_wss[serverIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
-                connect(m_wss[serverIP], &WSClient::iperfTPdata, this, &QIperfC::onIperfTPdata);
+//                connect(m_wss[serverIP], &WSClient::iperfTPdata, this, &QIperfC::onIperfTPdata);
+                connect(m_wss[serverIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
                 itimeout = iTimeout;
                 while (! m_wss[serverIP]->isConnected() && itimeout>0){
-//                    qDebug() << "wait WSClient:" << s << " connected";
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                     itimeout--;
@@ -326,16 +327,16 @@ void QIperfC::onStart()
             QString clientIP = tp->getMgrClient();
             if (!m_wsc.contains(clientIP)) {
                 s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
-                qDebug() << "client websocket url: " << s << Qt::endl;
                 m_wsc[clientIP]=new WSClient(clientIP, QUrl(s));
                 connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                 connect(m_wsc[clientIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
-                connect(m_wsc[clientIP], &WSClient::iperfTPdata, this, &QIperfC::onIperfTPdata);
+//                connect(m_wsc[clientIP], &WSClient::iperfTPdata, this, &QIperfC::onIperfTPdata);
+                connect(m_wsc[clientIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
                 itimeout = iTimeout;
                 while (! m_wsc[clientIP]->isConnected()&& itimeout>0){
-//                    qDebug() << "wait WSClient:" << s << " connected";
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
+                    itimeout--;
                 }
                 if (itimeout<=0){
                     emit errorStop(1,"Wait connect to " +s+ "timeout");
@@ -349,11 +350,13 @@ void QIperfC::onStart()
                     break;
                 }
             }
-            // TODO. set report ??
+            // TODO. set websocket to  report throughput
             QString di = tp->getDirection();
             if (di== QVariant::fromValue(TP::DirType::Tx).toString()){
                 m_wss[serverIP]->sendText(CMD_IPERF_REG);
+                m_wsc[clientIP]->sendText(CMD_IPERF_UNREG);
             }else if (di== QVariant::fromValue(TP::DirType::Rx).toString()){
+                m_wss[serverIP]->sendText(CMD_IPERF_UNREG);
                 m_wsc[clientIP]->sendText(CMD_IPERF_REG);
             }else if (di== QVariant::fromValue(TP::DirType::TR).toString()){
                 qDebug()<<"TODO: bidir monitor";
@@ -424,6 +427,7 @@ void QIperfC::onStart()
 #if (TEST_JSONRPC==1)
         //create RPC list for ipserf server and client
         foreach (TP *tp, tps) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
             //TODO: check client ping server first
             //RPC to control all server endpoint init iperf server
             if (createRPC_Server(tp, tp->getMgrServer())==-1){
@@ -439,6 +443,7 @@ void QIperfC::onStart()
         }
 
         foreach (QString mhost, map_qiperfds_server.keys()) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
             //TODO: wait server ready/start
             qDebug() <<" Start iperf server: "<< mhost << Qt::endl;
             auto rpc_tp = map_qiperfds_server.value(mhost);
@@ -467,6 +472,7 @@ void QIperfC::onStart()
 //            }
         }
         foreach (QString mhost, map_qiperfds_client.keys()) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
             //TODO: wait client ready/start
             qDebug() <<" Start iperf client: "<< mhost << Qt::endl;
             auto rpc_tp = map_qiperfds_client.value(mhost);
@@ -483,6 +489,7 @@ void QIperfC::onStart()
         }
         //TODO: start all Iperf client
         foreach (QString mhost, map_qiperfds_client.keys()) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
             auto rpc_tp = map_qiperfds_client.value(mhost);
             auto rs = rpc_tp->rpc->callAsync("startAll");
         }
@@ -494,23 +501,23 @@ void QIperfC::onStart()
     }
 }
 
-void QIperfC::onStop()
-{
+void QIperfC::onStop(){
     updateRunStatus(false);
-    QString e = getNowString();
-    QDateTime enddatetime = QDateTime::fromString(e,DATETIME_NOW_FORMAT);
-    emit updateStatus("Finish at  "+ e +" (Runtime: "+enddatetime.secsTo(m_TestStartTime)+" sec)");
+    QString endtime = getNowString();
+    QDateTime enddatetime = QDateTime::fromString(endtime,DATETIME_NOW_FORMAT);
+    emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(m_TestStartTime.secsTo(enddatetime))+" sec)");
     //stop test
 //    m_tpmgr->stop();
     // check all client endpoint stop
     // force stop all client endpoint
 }
 
-void QIperfC::onClear()
-{
-//    on_Clear();
+void QIperfC::onClear(){
+    //clear all test date, config setting remain unchanged
     //TODO: clear  m_tpmgr throughput data
-//    m_tpplot->clearGraphs();
+    if (m_tpmgr->rootChildCount()>0) {
+        m_tpmgr->clear();
+    }
     m_tpplot->clear();
     emit updateStatus("");
     emit updateStarttime("");
@@ -619,6 +626,14 @@ void QIperfC::notificationReceived(const QString key, const QVariant value)
                      << "Value:" << value << Qt::endl;
 }
 
+void QIperfC::onTest()
+{
+    QString s="[{\"idx\":\"7\",\"unit\":\"Mbits/sec\",\"value\":\"22.3\"},{\"idx\":\"10\",\"unit\":\"Mbits/sec\",\"value\":\"22.2\"},{\"idx\":\"12\",\"unit\":\"Mbits/sec\",\"value\":\"22.0\"}]";
+
+    onIperfTPdata("0", "0.0-1.0", s);
+    ui->pb_test->setEnabled(true);
+}
+
 void QIperfC::closeEvent(QCloseEvent *event)
 {
     //TODO: check config edit.
@@ -690,10 +705,10 @@ void QIperfC::onIperfStoped(QString ipport)
     qDebug() << "onIperfStoped:" << ipport;
 }
 
-void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString data)
+void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
 //    qDebug() << "onIperfTPdata:" << refrow << " : " << data;
-    QJsonDocument doc=QJsonDocument::fromJson(data.toUtf8());
+    QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8());
     QJsonArray jArr = doc.array();//.object();
     foreach (auto jObj, jArr){
 //        qDebug() << "idx: " << jObj["idx"] << " value: " << jObj["value"]
@@ -705,18 +720,17 @@ void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString data)
 
         Q_UNUSED(refrow)
         //Q_UNUSED(sInterval)
-        //TODO treeview data
-//        m_tpmgr->addTPdata(refrow, sInterval,
-//                           jObj["idx"].toString(),
-//                jObj["value"].toString(), jObj["unit"].toString(),
-//                dir);
-        //TODO chart data
         // iperf sInterval = 0.00-1.00 format
         if (sInterval.contains("-")){
             sInterval = sInterval.right(sInterval.indexOf("-"));
         }
-//        qDebug()<< "sInterval: " << sInterval;
-        m_tpplot->addTPData(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
+        //TODO treeview data
+        m_tpmgr->addTPdata(refrow, sInterval,
+                           jObj["idx"].toString(),
+                jObj["value"].toString(), jObj["unit"].toString(),
+                dir);
+        // chart data
+        m_tpplot->onIperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
@@ -777,6 +791,8 @@ void QIperfC::init_actions()
 
     //help
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
+    //test
+    connect(ui->pb_test, &QPushButton::clicked, this, &QIperfC::onTest);
 }
 
 void QIperfC::initStatusbar()
@@ -850,17 +866,6 @@ void QIperfC::on_pb_add_server_clicked()
     pclient->send_MessageToServer(strJson);
 }
 
-
-void QIperfC::on_pb_start_clicked()
-{
-    QJsonObject mainObj;
-    mainObj.insert("Action", CMD_IPERF_START);
-    QJsonDocument doc(mainObj);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-    pclient->send_MessageToServer(strJson);
-}
-
-
 void QIperfC::on_pb_stop_clicked()
 {
     QJsonObject mainObj;
@@ -901,9 +906,11 @@ void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
         bStart=false;
         ui->actionStart->setEnabled(!bStart);
         ui->actionStop->setEnabled(bStart);
+        ui->actionClear->setEnabled(!bStart);
     } else {
         ui->actionStart->setEnabled(false);
         ui->actionStop->setEnabled(false);
+//        ui->actionClear->setEnabled(false);
     }
     //    updateRunStatus(bStart);
 }

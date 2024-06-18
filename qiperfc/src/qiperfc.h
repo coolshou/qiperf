@@ -71,7 +71,8 @@ public slots:
     int createRPC_Client(TP tp, QString host="127.0.0.1", int rpc_port=RPC_PORT);
 #endif
     void notificationReceived(const QString key, const QVariant value);
-
+    //test
+    void onTest();
 signals:
     void updateEndpointNum(int n);
     void updateStarttime(QString stime);
@@ -97,7 +98,6 @@ private slots:
     void onUpdateStatus(QString msg);
     void on_pb_status_clicked();
     void on_pb_add_server_clicked();
-    void on_pb_start_clicked();
     void on_pb_stop_clicked();
     void on_updateEndpointNum(int n);
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
@@ -128,8 +128,6 @@ private:
     QMap<QString, RpcTp *> map_qiperfds_client; // manager all qiperfd <manager ip, rpc_client> for iperf client
 #endif
     UdpReceiver *m_receiver;
-//    QChartView *m_tpchart;
-//    TPChart *m_tpchart;
     EndPointMgr *m_endpointmgr;
     QLabel *m_start_label;
     QLabel *m_status_label;

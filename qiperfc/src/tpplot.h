@@ -18,13 +18,16 @@ public:
     explicit TPPlot(QWidget *parent = nullptr);
     void setStartTime(QDateTime startTime);
     void addTPDatas(QString sInterval, QString idx, QString datas); // time sInterval, parallel number , throughput data list
-    void addTPData(QString sInterval, QString idx, QString data);  //
     void addTPData(QString idx, double xdata, double ydata);  //
     QCPGraph *getGraph(QString idx); // get QCPGraph by index
     void clear();
 
+public slots:
+    void onIperfTPdata(QString sInterval, QString idx, QString data);  //
+
 private slots:
     void realtimeDataSlot(QPrivateSignal sig);
+
 private:
     void initCustomPlote();
     void addRandomGraph();

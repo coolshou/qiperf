@@ -10,12 +10,21 @@ TP::TP(QString id, QString data, TP *parent)
     m_jsondata = "";
     if (data!=""){
         this->loadData(data);
+    }else{
+        m_itemDatas.append(m_id);
+        for(auto i=(int)TP::server;i<TP::comment;i++){
+            m_itemDatas.append("");
+        }
     }
 }
 
 void TP::appendChild(TP *item)
 {
     m_childItems.append(item);
+}
+
+void TP::clear(){
+    m_childItems.clear();
 }
 
 int TP::findChild(TP *child)
@@ -250,7 +259,7 @@ int TP::getPort()
 
 void TP::setThroughput(QString value)
 {
-    m_itemDatas[TP::cols::throughput] = value;
+    m_itemDatas[TP::throughput] = value;
 }
 
 void TP::updateTimeStemp()

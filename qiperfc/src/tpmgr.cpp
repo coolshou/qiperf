@@ -33,6 +33,9 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
     //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
     TP *item = static_cast<TP*>(index.internalPointer());
 //    //    EndPoint *item = itemFromIndex(index);
+//    QVariant t = item->data(index.column());
+//    qDebug() << "data: " << t;
+//    return t;
     return item->data(index.column());
 }
 
@@ -122,7 +125,6 @@ bool TPMgr::add(QString data)
     int idx = rootItem->childCount();
     beginInsertRows(QModelIndex(), idx, idx);
     TP *tp = new TP(QString::number(idx), data, rootItem);
-    qDebug() << "=========> add:" << tp;
     rootItem->appendChild(tp);
     endInsertRows();
     return true;
@@ -146,6 +148,7 @@ QModelIndex TPMgr::indexFromItem(TP *item){
 
     for(int i=0; i < parents.count(); i++){
         ix = index(parents[i]->row(), 0, ix);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     ix = index(ix.row(), 0, ix);
     return ix;
@@ -162,6 +165,7 @@ QList<TP *> TPMgr::getChilds()
     m_tps.clear();
     for(int i = 0; i<this->rootItem->childCount();i++){
         m_tps.append(this->rootItem->child(i));
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 
     return m_tps;
@@ -189,6 +193,7 @@ QByteArray TPMgr::savedata()
             QJsonDocument jsonDoc= QJsonDocument::fromJson(tp->saveData().toUtf8());
             QJsonObject jsonObj = jsonDoc.object();
             jsonarr.append(jsonObj);
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }else {
         qDebug() << "TPMgr::savedata: No data to save" << Qt::endl;
@@ -206,27 +211,27 @@ bool TPMgr::loaddata(QByteArray data)
         QJsonDocument doc(obj);
         QString strJson(doc.toJson(QJsonDocument::Compact));
         add(strJson);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     return true;
 }
 
-void TPMgr::reset()
-{
+void TPMgr::reset(){
+    //reset all data to none
     beginResetModel();
     m_tps.clear();
     this->rootItem = new TP(("Root"), ("Root"));
     endResetModel();
 }
 
-//TP *TPMgr::itemFromIndex(const QModelIndex &index) const
-//{
-//    if (index.isValid())
-//    {
-//        TP *item = static_cast<TP*>(index.internalPointer());
-//        return item;
-//    }
-//    return rootItem;
-//}
+void TPMgr::clear(){
+    // clean test record
+    if (this->rootItem->haveChilds()){
+        qDebug()<< "clear";
+        this->rootItem->clear();
+        emit dataChanged(QModelIndex(),QModelIndex());
+    }
+}
 
 TP *TPMgr::getItem(const QModelIndex &index) const
 {
@@ -245,57 +250,37 @@ int TPMgr::swapDirection(QModelIndex midx)
 {
     TP *tp= getItem(midx);
     if (tp->getDirection().contains("Tx")){
-//        qDebug() << "to Rx";
         tp->setDirection(TP::DirType::Rx);
     }else if (tp->getDirection().contains("Rx")){
-//        qDebug() << "to Tx";
         tp->setDirection(TP::DirType::Tx);
     }
-    qDebug() << "after: " << tp->data(TP::cols::dir);
-    emit dataChanged(midx,midx);
+//    qDebug() << "after: " << tp->data(TP::cols::dir) << " midx: " <<midx;
+    emit dataChanged(QModelIndex(),QModelIndex());
     return 0;
 }
 
 void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir)
 {
-
+    Q_UNUSED(sInterval)
+    Q_UNUSED(unit)
+    Q_UNUSED(dir)
     TP *tp = getItemByIdx(midx);
     if (tp==nullptr){
         qDebug() << "no parrent iperf pair??";
         return;
     }
-    qDebug() << "idx: " << idx << " TP:" << tp;
-    TP *c = getItemByIdx(idx, tp);
+    TP *c = getItemByIdx(midx+"_"+idx, tp);
     if (c==nullptr){
-        qDebug() << "NEW:" << midx << "Interval: "<< sInterval << "idx:" << idx << "value:" << value << "unit:" << unit << "dir:" << dir;
-//        c = new TP(idx, "", tp);
-//        c->setThroughput(value);
-//        tp->appendChild(c);
+//        beginInsertRows(QModelIndex(),tp->childCount(),tp->childCount());
+        c = new TP(midx+"_"+idx, "", tp);
+        c->setThroughput(value);
+//        c->setExpanded(true);
+        tp->appendChild(c);
+//        endInsertRows();
     }else{
-        qDebug() << "UPDATE:" << midx << "Interval: "<< sInterval << "idx:" << idx << "value:" << value;
         c->setThroughput(value);
     }
-
-    // get rootItem by midx;
-    //qDebug() << "this->rootItem:" << this->rootItem << " count:" << this->rootItem->childCount();
-
-//    if (this->rootItem->childCount()<=0){
-//        TP *c = new TP(idx, "", this->rootItem);
-//        c->setThroughput(value);
-//        this->rootItem->appendChild(c);
-//    }else{
-//        TP *tp = this->rootItem->child(midx.toInt());
-//        if (tp){
-//            qDebug()<< "TODO: tp:" << tp->getID();
-//            // TODO: unit check?
-
-//            //
-////            tp->appendChild(c);
-//        }else{
-//            qDebug()<< "unknown midx:" << midx;
-//        }
-//    }
-    //tp->appendChild();
+    emit dataChanged(QModelIndex(),QModelIndex());
 }
 
 TP *TPMgr::getItemByIdx(QString midx, TP *item)
@@ -304,7 +289,7 @@ TP *TPMgr::getItemByIdx(QString midx, TP *item)
     if (item==nullptr){
         lst = getChilds();
     }else{
-        qDebug() << "getItemByIdx:" << midx << " item:" << item;
+//        qDebug() << "getItemByIdx:" << midx << " item:" << item;
         if (item->haveChilds()){
             if (item->childCount()>0){
                 lst = item->getChilds();
@@ -312,7 +297,7 @@ TP *TPMgr::getItemByIdx(QString midx, TP *item)
                 return nullptr;
             }
         }else{
-            qDebug() << "item: " << item << " DO NOT have child";
+//            qDebug() << "item: " << item << " DO NOT have child";
             return nullptr;
         }
     }
@@ -325,4 +310,28 @@ TP *TPMgr::getItemByIdx(QString midx, TP *item)
         }
     }
     return nullptr;
+}
+
+void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
+{
+    QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8());
+    QJsonArray jArr = doc.array();//.object();
+    double sum=0;
+    foreach (auto jObj, jArr){
+        QString dir=nullptr;
+        if (!jObj["dir"].isUndefined()){
+            dir=jObj["dir"].toString();
+        }
+        sum = sum + jObj["value"].toString().toDouble();
+        this->addTPdata(refrow, sInterval, jObj["idx"].toString(),
+                jObj["value"].toString(), jObj["unit"].toString(), dir);
+        // chart data
+        emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    TP *tp = getItemByIdx(refrow);
+    if (!(tp==nullptr)){
+        tp->setThroughput(QString::number(sum));
+        emit dataChanged(QModelIndex(),QModelIndex());
+    }
 }

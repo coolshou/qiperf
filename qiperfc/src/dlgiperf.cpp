@@ -16,8 +16,8 @@ DlgIperf::DlgIperf(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->cb_version, &QComboBox::currentTextChanged, this, &DlgIperf::ChangeVersion);
-    connect(ui->chk_bidir, &QCheckBox::stateChanged, this, &DlgIperf::on_chk_bidir_statech);
-    connect(ui->chk_reverse, &QCheckBox::stateChanged, this, &DlgIperf::on_chk_reverse_statech);
+    connect(ui->chk_bidir, &QCheckBox::stateChanged, this, &DlgIperf::onChkBidirStatech);
+    connect(ui->chk_reverse, &QCheckBox::stateChanged, this, &DlgIperf::onChkReverseStatech);
 
 //    connect(ui, &QDialog::accepted, this, &QDialog::onAccepted);
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DlgIperf::onAccepted);
@@ -27,8 +27,8 @@ DlgIperf::DlgIperf(QWidget *parent) :
     auto * model = qobject_cast<QStandardItemModel*>(ui->cb_protocal->model());
     auto * itemUTP = model->item(1);
     itemUTP->setEnabled(false);
-    auto * itemSCTP = model->item(2);
-    itemSCTP->setEnabled(false);
+//    auto * itemSCTP = model->item(2);
+//    itemSCTP->setEnabled(false);
 //    ui->cb_protocal->model()->item(1);
 }
 
@@ -205,14 +205,14 @@ void DlgIperf::onAccepted()
     }
 }
 
-void DlgIperf::on_chk_bidir_statech(int state)
+void DlgIperf::onChkBidirStatech(int state)
 {
     if (state==Qt::Checked){
         ui->chk_reverse->setCheckState(Qt::Unchecked);
     }
 }
 
-void DlgIperf::on_chk_reverse_statech(int state)
+void DlgIperf::onChkReverseStatech(int state)
 {
     if (state==Qt::Checked){
         ui->chk_bidir->setCheckState(Qt::Unchecked);

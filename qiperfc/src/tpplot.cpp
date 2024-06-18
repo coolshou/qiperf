@@ -19,7 +19,7 @@ void TPPlot::addTPDatas(QString sInterval, QString idx, QString datas)
 //    }
 }
 
-void TPPlot::addTPData(QString sInterval, QString idx, QString data)
+void TPPlot::onIperfTPdata(QString sInterval, QString idx, QString data)
 {
     double x = sInterval.toDouble();
     double y = data.toDouble();
@@ -33,6 +33,9 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata)
     if (ydata> this->yAxis->range().upper){
         this->yAxis->setRange(0, ydata+50);
     }
+    if (xdata> this->xAxis->range().upper){
+        this->xAxis->setRange(0, xdata+30);
+    }
     graph->addData(xdata, ydata);
     this->replot();
 }
@@ -43,26 +46,30 @@ QCPGraph *TPPlot::getGraph(QString idx)
     QCPGraph *g;
     if (!m_graphs.contains(idx)){
         g = this->addGraph();
+        graphPen = newColorPen(rand()%245+10, rand()%245+10, rand()%245+10, 1);
+        g->setPen(graphPen);
+        g->setLineStyle(QCPGraph::lsLine);
     }else{
         g = m_graphs.value(idx);
     }
 //    qDebug() << "getGraph: " << idx << " g:" << g;
     g->setName(idx);
-    graphPen = newColorPen(rand()%245+10, rand()%245+10, rand()%245+10, 1);
-    g->setPen(graphPen);
-    g->setLineStyle(QCPGraph::lsLine);
     m_graphs.insert(idx,g);
     return g;
 }
 
 void TPPlot::clear()
 {
-    for( int g=0; g<this->graphCount(); g++ )
-    {
-        this->graph(g)->data()->clear();
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
-        this->removeGraph(g);
-    }
+//    qDebug() <<"graphCount: " << this->graphCount();
+//    for( int g=0; g<this->graphCount(); g++ )
+//    {
+//        QCoreApplication::processEvents(QEventLoop::AllEvents);
+//        this->graph(g)->data()->clear();
+//        qDebug() <<"removeGraph: " << g;
+//        this->removeGraph(g);
+//    }
+//    m_graphs.clear();
+    this->clearGraphs();
     this->replot();
 }
 

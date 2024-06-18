@@ -30,6 +30,7 @@ public:
     };
     Q_ENUM(cols)
     void appendChild(TP *child);
+    void clear();
     int findChild(TP *child);
 
     TP *child(int row);

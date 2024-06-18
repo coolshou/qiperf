@@ -29,14 +29,15 @@ public:
     QByteArray savedata();
     bool loaddata(QByteArray data);
     void reset();
+    void clear();
     TP *getItem(const QModelIndex& index) const;
     int swapDirection(QModelIndex midx);
     void addTPdata(QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir=nullptr);
     TP *getItemByIdx(QString midx, TP *item=nullptr);
-
-private:
-//    TP *itemFromIndex(const QModelIndex &index) const;
-
+public slots:
+    void onIperfTPdata(QString refrow, QString sInterval, QString datas);
+signals:
+    void IperfTPdata(QString sInterval, QString idx, QString data);
 
 private:
     TP *rootItem;
