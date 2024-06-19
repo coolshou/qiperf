@@ -175,6 +175,9 @@
            <property name="alignment">
             <set>Qt::AlignCenter</set>
            </property>
+           <property name="maximum">
+            <number>9999</number>
+           </property>
           </widget>
          </item>
          <item row="13" column="3">
@@ -580,6 +583,9 @@
          </item>
          <item row="6" column="3">
           <widget class="QComboBox" name="cb_unit_bitrate">
+           <property name="currentText">
+            <string>M</string>
+           </property>
            <item>
             <property name="text">
              <string>K</string>
@@ -620,7 +626,7 @@
          <item row="7" column="3">
           <widget class="QComboBox" name="cb_unit_windowsize">
            <property name="currentText">
-            <string>K</string>
+            <string>M</string>
            </property>
            <item>
             <property name="text">
