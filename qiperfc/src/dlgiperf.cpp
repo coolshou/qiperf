@@ -24,9 +24,9 @@ DlgIperf::DlgIperf(QWidget *parent) :
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     // TODD: temp disable item of UDP/SCTP
-    auto * model = qobject_cast<QStandardItemModel*>(ui->cb_protocal->model());
-    auto * itemUTP = model->item(1);
-    itemUTP->setEnabled(false);
+//    auto * model = qobject_cast<QStandardItemModel*>(ui->cb_protocal->model());
+//    auto * itemUTP = model->item(1);
+//    itemUTP->setEnabled(false);
 //    auto * itemSCTP = model->item(2);
 //    itemSCTP->setEnabled(false);
 //    ui->cb_protocal->model()->item(1);

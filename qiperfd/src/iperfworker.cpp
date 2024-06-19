@@ -64,8 +64,8 @@ void IperfWorker::work()
 //    m_iperf->start();
     connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
     connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
-    connect(m_iperf, SIGNAL(readyRead()), this, SLOT(readyReadStdOut()));
-    connect(m_iperf, SIGNAL(started()), this, SLOT(onStarted()));
+    connect(m_iperf, &QProcess::readyRead, this, &IperfWorker::readyReadStdOut);
+    connect(m_iperf, &QProcess::started, this, &IperfWorker::onStarted);
 //    connect(m_iperf, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(onFinished(int,QProcess::ExitStatus)));
     connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
     //errorOccurred(QProcess::ProcessError error)
@@ -119,6 +119,11 @@ void IperfWorker::setIperfLogPath(QString filepath)
     m_iperflogpath = filepath;
 }
 
+void IperfWorker::setBidirTag(QString bidir)
+{
+    m_bidirtag = bidir;
+}
+
 void IperfWorker::setRefRow(QString refrow)
 {
     m_refrow = refrow;
@@ -145,7 +150,7 @@ void IperfWorker::onStarted()
 {
     QString tmp = m_iperflogpath+"/"+getBindKey()+".log";
     m_logfile=new QFile(tmp);
-    qDebug() << "m_logfile: " << m_logfile->fileName();
+    qInfo() << "m_logfile: " << m_logfile->fileName();
 
     if(m_logfile->open(QIODevice::WriteOnly|QIODevice::Append)){
         m_logtextstream = new QTextStream(m_logfile);
@@ -216,77 +221,93 @@ void IperfWorker::parserStdOut(QString msg)
 
 void IperfWorker::parserIperf3(QString msg)
 {
-    if (m_protocal=="TCP"){
-        if (msg.contains("Server listening")||
-            msg.contains("Accepted connection")||
-            msg.contains("Connecting")||
-            msg.contains("local") ||
-            msg.contains("Interval") ||
-            msg.contains("(omitted)")||
-            msg.contains("- - ")||
-            msg.contains("--")){
-            //ignore this lines
-        }else if(msg.contains("iperf Done.")){
-            // TODO: when see this : iperf run finish!!
-        }else if(msg.contains("sender")||
-                 msg.contains("receiver")){
-            //TODO: final sumary
+    if (msg.contains("Server listening")||
+        msg.contains("Accepted connection")||
+        msg.contains("Connecting")||
+        msg.contains("local") ||
+        msg.contains("Interval") ||
+        msg.contains("(omitted)")||
+        msg.contains("- - ")||
+        msg.contains("--")||
+        msg.contains("Reverse mode")){
+        //ignore this lines
+    }else if(msg.contains("iperf Done.")){
+        // TODO: when see this : iperf run finish!!
+    }else if(msg.contains("sender")||
+             msg.contains("receiver")){
+        //TODO: final sumary
 
-        }else{
+    }else{
 //            qDebug() << "parserIperf3: " << msg;
-            QString sDir = nullptr;
-            int iS = msg.indexOf("]",0, Qt::CaseInsensitive);
-            QString idx = msg.mid(1,3).trimmed();  // extract [ idx]
+        QString sDir = nullptr;
+        int iS = msg.indexOf("]",0, Qt::CaseInsensitive);
+        QString idx = msg.mid(1,3).trimmed();  // extract [ idx]
+        msg = msg.right(msg.length()-iS-1);
+        QString sTag="";
+        if (m_servermode){
+            sTag="s";
+        }else{
+            sTag="c";
+        }
+        int iparallel = m_parallel.toInt();
+        if (m_bidir){
+//                iparallel = m_parallel.toInt()*2; // bidir ;
+            // in bidir only get
+            iS = msg.indexOf("]",0, Qt::CaseInsensitive);
+            sDir = msg.mid(1,iS-1).trimmed();// server:[TX-S][RX-S], client:[TX-C][RX-C]
             msg = msg.right(msg.length()-iS-1);
-            int iparallel;
-            if (m_bidir){
-                iparallel = m_parallel.toInt()*2; // bidir;
-                qDebug() << "m_bidir: " << m_bidir ;
-                //TODO: bidir
-                iS = msg.indexOf("]",0, Qt::CaseInsensitive);
-                sDir = msg.mid(1,2).trimmed();
-                msg = msg.right(msg.length()-iS-1);
+            if (sDir.contains("RX")){
+                if (m_servermode){
+                    sDir = "Tx";
+                }else{
+                    sDir = "Rx";
+                }
+                msg = msg.trimmed();
+//                    qDebug() << "bidir msg:" << msg;
             }else {
-                iparallel = m_parallel.toInt();
+                //ignore Tx part data
+                return;
             }
-            QStringList data = msg.split(" ", Qt::SkipEmptyParts);
-            QString sInterval  = data[0]; // Interval
+        }else{
+            sDir = m_bidirtag;
+        }
+        QStringList data = msg.split(" ", Qt::SkipEmptyParts);
+        QString sInterval  = data[0]; // Interval
 //            qDebug() << "idx:" << idx << " ,Interval:" << sInterval
 //                     << " ,Bitrate:" << irec->m_value  << " ,unit:" << irec->m_unit;
-            if (!m_tpdatas.contains(sInterval)){
+        if (!m_tpdatas.contains(sInterval)){
 //                qDebug() << "new data: " << sInterval;
-                QJsonArray lst =QJsonArray();
-                m_tpdatas.insert(sInterval, lst);
+            QJsonArray lst =QJsonArray();
+            m_tpdatas.insert(sInterval, lst);
+        }
+        if (m_tpdatas[sInterval].count()<iparallel){
+            QJsonObject irec = QJsonObject();
+            irec.insert("idx", idx+sTag);  // parallel num
+            irec.insert("value", data[4]);  // Bitrate
+            irec.insert("unit", data[5]);  // Bitrate unit
+            if (!sDir.isNull()){
+                irec.insert("dir", sDir);  // direction
             }
-            if (m_tpdatas[sInterval].count()<iparallel){
-                QJsonObject irec = QJsonObject();
-                irec.insert("idx", idx);  // parallel num
-                irec.insert("value", data[4]);  // Bitrate
-                irec.insert("unit", data[5]);  // Bitrate unit
-                if (!sDir.isNull()){
-                    irec.insert("dir", sDir);  // direction
-                }
-                if (idx.contains("SUM", Qt::CaseInsensitive)){
-                    qDebug() << "==msg==  " << msg;
-                }else{
+            if (idx.contains("SUM", Qt::CaseInsensitive)){
+                qDebug() << "==msg==  " << msg;
+            }else{
 //                    qDebug() << "m_parallel: " << iparallel << "m_tpdatas length: " << m_tpdatas[sInterval].count();
-                    m_tpdatas[sInterval].append(irec);
-                }
+                m_tpdatas[sInterval].append(irec);
             }
-            if ((m_tpdatas[sInterval].count()>=iparallel)&&
-                 !idx.contains("SUM", Qt::CaseInsensitive)){
-                QJsonArray arr = m_tpdatas[sInterval];
-                QJsonDocument doc;
-                doc.setArray(arr);
+        }
+        if ((m_tpdatas[sInterval].count()>=iparallel)&&
+             !idx.contains("SUM", Qt::CaseInsensitive)){
+            QJsonArray arr = m_tpdatas[sInterval];
+            QJsonDocument doc;
+            doc.setArray(arr);
 //                qDebug() << "m_tpdatas: " << doc.toJson(QJsonDocument::Compact);
-                if (sInterval.contains("-")){
-                    sInterval = sInterval.right(sInterval.indexOf("-"));
-                }
-                emit onThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
-
+            if (sInterval.contains("-")){
+                sInterval = sInterval.right(sInterval.indexOf("-"));
             }
+            emit onThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
 
         }
+
     }
 }
 /*TCP
@@ -311,6 +332,53 @@ void IperfWorker::parserIperf3(QString msg)
 [  7]   0.00-10.00  sec  26.8 MBytes  22.5 Mbits/sec    0             sender
 [  7]   0.00-10.00  sec  26.8 MBytes  22.5 Mbits/sec                  receiver
 */
+/*
+
+ *
+*/
 /* UDP
+-----------------------------------------------------------
+Server listening on 5201 (test #1)
+-----------------------------------------------------------
+Accepted connection from 192.168.111.23, port 37809
+[  7] local 192.168.111.125 port 5201 connected to 192.168.111.23 port 41708
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  7]   0.00-1.00   sec   129 KBytes  1.05 Mbits/sec  0.009 ms  0/91 (0%)  (omitted)
+[  7]   1.00-2.00   sec   127 KBytes  1.04 Mbits/sec  0.007 ms  0/90 (0%)  (omitted)
+[  7]   0.00-1.00   sec   129 KBytes  1.05 Mbits/sec  0.011 ms  0/91 (0%)
+[  7]   1.00-2.00   sec   127 KBytes  1.04 Mbits/sec  0.008 ms  0/90 (0%)
+[  7]   2.00-3.00   sec   129 KBytes  1.05 Mbits/sec  0.013 ms  0/91 (0%)
+[  7]   3.00-4.00   sec   129 KBytes  1.05 Mbits/sec  0.013 ms  0/91 (0%)
+[  7]   4.00-5.00   sec   127 KBytes  1.04 Mbits/sec  0.012 ms  0/90 (0%)
+[  7]   5.00-6.00   sec   129 KBytes  1.05 Mbits/sec  0.009 ms  0/91 (0%)
+[  7]   6.00-7.00   sec   127 KBytes  1.04 Mbits/sec  0.009 ms  0/90 (0%)
+[  7]   7.00-8.00   sec   129 KBytes  1.05 Mbits/sec  0.024 ms  0/91 (0%)
+[  7]   8.00-9.00   sec   127 KBytes  1.04 Mbits/sec  0.011 ms  0/90 (0%)
+[  7]   9.00-10.00  sec   129 KBytes  1.05 Mbits/sec  0.013 ms  0/91 (0%)
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  7]   0.00-10.00  sec  1.25 MBytes  1.05 Mbits/sec  0.013 ms  0/906 (0%)  receiver
+
+Connecting to host 192.168.111.125, port 5201
+[  7] local 192.168.111.23 port 41708 connected to 192.168.111.125 port 5201
+[ ID] Interval           Transfer     Bitrate         Total Datagrams
+[  7]   0.00-1.00   sec   129 KBytes  1.05 Mbits/sec  91  (omitted)
+[  7]   1.00-2.00   sec   127 KBytes  1.04 Mbits/sec  90  (omitted)
+[  7]   0.00-1.00   sec   129 KBytes  1.05 Mbits/sec  91
+[  7]   1.00-2.00   sec   129 KBytes  1.05 Mbits/sec  91
+[  7]   2.00-3.00   sec   127 KBytes  1.04 Mbits/sec  90
+[  7]   3.00-4.00   sec   129 KBytes  1.05 Mbits/sec  91
+[  7]   4.00-5.00   sec   127 KBytes  1.04 Mbits/sec  90
+[  7]   5.00-6.00   sec   129 KBytes  1.05 Mbits/sec  91
+[  7]   6.00-7.00   sec   127 KBytes  1.04 Mbits/sec  90
+[  7]   7.00-8.00   sec   129 KBytes  1.05 Mbits/sec  91
+[  7]   8.00-9.00   sec   127 KBytes  1.04 Mbits/sec  90
+[  7]   9.00-10.00  sec   129 KBytes  1.05 Mbits/sec  91
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  7]   0.00-10.00  sec  1.25 MBytes  1.05 Mbits/sec  0.000 ms  0/906 (0%)  sender
+[  7]   0.00-10.00  sec  1.25 MBytes  1.05 Mbits/sec  0.013 ms  0/906 (0%)  receiver
+
+iperf Done.
 
 */

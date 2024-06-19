@@ -24,7 +24,9 @@ void TP::appendChild(TP *item)
 }
 
 void TP::clear(){
-    m_childItems.clear();
+    //TODO: following will cause proble!!
+//    qDeleteAll(m_childItems);
+//    m_childItems.clear();
 }
 
 int TP::findChild(TP *child)
@@ -99,8 +101,12 @@ bool TP::removeChildren(int position, int count)
     if (position < 0 || position + count > m_childItems.size())
     return false;
 
+//    qDeleteAll(m_childItems);
+//    m_childItems.clear();
     for (int row = 0; row < count; ++row){
-        delete m_childItems.takeAt(position);
+        TP *tp =m_childItems.takeAt(position);
+        delete tp;
+        tp=nullptr;
     }
 
     return true;
@@ -108,6 +114,7 @@ bool TP::removeChildren(int position, int count)
 
 int TP::row() const
 {
+    //TODO: after clear, the may cause problem
     if (m_parentItem){
         if (m_parentItem->haveChilds()){
             return m_parentItem->m_childItems.indexOf(const_cast<TP*>(this));
@@ -123,7 +130,6 @@ QString TP::getID()
 
 void TP::loadData(QString data)
 {
-//    qDebug() << "loadData:" << m_parentItem << Qt::endl;
     QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
     QJsonObject jsonRoot = doc.object();
 
@@ -136,14 +142,11 @@ void TP::loadData(QString data)
     m_omit = o_client["omit"].toInt();
 
 //    QString m_mclient = o_client["manager"].toString();
-//    int dir=DirType::Tx;
     m_direction = QVariant::fromValue(DirType::Tx).toString();
     if (o_client["bidir"].toBool()){
-//        dir=DirType::TR;
         m_direction=QVariant::fromValue(DirType::TR).toString();
     }
     if (o_client["reverse"].toBool()){
-//        dir=DirType::Rx;
         m_direction=QVariant::fromValue(DirType::Rx).toString();
     }
 
@@ -151,13 +154,10 @@ void TP::loadData(QString data)
     m_server = o_client["target"].toString();
     m_mgrserver = o_server["manager"].toString();
 
-//    QString m_mserver = o_server["manager"].toString();
-//    m_itemDatas.append(m_mserver+"("+m_server+")");
     m_itemDatas.clear();
     m_itemDatas.append(m_id);
     m_itemDatas.append(m_server);
     m_itemDatas.append(m_direction);
-//    m_itemDatas.append(m_mclient+"("+m_client+")");
     m_itemDatas.append(m_client);
     m_itemDatas.append(""); //throughput
     m_itemDatas.append(""); //comment
@@ -165,6 +165,16 @@ void TP::loadData(QString data)
     m_jsondata = data;
 }
 
+QString TP::getJsonData(){
+    return m_jsondata;
+}
+void TP::resetData(){
+    //reset (clear) test data
+//    clear();
+    QString d = getJsonData();
+    loadData(d);
+
+}
 QString TP::saveData()
 {
     return m_jsondata;

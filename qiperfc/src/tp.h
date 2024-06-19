@@ -48,6 +48,8 @@ public:
 
     QString getID();
     void loadData(QString data);
+    QString getJsonData();
+    void resetData();
     QString saveData();
     int getVersion();
     QString getServer();

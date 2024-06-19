@@ -244,6 +244,8 @@
     <addaction name="actionAdd"/>
     <addaction name="actionEdit"/>
     <addaction name="actionDelete"/>
+    <addaction name="separator"/>
+    <addaction name="actionShowLog"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -463,6 +465,11 @@
    </property>
    <property name="text">
     <string>Clear</string>
+   </property>
+  </action>
+  <action name="actionShowLog">
+   <property name="text">
+    <string>Show Log (TODO)</string>
    </property>
   </action>
  </widget>

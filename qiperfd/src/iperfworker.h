@@ -23,6 +23,7 @@ public:
     void setStop();
     QString getBindKey(); // return  bind_addr:port
     void setIperfLogPath(QString filepath); //full path of iperf log filename
+    void setBidirTag(QString bidir);
     void setRefRow(QString refrow);
     void setExtra(QString parallel, QString protocal,bool bidir);
     void toLogFile(QString msg);
@@ -59,8 +60,10 @@ private:
     QString m_parallel="0";
     QString m_protocal="TCP";
     bool m_bidir=false;
+    bool m_reverse=false; //TODO
     QString m_iperfexe; // iperf exec name
     QString m_iperflogpath;
+    QString m_bidirtag;
     QFile *m_logfile;
     QTextStream *m_logtextstream;
     uint m_port;  //iperf port

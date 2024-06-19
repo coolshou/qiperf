@@ -102,7 +102,7 @@ private slots:
     void on_updateEndpointNum(int n);
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onTPDataUpdate(const QModelIndex &parent, int first, int last);
-    void onItemClicked(QModelIndex idx);
+    void onItemDClicked(QModelIndex idx);
     void onRPC_result(const QVariant& result);
     void onRPC_error(int code, const QString& message);
     void onIperfStarted(QString ipport);

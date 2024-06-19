@@ -52,6 +52,7 @@ QIperfC::QIperfC(QWidget *parent)
     iTimeout = 10*100;
     //
     m_tpmgr = new TPMgr(this);
+
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &QIperfC::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::rowsRemoved, this, &QIperfC::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
@@ -61,8 +62,10 @@ QIperfC::QIperfC(QWidget *parent)
     ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
     ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
     ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
+    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
+//    ui->tv_throughput->expand(m_tpmgr.rootItemIndex());
 //    ui->tv_throughput->expandAll();
-    connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemClicked);
+    connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemDClicked); //edit item on double click
 
     //TODO: slow update text/image?
     tpdrdelegate = new TPDirDelegate(this);
@@ -217,7 +220,7 @@ void QIperfC::on_Save()
 //        fileName = fileName + QIPERF_EXT
         fileName = fi.path() + fi.baseName() + "."+ QIPERF_EXT;
     }
-    qDebug() << "save file: " << fileName << Qt::endl;
+    qInfo() << "save file: " << fileName ;
     save(fileName);
 
 }
@@ -249,7 +252,7 @@ void QIperfC::on_pairEdit()
     // TODO: edit
     QModelIndex idx = ui->tv_throughput->selectionModel()->currentIndex();
 //    qDebug() << "on_pairEdit: " << cur;
-    onItemClicked(idx);
+    onItemDClicked(idx);
 }
 
 void QIperfC::on_pairDelete()
@@ -273,6 +276,8 @@ void QIperfC::onPairSwap()
 void QIperfC::onStart()
 {
     resetError();
+    //TODO: clear old test record!!
+
     m_TestStartTime = QDateTime::currentDateTime();
     m_tpplot->setStartTime(m_TestStartTime);
     QString startTime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
@@ -283,6 +288,7 @@ void QIperfC::onStart()
         //start test
         QList<TP *> tps = m_tpmgr->getChilds();
         QString s;
+        QString cmd;
         qint64 rs=0;
         int maxtestduration=0;
         int iwait=0;
@@ -315,13 +321,14 @@ void QIperfC::onStart()
                     emit errorStop(1,"Wait connect to " +s+ " timeout");
                     break;
                 }
-                //tell server add iperf server
-                QString cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
-                rs = m_wss[serverIP]->sendText(cmd);
-                if (rs<=0){
-                    emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
-                    break;
-                }
+            }
+            //tell server add iperf server
+            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
+            qInfo() << "server cmd: CMD_IPERF_ADD";
+            rs = m_wss[serverIP]->sendText(cmd);
+            if (rs<=0){
+                emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
+                break;
             }
             //RPC to control all client endpoint (iperf client)
             QString clientIP = tp->getMgrClient();
@@ -342,31 +349,36 @@ void QIperfC::onStart()
                     emit errorStop(1,"Wait connect to " +s+ "timeout");
                     break;
                 }
-                //tell client add iperf client
-                QString cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
-                rs = m_wsc[clientIP]->sendText(cmd);
-                if (rs<=0){
-                    emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
-                    break;
-                }
             }
+            //tell client add iperf client
+            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
+            qInfo() << "client cmd: CMD_IPERF_ADD";
+            rs = m_wsc[clientIP]->sendText(cmd);
+            if (rs<=0){
+                emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
+                break;
+            }
+
             // TODO. set websocket to  report throughput
             QString di = tp->getDirection();
             if (di== QVariant::fromValue(TP::DirType::Tx).toString()){
-                m_wss[serverIP]->sendText(CMD_IPERF_REG);
+                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx");
                 m_wsc[clientIP]->sendText(CMD_IPERF_UNREG);
             }else if (di== QVariant::fromValue(TP::DirType::Rx).toString()){
                 m_wss[serverIP]->sendText(CMD_IPERF_UNREG);
-                m_wsc[clientIP]->sendText(CMD_IPERF_REG);
+                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx");
             }else if (di== QVariant::fromValue(TP::DirType::TR).toString()){
-                qDebug()<<"TODO: bidir monitor";
+                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx");
+                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx");
             }else {
-                emit errorStop(3, "Wrong setting of iperf direction: "+ di);
+                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx");
+                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx");
             }
         }
         //TODO: record which should report iperf throughput value
 
         if(bErrorStop>0){
+            qDebug() << "Some error happen!!";
             return;
         }
         //Start server
@@ -379,6 +391,7 @@ void QIperfC::onStart()
             }
         }
         if(bErrorStop>0){
+            qDebug() << "Start server error happen!!";
             return;
         }
         //Start client
@@ -391,6 +404,7 @@ void QIperfC::onStart()
             }
         }
         if(bErrorStop>0){
+            qDebug() << "Start client error happen!!";
             return;
         }
         //TODO: wait all test done!!
@@ -915,7 +929,7 @@ void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
     //    updateRunStatus(bStart);
 }
 
-void QIperfC::onItemClicked(QModelIndex idx)
+void QIperfC::onItemDClicked(QModelIndex idx)
 {
     TP *tp = m_tpmgr->getItem(idx);
     dlgiperf->loadJsonCfg(tp->saveData());

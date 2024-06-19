@@ -490,6 +490,8 @@ void QIperfd::start(int idx)
 {
     QThread *th = m_threads.value(idx);
     m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath+"/"+s_starttime);
+    m_iperfworkers.value(idx)->setBidirTag(m_directions[s_starttime]);
+
     // QString id= QString( "%1" ).arg(reinterpret_cast<long>(th->currentThreadId()), 16);
 //    QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
 //    qDebug() << "run thread id:" << id << Qt::endl;
@@ -726,36 +728,47 @@ void QIperfd::onQuit()
 void QIperfd::onWSactMessage(QString msg)
 {
     //handle act message from websocket
+    int cut = msg.indexOf(':', 0);
+    QString act = msg.left(cut);
+    qDebug()<< "onWSactMessage: " << act;
+    msg = msg.right(msg.length()-cut-1);
     // expect in json format
-    if (msg.startsWith(CMD_IPERF_ADD)){
+    if (act.startsWith(CMD_IPERF_ADD)){
         QJsonParseError error;
-        msg = msg.remove(0, QString(QString(CMD_IPERF_ADD)+":").length());
-        int cut = msg.indexOf(':', 0);
+        cut = msg.indexOf(':', 0);
         QString refrow = msg.left(cut);
         msg = msg.right(msg.length()-cut-1);
+
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
             add(refrow, doc.toVariant().toMap());
         }else{
             onLog("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + msg.toUtf8());
         }
-    }else if (msg.startsWith(CMD_IPERF_DEL)){
+    }else if (act.startsWith(CMD_IPERF_DEL)){
         onLog("TODO: onWSactMessage: CMD_IPERF_DEL:" + msg);
-    }else if (msg.startsWith(CMD_IPERF_REG)){
-        msg = msg.remove(0, QString(QString(CMD_IPERF_REG)+":").length());
-        // TODO: tag for bidir
+    }else if (act.startsWith(CMD_IPERF_REG)){
+        QStringList d = msg.split(":");
+        QString starttime = d[0];
+        msg = d[1];
+        m_directions[starttime] = msg; // tag for bidir
         bReportTPData = true;
-        qDebug() << "SET to Report throughput data";
-    }else if (msg.startsWith(CMD_IPERF_UNREG)){
+        qInfo() << "SET to Report throughput data: " << msg;
+    }else if (act.startsWith(CMD_IPERF_UNREG)){
         bReportTPData = false;
-        qDebug() << "SET to NOT Report throughput data";
-    }else if (msg.startsWith(CMD_IPERF_CLEAR)){
+        m_directions.clear();
+        qInfo() << "SET to NOT Report throughput data";
+    }else if (act.startsWith(CMD_IPERF_CLEAR)){
         clear();
-    }else if (msg.startsWith(CMD_IPERF_START)){
-        s_starttime = msg.remove(0, (QString(CMD_IPERF_START).length()+1));
-        m_starttime =QDateTime::fromString(s_starttime, "yyyy-MM-dd_hhmmss.zzz");
+    }else if (act.startsWith(CMD_IPERF_START)){
+        s_starttime = msg;
+        m_starttime =QDateTime::fromString(s_starttime, DATETIME_NOW_FORMAT);
+        qInfo() << "s_starttime: " << s_starttime;
         startAll();
-    }else if (msg.startsWith(CMD_IPERF_STOP)){
+    }else if (act.startsWith(CMD_IPERF_STOP)){
         stopAll();
+    }else {
+        qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;
+        qDebug() << "\n==========";
     }
 }

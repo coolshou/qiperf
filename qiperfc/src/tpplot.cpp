@@ -30,10 +30,11 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata)
 {
     // TODO: add single x/y data to graphic
     QCPGraph *graph = getGraph(idx);
-    if (ydata> this->yAxis->range().upper){
-        this->yAxis->setRange(0, ydata+50);
+    if (ydata >= this->yAxis->range().upper){
+        int aval = round(ydata*0.1);
+        this->yAxis->setRange(0, ydata+aval);
     }
-    if (xdata> this->xAxis->range().upper){
+    if (xdata >= this->xAxis->range().upper){
         this->xAxis->setRange(0, xdata+30);
     }
     graph->addData(xdata, ydata);

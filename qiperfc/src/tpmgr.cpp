@@ -10,6 +10,7 @@ TPMgr::TPMgr(QObject *parent)
     : QAbstractItemModel(parent)
 {
     this->rootItem = new TP(("Root"), ("Root"));
+
 }
 TPMgr::~TPMgr()
 {
@@ -31,6 +32,7 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
 //    }
 //    return QVariant();
     //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
+
     TP *item = static_cast<TP*>(index.internalPointer());
 //    //    EndPoint *item = itemFromIndex(index);
 //    QVariant t = item->data(index.column());
@@ -227,8 +229,9 @@ void TPMgr::reset(){
 void TPMgr::clear(){
     // clean test record
     if (this->rootItem->haveChilds()){
-        qDebug()<< "clear";
-        this->rootItem->clear();
+        foreach(auto tp, this->rootItem->getChilds()){
+            tp->resetData();
+        }
         emit dataChanged(QModelIndex(),QModelIndex());
     }
 }
@@ -263,7 +266,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString valu
 {
     Q_UNUSED(sInterval)
     Q_UNUSED(unit)
-    Q_UNUSED(dir)
+
     TP *tp = getItemByIdx(midx);
     if (tp==nullptr){
         qDebug() << "no parrent iperf pair??";
@@ -274,6 +277,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString valu
 //        beginInsertRows(QModelIndex(),tp->childCount(),tp->childCount());
         c = new TP(midx+"_"+idx, "", tp);
         c->setThroughput(value);
+        c->setDirection(dir);
 //        c->setExpanded(true);
         tp->appendChild(c);
 //        endInsertRows();
@@ -316,22 +320,25 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
     QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8());
     QJsonArray jArr = doc.array();//.object();
-    double sum=0;
+//    double sum=0;
     foreach (auto jObj, jArr){
         QString dir=nullptr;
+        QString value="";
         if (!jObj["dir"].isUndefined()){
             dir=jObj["dir"].toString();
         }
-        sum = sum + jObj["value"].toString().toDouble();
-        this->addTPdata(refrow, sInterval, jObj["idx"].toString(),
-                jObj["value"].toString(), jObj["unit"].toString(), dir);
+        //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
+        value = jObj["value"].toString();
+//        sum = sum + value.toDouble();
+        this->addTPdata(refrow, sInterval, jObj["idx"].toString(), value,
+                jObj["unit"].toString(), dir);
         // chart data
         emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
-    TP *tp = getItemByIdx(refrow);
-    if (!(tp==nullptr)){
-        tp->setThroughput(QString::number(sum));
-        emit dataChanged(QModelIndex(),QModelIndex());
-    }
+//    TP *tp = getItemByIdx(refrow);
+//    if (!(tp==nullptr)){
+//        tp->setThroughput(QString::number(sum));
+//        emit dataChanged(QModelIndex(),QModelIndex());
+//    }
 }
