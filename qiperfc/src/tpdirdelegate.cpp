@@ -27,7 +27,7 @@ void TPDirDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
             qDebug() << "data.isValid: " << data << ::Qt::endl;
         }
     }
-//    else {
-//        QStyledItemDelegate::paint(painter, option, index); //this will draw text too
-//    }
+    else {
+        QStyledItemDelegate::paint(painter, option, index); //this will draw text too
+    }
 }
