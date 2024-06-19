@@ -96,20 +96,23 @@ TP *TP::parentItem()
 
 bool TP::removeChildren(int position, int count)
 {
-        if (position < 0 || position + count > m_childItems.size())
-        return false;
+    if (position < 0 || position + count > m_childItems.size())
+    return false;
 
-        for (int row = 0; row < count; ++row)
+    for (int row = 0; row < count; ++row){
         delete m_childItems.takeAt(position);
+    }
 
-        return true;
+    return true;
 }
 
 int TP::row() const
 {
-    if (m_parentItem)
-        return m_parentItem->m_childItems.indexOf(const_cast<TP*>(this));
-
+    if (m_parentItem){
+        if (m_parentItem->haveChilds()){
+            return m_parentItem->m_childItems.indexOf(const_cast<TP*>(this));
+        }
+    }
     return 0;
 }
 
@@ -221,6 +224,11 @@ QString TP::getMgrClient()
     return m_mgrclient;
 }
 
+QString TP::getThroughput()
+{
+    return data(TP::throughput).toString();
+}
+
 int TP::getWaitTime()
 {
     //omit time + test duration
@@ -240,15 +248,32 @@ int TP::setDirection(DirType direction)
     }else if (direction == DirType::Rx){
         o_client["bidir"]=false;
         o_client["reverse"]=true;
-    }else {
+    }else if (direction == DirType::TR){
         o_client["bidir"]=true;
         o_client["reverse"]=false;
+    }else {
+        o_client["bidir"]=true;
+        o_client["reverse"]=true;
     }
     jsonRoot["client"]=o_client;
     doc.setObject(jsonRoot);
     m_jsondata =doc.toJson(QJsonDocument::Compact);
     setData(TP::cols::dir, m_direction);
 
+    return 0;
+}
+
+int TP::setDirection(QString direction)
+{
+    if (direction.contains("Tx")){
+        setDirection(TP::Tx);
+    }else if (direction.contains("Rx")){
+        setDirection(TP::Rx);
+    }else if (direction.contains("TR")){
+        setDirection(TP::TR);
+    }else {
+        setDirection(TP::RT);
+    }
     return 0;
 }
 

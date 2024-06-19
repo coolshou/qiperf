@@ -17,7 +17,8 @@ public:
     enum DirType{
         Tx=0,
         Rx=1,
-        TR=2
+        TR=2,
+        RT=3
     };
     Q_ENUM(DirType)
     enum cols{
@@ -54,10 +55,12 @@ public:
     QString getClient();
     QString getClientArgs();
     QString getDirection();
-    QString getMgrServer();
-    QString getMgrClient();
+    QString getMgrServer(); //manager server ip
+    QString getMgrClient(); //manager client ip
+    QString getThroughput(); //
     int getWaitTime();
     int setDirection(DirType direction);
+    int setDirection(QString direction);
     int getPort();
     void setThroughput(QString value);
     void updateTimeStemp();
