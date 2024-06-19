@@ -9,9 +9,10 @@ TPDirDelegate::TPDirDelegate(QObject *parent)
 
 void TPDirDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    //TODO: when column is selected, the bg color did not fit to selected
-    if (index.isValid() && index.column() == TP::cols::dir) { // Assuming you want to display images in column::dir
-//        QVariant data = index.data(Qt::UserRole); // Retrieve data associated with the index
+    if (index.isValid() && index.column() == TP::cols::dir) {
+        QModelIndex itm;// = index;
+        QStyledItemDelegate::paint(painter, option, itm); //do not draw text
+        // Assuming you want to display images in column::dir
         QVariant data = index.data(); // Retrieve data associated with the index
         if (data.isValid()) {
             QString imagePath = ":/"+data.toString();// Assumes you store the image path in Qt::UserRole
@@ -26,7 +27,7 @@ void TPDirDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
             qDebug() << "data.isValid: " << data << ::Qt::endl;
         }
     }
-    else {
-        QStyledItemDelegate::paint(painter, option, index); //this will draw text too
-    }
+//    else {
+//        QStyledItemDelegate::paint(painter, option, index); //this will draw text too
+//    }
 }
