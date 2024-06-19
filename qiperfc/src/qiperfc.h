@@ -99,7 +99,7 @@ private slots:
     void on_pb_status_clicked();
     void on_pb_add_server_clicked();
     void on_pb_stop_clicked();
-    void on_updateEndpointNum(int n);
+    void on_updateQIperfdNum(int n);
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onTPDataUpdate(const QModelIndex &parent, int first, int last);
     void onItemDClicked(QModelIndex idx);
@@ -131,7 +131,7 @@ private:
     EndPointMgr *m_endpointmgr;
     QLabel *m_start_label;
     QLabel *m_status_label;
-    QLabel *m_endpoint_label;
+    QLabel *m_label_qiperfd;
     TPMgr *m_tpmgr;
     TPDirDelegate *tpdrdelegate;
 

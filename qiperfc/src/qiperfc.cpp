@@ -822,15 +822,14 @@ void QIperfC::initStatusbar()
     connect(this , &QIperfC::updateStatus, this,  &QIperfC::onUpdateStatus);
 
     // statusbar of endpints
-    m_endpoint_label = new QLabel(this);
+    m_label_qiperfd = new QLabel(this);
 //TODO: double click
-    m_endpoint_label->setText("endpoints:0");
-    m_endpoint_label->setFrameStyle(static_cast<int>(QFrame::Box) | static_cast<int>(QFrame::Sunken));
+    m_label_qiperfd->setText(QString(QIPERFD_NAME)+":0");
+    m_label_qiperfd->setFrameStyle(static_cast<int>(QFrame::Box) | static_cast<int>(QFrame::Sunken));
 //    m_endpoint_label->setTextFormat(Qt::RichText);
 //    m_endpoint_label->setOpenExternalLinks(true);
-    ui->statusbar->addPermanentWidget(m_endpoint_label);
-
-    connect(this , &QIperfC::updateEndpointNum, this, &QIperfC::on_updateEndpointNum);
+    ui->statusbar->addPermanentWidget(m_label_qiperfd);
+    connect(this , &QIperfC::updateEndpointNum, this, &QIperfC::on_updateQIperfdNum);
 }
 
 void QIperfC::onUpdateStarttime(QString stime)
@@ -890,10 +889,9 @@ void QIperfC::on_pb_stop_clicked()
 
 }
 
-void QIperfC::on_updateEndpointNum(int n)
+void QIperfC::on_updateQIperfdNum(int n)
 {
-//    qDebug() << "on_updateEndpointNum: " << n << Qt::endl;
-    m_endpoint_label->setText("endpoints:" + QString::number(n));
+    m_label_qiperfd->setText(QString(QIPERFD_NAME)+ ":" + QString::number(n));
 }
 
 void QIperfC::onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
