@@ -126,8 +126,13 @@ win32 {
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/../$${TARGET}_$${QT_ARCH}))
 
     DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
-    iperfbin.commands = \
-        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../release/$${TARGET}.exe)) $$DIST_FILE
+CONFIG(release, debug|release) {
+    release: iperfbin.commands = \
+        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Release/$${TARGET}.exe)) $$DIST_FILE
+} else {
+    debug: iperfbin.commands = \
+        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Debug/$${TARGET}.exe)) $$DIST_FILE
+}
     deploy.commands = \
         windeployqt $$DIST_FILE
 

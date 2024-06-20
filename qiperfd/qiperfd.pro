@@ -104,7 +104,7 @@ CONFIG(release, debug|release) {
         $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Release/$${TARGET}.exe)) $$DIST_FILE
 } else {
     debug: iperfbin.commands = \
-            $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Debug/$${TARGET}.exe)) $$DIST_FILE
+        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Debug/$${TARGET}.exe)) $$DIST_FILE
 }
     deploy.commands = \
         windeployqt $$DIST_FILE
