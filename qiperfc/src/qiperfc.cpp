@@ -81,7 +81,7 @@ QIperfC::QIperfC(QWidget *parent)
     ui->tv_qiperfd->setColumnWidth(1, 130);
 
     dlgiperf = new DlgIperf(this);
-    formEndpoits = new FormEndPoints();
+
     //
     m_receiver = new UdpReceiver(QIPERFD_BPORT,this);
     connect(m_receiver, &UdpReceiver::notice, this, &QIperfC::on_notice);
@@ -655,6 +655,15 @@ void QIperfC::closeEvent(QCloseEvent *event)
 
     saveSettings();
 }
+
+bool QIperfC::eventFilter(QObject *obj, QEvent *event)
+{
+    if(obj == m_label_qiperfd && event->type() == QMouseEvent::MouseButtonPress) {
+        //do something
+        qDebug()<< "TODO: show qiperfd manager dialog";
+    }
+    return QObject::eventFilter(obj,event);
+}
 void QIperfC::updateRunStatus(bool bStart)
 {
     ui->actionStart->setEnabled(!bStart);
@@ -823,6 +832,7 @@ void QIperfC::initStatusbar()
 
     // statusbar of endpints
     m_label_qiperfd = new QLabel(this);
+    m_label_qiperfd->installEventFilter(this);
 //TODO: double click
     m_label_qiperfd->setText(QString(QIPERFD_NAME)+":0");
     m_label_qiperfd->setFrameStyle(static_cast<int>(QFrame::Box) | static_cast<int>(QFrame::Sunken));

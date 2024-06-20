@@ -45,7 +45,6 @@ SOURCES += \
     src/QIPConfig.cpp \
     src/dlgiperf.cpp \
     src/endpointmgr.cpp \
-    src/formendpoints.cpp \
     src/formoption.cpp \
     src/main.cpp \
     src/qiperfc.cpp \
@@ -71,7 +70,6 @@ HEADERS += \
     src/QIPConfig.h \
     src/dlgiperf.h \
     src/endpointmgr.h \
-    src/formendpoints.h \
     src/formoption.h \
     src/qiperfc.h \
     src/rpctp.h \
@@ -86,7 +84,6 @@ HEADERS += \
 
 FORMS += \
     src/dlgiperf.ui \
-    src/formendpoints.ui \
     src/formoption.ui \
     src/qiperfc.ui
 

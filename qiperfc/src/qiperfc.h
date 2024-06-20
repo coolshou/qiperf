@@ -18,7 +18,6 @@
 #include "udpreceiver.h"
 //#include "tpchart.h"
 #include "endpointmgr.h"
-#include "formendpoints.h"
 #include "tpmgr.h"
 #include "tpdirdelegate.h"
 #include "QIPConfig.h"
@@ -82,7 +81,8 @@ signals:
     void testStoped(int err); // signal when test stoped, 0: no error
 
 protected:
-     void closeEvent(QCloseEvent *event)override;
+    void closeEvent(QCloseEvent *event)override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
 private:
     void updateRunStatus(bool bStart);
     void initCustomPlote();
@@ -90,6 +90,7 @@ private:
     void resetError();
     void saveSettings();
     void loadSettings();
+
 
 private slots:
     void init_actions();
@@ -110,12 +111,12 @@ private slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString data);
     void onDisconnected(QString serverip);
     void onPlotContextMenuRequest(QPoint pos);
+
 private:
     Ui::MainWindow *ui;
     TPPlot *m_tpplot;
     QSettings *m_settings;
     DlgIperf * dlgiperf;  // dialog of iperf config
-    FormEndPoints * formEndpoits;
     PipeClient *pclient;
 #if (TEST_WS==1)
     QMap<QString, WSClient *> m_wss; // websocket client list for manager iperf server
