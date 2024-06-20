@@ -22,8 +22,9 @@
 
 #include "qiperfd.h"
 #include "../src/comm.h"
-#include <jcon/json_rpc_websocket_server.h>
+
 #if (USE_JSONRPC==1)
+#include <jcon/json_rpc_websocket_server.h>
 #include "myservice.h"
 #endif
 #if defined(Q_OS_LINUX)

@@ -179,13 +179,13 @@ QIperfd::~QIperfd()
     savecfg();
 }
 
-void QIperfd::closeEvent(QCloseEvent *event)
-{
-    Q_UNUSED(event)
-    //TODO: close app check
-    qDebug() << "closeEvent" <<  Qt::endl;
-    savecfg();
-}
+//void QIperfd::closeEvent(QCloseEvent *event)
+//{
+//    Q_UNUSED(event)
+//    //TODO: close app check
+//    qDebug() << "closeEvent" <<  Qt::endl;
+//    savecfg();
+//}
 void QIperfd::onLog(QString text)
 {
     qInfo() << qApp->applicationPid() <<"," << text;

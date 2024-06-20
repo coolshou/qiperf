@@ -8,7 +8,7 @@
 #include <QList>
 #include <QString>
 #include <QDateTime>
-#include <QCloseEvent>
+//#include <QCloseEvent> # require gui
 
 #if defined(Q_OS_LINUX)
 #include <QSocketNotifier>
@@ -69,7 +69,7 @@ signals:
     void iperfStarted(QString bindkey); // iperf thrad started
 
 protected:
-    void closeEvent(QCloseEvent *event);
+//    void closeEvent(QCloseEvent *event);
 private slots:
     void onWSactMessage(QString msg); //procress websocket action message
 
