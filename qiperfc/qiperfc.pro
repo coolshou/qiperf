@@ -106,7 +106,7 @@ RESOURCES += \
 
 win32 {
     #VER = $$system(findstr /c:"\"define QIPERFD_VERSION\"" $$PWD/../src/versions.h)
-    VERSION = 0.2.11209.20 # major.minor.patch.build
+    VERSION = 0.2.11306.20 # major.minor.patch.build
     # windows resources
     #    CONFIG += embed_manifest_exe
 
