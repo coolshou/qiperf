@@ -1,6 +1,7 @@
 QT += core gui
-QT += network
+QT += network websockets
 QT += printsupport # require by qcustomplot
+CONFIG += release
 DEFINES += QCUSTOMPLOT_USE_OPENGL # qcustomplot use OPENGL
 win32: {
     LIBS += \
@@ -20,7 +21,7 @@ win32:unix:!android:{
 #CONFIG += c++17
 
 include(../qiperf.pri)
-include(../jcon-cpp.pri)
+#include(../jcon-cpp.pri)
 unix {
 #include(../sigwatch.pri)
 }

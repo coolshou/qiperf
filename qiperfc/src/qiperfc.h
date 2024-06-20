@@ -13,7 +13,6 @@
 
 #include "comm.h"
 #include "pipeclient.h"
-#include "jcon/json_rpc_websocket_client.h"
 #include "dlgiperf.h"
 #include "udpreceiver.h"
 //#include "tpchart.h"
@@ -30,6 +29,7 @@
 #include "wsclient.h"
 #endif
 #if (TEST_JSONRPC==1)
+#include "jcon/json_rpc_websocket_client.h"
 #include "rpctp.h"
 #endif
 
