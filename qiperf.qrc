@@ -23,5 +23,6 @@
         <file alias="pair-swap">images/iperf-swap.png</file>
         <file alias="clear">images/clear.png</file>
         <file alias="RT">images/RT.png</file>
+        <file alias="qiperfd">images/qiperfd.png</file>
     </qresource>
 </RCC>

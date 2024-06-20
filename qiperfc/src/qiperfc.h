@@ -22,6 +22,8 @@
 #include "tpdirdelegate.h"
 #include "QIPConfig.h"
 #include "tpplot.h"
+#include "formqiperfds.h"
+#include "dlgtest.h"
 
 #if (TEST_WS==1)
 #include "wsclient.h"
@@ -97,9 +99,6 @@ private slots:
     void initStatusbar();
     void onUpdateStarttime(QString stime);
     void onUpdateStatus(QString msg);
-    void on_pb_status_clicked();
-    void on_pb_add_server_clicked();
-    void on_pb_stop_clicked();
     void on_updateQIperfdNum(int n);
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onTPDataUpdate(const QModelIndex &parent, int first, int last);
@@ -114,6 +113,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    FormQIperfds *m_frm_qiperfds;
+    DlgTest *m_dlgtest;
     TPPlot *m_tpplot;
     QSettings *m_settings;
     DlgIperf * dlgiperf;  // dialog of iperf config

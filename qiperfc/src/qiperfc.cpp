@@ -40,6 +40,10 @@ QIperfC::QIperfC(QWidget *parent)
     QString settingfilename = settingfilepath + "/" + QIPERFC_NAME + ".ini";
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     ui->setupUi(this);
+    ui->menubar->installEventFilter(this);
+    ui->menuTest->setVisible(false);
+    m_dlgtest = new DlgTest();
+    m_frm_qiperfds = new FormQIperfds();
     initStatusbar();
     loadSettings();
     m_qipconfig = new QIPConfig();
@@ -76,9 +80,7 @@ QIperfC::QIperfC(QWidget *parent)
 //    ui->tv_throughput->header()->setVisible(true);
 
     m_endpointmgr = new EndPointMgr(this);
-    ui->tv_qiperfd->setModel(m_endpointmgr);
-    ui->tv_qiperfd->setColumnWidth(0, 130);
-    ui->tv_qiperfd->setColumnWidth(1, 130);
+    m_frm_qiperfds->setModel(m_endpointmgr);
 
     dlgiperf = new DlgIperf(this);
 
@@ -181,7 +183,7 @@ QString QIperfC::getNowString()
 
 void QIperfC::onNewMessage(const QString msg)
 {
-    ui->textEdit->append(msg);
+    m_dlgtest->append(msg);
 }
 
 void QIperfC::on_New()
@@ -642,10 +644,7 @@ void QIperfC::notificationReceived(const QString key, const QVariant value)
 
 void QIperfC::onTest()
 {
-    QString s="[{\"idx\":\"7\",\"unit\":\"Mbits/sec\",\"value\":\"22.3\"},{\"idx\":\"10\",\"unit\":\"Mbits/sec\",\"value\":\"22.2\"},{\"idx\":\"12\",\"unit\":\"Mbits/sec\",\"value\":\"22.0\"}]";
-
-    onIperfTPdata("0", "0.0-1.0", s);
-    ui->pb_test->setEnabled(true);
+    m_dlgtest->show();
 }
 
 void QIperfC::closeEvent(QCloseEvent *event)
@@ -659,8 +658,16 @@ void QIperfC::closeEvent(QCloseEvent *event)
 bool QIperfC::eventFilter(QObject *obj, QEvent *event)
 {
     if(obj == m_label_qiperfd && event->type() == QMouseEvent::MouseButtonPress) {
-        //do something
-        qDebug()<< "TODO: show qiperfd manager dialog";
+//        m_frm_qiperfds->setGeometry();
+        int dx = m_frm_qiperfds->geometry().width()/2;
+        int dy = m_frm_qiperfds->geometry().height()/2;
+        QPoint p(this->geometry().center().x()-dx, this->geometry().center().y()-dy);
+        m_frm_qiperfds->move(p);
+        m_frm_qiperfds->show();
+    }
+    if(obj == ui->menubar && event->type() == (Qt::Key_Control & QMouseEvent::MouseButtonPress)) {
+        qDebug() << "show menuTest";
+        ui->menuTest->setVisible(true);
     }
     return QObject::eventFilter(obj,event);
 }
@@ -815,7 +822,8 @@ void QIperfC::init_actions()
     //help
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
     //test
-    connect(ui->pb_test, &QPushButton::clicked, this, &QIperfC::onTest);
+    connect(ui->actionTest, SIGNAL(triggered()), this, SLOT(onTest()));
+
 }
 
 void QIperfC::initStatusbar()
@@ -850,53 +858,6 @@ void QIperfC::onUpdateStarttime(QString stime)
 void QIperfC::onUpdateStatus(QString msg)
 {
     m_status_label->setText(msg);
-}
-
-
-void QIperfC::on_pb_status_clicked()
-{
-    pclient->send_MessageToServer(CMD_STATUS);
-}
-
-
-void QIperfC::on_pb_add_server_clicked()
-{
-    /*'''
-    { "Action" : CMD_IPERF_ADD,
-      "iperf":
-        { version:3,
-          port:5201,
-          cmd_args:
-            ["-s"]
-        }
-    }
-    '''*/
-    QJsonObject mainObj;
-    QJsonObject iperfObj;
-    iperfObj.insert("version", 3);
-    iperfObj.insert("port", 5201);
-    QJsonArray cmd_args;
-    cmd_args.push_back("-s");
-//    cmd_args.push_back("--forceflush");
-
-    iperfObj.insert("cmd_args", cmd_args);
-    mainObj.insert("Action", CMD_IPERF_ADD);
-    mainObj.insert("iperf", iperfObj);
-
-    QJsonDocument doc(mainObj);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-
-    pclient->send_MessageToServer(strJson);
-}
-
-void QIperfC::on_pb_stop_clicked()
-{
-    QJsonObject mainObj;
-    mainObj.insert("Action", CMD_IPERF_STOP);
-    QJsonDocument doc(mainObj);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-    pclient->send_MessageToServer(strJson);
-
 }
 
 void QIperfC::on_updateQIperfdNum(int n)
