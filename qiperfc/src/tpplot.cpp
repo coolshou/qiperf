@@ -13,6 +13,9 @@ void TPPlot::setStartTime(QDateTime startTime)
 
 void TPPlot::addTPDatas(QString sInterval, QString idx, QString datas)
 {
+    Q_UNUSED(sInterval)
+    Q_UNUSED(idx)
+    Q_UNUSED(datas)
     //TODO:
 //    foreach (auto data, datas){
 
