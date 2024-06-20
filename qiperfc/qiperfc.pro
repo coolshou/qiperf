@@ -44,6 +44,7 @@ SOURCES += \
     lib/qcustomplot.cpp \
     src/QIPConfig.cpp \
     src/dlgiperf.cpp \
+    src/dlgrecord.cpp \
     src/dlgtest.cpp \
     src/endpointmgr.cpp \
     src/formoption.cpp \
@@ -71,6 +72,7 @@ HEADERS += \
     lib/qcustomplot.h \
     src/QIPConfig.h \
     src/dlgiperf.h \
+    src/dlgrecord.h \
     src/dlgtest.h \
     src/endpointmgr.h \
     src/formoption.h \
@@ -88,6 +90,7 @@ HEADERS += \
 
 FORMS += \
     src/dlgiperf.ui \
+    src/dlgrecord.ui \
     src/dlgtest.ui \
     src/formoption.ui \
     src/formqiperfds.ui \
