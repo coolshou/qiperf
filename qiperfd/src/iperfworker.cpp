@@ -8,6 +8,7 @@
 #include <QFileInfo>
 #include <QJsonValue>
 #include <QJsonDocument>
+#include <QJsonObject>
 
 //#include <QOverload>
 
