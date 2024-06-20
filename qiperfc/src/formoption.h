@@ -12,7 +12,8 @@ class FormOption : public QWidget
     Q_OBJECT
 
 public:
-    explicit FormOption(QSettings *cfg, QStringList interfaces, QWidget *parent = nullptr);
+    explicit FormOption(QSettings *cfg, QWidget *parent = nullptr);
+//    explicit FormOption(QSettings *cfg, QStringList interfaces, QWidget *parent = nullptr);
     ~FormOption() override;
     void loadcfg(QSettings *cfg);
     void updatecfg();

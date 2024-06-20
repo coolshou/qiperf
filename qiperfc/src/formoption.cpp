@@ -1,13 +1,14 @@
 #include "formoption.h"
 #include "ui_formoption.h"
 
-FormOption::FormOption(QSettings *cfg, QStringList interfaces, QWidget *parent) :
+FormOption::FormOption(QSettings *cfg, QWidget *parent) :
+//FormOption::FormOption(QSettings *cfg, QStringList interfaces, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FormOption)
 {
     ui->setupUi(this);
     m_cfg = cfg;
-    ui->cb_minterfaces->addItems(interfaces);
+//    ui->cb_minterfaces->addItems(interfaces);
     loadcfg(cfg);
 }
 

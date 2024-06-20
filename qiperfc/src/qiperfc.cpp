@@ -40,10 +40,13 @@ QIperfC::QIperfC(QWidget *parent)
     QString settingfilename = settingfilepath + "/" + QIPERFC_NAME + ".ini";
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     ui->setupUi(this);
-    ui->menubar->installEventFilter(this);
-    ui->menuTest->setVisible(false);
+//    ui->menubar->installEventFilter(this);
+//    ui->menuTest->setVisible(false);
+//    ui->menuTest->setEnabled(false);
+//    ui->toolBar->installEventFilter(this);
     m_dlgtest = new DlgTest();
     m_frm_qiperfds = new FormQIperfds();
+    m_frm_option = new FormOption(m_settings);
     initStatusbar();
     loadSettings();
     m_qipconfig = new QIPConfig();
@@ -539,6 +542,11 @@ void QIperfC::onClear(){
     emit updateStarttime("");
 }
 
+void QIperfC::onConfig()
+{
+    m_frm_option->show();
+}
+
 void QIperfC::onAbout()
 {
     QMessageBox::about(this, "About", QString(QIPERFC_NAME)+"\n"
@@ -665,9 +673,12 @@ bool QIperfC::eventFilter(QObject *obj, QEvent *event)
         m_frm_qiperfds->move(p);
         m_frm_qiperfds->show();
     }
-    if(obj == ui->menubar && event->type() == (Qt::Key_Control & QMouseEvent::MouseButtonPress)) {
+    if((obj == ui->menubar || obj == ui->toolBar) &&
+            (event->type() == (Qt::Key_Control & QMouseEvent::MouseButtonPress))) {
         qDebug() << "show menuTest";
         ui->menuTest->setVisible(true);
+        ui->menuTest->setEnabled(true);
+
     }
     return QObject::eventFilter(obj,event);
 }
@@ -818,6 +829,8 @@ void QIperfC::init_actions()
     connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
     connect(ui->actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
     connect(ui->actionClear, SIGNAL(triggered()), this, SLOT(onClear()));
+    //option
+    connect(ui->actionConfig, SIGNAL(triggered()), this, SLOT(onConfig()));
 
     //help
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));

@@ -24,6 +24,7 @@
 #include "tpplot.h"
 #include "formqiperfds.h"
 #include "dlgtest.h"
+#include "formoption.h"
 
 #if (TEST_WS==1)
 #include "wsclient.h"
@@ -62,6 +63,7 @@ public slots:
     void onStart();
     void onStop();
     void onClear();
+    void onConfig();
     void onAbout();
     void aboutQCustomPlot();
     void onErrorStop(int err, QString msg);
@@ -114,6 +116,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     FormQIperfds *m_frm_qiperfds;
+    FormOption *m_frm_option;
     DlgTest *m_dlgtest;
     TPPlot *m_tpplot;
     QSettings *m_settings;
