@@ -18,6 +18,7 @@ IcmpPing::IcmpPing(QObject *parent)
 bool IcmpPing::pingHost(const QString &hostname, int count)
 {
 #if defined(Q_OS_WIN32)
+    Q_UNUSED(count)
     // We declare variables
     HANDLE hIcmpFile;                       // Handler
     unsigned long ipaddr = INADDR_NONE;     // Destination address
