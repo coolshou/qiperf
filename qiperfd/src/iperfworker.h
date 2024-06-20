@@ -10,6 +10,7 @@
 #include <QMap>
 #include <QJsonArray>
 
+#include "iperfwrapper.h"
 
 class IperfWorker : public QObject
 {
@@ -40,19 +41,22 @@ public slots:
     void work();
     bool isRunning();
 
+
 private slots:
     void onStarted();
     void readyReadStdOut();
     void readyReadStdErr();
     void onFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void parserStdOut(QString msg);
-    void parserIperf3(QString msg);
+    void onThroughputData(int idx, QString sInterval,  QString data);
+//    void parserIperf3(QString msg);
 
 private:
     QString m_refrow;
     int m_idx;  // refrow
     int m_version; // iperf version 2 or 3
     QObject *m_parent;
+    IperfWrapper *m_iperfwrapper;
     bool m_stop;  //user stop;
     bool m_running; // is running
     bool m_servermode=false;

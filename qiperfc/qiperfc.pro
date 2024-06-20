@@ -41,6 +41,7 @@ SOURCES += \
     $$PWD/../src/endpoint.cpp \
     $$PWD/../src/endpointtype.cpp \
     $$PWD/../src/endpointact.cpp \
+    $$PWD/../src/iperfwrapper.cpp \
     lib/axistag.cpp \
     lib/qcustomplot.cpp \
     src/QIPConfig.cpp \
@@ -69,6 +70,7 @@ HEADERS += \
     $$PWD/../src/endpointtype.h \
     $$PWD/../src/versions.h \
     $$PWD/../src/endpointact.h \
+    $$PWD/../src/iperfwrapper.h \
     lib/axistag.h \
     lib/qcustomplot.h \
     src/QIPConfig.h \

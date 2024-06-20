@@ -45,6 +45,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     loadcfg(apppath);
     //    qDebug() << "start UdpSrv" << Qt::endl;
     //
+    m_iperfwrapper = new IperfWrapper(this);
 //    m_myinfo = new MyInfo(getManagerInterface());
     m_myinfo = new MyInfo(mgr_ifname);
     connect(this, &QIperfd::setMgrIfname, m_myinfo, &MyInfo::setIfname);
@@ -350,7 +351,8 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
     //conver json data format to iperf args
     QString args;
     if (ver == static_cast<int>(IPERF_VER::V3)){
-        args = toIperf3args(jsondata);
+        args = m_iperfwrapper->toIperf3args(jsondata);
+//        args = toIperf3args(jsondata);
     }else if (ver==static_cast<int>(IPERF_VER::V2)){
         qDebug() << "TODO convert json format to Iperf2 args";
     }else {
@@ -358,93 +360,6 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
         return -1;
     }
     return add(refrow, ver, cmd, args, port, binaddr, target, parallel, protocal, bidir);
-}
-
-QString QIperfd::toIperf3args(QVariantMap jsondata)
-{
-    QString args;
-    bool bServer = jsondata["server"].toBool();
-    if (bServer){
-        args = args + " -s ";
-    }
-    uint port = jsondata["port"].toUInt();
-    if (port>0){
-        args = args + " -p " + QString::number(port);
-    }
-    if (!bServer){
-        QString target = jsondata["target"].toString();
-        if (!target.isEmpty()){
-            args = args + " -c " + target;
-        }
-    }
-    QString bindaddr = jsondata["bind"].toString();
-    if (!bindaddr.isEmpty()){
-        args = args + " --bind " + bindaddr;
-    }
-    if (!bServer){
-        bool bidir = jsondata["bidir"].toBool();
-        if (bidir){
-            args = args + " --bidir";
-        }
-        bool reverse = jsondata["reverse"].toBool();
-        if (reverse){
-            args = args + " -R";
-        }
-        uint duration = jsondata["duration"].toUInt();
-        if (duration>0){
-            args = args + " -t " + QString::number(duration);
-        }
-    }
-    uint interval = jsondata["interval"].toUInt();
-    if (interval>0){
-        args = args + " -i " + QString::number(interval);
-    }
-    if (!bServer){
-        uint omit = jsondata["omit"].toUInt();
-        if (omit>0){
-            args = args + " -O " + QString::number(omit);
-        }
-        uint parallel = jsondata["parallel"].toUInt();
-        if (parallel>1){
-            args = args + " -P " + QString::number(parallel);
-        }
-        QString protocal = jsondata["protocal"].toString();
-        if (protocal.contains("UDP")){
-            args = args + " -u ";
-        }
-        uint windowsize = jsondata["windowsize"].toUInt();
-        if (windowsize>0){
-            QString unit_windowsize = jsondata["unit_windowsize"].toString();
-            args = args + " -w " +QString::number(windowsize)+ unit_windowsize;
-        }
-        uint bitrate = jsondata["bitrate"].toUInt();
-        if (bitrate>0){
-            QString unit_bitrate = jsondata["unit_bitrate"].toString();
-            args = args + " -b " +QString::number(bitrate)+ unit_bitrate;
-        }
-        uint buffer = jsondata["buffer"].toUInt();
-        if (buffer>0){
-            QString unit_buffer = jsondata["unit_buffer"].toString();
-            args = args + " -l " +QString::number(buffer)+ unit_buffer;
-        }
-        int dscp = jsondata["dscp"].toUInt();
-        if ((dscp>=0)&&(dscp<=64)){
-            args = args + " --dscp " +QString::number(dscp);
-        }
-        uint mss = jsondata["mss"].toUInt();
-        if (mss>0){
-            args = args + " -M " +QString::number(mss);
-        }
-        int tos = jsondata["tos"].toUInt();
-        if ((tos>=0)&&(tos<=255)){
-            args = args + " --tos " +QString::number(tos);
-        }
-    }
-    QString fmtreport = jsondata["fmtreport"].toString();
-    if (!fmtreport.isEmpty()){
-        args = args + " -f " + fmtreport;
-    }
-    return args;
 }
 
 int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bindHost)

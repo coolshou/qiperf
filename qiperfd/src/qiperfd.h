@@ -8,6 +8,8 @@
 #include <QList>
 #include <QString>
 #include <QDateTime>
+#include "iperfwrapper.h"
+
 //#include <QCloseEvent> # require gui
 
 #if defined(Q_OS_LINUX)
@@ -43,8 +45,6 @@ public:
             QString bndaddr="0.0.0.0", QString target="",
             QString parallel="0", QString protocal="TCP", bool bidir=false);
     int add(QString refrow, QVariantMap jsondata);
-    QString toIperf3args(QVariantMap jsondata);
-    QString toIperf2args(QVariantMap jsondata);
     int addIperfServer(QString refrow, int version, uint port, QString bindHost="");
     int addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs);
     void start(int idx); // start idx of iperf
@@ -62,7 +62,7 @@ public slots:
     void onIperfLog(int idx, QString text);
     void onStarted(int idx);
     void onFinished(int idx, int exitCode, int exitStatus);
-    void onThroughput(int idx, QString sInterval, QString data); // refrow, throughput data
+    void onThroughput(int idx, QString sInterval, QString data); // idx, refrow, throughput data
     void onQuit();
 signals:
     void setMgrIfname(QString interface);
@@ -75,6 +75,7 @@ private slots:
 
 private:
     QString tmpfilepath;
+    IperfWrapper *m_iperfwrapper;
     QSettings *cfg;
     UdpSrv *m_udpsrv;
     MyInfo *m_myinfo;

@@ -64,6 +64,8 @@ QVariant EndPointMgr::headerData(int section, Qt::Orientation orientation,
                 return QString("OS");
             case 4:
                 return QString("OS Ver");
+            case 5:
+                return QString("Last seen");
             default:
                 return QVariant();
         }
