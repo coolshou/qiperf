@@ -10,7 +10,6 @@
 #include <QMap>
 #include <QJsonArray>
 
-#include "iperfrecord.h"
 
 class IperfWorker : public QObject
 {
@@ -72,7 +71,6 @@ private:
     QString m_cmd; //iperf exec full path
     QStringList m_arguments;  //iperf args
     QProcess *m_iperf; // iperf procress
-//    QMap<QString, QList<IperfRecord *>> m_tpdatas;
     QMap<QString, QJsonArray> m_tpdatas;
 
 };
