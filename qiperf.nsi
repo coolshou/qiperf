@@ -158,9 +158,9 @@ Section "qiperf daemon" SECTION_Daemon
         # #  serivice file
         SetOutPath "$INSTDIR"
 !ifdef WIN64
-        File "qiperfd\nssm.exe"
+        File "lib\nssm.exe"
 !else
-        File "qiperfd\nssm_x86.exe" /oname=nssm.exe
+        File "lib\nssm_x86.exe" /oname=nssm.exe
 !endif
         #CreateShortCut "$DESKTOP\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
 
@@ -337,6 +337,7 @@ SectionEnd
 BrandingText "Quick iperf daemon"
 
 Function .onInit
+# TODO: Silent mode/ Full mode
     ${If} ${RunningX64}
     !ifdef WIN64
             SetRegView 64
@@ -384,17 +385,13 @@ init.done:
 FunctionEnd
 
 Function install_qiperfd
-  #WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "qiperfd" '"$INSTDIR\${QIPERFD_NAME}"'
-  # start
+  # install qiperfd  service & start it
    Exec '"$INSTDIR\nssm.exe" install "qiperfd" "$INSTDIR\${QIPERFD_NAME}"'
    Exec '"$INSTDIR\nssm.exe" start "qiperfd" '
-  # install qiperfd as service  => require app implement SERVICE API
-  #SimpleSC::InstallService "qiperfd" "quick iperf daemon" "16" "2" "$INSTDIR\qiperfd.exe" "" "" ""
-  #Pop $0 ; returns an errorcode (<>0) otherwise success (0)
-  #SimpleSC::StartService "qiperfd" "" "100"
 FunctionEnd
 
 Function un.install_qiperfd
+    # uninstall qiperfd  service
     Exec '"$INSTDIR\nssm.exe" stop "qiperfd" '
     Exec '"$INSTDIR\nssm.exe" remove "qiperfd" confirm'
     #kill qiperfd
@@ -419,29 +416,12 @@ Function un.install_qiperfd
         DetailPrint "${QIPERFTRAY_NAME} was not found to be running"
     ${EndIf}
     ${nsProcess::Unload}
-    #DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Run\qiperfd"
     #kill qiperfc
-
-  # uninstall qiperfd as service
-  #SimpleSC::StopService "qiperfd" "1" "60"
-  #Pop $0 ; returns an errorcode (<>0) otherwise success (0)
-  #SimpleSC::RemoveService "qiperfd"
-  #Pop $0 ; returns an errorcode (<>0) otherwise success (0)
-  #DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\qiperfd"
-
 FunctionEnd
 
 Function .oninstsuccess
-    # run the QIPERFD
     SetOutPath "$INSTDIR\"
-    #    nsExec::Exec "$INSTDIR\${QIPERFD_NAME}"
-    #    #Pop $ExitCode
-    #    # run the QIPERFTRAY
-    #    nsExec::Exec "$INSTDIR\${QIPERFTRAY_NAME}"
-     #   #Pop $ExitCode
-    #ExecShell "" "$INSTDIR\${QIPERFD_NAME}" SW_HIDE
     Exec "$INSTDIR\${QIPERFTRAY_NAME}"
-
 FunctionEnd
 
 ; eof
