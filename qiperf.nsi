@@ -3,7 +3,7 @@
 ; Define your application name
 !define APPNAME "qiperf"
 !define APPVERSION 0.2.0.0
-!define APPFileVersion 0.2.11306.20
+!define APPFileVersion 0.2.11306.21
 !define APPDOMAIN "coolshou.idv.tw"
 !define APPURL "https://github.com/coolshou/qiperf"
 #!define WIN64 ; comment out for 32 bit
@@ -12,10 +12,6 @@
 !define QIPERFTRAY_NAME  "qiperftray.exe"
 
 VIProductVersion ${APPFileVersion}
-
-#Var QIPERFD_SOURCEPATH
-#Var QIPERFC_SOURCEPATH
-#Var QIPERFTRAY_SOURCEPATH
 
 !define APPNAMEANDVERSION "qiperf ${APPVERSION}"
 
@@ -319,6 +315,7 @@ Section Uninstall
         RMDir "$INSTDIR\"
 
         ${unregisterExtension} ".qip" "Quick Iperf config File"
+
 SectionEnd
 
 BrandingText "Quick iperf daemon"
@@ -337,16 +334,6 @@ Function .onInit
     !ifdef WIN64
       strcpy $INSTDIR "$PROGRAMFILES64\${APPNAME}"
     !endif
-    # set source path
-#    !ifdef WIN64
-#       StrCpy $QIPERFD_SOURCEPATH "qiperfd_x86_64"
-#        StrCpy $QIPERFC_SOURCEPATH "qiperfc_x86_64"
-#        StrCpy $QIPERFTRAY_SOURCEPATH "qiperftray_x86_64"
-#    !else
-#        StrCpy $QIPERFD_SOURCEPATH "qiperfd_x86"
-#        StrCpy $QIPERFC_SOURCEPATH "qiperfc_x86"
-#        StrCpy $QIPERFTRAY_SOURCEPATH "qiperftray_x86"
-#    !endif
 
   # set section 'daemon' as selected and read-only
   IntOp $0 ${SF_SELECTED} | ${SF_RO}
