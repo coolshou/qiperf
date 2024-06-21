@@ -13,7 +13,9 @@
 
 VIProductVersion ${APPFileVersion}
 
-Var SOURCEPATH
+Var QIPERFD_SOURCEPATH
+Var QIPERFC_SOURCEPATH
+Var QIPERFTRAY_SOURCEPATH
 
 !define APPNAMEANDVERSION "qiperf ${APPVERSION}"
 
@@ -65,7 +67,7 @@ Section "qiperf daemon" SECTION_Daemon
         ; Set Section Files and Shortcuts
         SetOutPath "$INSTDIR\"
         File "images\qiperf.ico"
-        !cd qiperfd_$SOURCEPATH
+        !cd $QIPERFD_SOURCEPATH
         File "libgcc_s_seh-1.dll"
         File "libstdc++-6.dll"
         File "libwinpthread-1.dll"
@@ -113,7 +115,8 @@ Section "qiperf daemon" SECTION_Daemon
         File "windows\x86_64\cygz.dll"
         File "windows\x86_64\iperf3.exe"
         SetOutPath "$INSTDIR\"
-        !cd ..\qiperftray_$SOURCEPATH
+        !cd ..
+        !cd $QIPERFTRAY_SOURCEPATH
         File "D3Dcompiler_47.dll"
         File "libEGL.dll"
         File "libGLESv2.dll"
@@ -159,7 +162,7 @@ Section "qiperf console" SECTION_Console
 
         ; Set Section Files and Shortcuts
         SetOutPath "$INSTDIR\"
-        !cd qiperfc_$SOURCEPATH
+        !cd $QIPERFC_SOURCEPATH
         File "${QIPERFC_NAME}"
         File "Qt5PrintSupport.dll"
         SetOutPath "$INSTDIR\printsupport\"
@@ -320,9 +323,13 @@ Function .onInit
     !endif
     # set source path
     !ifdef WIN64
-        StrCpy $SOURCEPATH "x86_64"
+        StrCpy $QIPERFD_SOURCEPATH "qiperfd_x86_64"
+        StrCpy $QIPERFC_SOURCEPATH "qiperfc_x86_64"
+        StrCpy $QIPERFTRAY_SOURCEPATH "qiperftray_x86_64"
     !else
-        StrCpy $SOURCEPATH "x86"
+        StrCpy $QIPERFD_SOURCEPATH "qiperfd_x86"
+        StrCpy $QIPERFC_SOURCEPATH "qiperfc_x86"
+        StrCpy $QIPERFTRAY_SOURCEPATH "qiperftray_x86"
     !endif
 
   # set section 'daemon' as selected and read-only
