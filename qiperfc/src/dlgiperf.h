@@ -5,6 +5,8 @@
 #include <QStringList>
 #include <QCloseEvent>
 #include <QEvent>
+#include <QMap>
+#include <QString>
 
 namespace Ui {
 class DlgIperf;
@@ -21,6 +23,7 @@ public:
     QString getJsonCfg();
     void loadJsonCfg(QString jsoncfg);
     bool add(QString mgr);
+    bool add(QString mgr, QString mdata); // mgr: manager ip, mdata: relative data
     void updateUI();
 
 public slots:
@@ -28,6 +31,10 @@ public slots:
     void onAccepted();
     void onChkBidirStatech(int state);
     void onChkReverseStatech(int state);
+    void onSelectMServer(QString text);
+    void onSelectMClient(QString text);
+
+
 protected:
     void changeEvent(QEvent *e) override;
 //    void closeEvent(QCloseEvent *event) override;
@@ -35,6 +42,7 @@ protected:
 private:
     Ui::DlgIperf *ui;
     QStringList mgrls; //manager ip address list
+    QMap<QString, QStringList> m_ips; // manager ip, all support ip in the manager server
 };
 
 #endif // DLGIPERF_H

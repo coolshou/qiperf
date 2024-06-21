@@ -4,11 +4,14 @@
 
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QHostAddress>
 #include <QMessageBox>
 #include <QStandardItemModel>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QCoreApplication>
+#include <QEventLoop>
 
 DlgIperf::DlgIperf(QWidget *parent) :
     QDialog(parent),
@@ -22,6 +25,11 @@ DlgIperf::DlgIperf(QWidget *parent) :
 //    connect(ui, &QDialog::accepted, this, &QDialog::onAccepted);
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DlgIperf::onAccepted);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+//    connect(ui->cb_mserver_ip, QOverload<int>::of(&QComboBox::currentIndexChanged),
+//            this,&DlgIperf::onSelectMServer);
+    connect(ui->cb_mserver_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMServer);
+    connect(ui->cb_mclient_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMClient);
 
     // TODD: temp disable item of UDP/SCTP
 //    auto * model = qobject_cast<QStandardItemModel*>(ui->cb_protocal->model());
@@ -55,7 +63,7 @@ QString DlgIperf::getJsonCfg()
         serverObj.insert("interval", ui->sb_interval->value());
 //        serverObj.insert("bind", ui->cb_server_bind_ip->currentText());
         if (ui->chk_server_bind_ip->isChecked()){
-            serverObj.insert("bind", ui->le_target_ip->text());
+            serverObj.insert("bind", ui->cb_target_ip->currentText());
         }
         mainObj.insert("server", serverObj);
     }
@@ -69,7 +77,7 @@ QString DlgIperf::getJsonCfg()
         clientObj.insert("bind", ui->cb_client_bind_ip->currentText());
     }
     clientObj.insert("protocal", ui->cb_protocal->currentText());
-    clientObj.insert("target", ui->le_target_ip->text());
+    clientObj.insert("target", ui->cb_target_ip->currentText());
     clientObj.insert("duration", ui->sb_duration->value());
     clientObj.insert("omit", ui->sb_omit->value());
     clientObj.insert("parallel", ui->sb_parallel->value());
@@ -112,7 +120,7 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
     QJsonObject clientObj = mainObj["client"].toObject();
     ui->cb_mclient_ip->setCurrentText(clientObj["manager"].toString());
     ui->cb_client_bind_ip->setCurrentText(clientObj["bind"].toString());
-    ui->le_target_ip->setText(clientObj["target"].toString());
+    ui->cb_target_ip->setCurrentText(clientObj["target"].toString());
     ui->sb_duration->setValue(clientObj["duration"].toInt());
     ui->sb_omit->setValue(clientObj["omit"].toInt());
     ui->sb_bitrate->setValue(clientObj["bitrate"].toInt());
@@ -138,6 +146,42 @@ bool DlgIperf::add(QString mgr)
     return false;
 }
 
+bool DlgIperf::add(QString mgr, QString mdata)
+{
+    if (add(mgr)){
+        QStringList ds;
+        QJsonDocument doc=QJsonDocument::fromJson(mdata.toUtf8());
+        QJsonObject obj = doc.object();
+        QJsonObject data;
+        QJsonArray addrs;
+        QString mif = obj["Manager"].toString();
+        if (obj.contains("Net")){
+            QJsonObject net = obj["Net"].toObject();
+            foreach(const QString& key, net.keys()) {
+                if (key != mif){
+                    data = net.value(key).toObject();
+                    if (data.contains("address")) {
+                        addrs= data.value("address").toArray();
+                        if (!addrs.empty()){
+                            foreach(auto addr, addrs){
+                                if (addr.isArray()){
+                                    ds.append(addr[0].toString());
+                                }
+                                QCoreApplication::processEvents(QEventLoop::AllEvents);
+                            }
+                        }
+                    }
+                }
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
+            }
+        }
+        ds.sort(Qt::CaseInsensitive);
+        m_ips.insert(mgr, ds);
+        return true;
+    }
+    return false;
+}
+
 void DlgIperf::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
@@ -149,13 +193,6 @@ void DlgIperf::changeEvent(QEvent *e)
         break;
     }
 }
-
-//void DlgIperf::closeEvent(QCloseEvent *event)
-//{
-
-
-
-//}
 
 void DlgIperf::updateUI()
 {
@@ -179,27 +216,36 @@ void DlgIperf::onAccepted()
 {
     bool close=true;
     //check require fields value
-    QHostAddress addr;
-    if (!addr.setAddress(ui->le_target_ip->text())){
+    QHostAddress addr_target;
+    bool bok = addr_target.setAddress(ui->cb_target_ip->currentText());
+    if (!bok){
         QMessageBox::warning(this, tr("WARNING!!"),
                              tr("Please specify iperf server ip address!!"),
                              QMessageBox::Ok);
-        ui->le_target_ip->setFocus();
-//        event->ignore();
-//        abort();
-//        close = false;
+        ui->cb_target_ip->setFocus();
         return;
     }
-    //TODO: check le_target_ip IPv4/IPv6 format
-    //TODO: check cb_client_bind_ip IPv4/IPv6 format
-    if (!addr.setAddress(ui->cb_client_bind_ip->currentText())){
+    QHostAddress addr_client;
+    bok =addr_client.setAddress(ui->cb_client_bind_ip->currentText());
+    if (!bok){
         QMessageBox::warning(this, tr("WARNING!!"),
                              tr("Please specify iperf client bind ip address!!"),
                              QMessageBox::Ok);
         ui->cb_client_bind_ip->setFocus();
-//        close = false;
         return;
     }
+    //check target and client in same protocal type
+    if(addr_target.protocol()!=addr_client.protocol()){
+        QMessageBox::warning(this, tr("WARNING!!"),
+                             tr("Please specify same protocol type of target IP and client IP!!"),
+                             QMessageBox::Ok);
+        // TODO: show multi focus color on following item
+        ui->cb_target_ip->setFocus();
+        ui->cb_client_bind_ip->setFocus();
+        return;
+    }
+    // TODO: check duplicate <target ip>:<port> binding!!
+
     if (close){
         accept();
     }
@@ -216,5 +262,35 @@ void DlgIperf::onChkReverseStatech(int state)
 {
     if (state==Qt::Checked){
         ui->chk_bidir->setCheckState(Qt::Unchecked);
+    }
+}
+
+void DlgIperf::onSelectMServer(QString text)
+{
+    if (!text.isEmpty()){
+        if (!m_ips.isEmpty()){
+            if (m_ips.contains(text)){
+                QStringList ds = m_ips.value(text);
+                if (ds.length()>0){
+                    ui->cb_target_ip->clear();
+                    ui->cb_target_ip->addItems(ds);
+                }
+            }
+        }
+    }
+}
+
+void DlgIperf::onSelectMClient(QString text)
+{
+    if (!text.isEmpty()){
+        if (!m_ips.isEmpty()){
+            if (m_ips.contains(text)){
+                QStringList ds = m_ips.value(text);
+                if (ds.length()>0){
+                    ui->cb_client_bind_ip->clear();
+                    ui->cb_client_bind_ip->addItems(ds);
+                }
+            }
+        }
     }
 }

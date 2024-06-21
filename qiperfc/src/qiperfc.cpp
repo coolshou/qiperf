@@ -580,10 +580,11 @@ void QIperfC::on_notice(QString send_addr, QString msg)
         int act = obj["ACT"].toInt();
         switch (act){
             case EndPointAct::Add:
-//                qInfo() << "EndPointAct::Add: " << send_addr << " msg: " << msg;
                 if (m_endpointmgr->add(send_addr, msg)){
                     if (dlgiperf){
-                        if (dlgiperf->add(send_addr)){
+//                        qInfo() << "on_notice:EndPointAct:Add: " << send_addr << " msg: " << msg;
+//                        if (dlgiperf->add(send_addr)){
+                        if (dlgiperf->add(send_addr, msg)){
                             dlgiperf->updateUI();
                         }
                     }
