@@ -14,11 +14,6 @@
 VIProductVersion ${APPFileVersion}
 
 Var SOURCEPATH
-!ifdef WIN64
-    StrCpy $SOURCEPATH "x86_64"
-!else
-    StrCpy $SOURCEPATH "x86"
-!endif
 
 !define APPNAMEANDVERSION "qiperf ${APPVERSION}"
 
@@ -66,7 +61,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${APPFileVersion}"
 Section "qiperf daemon" SECTION_Daemon
         ; Set Section properties
         SetOverwrite on
-
+    Var /GLOBAL SOURCEPATH
         ; Set Section Files and Shortcuts
         SetOutPath "$INSTDIR\"
         File "images\qiperf.ico"
@@ -159,7 +154,7 @@ SectionEnd
 Section "qiperf console" SECTION_Console
         ; Set Section properties
         SetOverwrite on
-
+    Var /GLOBAL SOURCEPATH
         ; Set Section Files and Shortcuts
         SetOutPath "$INSTDIR\"
         File "qiperfc_${SOURCEPATH}\${QIPERFC_NAME}"
@@ -307,19 +302,26 @@ SectionEnd
 BrandingText "Quick iperf daemon"
 
 Function .onInit
-        ${If} ${RunningX64}
-        !ifdef WIN64
-                SetRegView 64
-        !endif
-        ${Else}
-        !ifdef WIN64
-                MessageBox MB_OK|MB_ICONSTOP 'This is the 64 bit ${APPNAME} installer$\r$\nPlease download the 32 bit version $\r$\nClick Ok to quit Setup.'
-                Quit
-        !endif
-        ${EndIf}
-!ifdef WIN64
-  strcpy $INSTDIR "$PROGRAMFILES64\${APPNAME}"
-!endif
+    ${If} ${RunningX64}
+    !ifdef WIN64
+            SetRegView 64
+    !endif
+    ${Else}
+    !ifdef WIN64
+            MessageBox MB_OK|MB_ICONSTOP 'This is the 64 bit ${APPNAME} installer$\r$\nPlease download the 32 bit version $\r$\nClick Ok to quit Setup.'
+            Quit
+    !endif
+    ${EndIf}
+    !ifdef WIN64
+      strcpy $INSTDIR "$PROGRAMFILES64\${APPNAME}"
+    !endif
+    # set source path
+    Var /GLOBAL SOURCEPATH
+    !ifdef WIN64
+        StrCpy $SOURCEPATH "x86_64"
+    !else
+        StrCpy $SOURCEPATH "x86"
+    !endif
 
   # set section 'daemon' as selected and read-only
   IntOp $0 ${SF_SELECTED} | ${SF_RO}
