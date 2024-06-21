@@ -48,8 +48,6 @@ Var UNINSTALL_OLD_VERSION
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_INSTFILES
-    !define MUI_FINISHPAGE_RUN
-    !define MUI_FINISHPAGE_RUN_FUNCTION "StartQIperfd"
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_CONFIRM
@@ -158,6 +156,13 @@ Section "qiperf daemon" SECTION_Daemon
         SetOutPath "$INSTDIR\styles\"
         File "styles\qwindowsvistastyle.dll"
         !cd ..
+        # #  serivice file
+        SetOutPath "$INSTDIR"
+!ifdef WIN64
+        File "qiperfd\nssm.exe"
+!else
+        File "qiperfd\nssm_x86.exe" /oname=nssm.exe
+!endif
         CreateShortCut "$DESKTOP\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
 
         CreateDirectory "$SMPROGRAMS\qiperf"
@@ -379,9 +384,9 @@ init.done:
 FunctionEnd
 
 Function install_qiperfd
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "qiperfd" '"$INSTDIR\${QIPERFD_NAME}"'
+  #WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "qiperfd" '"$INSTDIR\${QIPERFD_NAME}"'
   # start
-
+   Exec '"$INSTDIR\nssm.exe" install "qiperfd" "$INSTDIR\${QIPERFD_NAME}"'
   # install qiperfd as service  => require app implement SERVICE API
   #SimpleSC::InstallService "qiperfd" "quick iperf daemon" "16" "2" "$INSTDIR\qiperfd.exe" "" "" ""
   #Pop $0 ; returns an errorcode (<>0) otherwise success (0)
@@ -389,6 +394,8 @@ Function install_qiperfd
 FunctionEnd
 
 Function un.install_qiperfd
+    Exec '"$INSTDIR\nssm.exe" stop "qiperfd" '
+    Exec '"$INSTDIR\nssm.exe" remove "qiperfd" confirm'
     #kill qiperfd
     ${nsProcess::FindProcess} "${QIPERFD_NAME}" $R0
     ${If} $R0 == 0
@@ -411,7 +418,7 @@ Function un.install_qiperfd
         DetailPrint "${QIPERFTRAY_NAME} was not found to be running"
     ${EndIf}
     ${nsProcess::Unload}
-    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Run\qiperfd"
+    #DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Run\qiperfd"
     #kill qiperfc
 
   # uninstall qiperfd as service
@@ -423,7 +430,7 @@ Function un.install_qiperfd
 
 FunctionEnd
 
-Function StartQIperfd
+Function .oninstsuccess
     # run the QIPERFD
     SetOutPath "$INSTDIR\"
     #    nsExec::Exec "$INSTDIR\${QIPERFD_NAME}"
@@ -431,7 +438,7 @@ Function StartQIperfd
     #    # run the QIPERFTRAY
     #    nsExec::Exec "$INSTDIR\${QIPERFTRAY_NAME}"
      #   #Pop $ExitCode
-    ExecShell "" "$INSTDIR\${QIPERFD_NAME}" SW_HIDE
+    #ExecShell "" "$INSTDIR\${QIPERFD_NAME}" SW_HIDE
     Exec "$INSTDIR\${QIPERFTRAY_NAME}"
 
 FunctionEnd
