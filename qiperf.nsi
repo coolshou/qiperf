@@ -43,6 +43,8 @@ Var UNINSTALL_OLD_VERSION
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_INSTFILES
+!define MUI_FINISHPAGE_RUN
+!define MUI_FINISHPAGE_RUN_FUNCTION "StartQIperfd"
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_CONFIRM
@@ -409,7 +411,7 @@ Function un.install_qiperfd
 
 FunctionEnd
 
-Function .oninstsuccess
+Function StartQIperfd
     # run the QIPERFD
     SetOutPath "$INSTDIR\"
     #    nsExec::Exec "$INSTDIR\${QIPERFD_NAME}"
