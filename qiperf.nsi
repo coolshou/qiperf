@@ -7,6 +7,9 @@
 !define APPDOMAIN "coolshou.idv.tw"
 !define APPURL "https://github.com/coolshou/qiperf"
 !define WIN64 ; comment out for 32 bit
+!define QIPERFD_NAME  "qiperfd.exe"
+!define QIPERFC_NAME  "qiperfc.exe"
+!define QIPERFTRAY_NAME  "qiperftray.exe"
 
 VIProductVersion ${APPFileVersion}
 
@@ -26,6 +29,8 @@ SetCompressor LZMA
 !include "x64.nsh"
 ; Modern interface settings
 !include "MUI.nsh"
+!include "nsProcess.nsh"
+!include "FileAssociation.nsh"
 
 !define MUI_ABORTWARNING
 !define MUI_ICON "images\qiperf.ico"
@@ -62,7 +67,7 @@ Section "qiperf daemon" SECTION_Daemon
         File "qiperfd_x86_64\libgcc_s_seh-1.dll"
         File "qiperfd_x86_64\libstdc++-6.dll"
         File "qiperfd_x86_64\libwinpthread-1.dll"
-        File "qiperfd_x86_64\qiperfd.exe"
+        File "qiperfd_x86_64\${QIPERFD_NAME}"
         File "qiperfd_x86_64\Qt5Core.dll"
         File "qiperfd_x86_64\Qt5Network.dll"
         File "qiperfd_x86_64\Qt5WebSockets.dll"
@@ -110,7 +115,7 @@ Section "qiperf daemon" SECTION_Daemon
         File "qiperftray_x86_64\libEGL.dll"
         File "qiperftray_x86_64\libGLESv2.dll"
         File "qiperftray_x86_64\opengl32sw.dll"
-        File "qiperftray_x86_64\qiperftray.exe"
+        File "qiperftray_x86_64\${QIPERFTRAY_NAME}"
         File "qiperftray_x86_64\Qt5Gui.dll"
         File "qiperftray_x86_64\Qt5Svg.dll"
         File "qiperftray_x86_64\Qt5Widgets.dll"
@@ -131,14 +136,17 @@ Section "qiperf daemon" SECTION_Daemon
         SetOutPath "$INSTDIR\styles\"
         File "qiperftray_x86_64\styles\qwindowsvistastyle.dll"
 
-        CreateShortCut "$DESKTOP\qiperftray.lnk" "$INSTDIR\qiperftray.exe"
+        CreateShortCut "$DESKTOP\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
 
         CreateDirectory "$SMPROGRAMS\qiperf"
-        #CreateShortCut "$SMPROGRAMS\qiperf\qiperfd.lnk" "$INSTDIR\qiperfd.exe"
-        CreateShortCut "$SMPROGRAMS\qiperf\qiperftray.lnk" "$INSTDIR\qiperftray.exe"
+        #CreateShortCut "$SMPROGRAMS\qiperf\qiperfd.lnk" "$INSTDIR\${QIPERFD_NAME}"
+        CreateShortCut "$SMPROGRAMS\qiperf\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
         CreateShortCut "$SMPROGRAMS\qiperf\Uninstall.lnk" "$INSTDIR\uninstall.exe"
 
         Call install_qiperfd
+        # run the QIPERFD
+        SetOutPath "$INSTDIR\"
+        Exec "$INSTDIR\${QIPERFD_NAME}"
 
 SectionEnd
 
@@ -148,13 +156,16 @@ Section "qiperf console" SECTION_Console
 
         ; Set Section Files and Shortcuts
         SetOutPath "$INSTDIR\"
-        File "qiperfc_x86_64\qiperfc.exe"
+        File "qiperfc_x86_64\${QIPERFC_NAME}"
         File "qiperfc_x86_64\Qt5PrintSupport.dll"
         SetOutPath "$INSTDIR\printsupport\"
         File "qiperfc_x86_64\printsupport\windowsprintersupport.dll"
 
-        CreateShortCut "$DESKTOP\qiperfc.lnk" "$INSTDIR\qiperfc.exe"
-        CreateShortCut "$SMPROGRAMS\qiperf\qiperfc.lnk" "$INSTDIR\qiperfc.exe"
+        CreateShortCut "$DESKTOP\qiperfc.lnk" "$INSTDIR\${QIPERFC_NAME}"
+        CreateShortCut "$SMPROGRAMS\qiperf\qiperfc.lnk" "$INSTDIR\${QIPERFC_NAME}"
+
+        ${registerExtension} "$INSTDIR\${QIPERFC_NAME}" ".qip" "Quick Iperf config File"
+
 SectionEnd
 
 Section -FinishSection
@@ -203,7 +214,7 @@ Section Uninstall
         Delete "$INSTDIR\libgcc_s_seh-1.dll"
         Delete "$INSTDIR\libstdc++-6.dll"
         Delete "$INSTDIR\libwinpthread-1.dll"
-        Delete "$INSTDIR\qiperfd.exe"
+        Delete "$INSTDIR\${QIPERFD_NAME}"
         Delete "$INSTDIR\Qt5Core.dll"
         Delete "$INSTDIR\Qt5Network.dll"
         Delete "$INSTDIR\Qt5WebSockets.dll"
@@ -247,7 +258,7 @@ Section Uninstall
         Delete "$INSTDIR\libEGL.dll"
         Delete "$INSTDIR\libGLESv2.dll"
         Delete "$INSTDIR\opengl32sw.dll"
-        Delete "$INSTDIR\qiperftray.exe"
+        Delete "$INSTDIR\${QIPERFTRAY_NAME}"
         Delete "$INSTDIR\Qt5Gui.dll"
         Delete "$INSTDIR\Qt5Svg.dll"
         Delete "$INSTDIR\Qt5Widgets.dll"
@@ -266,7 +277,7 @@ Section Uninstall
 
 
         ; Clean up qiperf console
-        Delete "$INSTDIR\qiperfc.exe"
+        Delete "$INSTDIR\${QIPERFC_NAME}"
         Delete "$INSTDIR\Qt5PrintSupport.dll"
         Delete "$INSTDIR\printsupport\windowsprintersupport.dll"
 
@@ -284,6 +295,7 @@ Section Uninstall
         RMDir "$INSTDIR\bearer\"
         RMDir "$INSTDIR\"
 
+        ${unregisterExtension} ".qip" "Quick Iperf config File"
 SectionEnd
 
 BrandingText "Quick iperf daemon"
@@ -312,18 +324,34 @@ Function .onInit
 FunctionEnd
 
 Function install_qiperfd
-  # install qiperfd as service
-        SimpleSC::InstallService "qiperfd" "quick iperf daemon" "16" "2" "$INSTDIR\qiperfd.exe" "" "" ""
-  Pop $0 ; returns an errorcode (<>0) otherwise success (0)
-  SimpleSC::StartService "qiperfd" "" "100"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "qiperfd" '"$INSTDIR\${QIPERFD_NAME}"'
+  # start
+
+  # install qiperfd as service  => require app implement SERVICE API
+  #SimpleSC::InstallService "qiperfd" "quick iperf daemon" "16" "2" "$INSTDIR\qiperfd.exe" "" "" ""
+  #Pop $0 ; returns an errorcode (<>0) otherwise success (0)
+  #SimpleSC::StartService "qiperfd" "" "100"
 FunctionEnd
 
 Function un.install_qiperfd
+    #kill qiperfd
+    ${nsProcess::FindProcess} "${QIPERFD_NAME}" $R0
+    ${If} $R0 == 0
+        DetailPrint "${APPNAME} is running. Closing it down"
+        ${nsProcess::CloseProcess} "${QIPERFD_NAME}" $R0
+        DetailPrint "Waiting for ${APPNAME} to close"
+        Sleep 2000
+    ${Else}
+        DetailPrint "${QIPERFD_NAME} was not found to be running"
+    ${EndIf}
+    ${nsProcess::Unload}
+
+    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Run\qiperfd"
   # uninstall qiperfd as service
-        SimpleSC::StopService "qiperfd" "1" "60"
-        Pop $0 ; returns an errorcode (<>0) otherwise success (0)
-  SimpleSC::RemoveService "qiperfd"
-        Pop $0 ; returns an errorcode (<>0) otherwise success (0)
+  #SimpleSC::StopService "qiperfd" "1" "60"
+  #Pop $0 ; returns an errorcode (<>0) otherwise success (0)
+  #SimpleSC::RemoveService "qiperfd"
+  #Pop $0 ; returns an errorcode (<>0) otherwise success (0)
   #DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\qiperfd"
 
 FunctionEnd
