@@ -162,7 +162,7 @@ Section "qiperf daemon" SECTION_Daemon
 !else
         File "qiperfd\nssm_x86.exe" /oname=nssm.exe
 !endif
-        CreateShortCut "$DESKTOP\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
+        #CreateShortCut "$DESKTOP\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
 
         CreateDirectory "$SMPROGRAMS\qiperf"
         #CreateShortCut "$SMPROGRAMS\qiperf\qiperfd.lnk" "$INSTDIR\${QIPERFD_NAME}"
@@ -238,7 +238,8 @@ Section Uninstall
         Delete "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
         Delete "$INSTDIR\qiperf.ico"
         ; Delete Shortcuts
-        Delete "$DESKTOP\qiperftray.lnk"
+        #Delete "$DESKTOP\qiperftray.lnk"
+        Delete "$DESKTOP\qiperfc.lnk"
         Delete "$SMPROGRAMS\qiperf\qiperfd.lnk"
         Delete "$SMPROGRAMS\qiperf\qiperftray.lnk"
         Delete "$SMPROGRAMS\qiperf\qiperfc.lnk"
@@ -377,15 +378,16 @@ init.done:
   # set section 'daemon' as selected and read-only
   IntOp $0 ${SF_SELECTED} | ${SF_RO}
   SectionSetFlags ${SECTION_Daemon} $0
-        # set section 'console' as unselected
-        #IntOp $0 ~${SF_SELECTED}
-        SectionSetFlags ${SECTION_Console} 0
+   # set section 'console' as unselected
+   #IntOp $0 ~${SF_SELECTED}
+   SectionSetFlags ${SECTION_Console} 0
 FunctionEnd
 
 Function install_qiperfd
   #WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "qiperfd" '"$INSTDIR\${QIPERFD_NAME}"'
   # start
    Exec '"$INSTDIR\nssm.exe" install "qiperfd" "$INSTDIR\${QIPERFD_NAME}"'
+   Exec '"$INSTDIR\nssm.exe" start "qiperfd" '
   # install qiperfd as service  => require app implement SERVICE API
   #SimpleSC::InstallService "qiperfd" "quick iperf daemon" "16" "2" "$INSTDIR\qiperfd.exe" "" "" ""
   #Pop $0 ; returns an errorcode (<>0) otherwise success (0)
