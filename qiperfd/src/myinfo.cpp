@@ -42,9 +42,24 @@ QString MyInfo::collectInfo()
     QJsonObject mainObject;
     mainObject.insert("ACT", EndPointAct::Add);
     mainObject.insert("Type", getEndpointType());
-//    mainObject.insert("Type", getEndpointType());
     mainObject.insert("HostName", QHostInfo::localHostName());
-    mainObject.insert("OS", QSysInfo::prettyProductName());
+    if (EndPointType::Windows==getEndpointType()){
+        //Windows 11
+        QString OS = "Windows 10";
+        QString OSVer = QSysInfo::kernelVersion();
+        QStringList ds = OSVer.split(".");
+        if (ds[0].toInt()==10){
+            //Windows 10/11
+            if (ds[2].toInt()>19045){
+                OS = "Windows 11";
+            }
+        }else{
+            OS = QSysInfo::prettyProductName();
+        }
+        mainObject.insert("OS", OS);
+    }else{
+        mainObject.insert("OS", QSysInfo::prettyProductName());
+    }
     mainObject.insert("OSVer", QSysInfo::kernelVersion());
     mainObject.insert("Manager", m_ifname);
     mainObject.insert("update", update);
