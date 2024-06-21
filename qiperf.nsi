@@ -61,7 +61,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${APPFileVersion}"
 Section "qiperf daemon" SECTION_Daemon
         ; Set Section properties
         SetOverwrite on
-    Var /GLOBAL SOURCEPATH
+
         ; Set Section Files and Shortcuts
         SetOutPath "$INSTDIR\"
         File "images\qiperf.ico"
@@ -154,7 +154,7 @@ SectionEnd
 Section "qiperf console" SECTION_Console
         ; Set Section properties
         SetOverwrite on
-    Var /GLOBAL SOURCEPATH
+
         ; Set Section Files and Shortcuts
         SetOutPath "$INSTDIR\"
         File "qiperfc_${SOURCEPATH}\${QIPERFC_NAME}"
@@ -316,7 +316,6 @@ Function .onInit
       strcpy $INSTDIR "$PROGRAMFILES64\${APPNAME}"
     !endif
     # set source path
-    Var /GLOBAL SOURCEPATH
     !ifdef WIN64
         StrCpy $SOURCEPATH "x86_64"
     !else
