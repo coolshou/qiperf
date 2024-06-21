@@ -6,8 +6,8 @@ FormQIperfds::FormQIperfds(QWidget *parent) :
     ui(new Ui::FormQIperfds)
 {
     ui->setupUi(this);
-    setColumnWidth(0, 130);
-    setColumnWidth(1, 150);
+    //setColumnWidth(0, 160);
+    //setColumnWidth(1, 180);
 
 }
 
