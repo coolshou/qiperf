@@ -43,8 +43,8 @@ Var UNINSTALL_OLD_VERSION
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_INSTFILES
-!define MUI_FINISHPAGE_RUN
-!define MUI_FINISHPAGE_RUN_FUNCTION "StartQIperfd"
+    !define MUI_FINISHPAGE_RUN
+    !define MUI_FINISHPAGE_RUN_FUNCTION "StartQIperfd"
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_CONFIRM
@@ -325,6 +325,17 @@ SectionEnd
 BrandingText "Quick iperf daemon"
 
 Function .onInit
+    ${If} ${RunningX64}
+    !ifdef WIN64
+            SetRegView 64
+    !endif
+    ${Else}
+    !ifdef WIN64
+            MessageBox MB_OK|MB_ICONSTOP 'This is the 64 bit ${APPNAME} installer$\r$\nPlease download the 32 bit version $\r$\nClick Ok to quit Setup.'
+            Quit
+    !endif
+    ${EndIf}
+
 # ;Check earlier installation
   ClearErrors
   ReadRegStr $0 HKLM "Software\${PRODUCT_REG_KEY}" "DisplayVersion"
@@ -344,16 +355,7 @@ init.uninst:
 
 init.done:
 
-    ${If} ${RunningX64}
-    !ifdef WIN64
-            SetRegView 64
-    !endif
-    ${Else}
-    !ifdef WIN64
-            MessageBox MB_OK|MB_ICONSTOP 'This is the 64 bit ${APPNAME} installer$\r$\nPlease download the 32 bit version $\r$\nClick Ok to quit Setup.'
-            Quit
-    !endif
-    ${EndIf}
+
     !ifdef WIN64
       strcpy $INSTDIR "$PROGRAMFILES64\${APPNAME}"
     !endif
