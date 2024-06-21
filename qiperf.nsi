@@ -65,7 +65,7 @@ Section "qiperf daemon" SECTION_Daemon
         ; Set Section Files and Shortcuts
         SetOutPath "$INSTDIR\"
         File "images\qiperf.ico"
-        !cd "qiperfd_$SOURCEPATH"
+        !cd qiperfd_$SOURCEPATH
         File "libgcc_s_seh-1.dll"
         File "libstdc++-6.dll"
         File "libwinpthread-1.dll"
@@ -113,7 +113,7 @@ Section "qiperf daemon" SECTION_Daemon
         File "windows\x86_64\cygz.dll"
         File "windows\x86_64\iperf3.exe"
         SetOutPath "$INSTDIR\"
-        !cd "..\qiperftray_$SOURCEPATH"
+        !cd ..\qiperftray_$SOURCEPATH
         File "D3Dcompiler_47.dll"
         File "libEGL.dll"
         File "libGLESv2.dll"
@@ -138,7 +138,7 @@ Section "qiperf daemon" SECTION_Daemon
         File "platforms\qwindows.dll"
         SetOutPath "$INSTDIR\styles\"
         File "styles\qwindowsvistastyle.dll"
-        !cd ".."
+        !cd ..
         CreateShortCut "$DESKTOP\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
 
         CreateDirectory "$SMPROGRAMS\qiperf"
@@ -159,12 +159,12 @@ Section "qiperf console" SECTION_Console
 
         ; Set Section Files and Shortcuts
         SetOutPath "$INSTDIR\"
-        !cd "qiperfc_$SOURCEPATH"
+        !cd qiperfc_$SOURCEPATH
         File "${QIPERFC_NAME}"
         File "Qt5PrintSupport.dll"
         SetOutPath "$INSTDIR\printsupport\"
         File "printsupport\windowsprintersupport.dll"
-        !cd ".."
+        !cd ..
         CreateShortCut "$DESKTOP\qiperfc.lnk" "$INSTDIR\${QIPERFC_NAME}"
         CreateShortCut "$SMPROGRAMS\qiperf\qiperfc.lnk" "$INSTDIR\${QIPERFC_NAME}"
 
