@@ -11,6 +11,8 @@
 !define QIPERFC_NAME  "qiperfc.exe"
 !define QIPERFTRAY_NAME  "qiperftray.exe"
 
+!define PRODUCT_REG_KEY "Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
+
 VIProductVersion ${APPFileVersion}
 
 !define APPNAMEANDVERSION "qiperf ${APPVERSION}"
@@ -184,19 +186,19 @@ SectionEnd
 Section -FinishSection
 
         WriteRegStr HKLM "Software\${APPNAME}" "" "$INSTDIR"
-        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayName" "${APPNAME}"
-        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayIcon" "$INSTDIR\qiperf.ico"
-        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "Publisher" "${APPDOMAIN}"
-        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayVersion" "${APPFileVersion}"
-        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "HelpLink" "${APPURL}"
-        WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "NoModify" "1"
-        WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "NoRepair" "1"
-        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "UninstallString" "$INSTDIR\uninstall.exe"
+        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "DisplayName" "${APPNAME}"
+        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "DisplayIcon" "$INSTDIR\qiperf.ico"
+        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "Publisher" "${APPDOMAIN}"
+        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "DisplayVersion" "${APPFileVersion}"
+        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "HelpLink" "${APPURL}"
+        WriteRegDWORD HKLM "Software\${PRODUCT_REG_KEY}" "NoModify" "1"
+        WriteRegDWORD HKLM "Software\${PRODUCT_REG_KEY}" "NoRepair" "1"
+        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "UninstallString" "$INSTDIR\uninstall.exe"
         WriteUninstaller "$INSTDIR\uninstall.exe"
         # size
         ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
         IntFmt $0 "0x%08X" $0
-        WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "EstimatedSize" "$0"
+        WriteRegDWORD HKLM "Software\${PRODUCT_REG_KEY}" "EstimatedSize" "$0"
 
 SectionEnd
 
@@ -210,7 +212,7 @@ SectionEnd
 Section Uninstall
         Call un.install_qiperfd
         ;Remove from registry...
-        DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
+        DeleteRegKey HKLM "Software\${PRODUCT_REG_KEY}"
         DeleteRegKey HKLM "SOFTWARE\${APPNAME}"
 
         ; Delete self
@@ -315,6 +317,24 @@ SectionEnd
 BrandingText "Quick iperf daemon"
 
 Function .onInit
+# ;Check earlier installation
+  ClearErrors
+  ReadRegStr $0 HKLM "Software\${PRODUCT_REG_KEY}" "DisplayVersion"
+  IfErrors init.uninst ; older versions might not have "Version" string set
+  ${VersionCompare} $0 ${APPFileVersion} $1
+  IntCmp $1 2 init.uninst
+    MessageBox MB_YESNO|MB_ICONQUESTION "${APPNAME} version $0 seems to be already installed on your system.$\nWould you like to proceed with the installation of version ${APPFileVersion}?" \
+        IDYES init.uninst
+    Quit
+
+init.uninst:
+  ClearErrors
+  ReadRegStr $0 HKLM "Software\${PRODUCT_REG_KEY}" ""
+  IfErrors init.done
+  StrCpy $UNINSTALL_OLD_VERSION '"$0\uninstall.exe" /S _?=$0'
+
+init.done:
+
     ${If} ${RunningX64}
     !ifdef WIN64
             SetRegView 64
@@ -390,7 +410,7 @@ Function .oninstsuccess
     #    # run the QIPERFTRAY
     #    nsExec::Exec "$INSTDIR\${QIPERFTRAY_NAME}"
      #   #Pop $ExitCode
-    Exec "$INSTDIR\${QIPERFD_NAME}"
+    ExecShell "" "$INSTDIR\${QIPERFD_NAME}" SW_HIDE
     Exec "$INSTDIR\${QIPERFTRAY_NAME}"
 
 FunctionEnd
