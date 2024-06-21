@@ -22,7 +22,11 @@ Name "${APPNAMEANDVERSION}"
 InstallDir "$PROGRAMFILES\qiperf"
 InstallDirRegKey HKLM "Software\${APPNAME}" ""
 
-OutFile "qiperf-setup-${APPFileVersion}.exe"
+!ifdef WIN64
+    OutFile "qiperf-setup-${APPFileVersion}.exe"
+!else
+    OutFile "qiperf-setup-${APPFileVersion}_x86.exe"
+!endif
 
 !include "FileFunc.nsh"
 ; Use compression
