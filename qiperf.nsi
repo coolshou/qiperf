@@ -157,10 +157,10 @@ Section "qiperf daemon" SECTION_Daemon
         # run the QIPERFD
         SetOutPath "$INSTDIR\"
         nsExec::Exec "$INSTDIR\${QIPERFD_NAME}"
-        Pop $ExitCode
+        #Pop $ExitCode
         # run the QIPERFTRAY
         nsExec::Exec "$INSTDIR\${QIPERFTRAY_NAME}"
-        Pop $ExitCode
+        #Pop $ExitCode
 
 SectionEnd
 
@@ -377,6 +377,8 @@ Function un.install_qiperfd
     ${EndIf}
     ${nsProcess::Unload}
     DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Run\qiperfd"
+    #kill qiperfc
+
   # uninstall qiperfd as service
   #SimpleSC::StopService "qiperfd" "1" "60"
   #Pop $0 ; returns an errorcode (<>0) otherwise success (0)
