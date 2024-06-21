@@ -160,7 +160,11 @@ Section "qiperf daemon" SECTION_Daemon
         Call install_qiperfd
         # run the QIPERFD
         SetOutPath "$INSTDIR\"
-        Exec "$INSTDIR\${QIPERFD_NAME}"
+        nsExec::Exec "$INSTDIR\${QIPERFD_NAME}"
+        Pop $ExitCode
+        # run the QIPERFTRAY
+        nsExec::Exec "$INSTDIR\${QIPERFTRAY_NAME}"
+        Pop $ExitCode
 
 SectionEnd
 
@@ -366,15 +370,25 @@ Function un.install_qiperfd
     #kill qiperfd
     ${nsProcess::FindProcess} "${QIPERFD_NAME}" $R0
     ${If} $R0 == 0
-        DetailPrint "${APPNAME} is running. Closing it down"
+        DetailPrint "${QIPERFD_NAME} is running. Closing it down"
         ${nsProcess::CloseProcess} "${QIPERFD_NAME}" $R0
-        DetailPrint "Waiting for ${APPNAME} to close"
+        DetailPrint "Waiting for ${QIPERFD_NAME} to close"
         Sleep 2000
     ${Else}
         DetailPrint "${QIPERFD_NAME} was not found to be running"
     ${EndIf}
     ${nsProcess::Unload}
-
+    #kill qiperftray
+    ${nsProcess::FindProcess} "${QIPERFTRAY_NAME}" $R0
+    ${If} $R0 == 0
+        DetailPrint "${QIPERFTRAY_NAME} is running. Closing it down"
+        ${nsProcess::CloseProcess} "${QIPERFTRAY_NAME}" $R0
+        DetailPrint "Waiting for ${QIPERFTRAY_NAME} to close"
+        Sleep 2000
+    ${Else}
+        DetailPrint "${QIPERFTRAY_NAME} was not found to be running"
+    ${EndIf}
+    ${nsProcess::Unload}
     DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Run\qiperfd"
   # uninstall qiperfd as service
   #SimpleSC::StopService "qiperfd" "1" "60"
