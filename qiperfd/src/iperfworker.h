@@ -27,7 +27,7 @@ public:
     void setRefRow(QString refrow);
     void setExtra(QString parallel, QString protocal,bool bidir);
     void toLogFile(QString msg);
-
+    bool getServerMode();
 signals:
     void started(int idx); // refrow
     void finished(int idx, int exitCode, int exitStatus); // refrow

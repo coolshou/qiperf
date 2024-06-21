@@ -406,12 +406,17 @@ void QIperfd::start(int idx)
     QThread *th = m_threads.value(idx);
     m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath+"/"+s_starttime);
     m_iperfworkers.value(idx)->setBidirTag(m_directions[s_starttime]);
+    QString s="C";
+    if (m_iperfworkers.value(idx)->getServerMode()){
+        s="S";
+    }
+
 
     // QString id= QString( "%1" ).arg(reinterpret_cast<long>(th->currentThreadId()), 16);
 //    QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
 //    qDebug() << "run thread id:" << id << Qt::endl;
     th->start();
-    emit iperfStarted(QString(CMD_IPERF_STARTED)+":"
+    emit iperfStarted(QString(CMD_IPERF_STARTED)+":"+s+":"
                       + m_iperfworkers.value(idx)->getBindKey());
 }
 void QIperfd::startAll()

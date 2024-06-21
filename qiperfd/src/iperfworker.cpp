@@ -149,6 +149,11 @@ void IperfWorker::toLogFile(QString msg)
     }
 }
 
+bool IperfWorker::getServerMode()
+{
+    return m_servermode;
+}
+
 void IperfWorker::onStarted()
 {
     QString tmp = m_iperflogpath+"/"+getBindKey()+".log";

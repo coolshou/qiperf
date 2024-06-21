@@ -126,18 +126,26 @@ void WSClient::onStateChanged(QAbstractSocket::SocketState state)
 //! [onTextMessageReceived]
 void WSClient::onTextMessageReceived(QString message)
 {
+    int cut2;
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     int cut = message.indexOf(':', 0);
     QString act = message.left(cut);
     message = message.right(message.length()-cut-1);
 
     if (act.startsWith(CMD_IPERF_STARTED)){
+        cut2 = message.indexOf(':', 0);
+        QString smode = message.left(cut2); // S: server/ C: client mode
+        message = message.right(message.length()-cut2-1);
+
+        qDebug()<< "CMD_IPERF_STARTED: mode:"<< smode << " ip: " << message;
+
 //        emit iperfStarted(refrow);
     }else if (act.startsWith(CMD_IPERF_STOPED)){
+        qDebug()<< "CMD_IPERF_STOPED:" << message;
 //        emit iperfStoped(refrow);
     } else if (act.startsWith(CMD_IPERF_TP_DATA)){
         QJsonParseError error;
-        int cut2 = message.indexOf(':', 0);
+        cut2 = message.indexOf(':', 0);
         QString refrow = message.left(cut2);
         message = message.right(message.length()-cut2-1);
         int cut3 = message.indexOf(':', 0);
