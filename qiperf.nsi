@@ -32,6 +32,9 @@ SetCompressor LZMA
 !include "MUI.nsh"
 !include "nsProcess.nsh"
 !include "FileAssociation.nsh"
+!include "WordFunc.nsh"
+!insertmacro VersionCompare
+Var UNINSTALL_OLD_VERSION
 
 !define MUI_ABORTWARNING
 !define MUI_ICON "images\qiperf.ico"
@@ -332,6 +335,7 @@ init.uninst:
   ReadRegStr $0 HKLM "Software\${PRODUCT_REG_KEY}" ""
   IfErrors init.done
   StrCpy $UNINSTALL_OLD_VERSION '"$0\uninstall.exe" /S _?=$0'
+  ExecWait '$UNINSTALL_OLD_VERSION'
 
 init.done:
 
