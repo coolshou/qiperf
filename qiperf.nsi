@@ -154,13 +154,7 @@ Section "qiperf daemon" SECTION_Daemon
         CreateShortCut "$SMPROGRAMS\qiperf\Uninstall.lnk" "$INSTDIR\uninstall.exe"
 
         Call install_qiperfd
-        # run the QIPERFD
-        SetOutPath "$INSTDIR\"
-        nsExec::Exec "$INSTDIR\${QIPERFD_NAME}"
-        #Pop $ExitCode
-        # run the QIPERFTRAY
-        nsExec::Exec "$INSTDIR\${QIPERFTRAY_NAME}"
-        #Pop $ExitCode
+
 
 SectionEnd
 
@@ -385,6 +379,19 @@ Function un.install_qiperfd
   #SimpleSC::RemoveService "qiperfd"
   #Pop $0 ; returns an errorcode (<>0) otherwise success (0)
   #DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\qiperfd"
+
+FunctionEnd
+
+Function .oninstsuccess
+    # run the QIPERFD
+    SetOutPath "$INSTDIR\"
+    #    nsExec::Exec "$INSTDIR\${QIPERFD_NAME}"
+    #    #Pop $ExitCode
+    #    # run the QIPERFTRAY
+    #    nsExec::Exec "$INSTDIR\${QIPERFTRAY_NAME}"
+     #   #Pop $ExitCode
+    Exec "$INSTDIR\${QIPERFD_NAME}"
+    Exec "$INSTDIR\${QIPERFTRAY_NAME}"
 
 FunctionEnd
 
