@@ -43,6 +43,7 @@ private:
     Ui::DlgIperf *ui;
     QStringList mgrls; //manager ip address list
     QMap<QString, QStringList> m_ips; // manager ip, all support ip in the manager server
+    bool b_ipv6;
 };
 
 #endif // DLGIPERF_H

@@ -18,6 +18,7 @@ DlgIperf::DlgIperf(QWidget *parent) :
     ui(new Ui::DlgIperf)
 {
     ui->setupUi(this);
+    b_ipv6 = false;
     connect(ui->cb_version, &QComboBox::currentTextChanged, this, &DlgIperf::ChangeVersion);
     connect(ui->chk_bidir, &QCheckBox::stateChanged, this, &DlgIperf::onChkBidirStatech);
     connect(ui->chk_reverse, &QCheckBox::stateChanged, this, &DlgIperf::onChkReverseStatech);
@@ -61,7 +62,7 @@ QString DlgIperf::getJsonCfg()
         serverObj.insert("parallel", ui->sb_parallel->value());
         serverObj.insert("bidir", ui->chk_bidir->isChecked());
         serverObj.insert("interval", ui->sb_interval->value());
-//        serverObj.insert("bind", ui->cb_server_bind_ip->currentText());
+//        serverObj.insert("ipv6", b_ipv6);
         if (ui->chk_server_bind_ip->isChecked()){
             serverObj.insert("bind", ui->cb_target_ip->currentText());
         }
@@ -72,6 +73,7 @@ QString DlgIperf::getJsonCfg()
     clientObj.insert("version", ui->cb_version->currentText());
     clientObj.insert("port", ui->sb_port->value());
     clientObj.insert("manager", ui->cb_mclient_ip->currentText());
+    clientObj.insert("ipv6", b_ipv6);
     if (!ui->cb_client_bind_ip->currentText().isEmpty()) {
         //TODO: check IPv4/IPv6format
         clientObj.insert("bind", ui->cb_client_bind_ip->currentText());
@@ -245,7 +247,10 @@ void DlgIperf::onAccepted()
         return;
     }
     // TODO: check duplicate <target ip>:<port> binding!!
-
+    if ((addr_client.protocol()==QAbstractSocket::IPv6Protocol)&&
+            (addr_target.protocol()==QAbstractSocket::IPv6Protocol)){
+        b_ipv6=true;
+    }
     if (close){
         accept();
     }
