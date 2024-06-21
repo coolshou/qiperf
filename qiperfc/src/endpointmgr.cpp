@@ -3,6 +3,8 @@
 #include <QJsonObject>
 #include <QDateTime>
 
+#include "comm.h"
+
 EndPointMgr::EndPointMgr(QObject *parent)
     : QAbstractItemModel(parent)
 {
@@ -54,17 +56,17 @@ QVariant EndPointMgr::headerData(int section, Qt::Orientation orientation,
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole){
         switch (section)
         {
-            case 0:
-                return QString("Endpoint");
-            case 1:
+            case EndPointMgr::name:
+                return QString(QIPERFD_NAME);
+            case EndPointMgr::ifname:
                 return QString("Manager Interface");
-            case 2:
+            case EndPointMgr::type:
                 return QString("Type");
-            case 3:
+            case EndPointMgr::os:
                 return QString("OS");
-            case 4:
+            case EndPointMgr::osver:
                 return QString("OS Ver");
-            case 5:
+            case EndPointMgr::status:
                 return QString("Last seen");
             default:
                 return QVariant();

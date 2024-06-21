@@ -6,6 +6,7 @@
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
+
 #include "../src/endpoint.h"
 
 //class to manager all EndPoint
@@ -14,6 +15,16 @@ class EndPointMgr : public QAbstractItemModel
 {
     Q_OBJECT
 public:
+    enum cols{
+        name=0,
+        ifname=1,
+        type=2,
+        os=3,
+        osver=4,
+        status=5
+    };
+    Q_ENUM(cols)
+
     explicit EndPointMgr(QObject *parent = nullptr);
     ~EndPointMgr() override;
     QModelIndex index(int row, int column,
