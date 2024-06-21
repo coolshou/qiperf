@@ -39,7 +39,6 @@ SetCompressor LZMA
 !include "FileAssociation.nsh"
 !include "WordFunc.nsh"
 !insertmacro VersionCompare
-Var UNINSTALL_OLD_VERSION
 
 !define MUI_ABORTWARNING
 !define MUI_ICON "images\qiperf.ico"
@@ -209,7 +208,7 @@ Section -FinishSection
         WriteRegDWORD HKLM "Software\${PRODUCT_REG_KEY}" "NoModify" "1"
         WriteRegDWORD HKLM "Software\${PRODUCT_REG_KEY}" "NoRepair" "1"
         WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "UninstallString" "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
-        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "QuietUninstallString" '"$INSTDIR\${PROJECT_UNINSTALL_EXE}" /S _?=$INSTDIR'
+        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "QuietUninstallString" '"$INSTDIR\${PRODUCT_UNINSTALL_EXE}" /S _?=$INSTDIR'
 
         WriteUninstaller "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
         # size
