@@ -12,6 +12,7 @@
 !define QIPERFTRAY_NAME  "qiperftray.exe"
 
 !define PRODUCT_REG_KEY "Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
+!define PRODUCT_UNINSTALL_EXE "uninstall.exe"
 
 VIProductVersion ${APPFileVersion}
 
@@ -162,7 +163,7 @@ Section "qiperf daemon" SECTION_Daemon
         CreateDirectory "$SMPROGRAMS\qiperf"
         #CreateShortCut "$SMPROGRAMS\qiperf\qiperfd.lnk" "$INSTDIR\${QIPERFD_NAME}"
         CreateShortCut "$SMPROGRAMS\qiperf\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
-        CreateShortCut "$SMPROGRAMS\qiperf\Uninstall.lnk" "$INSTDIR\uninstall.exe"
+        CreateShortCut "$SMPROGRAMS\qiperf\Uninstall.lnk" "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
 
         Call install_qiperfd
 
@@ -202,8 +203,10 @@ Section -FinishSection
         WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "HelpLink" "${APPURL}"
         WriteRegDWORD HKLM "Software\${PRODUCT_REG_KEY}" "NoModify" "1"
         WriteRegDWORD HKLM "Software\${PRODUCT_REG_KEY}" "NoRepair" "1"
-        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "UninstallString" "$INSTDIR\uninstall.exe"
-        WriteUninstaller "$INSTDIR\uninstall.exe"
+        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "UninstallString" "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
+        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "QuietUninstallString" '"$INSTDIR\${PROJECT_UNINSTALL_EXE}" /S _?=$INSTDIR'
+
+        WriteUninstaller "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
         # size
         ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
         IntFmt $0 "0x%08X" $0
@@ -228,7 +231,7 @@ Section Uninstall
         DeleteRegKey HKLM "SOFTWARE\${APPNAME}"
 
         ; Delete self
-        Delete "$INSTDIR\uninstall.exe"
+        Delete "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
         Delete "$INSTDIR\qiperf.ico"
         ; Delete Shortcuts
         Delete "$DESKTOP\qiperftray.lnk"
@@ -352,10 +355,13 @@ Function .onInit
 
 init.uninst:
   ClearErrors
-  ReadRegStr $0 HKLM "Software\${PRODUCT_REG_KEY}" ""
+${If} ${Silent}
+  ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "QuietUninstallString"
+${Else}
+  ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "UninstallString"
+${EndIf}
   IfErrors init.done
-  StrCpy $UNINSTALL_OLD_VERSION '"$0\uninstall.exe" /S _?=$0'
-  ExecWait '$UNINSTALL_OLD_VERSION'
+  ExecWait "$R0"
 
 init.done:
 
