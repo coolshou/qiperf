@@ -214,6 +214,9 @@ SectionEnd
 ;Uninstall section
 Section Uninstall
         Call un.install_qiperfd
+    !ifdef WIN64
+            SetRegView 64
+    !endif
         ;Remove from registry...
         DeleteRegKey HKLM "Software\${PRODUCT_REG_KEY}"
         DeleteRegKey HKLM "SOFTWARE\${APPNAME}"
