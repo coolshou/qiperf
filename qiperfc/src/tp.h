@@ -54,6 +54,7 @@ public:
     int getVersion();
     QString getServer();
     QString getServerArgs();
+    QString getBindKey(bool s=true);
     QString getClient();
     QString getClientArgs();
     QString getDirection();

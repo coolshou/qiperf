@@ -107,7 +107,7 @@ private slots:
     void onItemDClicked(QModelIndex idx);
     void onRPC_result(const QVariant& result);
     void onRPC_error(int code, const QString& message);
-    void onIperfStarted(QString ipport);
+    void onIperfStarted(QString smode, QString ipport);
     void onIperfStoped(QString ipport);
     void onIperfTPdata(QString refrow, QString sInterval, QString data);
     void onDisconnected(QString serverip);
@@ -125,7 +125,8 @@ private:
 #if (TEST_WS==1)
     QMap<QString, WSClient *> m_wss; // websocket client list for manager iperf server
     QMap<QString, WSClient *> m_wsc; // websocket client list for manager iperf client
-
+    QMap<QString, int> m_status_server; // store server status, 0: init, 1: running, 2: error?
+    QMap<QString, int> m_status_client; // store client status, 0: init, 1: running, 2: error?
 #endif
 #if (TEST_JSONRPC==1)
     jcon::JsonRpcWebSocketClient *rpc_client;

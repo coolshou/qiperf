@@ -202,6 +202,15 @@ QString TP::getServerArgs()
     return strJson;
 }
 
+QString TP::getBindKey(bool smode)
+{
+    if (smode){
+        return m_server+"_"+QString::number(m_port);
+    }else{
+        return m_client + "-" + m_server + "_" + QString::number(m_port);;
+    }
+}
+
 QString TP::getClient()
 {
     return m_itemDatas[TP::client].toString();

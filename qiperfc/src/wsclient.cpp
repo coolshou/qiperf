@@ -136,10 +136,8 @@ void WSClient::onTextMessageReceived(QString message)
         cut2 = message.indexOf(':', 0);
         QString smode = message.left(cut2); // S: server/ C: client mode
         message = message.right(message.length()-cut2-1);
-
         qDebug()<< "CMD_IPERF_STARTED: mode:"<< smode << " ip: " << message;
-
-//        emit iperfStarted(refrow);
+        emit iperfStarted(smode, message);
     }else if (act.startsWith(CMD_IPERF_STOPED)){
         qDebug()<< "CMD_IPERF_STOPED:" << message;
 //        emit iperfStoped(refrow);

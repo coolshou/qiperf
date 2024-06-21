@@ -335,6 +335,7 @@ void QIperfC::onStart()
                 emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
                 break;
             }
+            m_status_server[tp->getBindKey(true)]=0;
             //RPC to control all client endpoint (iperf client)
             QString clientIP = tp->getMgrClient();
             if (!m_wsc.contains(clientIP)) {
@@ -363,7 +364,7 @@ void QIperfC::onStart()
                 emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
                 break;
             }
-
+            m_status_client[tp->getBindKey(false)]=0;
             // TODO. set websocket to  report throughput
             QString di = tp->getDirection();
             if (di== QVariant::fromValue(TP::DirType::Tx).toString()){
@@ -398,6 +399,22 @@ void QIperfC::onStart()
         if(bErrorStop>0){
             qDebug() << "Start server error happen!!";
             return;
+        }
+        //TODO: wait server start up and ready
+        int chk=0;
+        bool bServerReady=false;
+        while (!bServerReady){
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            chk=0;
+            foreach(auto skey, m_status_server.keys()){
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
+                chk=chk+m_status_server.value(skey, 0);
+            }
+            if (chk>=m_status_server.keys().length()){
+                bServerReady=true;
+            }else{
+                qDebug() << " wait server ready: "<< QString::number(chk);
+            }
         }
         //Start client
         for (auto key: m_wsc.keys()){
@@ -739,14 +756,20 @@ void QIperfC::onRPC_error(int code, const QString &message)
     qDebug() << "onRPC_error: (" << code << ")" << message << Qt::endl;
 }
 
-void QIperfC::onIperfStarted(QString ipport)
+void QIperfC::onIperfStarted(QString smode, QString ipport)
 {
     qDebug() << "onIperfStarted:" << ipport;
+    if (smode.contains("S", Qt::CaseSensitive)){
+        m_status_server[ipport]=1;
+    }else{
+        m_status_client[ipport]=1;
+    }
 }
 
 void QIperfC::onIperfStoped(QString ipport)
 {
     qDebug() << "onIperfStoped:" << ipport;
+    m_status_server[ipport]=2;
 }
 
 void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString datas)
