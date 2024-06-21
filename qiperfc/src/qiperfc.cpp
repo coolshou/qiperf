@@ -672,6 +672,8 @@ bool QIperfC::eventFilter(QObject *obj, QEvent *event)
         QPoint p(this->geometry().center().x()-dx, this->geometry().center().y()-dy);
         m_frm_qiperfds->move(p);
         m_frm_qiperfds->show();
+        m_frm_qiperfds->raise();
+        m_frm_qiperfds->activateWindow();
     }
     if((obj == ui->menubar || obj == ui->toolBar) &&
             (event->type() == (Qt::Key_Control & QMouseEvent::MouseButtonPress))) {
