@@ -9,6 +9,7 @@
 #include <QJsonValue>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QDir>
 
 //#include <QOverload>
 
@@ -158,7 +159,7 @@ void IperfWorker::onStarted()
 {
     QString tmp = m_iperflogpath+"/"+getBindKey()+".log";
     m_logfile=new QFile(tmp);
-    qInfo() << "m_logfile: " << m_logfile->fileName();
+    qInfo() << "m_logfile: " << QDir::toNativeSeparators(m_logfile->fileName());
 
     if(m_logfile->open(QIODevice::WriteOnly|QIODevice::Append)){
         m_logtextstream = new QTextStream(m_logfile);
