@@ -194,9 +194,13 @@ void IperfWorker::readyReadStdErr()
     QByteArray processOutput;
     processOutput = m_iperf->readAllStandardError();
 
-    qDebug() << "Error was " << QString(processOutput);
+    QString err = QString(processOutput);
+    qDebug() << "Error was " << err;
 
-    emit onStderr(m_idx, QString(processOutput));
+    m_running = false;
+    m_stop = true;
+    emit onStderr(m_idx, err);
+    onFinished(1, QProcess::ExitStatus(2)); // something error
 
 }
 
@@ -213,8 +217,8 @@ void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
     }
 
     m_running = false;
-    emit finished(m_idx, exitCode, int(exitStatus));
     m_stop = true;
+    emit finished(m_idx, exitCode, int(exitStatus));
 }
 
 void IperfWorker::parserStdOut(QString msg)

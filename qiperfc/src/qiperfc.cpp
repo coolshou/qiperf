@@ -791,8 +791,8 @@ void QIperfC::onIperfStarted(QString smode, QString ipport)
 
 void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err)
 {
-    qDebug() << "onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
     if (err_no.toInt()>0){
+        qDebug() << "onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
         m_tpmgr->addComment(refrow, err);
     }
 //    m_tpmgr.setComment();
