@@ -973,5 +973,7 @@ void QIperfC::onItemDClicked(QModelIndex idx)
     if (rc == QDialog::Accepted){
         QString rs= dlgiperf->getJsonCfg();
         tp->loadData(rs);
+//        m_tpmgr
+        m_tpmgr->setItem(idx, tp);
     }
 }

@@ -249,6 +249,14 @@ TP *TPMgr::getItem(const QModelIndex &index) const
     return rootItem;
 }
 
+void TPMgr::setItem(const QModelIndex &index, TP *item)
+{
+    if (index.isValid()) {
+//        rootItem->appendChild();
+        // TODO:
+    }
+}
+
 int TPMgr::swapDirection(QModelIndex midx)
 {
     TP *tp= getItem(midx);
@@ -295,7 +303,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString valu
     }else{
         c->setThroughput(value);
     }
-    emit dataChanged(QModelIndex(),QModelIndex());
+//    emit dataChanged(QModelIndex(),QModelIndex());
 }
 
 TP *TPMgr::getItemByIdx(QString midx, TP *item)
@@ -347,6 +355,9 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
+    // signal dataChanged when all throughput data update!!
+    emit dataChanged(QModelIndex(),QModelIndex());
+
 //    TP *tp = getItemByIdx(refrow);
 //    if (!(tp==nullptr)){
 //        tp->setThroughput(QString::number(sum));
