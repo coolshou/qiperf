@@ -416,8 +416,8 @@ void QIperfd::start(int idx)
 //    QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
 //    qDebug() << "run thread id:" << id << Qt::endl;
     th->start();
-    emit iperfStarted(QString(CMD_IPERF_STARTED)+":"+s+":"
-                      + m_iperfworkers.value(idx)->getBindKey());
+    emit iperfStarted(QString(CMD_IPERF_STARTED)+":"+QString::number(idx)+
+                      ":"+ s +":" + m_iperfworkers.value(idx)->getBindKey());
 }
 void QIperfd::startAll()
 {

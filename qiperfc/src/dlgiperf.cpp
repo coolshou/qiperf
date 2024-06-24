@@ -66,7 +66,9 @@ QString DlgIperf::getJsonCfg()
         if (ui->chk_server_bind_ip->isChecked()){
             serverObj.insert("bind", ui->cb_target_ip->currentText());
         }
+        serverObj.insert("fmtreport", ui->cb_fmtreport->currentText());
         mainObj.insert("server", serverObj);
+
     }
     //client
     QJsonObject clientObj;
