@@ -78,6 +78,9 @@ int main(int argc, char *argv[])
         QFileInfo fi(argv[1]);
         if (fi.suffix().compare(QIPERF_EXT)==0){
             qDebug() << "TODO load: " << argv[1] ;
+            main.load(argv[1]);
+        }else{
+            qDebug() << "unknown file ext: " << argv[1] ;
         }
     }
     main.show();
