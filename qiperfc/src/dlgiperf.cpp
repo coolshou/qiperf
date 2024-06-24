@@ -241,7 +241,7 @@ void DlgIperf::onAccepted()
 
     if (ui->cb_mserver_ip->currentText() == ui->cb_mclient_ip->currentText()){
         QMessageBox::warning(this, tr("WARNING!!"),
-                             tr("Set Manager Server and Client on same IP address may cause problem!!"),
+                             tr("Forbid setting same address of Manager Server and Manager Client!!"),
                              QMessageBox::Ok);
         ui->cb_mclient_ip->setFocus();
         return;
