@@ -238,6 +238,16 @@ void DlgIperf::onAccepted()
         ui->cb_client_bind_ip->setFocus();
         return;
     }
+
+    if (ui->cb_mserver_ip->currentText() == ui->cb_mclient_ip->currentText()){
+        QMessageBox::warning(this, tr("WARNING!!"),
+                             tr("Set Manager Server and Client on same IP address may cause problem!!"),
+                             QMessageBox::Ok);
+        ui->cb_mclient_ip->setFocus();
+        return;
+    }
+
+
     //check target and client in same protocal type
     if(addr_target.protocol()!=addr_client.protocol()){
         QMessageBox::warning(this, tr("WARNING!!"),
