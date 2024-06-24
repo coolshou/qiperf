@@ -131,6 +131,9 @@ void WSClient::onTextMessageReceived(QString message)
     int cut = message.indexOf(':', 0);
     QString act = message.left(cut); //action : CMD_IPERF_STARTED/CMD_IPERF_STOPED...
     message = message.right(message.length()-cut-1);
+    cut2 = message.indexOf(':', 0);
+    QString m_idx = message.left(cut2); // refrow
+    message = message.right(message.length()-cut2-1);
 
     if (act.startsWith(CMD_IPERF_STARTED)){
         cut2 = message.indexOf(':', 0);
@@ -139,9 +142,6 @@ void WSClient::onTextMessageReceived(QString message)
         qDebug()<< "CMD_IPERF_STARTED: mode:"<< smode << " ip: " << message;
         emit iperfStarted(smode, message);
     }else if (act.startsWith(CMD_IPERF_STOPED)){
-        cut2 = message.indexOf(':', 0);
-        QString m_idx = message.left(cut2); // refrow
-        message = message.right(message.length()-cut2-1);
         cut2 = message.indexOf(':', 0);  //
         QString err_no = message.left(cut2); // error code
         message = message.right(message.length()-cut2-1); // error message
@@ -150,16 +150,13 @@ void WSClient::onTextMessageReceived(QString message)
 
     } else if (act.startsWith(CMD_IPERF_TP_DATA)){
         QJsonParseError error;
-        cut2 = message.indexOf(':', 0);
-        QString refrow = message.left(cut2);
-        message = message.right(message.length()-cut2-1);
         int cut3 = message.indexOf(':', 0);
         QString sInterval = message.left(cut3);
         message = message.right(message.length()-cut3-1);
 
         QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
-            emit iperfTPdata(refrow, sInterval, message);
+            emit iperfTPdata(m_idx, sInterval, message);
         }else{
             qDebug() << "onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + message.toUtf8();
         }
