@@ -626,7 +626,7 @@ void QIperfd::onStarted(int m_idx, bool smode, QString ipport)
 void QIperfd::onFinished(int idx, int exitCode, int exitStatus)
 {
     QString msg = QString(CMD_IPERF_STOPED)+":"+ QString::number(idx);
-    msg = msg + QString::number(exitCode)+  ":" + QString::number(exitStatus);
+    msg = msg + ":" + QString::number(exitCode)+  ":" + QString::number(exitStatus);
     onLog("TODO: onFinished:" + msg);
     m_wsserver->sendTextResult(msg);
     if (m_threads.contains(idx))

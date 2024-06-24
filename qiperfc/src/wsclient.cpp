@@ -145,7 +145,7 @@ void WSClient::onTextMessageReceived(QString message)
         cut2 = message.indexOf(':', 0);  //
         QString err_no = message.left(cut2); // error code
         message = message.right(message.length()-cut2-1); // error message
-        qDebug()<< "CMD_IPERF_STOPED:" << message;
+//        qDebug()<< "CMD_IPERF_STOPED:" << message;
         emit iperfStoped(m_idx, err_no, message);
 
     } else if (act.startsWith(CMD_IPERF_TP_DATA)){

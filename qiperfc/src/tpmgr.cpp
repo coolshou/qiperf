@@ -262,6 +262,17 @@ int TPMgr::swapDirection(QModelIndex midx)
     return 0;
 }
 
+void TPMgr::addComment(QString midx, QString comment)
+{
+    TP *tp = getItemByIdx(midx);
+    if (tp==nullptr){
+        qDebug() << "addComment: no parrent iperf pair?? (midx=" << midx << ")";
+        return;
+    }
+    tp->setComment(comment);
+
+}
+
 void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir)
 {
     Q_UNUSED(sInterval)
@@ -269,7 +280,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString valu
 
     TP *tp = getItemByIdx(midx);
     if (tp==nullptr){
-        qDebug() << "no parrent iperf pair??";
+        qDebug() << "addTPdata: no parrent iperf pair?? (midx=" << midx << ")" << idx;
         return;
     }
     TP *c = getItemByIdx(midx+"_"+idx, tp);

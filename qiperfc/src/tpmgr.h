@@ -32,6 +32,7 @@ public:
     void clear();
     TP *getItem(const QModelIndex& index) const;
     int swapDirection(QModelIndex midx);
+    void addComment(QString midx, QString comment);
     void addTPdata(QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir=nullptr);
     TP *getItemByIdx(QString midx, TP *item=nullptr);
 public slots:
