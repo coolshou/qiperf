@@ -15,6 +15,7 @@
 !define PRODUCT_UNINSTALL_EXE "uninstall.exe"
 
 VIProductVersion ${APPFileVersion}
+var  OLD_VERSION
 
 !define APPNAMEANDVERSION "qiperf ${APPVERSION}"
 
@@ -64,6 +65,12 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "${APPNAME} is a tradema
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(C) ${APPDOMAIN}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${APPNAME}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${APPFileVersion}"
+
+Section "" SECTION_uninstallold
+    # uninstall old version
+    ${If} $OLD_VERSION != ""  ExecWait "$OLD_VERSION"
+
+SectionEnd
 
 Section "qiperf daemon" SECTION_Daemon
         ; Set Section properties
@@ -170,8 +177,6 @@ Section "qiperf daemon" SECTION_Daemon
         CreateShortCut "$SMPROGRAMS\qiperf\Uninstall.lnk" "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
 
         Call install_qiperfd
-
-
 SectionEnd
 
 Section "qiperf console" SECTION_Console
@@ -220,8 +225,9 @@ SectionEnd
 
 ; Modern install component descriptions
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-        !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Daemon} "quick iperf daemon && systray"
-        !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Console} "quick iperf console"
+    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_uninstallold}  ""
+    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Daemon} "quick iperf daemon && systray"
+    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Console} "quick iperf console"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;Uninstall section
@@ -367,7 +373,8 @@ ${Else}
   ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "UninstallString"
 ${EndIf}
   IfErrors init.done
-  ExecWait "$R0"
+  strcpy $OLD_VERSION $R0
+  #ExecWait "$R0"
 
 init.done:
 
