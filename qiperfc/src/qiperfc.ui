@@ -280,7 +280,7 @@
      <normaloff>:/pair-del</normaloff>:/pair-del</iconset>
    </property>
    <property name="text">
-    <string>Delete</string>
+    <string>Delete(TODO)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
