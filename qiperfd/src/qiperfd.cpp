@@ -618,7 +618,7 @@ void QIperfd::onStarted(int m_idx, bool smode, QString ipport)
         msg = msg + ":C";
     }
     msg = msg + ":"+ ipport;
-    onLog("TODO: onStarted:" + msg);
+//    onLog("TODO: onStarted:" + msg);
     m_wsserver->sendTextResult(msg);
     m_runstatus[m_idx]=1;
 }

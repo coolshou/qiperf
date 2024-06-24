@@ -211,6 +211,9 @@ void WSServer::onServerError(QWebSocketProtocol::CloseCode closeCode)
 void WSServer::sendTextResult(QString msg)
 {
     //send Test back to client
-    sendTextMessage(msg);
+    qint64 rc = sendTextMessage(msg);
+    if (rc<=0){
+        qDebug() << "sendTextResult: sendTextMessage return size:" << rc;
+    }
 }
 

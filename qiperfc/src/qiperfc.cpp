@@ -407,6 +407,8 @@ void QIperfC::onStart()
         //###############################
          QThread::sleep(3);
         //TODO: wait server start up and ready
+        QDateTime oldDT = QDateTime::currentDateTime();
+        QDateTime newDT;
         int chk=0;
         bool bServerReady=false;
         while (!bServerReady){ //TODO: timeout!!!
@@ -425,6 +427,16 @@ void QIperfC::onStart()
                 emit updateStatus(" wait server ready: "+ QString::number(chk)+ "/"+
                                   QString::number(m_status_server.keys().length()));
             }
+            newDT = QDateTime::currentDateTime();
+            if (oldDT.secsTo(newDT)>20){
+                // timeout in 20 sec
+                break;
+            }
+        }
+        if (!bServerReady){
+            qDebug() << "server not readey: " << m_status_server;
+            emit errorStop(4, "server not readey:" +  m_status_server.keys().join(","));
+            return;
         }
         //Start client
         for (auto key: m_wsc.keys()){
