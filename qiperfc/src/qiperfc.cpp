@@ -282,6 +282,8 @@ void QIperfC::onStart()
 {
     resetError();
     //TODO: clear old test record!!
+    m_status_server.clear();
+    m_status_client.clear();
 
     m_TestStartTime = QDateTime::currentDateTime();
     m_tpplot->setStartTime(m_TestStartTime);
@@ -313,6 +315,7 @@ void QIperfC::onStart()
 //                qDebug() << "server websocket url: " << s << Qt::endl;
                 m_wss[serverIP]=new WSClient(serverIP, QUrl(s));
                 connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
+                connect(m_wss[serverIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
                 connect(m_wss[serverIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
 //                connect(m_wss[serverIP], &WSClient::iperfTPdata, this, &QIperfC::onIperfTPdata);
                 connect(m_wss[serverIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
@@ -342,6 +345,7 @@ void QIperfC::onStart()
                 s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
                 m_wsc[clientIP]=new WSClient(clientIP, QUrl(s));
                 connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
+                connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
                 connect(m_wsc[clientIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
 //                connect(m_wsc[clientIP], &WSClient::iperfTPdata, this, &QIperfC::onIperfTPdata);
                 connect(m_wsc[clientIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
@@ -400,20 +404,26 @@ void QIperfC::onStart()
             qDebug() << "Start server error happen!!";
             return;
         }
+        //###############################
+         QThread::sleep(3);
         //TODO: wait server start up and ready
         int chk=0;
         bool bServerReady=false;
-        while (!bServerReady){
+        while (!bServerReady){ //TODO: timeout!!!
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             chk=0;
             foreach(auto skey, m_status_server.keys()){
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
-                chk=chk+m_status_server.value(skey, 0);
+                if (m_status_server.value(skey, 0)==1){
+                    chk++;
+                }
             }
             if (chk>=m_status_server.keys().length()){
                 bServerReady=true;
             }else{
-                qDebug() << " wait server ready: "<< QString::number(chk);
+//                qDebug() << " wait server ready: "<< QString::number(chk);
+                emit updateStatus(" wait server ready: "+ QString::number(chk)+ "/"+
+                                  QString::number(m_status_server.keys().length()));
             }
         }
         //Start client
@@ -429,6 +439,7 @@ void QIperfC::onStart()
             qDebug() << "Start client error happen!!";
             return;
         }
+
         //TODO: wait all test done!!
         while (maxtestduration>0){
             QCoreApplication::processEvents(QEventLoop::AllEvents);
@@ -758,7 +769,7 @@ void QIperfC::onRPC_error(int code, const QString &message)
 
 void QIperfC::onIperfStarted(QString smode, QString ipport)
 {
-    qDebug() << "onIperfStarted:" << ipport;
+    qDebug() << "onIperfStarted:" << smode << " : " << ipport;
     if (smode.contains("S", Qt::CaseSensitive)){
         m_status_server[ipport]=1;
     }else{
@@ -766,10 +777,12 @@ void QIperfC::onIperfStarted(QString smode, QString ipport)
     }
 }
 
-void QIperfC::onIperfStoped(QString ipport)
+void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err)
 {
-    qDebug() << "onIperfStoped:" << ipport;
-    m_status_server[ipport]=2;
+    qDebug() << "onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
+//    m_tpmgr.setComment();
+    //TODO
+//    m_status_server[ipport]=2;
 }
 
 void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString datas)

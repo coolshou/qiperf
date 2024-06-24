@@ -598,7 +598,7 @@ void QIperfd::readStdOut(int idx, QString text)
 void QIperfd::onErrored(int m_idx, QString text)
 {
     QString msg = QString(CMD_IPERF_STOPED)+":"+QString::number(m_idx);
-    msg = msg + ":1:"+ text;
+    msg = msg + ":1:"+ text; // error no, error
     m_wsserver->sendTextResult(msg);
     onLog("TODO: onErrored:" + msg);
 }

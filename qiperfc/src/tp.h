@@ -65,6 +65,7 @@ public:
     int setDirection(DirType direction);
     int setDirection(QString direction);
     int getPort();
+    void setComment(QString comment);
     void setThroughput(QString value);
     void updateTimeStemp();
     QString getLastNoticeTime();

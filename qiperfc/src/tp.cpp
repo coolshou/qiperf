@@ -301,6 +301,17 @@ int TP::getPort()
     return m_port;
 }
 
+void TP::setComment(QString comment)
+{
+    QString m;
+    if (m_itemDatas[TP::comment].isValid()){
+        m = m_itemDatas[TP::comment].toString() + "\n" + comment;
+    }else{
+        m= comment;
+    }
+    m_itemDatas[TP::comment] = m;
+}
+
 void TP::setThroughput(QString value)
 {
     m_itemDatas[TP::throughput] = value;

@@ -129,7 +129,7 @@ void WSClient::onTextMessageReceived(QString message)
     int cut2;
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     int cut = message.indexOf(':', 0);
-    QString act = message.left(cut);
+    QString act = message.left(cut); //action : CMD_IPERF_STARTED/CMD_IPERF_STOPED...
     message = message.right(message.length()-cut-1);
 
     if (act.startsWith(CMD_IPERF_STARTED)){
@@ -139,8 +139,15 @@ void WSClient::onTextMessageReceived(QString message)
         qDebug()<< "CMD_IPERF_STARTED: mode:"<< smode << " ip: " << message;
         emit iperfStarted(smode, message);
     }else if (act.startsWith(CMD_IPERF_STOPED)){
+        cut2 = message.indexOf(':', 0);
+        QString m_idx = message.left(cut2); // refrow
+        message = message.right(message.length()-cut2-1);
+        cut2 = message.indexOf(':', 0);  //
+        QString err_no = message.left(cut2); // error code
+        message = message.right(message.length()-cut2-1); // error message
         qDebug()<< "CMD_IPERF_STOPED:" << message;
-//        emit iperfStoped(refrow);
+        emit iperfStoped(m_idx, err_no, message);
+
     } else if (act.startsWith(CMD_IPERF_TP_DATA)){
         QJsonParseError error;
         cut2 = message.indexOf(':', 0);
