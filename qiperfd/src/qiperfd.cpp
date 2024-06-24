@@ -316,7 +316,7 @@ int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint 
     iperfer->setRefRow(refrow);
     iperfer->setExtra(parallel, protocal, bidir);
 //    connect(iperfer, &IperfWorker::onStdout, this, &QIperfd::readStdOut);
-    connect(iperfer, &IperfWorker::onStderr, this, &QIperfd::readStdErr);
+    connect(iperfer, &IperfWorker::onStderr, this, &QIperfd::onErrored);
     connect(iperfer, &IperfWorker::log, this, &QIperfd::onIperfLog);
     connect(iperfer, &IperfWorker::started, this, &QIperfd::onStarted);
     connect(iperfer, &IperfWorker::finished, this, &QIperfd::onFinished);
@@ -595,9 +595,12 @@ void QIperfd::readStdOut(int idx, QString text)
     onLog("TODO: readStdOut(" + QString::number(idx) + "):" + text);
 }
 
-void QIperfd::readStdErr(int idx, QString text)
+void QIperfd::onErrored(int m_idx, QString text)
 {
-    onLog("TODO: readStdErr(" + QString::number(idx)+ "):" + text);
+    QString msg = QString(CMD_IPERF_STOPED)+":"+QString::number(m_idx);
+    msg = msg + ":1:"+ text;
+    m_wsserver->sendTextResult(msg);
+    onLog("TODO: onErrored:" + msg);
 }
 
 void QIperfd::onIperfLog(int idx, QString text)
@@ -606,15 +609,26 @@ void QIperfd::onIperfLog(int idx, QString text)
     onLog("(" + QString::number(idx) + ")" + text + "");
 }
 
-void QIperfd::onStarted(int idx)
+void QIperfd::onStarted(int m_idx, bool smode, QString ipport)
 {
-    onLog("TODO: onStarted(" + QString::number(idx) + "):");
-    m_runstatus[idx]=1;
+    QString msg = QString(CMD_IPERF_STARTED)+":"+QString::number(m_idx);
+    if (smode){
+        msg = msg + ":S";
+    }else{
+        msg = msg + ":C";
+    }
+    msg = msg + ":"+ ipport;
+    onLog("TODO: onStarted:" + msg);
+    m_wsserver->sendTextResult(msg);
+    m_runstatus[m_idx]=1;
 }
 
 void QIperfd::onFinished(int idx, int exitCode, int exitStatus)
 {
-    onLog("TODO: onFinished(" + QString::number(idx) + "):" +QString::number(exitCode)+  ":" + QString::number(exitStatus));
+    QString msg = QString(CMD_IPERF_STOPED)+":"+ QString::number(idx);
+    msg = msg + QString::number(exitCode)+  ":" + QString::number(exitStatus);
+    onLog("TODO: onFinished:" + msg);
+    m_wsserver->sendTextResult(msg);
     if (m_threads.contains(idx))
     {
         m_threads.remove(idx);
@@ -623,8 +637,6 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus)
     {
         m_iperfworkers.remove(idx);
     }
-    //    m_threads.removeAt(idx);
-    //    m_iperfworkers.removeAt(idx);
     m_runstatus[idx]=0;
 }
 

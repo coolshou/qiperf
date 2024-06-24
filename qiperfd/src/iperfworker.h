@@ -29,7 +29,7 @@ public:
     void toLogFile(QString msg);
     bool getServerMode();
 signals:
-    void started(int idx); // refrow
+    void started(int idx, bool smode, QString ipport); // refrow, S/C, IPPort
     void finished(int idx, int exitCode, int exitStatus); // refrow
     void log(int idx, QString msg); // refrow
     void onStdout(int idx, QString text); // refrow

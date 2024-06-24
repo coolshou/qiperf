@@ -167,7 +167,7 @@ void IperfWorker::onStarted()
     }
     m_running = true;
     m_iperfwrapper->setSetting(m_idx, m_servermode, m_parallel, m_bidir, m_bidirtag);
-    emit started(m_idx);
+    emit started(m_idx, m_servermode, getBindKey());
 }
 
 void IperfWorker::readyReadStdOut()

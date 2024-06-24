@@ -109,7 +109,7 @@ QList<QString> WSServer::getClients()
     return m_clients.keys();
 }
 
-void WSServer::sendTextMessage(QString msg, QString target)
+qint64 WSServer::sendTextMessage(QString msg, QString target)
 {
     //send msg to target, if target is null, send to all connected client
     QList<QString> ts;
@@ -126,8 +126,10 @@ void WSServer::sendTextMessage(QString msg, QString target)
             if (rc<=0){
                 qDebug() << "error sendText size=" << rc << " : " << msg;
             }
+
         }
     }
+    return rc;
 
 }
 
