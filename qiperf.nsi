@@ -46,6 +46,7 @@ SetCompressor LZMA
 # uninstall icon
 !define MUI_UNICON "images\uninstall.ico"
 !insertmacro MUI_PAGE_WELCOME
+Page custom uninstallold ;Custom page
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -66,13 +67,13 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(C) ${APPDOMAIN}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${APPNAME}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${APPFileVersion}"
 
-Section "" SECTION_uninstallold
+Function uninstallold
     # uninstall old version
     ${If} $OLD_VERSION != ""
         ExecWait "$OLD_VERSION"
     ${EndIf}
 
-SectionEnd
+FunctionEnd
 
 Section "qiperf daemon" SECTION_Daemon
         ; Set Section properties
