@@ -68,7 +68,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${APPFileVersion}"
 
 Section "" SECTION_uninstallold
     # uninstall old version
-    ${If} $OLD_VERSION != ""  ExecWait "$OLD_VERSION"
+    ${If} $OLD_VERSION != ""  ExecWait "$OLD_VERSION" ${EndIf}
 
 SectionEnd
 
