@@ -68,7 +68,9 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${APPFileVersion}"
 
 Section "" SECTION_uninstallold
     # uninstall old version
-    ${If} $OLD_VERSION != ""  ExecWait "$OLD_VERSION" ${EndIf}
+    ${If} $OLD_VERSION != ""
+        ExecWait "$OLD_VERSION"
+    ${EndIf}
 
 SectionEnd
 
@@ -225,7 +227,7 @@ SectionEnd
 
 ; Modern install component descriptions
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_uninstallold}  ""
+    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_uninstallold}  "detect old version"
     !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Daemon} "quick iperf daemon && systray"
     !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Console} "quick iperf console"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
