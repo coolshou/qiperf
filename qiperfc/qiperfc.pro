@@ -1,7 +1,8 @@
 QT += core gui
 QT += network websockets
 QT += printsupport # require by qcustomplot
-CONFIG += release
+#CONFIG += release
+#CONFIG += release
 DEFINES += QCUSTOMPLOT_USE_OPENGL # qcustomplot use OPENGL
 win32: {
     LIBS += \
