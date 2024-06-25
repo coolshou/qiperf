@@ -238,7 +238,11 @@ void TPMgr::clear(){
     // clean test record
     if (this->rootItem->haveChilds()){
         foreach(auto tp, this->rootItem->getChilds()){
+            tp->removeChildren(0, tp->childCount());
+            tp->setThroughput("Tx", 0);
+            tp->setThroughput("Rx", 0);
             tp->resetData();
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
         emit dataChanged(QModelIndex(),QModelIndex());
     }
@@ -311,17 +315,15 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString valu
     }
     TP *c = getItemByIdx(midx+"_"+idx, tp); //config item
     if (c==nullptr){
-//        beginInsertRows(QModelIndex(),tp->childCount(),tp->childCount());
         c = new TP(midx+"_"+idx, "", tp);
         c->setThroughput(value);
         c->setDirection(dir);
 //        c->setExpanded(true);
         tp->appendChild(c);
-//        endInsertRows();
+//        this
     }else{
         c->setThroughput(value);
     }
-//    emit dataChanged(QModelIndex(),QModelIndex());
 }
 
 TP *TPMgr::getItemByIdx(QString midx, TP *item)

@@ -74,6 +74,7 @@ void TPPlot::clear()
 //    }
 //    m_graphs.clear();
     this->clearGraphs();
+    m_graphs.clear();
     this->replot();
 }
 

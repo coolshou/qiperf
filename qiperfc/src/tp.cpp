@@ -105,12 +105,12 @@ bool TP::removeChildren(int position, int count)
     return false;
 
 //    qDeleteAll(m_childItems);
-//    m_childItems.clear();
-    for (int row = 0; row < count; ++row){
-        TP *tp =m_childItems.takeAt(position);
-        delete tp;
-        tp=nullptr;
-    }
+    m_childItems.clear();
+//    for (int row = position; row < count; ++row){
+//        TP *tp =m_childItems.takeAt(row);
+//        delete tp;
+//        tp=nullptr;
+//    }
 
     return true;
 }
