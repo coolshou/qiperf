@@ -31,6 +31,8 @@ public:
     void reset();
     void clear();
     TP *getItem(const QModelIndex& index) const;
+    TP *getRootItem() const;
+    QModelIndex getRootItemIdx();
     void setItem(const QModelIndex& index, TP *item);
     int swapDirection(QModelIndex midx);
     void addComment(QString midx, QString comment);

@@ -16,6 +16,9 @@ TP::TP(QString id, QString data, TP *parent)
             m_itemDatas.append("");
         }
     }
+    m_datatype = 0;
+    m_Tx = 0;
+    m_Rx = 0;
 }
 
 void TP::appendChild(TP *item)
@@ -317,6 +320,15 @@ void TP::setThroughput(QString value)
     m_itemDatas[TP::throughput] = value;
 }
 
+void TP::setThroughput(QString dir, QString value)
+{
+    if (dir.contains("Tx")){
+        m_Tx = value.toDouble();
+    }else{
+        m_Rx = value.toDouble();
+    }
+}
+
 void TP::updateTimeStemp()
 {
     QDateTime t=QDateTime::currentDateTime();
@@ -326,4 +338,24 @@ void TP::updateTimeStemp()
 QString TP::getLastNoticeTime()
 {
     return m_lastnoticetime;
+}
+
+void TP::setDataType(int datatype)
+{
+    m_datatype = datatype;
+}
+
+int TP::getDataType()
+{
+    return m_datatype;
+}
+
+QString TP::getTxRxThroughput()
+{
+   double v = m_Tx+m_Rx;
+   if (v>0){
+       return QString::number(v);
+   }else{
+       return "";
+   }
 }

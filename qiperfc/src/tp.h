@@ -67,11 +67,17 @@ public:
     int getPort();
     void setComment(QString comment);
     void setThroughput(QString value);
+    void setThroughput(QString dir, QString value);
     void updateTimeStemp();
     QString getLastNoticeTime();
+    void setDataType(int datatype);
+    int getDataType();
+    QString getTxRxThroughput();
+
 signals:
 
 private:
+    int m_datatype; // item type, 0: init, 1: for config root item, 2: throughput data
     QList<TP *> m_childItems;
     QList<QVariant> m_itemDatas;
     TP *m_parentItem;
@@ -81,7 +87,7 @@ private:
     int m_version; //iperf version
     QString m_server; // target server ip
     QString m_mgrserver; // target manger server ip
-    QString m_direction; //direction: up/down
+    QString m_direction; //direction: 0,1,2,
     QString m_client; // client ip
     QString m_mgrclient; // manager client ip
     int m_port; //port number
@@ -91,7 +97,8 @@ private:
     QString m_comment; // comment
 
     QString m_lastnoticetime; // last get notice time string, eq: 2023.17.06.12:22:07.905
-
+    double m_Tx; //record Tx throughput
+    double m_Rx; //record Rx throughput
 };
 
 #endif // TP_H
