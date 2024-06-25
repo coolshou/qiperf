@@ -255,6 +255,7 @@ void DlgIperf::onAccepted()
                              tr("Forbid setting same address of Manager Server and Manager Client!!"),
                              QMessageBox::Ok);
         ui->cb_mclient_ip->setFocus();
+        //TODO: use style to hightlight some item:  *{border: 3px solid red;}
         return;
     }
 
