@@ -52,7 +52,8 @@ QString DlgIperf::getJsonCfg()
     QJsonObject mainObj;
     mainObj.insert("Action", CMD_IPERF_ADD);
 
-    if (ui->gb_control_server->isChecked()){
+//    if (ui->gb_control_server->isChecked())
+    {
         //server
         QJsonObject serverObj;
         serverObj.insert("version", ui->cb_version->currentText());
@@ -201,10 +202,19 @@ void DlgIperf::changeEvent(QEvent *e)
 void DlgIperf::updateUI()
 {
     //update UI of manager ip address
+    //
+    QString cur = ui->cb_mserver_ip->currentText();
     ui->cb_mserver_ip->clear();
     ui->cb_mserver_ip->addItems(mgrls);
+    if (!cur.isEmpty()){
+        ui->cb_mserver_ip->setCurrentIndex(ui->cb_mserver_ip->findText(cur));
+    }
+    cur = ui->cb_mclient_ip->currentText();
     ui->cb_mclient_ip->clear();
     ui->cb_mclient_ip->addItems(mgrls);
+    if (!cur.isEmpty()){
+        ui->cb_mclient_ip->setCurrentIndex(ui->cb_mclient_ip->findText(cur));
+    }
 }
 
 void DlgIperf::ChangeVersion(const QString ver)
