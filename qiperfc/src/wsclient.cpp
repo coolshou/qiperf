@@ -138,14 +138,13 @@ void WSClient::onTextMessageReceived(QString message)
     if (act.startsWith(CMD_IPERF_STARTED)){
         cut2 = message.indexOf(':', 0);
         QString smode = message.left(cut2); // S: server/ C: client mode
-        message = message.right(message.length()-cut2-1);
-//        qDebug()<< "CMD_IPERF_STARTED: mode:"<< smode << " ip: " << message;
+        message = message.right(message.length()-cut2-1); // key
         emit iperfStarted(smode, message);
     }else if (act.startsWith(CMD_IPERF_STOPED)){
         cut2 = message.indexOf(':', 0);  //
         QString err_no = message.left(cut2); // error code
         message = message.right(message.length()-cut2-1); // error message
-//        qDebug()<< "CMD_IPERF_STOPED:" << message;
+        qDebug()<< "CMD_IPERF_STOPED:" << message;
         emit iperfStoped(m_idx, err_no, message);
 
     } else if (act.startsWith(CMD_IPERF_TP_DATA)){
