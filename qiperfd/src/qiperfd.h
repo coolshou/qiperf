@@ -97,7 +97,7 @@ private:
     QString s_starttime;   // Test Start time in string;
     QMap<int, int> m_runstatus; //record thread idx run status, 0: stop , 1: running
     bool bReportTPData; // report throughput data
-    QMap<QString, QString> m_directions; // direction tag for each test
+    QMap<QString, QMap<QString, QString>> m_directions; // starttime, bindkey, dir_tag: direction tag for each test
 };
 
 #endif // QIPERFD_H

@@ -405,19 +405,19 @@ void QIperfd::start(int idx)
 {
     QThread *th = m_threads.value(idx);
     m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath+"/"+s_starttime);
-    m_iperfworkers.value(idx)->setBidirTag(m_directions[s_starttime]);
+//    m_iperfworkers.value(idx)->setBidirTag(m_directions[s_starttime]);
     QString s="C";
     if (m_iperfworkers.value(idx)->getServerMode()){
         s="S";
     }
-
-
+    ;
     // QString id= QString( "%1" ).arg(reinterpret_cast<long>(th->currentThreadId()), 16);
 //    QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
 //    qDebug() << "run thread id:" << id << Qt::endl;
     th->start();
-    emit iperfStarted(QString(CMD_IPERF_STARTED)+":"+QString::number(idx)+
-                      ":"+ s +":" + m_iperfworkers.value(idx)->getBindKey());
+    emit iperfStarted(QString(CMD_IPERF_STARTED)+":"+
+                      QString::number(m_iperfworkers.value(idx)->getRefRow())+":"+
+                      s +":" + m_iperfworkers.value(idx)->getBindKey());
 }
 void QIperfd::startAll()
 {
@@ -619,6 +619,7 @@ void QIperfd::onStarted(int m_idx, bool smode, QString ipport)
     }
     msg = msg + ":"+ ipport;
 //    onLog("TODO: onStarted:" + msg);
+    qDebug() << "onStarted: " << msg;
     m_wsserver->sendTextResult(msg);
     m_runstatus[m_idx]=1;
 }
@@ -682,14 +683,18 @@ void QIperfd::onWSactMessage(QString msg)
     }else if (act.startsWith(CMD_IPERF_REG)){
         QStringList d = msg.split(":");
         QString starttime = d[0];
-        msg = d[1];
-        m_directions[starttime] = msg; // tag for bidir
+        QString tag = d[1];
+        QString bindkey = d[2];
+        m_directions[starttime][bindkey] = tag; // tag for bidir
         bReportTPData = true;
         qInfo() << "SET to Report throughput data: " << msg;
     }else if (act.startsWith(CMD_IPERF_UNREG)){
+        QStringList d = msg.split(":");
+        QString starttime = d[0];
+        QString bindkey = d[1];
         bReportTPData = false;
-        m_directions.clear();
-        qInfo() << "SET to NOT Report throughput data";
+        m_directions[starttime][bindkey].clear();
+        qInfo() << "SET to NOT Report throughput data: " << msg;
     }else if (act.startsWith(CMD_IPERF_CLEAR)){
         clear();
     }else if (act.startsWith(CMD_IPERF_START)){

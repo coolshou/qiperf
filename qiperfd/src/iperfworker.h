@@ -28,6 +28,7 @@ public:
     void setExtra(QString parallel, QString protocal,bool bidir);
     void toLogFile(QString msg);
     bool getServerMode();
+    int getRefRow();
 signals:
     void started(int idx, bool smode, QString ipport); // refrow, S/C, IPPort
     void finished(int idx, int exitCode, int exitStatus); // refrow
@@ -52,8 +53,8 @@ private slots:
 //    void parserIperf3(QString msg);
 
 private:
-    QString m_refrow;
-    int m_idx;  // refrow
+    int m_refrow;// refrow
+    int m_idx;
     int m_version; // iperf version 2 or 3
     QObject *m_parent;
     IperfWrapper *m_iperfwrapper;

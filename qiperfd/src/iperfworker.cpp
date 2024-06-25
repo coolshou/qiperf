@@ -24,7 +24,7 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
     m_logfile = nullptr;
     m_logtextstream = nullptr;
     m_iperflogpath = "";
-    m_idx = idx;
+    m_idx = idx; // thread index
     m_iperfwrapper = new IperfWrapper(this);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfWorker::onThroughputData);
 //    this->deleteLater(); //this will cause stdout not flush??
@@ -44,6 +44,19 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
     m_target = target;
     if (m_version>=static_cast<int>(IPERF_VER::V3)){
         m_arguments.append("--forceflush");
+    }
+    if (m_servermode){
+        if (m_arguments.contains("-R")||m_arguments.contains("--reverse")){
+            m_bidirtag="";
+        }else{
+            m_bidirtag="Tx";
+        }
+    }else{
+        if (m_arguments.contains("-R")||m_arguments.contains("--reverse")){
+            m_bidirtag="Rx";
+        }else{
+            m_bidirtag="";
+        }
     }
 }
 
@@ -106,7 +119,7 @@ void IperfWorker::setStop()
 
     }
 //    emit log("setStop");
-    emit finished(m_idx, 0, QProcess::NormalExit);
+    emit finished(m_refrow, 0, QProcess::NormalExit);
 }
 
 QString IperfWorker::getBindKey()
@@ -130,7 +143,7 @@ void IperfWorker::setBidirTag(QString bidir)
 
 void IperfWorker::setRefRow(QString refrow)
 {
-    m_refrow = refrow;
+    m_refrow = refrow.toInt();
 }
 
 void IperfWorker::setExtra(QString parallel, QString protocal, bool bidir)
@@ -155,6 +168,11 @@ bool IperfWorker::getServerMode()
     return m_servermode;
 }
 
+int IperfWorker::getRefRow()
+{
+    return m_refrow;
+}
+
 void IperfWorker::onStarted()
 {
     QString tmp = m_iperflogpath+"/"+getBindKey()+".log";
@@ -164,11 +182,11 @@ void IperfWorker::onStarted()
     if(m_logfile->open(QIODevice::WriteOnly|QIODevice::Append)){
         m_logtextstream = new QTextStream(m_logfile);
     }else{
-        emit onStderr(m_idx, "ERROR: open file '"+ tmp +"' Fail");
+        emit onStderr(m_refrow, "ERROR: open file '"+ tmp +"' Fail");
     }
     m_running = true;
-    m_iperfwrapper->setSetting(m_idx, m_servermode, m_parallel, m_bidir, m_bidirtag);
-    emit started(m_idx, m_servermode, getBindKey());
+    m_iperfwrapper->setSetting(m_refrow, m_servermode, m_parallel, m_bidir, m_bidirtag);
+    emit started(m_refrow, m_servermode, getBindKey());
 }
 
 void IperfWorker::readyReadStdOut()
@@ -182,7 +200,6 @@ void IperfWorker::readyReadStdOut()
         foreach (auto line , QString(processOutput).split("\n")){
             //ignore empty line
             if (line.length()>0){
-//                qDebug() << "line: " << line;
                 parserStdOut(line);
             }
         }
@@ -200,7 +217,7 @@ void IperfWorker::readyReadStdErr()
 
     m_running = false;
     m_stop = true;
-    emit onStderr(m_idx, err);
+    emit onStderr(m_refrow, err);
     onFinished(1, QProcess::ExitStatus(2)); // something error
 
 }
@@ -219,14 +236,13 @@ void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 
     m_running = false;
     m_stop = true;
-    emit finished(m_idx, exitCode, int(exitStatus));
+    emit finished(m_refrow, exitCode, int(exitStatus));
 }
 
 void IperfWorker::parserStdOut(QString msg)
 {
     if (m_version==3){
         m_iperfwrapper->parserIperf3(msg);
-//        parserIperf3(msg);
     }else if (m_version==2){
 
     }else {
@@ -236,5 +252,9 @@ void IperfWorker::parserStdOut(QString msg)
 
 void IperfWorker::onThroughputData(int idx, QString sInterval, QString data)
 {
-    emit onThroughput(idx, sInterval, data);
+    if(m_bidirtag.isEmpty()){
+        qDebug() << "No m_bidirtag, not reprot ThroughputData: ("<<sInterval<<")" << data;
+    }else{
+        emit onThroughput(idx, sInterval, data);
+    }
 }
