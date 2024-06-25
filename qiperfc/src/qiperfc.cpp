@@ -69,7 +69,8 @@ QIperfC::QIperfC(QWidget *parent)
     ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
     ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
     ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
-    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
+//    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
+//    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
 //    ui->tv_throughput->expand(m_tpmgr.rootItemIndex());
 //    ui->tv_throughput->expandAll();
     connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemDClicked); //edit item on double click
@@ -310,6 +311,7 @@ void QIperfC::onStart()
             }
             refrow = tp->row();
             QString serverIP = tp->getMgrServer();
+            //TODO: detect manager server is pingable
             if (!m_wss.contains(serverIP)) {
                 s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
 //                qDebug() << "server websocket url: " << s << Qt::endl;
@@ -332,15 +334,16 @@ void QIperfC::onStart()
             }
             //tell server add iperf server
             cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
-            qInfo() << "server cmd: CMD_IPERF_ADD";
+            qInfo() << "server cmd:"<< serverIP << " CMD_IPERF_ADD:" << tp->getServer() << ":" << tp->getPort() ;
             rs = m_wss[serverIP]->sendText(cmd);
             if (rs<=0){
                 emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
                 break;
             }
-            m_status_server[tp->getBindKey(true)]=0;
+            m_status_server[tp->getBindKey(true)]=0; // init server of BindKey status 0
             //RPC to control all client endpoint (iperf client)
             QString clientIP = tp->getMgrClient();
+            //TODO: detect manager client is pingable
             if (!m_wsc.contains(clientIP)) {
                 s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
                 m_wsc[clientIP]=new WSClient(clientIP, QUrl(s));
@@ -362,27 +365,28 @@ void QIperfC::onStart()
             }
             //tell client add iperf client
             cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
-            qInfo() << "client cmd: CMD_IPERF_ADD";
+            qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
             rs = m_wsc[clientIP]->sendText(cmd);
             if (rs<=0){
                 emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
                 break;
             }
-            m_status_client[tp->getBindKey(false)]=0;
+            m_status_client[tp->getBindKey(false)]=0;// init client of BindKey status 0
+
             // TODO. set websocket to  report throughput
             QString di = tp->getDirection();
             if (di== QVariant::fromValue(TP::DirType::Tx).toString()){
-                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx");
-                m_wsc[clientIP]->sendText(CMD_IPERF_UNREG);
+                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(true));
+                m_wsc[clientIP]->sendText(QString(CMD_IPERF_UNREG)+":"+startTime+":"+tp->getBindKey(false));
             }else if (di== QVariant::fromValue(TP::DirType::Rx).toString()){
-                m_wss[serverIP]->sendText(CMD_IPERF_UNREG);
-                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx");
+                m_wss[serverIP]->sendText(QString(CMD_IPERF_UNREG)+":"+startTime+":"+tp->getBindKey(true));
+                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(false));
             }else if (di== QVariant::fromValue(TP::DirType::TR).toString()){
-                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx");
-                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx");
+                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(true));
+                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(false));
             }else {
-                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx");
-                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx");
+                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(true));
+                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(false));
             }
         }
         //TODO: record which should report iperf throughput value
@@ -435,7 +439,13 @@ void QIperfC::onStart()
         }
         if (!bServerReady){
             qDebug() << "server not readey: " << m_status_server;
-            emit errorStop(4, "server not readey:" +  m_status_server.keys().join(","));
+            QStringList ds;
+            foreach (auto key, m_status_server.keys()){
+                if (m_status_server[key]==0){
+                    ds.append(key);
+                }
+            }
+            emit errorStop(4, "Iperf server not readey:" +  ds.join(","));
             return;
         }
         //Start client
@@ -562,6 +572,7 @@ void QIperfC::onStart()
 
 void QIperfC::onStop(){
     updateRunStatus(false);
+    //TODO: stop the running test!!
     QString endtime = getNowString();
     QDateTime enddatetime = QDateTime::fromString(endtime,DATETIME_NOW_FORMAT);
     emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(m_TestStartTime.secsTo(enddatetime))+" sec)");
@@ -573,7 +584,6 @@ void QIperfC::onStop(){
 
 void QIperfC::onClear(){
     //clear all test date, config setting remain unchanged
-    //TODO: clear  m_tpmgr throughput data
     if (m_tpmgr->rootChildCount()>0) {
         m_tpmgr->clear();
     }
@@ -607,11 +617,13 @@ void QIperfC::onErrorStop(int err, QString msg)
     m_ErrorMSG = msg;
     emit updateStarttime("");
     emit updateStatus(msg);
-    onStop();
+    updateRunStatus(false);
+//    onStop();
 }
 
 void QIperfC::on_notice(QString send_addr, QString msg)
 {
+    //receive qiperfd notices
     QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8());
     // check validity of the document
     if(!doc.isNull())
@@ -632,13 +644,13 @@ void QIperfC::on_notice(QString send_addr, QString msg)
                 }
                 break;
             case EndPointAct::Update:
-                qDebug() << "TODO EndPoint Update: from(" << send_addr << ") " << msg << Qt::endl;
+                qDebug() << "TODO qiperfd Update: from(" << send_addr << ") " << msg << Qt::endl;
                 break;
             case EndPointAct::Del:
-                qDebug() << "TODO EndPoint Del: from(" << send_addr << ") " << msg << Qt::endl;
+                qDebug() << "TODO qiperfd Del: from(" << send_addr << ") " << msg << Qt::endl;
                 break;
             case EndPointAct::Disable:
-                qDebug() << "TODO EndPoint Disable: from(" << send_addr << ") " << msg << Qt::endl;
+                qDebug() << "TODO qiperfd Disable: from(" << send_addr << ") " << msg << Qt::endl;
                 break;
         }
     } else {
@@ -794,6 +806,8 @@ void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err)
     if (err_no.toInt()>0){
         qDebug() << "onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
         m_tpmgr->addComment(refrow, err);
+    }else{
+        qDebug() << "onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
     }
 //    m_tpmgr.setComment();
     //TODO
@@ -802,28 +816,21 @@ void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err)
 
 void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
-//    qDebug() << "onIperfTPdata:" << refrow << " : " << data;
+    //receive iperf throughput data
     QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8());
     QJsonArray jArr = doc.array();//.object();
     foreach (auto jObj, jArr){
-//        qDebug() << "idx: " << jObj["idx"] << " value: " << jObj["value"]
-//                 << "unit: " << jObj["unit"] << " dir: " << jObj["dir"];
         QString dir=nullptr;
         if (!jObj["dir"].isUndefined()){
             dir=jObj["dir"].toString();
         }
-
-        Q_UNUSED(refrow)
-        //Q_UNUSED(sInterval)
         // iperf sInterval = 0.00-1.00 format
         if (sInterval.contains("-")){
             sInterval = sInterval.right(sInterval.indexOf("-"));
         }
         //TODO treeview data
-        m_tpmgr->addTPdata(refrow, sInterval,
-                           jObj["idx"].toString(),
-                jObj["value"].toString(), jObj["unit"].toString(),
-                dir);
+        m_tpmgr->addTPdata(refrow, sInterval, jObj["idx"].toString(),
+                jObj["value"].toString(), jObj["unit"].toString(), dir);
         // chart data
         m_tpplot->onIperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
         QCoreApplication::processEvents(QEventLoop::AllEvents);
