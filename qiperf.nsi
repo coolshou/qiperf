@@ -15,7 +15,9 @@
 !define PRODUCT_UNINSTALL_EXE "uninstall.exe"
 
 VIProductVersion ${APPFileVersion}
-var  OLD_VERSION
+var OLD_VERSION
+# install mode: 0: daemon only, 1: daemon+ console
+var OLD_INSTALL_MODE
 
 !define APPNAMEANDVERSION "qiperf ${APPVERSION}"
 
@@ -179,10 +181,14 @@ Section "qiperf daemon" SECTION_Daemon
         CreateShortCut "$SMPROGRAMS\qiperf\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
         CreateShortCut "$SMPROGRAMS\qiperf\Uninstall.lnk" "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
 
+        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode" "0"
+
         Call install_qiperfd
 SectionEnd
 
 Section "qiperf console" SECTION_Console
+    #TODO: close qiperfc before copy new file
+
         ; Set Section properties
         SetOverwrite on
 
@@ -201,6 +207,8 @@ Section "qiperf console" SECTION_Console
         CreateShortCut "$DESKTOP\qiperfc.lnk" "$INSTDIR\${QIPERFC_NAME}"
         CreateShortCut "$SMPROGRAMS\qiperf\qiperfc.lnk" "$INSTDIR\${QIPERFC_NAME}"
 
+        WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode" "1"
+        # reg ".qip" ext
         ${registerExtension} "$INSTDIR\${QIPERFC_NAME}" ".qip" "Quick Iperf config File"
 
 SectionEnd
@@ -379,7 +387,12 @@ ${EndIf}
   #ExecWait "$R0"
 
 init.done:
+    # TODO: get old setup mode
 
+    # get preview install mode
+    ClearErrors
+    ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode"
+    strcpy $OLD_INSTALL_MODE $R0
 
     !ifdef WIN64
       strcpy $INSTDIR "$PROGRAMFILES64\${APPNAME}"
@@ -390,7 +403,11 @@ init.done:
   SectionSetFlags ${SECTION_Daemon} $0
    # set section 'console' as unselected
    #IntOp $0 ~${SF_SELECTED}
-   SectionSetFlags ${SECTION_Console} 0
+   ${If} ${OLD_INSTALL_MODE}
+     SectionSetFlags ${SECTION_Console}  ${SF_SELECTED}
+   ${Else}
+    SectionSetFlags ${SECTION_Console} 0
+   ${EndIf}
 FunctionEnd
 
 Function install_qiperfd
@@ -429,6 +446,7 @@ Function un.install_qiperfd
 FunctionEnd
 
 Function .oninstsuccess
+  # final install success, run qiperftray
     SetOutPath "$INSTDIR\"
     Exec "$INSTDIR\${QIPERFTRAY_NAME}"
 FunctionEnd
