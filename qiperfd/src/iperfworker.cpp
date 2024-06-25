@@ -47,15 +47,24 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
     }
     if (m_servermode){
         if (m_arguments.contains("-R")||m_arguments.contains("--reverse")){
-            m_bidirtag="";
+            if (m_arguments.contains("--bidir")){
+                m_bidirtag="Rx";
+            }else{
+                m_bidirtag="";
+            }
         }else{
             m_bidirtag="Tx";
         }
     }else{
-        if (m_arguments.contains("-R")||m_arguments.contains("--reverse")){
+        if (m_arguments.contains("-R")||m_arguments.contains("--reverse")||
+                m_arguments.contains("--bidir")){
             m_bidirtag="Rx";
         }else{
-            m_bidirtag="";
+            if (m_arguments.contains("--bidir")){
+                m_bidirtag="Tx";
+            }else{
+                m_bidirtag="";
+            }
         }
     }
 }
