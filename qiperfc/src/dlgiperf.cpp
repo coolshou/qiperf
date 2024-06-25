@@ -61,6 +61,7 @@ QString DlgIperf::getJsonCfg()
         serverObj.insert("manager", ui->cb_mserver_ip->currentText());
         serverObj.insert("protocal", ui->cb_protocal->currentText());
         serverObj.insert("parallel", ui->sb_parallel->value());
+        serverObj.insert("reverse", ui->chk_reverse->isChecked());
         serverObj.insert("bidir", ui->chk_bidir->isChecked());
         serverObj.insert("interval", ui->sb_interval->value());
 //        serverObj.insert("ipv6", b_ipv6);
