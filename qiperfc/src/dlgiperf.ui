@@ -102,6 +102,9 @@
             </item>
             <item>
              <widget class="QComboBox" name="cb_version">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="currentIndex">
                <number>1</number>
               </property>
