@@ -8,6 +8,8 @@
 #include <QMap>
 #include <QString>
 
+#include "tpmgr.h"
+
 namespace Ui {
 class DlgIperf;
 }
@@ -18,13 +20,14 @@ class DlgIperf : public QDialog
     Q_OBJECT
 
 public:
-    explicit DlgIperf(QWidget *parent = nullptr);
+    explicit DlgIperf(TPMgr *tpmgr, QWidget *parent = nullptr);
     ~DlgIperf() override;
     QString getJsonCfg();
     void loadJsonCfg(QString jsoncfg);
     bool add(QString mgr);
     bool add(QString mgr, QString mdata); // mgr: manager ip, mdata: relative data
     void updateUI();
+    void setExcIdx(QModelIndex excIdx);
 
 public slots:
     void ChangeVersion(const QString ver);
@@ -41,9 +44,11 @@ protected:
 
 private:
     Ui::DlgIperf *ui;
+    TPMgr *m_tpmgr;
     QStringList mgrls; //manager ip address list
     QMap<QString, QStringList> m_ips; // manager ip, all support ip in the manager server
     bool b_ipv6;
+    QModelIndex m_excIdx;
 };
 
 #endif // DLGIPERF_H

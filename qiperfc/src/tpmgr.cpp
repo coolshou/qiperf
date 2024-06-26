@@ -34,7 +34,7 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
     //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
 
     TP *item = static_cast<TP*>(index.internalPointer());
-    if (item->getDataType()==1){
+    if (item->getDataType()==TPMgrData::config){
         if (index.column()== TP::cols::throughput) {
             //special case of throughput data (sum of all iperf  --parallel value)
             return QVariant(item->getTxRxThroughput());
@@ -134,7 +134,7 @@ bool TPMgr::add(QString data)
     int idx = rootItem->childCount();
     beginInsertRows(QModelIndex(), idx, idx);
     TP *tp = new TP(QString::number(idx), data, rootItem);
-    tp->setDataType(1);
+    tp->setDataType(TPMgrData::config);
     rootItem->appendChild(tp);
     endInsertRows();
     return true;
@@ -236,6 +236,7 @@ void TPMgr::reset(){
 
 void TPMgr::clear(){
     // clean test record
+    // TODO: when there is child the folding icon will not remove after clear!!
     if (this->rootItem->haveChilds()){
         foreach(auto tp, this->rootItem->getChilds()){
             tp->removeChildren(0, tp->childCount());
@@ -274,6 +275,7 @@ QModelIndex TPMgr::getRootItemIdx()
 void TPMgr::setItem(const QModelIndex &index, TP *item)
 {
     if (index.isValid()) {
+        qDebug() << "setItem:" << index << " item:" << item;
 //        rootItem->appendChild();
         // TODO:
     }
@@ -318,9 +320,8 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString valu
         c = new TP(midx+"_"+idx, "", tp);
         c->setThroughput(value);
         c->setDirection(dir);
-//        c->setExpanded(true);
         tp->appendChild(c);
-//        this
+//        c->setExpanded(true);
     }else{
         c->setThroughput(value);
     }
@@ -353,6 +354,89 @@ TP *TPMgr::getItemByIdx(QString midx, TP *item)
         }
     }
     return nullptr;
+}
+
+QMap<QString, QStringList> TPMgr::getBindkeys()
+{
+    //TODO:  get all getBindkeys (managerIP_IP_Port)
+    // each manager qiperfd's IP:Port can not be duplicate
+    QMap<QString, QStringList> ds;
+    QString mip;
+    foreach (auto tp, this->getChilds()){
+        mip = tp->getMgrServer();
+        foreach(auto ch, tp->getChilds()){
+            mip.append(ch->getServer()+"_"+QString::number(ch->getPort()));
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+        }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    return ds;
+}
+
+bool TPMgr::isBindkeyExist(QString managerIP, QString bindkey, QModelIndex exc_idx)
+{
+    QString mip;
+    QString sbindkey;
+    foreach (auto tp, this->getChilds()){
+        if (exc_idx.isValid()){
+            if (this->getItem(exc_idx) == tp){
+                //skip same item
+                continue;
+            }
+        }
+//
+        if(tp->getMgrServer().indexOf(managerIP)==0){
+            sbindkey= tp->getServer()+"_"+QString::number(tp->getPort());
+            if (sbindkey.indexOf(bindkey)==0){
+                return true;
+            }
+        }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    return false;
+}
+
+int TPMgr::getMaxPort(QString m_ip, QString targetIP)
+{
+    int maxPort=0;
+    int port;
+    foreach(auto tp, this->rootItem->getChilds()){
+        if(m_ip == tp->getMgrServer() && (targetIP == tp->getServer())){
+            port = tp->getPort();
+            if (port>maxPort){
+                maxPort = port;
+            }
+        }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    return maxPort;
+}
+
+void TPMgr::onPaste(QString data)
+{
+    QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8());
+    if(!doc.isNull())
+    {
+       QJsonObject jsonRoot = doc.object();
+       if (jsonRoot.contains("client") &&jsonRoot.contains("server")){
+           QJsonObject o_client = jsonRoot["client"].toObject();
+           QJsonObject o_server = jsonRoot["server"].toObject();
+           int num = this->getMaxPort(o_server["manager"].toString(),
+                                         o_client["target"].toString());
+            o_client["port"]=num+1;
+            o_server["port"]=num+1;
+            jsonRoot.remove("client");
+            jsonRoot.remove("server");
+            jsonRoot.insert("client", o_client);
+            jsonRoot.insert("server", o_server);
+            doc.setObject(jsonRoot);
+            QString strJson(doc.toJson(QJsonDocument::Compact));
+//            qDebug() << "strJson:\n" << strJson;
+            this->add(strJson);
+       }else{
+           qDebug() << "Wrong format of clipboard data: " << data;
+       }
+    }
 }
 
 void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)

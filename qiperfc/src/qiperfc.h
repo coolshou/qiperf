@@ -10,6 +10,7 @@
 #include <QPen>
 #include <QObject>
 #include <QSettings>
+#include <QClipboard>
 
 #include "comm.h"
 #include "pipeclient.h"
@@ -64,6 +65,8 @@ public slots:
     void onStop();
     void onClear();
     void onConfig();
+    void onCopy();
+    void onPaste();
     void onAbout();
     void aboutQCustomPlot();
     void onErrorStop(int err, QString msg);
@@ -115,6 +118,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QClipboard *m_clipboard;
     FormQIperfds *m_frm_qiperfds;
     FormOption *m_frm_option;
     DlgTest *m_dlgtest;

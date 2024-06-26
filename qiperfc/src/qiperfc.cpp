@@ -39,6 +39,7 @@ QIperfC::QIperfC(QWidget *parent)
     }
     QString settingfilename = settingfilepath + "/" + QIPERFC_NAME + ".ini";
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
+    m_clipboard = QApplication::clipboard();
     ui->setupUi(this);
 //    ui->menubar->installEventFilter(this);
 //    ui->menuTest->setVisible(false);
@@ -69,10 +70,11 @@ QIperfC::QIperfC(QWidget *parent)
     ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
     ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
     ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
+    ui->tv_throughput->installEventFilter(this);
 //    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
 //    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
 //    ui->tv_throughput->expand(m_tpmgr.rootItemIndex());
-//    ui->tv_throughput->expandAll();
+    ui->tv_throughput->expandAll();// will show folding icon when have child item
     connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemDClicked); //edit item on double click
 
     //TODO: slow update text/image?
@@ -86,7 +88,7 @@ QIperfC::QIperfC(QWidget *parent)
     m_endpointmgr = new EndPointMgr(this);
     m_frm_qiperfds->setModel(m_endpointmgr);
 
-    dlgiperf = new DlgIperf(this);
+    dlgiperf = new DlgIperf(m_tpmgr, this);
 
     //
     m_receiver = new UdpReceiver(QIPERFD_BPORT,this);
@@ -246,9 +248,11 @@ void QIperfC::on_pairAdd()
 {
     // on_pair_add
     dlgiperf->updateUI();
+    dlgiperf->setExcIdx(QModelIndex());//new
     int rc = dlgiperf->exec();// show dlgiperf
     if (rc == QDialog::Accepted){
         QString rs= dlgiperf->getJsonCfg();
+//        qDebug()<< "on_pairAdd: \n" << rs;
         m_tpmgr->add(rs);
     }
 }
@@ -438,13 +442,13 @@ void QIperfC::onStart()
             }
         }
         if (!bServerReady){
-            qDebug() << "server not readey: " << m_status_server;
             QStringList ds;
             foreach (auto key, m_status_server.keys()){
                 if (m_status_server[key]==0){
                     ds.append(key);
                 }
             }
+            qDebug() << "server not readey: " << ds.join(",");
             emit errorStop(4, "Iperf server not readey:" +  ds.join(","));
             return;
         }
@@ -597,6 +601,28 @@ void QIperfC::onConfig()
     m_frm_option->show();
 }
 
+void QIperfC::onCopy()
+{
+    if (ui->tv_throughput->hasFocus()){
+        QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
+        TP *tp;
+        QString s="";
+        foreach(auto idx, idxs){
+            tp = m_tpmgr->getItem(idx);
+            s = s + "\n" + tp->getJsonData();
+        }
+        m_clipboard->setText(s);
+    }
+}
+
+void QIperfC::onPaste()
+{
+    if (ui->tv_throughput->hasFocus()){
+        QString clip = m_clipboard->text();
+        m_tpmgr->onPaste(clip);
+    }
+}
+
 void QIperfC::onAbout()
 {
     QMessageBox::about(this, "About", QString(QIPERFC_NAME)+"\n"
@@ -734,6 +760,15 @@ bool QIperfC::eventFilter(QObject *obj, QEvent *event)
         ui->menuTest->setVisible(true);
         ui->menuTest->setEnabled(true);
 
+    }
+    if(obj == ui->tv_throughput && event->type() ==QEvent::KeyPress){
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if(keyEvent->key() == Qt::Key_C && keyEvent->modifiers().testFlag(Qt::ControlModifier)){ //ctrl+c
+            onCopy();
+        }
+        if(keyEvent->key() == Qt::Key_C && keyEvent->modifiers().testFlag(Qt::ControlModifier)){  //ctrl+v
+            onPaste();
+        }
     }
     return QObject::eventFilter(obj,event);
 }
@@ -880,7 +915,10 @@ void QIperfC::init_actions()
     connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(on_New()));
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(on_Open()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(on_Save()));
-    //
+    // edit
+    connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(onCopy()));
+    connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(onPaste()));
+
     connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(on_pairAdd()));
     connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(on_pairEdit()));
     connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(on_pairDelete()));
@@ -976,11 +1014,11 @@ void QIperfC::onItemDClicked(QModelIndex idx)
 {
     TP *tp = m_tpmgr->getItem(idx);
     dlgiperf->loadJsonCfg(tp->saveData());
+    dlgiperf->setExcIdx(idx);
     int rc = dlgiperf->exec();// show dlgiperf
     if (rc == QDialog::Accepted){
         QString rs= dlgiperf->getJsonCfg();
         tp->loadData(rs);
-//        m_tpmgr
         m_tpmgr->setItem(idx, tp);
     }
 }

@@ -5,8 +5,20 @@
 #include <QAbstractItemModel>
 #include <QList>
 #include <QJsonObject>
-
+#include <QMap>
 #include "tp.h"
+
+class TPMgrData: public QObject
+{
+    Q_GADGET
+public:
+    enum DataType{
+        root=0,  // root item
+        config=1,  // config item
+        TP=2     // throughput data item
+    };
+    Q_ENUM(DataType)
+};
 
 //class to manager all Throughput data
 class TPMgr : public QAbstractItemModel
@@ -38,6 +50,11 @@ public:
     void addComment(QString midx, QString comment);
     void addTPdata(QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir=nullptr);
     TP *getItemByIdx(QString midx, TP *item=nullptr);
+    QMap<QString, QStringList> getBindkeys(); // get all getBindkeys (managerIP: IP_Port, IP_Port ...)
+    bool isBindkeyExist(QString managerIP, QString bindkey, QModelIndex exc_idx);
+    int getMaxPort(QString m_ip, QString targetIP); // get all tp config's port number and return Max value in same manage ip & target ip
+    void onPaste(QString data);
+
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
 signals:

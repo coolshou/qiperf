@@ -80,6 +80,9 @@
            <property name="uniformRowHeights">
             <bool>false</bool>
            </property>
+           <attribute name="headerShowSortIndicator" stdset="0">
+            <bool>false</bool>
+           </attribute>
           </widget>
           <widget class="QWidget" name="widget_console" native="true">
            <property name="minimumSize">
@@ -331,7 +334,7 @@
      <normaloff>:/copy</normaloff>:/copy</iconset>
    </property>
    <property name="text">
-    <string>Copy (TODO)</string>
+    <string>Copy</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
@@ -343,7 +346,7 @@
      <normaloff>:/paste</normaloff>:/paste</iconset>
    </property>
    <property name="text">
-    <string>Paste (TODO)</string>
+    <string>Paste</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>

@@ -13,11 +13,12 @@
 #include <QCoreApplication>
 #include <QEventLoop>
 
-DlgIperf::DlgIperf(QWidget *parent) :
+DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DlgIperf)
 {
     ui->setupUi(this);
+    m_tpmgr = tpmgr;
     b_ipv6 = false;
     connect(ui->cb_version, &QComboBox::currentTextChanged, this, &DlgIperf::ChangeVersion);
     connect(ui->chk_bidir, &QCheckBox::stateChanged, this, &DlgIperf::onChkBidirStatech);
@@ -140,6 +141,7 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
     ui->sb_mss->setValue(clientObj["mss"].toInt());
     ui->cb_fmtreport->setCurrentText(clientObj["fmtreport"].toString());
     ui->chk_reverse->setChecked(clientObj["reverse"].toBool());
+
 }
 
 bool DlgIperf::add(QString mgr)
@@ -218,6 +220,11 @@ void DlgIperf::updateUI()
     }
 }
 
+void DlgIperf::setExcIdx(QModelIndex excIdx)
+{
+    m_excIdx = excIdx;
+}
+
 void DlgIperf::ChangeVersion(const QString ver)
 {
     int port=5201;
@@ -271,6 +278,16 @@ void DlgIperf::onAccepted()
         return;
     }
     // TODO: check duplicate <target ip>:<port> binding!!
+    QString bindkey = ui->cb_target_ip->currentText()+"_"+ QString::number(ui->sb_port->value());
+    if (m_tpmgr->isBindkeyExist(ui->cb_mserver_ip->currentText(), bindkey, m_excIdx))
+    {
+        QString msg = ui->cb_mserver_ip->currentText() + " already have " + bindkey+ "\n Please use other value of port";
+        QMessageBox::warning(this, tr("ERROR!!"), tr(msg.toUtf8()),
+                             QMessageBox::Ok);
+        ui->sb_port->setFocus();
+        return;
+    }
+
     if ((addr_client.protocol()==QAbstractSocket::IPv6Protocol)&&
             (addr_target.protocol()==QAbstractSocket::IPv6Protocol)){
         b_ipv6=true;
