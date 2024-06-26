@@ -7,7 +7,7 @@
 namespace Ui {
 class FormQIperfds;
 }
-
+// GUI to show QIperfd list
 class FormQIperfds : public QWidget
 {
     Q_OBJECT
