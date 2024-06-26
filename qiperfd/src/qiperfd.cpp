@@ -61,18 +61,8 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     connect(m_wsserver, &WSServer::actMessage, this ,&QIperfd::onWSactMessage);
     connect(this, &QIperfd::iperfStarted, m_wsserver, &WSServer::sendTextResult);
 #endif
-    //Q_UNUSED(pserver)
 
     m_pserver=pserver;
-//    //TODO: why following did not work??
-/*
-    QMetaObject::Connection rc =connect(m_pserver, &PipeServer::pipeMessage, this, &QIperfd::onPipeMessage);
-    if (!rc){
-        qDebug() << "connect pipeMessage fail" << Qt::endl;
-    }else {
-        qDebug() << "Connection: " << rc << Qt::endl;
-    }
-*/
     // systemtray GUI interaction interface
     // iperf control interface, accept add/del iperf setting from remote
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
