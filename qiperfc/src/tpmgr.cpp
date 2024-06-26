@@ -9,7 +9,8 @@
 TPMgr::TPMgr(QObject *parent)
     : QAbstractItemModel(parent)
 {
-    this->rootItem = new TP(("Root"), ("Root"));
+    rootItem = new TP(("Root"), ("Root"));
+    rootItem->setDataType(TPMgrData::root);
 
 }
 TPMgr::~TPMgr()
@@ -166,15 +167,15 @@ QModelIndex TPMgr::indexFromItem(TP *item){
 
 int TPMgr::rootChildCount()
 {
-    return this->rootItem->childCount();
+    return rootItem->childCount();
 }
 
 QList<TP *> TPMgr::getChilds()
 {
 //    QList<TP *> tps;
     m_tps.clear();
-    for(int i = 0; i<this->rootItem->childCount();i++){
-        m_tps.append(this->rootItem->child(i));
+    for(int i = 0; i<rootItem->childCount();i++){
+        m_tps.append(rootItem->child(i));
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 
@@ -230,15 +231,15 @@ void TPMgr::reset(){
     //reset all data to none
     beginResetModel();
     m_tps.clear();
-    this->rootItem = new TP(("Root"), ("Root"));
+    rootItem = new TP(("Root"), ("Root"));
     endResetModel();
 }
 
 void TPMgr::clear(){
     // clean test record
     // TODO: when there is child the folding icon will not remove after clear!!
-    if (this->rootItem->haveChilds()){
-        foreach(auto tp, this->rootItem->getChilds()){
+    if (rootItem->haveChilds()){
+        foreach(auto tp, rootItem->getChilds()){
             tp->removeChildren(0, tp->childCount());
             tp->setThroughput("Tx", 0);
             tp->setThroughput("Rx", 0);
@@ -269,7 +270,9 @@ TP *TPMgr::getRootItem() const
 
 QModelIndex TPMgr::getRootItemIdx()
 {
-    return indexFromItem(rootItem);
+    QModelIndex idx = indexFromItem(rootItem);
+    qDebug() << "idx:" << idx << " rootItem:" << rootItem;
+    return idx;
 }
 
 void TPMgr::setItem(const QModelIndex &index, TP *item)
@@ -400,7 +403,7 @@ int TPMgr::getMaxPort(QString m_ip, QString targetIP)
 {
     int maxPort=0;
     int port;
-    foreach(auto tp, this->rootItem->getChilds()){
+    foreach(auto tp, rootItem->getChilds()){
         if(m_ip == tp->getMgrServer() && (targetIP == tp->getServer())){
             port = tp->getPort();
             if (port>maxPort){
