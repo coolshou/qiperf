@@ -52,7 +52,7 @@ QIperfC::QIperfC(QWidget *parent)
     loadSettings();
     m_qipconfig = new QIPConfig();
     //UI actions
-    init_actions();
+    initActions();
     //dataTimer = QTimer();
     initCustomPlote();
     connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
@@ -71,10 +71,10 @@ QIperfC::QIperfC(QWidget *parent)
     ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
     ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
     ui->tv_throughput->installEventFilter(this);
-//    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
+    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
 //    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
-//    ui->tv_throughput->expand(m_tpmgr.rootItemIndex());
-    ui->tv_throughput->expandAll();// will show folding icon when have child item
+//    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
+//    ui->tv_throughput->expandAll();// will show folding icon when have child item??
     connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemDClicked); //edit item on double click
 
     //TODO: slow update text/image?
@@ -99,6 +99,7 @@ QIperfC::QIperfC(QWidget *parent)
     connect(pclient, SIGNAL(newMessage(QString)), this, SLOT(onNewMessage(QString)));
     pclient->SetAppHandle(qApp);
 
+    m_dlgrecord = new DlgRecord(this);
     // control remote qiperfd?
 #if (TEST_JSONRPC==1)
     qDebug() << "test jcon rpc server" << Qt::endl;
@@ -141,7 +142,7 @@ bool QIperfC::load(QString filename)
         switch (ret) {
           case QMessageBox::Save:
               // Save was clicked
-              on_Save();
+              onSave();
               break;
           case QMessageBox::Discard:
               // Don't Save was clicked
@@ -192,13 +193,13 @@ void QIperfC::onNewMessage(const QString msg)
     m_dlgtest->append(msg);
 }
 
-void QIperfC::on_New()
+void QIperfC::onNew()
 {
     //TODO: check tp config exist?
     on_Clear();
 }
 
-void QIperfC::on_Open()
+void QIperfC::onOpen()
 {
     //TODO: load test config file
     QString fileName = QFileDialog::getOpenFileName(this,
@@ -214,7 +215,7 @@ void QIperfC::on_Open()
     load(fileName);
 }
 
-void QIperfC::on_Save()
+void QIperfC::onSave()
 {
     //TODO: save test config file
     QString fileName = QFileDialog::getSaveFileName(this,
@@ -244,7 +245,7 @@ void QIperfC::on_Clear()
     onClear();
 }
 
-void QIperfC::on_pairAdd()
+void QIperfC::onPairAdd()
 {
     // on_pair_add
     dlgiperf->updateUI();
@@ -257,7 +258,7 @@ void QIperfC::on_pairAdd()
     }
 }
 
-void QIperfC::on_pairEdit()
+void QIperfC::onPairEdit()
 {
     // TODO: edit
     QModelIndex idx = ui->tv_throughput->selectionModel()->currentIndex();
@@ -265,7 +266,7 @@ void QIperfC::on_pairEdit()
     onItemDClicked(idx);
 }
 
-void QIperfC::on_pairDelete()
+void QIperfC::onPairDelete()
 {
     QModelIndex cur = ui->tv_throughput->selectionModel()->currentIndex();
     if (!m_tpmgr->removeRow(cur.row(), cur.parent())){
@@ -596,6 +597,12 @@ void QIperfC::onClear(){
     emit updateStarttime("");
 }
 
+void QIperfC::onShowLog()
+{
+    //TODO: onShowLog
+    m_dlgrecord->show();
+}
+
 void QIperfC::onConfig()
 {
     m_frm_option->show();
@@ -908,26 +915,28 @@ void QIperfC::onPlotContextMenuRequest(QPoint pos)
 
 }
 
-void QIperfC::init_actions()
+void QIperfC::initActions()
 {
     // init actions
     // file
-    connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(on_New()));
-    connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(on_Open()));
-    connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(on_Save()));
+    connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(onNew()));
+    connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
+    connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(onSave()));
     // edit
     connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(onCopy()));
     connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(onPaste()));
 
-    connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(on_pairAdd()));
-    connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(on_pairEdit()));
-    connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(on_pairDelete()));
+    connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(onPairAdd()));
+    connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(onPairEdit()));
+    connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(onPairDelete()));
     connect(ui->actionSwap, SIGNAL(triggered()), this, SLOT(onPairSwap()));
 
-    //start/stop
+    // run
     connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
     connect(ui->actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
     connect(ui->actionClear, SIGNAL(triggered()), this, SLOT(onClear()));
+    connect(ui->actionShowLog, SIGNAL(triggered()), this, SLOT(onShowLog()));
+
     //option
     connect(ui->actionConfig, SIGNAL(triggered()), this, SLOT(onConfig()));
 

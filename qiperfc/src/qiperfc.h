@@ -25,6 +25,7 @@
 #include "formqiperfds.h"
 #include "dlgtest.h"
 #include "formoption.h"
+#include "dlgrecord.h"
 
 #if (TEST_WS==1)
 #include "wsclient.h"
@@ -53,17 +54,18 @@ public:
 
 public slots:
     void onNewMessage(const QString msg);
-    void on_New();
-    void on_Open();
-    void on_Save();
+    void onNew();
+    void onOpen();
+    void onSave();
     void on_Clear();
-    void on_pairAdd();
-    void on_pairEdit();
-    void on_pairDelete();
+    void onPairAdd();
+    void onPairEdit();
+    void onPairDelete();
     void onPairSwap();
     void onStart();
     void onStop();
     void onClear();
+    void onShowLog();
     void onConfig();
     void onCopy();
     void onPaste();
@@ -100,7 +102,7 @@ private:
 
 
 private slots:
-    void init_actions();
+    void initActions();
     void initStatusbar();
     void onUpdateStarttime(QString stime);
     void onUpdateStatus(QString msg);
@@ -122,6 +124,7 @@ private:
     FormQIperfds *m_frm_qiperfds;
     FormOption *m_frm_option;
     DlgTest *m_dlgtest;
+    DlgRecord *m_dlgrecord; //TODO: store final test result
     TPPlot *m_tpplot;
     QSettings *m_settings;
     DlgIperf * dlgiperf;  // dialog of iperf config
