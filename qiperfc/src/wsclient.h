@@ -71,7 +71,7 @@ public:
     bool isConnected();
 signals:
     void iperfStarted(QString smode, QString ipport);  //mode ,ip-port
-    void iperfStoped(QString refrow, QString err_no, QString err);  //refrow, error no (0: no error), error message
+    void iperfStoped(QString refrow, QString err_no, QString err, QString ipport);  //refrow, error no (0: no error), error message
     void disconnected(QString serverip);
     void iperfTPdata(QString refrow, QString sInterval, QString data); // refrow, throughput data
 

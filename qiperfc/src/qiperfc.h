@@ -113,7 +113,7 @@ private slots:
     void onRPC_result(const QVariant& result);
     void onRPC_error(int code, const QString& message);
     void onIperfStarted(QString smode, QString ipport);
-    void onIperfStoped(QString refrow, QString err_no, QString err);
+    void onIperfStoped(QString refrow, QString err_no, QString err, QString ipport);
     void onIperfTPdata(QString refrow, QString sInterval, QString data);
     void onDisconnected(QString serverip);
     void onPlotContextMenuRequest(QPoint pos);

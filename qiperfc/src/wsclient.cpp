@@ -141,11 +141,17 @@ void WSClient::onTextMessageReceived(QString message)
         message = message.right(message.length()-cut2-1); // key
         emit iperfStarted(smode, message);
     }else if (act.startsWith(CMD_IPERF_STOPED)){
+        qDebug()<< "CMD_IPERF_STOPED:" << message;
+
         cut2 = message.indexOf(':', 0);  //
         QString err_no = message.left(cut2); // error code
+        message = message.right(message.length()-cut2-1);
+        cut2 = message.indexOf(':', 0);  //
+        QString bindkey = message.left(cut2); // key
         message = message.right(message.length()-cut2-1); // error message
-        qDebug()<< "CMD_IPERF_STOPED:" << message;
-        emit iperfStoped(m_idx, err_no, message);
+
+
+        emit iperfStoped(m_idx, err_no, message, bindkey);
 
     } else if (act.startsWith(CMD_IPERF_TP_DATA)){
         QJsonParseError error;

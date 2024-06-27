@@ -843,11 +843,11 @@ void QIperfC::onIperfStarted(QString smode, QString ipport)
     }
 }
 
-void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err)
+void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err, QString ipport)
 {
     if (err_no.toInt()>0){
-        qDebug() << "onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
-        m_tpmgr->addComment(refrow, err);
+        qDebug() << "addComment onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
+        m_tpmgr->addComment(refrow, "["+ ipport +"]" +err);
     }else{
         qDebug() << "onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
     }

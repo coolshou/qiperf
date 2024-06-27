@@ -61,7 +61,7 @@ public slots:
     void onErrored(int m_idx, QString text);
     void onIperfLog(int idx, QString text);
     void onStarted(int m_idx, bool smode, QString ipport);
-    void onFinished(int idx, int exitCode, int exitStatus);
+    void onFinished(int idx, int exitCode, int exitStatus, QString ipport);
     void onThroughput(int idx, QString sInterval, QString data); // idx, refrow, throughput data
     void onQuit();
 signals:

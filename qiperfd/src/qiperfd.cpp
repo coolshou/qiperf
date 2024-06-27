@@ -590,7 +590,6 @@ void QIperfd::onErrored(int m_idx, QString text)
     QString msg = QString(CMD_IPERF_STOPED)+":"+QString::number(m_idx);
     msg = msg + ":1:"+ text; // error no, error
     m_wsserver->sendTextResult(msg);
-    onLog("TODO: onErrored:" + msg);
 }
 
 void QIperfd::onIperfLog(int idx, QString text)
@@ -614,11 +613,12 @@ void QIperfd::onStarted(int m_idx, bool smode, QString ipport)
     m_runstatus[m_idx]=1;
 }
 
-void QIperfd::onFinished(int idx, int exitCode, int exitStatus)
+void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport)
 {
     QString msg = QString(CMD_IPERF_STOPED)+":"+ QString::number(idx);
     msg = msg + ":" + QString::number(exitCode)+  ":" + QString::number(exitStatus);
-    onLog("TODO: onFinished:" + msg);
+    msg = msg + ":" + ipport;
+    onLog("TODO: onFinished: " + msg);
     m_wsserver->sendTextResult(msg);
     if (m_threads.contains(idx))
     {
