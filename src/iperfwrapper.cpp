@@ -180,6 +180,9 @@ void IperfWrapper::parserIperf3(QString linedata)
                 qDebug() << "==linedata==  " << linedata;
             }else{
 //                    qDebug() << "m_parallel: " << iparallel << "m_tpdatas length: " << m_tpdatas[sInterval].count();
+                if (linedata.contains("receiver")){
+                    irec.insert("AVG", true); //final data is the average of throughput
+                }
                 m_tpdatas[sInterval].append(irec);
             }
         }

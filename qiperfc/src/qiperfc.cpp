@@ -869,9 +869,13 @@ void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString datas)
     QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8());
     QJsonArray jArr = doc.array();//.object();
     foreach (auto jObj, jArr){
+        bool avg=false;
         QString dir=nullptr;
         if (!jObj["dir"].isUndefined()){
             dir=jObj["dir"].toString();
+        }
+        if (!jObj["AVG"].isUndefined()){
+            avg=jObj["AVG"].toBool();
         }
         // iperf sInterval = 0.00-1.00 format
         if (sInterval.contains("-")){
@@ -881,7 +885,9 @@ void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         m_tpmgr->addTPdata(refrow, sInterval, jObj["idx"].toString(),
                 jObj["value"].toString(), jObj["unit"].toString(), dir);
         // chart data
-        m_tpplot->onIperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
+        if (!avg){
+            m_tpplot->onIperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
+        }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
