@@ -108,9 +108,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     ../qiperf.qrc
 
+VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFC_VERSION\"" | awk -F\' \'  \'{print $3}\' )
+message(QIPERFC_VERSION: $$VERSION)
+
 win32 {
     #VER = $$system(findstr /c:"\"define QIPERFD_VERSION\"" $$PWD/../src/versions.h)
-    VERSION = 0.2.11306.20 # major.minor.patch.build
+    #VERSION = 0.2.11306.27 # major.minor.patch.build
     # windows resources
     #    CONFIG += embed_manifest_exe
 
@@ -145,8 +148,6 @@ CONFIG(release, debug|release) {
     export(iperfbin.commands)
     QMAKE_EXTRA_TARGETS += first iperfbin deploy
 
-} else{
-    VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFC_VERSION\"" | awk -F\' \'  \'{print $3}\' )
 }
 unix:!android {
     MIME.files += \
