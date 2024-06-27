@@ -2,6 +2,9 @@
 #include "ui_qiperftray.h"
 
 #include "comm.h"
+#include "version.h"
+#include <QMessageBox>
+
 #include <QDebug>
 
 QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
@@ -32,6 +35,8 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     QObject::connect(ui->pb_setMgrIfname, SIGNAL(clicked()), this, SLOT(onSetMgrIfname()));
     QObject::connect(ui->pb_getMgrIfname, SIGNAL(clicked()), this, SLOT(onGetMgrIfname()));
     onGetMgrIfname();
+
+    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
 
     statuser = new QTimer();
     QObject::connect(statuser, SIGNAL(timeout()), this, SLOT(onTimeout()));
@@ -136,6 +141,14 @@ void QIperfTray::onSetMgrIfname()
 void QIperfTray::onGetMgrIfname()
 {
     pclient->send_MessageToServer(CMD_IFNAMES);
+}
+
+void QIperfTray::onAbout()
+{
+    QMessageBox::about(this, "About", QString(QIPERFTRAY_NAME)+
+                       " v"+QString(QIPERFTRAY_VERSION)+"\n"
+                       "Auther: Jimmy Yeh\n"
+                       "URL: https://github.com/coolshou/qiperf");
 }
 void QIperfTray::closeEvent(QCloseEvent *event)
 {

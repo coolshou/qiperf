@@ -31,6 +31,7 @@ public slots:
     void onTrayIconActivated();
     void onSetMgrIfname();
     void onGetMgrIfname();
+    void onAbout();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
