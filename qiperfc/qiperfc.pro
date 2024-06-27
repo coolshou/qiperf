@@ -108,7 +108,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     ../qiperf.qrc
 
-VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFC_VERSION\"" | awk -F\' \'  \'{print $3}\' )
+VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFC_VERSION\"" | awk -F\' \'  \'{print $3}\' | awk -F\'\"\'  \'{print $2}\')
 message(QIPERFC_VERSION: $$VERSION)
 
 win32 {

@@ -79,7 +79,7 @@ android {
 
 }
 
-VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFD_VERSION\"" | awk -F\' \'  \'{print $3}\' )
+VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFD_VERSION\"" | awk -F\' \'  \'{print $3}\' | awk -F\'\"\'  \'{print $2}\')
 message(QIPERFD_VERSION: $$VERSION)
 
 win32 {

@@ -35,7 +35,7 @@ else: unix:!android: target.path = /opt/qiperfd/bin
 RESOURCES += \
     $$PWD/../qiperf.qrc
 
-VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFTRAY_VERSION\"" | awk -F\' \'  \'{print $3}\' )
+VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFTRAY_VERSION\"" | awk -F\' \'  \'{print $3}\' | awk -F\'\"\'  \'{print $2}\')
 message(QIPERFTRAY_VERSION: $$VERSION)
 
 win32 {
