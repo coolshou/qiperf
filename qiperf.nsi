@@ -310,6 +310,7 @@ Section Uninstall
         Delete "$INSTDIR\libGLESv2.dll"
         Delete "$INSTDIR\opengl32sw.dll"
         Delete "$INSTDIR\${QIPERFTRAY_NAME}"
+        Delete "$INSTDIR\nssm.exe"
         Delete "$INSTDIR\Qt5Gui.dll"
         Delete "$INSTDIR\Qt5Svg.dll"
         Delete "$INSTDIR\Qt5Widgets.dll"
