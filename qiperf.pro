@@ -11,5 +11,5 @@ qiperftray.subdir = qiperftray
 qiperfd.subdir = qiperfd
 qiperfc.subdir = qiperfc
 
-qiperfc.depends = qiperfd
+#qiperfc.depends = qiperfd
 qiperftray.depends = qiperfd
