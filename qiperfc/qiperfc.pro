@@ -121,7 +121,7 @@ win32 {
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
 
     QMAKE_TARGET_PRODUCT=$${TARGET} #：指定項目目標的產品名稱，僅適用於Windows
-    QMAKE_TARGET_DESCRIPTION="qiperfc console of iperf" #：指定項目目標的描述資訊，僅適用於Windows
+    QMAKE_TARGET_DESCRIPTION="quick iperf console" #：指定項目目標的描述資訊，僅適用於Windows
     #PACKAGE_DOMAIN：
     #PACKAGE_VERSION：
     RC_CODEPAGE=0x04b0 #unicode：指定應該被包含進一個.rc檔案中的字碼頁，僅適用於Windows
