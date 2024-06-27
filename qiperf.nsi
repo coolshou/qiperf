@@ -403,7 +403,7 @@ init.done:
   SectionSetFlags ${SECTION_Daemon} $0
    # set section 'console' as unselected
    #IntOp $0 ~${SF_SELECTED}
-   ${If} ${OLD_INSTALL_MODE}
+   ${If} $OLD_INSTALL_MODE  != ""
      SectionSetFlags ${SECTION_Console}  ${SF_SELECTED}
    ${Else}
     SectionSetFlags ${SECTION_Console} 0
