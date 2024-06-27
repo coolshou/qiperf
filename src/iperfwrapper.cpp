@@ -119,9 +119,10 @@ void IperfWrapper::parserIperf3(QString linedata)
         linedata.contains("Reverse mode")){
         //ignore this lines
     }else if(linedata.contains("iperf Done.")){
-        // TODO: when see this : iperf run finish!!
-    }else if(linedata.contains("sender")||
-             linedata.contains("receiver")){
+        // TODO: when see this : iperf server run finish!!
+    }else if(linedata.contains("sender")){
+//             ||
+//             linedata.contains("receiver")){
         //TODO: final sumary
 
     }else{

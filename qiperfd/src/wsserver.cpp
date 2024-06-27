@@ -54,6 +54,8 @@
 #include <QtCore/QFile>
 #include <QtNetwork/QSslCertificate>
 #include <QtNetwork/QSslKey>
+#include <QCoreApplication>
+#include <QEventLoop>
 
 #include <QDebug>
 
@@ -124,10 +126,10 @@ qint64 WSServer::sendTextMessage(QString msg, QString target)
 //            onLog("TODO: send:" + msg + " back to " + t);
             rc= m_clients.value(t)->sendTextMessage(msg);
             if (rc<=0){
-                qDebug() << "error sendText size=" << rc << " : " << msg;
+                qDebug() << "ERROR sendText to " << t << " size=" << rc << " : " << msg;
             }
-
         }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     return rc;
 
@@ -212,8 +214,8 @@ void WSServer::sendTextResult(QString msg)
 {
     //send Test back to client
     qint64 rc = sendTextMessage(msg);
-    if (rc<=0){
-        qDebug() << "sendTextResult: sendTextMessage return size:" << rc;
+    if (rc<0){
+        qDebug() << "sendTextResult: sendTextMessage return size:(" << rc << "):" << msg;
     }
 }
 
