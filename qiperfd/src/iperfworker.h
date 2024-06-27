@@ -31,7 +31,7 @@ public:
     int getRefRow();
 signals:
     void started(int idx, bool smode, QString ipport); // refrow, S/C, IPPort
-    void finished(int idx, int exitCode, int exitStatus); // refrow
+    void finished(int idx, int exitCode, int exitStatus, QString ipport); // refrow, exitcode, exitStatus, , IPPort
     void log(int idx, QString msg); // refrow
     void onStdout(int idx, QString text); // refrow
     void onStderr(int idx, QString text); // refrow
@@ -64,7 +64,7 @@ private:
     QString m_parallel="0";
     QString m_protocal="TCP";
     bool m_bidir=false;
-    bool m_reverse=false; //TODO
+    //bool m_reverse=false;
     QString m_iperfexe; // iperf exec name
     QString m_iperflogpath;
     QString m_bidirtag;

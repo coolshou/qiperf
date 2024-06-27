@@ -123,12 +123,9 @@ void IperfWorker::setStop()
     if (m_iperf->waitForFinished(1000)){
         emit log(m_idx, "iperf killed");
     }else{
-//        emit log("kill iperf ");
         m_iperf->terminate();
-
     }
-//    emit log("setStop");
-    emit finished(m_refrow, 0, QProcess::NormalExit);
+    emit finished(m_refrow, 0, 2, getBindKey());
 }
 
 QString IperfWorker::getBindKey()
@@ -205,14 +202,14 @@ void IperfWorker::readyReadStdOut()
 
     if (processOutput.length()>0){
         toLogFile(processOutput);
-//        parserStdOut(processOutput);
         foreach (auto line , QString(processOutput).split("\n")){
             //ignore empty line
             if (line.length()>0){
                 parserStdOut(line);
             }
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
-//        emit onStdout(m_idx, QString(processOutput));
+
     }
 }
 
@@ -221,8 +218,8 @@ void IperfWorker::readyReadStdErr()
     QByteArray processOutput;
     processOutput = m_iperf->readAllStandardError();
 
-    QString err = QString(processOutput);
-    qDebug() << "Error was " << err;
+    QString err = getBindKey() + ":" + QString(processOutput);
+    qDebug() << "readyReadStdErr: " << err;
 
     m_running = false;
     m_stop = true;
@@ -245,7 +242,7 @@ void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 
     m_running = false;
     m_stop = true;
-    emit finished(m_refrow, exitCode, int(exitStatus));
+    emit finished(m_refrow, exitCode, int(exitStatus), getBindKey());
 }
 
 void IperfWorker::parserStdOut(QString msg)
