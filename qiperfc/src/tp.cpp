@@ -308,9 +308,13 @@ void TP::setComment(QString comment)
 {
     QString m;
     if (m_itemDatas[TP::comment].isValid()){
-        m = m_itemDatas[TP::comment].toString() + "\n" + comment;
+        if (m_itemDatas[TP::comment].toString()!=""){
+            m = m_itemDatas[TP::comment].toString() + "\n" + comment;
+        }else{
+            m = comment;
+        }
     }else{
-        m= comment;
+        m = comment;
     }
     m_itemDatas[TP::comment] = m;
 }

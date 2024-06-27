@@ -24,7 +24,7 @@
 #include "tpplot.h"
 #include "formqiperfds.h"
 #include "dlgtest.h"
-#include "formoption.h"
+#include "dlgoption.h"
 #include "dlgrecord.h"
 
 #if (TEST_WS==1)
@@ -38,6 +38,46 @@
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+class TooltipEventFilter : public QObject
+{
+    Q_OBJECT
+public:
+    TooltipEventFilter(QTreeView* view) : QObject(view), view(view) {}
+signals:
+    void doCopy();
+    void doPaste();
+
+protected:
+    bool eventFilter(QObject* obj, QEvent* event) override {
+        if (event->type() == QEvent::MouseMove) {
+            QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+            QModelIndex index = view->indexAt(mouseEvent->pos());
+            if (index.isValid()) {
+                QString data = index.data().toString();
+//                qDebug() << "pos:"<< mouseEvent->globalPos() <<" data" << data;
+                QToolTip::showText(mouseEvent->globalPos(), data, view);
+            } else {
+                QToolTip::hideText();
+            }
+        }
+        if(event->type() ==QEvent::KeyPress){
+            QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+            if(keyEvent->key() == Qt::Key_C && keyEvent->modifiers().testFlag(Qt::ControlModifier)){ //ctrl+c
+//                onCopy();
+                emit doCopy();
+            }
+            if(keyEvent->key() == Qt::Key_C && keyEvent->modifiers().testFlag(Qt::ControlModifier)){  //ctrl+v
+//                onPaste();
+                emit doPaste();
+            }
+        }
+        return QObject::eventFilter(obj, event);
+    }
+
+private:
+    QTreeView* view;
+};
 
 class QIperfC : public QMainWindow
 {
@@ -122,7 +162,7 @@ private:
     Ui::MainWindow *ui;
     QClipboard *m_clipboard;
     FormQIperfds *m_frm_qiperfds;
-    FormOption *m_frm_option;
+    dlgOption *m_frm_option;
     DlgTest *m_dlgtest;
     DlgRecord *m_dlgrecord; //TODO: store final test result
     TPPlot *m_tpplot;
@@ -154,6 +194,7 @@ private:
     QString m_ErrorMSG;
     QString m_tpcfgname; //tp config file name
     QIPConfig *m_qipconfig;
+    int m_WaitServerReady;
 
 };
 #endif // QIPERFC_H

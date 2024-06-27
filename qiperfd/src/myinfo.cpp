@@ -8,6 +8,7 @@
 #include "endpoint.h"
 #include "endpointtype.h"
 #include "endpointact.h"
+#include "version.h"
 
 #include <QDebug>
 
@@ -35,6 +36,7 @@ QString MyInfo::collectInfo()
             "HW":"",
             "Addrs":[["ip", "Mask", "BCast"],["ip2", "Mask2", "BCast2"]]
    },
+   "qiperfd":"0.2.11306.21"
    "update":0
  }
 */
@@ -63,6 +65,7 @@ QString MyInfo::collectInfo()
     mainObject.insert("OSVer", QSysInfo::kernelVersion());
     mainObject.insert("Manager", m_ifname);
     mainObject.insert("update", update);
+    mainObject.insert("qiperfd", QString(QIPERFD_VERSION));
 
     QJsonObject netObject=collectNetInfo();
 

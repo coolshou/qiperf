@@ -1,22 +1,25 @@
-#ifndef FORMOPTION_H
-#define FORMOPTION_H
+#ifndef DLGOPTION_H
+#define DLGOPTION_H
 
-#include <QWidget>
+//#include <QWidget>
+#include <QDialog>
 #include <QSettings>
 namespace Ui {
-class FormOption;
+class DlgOption;
 }
 
-class FormOption : public QWidget
+class dlgOption : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit FormOption(QSettings *cfg, QWidget *parent = nullptr);
+    explicit dlgOption(QSettings *cfg, QWidget *parent = nullptr);
 //    explicit FormOption(QSettings *cfg, QStringList interfaces, QWidget *parent = nullptr);
-    ~FormOption() override;
+    ~dlgOption() override;
     void loadcfg(QSettings *cfg);
     void updatecfg();
+    void setWaitServerReady(int val);
+    int getWaitServerReady();
 signals:
     void ipaddressUpdated(QString ipaddress, int port);
 
@@ -29,8 +32,8 @@ private slots:
     void on_pb_save_clicked();
 
 private:
-    Ui::FormOption *ui;
+    Ui::DlgOption *ui;
     QSettings *m_cfg;
 };
 
-#endif // FORMOPTION_H
+#endif // DLGOPTION_H

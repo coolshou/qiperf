@@ -352,6 +352,22 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
     return add(refrow, ver, cmd, args, port, binaddr, target, parallel, protocal, bidir);
 }
 
+void QIperfd::del(int idx)
+{
+    //delete specify m_iperfworkers & m_threads
+    //
+    if (m_threads.contains(idx))
+    {
+        m_threads.remove(idx);
+    }
+    if (m_iperfworkers.contains(idx))
+    {
+        m_iperfworkers.remove(idx);
+    }
+
+    m_runstatus[idx]=0;
+}
+
 int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bindHost)
 {
     qDebug() << "addIperfServer:" << bindHost << ":" << port << Qt::endl;
@@ -395,19 +411,7 @@ void QIperfd::start(int idx)
 {
     QThread *th = m_threads.value(idx);
     m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath+"/"+s_starttime);
-//    m_iperfworkers.value(idx)->setBidirTag(m_directions[s_starttime]);
-    QString s="C";
-    if (m_iperfworkers.value(idx)->getServerMode()){
-        s="S";
-    }
-    ;
-    // QString id= QString( "%1" ).arg(reinterpret_cast<long>(th->currentThreadId()), 16);
-//    QString id = QString("%1").arg(quintptr(th->currentThreadId()), 16, 16, QLatin1Char('0'));
-//    qDebug() << "run thread id:" << id << Qt::endl;
     th->start();
-    emit iperfStarted(QString(CMD_IPERF_STARTED)+":"+
-                      QString::number(m_iperfworkers.value(idx)->getRefRow())+":"+
-                      s +":" + m_iperfworkers.value(idx)->getBindKey());
 }
 void QIperfd::startAll()
 {
@@ -417,9 +421,11 @@ void QIperfd::startAll()
         d.mkpath(tmp);
     }
     // start all thread
-    for (int i = 0; i < m_threads.count(); ++i)
+//    for (int i = 0; i < m_threads.count(); ++i)
+    for (auto it = m_threads.begin(); it != m_threads.end(); ++it)
     {
-        start(i);
+//        start(i);
+        start(it.key());
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
@@ -434,26 +440,27 @@ void QIperfd::stop(int idx)
 void QIperfd::stopAll()
 {
     // stop all iperfworker
-    for (int i = 0; i < m_iperfworkers.count(); ++i)
+//    for (int i = 0; i < m_iperfworkers.count(); ++i)
+    for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end();)
     {
-        stop(i);
+//        stop(i);
+        stop(it.key());
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
 
 void QIperfd::clear()
 {
-    //qDebug() << __FILE__ << __LINE__ ;
-
+    //clear all m_iperfworkers & m_threads
     if (!m_iperfworkers.isEmpty()){
         for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end();) {
-            m_iperfworkers.erase(it);
+            it = m_iperfworkers.erase(it);
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }
     if (!m_threads.isEmpty()){
         for (auto it = m_threads.begin(); it != m_threads.end();) {
-            m_threads.erase(it);
+            it = m_threads.erase(it);
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }
@@ -585,10 +592,10 @@ void QIperfd::readStdOut(int idx, QString text)
     onLog("TODO: readStdOut(" + QString::number(idx) + "):" + text);
 }
 
-void QIperfd::onErrored(int m_idx, QString text)
+void QIperfd::onErrored(int m_idx, QString text, QString ipport)
 {
-    QString msg = QString(CMD_IPERF_STOPED)+":"+QString::number(m_idx);
-    msg = msg + ":1:"+ text; // error no, error
+    QString msg = QString(CMD_IPERF_ERRORED)+":"+QString::number(m_idx);
+    msg = msg + ":1:"+ text+":"+ipport; // error no, error
     m_wsserver->sendTextResult(msg);
 }
 
@@ -607,7 +614,6 @@ void QIperfd::onStarted(int m_idx, bool smode, QString ipport)
         msg = msg + ":C";
     }
     msg = msg + ":"+ ipport;
-//    onLog("TODO: onStarted:" + msg);
     qDebug() << "onStarted: " << msg;
     m_wsserver->sendTextResult(msg);
     m_runstatus[m_idx]=1;
@@ -620,15 +626,8 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport)
     msg = msg + ":" + ipport;
     onLog("TODO: onFinished: " + msg);
     m_wsserver->sendTextResult(msg);
-    if (m_threads.contains(idx))
-    {
-        m_threads.remove(idx);
-    }
-    if (m_iperfworkers.contains(idx))
-    {
-        m_iperfworkers.remove(idx);
-    }
-    m_runstatus[idx]=0;
+    del(idx);
+
 }
 
 void QIperfd::onThroughput(int idx, QString sInterval, QString data)

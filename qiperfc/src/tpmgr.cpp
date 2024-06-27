@@ -305,7 +305,7 @@ void TPMgr::addComment(QString midx, QString comment)
         qDebug() << "addComment: no parrent iperf pair?? (midx=" << midx << ")";
         return;
     }
-    qDebug() <<"TPMgr::addComment: " << tp << " midx:" << midx << " comment:" <<comment;
+//    qDebug() <<"TPMgr::addComment: " << tp << " midx:" << midx << " comment:" <<comment;
     tp->setComment(comment);
     emit dataChanged(QModelIndex(),QModelIndex());
 }

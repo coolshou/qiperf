@@ -45,6 +45,7 @@ public:
             QString bndaddr="0.0.0.0", QString target="",
             QString parallel="0", QString protocal="TCP", bool bidir=false);
     int add(QString refrow, QVariantMap jsondata);
+    void del(int idx);
     int addIperfServer(QString refrow, int version, uint port, QString bindHost="");
     int addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs);
     void start(int idx); // start idx of iperf
@@ -58,7 +59,7 @@ public slots:
     void setManagerInterface(QString interface);
     void onPipeMessage(int idx, const QString msg);
     void readStdOut(int idx, QString text);
-    void onErrored(int m_idx, QString text);
+    void onErrored(int m_idx, QString text, QString ipport);
     void onIperfLog(int idx, QString text);
     void onStarted(int m_idx, bool smode, QString ipport);
     void onFinished(int idx, int exitCode, int exitStatus, QString ipport);

@@ -17,6 +17,7 @@
 #include <QCoreApplication>
 #include <QEventLoop>
 #include <QTreeView>
+#include <QToolTip>
 
 #include "tpdirdelegate.h"
 #include "endpointact.h"
@@ -47,7 +48,7 @@ QIperfC::QIperfC(QWidget *parent)
 //    ui->toolBar->installEventFilter(this);
     m_dlgtest = new DlgTest();
     m_frm_qiperfds = new FormQIperfds();
-    m_frm_option = new FormOption(m_settings);
+    m_frm_option = new dlgOption(m_settings);
     initStatusbar();
     loadSettings();
     m_qipconfig = new QIPConfig();
@@ -70,7 +71,11 @@ QIperfC::QIperfC(QWidget *parent)
     ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
     ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
     ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
-    ui->tv_throughput->installEventFilter(this);
+    TooltipEventFilter* filter = new TooltipEventFilter(ui->tv_throughput);
+    connect(filter, &TooltipEventFilter::doCopy, this, &QIperfC::onCopy);
+    connect(filter, &TooltipEventFilter::doPaste, this, &QIperfC::onPaste);
+    ui->tv_throughput->viewport()->installEventFilter(filter);
+//    ui->tv_throughput->installEventFilter(this);
     ui->tv_throughput->setRootIsDecorated(true); //show folding icon
 //    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
 //    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
@@ -132,6 +137,7 @@ QIperfC::~QIperfC()
 
 bool QIperfC::load(QString filename)
 {
+    //load test config file
     if (m_tpmgr->rootChildCount()>0) {
         QMessageBox msgBox;
         msgBox.setText("Clear data before load config");
@@ -418,9 +424,11 @@ void QIperfC::onStart()
         //TODO: wait server start up and ready
         QDateTime oldDT = QDateTime::currentDateTime();
         QDateTime newDT;
+        int iwaittime;
         int chk=0;
         bool bServerReady=false;
         while (!bServerReady){ //TODO: timeout!!!
+            QThread::sleep(1);
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             chk=0;
             foreach(auto skey, m_status_server.keys()){
@@ -431,14 +439,16 @@ void QIperfC::onStart()
             }
             if (chk>=m_status_server.keys().length()){
                 bServerReady=true;
-            }else{
-//                qDebug() << " wait server ready: "<< QString::number(chk);
-                emit updateStatus(" wait server ready: "+ QString::number(chk)+ "/"+
-                                  QString::number(m_status_server.keys().length()));
             }
             newDT = QDateTime::currentDateTime();
-            if (oldDT.secsTo(newDT)>20){
-                // timeout in 20 sec
+            iwaittime = m_WaitServerReady-oldDT.secsTo(newDT);
+            emit updateStatus(" wait server ready: "+ QString::number(chk)+ "/"+
+                              QString::number(m_status_server.keys().length())+
+                              ":"+ QString::number(iwaittime));
+
+//            if (oldDT.secsTo(newDT)>m_WaitServerReady){
+            if (iwaittime<0){
+                // timeout
                 break;
             }
         }
@@ -605,7 +615,12 @@ void QIperfC::onShowLog()
 
 void QIperfC::onConfig()
 {
-    m_frm_option->show();
+    m_frm_option->setWaitServerReady(m_WaitServerReady);
+    int rc = m_frm_option->exec();
+    if (rc == QDialog::Accepted){
+        //update setting
+        m_WaitServerReady = m_frm_option->getWaitServerReady();
+    }
 }
 
 void QIperfC::onCopy()
@@ -762,22 +777,14 @@ bool QIperfC::eventFilter(QObject *obj, QEvent *event)
         m_frm_qiperfds->raise();
         m_frm_qiperfds->activateWindow();
     }
-    if((obj == ui->menubar || obj == ui->toolBar) &&
-            (event->type() == (Qt::Key_Control & QMouseEvent::MouseButtonPress))) {
-        qDebug() << "show menuTest";
-        ui->menuTest->setVisible(true);
-        ui->menuTest->setEnabled(true);
+//    if((obj == ui->menubar || obj == ui->toolBar) &&
+//            (event->type() == (Qt::Key_Control & QMouseEvent::MouseButtonPress))) {
+//        qDebug() << "show menuTest";
+//        ui->menuTest->setVisible(true);
+//        ui->menuTest->setEnabled(true);
 
-    }
-    if(obj == ui->tv_throughput && event->type() ==QEvent::KeyPress){
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if(keyEvent->key() == Qt::Key_C && keyEvent->modifiers().testFlag(Qt::ControlModifier)){ //ctrl+c
-            onCopy();
-        }
-        if(keyEvent->key() == Qt::Key_C && keyEvent->modifiers().testFlag(Qt::ControlModifier)){  //ctrl+v
-            onPaste();
-        }
-    }
+//    }
+
     return QObject::eventFilter(obj,event);
 }
 void QIperfC::updateRunStatus(bool bStart)
@@ -808,6 +815,10 @@ void QIperfC::saveSettings()
     m_settings->setValue("windowState", saveState());
     m_settings->sync(); // forces to write the settings to storage
     m_settings->endGroup();
+    m_settings->beginGroup("Iperf");
+//    m_settings->value("WaitServerReady", 10).toInt();
+    m_settings->endGroup();
+    m_settings->sync();
 }
 
 void QIperfC::loadSettings()
@@ -821,6 +832,10 @@ void QIperfC::loadSettings()
     move(x,y);
     restoreGeometry(m_settings->value("geometry", newrect).toByteArray());
     restoreState(m_settings->value("windowState").toByteArray());
+    m_settings->endGroup();
+    m_settings->beginGroup("Iperf");
+    m_WaitServerReady =m_settings->value("WaitServerReady", 10).toInt();
+//    m_frm_option->setWaitServerReady();
     m_settings->endGroup();
 }
 
@@ -847,15 +862,14 @@ void QIperfC::onIperfStarted(QString smode, QString ipport)
 void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err, QString ipport)
 {
     if (err_no.toInt()>0){
-        qDebug() << "addComment onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
-        m_tpmgr->addComment(refrow, "["+ ipport +"]" +err);
+        m_tpmgr->addComment(refrow, "["+ ipport +"]Error:" +err);
         if (m_status_server.contains(ipport)){
             m_status_server[ipport]=TPStatus::stoped;
         }
         if (m_status_client.contains(ipport)){
             m_status_client[ipport]=TPStatus::stoped;
         }
-
+//        emit errorStop(2, "onIperfStoped: ["+ipport+"]("+err_no+"):"+err);
     }else{
         qDebug() << "onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
     }

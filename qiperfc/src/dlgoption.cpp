@@ -1,10 +1,10 @@
-#include "formoption.h"
-#include "ui_formoption.h"
+#include "dlgoption.h"
+#include "ui_dlgoption.h"
 
-FormOption::FormOption(QSettings *cfg, QWidget *parent) :
+dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
 //FormOption::FormOption(QSettings *cfg, QStringList interfaces, QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::FormOption)
+    QDialog(parent),
+    ui(new Ui::DlgOption)
 {
     ui->setupUi(this);
     m_cfg = cfg;
@@ -12,12 +12,12 @@ FormOption::FormOption(QSettings *cfg, QWidget *parent) :
     loadcfg(cfg);
 }
 
-FormOption::~FormOption()
+dlgOption::~dlgOption()
 {
     delete ui;
 }
 
-void FormOption::loadcfg(QSettings *cfg)
+void dlgOption::loadcfg(QSettings *cfg)
 {
     //load cfg to ui
     cfg->beginGroup("iperf");
@@ -37,7 +37,7 @@ void FormOption::loadcfg(QSettings *cfg)
     cfg->endGroup();
 }
 
-void FormOption::updatecfg()
+void dlgOption::updatecfg()
 {
     //save ui value to cfg
     m_cfg->beginGroup("iperf");
@@ -64,9 +64,22 @@ void FormOption::updatecfg()
     m_cfg->endGroup();
 }
 
-void FormOption::changeEvent(QEvent *e)
+void dlgOption::setWaitServerReady(int val)
 {
-    QWidget::changeEvent(e);
+    if ((val >= ui->sb_WaitServerReady->minimum()) &&
+        (val <= ui->sb_WaitServerReady->maximum())){
+        ui->sb_WaitServerReady->setValue(val);
+    }
+}
+
+int dlgOption::getWaitServerReady()
+{
+    return ui->sb_WaitServerReady->value();
+}
+
+void dlgOption::changeEvent(QEvent *e)
+{
+    QDialog::changeEvent(e);
     switch (e->type()) {
     case QEvent::LanguageChange:
         ui->retranslateUi(this);
@@ -76,14 +89,14 @@ void FormOption::changeEvent(QEvent *e)
     }
 }
 
-void FormOption::on_pb_cancel_clicked()
+void dlgOption::on_pb_cancel_clicked()
 {
     //
     this->close();
 }
 
 
-void FormOption::on_pb_save_clicked()
+void dlgOption::on_pb_save_clicked()
 {
     updatecfg();
     this->close();

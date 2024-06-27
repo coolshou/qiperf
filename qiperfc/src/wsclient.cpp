@@ -140,18 +140,25 @@ void WSClient::onTextMessageReceived(QString message)
         QString smode = message.left(cut2); // S: server/ C: client mode
         message = message.right(message.length()-cut2-1); // key
         emit iperfStarted(smode, message);
-    }else if (act.startsWith(CMD_IPERF_STOPED)){
-        qDebug()<< "CMD_IPERF_STOPED:" << message;
-
+    } else if (act.startsWith(CMD_IPERF_STOPED)){
         cut2 = message.indexOf(':', 0);  //
         QString err_no = message.left(cut2); // error code
         message = message.right(message.length()-cut2-1);
         cut2 = message.indexOf(':', 0);  //
-        QString bindkey = message.left(cut2); // key
-        message = message.right(message.length()-cut2-1); // error message
+        QString error = message.left(cut2); // error status
+        QString bindkey = message.right(message.length()-cut2-1); // bindkey
 
-
-        emit iperfStoped(m_idx, err_no, message, bindkey);
+//        qDebug()<< "CMD_IPERF_STOPED:" << err_no << " bindkey:" << bindkey << " error:" << error;
+        emit iperfStoped(m_idx, err_no, error, bindkey);
+    } else if (act.startsWith(CMD_IPERF_ERRORED)){
+        cut2 = message.indexOf(':', 0);  //
+        QString err_no = message.left(cut2); // error code
+        message = message.right(message.length()-cut2-1);
+        cut2 = message.lastIndexOf(':');  //
+        QString error = message.left(cut2); // key
+        QString bindkey = message.right(message.length()-cut2-1); // error message
+//        qDebug()<< "CMD_IPERF_ERRORED:" << err_no << " bindkey:" << bindkey << " message:" << error;
+        emit iperfStoped(m_idx, err_no, error, bindkey);
 
     } else if (act.startsWith(CMD_IPERF_TP_DATA)){
         QJsonParseError error;
@@ -167,7 +174,8 @@ void WSClient::onTextMessageReceived(QString message)
         }
 //        emit iperfStarted();
     } else {
-        qDebug() << "Message received:" << message << ": "<< pClient->peerAddress();
+        qDebug() << "Message received: act:" << act <<" refrow:" << m_idx <<
+                    " :"<< message << ": "<< pClient->peerAddress();
     }
 }
 //! [onTextMessageReceived]

@@ -90,9 +90,8 @@ void IperfWorker::work()
 //    m_iperf->start();
     connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
     connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
-    connect(m_iperf, &QProcess::readyRead, this, &IperfWorker::readyReadStdOut);
+//    connect(m_iperf, &QProcess::readyRead, this, &IperfWorker::readyReadStdOut);
     connect(m_iperf, &QProcess::started, this, &IperfWorker::onStarted);
-//    connect(m_iperf, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(onFinished(int,QProcess::ExitStatus)));
     connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
     //errorOccurred(QProcess::ProcessError error)
 
@@ -188,11 +187,11 @@ void IperfWorker::onStarted()
     if(m_logfile->open(QIODevice::WriteOnly|QIODevice::Append)){
         m_logtextstream = new QTextStream(m_logfile);
     }else{
-        emit onStderr(m_refrow, "ERROR: open file '"+ tmp +"' Fail");
+        emit onStderr(m_refrow, "ERROR: open file '"+ tmp +"' Fail", getBindKey());
     }
     m_running = true;
     m_iperfwrapper->setSetting(m_refrow, m_servermode, m_parallel, m_bidir, m_bidirtag);
-    emit started(m_refrow, m_servermode, getBindKey());
+    emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
 }
 
 void IperfWorker::readyReadStdOut()
@@ -218,12 +217,12 @@ void IperfWorker::readyReadStdErr()
     QByteArray processOutput;
     processOutput = m_iperf->readAllStandardError();
 
-    QString err = getBindKey() + ":" + QString(processOutput);
+    QString err = QString(processOutput);
     qDebug() << "readyReadStdErr: " << err;
 
     m_running = false;
     m_stop = true;
-    emit onStderr(m_refrow, err);
+    emit onStderr(m_refrow, err, getBindKey());
     onFinished(1, QProcess::ExitStatus(2)); // something error
 
 }
