@@ -33,12 +33,12 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata)
 {
     // TODO: add single x/y data to graphic
     QCPGraph *graph = getGraph(idx);
-    if (ydata >= this->yAxis->range().upper){
+    if (ydata >= yAxis->range().upper){
         int aval = round(ydata*0.1);
-        this->yAxis->setRange(0, ydata+aval);
+        yAxis->setRange(0, ydata+aval);
     }
-    if (xdata >= this->xAxis->range().upper){
-        this->xAxis->setRange(0, xdata+30);
+    if (xdata >= xAxis->range().upper){
+        xAxis->setRange(0, xdata+30);
     }
     graph->addData(xdata, ydata);
     this->replot();
@@ -75,6 +75,9 @@ void TPPlot::clear()
 //    m_graphs.clear();
     this->clearGraphs();
     m_graphs.clear();
+    //axis reset
+    xAxis->setRange(0, m_xAxisMaxDefault);
+    yAxis->setRange(0, m_yAxisMaxDefault);
     this->replot();
 }
 
@@ -86,15 +89,15 @@ void TPPlot::initCustomPlote()
     //x Axis
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
-    this->xAxis->setTicker(timeTicker);
+    xAxis->setTicker(timeTicker);
 
     //set axis Label
-    this->xAxis->setLabel("Time(Sec)");
-    this->yAxis->setLabel("Mbps");
+    xAxis->setLabel("Time(Sec)");
+    yAxis->setLabel("Mbps");
     //set axis range
     // TODO: update range by throughput/time
-    this->xAxis->setRange(0, 30);
-    this->yAxis->setRange(0, 100);
+    xAxis->setRange(0, m_xAxisMaxDefault);
+    yAxis->setRange(0, m_yAxisMaxDefault);
 //    this->replot();
     // legend
     this->legend->setVisible(true);
@@ -120,8 +123,8 @@ void TPPlot::initCustomPlote()
         this->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
     }
     // make left and bottom axes transfer their ranges to right and top axes:
-    connect(this->xAxis, SIGNAL(rangeChanged(QCPRange)), this->xAxis2, SLOT(setRange(QCPRange)));
-    connect(this->yAxis, SIGNAL(rangeChanged(QCPRange)), this->yAxis2, SLOT(setRange(QCPRange)));
+    connect(xAxis, SIGNAL(rangeChanged(QCPRange)), xAxis2, SLOT(setRange(QCPRange)));
+    connect(yAxis, SIGNAL(rangeChanged(QCPRange)), yAxis2, SLOT(setRange(QCPRange)));
 
 #if TEST_PLOT_DATA==1
     if (1) {
@@ -200,6 +203,6 @@ void TPPlot::realtimeDataSlot(QPrivateSignal sig)
     this->graph(0)->addData(time, value);
     this->graph(1)->addData(time, value2);
 
-    this->xAxis->setRange(time, 120, Qt::AlignRight);
+    xAxis->setRange(time, 120, Qt::AlignRight);
     this->replot();
 }
