@@ -99,14 +99,14 @@ void IperfWorker::work()
     m_iperf->start();
     if (m_iperf->waitForStarted()){
         emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
-        emit log(m_idx, "iperf: " + m_cmd + " "+  m_arguments.join(" "));
+        emit log(m_idx, "iperf: " + QDir::toNativeSeparators(m_cmd) + " "+  m_arguments.join(" "));
         while (!m_stop){
             //procress iperf output
             QThread::msleep(500);
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }else{
-        emit log(m_idx, "iperf not started!!" + m_cmd + " " + m_arguments.join(" "));
+        emit log(m_idx, "iperf not started!!" + QDir::toNativeSeparators(m_cmd) + " " + m_arguments.join(" "));
         emit log(m_idx, m_iperf->readAllStandardError());
     }
     //    emit finished(m_iperf->exitCode(), m_iperf->exitStatus());
