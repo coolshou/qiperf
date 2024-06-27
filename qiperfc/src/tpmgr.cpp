@@ -9,7 +9,8 @@
 TPMgr::TPMgr(QObject *parent)
     : QAbstractItemModel(parent)
 {
-    rootItem = new TP(("Root"), ("Root"));
+//    item = invisibleRootItem();
+    rootItem = new TP(("Root"), ("Root"), nullptr);
     rootItem->setDataType(TPMgrData::root);
 
 }
@@ -304,8 +305,9 @@ void TPMgr::addComment(QString midx, QString comment)
         qDebug() << "addComment: no parrent iperf pair?? (midx=" << midx << ")";
         return;
     }
+    qDebug() <<"TPMgr::addComment: " << tp << " midx:" << midx << " comment:" <<comment;
     tp->setComment(comment);
-
+    emit dataChanged(QModelIndex(),QModelIndex());
 }
 
 void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir)

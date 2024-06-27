@@ -3,10 +3,23 @@
 
 #include <QObject>
 #include <QAbstractItemModel>
+//#include <QStandardItemModel>
 #include <QList>
 #include <QJsonObject>
 #include <QMap>
 #include "tp.h"
+
+class TPStatus: public QObject
+{
+    Q_GADGET
+public:
+    enum Status{
+        init=0,  // init
+        started=1,  // started
+        stoped=2     // stoped
+    };
+    Q_ENUM(Status)
+};
 
 class TPMgrData: public QObject
 {

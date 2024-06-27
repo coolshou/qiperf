@@ -345,7 +345,7 @@ void QIperfC::onStart()
                 emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
                 break;
             }
-            m_status_server[tp->getBindKey(true)]=0; // init server of BindKey status 0
+            m_status_server[tp->getBindKey(true)]=TPStatus::init; // init server of BindKey status 0
             //RPC to control all client endpoint (iperf client)
             QString clientIP = tp->getMgrClient();
             //TODO: detect manager client is pingable
@@ -376,7 +376,7 @@ void QIperfC::onStart()
                 emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
                 break;
             }
-            m_status_client[tp->getBindKey(false)]=0;// init client of BindKey status 0
+            m_status_client[tp->getBindKey(false)]=TPStatus::init;// init client of BindKey status 0
 
             // TODO. set websocket to  report throughput
             QString di = tp->getDirection();
@@ -425,7 +425,7 @@ void QIperfC::onStart()
             chk=0;
             foreach(auto skey, m_status_server.keys()){
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
-                if (m_status_server.value(skey, 0)==1){
+                if (m_status_server.value(skey, 0)==TPStatus::started){
                     chk++;
                 }
             }
@@ -445,7 +445,7 @@ void QIperfC::onStart()
         if (!bServerReady){
             QStringList ds;
             foreach (auto key, m_status_server.keys()){
-                if (m_status_server[key]==0){
+                if (m_status_server[key]!=TPStatus::started){
                     ds.append(key);
                 }
             }
@@ -632,7 +632,8 @@ void QIperfC::onPaste()
 
 void QIperfC::onAbout()
 {
-    QMessageBox::about(this, "About", QString(QIPERFC_NAME)+"\n"
+    QMessageBox::about(this, "About", QString(QIPERFC_NAME)+
+                       " v"+QString(QIPERFC_VERSION)+"\n"
                        "Auther: Jimmy Yeh\n"
                        "URL: https://github.com/coolshou/qiperf");
 }
@@ -837,9 +838,9 @@ void QIperfC::onIperfStarted(QString smode, QString ipport)
 {
     qDebug() << "onIperfStarted:" << smode << " : " << ipport;
     if (smode.contains("S", Qt::CaseSensitive)){
-        m_status_server[ipport]=1;
+        m_status_server[ipport]=TPStatus::started;
     }else{
-        m_status_client[ipport]=1;
+        m_status_client[ipport]=TPStatus::started;
     }
 }
 
@@ -848,12 +849,18 @@ void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err, QString
     if (err_no.toInt()>0){
         qDebug() << "addComment onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
         m_tpmgr->addComment(refrow, "["+ ipport +"]" +err);
+        if (m_status_server.contains(ipport)){
+            m_status_server[ipport]=TPStatus::stoped;
+        }
+        if (m_status_client.contains(ipport)){
+            m_status_client[ipport]=TPStatus::stoped;
+        }
+
     }else{
         qDebug() << "onIperfStoped:" << refrow << " err_no:" << err_no << " : " << err;
     }
 //    m_tpmgr.setComment();
-    //TODO
-//    m_status_server[ipport]=2;
+
 }
 
 void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString datas)
