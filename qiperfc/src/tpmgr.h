@@ -47,18 +47,19 @@ public:
     int rowCount(const QModelIndex &parent=QModelIndex()) const override;
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
-    //// editable data model
-    // setData(); // require emit dataChanged()
-    // flags();  //return ItemIsEditable
-    //// header display mathod
+    // // editable data model
+    // setData() const override; // require emit dataChanged()
+    // flags() const override;  //return ItemIsEditable
+    // // header display mathod
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    //setHeaderData();  // require emit headerDataChanged()
-
+    //setHeaderData() const override;  // require emit headerDataChanged()
+    //
+    bool removeRows(int position, int rows, const QModelIndex &parent) override;
+    // ======
     bool add(QString data);
     QModelIndex indexFromItem(TP *item);
     int rootChildCount();
     QList<TP*> getChilds();
-    bool removeRows(int position, int rows, const QModelIndex &parent) override;
     QByteArray savedata();
     bool loaddata(QByteArray data);
     void reset();
