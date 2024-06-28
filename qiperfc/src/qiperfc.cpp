@@ -74,12 +74,14 @@ QIperfC::QIperfC(QWidget *parent)
     TooltipEventFilter* filter = new TooltipEventFilter(ui->tv_throughput);
     connect(filter, &TooltipEventFilter::doCopy, this, &QIperfC::onCopy);
     connect(filter, &TooltipEventFilter::doPaste, this, &QIperfC::onPaste);
+    connect(filter, &TooltipEventFilter::doDelete, this, &QIperfC::onDelete);
     ui->tv_throughput->viewport()->installEventFilter(filter);
 //    ui->tv_throughput->installEventFilter(this);
     ui->tv_throughput->setRootIsDecorated(true); //show folding icon
 //    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
 //    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
-//    ui->tv_throughput->expandAll();// will show folding icon when have child item??
+    ui->tv_throughput->expandAll();// will show folding icon when have child item??
+
     connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemDClicked); //edit item on double click
 
     //TODO: slow update text/image?
@@ -643,6 +645,11 @@ void QIperfC::onPaste()
         QString clip = m_clipboard->text();
         m_tpmgr->onPaste(clip);
     }
+}
+
+void QIperfC::onDelete()
+{
+    onPairDelete();
 }
 
 void QIperfC::onAbout()
