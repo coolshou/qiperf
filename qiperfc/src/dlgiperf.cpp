@@ -314,11 +314,11 @@ void DlgIperf::onChkReverseStatech(int state)
 void DlgIperf::onSelectMServer(QString text)
 {
     if (!text.isEmpty()){
+        ui->cb_target_ip->clear();
         if (!m_ips.isEmpty()){
             if (m_ips.contains(text)){
                 QStringList ds = m_ips.value(text);
                 if (ds.length()>0){
-                    ui->cb_target_ip->clear();
                     ui->cb_target_ip->addItems(ds);
                 }
             }
@@ -329,11 +329,11 @@ void DlgIperf::onSelectMServer(QString text)
 void DlgIperf::onSelectMClient(QString text)
 {
     if (!text.isEmpty()){
+        ui->cb_client_bind_ip->clear();
         if (!m_ips.isEmpty()){
             if (m_ips.contains(text)){
                 QStringList ds = m_ips.value(text);
                 if (ds.length()>0){
-                    ui->cb_client_bind_ip->clear();
                     ui->cb_client_bind_ip->addItems(ds);
                 }
             }
