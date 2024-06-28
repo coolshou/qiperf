@@ -387,20 +387,20 @@ void QIperfC::onStart()
             m_status_client[tp->getBindKey(false)]=TPStatus::init;// init client of BindKey status 0
 
             // TODO. set websocket to  report throughput
-            QString di = tp->getDirection();
-            if (di== QVariant::fromValue(TP::DirType::Tx).toString()){
-                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(true));
-                m_wsc[clientIP]->sendText(QString(CMD_IPERF_UNREG)+":"+startTime+":"+tp->getBindKey(false));
-            }else if (di== QVariant::fromValue(TP::DirType::Rx).toString()){
-                m_wss[serverIP]->sendText(QString(CMD_IPERF_UNREG)+":"+startTime+":"+tp->getBindKey(true));
-                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(false));
-            }else if (di== QVariant::fromValue(TP::DirType::TR).toString()){
-                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(true));
-                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(false));
-            }else {
-                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(true));
-                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(false));
-            }
+//            QString di = tp->getDirection();
+//            if (di== QVariant::fromValue(TP::DirType::Tx).toString()){
+//                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(true));
+//                m_wsc[clientIP]->sendText(QString(CMD_IPERF_UNREG)+":"+startTime+":"+tp->getBindKey(false));
+//            }else if (di== QVariant::fromValue(TP::DirType::Rx).toString()){
+//                m_wss[serverIP]->sendText(QString(CMD_IPERF_UNREG)+":"+startTime+":"+tp->getBindKey(true));
+//                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(false));
+//            }else if (di== QVariant::fromValue(TP::DirType::TR).toString()){
+//                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(true));
+//                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(false));
+//            }else {
+//                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(true));
+//                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(false));
+//            }
         }
         //TODO: record which should report iperf throughput value
 

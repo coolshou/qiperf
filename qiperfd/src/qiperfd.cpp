@@ -638,12 +638,12 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport)
 
 void QIperfd::onThroughput(int idx, QString sInterval, QString data)
 {
-    if (bReportTPData){
+//    if (bReportTPData){
         m_wsserver->sendTextResult(QString(CMD_IPERF_TP_DATA)+":"+
                                QString::number(idx)+":"+
                                sInterval+":"+
                                data);
-    }
+//    }
 }
 
 void QIperfd::onQuit()
