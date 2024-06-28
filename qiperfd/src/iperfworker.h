@@ -34,7 +34,7 @@ signals:
     void finished(int idx, int exitCode, int exitStatus, QString ipport); // refrow, exitcode, exitStatus, , IPPort
     void log(int idx, QString msg); // refrow
     void onStdout(int idx, QString text); // refrow
-    void onStderr(int idx, QString text, QString ipport); // refrow
+    void onStderr(int idx, int refrow, QString text, QString ipport); // idx, refrow, msg, ipport
     void onThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
 
 

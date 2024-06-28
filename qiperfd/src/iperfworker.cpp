@@ -187,7 +187,7 @@ void IperfWorker::onStarted()
     if(m_logfile->open(QIODevice::WriteOnly|QIODevice::Append)){
         m_logtextstream = new QTextStream(m_logfile);
     }else{
-        emit onStderr(m_refrow, "ERROR: open file '"+ tmp +"' Fail", getBindKey());
+        emit onStderr(m_idx, m_refrow, "ERROR: open file '"+ tmp +"' Fail", getBindKey());
     }
     m_running = true;
     m_iperfwrapper->setSetting(m_refrow, m_servermode, m_parallel, m_bidir, m_bidirtag);
@@ -222,7 +222,7 @@ void IperfWorker::readyReadStdErr()
 
     m_running = false;
     m_stop = true;
-    emit onStderr(m_refrow, err, getBindKey());
+    emit onStderr(m_idx, m_refrow, err, getBindKey());
     onFinished(1, QProcess::ExitStatus(2)); // something error
 
 }

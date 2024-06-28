@@ -592,11 +592,17 @@ void QIperfd::readStdOut(int idx, QString text)
     onLog("TODO: readStdOut(" + QString::number(idx) + "):" + text);
 }
 
-void QIperfd::onErrored(int m_idx, QString text, QString ipport)
+void QIperfd::onErrored(int m_idx, int refrow, QString text, QString ipport)
 {
-    QString msg = QString(CMD_IPERF_ERRORED)+":"+QString::number(m_idx);
+
+    QString msg = QString(CMD_IPERF_ERRORED)+":"+QString::number(refrow);
     msg = msg + ":1:"+ text+":"+ipport; // error no, error
     m_wsserver->sendTextResult(msg);
+    //remove error process??
+    if (isRunning(m_idx)){
+        stop(m_idx);
+    }
+    del(m_idx);
 }
 
 void QIperfd::onIperfLog(int idx, QString text)
