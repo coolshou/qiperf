@@ -243,6 +243,9 @@ SectionEnd
 ;Uninstall section
 Section Uninstall
         Call un.install_qiperfd
+        ${If} $OLD_INSTALL_MODE  != ""
+        Call un.install_qiperfc
+        ${EndIf}
     !ifdef WIN64
             SetRegView 64
     !endif
@@ -326,7 +329,6 @@ Section Uninstall
         Delete "$INSTDIR\imageformats\qwebp.dll"
         Delete "$INSTDIR\platforms\qwindows.dll"
         Delete "$INSTDIR\styles\qwindowsvistastyle.dll"
-
 
         ; Clean up qiperf console
         Delete "$INSTDIR\${QIPERFC_NAME}"
@@ -443,7 +445,22 @@ Function un.install_qiperfd
         DetailPrint "${QIPERFTRAY_NAME} was not found to be running"
     ${EndIf}
     ${nsProcess::Unload}
+
+FunctionEnd
+
+Function un.install_qiperfc
     #kill qiperfc
+    ${nsProcess::FindProcess} "${QIPERFC_NAME}" $R0
+    ${If} $R0 == 0
+        DetailPrint "${QIPERFC_NAME} is running. Closing it down"
+        ${nsProcess::CloseProcess} "${QIPERFC_NAME}" $R0
+        DetailPrint "Waiting for ${QIPERFC_NAME} to close"
+        Sleep 2000
+    ${Else}
+        DetailPrint "${QIPERFC_NAME} was not found to be running"
+    ${EndIf}
+    ${nsProcess::Unload}
+
 FunctionEnd
 
 Function .oninstsuccess
