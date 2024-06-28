@@ -364,7 +364,7 @@
      <normaloff>:/pair-swap</normaloff>:/pair-swap</iconset>
    </property>
    <property name="text">
-    <string>Swap(TODO)</string>
+    <string>Swap</string>
    </property>
    <property name="toolTip">
     <string>Swap Traffic direction</string>
