@@ -18,6 +18,7 @@
 
 IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
                          uint port, QString bindaddr, QString target,
+                         bool bidir, bool reverse,
                          QObject *parent)
     : QObject{parent}
 {
@@ -30,6 +31,8 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
 //    this->deleteLater(); //this will cause stdout not flush??
     m_parent = parent;
     m_version = version;
+    m_bidir = bidir;
+    m_reverse = reverse;
 //    emit log(QString("arg:"+arg));
     m_cmd = cmd; //iperf exec fullpath
     m_arguments = arg.split(" ");
@@ -46,8 +49,8 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
         m_arguments.append("--forceflush");
     }
     if (m_servermode){
-        if (m_arguments.contains("-R")||m_arguments.contains("--reverse")){
-            if (m_arguments.contains("--bidir")){
+        if (m_reverse){
+            if (m_bidir){
                 m_bidirtag="Rx";
             }else{
                 m_bidirtag="";
@@ -56,17 +59,17 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
             m_bidirtag="Tx";
         }
     }else{
-        if (m_arguments.contains("-R")||m_arguments.contains("--reverse")||
-                m_arguments.contains("--bidir")){
+        if (m_reverse||m_bidir){
             m_bidirtag="Rx";
         }else{
-            if (m_arguments.contains("--bidir")){
+            if (m_bidir){
                 m_bidirtag="Tx";
             }else{
                 m_bidirtag="";
             }
         }
     }
+    qDebug() << "[" << getBindKey() << "] reg m_bidirtag:" << m_bidirtag;
 }
 
 IperfWorker::~IperfWorker()
@@ -99,14 +102,14 @@ void IperfWorker::work()
     m_iperf->start();
     if (m_iperf->waitForStarted()){
         emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
-        emit log(m_idx, "iperf: " + QDir::toNativeSeparators(m_cmd) + " "+  m_arguments.join(" "));
+        emit log(m_idx, "iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "));
         while (!m_stop){
             //procress iperf output
             QThread::msleep(500);
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }else{
-        emit log(m_idx, "iperf not started!!" + QDir::toNativeSeparators(m_cmd) + " " + m_arguments.join(" "));
+        emit log(m_idx, "iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "));
         emit log(m_idx, m_iperf->readAllStandardError());
     }
     //    emit finished(m_iperf->exitCode(), m_iperf->exitStatus());
@@ -151,11 +154,10 @@ void IperfWorker::setRefRow(QString refrow)
     m_refrow = refrow.toInt();
 }
 
-void IperfWorker::setExtra(QString parallel, QString protocal, bool bidir)
+void IperfWorker::setExtra(QString parallel, QString protocal)
 {
     m_parallel=parallel;
     m_protocal=protocal;
-    m_bidir = bidir;
 }
 
 void IperfWorker::toLogFile(QString msg)
@@ -258,7 +260,7 @@ void IperfWorker::parserStdOut(QString msg)
 void IperfWorker::onThroughputData(int idx, QString sInterval, QString data)
 {
     if(m_bidirtag.isEmpty()){
-        qDebug() << "No m_bidirtag, not reprot ThroughputData: ("<<sInterval<<")" << data;
+//        qDebug() << "No m_bidirtag, not reprot ThroughputData: ("<<sInterval<<")" << data;
     }else{
         emit onThroughput(idx, sInterval, data);
     }

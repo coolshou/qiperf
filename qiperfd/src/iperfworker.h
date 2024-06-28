@@ -18,6 +18,7 @@ class IperfWorker : public QObject
 public:
     explicit IperfWorker(int idx, int version, QString cmd, QString arg="-s",
                          uint port=5201, QString bindaddr="0.0.0.0", QString target="",
+                         bool bidir=false, bool reverse=false,
                          QObject *parent = nullptr);
     ~IperfWorker() override;
     void setStop();
@@ -25,7 +26,7 @@ public:
     void setIperfLogPath(QString filepath); //full path of iperf log filename
     void setBidirTag(QString bidir);
     void setRefRow(QString refrow);
-    void setExtra(QString parallel, QString protocal,bool bidir);
+    void setExtra(QString parallel, QString protocal);
     void toLogFile(QString msg);
     bool getServerMode();
     int getRefRow();
@@ -64,7 +65,7 @@ private:
     QString m_parallel="0";
     QString m_protocal="TCP";
     bool m_bidir=false;
-    //bool m_reverse=false;
+    bool m_reverse=false;
     QString m_iperfexe; // iperf exec name
     QString m_iperflogpath;
     QString m_bidirtag;

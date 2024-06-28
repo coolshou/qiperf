@@ -294,7 +294,7 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
 
 int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint port,
                  QString bndaddr, QString target,
-                 QString parallel, QString protocal, bool bidir)
+                 QString parallel, QString protocal, bool bidir, bool reverse)
 { // add a IperfWorker to run iperf server/client
     // TODO: check host/port used?
     QThread *iperf_th = new QThread();
@@ -302,9 +302,9 @@ int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint 
     m_threads.insert(idx, iperf_th);
     //    m_threads.append(iperf_th);
     //    int idx = m_threads.count()-1;
-    IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port, bndaddr, target);
+    IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port, bndaddr, target, bidir, reverse);
     iperfer->setRefRow(refrow);
-    iperfer->setExtra(parallel, protocal, bidir);
+    iperfer->setExtra(parallel, protocal);
 //    connect(iperfer, &IperfWorker::onStdout, this, &QIperfd::readStdOut);
     connect(iperfer, &IperfWorker::onStderr, this, &QIperfd::onErrored);
     connect(iperfer, &IperfWorker::log, this, &QIperfd::onIperfLog);
@@ -337,6 +337,7 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
     QString parallel = jsondata["parallel"].toString(); // for server mode use
     QString protocal = jsondata["protocal"].toString(); // for server mode use
     bool bidir = jsondata["bidir"].toBool(); // for server mode use
+    bool reverse = jsondata["reverse"].toBool(); // for server mode use
 
     //conver json data format to iperf args
     QString args;
@@ -349,7 +350,7 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
         qDebug() << "Not support Iperf version:" << ver;
         return -1;
     }
-    return add(refrow, ver, cmd, args, port, binaddr, target, parallel, protocal, bidir);
+    return add(refrow, ver, cmd, args, port, binaddr, target, parallel, protocal, bidir, reverse);
 }
 
 void QIperfd::del(int idx)
