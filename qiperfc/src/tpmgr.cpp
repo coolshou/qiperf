@@ -4,6 +4,7 @@
 #include <QCoreApplication>
 #include <QEventLoop>
 
+
 #include "tp.h"
 
 TPMgr::TPMgr(QObject *parent)
@@ -21,10 +22,17 @@ TPMgr::~TPMgr()
 QVariant TPMgr::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid()){
-        qDebug() << "data index.isValid:" << index << Qt::endl;
+        qDebug() << "data index.isValid: " << index ;
         return QVariant();
     }
+
+//    if ((role == Qt::DecorationRole) && (index.column()==TP::cols::id)) {
+//        //show a custom icon!!
+//        qDebug() << "show DecorationRole folder";
+//        return iconProvider.icon(QFileIconProvider::Folder);
+//    }
     if (role != Qt::DisplayRole) {
+        //this will show text data!!
         //        qDebug() << "data not DisplayRole:" << index << Qt::endl;
         return QVariant();
     }
@@ -42,11 +50,6 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             return QVariant(item->getTxRxThroughput());
         }
     }
-
-//    //    EndPoint *item = itemFromIndex(index);
-//    QVariant t = item->data(index.column());
-//    qDebug() << "data: " << t;
-//    return t;
     return item->data(index.column());
 }
 

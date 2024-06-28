@@ -7,6 +7,7 @@
 #include <QList>
 #include <QJsonObject>
 #include <QMap>
+#include <QFileIconProvider>
 #include "tp.h"
 
 class TPStatus: public QObject
@@ -40,12 +41,19 @@ class TPMgr : public QAbstractItemModel
 public:
     explicit TPMgr(QObject *parent = nullptr);
     ~TPMgr() override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    int columnCount(const QModelIndex &parent) const override;
+    ////basic read only data model
     QModelIndex index(int row, int column, const QModelIndex &parent) const override;
     QModelIndex parent(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent=QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    //// editable data model
+    // setData(); // require emit dataChanged()
+    // flags();  //return ItemIsEditable
+    //// header display mathod
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    //setHeaderData();  // require emit headerDataChanged()
+
     bool add(QString data);
     QModelIndex indexFromItem(TP *item);
     int rootChildCount();
@@ -76,7 +84,7 @@ signals:
 private:
     TP *rootItem;
     QList<TP*> m_tps; //QList of tp, data
-
+    QFileIconProvider iconProvider;
 
 };
 
