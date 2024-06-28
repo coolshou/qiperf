@@ -243,7 +243,7 @@ SectionEnd
 ;Uninstall section
 Section Uninstall
         Call un.install_qiperfd
-        ${If} $OLD_INSTALL_MODE  != ""
+        ${If} $OLD_INSTALL_MODE  == "1"
         Call un.install_qiperfc
         ${EndIf}
     !ifdef WIN64
@@ -406,7 +406,7 @@ init.done:
   SectionSetFlags ${SECTION_Daemon} $0
    # set section 'console' as unselected
    #IntOp $0 ~${SF_SELECTED}
-   ${If} $OLD_INSTALL_MODE  != ""
+   ${If} $OLD_INSTALL_MODE  == "1"
      SectionSetFlags ${SECTION_Console}  ${SF_SELECTED}
    ${Else}
     SectionSetFlags ${SECTION_Console} 0
