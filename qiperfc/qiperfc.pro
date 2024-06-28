@@ -60,7 +60,8 @@ SOURCES += \
     src/tpdirdelegate.cpp \
     src/tpplot.cpp \
     src/udpreceiver.cpp \
-    src/wsclient.cpp
+    src/wsclient.cpp \
+    src/tooltipeventfilter.cpp
 
     # ../qiperfd/src/wsserver.cpp \
 
@@ -88,7 +89,8 @@ HEADERS += \
     src/tpdirdelegate.h \
     src/tpplot.h \
     src/udpreceiver.h \
-    src/wsclient.h
+    src/wsclient.h \
+    src/tooltipeventfilter.h
 
     # ../qiperfd/src/wsserver.h \
 
