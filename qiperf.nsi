@@ -10,6 +10,7 @@
 !define QIPERFD_NAME  "qiperfd.exe"
 !define QIPERFC_NAME  "qiperfc.exe"
 !define QIPERFTRAY_NAME  "qiperftray.exe"
+!define SERVICE_WRAPPER "nssm.exe"
 
 !define PRODUCT_REG_KEY "Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
 !define PRODUCT_UNINSTALL_EXE "uninstall.exe"
@@ -443,6 +444,17 @@ Function un.install_qiperfd
         Sleep 2000
     ${Else}
         DetailPrint "${QIPERFTRAY_NAME} was not found to be running"
+    ${EndIf}
+    ${nsProcess::Unload}
+    #kill nssm.exe
+    ${nsProcess::FindProcess} "${SERVICE_WRAPPER}" $R0
+    ${If} $R0 == 0
+        DetailPrint "${SERVICE_WRAPPER} is running. Closing it down"
+        ${nsProcess::CloseProcess} "${SERVICE_WRAPPER}" $R0
+        DetailPrint "Waiting for ${SERVICE_WRAPPER} to close"
+        Sleep 2000
+    ${Else}
+        DetailPrint "${SERVICE_WRAPPER} was not found to be running"
     ${EndIf}
     ${nsProcess::Unload}
 
