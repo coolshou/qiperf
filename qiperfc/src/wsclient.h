@@ -69,6 +69,10 @@ public:
     explicit WSClient(QString serverip, const QUrl &url, QObject *parent = nullptr);
     qint64 sendText(QString message);
     bool isConnected();
+
+public slots:
+    void onError(QAbstractSocket::SocketError error);
+
 signals:
     void iperfStarted(QString smode, QString ipport);  //mode ,ip-port
     void iperfStoped(QString refrow, QString err_no, QString err, QString ipport);  //refrow, error no (0: no error), error message

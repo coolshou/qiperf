@@ -67,6 +67,7 @@ WSClient::WSClient(QString serverip, const QUrl &url, QObject *parent) :
     connect(&m_webSocket, &QWebSocket::stateChanged, this, &WSClient::onStateChanged);
     connect(&m_webSocket, QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
             this, &WSClient::onSslErrors);
+    connect(&m_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &WSClient::onError);
 //    qDebug() << "WSClient open websocket:" << url << Qt::endl;
     m_serverip = serverip;
     m_url = url;
@@ -86,6 +87,7 @@ qint64 WSClient::sendText(QString message)
 
 bool WSClient::isConnected()
 {
+    // TODO: is isValid() ok for check the websocket connected!!??
     return m_webSocket.isValid();
 }
 
@@ -188,5 +190,11 @@ void WSClient::onSslErrors(const QList<QSslError> &errors)
     // The proper way to handle self-signed certificates is to add a custom root
     // to the CA store.
     m_webSocket.ignoreSslErrors();
+}
+
+void WSClient::onError(QAbstractSocket::SocketError error)
+{
+    qDebug() << "onError:" << error;
+
 }
 
