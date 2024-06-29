@@ -11,17 +11,19 @@ class QIPConfigData {
 public:
     // QJsonArray tpcfg;  // store iperf config pairs
     QString tpcfg;
+    QString testdate; // store test datetime of folder which include all record data file
+    QStringList datafilenames; // all recored data file name
 };
 
 class QIPConfig : public QObject {
     Q_OBJECT
 public:
-    QIPConfig(QObject *parent=nullptr);
+    QIPConfig(QString tmppath, QObject *parent=nullptr);
     bool loadFromFile(const QString &filePath);
     bool saveToFile(const QString &filePath) const;
     uint32_t getVersion();
     QByteArray getTPCfg();
-    void setTPCfg(QByteArray tpcfg);
+    void setTPCfg(QByteArray tpcfg, QString testdate="", QStringList datafilenames={});
 
 private:
     static const QByteArray MAGIC_VALUE;
@@ -29,9 +31,13 @@ private:
 
     QByteArray serialize() const;
     bool deserialize(const QByteArray &data);
+    QByteArray filesToStore(QStringList &inputFiles) const;
+    bool filesFromStore(QByteArray &inputData, const QString &outputFolder) const;
+    // QByteArray storefiles(const QStringList &inputFiles) const;
     // Configuration data
+    QString m_tmppath;
     QByteArray m_magic;
-    qint32 m_version;
+    uint32_t m_version;
     QIPConfigData *m_data; //compress zip/tar ?
 
 

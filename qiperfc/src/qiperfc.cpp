@@ -51,7 +51,7 @@ QIperfC::QIperfC(QWidget *parent)
     m_frm_option = new dlgOption(m_settings);
     initStatusbar();
     loadSettings();
-    m_qipconfig = new QIPConfig();
+    m_qipconfig = new QIPConfig(d.absolutePath()+QDir::separator()+"data");
     //UI actions
     initActions();
     //dataTimer = QTimer();
