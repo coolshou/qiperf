@@ -52,6 +52,7 @@ SOURCES += \
     src/dlgtest.cpp \
     src/endpointmgr.cpp \
     src/formqiperfds.cpp \
+    src/htmlwriter.cpp \
     src/main.cpp \
     src/qiperfc.cpp \
     src/rpctp.cpp \
@@ -82,6 +83,7 @@ HEADERS += \
     src/dlgtest.h \
     src/endpointmgr.h \
     src/formqiperfds.h \
+    src/htmlwriter.h \
     src/qiperfc.h \
     src/rpctp.h \
     src/tp.h \
