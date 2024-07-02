@@ -13,7 +13,12 @@
 #include <net/if.h>
 #endif
 #if defined(Q_OS_WIN32)
+#include <Windows.h>
 #include <iphlpapi.h>
+#include <comdef.h>
+#include <Wbemidl.h>
+#include <SetupAPI.h>
+#include <cfgmgr32.h>
 #endif
 
 #include "endpoint.h"
