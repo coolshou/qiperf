@@ -2,11 +2,11 @@
 
 ; Define your application name
 !define APPNAME "qiperf"
-!define APPVERSION 0.2
-!define APPFileVersion 0.2.11306.28
+!define APPVERSION 0.3
+!define APPFileVersion 0.3.11307.02
 !define APPDOMAIN "coolshou.idv.tw"
 !define APPURL "https://github.com/coolshou/qiperf"
-#!define WIN64 ; comment out for 32 bit
+#!define WIN64 ; force  64 bit, comment out for 32 bit
 !define QIPERFD_NAME  "qiperfd.exe"
 !define QIPERFC_NAME  "qiperfc.exe"
 !define QIPERFTRAY_NAME  "qiperftray.exe"

@@ -1,3 +1,12 @@
+qiperf (0.2.11307.02-1) UNRELEASED; urgency=medium
+
+  * add user stop()
+  * add net interface driver name/version
+  * add iperf record
+  * add save/load iperf record/env info
+
+ -- coolshou <coolshou2060@gmail.com>  Tue, 02 Jul 2024 10:17:17 +0800
+
 qiperf (0.2.11306.28-1) unstable; urgency=medium
 
   * Initial release
