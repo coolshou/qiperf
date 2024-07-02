@@ -322,7 +322,8 @@ QString MyInfo::getAdapterName(const QString &description) {
     }
 
     IWbemServices *pSvc = NULL;
-    hres = pLoc->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
+//    hres = pLoc->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
+    hres = pLoc->ConnectServer(SysAllocString(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
     if (FAILED(hres)) {
         qWarning() << "Could not connect to WMI";
         pLoc->Release();
@@ -340,7 +341,9 @@ QString MyInfo::getAdapterName(const QString &description) {
     }
 
     IEnumWbemClassObject* pEnumerator = NULL;
-    hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t("SELECT * FROM Win32_NetworkAdapter"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
+    //hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t("SELECT * FROM Win32_NetworkAdapter"), WBEM_FLAG_FORWARD_ONLY |
+    hres = pSvc->ExecQuery(SysAllocString("WQL"), SysAllocString("SELECT * FROM Win32_NetworkAdapter"), WBEM_FLAG_FORWARD_ONLY |
+                           WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
         qWarning() << "Query for network adapters failed";
         pSvc->Release();

@@ -23,7 +23,8 @@ win32:{
     LIBS     += -liphlpapi
     LIBS     += -lwbemuuid
     LIBS     += -lsetupapi
-    LIBS     += -lole32 -loleaut32 -lcomsuppw
+    LIBS     += -lole32 -loleaut32
+    # -lcomsuppw //mingw not support
 }
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
