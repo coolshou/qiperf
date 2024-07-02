@@ -23,6 +23,7 @@ win32:{
     LIBS     += -liphlpapi
     LIBS     += -lwbemuuid
     LIBS     += -lsetupapi
+    LIBS     += -lole32 -loleaut32
 }
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
