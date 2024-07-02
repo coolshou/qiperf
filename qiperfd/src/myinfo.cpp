@@ -342,7 +342,7 @@ QString MyInfo::getAdapterName(const QString &description) {
 
     IEnumWbemClassObject* pEnumerator = NULL;
     //hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t("SELECT * FROM Win32_NetworkAdapter"), WBEM_FLAG_FORWARD_ONLY |
-    hres = pSvc->ExecQuery(SysAllocString("WQL"), SysAllocString("SELECT * FROM Win32_NetworkAdapter"), WBEM_FLAG_FORWARD_ONLY |
+    hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT * FROM Win32_NetworkAdapter"), WBEM_FLAG_FORWARD_ONLY |
                            WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
         qWarning() << "Query for network adapters failed";
