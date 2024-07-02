@@ -12,6 +12,9 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 #endif
+#if defined(Q_OS_WIN32)
+#include <iphlpapi.h>
+#endif
 
 #include "endpoint.h"
 #include "endpointtype.h"
@@ -248,7 +251,7 @@ QString MyInfo::getDriverVersion(const QString &interfaceName, QString &driverna
 #if defined(Q_OS_WIN32)
 QString MyInfo::getDriverVersion(const QString &interfaceName, QString &drivername)
 {
-    if (drivers.contains(interfaceName)){
+    if (drivers->contains(interfaceName)){
         qDebug() << interfaceName << " getDriverVersion: " << drivers[interfaceName];
     }
     return QString();
