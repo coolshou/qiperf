@@ -25,7 +25,7 @@ public:
 #if defined(Q_OS_WIN32)
     QString getDriverVersion(const QString &interfaceName, QString &drivername);
     QString getDriverVersion(const QString &hardwareID);
-    QString getAdapterName(const QString &description)
+    QString getAdapterName(const QString &description);
     void getNetworkAdapterInfo();
 #endif
 public slots:
