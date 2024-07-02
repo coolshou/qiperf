@@ -252,11 +252,128 @@ QString MyInfo::getDriverVersion(const QString &interfaceName, QString &driverna
 QString MyInfo::getDriverVersion(const QString &interfaceName, QString &drivername)
 {
     if (drivers->contains(interfaceName)){
-        qDebug() << interfaceName << " getDriverVersion: " << drivers[interfaceName];
+        qDebug() << interfaceName << " getDriverVersion: " << drivers.value(interfaceName);
     }
     return QString();
 }
+QString MyInfo::getDriverVersion(const QString &hardwareID) {
+    HDEVINFO deviceInfoSet = SetupDiGetClassDevs(NULL, hardwareID.toStdWString().c_str(), NULL, DIGCF_PRESENT | DIGCF_ALLCLASSES);
+    if (deviceInfoSet == INVALID_HANDLE_VALUE) {
+        qWarning() << "SetupDiGetClassDevs failed";
+        return QString();
+    }
 
+    SP_DEVINFO_DATA deviceInfoData = {};
+    deviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
+
+    if (SetupDiEnumDeviceInfo(deviceInfoSet, 0, &deviceInfoData)) {
+        DWORD dataType, actualSize = 0;
+        BYTE data[256] = {0};
+
+        if (SetupDiGetDeviceRegistryProperty(deviceInfoSet, &deviceInfoData, SPDRP_DRIVER, &dataType, data, sizeof(data), &actualSize)) {
+            QString driverKey = QString::fromWCharArray((wchar_t*)data);
+
+            HKEY hKey;
+            QString driverVersionKey = "SYSTEM\\CurrentControlSet\\Control\\Class\\" + driverKey;
+            if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, driverVersionKey.toStdWString().c_str(), 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+                DWORD size = 256;
+                wchar_t version[256];
+                if (RegQueryValueEx(hKey, L"DriverVersion", NULL, NULL, (LPBYTE)version, &size) == ERROR_SUCCESS) {
+                    RegCloseKey(hKey);
+                    SetupDiDestroyDeviceInfoList(deviceInfoSet);
+                    return QString::fromWCharArray(version);
+                }
+                RegCloseKey(hKey);
+            }
+        }
+    }
+
+    SetupDiDestroyDeviceInfoList(deviceInfoSet);
+    return QString();
+}
+QString MyInfo::getAdapterName(const QString &description) {
+    // WMI initialization
+    HRESULT hres;
+    hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+    if (FAILED(hres)) {
+        qWarning() << "Failed to initialize COM library";
+        return QString();
+    }
+
+    hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
+    if (FAILED(hres)) {
+        qWarning() << "Failed to initialize security";
+        CoUninitialize();
+        return QString();
+    }
+
+    IWbemLocator *pLoc = NULL;
+    hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
+    if (FAILED(hres)) {
+        qWarning() << "Failed to create IWbemLocator object";
+        CoUninitialize();
+        return QString();
+    }
+
+    IWbemServices *pSvc = NULL;
+    hres = pLoc->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
+    if (FAILED(hres)) {
+        qWarning() << "Could not connect to WMI";
+        pLoc->Release();
+        CoUninitialize();
+        return QString();
+    }
+
+    hres = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
+    if (FAILED(hres)) {
+        qWarning() << "Could not set proxy blanket";
+        pSvc->Release();
+        pLoc->Release();
+        CoUninitialize();
+        return QString();
+    }
+
+    IEnumWbemClassObject* pEnumerator = NULL;
+    hres = pSvc->ExecQuery(bstr_t("WQL"), bstr_t("SELECT * FROM Win32_NetworkAdapter"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
+    if (FAILED(hres)) {
+        qWarning() << "Query for network adapters failed";
+        pSvc->Release();
+        pLoc->Release();
+        CoUninitialize();
+        return QString();
+    }
+
+    IWbemClassObject *pClsObj = NULL;
+    ULONG uReturn = 0;
+    while (pEnumerator) {
+        HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pClsObj, &uReturn);
+        if (0 == uReturn) break;
+
+        VARIANT vtProp;
+        hr = pClsObj->Get(L"Description", 0, &vtProp, 0, 0);
+        if (SUCCEEDED(hr) && vtProp.vt == VT_BSTR && QString::fromWCharArray(vtProp.bstrVal) == description) {
+            hr = pClsObj->Get(L"PNPDeviceID", 0, &vtProp, 0, 0);
+            if (SUCCEEDED(hr) && vtProp.vt == VT_BSTR) {
+                QString hardwareID = QString::fromWCharArray(vtProp.bstrVal);
+                VariantClear(&vtProp);
+                pClsObj->Release();
+                pEnumerator->Release();
+                pSvc->Release();
+                pLoc->Release();
+                CoUninitialize();
+                return hardwareID;
+            }
+        }
+        VariantClear(&vtProp);
+        pClsObj->Release();
+    }
+
+    pEnumerator->Release();
+    pSvc->Release();
+    pLoc->Release();
+    CoUninitialize();
+    return QString();
+}
 void MyInfo::getNetworkAdapterInfo() {
     ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
     PIP_ADAPTER_INFO pAdapterInfo = (IP_ADAPTER_INFO *)malloc(ulOutBufLen);
@@ -272,7 +389,18 @@ void MyInfo::getNetworkAdapterInfo() {
             drivers[pAdapter->AdapterName] = pAdapter->DriverVersion;
             qDebug() << "Adapter Name:" << pAdapter->AdapterName;
             qDebug() << "Description:" << pAdapter->Description;
-            qDebug() << "Driver Version:" << pAdapter->DriverVersion;
+            //qDebug() << "Driver Version:" << pAdapter->DriverVersion;
+            QString hardwareID = getAdapterName(QString::fromLocal8Bit(pAdapter->Description));
+            if (!hardwareID.isEmpty()) {
+                QString driverVersion = getDriverVersion(hardwareID);
+                if (!driverVersion.isEmpty()) {
+                    qDebug() << "Driver Version:" << driverVersion;
+                } else {
+                    qDebug() << "Driver version not found for adapter" << pAdapter->Description;
+                }
+            } else {
+                qDebug() << "Hardware ID not found for adapter" << pAdapter->Description;
+            }
             pAdapter = pAdapter->Next;
         }
     } else {
