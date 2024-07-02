@@ -33,9 +33,7 @@ MyInfo::MyInfo(QString mgr_ifname, QObject *parent)
     : QObject{parent}
 {
     m_ifname = mgr_ifname;
-#if defined(Q_OS_WIN32)
-    getNetworkAdapterInfo();
-#endif
+
 }
 
 QString MyInfo::collectInfo()
@@ -59,6 +57,9 @@ QString MyInfo::collectInfo()
    "update":0
  }
 */
+#if defined(Q_OS_WIN32)
+    getNetworkAdapterInfo();
+#endif
 
     QJsonObject mainObject;
     mainObject.insert("ACT", EndPointAct::Add);
@@ -256,8 +257,8 @@ QString MyInfo::getDriverVersion(const QString &interfaceName, QString &driverna
 #if defined(Q_OS_WIN32)
 QString MyInfo::getDriverVersion(const QString &interfaceName, QString &drivername)
 {
-    if (drivers->contains(interfaceName)){
-        qDebug() << interfaceName << " getDriverVersion: " << drivers.value(interfaceName);
+    if (drivers.contains(interfaceName)){
+        qDebug() << interfaceName << " getDriverVersion: " << drivers[interfaceName];
     }
     return QString();
 }
@@ -398,7 +399,7 @@ void MyInfo::getNetworkAdapterInfo() {
             if (!hardwareID.isEmpty()) {
                 QString driverVersion = getDriverVersion(hardwareID);
                 if (!driverVersion.isEmpty()) {
-                    drivers->value(pAdapter->AdapterName) = driverVersion;
+                    drivers[pAdapter->AdapterName] = driverVersion;
                     qDebug() << "Driver Version:" << driverVersion;
                 } else {
                     qDebug() << "Driver version not found for adapter" << pAdapter->Description;

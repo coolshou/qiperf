@@ -37,7 +37,7 @@ private:
     QString m_ifname;
     int update=0;
 //#if defined(Q_OS_WIN32)
-    QMap<QString, QString> *drivers;
+    QMap<QString, QString> drivers;
 //#endif
 };
 
