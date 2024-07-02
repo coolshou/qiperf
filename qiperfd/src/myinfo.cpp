@@ -386,7 +386,6 @@ void MyInfo::getNetworkAdapterInfo() {
     if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == NO_ERROR) {
         PIP_ADAPTER_INFO pAdapter = pAdapterInfo;
         while (pAdapter) {
-            drivers[pAdapter->AdapterName] = pAdapter->DriverVersion;
             qDebug() << "Adapter Name:" << pAdapter->AdapterName;
             qDebug() << "Description:" << pAdapter->Description;
             //qDebug() << "Driver Version:" << pAdapter->DriverVersion;
@@ -394,6 +393,7 @@ void MyInfo::getNetworkAdapterInfo() {
             if (!hardwareID.isEmpty()) {
                 QString driverVersion = getDriverVersion(hardwareID);
                 if (!driverVersion.isEmpty()) {
+                    drivers->value(pAdapter->AdapterName) = driverVersion;
                     qDebug() << "Driver Version:" << driverVersion;
                 } else {
                     qDebug() << "Driver version not found for adapter" << pAdapter->Description;
