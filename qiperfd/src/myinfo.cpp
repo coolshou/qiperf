@@ -4,6 +4,14 @@
 #include <QJsonDocument>
 #include <QHostInfo>
 #include <QNetworkInterface>
+#include <QDir>
+
+#if defined(Q_OS_LINUX)
+#include <unistd.h> //readlink
+//#include <fstream> //file
+#include <sys/ioctl.h>
+#include <net/if.h>
+#endif
 
 #include "endpoint.h"
 #include "endpointtype.h"
@@ -17,6 +25,9 @@ MyInfo::MyInfo(QString mgr_ifname, QObject *parent)
     : QObject{parent}
 {
     m_ifname = mgr_ifname;
+#if defined(Q_OS_WIN32)
+    getNetworkAdapterInfo();
+#endif
 }
 
 QString MyInfo::collectInfo()
@@ -91,7 +102,11 @@ QJsonObject MyInfo::collectNetInfo()
             (interface.type() == QNetworkInterface::Wifi)) {
             QJsonObject ifObject;
             ifObject.insert("HW", interface.hardwareAddress()); //硬體地址
-
+            QString drivername="";
+            QString ver =getDriverVersion(interface.name(), drivername);
+//            qDebug() << interface.name() << " version: " <<ver << " driver: " << drivername;
+            ifObject.insert("driverVersion", ver);             //driver version
+            ifObject.insert("driverName", drivername);             //driver name
             QJsonArray addrsObject;
             //獲取IP地址條目列表，每個條目中包含一個IP地址，一個子網掩碼和一個廣播地址
             QList<QNetworkAddressEntry> entryList= interface.addressEntries();
@@ -200,6 +215,72 @@ int MyInfo::getEndpointType()
     //    }
 }
 
+#if defined(Q_OS_LINUX)
+QString MyInfo::getDriverVersion(const QString &interfaceName, QString &drivername)
+{
+    //get Linux interfaceName driver version;
+    QString driverPath = QString("/sys/class/net/%1/device/driver/module").arg(interfaceName);
+    QFile driverLink(driverPath);
+    drivername = QDir(driverLink.symLinkTarget()).dirName();
+
+    QString verPath = driverPath + "/version";
+//    qDebug() << "verPath:" << verPath;
+    QFile file(verPath);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&file);
+        QString version = in.readLine();
+        file.close();
+        return version;
+    }else{
+        QString srcverPath = driverPath + "/srcversion";
+//        qDebug() << "srcverPath:" << srcverPath;
+        QFile file(srcverPath);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QTextStream in(&file);
+            QString version = in.readLine();
+            file.close();
+            return version;
+        }
+    }
+    return QString();
+}
+#endif
+#if defined(Q_OS_WIN32)
+QString MyInfo::getDriverVersion(const QString &interfaceName, QString &drivername)
+{
+    if (drivers.contains(interfaceName)){
+        qDebug() << interfaceName << " getDriverVersion: " << drivers[interfaceName];
+    }
+    return QString();
+}
+
+void MyInfo::getNetworkAdapterInfo() {
+    ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
+    PIP_ADAPTER_INFO pAdapterInfo = (IP_ADAPTER_INFO *)malloc(ulOutBufLen);
+
+    if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW) {
+        free(pAdapterInfo);
+        pAdapterInfo = (IP_ADAPTER_INFO *)malloc(ulOutBufLen);
+    }
+
+    if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == NO_ERROR) {
+        PIP_ADAPTER_INFO pAdapter = pAdapterInfo;
+        while (pAdapter) {
+            drivers[pAdapter->AdapterName] = pAdapter->DriverVersion;
+            qDebug() << "Adapter Name:" << pAdapter->AdapterName;
+            qDebug() << "Description:" << pAdapter->Description;
+            qDebug() << "Driver Version:" << pAdapter->DriverVersion;
+            pAdapter = pAdapter->Next;
+        }
+    } else {
+        qWarning() << "GetAdaptersInfo failed";
+    }
+
+    if (pAdapterInfo) {
+        free(pAdapterInfo);
+    }
+}
+#endif
 void MyInfo::setIfname(QString mgr_ifname)
 {
     m_ifname = mgr_ifname;

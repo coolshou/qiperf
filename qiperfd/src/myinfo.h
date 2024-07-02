@@ -18,8 +18,14 @@ public:
     QString updateInfo();
 //    QHostAddress getIPfromIfname(QString ifname);
     QList<QHostAddress> getIPfromIfname(QString ifname);
-
     int getEndpointType();
+#if defined(Q_OS_LINUX)
+    QString getDriverVersion(const QString &interfaceName, QString &drivername);
+#endif
+#if defined(Q_OS_WIN32)
+    QString getDriverVersion(const QString &interfaceName, QString &drivername);
+    void getNetworkAdapterInfo();
+#endif
 public slots:
     void setIfname(QString mgr_ifname);
 
@@ -28,6 +34,9 @@ signals:
 private:
     QString m_ifname;
     int update=0;
+//#if defined(Q_OS_WIN32)
+    QMap<QString, QString> *drivers;
+//#endif
 };
 
 #endif // MYINFO_H
