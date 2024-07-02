@@ -165,9 +165,9 @@ QList<QHostAddress> MyInfo::getIPfromIfname(QString ifname)
 
     QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
 
-    foreach (QNetworkInterface interface, interfaces) {
-        if (interface.name() == ifname) {
-            QList<QNetworkAddressEntry> addresses = interface.addressEntries();
+    foreach (QNetworkInterface niface, interfaces) {
+        if (niface.name() == ifname) {
+            QList<QNetworkAddressEntry> addresses = niface.addressEntries();
             foreach (QNetworkAddressEntry address, addresses) {
                 if (address.ip().protocol() == QAbstractSocket::IPv4Protocol) {
                     ipAddress = address.ip();
