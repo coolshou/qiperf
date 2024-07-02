@@ -105,20 +105,20 @@ QJsonObject MyInfo::collectNetInfo()
     QJsonObject netObjects;
     //獲取所有網路介面的列表
     QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
-    foreach(QNetworkInterface interface,list) //遍歷每一個網路介面
+    foreach(QNetworkInterface niface,list) //遍歷每一個網路介面
     {
-        if ((interface.type() == QNetworkInterface::Ethernet) ||
-            (interface.type() == QNetworkInterface::Wifi)) {
+        if ((niface.type() == QNetworkInterface::Ethernet) ||
+            (niface.type() == QNetworkInterface::Wifi)) {
             QJsonObject ifObject;
-            ifObject.insert("HW", interface.hardwareAddress()); //硬體地址
+            ifObject.insert("HW", niface.hardwareAddress()); //硬體地址
             QString drivername="";
-            QString ver =getDriverVersion(interface.name(), drivername);
+            QString ver =getDriverVersion(niface.name(), drivername);
 //            qDebug() << interface.name() << " version: " <<ver << " driver: " << drivername;
             ifObject.insert("driverVersion", ver);             //driver version
             ifObject.insert("driverName", drivername);             //driver name
             QJsonArray addrsObject;
             //獲取IP地址條目列表，每個條目中包含一個IP地址，一個子網掩碼和一個廣播地址
-            QList<QNetworkAddressEntry> entryList= interface.addressEntries();
+            QList<QNetworkAddressEntry> entryList= niface.addressEntries();
             foreach(QNetworkAddressEntry entry,entryList)//遍歷每個IP地址條目
             {
                 QJsonArray addrObject;
@@ -129,7 +129,7 @@ QJsonObject MyInfo::collectNetInfo()
             }
             ifObject.insert("address", addrsObject);
 //            netObjects.insert(interface.name(), ifObject);
-            netObjects.insert(interface.humanReadableName(), ifObject);
+            netObjects.insert(niface.humanReadableName(), ifObject);
 
         }
     }
