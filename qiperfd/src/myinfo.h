@@ -23,6 +23,7 @@ public:
     QString getDriverVersion(const QString &interfaceName, QString &drivername);
 #endif
 #if defined(Q_OS_WIN32)
+    QString getLastErrorAsString();
     QString getDriverVersion(const QString &interfaceName, QString &drivername);
     QString getDriverVersion(const QString &hardwareID);
     QString getAdapterName(const QString &description);
@@ -36,9 +37,9 @@ signals:
 private:
     QString m_ifname;
     int update=0;
-//#if defined(Q_OS_WIN32)
-    QMap<QString, QString> drivers;
-//#endif
+#if defined(Q_OS_WIN32)
+    QMap<QString, QStringList> drivers;
+#endif
 };
 
 #endif // MYINFO_H

@@ -255,17 +255,38 @@ QString MyInfo::getDriverVersion(const QString &interfaceName, QString &driverna
 }
 #endif
 #if defined(Q_OS_WIN32)
+QString MyInfo::getLastErrorAsString() {
+    DWORD errorMessageID = ::GetLastError();
+    if (errorMessageID == 0) {
+        return QString(); // No error message has been recorded
+    }
+
+    LPWSTR messageBuffer = nullptr;
+    size_t size = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&messageBuffer, 0, NULL);
+
+    QString message = "["+QString::number(errorMessageID)+"]"+ QString::fromWCharArray(messageBuffer, size);
+
+    // Free the buffer allocated by FormatMessage
+    LocalFree(messageBuffer);
+
+    return message;
+}
+
 QString MyInfo::getDriverVersion(const QString &interfaceName, QString &drivername)
 {
     if (drivers.contains(interfaceName)){
-        qDebug() << interfaceName << " getDriverVersion: " << drivers[interfaceName];
+        qDebug() << interfaceName << " getDriverVersion: " << drivers[interfaceName][0];
+        drivername = drivers[interfaceName][1];
+        return drivers[interfaceName][0];
+
     }
     return QString();
 }
 QString MyInfo::getDriverVersion(const QString &hardwareID) {
-    HDEVINFO deviceInfoSet = SetupDiGetClassDevs(NULL, hardwareID.toStdWString().c_str(), NULL, DIGCF_PRESENT | DIGCF_ALLCLASSES);
+    HDEVINFO deviceInfoSet = SetupDiGetClassDevs(NULL, hardwareID.toStdWString().c_str(), NULL, DIGCF_PRESENT | DIGCF_ALLCLASSES | DIGCF_DEVICEINTERFACE);
     if (deviceInfoSet == INVALID_HANDLE_VALUE) {
-        qWarning() << "SetupDiGetClassDevs failed";
+        qWarning() << "SetupDiGetClassDevs failed: " << hardwareID.toStdWString() << "\n" << getLastErrorAsString();
         return QString();
     }
 
@@ -288,10 +309,18 @@ QString MyInfo::getDriverVersion(const QString &hardwareID) {
                     RegCloseKey(hKey);
                     SetupDiDestroyDeviceInfoList(deviceInfoSet);
                     return QString::fromWCharArray(version);
+                }else{
+                    qDebug() << "Fail: RegQueryValueEx: " << hKey;
                 }
                 RegCloseKey(hKey);
+            }else{
+                qDebug() << "Fail: RegOpenKeyEx: " << driverVersionKey;
             }
+        }else{
+            qDebug() << "Fail: SetupDiGetDeviceRegistryProperty" ;
         }
+    }else{
+        qDebug() << "Fail: SetupDiEnumDeviceInfo" ;
     }
 
     SetupDiDestroyDeviceInfoList(deviceInfoSet);
@@ -395,20 +424,20 @@ void MyInfo::getNetworkAdapterInfo() {
     if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == NO_ERROR) {
         PIP_ADAPTER_INFO pAdapter = pAdapterInfo;
         while (pAdapter) {
-            qDebug() << "Adapter Name:" << pAdapter->AdapterName;
-            qDebug() << "Description:" << pAdapter->Description;
-            //qDebug() << "Driver Version:" << pAdapter->DriverVersion;
+            // qDebug() << "Adapter Name:" << pAdapter->AdapterName;
+            // qDebug() << "Description:" << pAdapter->Description;
             QString hardwareID = getAdapterName(QString::fromLocal8Bit(pAdapter->Description));
             if (!hardwareID.isEmpty()) {
                 QString driverVersion = getDriverVersion(hardwareID);
                 if (!driverVersion.isEmpty()) {
-                    drivers[pAdapter->AdapterName] = driverVersion;
-                    qDebug() << "Driver Version:" << driverVersion;
+                    drivers[pAdapter->AdapterName].append(driverVersion);
+                    drivers[pAdapter->AdapterName].append(QString(pAdapter->Description).trimmed());
+                    qInfo() << "\"" << drivers[pAdapter->AdapterName][1] << "\" Driver Version: " << driverVersion;
                 } else {
-                    qDebug() << "Driver version not found for adapter" << pAdapter->Description;
+                    // qDebug() << "Driver version not found for adapter\"" << pAdapter->Description << "\"";
                 }
             } else {
-                qDebug() << "Hardware ID not found for adapter" << pAdapter->Description;
+                // qDebug() << "Hardware ID not found for adapter" << pAdapter->Description;
             }
             pAdapter = pAdapter->Next;
         }
