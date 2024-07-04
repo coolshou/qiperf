@@ -11,6 +11,7 @@ class QIPConfigData {
 public:
     // QJsonArray tpcfg;  // store iperf config pairs
     QString tpcfg;
+    QString env; // store environment setting. eq: PC1 info/PC2 info ...
     QString testdate; // store test datetime of folder which include all record data file
     QStringList datafilenames; // all recored data file name
 };
@@ -38,6 +39,7 @@ private:
     QString m_tmppath;
     QByteArray m_magic;
     uint32_t m_version;
+    uint32_t m_loadversion;
     QIPConfigData *m_data; //compress zip/tar ?
 
 

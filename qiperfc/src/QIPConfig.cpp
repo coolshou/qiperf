@@ -3,15 +3,18 @@
 #include <QDebug>
 
 const QByteArray QIPConfig::MAGIC_VALUE = ".QIP";
-const qint32 QIPConfig::VERSION = 1;
+const qint32 QIPConfig::VERSION = 2;
 
 QIPConfig::QIPConfig(QString tmppath, QObject *parent):
     QObject(parent), m_tmppath(tmppath)
 {
     //init value
     m_data= new QIPConfigData();
-    m_version = 1;
+    m_version = 2;
     m_data->tpcfg = "";
+    m_data->env = "";
+    m_data->testdate = "";
+
 
 }
 
@@ -25,7 +28,7 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
 //    file.close();
     // QByteArray fdata = file.readAll();
     in >> m_magic;
-    in >> m_version;
+    in >> m_loadversion;
     if (m_magic.startsWith(MAGIC_VALUE)){
         QByteArray compressedtpcfg;
         in >> compressedtpcfg;
@@ -37,11 +40,15 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
         }
         file.close();
         if (deserialize(data)){
-            QByteArray compressedfiles;
-            //tmp path
-            QString outpath = m_tmppath + QDir::separator() + m_data->testdate;
-            in >> compressedfiles;
-            return filesFromStore(compressedfiles, outpath);
+            if (m_loadversion>=2){
+                QByteArray compressedfiles;
+                //tmp path
+                QString outpath = m_tmppath + QDir::separator() + m_data->testdate;
+                in >> compressedfiles;
+                return filesFromStore(compressedfiles, outpath);
+            }else {
+                return true;
+            }
         }else {
             qDebug() << "ERROR: Wrong format of the data: " << filePath;
             return false;
@@ -57,8 +64,6 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
 bool QIPConfig::saveToFile(const QString &filePath) const {
     QByteArray data = serialize();
     QByteArray compressedtpcfg = qCompress(data, 9);
-    // compressed data records
-    QByteArray compressedfiles = filesToStore(m_data->datafilenames);
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly)) {
         return false;
@@ -67,7 +72,11 @@ bool QIPConfig::saveToFile(const QString &filePath) const {
     out << static_cast<QByteArray>(MAGIC_VALUE);
     out << static_cast<qint32>(VERSION);
     out << static_cast<QByteArray>(compressedtpcfg);
-    out << compressedfiles;
+    // compressed data records
+    if (m_version>=2){
+        QByteArray compressedfiles = filesToStore(m_data->datafilenames);
+        out << compressedfiles;
+    }
 
     file.flush();
     file.close();
@@ -98,7 +107,10 @@ QByteArray QIPConfig::serialize() const {
     out.setVersion(QDataStream::Qt_5_15); // Set the stream version
 
     out << m_data->tpcfg;
-    out << m_data->testdate;
+    if (m_version>=2){
+        out << m_data->env;
+        out << m_data->testdate;
+    }
 
     return data;
 }
@@ -108,7 +120,10 @@ bool QIPConfig::deserialize(const QByteArray &data) {
     in.setVersion(QDataStream::Qt_5_15); // Set the stream version
 
     in >> m_data->tpcfg;
-    in >> m_data->testdate;
+    if (m_loadversion>=2){
+        in >> m_data->env;
+        in >> m_data->testdate;
+    }
 
     return !in.status();
 }
