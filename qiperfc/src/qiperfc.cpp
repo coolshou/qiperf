@@ -588,6 +588,25 @@ void QIperfC::onStart()
 }
 
 void QIperfC::onStop(){
+    QString cmd="";
+    foreach (auto key, m_wsc.keys()){
+            qDebug() << "m_wsc: " << key;
+            if (m_wsc[key]){
+                cmd = QString(CMD_IPERF_STOP)+":" + key;
+                qDebug() << m_wsc[key] << " m_wsc send cmd: " << cmd;
+                m_wsc[key]->sendText(cmd);
+            }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    foreach (auto key, m_wss.keys()){
+            qDebug() << "m_wss: " << key;
+            if (m_wss[key]){
+                cmd = QString(CMD_IPERF_STOP)+":" + key;
+                qDebug() << m_wss[key] <<  "m_wss send cmd: " << cmd;
+                m_wss[key]->sendText(cmd);
+            }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
     updateRunStatus(false);
     //TODO: stop the running test!!
     QString endtime = getNowString();
@@ -915,6 +934,7 @@ void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 
 void QIperfC::onDisconnected(QString serverip)
 {
+    qDebug() << "onDisconnected: " << serverip;
     if (m_wss.contains(serverip)){
         m_wss.remove(serverip);
     }
