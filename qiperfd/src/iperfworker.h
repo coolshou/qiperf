@@ -9,6 +9,7 @@
 #include <QTextStream>
 #include <QMap>
 #include <QJsonArray>
+#include <QTimer>
 
 #include "iperfwrapper.h"
 
@@ -37,12 +38,12 @@ signals:
     void onStdout(int idx, QString text); // refrow
     void onStderr(int idx, int refrow, QString text, QString ipport); // idx, refrow, msg, ipport
     void onThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
-
+    void stopSelfDestructor();
 
 public slots:
     void work();
     bool isRunning();
-
+    void onSelfDestructor();
 
 private slots:
     void onStarted();
@@ -54,6 +55,9 @@ private slots:
 //    void parserIperf3(QString msg);
 
 private:
+    int m_selfdestructorTime;
+    QTimer *m_selfdestructor;
+    int m_delaystart;
     int m_refrow;// refrow
     int m_idx;
     int m_version; // iperf version 2 or 3

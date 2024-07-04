@@ -22,6 +22,7 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
                          QObject *parent)
     : QObject{parent}
 {
+    m_delaystart =0; //TODO:
     m_logfile = nullptr;
     m_logtextstream = nullptr;
     m_iperflogpath = "";
@@ -70,6 +71,12 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
         }
     }
     qDebug() << "[" << getBindKey() << "] reg m_bidirtag:" << m_bidirtag;
+    m_selfdestructorTime = 10 * 1000; //10 sec
+    m_selfdestructor = new QTimer();
+    m_selfdestructor->setInterval(m_selfdestructorTime);
+    connect(m_selfdestructor, &QTimer::timeout, this, &IperfWorker::onSelfDestructor);
+    connect(this, &IperfWorker::stopSelfDestructor, m_selfdestructor, &QTimer::stop);
+
 }
 
 IperfWorker::~IperfWorker()
@@ -82,7 +89,7 @@ IperfWorker::~IperfWorker()
 
 void IperfWorker::work()
 {
-    //this code run in thread
+    //this code run in another thread
     m_stop = false;
 
     //create iperf procress
@@ -119,6 +126,14 @@ bool IperfWorker::isRunning()
 {
     return m_running;
 }
+
+void IperfWorker::onSelfDestructor()
+{
+    qDebug() << "onSelfDestructor";
+    m_selfdestructor->stop();
+    setStop();
+}
+
 void IperfWorker::setStop()
 {
     m_stop = true;
@@ -193,11 +208,18 @@ void IperfWorker::onStarted()
     }
     m_running = true;
     m_iperfwrapper->setSetting(m_refrow, m_servermode, m_parallel, m_bidir, m_bidirtag);
+    qInfo() << "start m_selfdestructor:";
+    m_selfdestructor->start();
     emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
 }
 
 void IperfWorker::readyReadStdOut()
 {
+    if (m_selfdestructor->isActive()){
+        qInfo() << "readyReadStdOut: stop m_selfdestructor";
+//        m_selfdestructor->stop();
+        emit stopSelfDestructor();
+    }
     QByteArray processOutput;
     processOutput = m_iperf->readAllStandardOutput();
 
@@ -216,6 +238,11 @@ void IperfWorker::readyReadStdOut()
 
 void IperfWorker::readyReadStdErr()
 {
+    if (m_selfdestructor->isActive()){
+        qInfo() << "readyReadStdErr: stop m_selfdestructor";
+//        m_selfdestructor->stop();
+        emit stopSelfDestructor();
+    }
     QByteArray processOutput;
     processOutput = m_iperf->readAllStandardError();
 
@@ -231,6 +258,11 @@ void IperfWorker::readyReadStdErr()
 
 void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    if (m_selfdestructor->isActive()){
+        qInfo() << "onFinished: stop m_selfdestructor";
+//        m_selfdestructor->stop();
+        emit stopSelfDestructor();
+    }
     if(m_logfile !=nullptr){
         m_logfile->close();
         delete m_logfile;
