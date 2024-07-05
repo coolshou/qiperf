@@ -19,27 +19,41 @@ public:
 //    QHostAddress getIPfromIfname(QString ifname);
     QList<QHostAddress> getIPfromIfname(QString ifname);
     int getEndpointType();
-#if defined(Q_OS_LINUX)
+    void getCpuMemInfo(QString &cpuModel, QString &totalMemory);
+    void getMotherboardInfo(QString &vendor, QString &model, QString &serial);
     QString getDriverVersion(const QString &interfaceName, QString &drivername);
+
+#if defined(Q_OS_LINUX)
+
 #endif
 #if defined(Q_OS_WIN32)
     QString getLastErrorAsString();
-    QString getDriverVersion(const QString &interfaceName, QString &drivername);
     QString getDriverVersion(const QString &hardwareID);
     QString getAdapterName(const QString &description);
     void getNetworkAdapterInfo();
 #endif
+
 public slots:
     void setIfname(QString mgr_ifname);
-
 signals:
 
 private:
+    QString getTotalMemory();
+    QString getCPUModel();
+#if defined(Q_OS_LINUX)
+    QString readSysFile(const QString &path);
+#endif
+#if defined(Q_OS_WIN32)
+    QString getWMIProperty(IWbemClassObject* pClsObj, const BSTR property)
+#endif
     QString m_ifname;
     int update=0;
 #if defined(Q_OS_WIN32)
     QMap<QString, QStringList> drivers;
 #endif
+
+
+
 };
 
 #endif // MYINFO_H
