@@ -42,6 +42,7 @@ private:
     QString getCPUModel();
 #if defined(Q_OS_LINUX)
     QString readSysFile(const QString &path);
+    QString readFileContent(const QString &filePath);
 #endif
 #if defined(Q_OS_WIN32)
     QString getWMIProperty(IWbemClassObject* pClsObj, const BSTR property)
@@ -51,7 +52,6 @@ private:
 #if defined(Q_OS_WIN32)
     QMap<QString, QStringList> drivers;
 #endif
-
 
 
 };

@@ -277,12 +277,24 @@ QString MyInfo::readSysFile(const QString &path) {
     }
 
     QTextStream in(&file);
+    //only read one line
     QString content = in.readLine().trimmed();
     file.close();
 
     return content;
 }
+QString MyInfo::readFileContent(const QString &filePath) {
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "Cannot open file" << filePath << ":" << file.errorString();
+        return QString();
+    }
 
+    QTextStream in(&file);
+    QString content = in.readAll();
+    file.close();
+    return content;
+}
 void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial) {
     vendor = readSysFile("/sys/class/dmi/id/board_vendor");
     model = readSysFile("/sys/class/dmi/id/board_name");
@@ -293,7 +305,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     qDebug() << "Motherboard Serial Number:" << serial;
 }
 QString MyInfo::getCPUModel() {
-    QString cpuInfo = readSysFile("/proc/cpuinfo");
+    QString cpuInfo = readFileContent("/proc/cpuinfo");
     QStringList lines = cpuInfo.split('\n');
     for (const QString &line : lines) {
         if (line.startsWith("model name")) {
@@ -304,7 +316,7 @@ QString MyInfo::getCPUModel() {
 }
 
 QString MyInfo::getTotalMemory() {
-    QString memInfo = readSysFile("/proc/meminfo");
+    QString memInfo = readFileContent("/proc/meminfo");
     QStringList lines = memInfo.split('\n');
     for (const QString &line : lines) {
         if (line.startsWith("MemTotal")) {
