@@ -325,6 +325,7 @@ QString MyInfo::getTotalMemory() {
     }
     return QString("Unknown Memory");
 }
+#endif
 
 void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory) {
     cpuModel = getCPUModel();
@@ -334,7 +335,7 @@ void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory) {
     qDebug() << "Total Memory:" << totalMemory;
 }
 
-#endif
+
 #if defined(Q_OS_WIN32)
 QString MyInfo::getLastErrorAsString() {
     DWORD errorMessageID = ::GetLastError();
