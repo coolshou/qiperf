@@ -62,9 +62,12 @@ void dlgOption::updatecfg()
     m_cfg->setValue("managerifname", ifname);
     QStringList qs = ifname.split(": ");
     int port = ui->sb_port->value();
-    emit ipaddressUpdated(qs[1], port);
+    if (qs.length()>=2){
+        emit ipaddressUpdated(qs[1], port);
+    }
     m_cfg->setValue("managerport", port);
     m_cfg->endGroup();
+    m_cfg->sync();
 }
 
 void dlgOption::setWaitServerReady(int val)
