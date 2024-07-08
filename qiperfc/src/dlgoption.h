@@ -27,9 +27,9 @@ protected:
     void changeEvent(QEvent *e) override;
 
 private slots:
-    void on_pb_cancel_clicked();
+    void onReject();
 
-    void on_pb_save_clicked();
+    void onAccept();
 
 private:
     Ui::DlgOption *ui;

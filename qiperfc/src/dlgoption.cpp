@@ -10,6 +10,9 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     m_cfg = cfg;
 //    ui->cb_minterfaces->addItems(interfaces);
     loadcfg(cfg);
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &dlgOption::onAccept);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &dlgOption::onReject);
+
 }
 
 dlgOption::~dlgOption()
@@ -89,14 +92,13 @@ void dlgOption::changeEvent(QEvent *e)
     }
 }
 
-void dlgOption::on_pb_cancel_clicked()
+void dlgOption::onReject()
 {
-    //
     this->close();
 }
 
 
-void dlgOption::on_pb_save_clicked()
+void dlgOption::onAccept()
 {
     updatecfg();
     this->close();
