@@ -5,6 +5,9 @@
 #include <QObject>
 #include <QHostAddress>
 
+#if defined(Q_OS_WIN32)
+#include "wbemcli.h"
+#endif
 
 class MyInfo : public QObject
 {
