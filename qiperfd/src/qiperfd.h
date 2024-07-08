@@ -57,7 +57,7 @@ public:
     bool isRunning(int idx); //check if iperf is running
 
 public slots:
-    void setManagerInterface(QString interface);
+    void setManagerInterface(QString ifname);
     void onPipeMessage(int idx, const QString msg);
     void readStdOut(int idx, QString text);
     void onErrored(int m_idx, int refrow, QString text, QString ipport);
@@ -67,7 +67,7 @@ public slots:
     void onThroughput(int idx, QString sInterval, QString data); // idx, refrow, throughput data
     void onQuit();
 signals:
-    void setMgrIfname(QString interface);
+    void setMgrIfname(QString ifname);
     void iperfStarted(QString bindkey); // iperf thrad started
 
 protected:

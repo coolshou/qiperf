@@ -224,13 +224,13 @@ QStringList QIperfd::listInterfaces()
     QStringList nslist;
 
     QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
-    foreach (QNetworkInterface interface, list) // 遍歷每一個網路介面
+    foreach (QNetworkInterface iface, list) // 遍歷每一個網路介面
     {
-        if ((interface.type() == QNetworkInterface::Ethernet) ||
-            (interface.type() == QNetworkInterface::Wifi))
+        if ((iface.type() == QNetworkInterface::Ethernet) ||
+            (iface.type() == QNetworkInterface::Wifi))
         {
-//            nslist << interface.name();
-            nslist << interface.humanReadableName(); //for windows
+//            nslist << iface.name();
+            nslist << iface.humanReadableName(); //for windows
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
@@ -242,15 +242,15 @@ QString QIperfd::getInterfaceAddr(QString ifname)
     QString tmp = "";
     // get first addr of an interface
     QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
-    foreach (QNetworkInterface interface, list) // 遍歷每一個網路介面
+    foreach (QNetworkInterface iface, list) // 遍歷每一個網路介面
     {
-        if (ifname.compare(interface.name()) == 0)
+        if (ifname.compare(iface.name()) == 0)
         {
-            if ((interface.type() == QNetworkInterface::Ethernet) ||
-                (interface.type() == QNetworkInterface::Wifi))
+            if ((iface.type() == QNetworkInterface::Ethernet) ||
+                (iface.type() == QNetworkInterface::Wifi))
             {
                 //            nslist << interface.name();
-                QList<QNetworkAddressEntry> entryList = interface.addressEntries();
+                QList<QNetworkAddressEntry> entryList = iface.addressEntries();
                 // only return first address
                 if (entryList.length() > 0)
                 {
@@ -279,11 +279,11 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
 {
     QString ifname="";
     QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
-    foreach (QNetworkInterface interface, list) // 遍歷每一個網路介面
+    foreach (QNetworkInterface iface, list) // 遍歷每一個網路介面
     {
-        if (name.compare(interface.humanReadableName()) == 0)
+        if (name.compare(iface.humanReadableName()) == 0)
         {
-            ifname = interface.name();
+            ifname = iface.name();
             qDebug() << "getIfNameByHumanReadableName:" << ifname << " from: " <<name << Qt::endl;
             break;
         }
@@ -475,12 +475,12 @@ bool QIperfd::isRunning(int idx)
     return false;
 }
 
-void QIperfd::setManagerInterface(QString interface)
+void QIperfd::setManagerInterface(QString ifname)
 {
-    mgr_ifname = interface;
+    mgr_ifname = ifname;
 //    qDebug() << "setManagerInterface:" << mgr_ifname << Qt::endl;
     savecfg();
-    emit setMgrIfname(interface);
+    emit setMgrIfname(ifname);
 }
 
 void QIperfd::onPipeMessage(int idx, const QString msg)
