@@ -46,10 +46,10 @@ void MyService::stopAll()
     return m_qiperfd->stopAll();
 }
 
-void MyService::setManagerInterface(QString interface)
+void MyService::setManagerInterface(QString ifname)
 {
 //    m_interface = interface;
-   emit sig_setManagerInterface(interface);
+   emit sig_setManagerInterface(ifname);
 }
 
 QString MyService::getManagerInterface()

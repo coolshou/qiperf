@@ -20,11 +20,11 @@ public:
     Q_INVOKABLE void stop(int idx);
     Q_INVOKABLE void stopAll();
 
-    void setManagerInterface(QString interface);
+    void setManagerInterface(QString ifname);
     QString getManagerInterface();
 
 signals:
-    void sig_setManagerInterface(QString interface);
+    void sig_setManagerInterface(QString ifname);
 private:
 //    static auto rpc_server;
 //    QString m_interface;
