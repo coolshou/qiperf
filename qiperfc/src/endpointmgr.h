@@ -43,6 +43,7 @@ public:
     void disable(QString id); //disable endpoint
     bool isExist(QString id);
     int getTotalEndpoints();
+    QString getPCsInfo(QStringList pcs);
 
 
 private:

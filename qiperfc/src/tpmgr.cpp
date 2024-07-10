@@ -49,6 +49,11 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             //special case of throughput data (sum of all iperf  --parallel value)
             return QVariant(item->getTxRxThroughput());
         }
+
+    }
+    if (index.column()== TP::cols::lostrate) {
+        //TODO: special case of loserate date
+        return QVariant(item->getLostRate());
     }
     return item->data(index.column());
 }
@@ -72,6 +77,8 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
             return QString("Client");
         case TP::cols::throughput:
             return QString("TPUT");
+        case TP::cols::lostrate:
+            return QString("Lost Rate (%)");
         case TP::cols::comment:
             return QString("comment");
         default:
@@ -215,6 +222,23 @@ QByteArray TPMgr::savedata()
     }
     QJsonDocument doc(jsonarr);
     return doc.toJson(QJsonDocument::Compact);
+}
+
+QStringList TPMgr::getPCs()
+{
+    QStringList ds;
+    //get all config's PC info
+    if(this->rootChildCount() > 0){
+        for (int row = 0; row < rootItem->childCount(); ++row){
+            TP *tp = rootItem->child(row);
+//            qDebug() << "MgrServer: " << tp->getMgrServer();
+//            qDebug() << "MgrClient: " << tp->getMgrClient();
+            ds.append(tp->getMgrServer()+";"+tp->getMgrClient());
+        }
+    }else {
+        qDebug() << "TPMgr::getPCs: No data to save" ;
+    }
+    return ds;
 }
 
 bool TPMgr::loaddata(QByteArray data)

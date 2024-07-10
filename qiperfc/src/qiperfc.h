@@ -46,7 +46,7 @@ class QIperfC : public QMainWindow
     Q_OBJECT
 
 public:
-    QIperfC(QWidget *parent = nullptr);
+    QIperfC(QString logpath, QWidget *parent = nullptr);
     ~QIperfC() override;
     void start();
     void stop();
@@ -123,6 +123,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QString m_logpath;
     QClipboard *m_clipboard;
     FormQIperfds *m_frm_qiperfds;
     dlgOption *m_frm_option;

@@ -30,11 +30,13 @@ public:
 
     QString getID();
     void loadData(QString data);
+    QString getJsonData();
     void updateTimeStemp();
     QString getLastNoticeTime();
 signals:
 
 private:
+    QString m_jsondata;
     QList<EndPoint *> m_childItems;
     QList<QVariant> m_itemDatas;
     EndPoint *m_parentItem; //parent item

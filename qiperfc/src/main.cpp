@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     app.setOrganizationName(QIPERF_ORG);
     app.setOrganizationDomain(QIPERF_DOMAIN);
     app.setApplicationName(QIPERFC_NAME);
-    QIperfC main;
+    QIperfC main(logfilePath);
 #if defined(Q_OS_LINUX) && TEST_SIGWATCH
     QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &main, SLOT(onQuit()));
 #endif

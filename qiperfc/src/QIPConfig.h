@@ -24,7 +24,7 @@ public:
     bool saveToFile(const QString &filePath) const;
     uint32_t getVersion();
     QByteArray getTPCfg();
-    void setTPCfg(QByteArray tpcfg, QString testdate="", QStringList datafilenames={});
+    void setTPCfg(QByteArray tpcfg, QString env="", QString testdate="", QStringList datafilenames={});
 
 private:
     static const QByteArray MAGIC_VALUE;

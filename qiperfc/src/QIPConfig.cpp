@@ -94,11 +94,14 @@ QByteArray QIPConfig::getTPCfg()
     return m_data->tpcfg.toUtf8();
 }
 
-void QIPConfig::setTPCfg(QByteArray tpcfg, QString testdate, QStringList datafilenames)
+void QIPConfig::setTPCfg(QByteArray tpcfg, QString env, QString testdate, QStringList datafilenames)
 {
     m_data->tpcfg= QString::fromUtf8(tpcfg);
-    m_data->testdate = testdate;
-    m_data->datafilenames = datafilenames;
+    m_data->env = env;
+    if (!testdate.isEmpty()){
+        m_data->testdate = testdate;
+        m_data->datafilenames = datafilenames;
+    }
 }
 
 QByteArray QIPConfig::serialize() const {

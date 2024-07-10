@@ -62,6 +62,7 @@ QString EndPoint::getID()
 
 void EndPoint::loadData(QString data)
 {
+    m_jsondata = data;
 //    QList<EndPoint *> parents;
 //    qDebug() << "loadData:" << m_parentItem << Qt::endl;
     //TODO: parser data
@@ -82,6 +83,11 @@ void EndPoint::loadData(QString data)
 //        qDebug() << "TODO: oNet:" << oNet << Qt::endl;
     }
 
+}
+
+QString EndPoint::getJsonData()
+{
+    return m_jsondata;
 }
 
 void EndPoint::updateTimeStemp()

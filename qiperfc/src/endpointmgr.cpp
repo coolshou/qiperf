@@ -1,7 +1,10 @@
 #include "endpointmgr.h"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QDateTime>
+#include <QCoreApplication>
+#include <QEventLoop>
 
 #include "comm.h"
 
@@ -134,13 +137,14 @@ QModelIndex EndPointMgr::indexFromItem(EndPoint *item){
         parent = parent->parentItem();
     }
     QModelIndex ix;
-    parent = rootItem;
+//    parent = rootItem;
     /*for(auto ch: parents){
         ix = index(ch->row(), 0, ix);
     }*/
 
     for(int i=0; i < parents.count(); i++){
         ix = index(parents[i]->row(), 0, ix);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     ix = index(ix.row(), 0, ix);
     return ix;
@@ -195,6 +199,7 @@ bool EndPointMgr::isExist(QString id)
         if (ep->getID() == id){
             return true;
         }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     return false;
 }
@@ -204,12 +209,50 @@ int EndPointMgr::getTotalEndpoints()
     return m_endpoints.length();
 }
 
+QString EndPointMgr::getPCsInfo(QStringList pcs)
+{
+    //return json string format of pcs info
+    QStringList targetpcs;
+//    qDebug() << "getPCsInfo: " << pcs;
+    foreach(auto pc, pcs){
+        QStringList ds = pc.split(";");
+        if (ds.length()==2){
+            if (!targetpcs.contains(ds[0])){
+                targetpcs.append(ds[0]);
+            }
+            if (!targetpcs.contains(ds[1])){
+                targetpcs.append(ds[1]);
+            }
+        }else{
+            qDebug() << "getPCsInfo: unknown format of pcs: "  << pc;
+        }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+
+    QStringList targetds;
+    foreach(EndPoint *ep, m_endpoints){
+        if (targetpcs.contains(ep->getID())){
+//            qDebug() << "ID: " << ep->getID();
+//            qDebug() << "data: " << ep->getJsonData();
+            targetds.append(ep->getJsonData());
+
+        }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    QJsonArray arr= QJsonArray::fromStringList(targetds);
+    QJsonDocument doc;
+    doc.setArray(arr);
+
+    return QString(doc.toJson());
+}
+
 EndPoint* EndPointMgr::getEndPoint(QString id)
 {
     foreach(EndPoint *ep, m_endpoints){
         if (ep->getID() == id){
             return ep;
         }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     return nullptr;
 }

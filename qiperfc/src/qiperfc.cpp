@@ -28,7 +28,7 @@
 
 
 
-QIperfC::QIperfC(QWidget *parent)
+QIperfC::QIperfC(QString logpath, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     QString settingfilepath =  QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
@@ -39,9 +39,17 @@ QIperfC::QIperfC(QWidget *parent)
         }
     }
     QString settingfilename = settingfilepath + "/" + QIPERFC_NAME + ".ini";
+    m_TestStartTime = QDateTime();
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     m_clipboard = QApplication::clipboard();
     ui->setupUi(this);
+
+    m_logpath = logpath + "data";
+    QDir dir(m_logpath);
+    if (!dir.exists()){
+        qDebug() << "create path: " << m_logpath;
+        dir.mkpath(".");
+    }
 //    ui->menubar->installEventFilter(this);
 //    ui->menuTest->setVisible(false);
 //    ui->menuTest->setEnabled(false);
@@ -71,6 +79,7 @@ QIperfC::QIperfC(QWidget *parent)
     ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
     ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
     ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
+    ui->tv_throughput->setColumnWidth(TP::cols::lostrate, 110);
     TooltipEventFilter* filter = new TooltipEventFilter(ui->tv_throughput);
     connect(filter, &TooltipEventFilter::doCopy, this, &QIperfC::onCopy);
     connect(filter, &TooltipEventFilter::doPaste, this, &QIperfC::onPaste);
@@ -181,8 +190,20 @@ bool QIperfC::save(QString filename)
     //prepare throughput config data
     if (m_tpmgr->rootChildCount()>0) {
         QByteArray b = m_tpmgr->savedata();
-        m_qipconfig->setTPCfg(b);
+        QStringList pcs = m_tpmgr->getPCs();
+        QString env= m_endpointmgr->getPCsInfo(pcs);
+//        qDebug() << "env: " << env;
+//        m_qipconfig->setTPCfg(b );
+        QString starttime="";
+        if (m_TestStartTime.isValid()){
+            starttime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
+            //m_logpath + "/" + starttime;
+            QString tmp = m_logpath + "/" + starttime;
+            QDir d(tmp);
+            qDebug() << "path: " << tmp << " :files: " << d.entryList(QDir::Files);
 
+        }
+        m_qipconfig->setTPCfg(b, env);
         m_qipconfig->saveToFile(filename);
         return true;
     }else {
@@ -302,6 +323,12 @@ void QIperfC::onStart()
     m_TestStartTime = QDateTime::currentDateTime();
     m_tpplot->setStartTime(m_TestStartTime);
     QString startTime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
+    QString datapath = m_logpath + "/" + startTime;
+    QDir d(datapath);
+    if (!d.exists()){
+        d.mkpath(".");
+    }
+
     emit updateStarttime(startTime);
     //if (m_tpmgr->children().count()>0) {
     if (m_tpmgr->rootChildCount()>0) {
@@ -624,6 +651,7 @@ void QIperfC::onClear(){
         m_tpmgr->clear();
     }
     m_tpplot->clear();
+    m_TestStartTime = QDateTime();
     emit updateStatus("");
     emit updateStarttime("");
 }

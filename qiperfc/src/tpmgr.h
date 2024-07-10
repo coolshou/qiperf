@@ -61,6 +61,7 @@ public:
     int rootChildCount();
     QList<TP*> getChilds();
     QByteArray savedata();
+    QStringList getPCs();
     bool loaddata(QByteArray data);
     void reset();
     void clear();
