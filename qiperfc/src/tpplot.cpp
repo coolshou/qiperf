@@ -78,6 +78,7 @@ void TPPlot::clear()
     //axis reset
     xAxis->setRange(0, m_xAxisMaxDefault);
     yAxis->setRange(0, m_yAxisMaxDefault);
+
     this->replot();
 }
 
@@ -94,10 +95,14 @@ void TPPlot::initCustomPlot()
     //set axis Label
     xAxis->setLabel("Time(Sec)");
     yAxis->setLabel("Mbps");
+    yAxis2->setLabel("Lost Rate(%)");
+    yAxis2->setTickLabels(true);
     //set axis range
     // TODO: update range by throughput/time
     xAxis->setRange(0, m_xAxisMaxDefault);
     yAxis->setRange(0, m_yAxisMaxDefault);
+    yAxis2->setRange(0, 100);
+
 //    this->replot();
     // legend
     this->legend->setVisible(true);
@@ -124,7 +129,7 @@ void TPPlot::initCustomPlot()
     }
     // make left and bottom axes transfer their ranges to right and top axes:
     connect(xAxis, SIGNAL(rangeChanged(QCPRange)), xAxis2, SLOT(setRange(QCPRange)));
-    connect(yAxis, SIGNAL(rangeChanged(QCPRange)), yAxis2, SLOT(setRange(QCPRange)));
+//    connect(yAxis, SIGNAL(rangeChanged(QCPRange)), yAxis2, SLOT(setRange(QCPRange)));
 
 #if TEST_PLOT_DATA==1
     if (1) {

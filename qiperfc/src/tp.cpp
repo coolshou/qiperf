@@ -163,6 +163,7 @@ void TP::loadData(QString data)
     m_itemDatas.append(m_direction);
     m_itemDatas.append(m_client);
     m_itemDatas.append(""); //throughput
+    m_itemDatas.append(""); //lost rate
     m_itemDatas.append(""); //comment
 
     m_jsondata = data;
@@ -362,4 +363,19 @@ QString TP::getTxRxThroughput()
    }else{
        return "";
    }
+}
+
+QString TP::getLostRate()
+{
+    if (m_totalpacket>0){
+        double v = (m_lostpacket / m_totalpacket)*100;
+        if (v>0){
+            return QString::number(v) +
+                    "("+ QString::number(m_lostpacket) +"/"+ QString::number(m_totalpacket) +")";
+        }else{
+            return QString();
+        }
+    }else{
+        return QString();
+    }
 }

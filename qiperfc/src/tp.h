@@ -27,7 +27,8 @@ public:
         dir=2,
         client=3,
         throughput=4,
-        comment=5
+        lostrate=5,
+        comment=6
     };
     Q_ENUM(cols)
     void appendChild(TP *child);
@@ -73,6 +74,7 @@ public:
     void setDataType(int datatype);
     int getDataType();
     QString getTxRxThroughput();
+    QString getLostRate();
 
 signals:
 
@@ -99,6 +101,8 @@ private:
     QString m_lastnoticetime; // last get notice time string, eq: 2023.17.06.12:22:07.905
     double m_Tx; //record Tx throughput
     double m_Rx; //record Rx throughput
+    int m_lostpacket; // record lost packet
+    int m_totalpacket; // record total packet
 };
 
 #endif // TP_H
