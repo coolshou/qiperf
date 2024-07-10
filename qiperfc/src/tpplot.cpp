@@ -2,7 +2,7 @@
 
 TPPlot::TPPlot(QWidget *parent):QCustomPlot(parent)
 {
-    initCustomPlote();
+    initCustomPlot();
 }
 
 void TPPlot::setStartTime(QDateTime startTime)
@@ -81,7 +81,7 @@ void TPPlot::clear()
     this->replot();
 }
 
-void TPPlot::initCustomPlote()
+void TPPlot::initCustomPlot()
 {
     this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                                   QCP::iSelectLegend | QCP::iSelectPlottables);

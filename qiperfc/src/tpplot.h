@@ -29,7 +29,7 @@ private slots:
     void realtimeDataSlot(QPrivateSignal sig);
 
 private:
-    void initCustomPlote();
+    void initCustomPlot();
     void addRandomGraph();
     QPen newColorPen(int r, int g, int b, int width);
     QDateTime m_starttime;
