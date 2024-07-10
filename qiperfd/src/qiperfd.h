@@ -13,7 +13,7 @@
 //#include <QCloseEvent> # require gui
 
 #if defined(Q_OS_LINUX)
-#include <QSocketNotifier>
+//#include <QSocketNotifier>
 #endif
 #include "comm.h"
 #include "pipeserver.h"

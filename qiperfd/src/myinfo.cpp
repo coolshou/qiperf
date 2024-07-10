@@ -300,9 +300,9 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     model = readSysFile("/sys/class/dmi/id/board_name");
     serial = readSysFile("/sys/class/dmi/id/board_serial");
 
-    qDebug() << "Motherboard Vendor:" << vendor;
-    qDebug() << "Motherboard Model:" << model;
-    qDebug() << "Motherboard Serial Number:" << serial;
+    qInfo() << "Motherboard Vendor:" << vendor;
+    qInfo() << "Motherboard Model:" << model;
+    qInfo() << "Motherboard Serial Number:" << serial;
 }
 QString MyInfo::getCPUModel() {
     QString cpuInfo = readFileContent("/proc/cpuinfo");
@@ -331,8 +331,8 @@ void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory) {
     cpuModel = getCPUModel();
     totalMemory = getTotalMemory();
 
-    qDebug() << "CPU Model:" << cpuModel;
-    qDebug() << "Total Memory:" << totalMemory;
+    qInfo() << "CPU Model:" << cpuModel;
+    qInfo() << "Total Memory:" << totalMemory;
 }
 
 
