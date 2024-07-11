@@ -18,7 +18,7 @@
 
 IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
                          uint port, QString bindaddr, QString target,
-                         bool bidir, bool reverse,
+                         bool bidir, bool reverse, int interval,
                          QObject *parent)
     : QObject{parent}
 {
@@ -70,8 +70,9 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
             }
         }
     }
-    qDebug() << "[" << getBindKey() << "] reg m_bidirtag:" << m_bidirtag;
-    m_selfdestructorTime = 10 * 1000; //10 sec
+    m_interval = interval;
+    qDebug() << "[" << getBindKey() << "] reg m_bidirtag:" << m_bidirtag << " interval:" << m_interval;
+    m_selfdestructorTime = (10+m_interval) * 1000; //10 sec + report interval
     m_selfdestructor = new QTimer(this);
     m_selfdestructor->setInterval(m_selfdestructorTime);
     connect(m_selfdestructor, &QTimer::timeout, this, &IperfWorker::onSelfDestructor);
@@ -217,7 +218,6 @@ void IperfWorker::readyReadStdOut()
 {
     if (m_selfdestructor->isActive()){
         qInfo() << "readyReadStdOut: stop m_selfdestructor";
-//        m_selfdestructor->stop();
         emit stopSelfDestructor();
     }
     QByteArray processOutput;
@@ -240,14 +240,15 @@ void IperfWorker::readyReadStdErr()
 {
     if (m_selfdestructor->isActive()){
         qInfo() << "readyReadStdErr: stop m_selfdestructor";
-//        m_selfdestructor->stop();
         emit stopSelfDestructor();
     }
     QByteArray processOutput;
     processOutput = m_iperf->readAllStandardError();
-
     QString err = QString(processOutput);
-    qDebug() << "readyReadStdErr: " << err;
+    if (processOutput.length()>0){
+        qDebug() << "readyReadStdErr: " << err;
+        toLogFile(processOutput);
+    }
 
     m_running = false;
     m_stop = true;

@@ -44,7 +44,7 @@ public:
     int add(QString refrow, int version,QString m_cmd,QString args, uint port,
             QString bndaddr="0.0.0.0", QString target="",
             QString parallel="0", QString protocal="TCP",
-            bool bidir=false, bool reverse=false);
+            bool bidir=false, bool reverse=false, int interval=1);
     int add(QString refrow, QVariantMap jsondata);
     void del(int idx);
     int addIperfServer(QString refrow, int version, uint port, QString bindHost="");

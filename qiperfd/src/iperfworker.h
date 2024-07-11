@@ -19,7 +19,7 @@ class IperfWorker : public QObject
 public:
     explicit IperfWorker(int idx, int version, QString cmd, QString arg="-s",
                          uint port=5201, QString bindaddr="0.0.0.0", QString target="",
-                         bool bidir=false, bool reverse=false,
+                         bool bidir=false, bool reverse=false, int interval=1,
                          QObject *parent = nullptr);
     ~IperfWorker() override;
     void setStop();
@@ -70,6 +70,7 @@ private:
     QString m_protocal="TCP";
     bool m_bidir=false;
     bool m_reverse=false;
+    int m_interval=1;  // report interval
     QString m_iperfexe; // iperf exec name
     QString m_iperflogpath;
     QString m_bidirtag;
