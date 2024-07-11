@@ -159,6 +159,7 @@ void IperfWrapper::parserIperf3(QString linedata)
         }else{
             sDir = m_bidirtag;
         }
+        //"0.00-1.00   sec   111 MBytes   931 Mbits/sec"
         QStringList data = linedata.split(" ", Qt::SkipEmptyParts);
         QString sInterval  = data[0]; // Interval
 //            qDebug() << "idx:" << idx << " ,Interval:" << sInterval
@@ -177,7 +178,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                 irec.insert("dir", sDir);  // direction
             }
             if (idx.contains("SUM", Qt::CaseInsensitive)){
-                qDebug() << "==linedata==  " << linedata;
+                qInfo() << "==linedata==SUM==  " << linedata;
             }else{
 //                    qDebug() << "m_parallel: " << iparallel << "m_tpdatas length: " << m_tpdatas[sInterval].count();
                 if (linedata.contains("receiver")){
@@ -196,9 +197,10 @@ void IperfWrapper::parserIperf3(QString linedata)
                 sInterval = sInterval.right(sInterval.indexOf("-"));
             }
             emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
-
+            //clear record
+//            QMap<QString, QJsonArray>().swap(m_tpdatas); // looks ok?
+            m_tpdatas.remove(sInterval);
         }
-
     }
 }
 
