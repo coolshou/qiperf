@@ -69,6 +69,7 @@ public slots:
 signals:
     void setMgrIfname(QString ifname);
     void iperfStarted(QString bindkey); // iperf thrad started
+    void setStop();
 
 protected:
 //    void closeEvent(QCloseEvent *event);

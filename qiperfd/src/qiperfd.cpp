@@ -313,6 +313,7 @@ int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint 
     connect(iperfer, &IperfWorker::onThroughput, this, &QIperfd::onThroughput);
     iperfer->moveToThread(iperf_th);
     connect(iperf_th, &QThread::started, iperfer, &IperfWorker::work);
+    connect(this, &QIperfd::setStop, iperfer, &IperfWorker::setStop);
 
     //    m_iperfworkers.append(iperfer);
     m_iperfworkers.insert(idx, iperfer);
@@ -441,13 +442,14 @@ void QIperfd::stop(int idx)
 void QIperfd::stopAll()
 {
     // stop all iperfworker
+    emit setStop();
 //    for (int i = 0; i < m_iperfworkers.count(); ++i)
-    for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end();)
-    {
-//        stop(i);
-        stop(it.key());
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
-    }
+//    for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end();)
+//    {
+////        stop(i);
+////        stop(it.key());
+//        QCoreApplication::processEvents(QEventLoop::AllEvents);
+//    }
 }
 
 void QIperfd::clear()
