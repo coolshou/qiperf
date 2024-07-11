@@ -58,6 +58,8 @@
 #include <QWebSocket>
 #include <QWebSocketProtocol>
 #include <QList>
+#include <QFile>
+#include <QQueue>
 
 QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
@@ -66,11 +68,20 @@ class WSServer : public QObject
 {
     Q_OBJECT
 public:
+    enum sendtype{
+        text=0,
+        file=1
+    };
+    Q_ENUM(sendtype)
+
     explicit WSServer(quint16 port, QObject *parent = nullptr);
     ~WSServer() override;
     QList<QString> getClients(); //return current connected client list
     qint64 sendTextMessage(QString msg, QString target=nullptr); // send message to client
+    qint64 sendBinaryMessage(QByteArray &data, QString target=nullptr); // send binary to client
     void onLog(QString text);
+    void addFileToSend(QString filename, QString target=nullptr);
+
 public slots:
     void sendTextResult(QString msg);
 signals:
@@ -83,11 +94,21 @@ private Q_SLOTS:
     void socketDisconnected();
     void onSslErrors(const QList<QSslError> &errors);
     void onServerError(QWebSocketProtocol::CloseCode closeCode);
+    void onBytesWritten(qint64 bytes);
 
 private:
+    void sendNextChunk(QString target);
     QWebSocketServer *m_pWebSocketServer;
 //    QList<QWebSocket *> m_clients;
     QMap<QString, QWebSocket *> m_clients;
+    int m_sendtype=0; // 0: text, 1: file
+    QFile *m_currentFile = nullptr; // current file to send
+    QString m_fileName;  // current filename to send
+    QStringList m_filenames; // multi filename to send
+    QQueue<QFile *> m_files; // multi file to send
+    qint64 m_chunkSize;
+    bool m_filenameSent = false;
+
 };
 
 #endif //WSSERVER_H

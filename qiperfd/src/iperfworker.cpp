@@ -72,7 +72,7 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
     }
     qDebug() << "[" << getBindKey() << "] reg m_bidirtag:" << m_bidirtag;
     m_selfdestructorTime = 10 * 1000; //10 sec
-    m_selfdestructor = new QTimer();
+    m_selfdestructor = new QTimer(this);
     m_selfdestructor->setInterval(m_selfdestructorTime);
     connect(m_selfdestructor, &QTimer::timeout, this, &IperfWorker::onSelfDestructor);
     connect(this, &IperfWorker::stopSelfDestructor, m_selfdestructor, &QTimer::stop);
@@ -142,7 +142,7 @@ void IperfWorker::setStop()
     }else{
         m_iperf->terminate();
     }
-    emit finished(m_refrow, 0, 2, getBindKey());
+//    emit finished(m_refrow, 0, 2, getBindKey());
 }
 
 QString IperfWorker::getBindKey()

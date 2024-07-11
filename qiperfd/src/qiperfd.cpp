@@ -443,13 +443,6 @@ void QIperfd::stopAll()
 {
     // stop all iperfworker
     emit setStop();
-//    for (int i = 0; i < m_iperfworkers.count(); ++i)
-//    for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end();)
-//    {
-////        stop(i);
-////        stop(it.key());
-//        QCoreApplication::processEvents(QEventLoop::AllEvents);
-//    }
 }
 
 void QIperfd::clear()

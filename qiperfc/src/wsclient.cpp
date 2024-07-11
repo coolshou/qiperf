@@ -78,9 +78,11 @@ WSClient::WSClient(QString serverip, const QUrl &url, QObject *parent) :
 qint64 WSClient::sendText(QString message)
 {
     qint64 rc=0;
-    rc = m_webSocket.sendTextMessage(message);
-    if (rc <=0){
-        qDebug() << "error sendText size=" << rc << ", " << message;
+    if (m_webSocket.isValid()){
+        rc = m_webSocket.sendTextMessage(message);
+        if (rc <=0){
+            qDebug() << "error sendText size=" << rc << ", " << message;
+        }
     }
     return rc;
 }

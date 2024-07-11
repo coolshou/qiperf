@@ -56,6 +56,7 @@
 #include <QtNetwork/QSslKey>
 #include <QCoreApplication>
 #include <QEventLoop>
+#include <QFileInfo>
 
 #include <QDebug>
 
@@ -124,6 +125,8 @@ qint64 WSServer::sendTextMessage(QString msg, QString target)
     for(auto &t: qAsConst(ts)) {
         if (m_clients.contains(t)) {
 //            onLog("TODO: send:" + msg + " back to " + t);
+            m_sendtype=WSServer::sendtype::text;
+//            qDebug() << "[sendTextMessage]TO: " << t <<" : " << msg;
             rc= m_clients.value(t)->sendTextMessage(msg);
             if (rc<=0){
                 qDebug() << "ERROR sendText to " << t << " size=" << rc << " : " << msg;
@@ -135,9 +138,49 @@ qint64 WSServer::sendTextMessage(QString msg, QString target)
 
 }
 
+qint64 WSServer::sendBinaryMessage(QByteArray &data, QString target)
+{
+    QList<QString> ts;
+    if (!target.isNull()){
+        ts.append(target);
+    }else{
+        ts = m_clients.keys();
+    }
+    qint64 rc=0;
+    for(auto &t: qAsConst(ts)) {
+        if (m_clients.contains(t)) {
+            rc = m_clients.value(t)->sendBinaryMessage(data);
+            if (rc<=0){
+                qDebug() << "ERROR sendBinaryMessage to " << t << " size=" << rc << " : " << data;
+            }
+        }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    return rc;
+}
+
 void WSServer::onLog(QString text)
 {
     qInfo() << "WSServer::onLog: " << text;
+}
+
+void WSServer::addFileToSend(QString filename, QString target)
+{
+    if (m_filenames.contains(filename)){
+        qDebug() << "addFileToSend: File exist: " << filename;
+        return;
+    }
+    m_filenames.append(filename);
+    QFile *file = new QFile(filename);
+    if (!file->open(QIODevice::ReadOnly)) {
+        qWarning() << "Cannot open file" << filename << ":" << file->errorString();
+        delete file;
+//        continue;
+    }
+    m_files.enqueue(file);
+    m_sendtype=WSServer::sendtype::file;
+    sendNextChunk(target);
+
 }
 
 //! [onNewConnection]
@@ -150,6 +193,9 @@ void WSServer::onNewConnection()
         connect(pSocket, &QWebSocket::textMessageReceived, this, &WSServer::processTextMessage);
         connect(pSocket, &QWebSocket::binaryMessageReceived, this, &WSServer::processBinaryMessage);
         connect(pSocket, &QWebSocket::disconnected, this, &WSServer::socketDisconnected);
+        //TODO: when sendTextMessage following will also trigger!
+        connect(pSocket, &QWebSocket::bytesWritten, this, &WSServer::onBytesWritten);
+
         m_clients[sfrom] =  pSocket;
     }
 
@@ -159,7 +205,7 @@ void WSServer::onNewConnection()
 //! [processTextMessage]
 void WSServer::processTextMessage(QString message)
 {
-//    qDebug() << "processTextMessage:" << message << Qt::endl;
+//    qDebug() << "processTextMessage:" << message ;
 //    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     emit actMessage(message);
 
@@ -177,7 +223,6 @@ void WSServer::processBinaryMessage(QByteArray message)
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient)
     {
-
         pClient->sendBinaryMessage(message);
     }
 }
@@ -196,6 +241,7 @@ void WSServer::socketDisconnected()
 //            m_clients.removeAll(pClient);
         }
         pClient->deleteLater();
+        pClient = nullptr;
     }
 }
 //! [socketDisconnected]
@@ -210,9 +256,77 @@ void WSServer::onServerError(QWebSocketProtocol::CloseCode closeCode)
     qDebug() << "Server Error occurred:" << closeCode << Qt::endl;
 }
 
+void WSServer::onBytesWritten(qint64 bytes)
+{
+    Q_UNUSED(bytes);
+    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    if (pClient)
+    {
+        if (m_sendtype==WSServer::sendtype::file){
+            QString target = pClient->peerAddress().toString();
+            qDebug() << "onBytesWritten: " << target << " size: " << QString::number(bytes);
+            sendNextChunk(target);
+        }
+    }
+
+}
+
+void WSServer::sendNextChunk(QString target)
+{
+    if (!m_clients.contains(target)){
+        qDebug() << "No target client: " << target;
+        return;
+    }
+    QWebSocket *client = m_clients.value(target);
+
+    if (!client || m_files.isEmpty()) {
+        return;
+    }
+
+    if (!m_currentFile) {
+        m_currentFile = m_files.dequeue();
+        m_fileName = QFileInfo(m_currentFile->fileName()).fileName();
+        m_filenameSent = false;
+    }
+
+    if (m_currentFile->atEnd()) {
+        int rc;
+        qDebug() << "File transfer completed for" << m_fileName;
+        rc = m_filenames.removeAll(m_fileName);
+        if (rc > 1){
+            qDebug() << "[sendNextChunk]remove: " << m_fileName << " more then one";
+        }
+        m_currentFile->close();
+        delete m_currentFile;
+        m_currentFile = nullptr;
+        if (m_files.isEmpty()) {
+            return;
+        }
+        m_currentFile = m_files.dequeue();
+        m_fileName = QFileInfo(m_currentFile->fileName()).fileName();
+        m_filenameSent = false;
+    }
+
+    QByteArray buffer;
+    if (!m_filenameSent) {
+        buffer = m_fileName.toUtf8() + '\0';
+        m_filenameSent = true;
+    }
+    qint64 rc;
+    buffer.append(m_currentFile->read(m_chunkSize - buffer.size()));
+    rc = client->sendBinaryMessage(buffer);
+    qDebug() << "Sent chunk of size:" << buffer.size() << "for file:" << m_fileName;
+    if (rc != buffer.size()){
+        qDebug() << "send chunk of size error: \nexpect: " << QString::number(buffer.size()) <<
+                    "\nactually: " << QString::number(rc);
+    }
+
+}
+
 void WSServer::sendTextResult(QString msg)
 {
     //send Test back to client
+
     qint64 rc = sendTextMessage(msg);
     if (rc<0){
         qDebug() << "sendTextResult: sendTextMessage return size:(" << rc << "):" << msg;
