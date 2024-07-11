@@ -3,7 +3,7 @@ QT += core network websockets
 
 CONFIG += c++17 console
 CONFIG -= app_bundle
-CONFIG += release
+#CONFIG += release
 
 #include(../jcon-cpp.pri)
 include(../qiperf.pri)
