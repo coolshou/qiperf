@@ -1,14 +1,14 @@
-qiperf (0.2.11307.02-1) UNRELEASED; urgency=medium
+qiperf (0.2.11307.02-1) unstable; urgency=medium
 
   * add user stop()
   * add net interface driver name/version
-  * add iperf record
-  * add save/load iperf record/env info
+  * add store iperf record files on test finish
+  * add save/load .QIP with iperf record/env info
 
- -- coolshou <coolshou2060@gmail.com>  Tue, 02 Jul 2024 10:17:17 +0800
+ -- coolshou <jimmy_yeh@alphanetworks.com>  Tue, 02 Jul 2024 10:17:17 +0800
 
 qiperf (0.2.11306.28-1) unstable; urgency=medium
 
   * Initial release
 
- -- coolshou <coolshou2060@gmail.com>  Thu, 01 Nov 2023 00:00:00 +0800
+ -- coolshou <jimmy_yeh@alphanetworks.com>  Thu, 01 Nov 2023 00:00:00 +0800
