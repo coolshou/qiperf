@@ -19,6 +19,8 @@ TP::TP(QString id, QString data, TP *parent)
     m_datatype = 0;
     m_Tx = 0;
     m_Rx = 0;
+    m_lostpacket = 0;
+    m_totalpacket = 0;
 }
 
 void TP::appendChild(TP *item)
