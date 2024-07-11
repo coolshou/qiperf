@@ -342,17 +342,17 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString valu
     Q_UNUSED(sInterval)
     Q_UNUSED(unit)
 
-    TP *tp = getItemByIdx(midx);
+    TP *tp = getItemByIdx(midx); //parent item
     if (tp==nullptr){
-        qDebug() << "addTPdata: no parrent iperf pair?? (midx=" << midx << ")" << idx;
+        qDebug() << "addTPdata: no parent iperf pair?? (midx=" << midx << ")" << idx;
         return;
     }
-    TP *c = getItemByIdx(midx+"_"+idx, tp); //config item
+    TP *c = getItemByIdx(midx+"_"+idx, tp); //iperf pair config item
     if (c==nullptr){
         c = new TP(midx+"_"+idx, "", tp);
         c->setThroughput(value);
         c->setDirection(dir);
-        tp->appendChild(c);
+        tp->appendChild(c); // add iperf pair config item to parent item
 //        c->setExpanded(true);
     }else{
         c->setThroughput(value);
