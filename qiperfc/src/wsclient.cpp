@@ -189,7 +189,6 @@ void WSClient::onTextMessageReceived(QString message)
 void WSClient::onBinaryMessageReceived(const QByteArray &message) {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     QString from = pClient->peerAddress().toString();
-//    qDebug() << "onBinaryMessageReceived from :" << from;
 
     if (!m_files.contains(from)){
         // Extract filename
@@ -212,11 +211,10 @@ void WSClient::onBinaryMessageReceived(const QByteArray &message) {
         m_files[from]->write(message);
     }
 
-    qInfo() << "Chunk written to file";
+//    qInfo() << "Chunk written to file";
 
     if (message.size() < m_chunkSize && m_files[from]) {
         // Assume that a smaller chunk means end of file
-//        QFileInfo fi(m_files[from]);
         qInfo() << "File transfer completed and saved: " << m_files[from]->fileName();
         m_files[from]->close();
         m_files.remove(from);
