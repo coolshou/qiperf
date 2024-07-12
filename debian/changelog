@@ -1,11 +1,13 @@
-qiperf (0.2.11307.02-1) unstable; urgency=medium
+qiperf (0.2.11307.15-1) unstable; urgency=medium
 
   * add user stop()
   * add net interface driver name/version
   * add store iperf record files on test finish
+  * add Run->Show Log function after test
+
   * add save/load .QIP with iperf record/env info
 
- -- coolshou <jimmy_yeh@alphanetworks.com>  Tue, 02 Jul 2024 10:17:17 +0800
+ -- coolshou <jimmy_yeh@alphanetworks.com>  Tue, 15 Jul 2024 10:17:17 +0800
 
 qiperf (0.2.11306.28-1) unstable; urgency=medium
 
