@@ -50,13 +50,26 @@
 
 #include "codeeditor.h"
 
+#include <QApplication>
 #include <QPainter>
 #include <QTextBlock>
+#include <QStyle>
+#include <QDesktopWidget>
+
 
 //![constructor]
 
 CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
+    setReadOnly(true);
+//    setGeometry(0,0,1024,768);
+    QDesktopWidget *desktop = QApplication::desktop();
+    int WIDTH = 1024;
+    int HEIGHT = 768;
+    int x = (desktop->width() - WIDTH) / 2;
+    int y = (desktop->height() - HEIGHT) / 2;
+    setGeometry(x,y,WIDTH, HEIGHT);
+
     lineNumberArea = new LineNumberArea(this);
 
     connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
@@ -65,6 +78,10 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 
     updateLineNumberAreaWidth(0);
     highlightCurrentLine();
+    setWindowModality(Qt::WindowModal);
+//    setWindowFlags( Qt::Window | Qt::CustomizeWindowHint
+//                               | Qt::WindowTitleHint
+//                               | Qt::WindowCloseButtonHint );
 }
 
 //![constructor]
@@ -83,6 +100,16 @@ int CodeEditor::lineNumberAreaWidth()
     int space = 3 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
 
     return space;
+}
+
+void CodeEditor::load(QString filename)
+{
+    setWindowTitle(filename);
+    QFile file(filename);
+    file.open(QIODevice::Text | QFile::ReadOnly);
+    QString content = QString::fromUtf8(file.readAll());
+    this->setPlainText(content);
+    file.close();
 }
 
 //![extraAreaWidth]

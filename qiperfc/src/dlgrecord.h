@@ -18,11 +18,15 @@ public:
     void setRootPath(QString rootpath);
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
+
+private slots:
+    void onItemDClicked(QModelIndex idx);
 
 private:
     Ui::DlgRecord *ui;
     QFileSystemModel *m_fileModel;
+    QString m_rootpath;
 };
 
 #endif // DLGRECORD_H

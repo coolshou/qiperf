@@ -73,6 +73,7 @@ public:
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
+    void load(QString filename);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
