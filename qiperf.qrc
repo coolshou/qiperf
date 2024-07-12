@@ -24,5 +24,6 @@
         <file alias="clear">images/clear.png</file>
         <file alias="RT">images/RT.png</file>
         <file alias="qiperfd">images/qiperfd.png</file>
+        <file alias="logfile">images/logfile.png</file>
     </qresource>
 </RCC>
