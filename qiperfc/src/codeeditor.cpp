@@ -55,12 +55,13 @@
 #include <QTextBlock>
 #include <QStyle>
 #include <QDesktopWidget>
-
+#include <QIcon>
 
 //![constructor]
 
 CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
+    setWindowIcon(QIcon(":logfile"));
     setReadOnly(true);
 //    setGeometry(0,0,1024,768);
     QDesktopWidget *desktop = QApplication::desktop();

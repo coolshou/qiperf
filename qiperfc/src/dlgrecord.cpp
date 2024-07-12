@@ -2,7 +2,7 @@
 #include "ui_dlgrecord.h"
 
 #include <QAbstractItemModel>
-#include "codeeditor.h"
+
 
 #include <QDebug>
 
@@ -11,6 +11,8 @@ DlgRecord::DlgRecord(QWidget *parent) :
     ui(new Ui::DlgRecord)
 {
     ui->setupUi(this);
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DlgRecord::close);
+
     m_fileModel = new QFileSystemModel(this);
     m_fileModel->setFilter(QDir::NoDotAndDotDot | QDir::Files);
     ui->tvLogFiles->setModel(m_fileModel);
@@ -33,6 +35,17 @@ void DlgRecord::setRootPath(QString rootpath)
     setWindowTitle(rootpath);
 }
 
+void DlgRecord::close()
+{
+    foreach(auto key, m_logfiles.keys()){
+        m_logfiles[key]->hide();
+        m_logfiles[key]->close();
+        m_logfiles.remove(key);
+        QApplication::processEvents(QEventLoop::AllEvents);
+    }
+
+}
+
 void DlgRecord::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
@@ -45,16 +58,28 @@ void DlgRecord::changeEvent(QEvent *e)
     }
 }
 
+void DlgRecord::closeEvent(QCloseEvent *e)
+{
+    close();
+    QDialog::closeEvent(e);
+}
+
 
 void DlgRecord::onItemDClicked(QModelIndex idx)
 {
-    auto itm = m_fileModel->itemData(idx);
-    if (!itm.isEmpty()){
-        QString filename = m_rootpath + QDir::separator() + itm[0].toString();
-        qDebug() << "onItemDClicked: " << filename;
-        CodeEditor *ce=new CodeEditor();
-        ce->load(filename);
-        ce->show();
+    if (idx.column()==0){
+        auto itm = m_fileModel->itemData(idx);
+        if (!itm.isEmpty()){
+            QString filename = m_rootpath + QDir::separator() + itm[0].toString();
+            if (!m_logfiles.contains(filename)){
+                m_logfiles[filename] = new CodeEditor();
+                m_logfiles[filename]->load(filename);
+                m_logfiles[filename]->show();
+            }else{
+                m_logfiles[filename]->activateWindow();
+            }
+
+
+        }
     }
-//    ce.
 }
