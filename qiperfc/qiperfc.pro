@@ -46,6 +46,7 @@ SOURCES += \
     lib/axistag.cpp \
     lib/qcustomplot.cpp \
     src/QIPConfig.cpp \
+    src/codeeditor.cpp \
     src/dlgiperf.cpp \
     src/dlgoption.cpp \
     src/dlgrecord.cpp \
@@ -77,6 +78,7 @@ HEADERS += \
     lib/axistag.h \
     lib/qcustomplot.h \
     src/QIPConfig.h \
+    src/codeeditor.h \
     src/dlgiperf.h \
     src/dlgoption.h \
     src/dlgrecord.h \
