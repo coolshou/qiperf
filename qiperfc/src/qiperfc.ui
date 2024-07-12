@@ -396,6 +396,10 @@
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/logfile</normaloff>:/logfile</iconset>
+   </property>
    <property name="text">
     <string>Show Log</string>
    </property>
