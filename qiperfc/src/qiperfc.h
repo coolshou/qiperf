@@ -54,6 +54,7 @@ public:
     bool save(QString filename); // save tp config
     QString getNowString();
 
+
 public slots:
     void onNewMessage(const QString msg);
     void onNew();
@@ -159,6 +160,7 @@ private:
     QString m_tpcfgname; //tp config file name
     QIPConfig *m_qipconfig;
     int m_WaitServerReady;
+    QString m_datapath;
 
 };
 #endif // QIPERFC_H

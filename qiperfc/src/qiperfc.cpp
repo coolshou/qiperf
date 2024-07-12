@@ -12,7 +12,6 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QSaveFile>
-#include <QMessageBox>
 #include <QThread>
 #include <QCoreApplication>
 #include <QEventLoop>
@@ -323,8 +322,8 @@ void QIperfC::onStart()
     m_TestStartTime = QDateTime::currentDateTime();
     m_tpplot->setStartTime(m_TestStartTime);
     QString startTime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
-    QString datapath = m_logpath + "/" + startTime;
-    QDir d(datapath);
+    m_datapath = m_logpath + "/" + startTime;
+    QDir d(m_datapath);
     if (!d.exists()){
         d.mkpath(".");
     }
@@ -658,8 +657,17 @@ void QIperfC::onClear(){
 
 void QIperfC::onShowLog()
 {
-    //TODO: onShowLog
-    m_dlgrecord->show();
+    if (!m_datapath.isEmpty()){
+        QDir d(m_datapath);
+        if (d.exists()){
+            m_dlgrecord->setRootPath(m_datapath);
+            m_dlgrecord->show();
+        }else{
+            QMessageBox::information(this, "ERROR", "No test record folder: " + m_datapath);
+        }
+    }else{
+        QMessageBox::information(this, "ERROR", "No test record");
+    }
 }
 
 void QIperfC::onConfig()
