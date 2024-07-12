@@ -314,6 +314,7 @@ void QIperfC::onPairSwap()
 
 void QIperfC::onStart()
 {
+    ui->actionShowLog->setEnabled(true);
     resetError();
     //TODO: clear old test record!!
     m_status_server.clear();
@@ -653,6 +654,7 @@ void QIperfC::onClear(){
     m_TestStartTime = QDateTime();
     emit updateStatus("");
     emit updateStarttime("");
+    ui->actionShowLog->setEnabled(false);
 }
 
 void QIperfC::onShowLog()

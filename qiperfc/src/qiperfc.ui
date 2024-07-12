@@ -393,8 +393,11 @@
    </property>
   </action>
   <action name="actionShowLog">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
-    <string>Show Log (TODO)</string>
+    <string>Show Log</string>
    </property>
   </action>
   <action name="actionTest">
