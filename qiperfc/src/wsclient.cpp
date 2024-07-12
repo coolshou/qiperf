@@ -53,11 +53,11 @@
 #include "comm.h"
 #include <QJsonParseError>
 #include <QJsonDocument>
-
+#include <QDir>
 QT_USE_NAMESPACE
 
 //! [constructor]
-WSClient::WSClient(QString serverip, const QUrl &url, QObject *parent) :
+WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject *parent) :
     QObject(parent)
 {
     connect(&m_webSocket, &QWebSocket::connected, this, &WSClient::onConnected);
@@ -68,9 +68,12 @@ WSClient::WSClient(QString serverip, const QUrl &url, QObject *parent) :
     connect(&m_webSocket, QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
             this, &WSClient::onSslErrors);
     connect(&m_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &WSClient::onError);
+    connect(&m_webSocket, &QWebSocket::textMessageReceived, this, &WSClient::onTextMessageReceived);
+    connect(&m_webSocket, &QWebSocket::binaryMessageReceived, this, &WSClient::onBinaryMessageReceived);
 //    qDebug() << "WSClient open websocket:" << url << Qt::endl;
     m_serverip = serverip;
     m_url = url;
+    m_datapath = datapath + QDir::separator();
     m_webSocket.open(m_url);
 }
 //! [constructor]
@@ -98,8 +101,7 @@ bool WSClient::isConnected()
 void WSClient::onConnected()
 {
 //    qDebug() << "WebSocket connected: " << m_url;
-    connect(&m_webSocket, &QWebSocket::textMessageReceived,
-            this, &WSClient::onTextMessageReceived);
+
 }
 //! [onConnected]
 //!
@@ -183,6 +185,46 @@ void WSClient::onTextMessageReceived(QString message)
     }
 }
 //! [onTextMessageReceived]
+
+void WSClient::onBinaryMessageReceived(const QByteArray &message) {
+    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    QString from = pClient->peerAddress().toString();
+//    qDebug() << "onBinaryMessageReceived from :" << from;
+
+    if (!m_files.contains(from)){
+        // Extract filename
+        int nullIndex = message.indexOf('\0');
+        if (nullIndex == -1) {
+            qWarning() << "Invalid message format";
+            return;
+        }
+        QString fileName = QString::fromUtf8(message.left(nullIndex));
+        QString filePath = m_datapath + fileName;
+        m_files[from] =new QFile(filePath);
+        if (!m_files[from]->open(QIODevice::WriteOnly)) {
+            qWarning() << "Cannot open file" << filePath << ":" << m_files[from]->errorString();
+            delete m_files[from];
+            m_files[from] = nullptr;
+            return;
+        }
+        m_files[from]->write(message.mid(nullIndex + 1));
+    } else {
+        m_files[from]->write(message);
+    }
+
+    qInfo() << "Chunk written to file";
+
+    if (message.size() < m_chunkSize && m_files[from]) {
+        // Assume that a smaller chunk means end of file
+//        QFileInfo fi(m_files[from]);
+        qInfo() << "File transfer completed and saved: " << m_files[from]->fileName();
+        m_files[from]->close();
+        m_files.remove(from);
+        delete m_files[from];
+        m_files[from] = nullptr;
+    }
+
+}
 
 void WSClient::onSslErrors(const QList<QSslError> &errors)
 {

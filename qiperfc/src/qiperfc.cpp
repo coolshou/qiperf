@@ -354,7 +354,7 @@ void QIperfC::onStart()
             if (!m_wss.contains(serverIP)) {
                 s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
 //                qDebug() << "server websocket url: " << s << Qt::endl;
-                m_wss[serverIP]=new WSClient(serverIP, QUrl(s));
+                m_wss[serverIP]=new WSClient(serverIP, QUrl(s), m_datapath);
                 connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                 connect(m_wss[serverIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
                 connect(m_wss[serverIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
@@ -385,7 +385,7 @@ void QIperfC::onStart()
             //TODO: detect manager client is pingable
             if (!m_wsc.contains(clientIP)) {
                 s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
-                m_wsc[clientIP]=new WSClient(clientIP, QUrl(s));
+                m_wsc[clientIP]=new WSClient(clientIP, QUrl(s), m_datapath);
                 connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                 connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
                 connect(m_wsc[clientIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);

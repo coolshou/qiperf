@@ -57,6 +57,7 @@
 #include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtCore/QUrl>
+#include <QFile>
 
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 
@@ -66,7 +67,7 @@ class WSClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit WSClient(QString serverip, const QUrl &url, QObject *parent = nullptr);
+    explicit WSClient(QString serverip, const QUrl &url, QString datapath, QObject *parent = nullptr);
     qint64 sendText(QString message);
     bool isConnected();
 
@@ -88,11 +89,15 @@ private Q_SLOTS:
     void onStateChanged(QAbstractSocket::SocketState state);
     void onTextMessageReceived(QString message);
     void onSslErrors(const QList<QSslError> &errors);
+    void onBinaryMessageReceived(const QByteArray &message);
 
 private:
+    QString m_datapath;
     QString m_serverip;
     QWebSocket m_webSocket;
     QUrl m_url;
+    QMap<QString, QFile *> m_files; // accept file from different source
+    qint64 m_chunkSize = 64 * 1024;
 };
 
 #endif // WSCLIENT_H
