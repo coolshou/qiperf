@@ -261,11 +261,15 @@ void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
     if (m_selfdestructor->isActive()){
         qInfo() << "onFinished: stop m_selfdestructor";
-//        m_selfdestructor->stop();
         emit stopSelfDestructor();
     }
+    QString filename="";
     if(m_logfile !=nullptr){
+        m_logfile->flush();
         m_logfile->close();
+        filename = m_logfile->fileName();
+        qDebug() << "TODO: send file back: " << filename;
+
         delete m_logfile;
         m_logfile = nullptr;
     }
@@ -276,7 +280,7 @@ void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 
     m_running = false;
     m_stop = true;
-    emit finished(m_refrow, exitCode, int(exitStatus), getBindKey());
+    emit finished(m_refrow, exitCode, int(exitStatus), getBindKey(), filename);
 }
 
 void IperfWorker::parserStdOut(QString msg)

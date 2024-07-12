@@ -179,7 +179,7 @@ void WSServer::addFileToSend(QString filename, QString target)
     }
     m_files.enqueue(file);
     m_sendtype=WSServer::sendtype::file;
-    sendNextChunk(target);
+    sendNextChunk(m_currentClient);
 
 }
 
@@ -197,6 +197,7 @@ void WSServer::onNewConnection()
         connect(pSocket, &QWebSocket::bytesWritten, this, &WSServer::onBytesWritten);
 
         m_clients[sfrom] =  pSocket;
+        m_currentClient = sfrom;
     }
 
 }

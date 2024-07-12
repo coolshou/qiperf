@@ -101,6 +101,7 @@ private:
     QWebSocketServer *m_pWebSocketServer;
 //    QList<QWebSocket *> m_clients;
     QMap<QString, QWebSocket *> m_clients;
+    QString m_currentClient; // current client key
     int m_sendtype=0; // 0: text, 1: file
     QFile *m_currentFile = nullptr; // current file to send
     QString m_fileName;  // current filename to send

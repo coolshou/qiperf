@@ -626,13 +626,18 @@ void QIperfd::onStarted(int m_idx, bool smode, QString ipport)
     m_runstatus[m_idx]=1;
 }
 
-void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport)
+void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport, QString filename)
 {
     QString msg = QString(CMD_IPERF_STOPED)+":"+ QString::number(idx);
     msg = msg + ":" + QString::number(exitCode)+  ":" + QString::number(exitStatus);
     msg = msg + ":" + ipport;
     onLog("TODO: onFinished: " + msg);
     m_wsserver->sendTextResult(msg);
+    if (!filename.isEmpty()){
+        if(QFileInfo::exists(filename)){
+            m_wsserver->addFileToSend(filename);
+        }
+    }
     del(idx);
 
 }
