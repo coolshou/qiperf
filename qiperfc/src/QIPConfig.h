@@ -26,6 +26,9 @@ public:
     QByteArray getTPCfg();
     void setTPCfg(QByteArray tpcfg, QString env="", QString testdate="", QStringList datafilenames={});
 
+signals:
+    void updateDataPath(QString datapath);
+
 private:
     static const QByteArray MAGIC_VALUE;
     static const qint32 VERSION;

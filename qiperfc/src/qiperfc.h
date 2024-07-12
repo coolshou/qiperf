@@ -121,6 +121,7 @@ private slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString data);
     void onDisconnected(QString serverip);
     void onPlotContextMenuRequest(QPoint pos);
+    void onUpdateDataPath(QString datapath);
 
 private:
     Ui::MainWindow *ui;

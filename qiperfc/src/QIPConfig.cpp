@@ -25,8 +25,6 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
     }
 //    QDataStream in(file.readAll());
     QDataStream in(&file);
-//    file.close();
-    // QByteArray fdata = file.readAll();
     in >> m_magic;
     in >> m_loadversion;
     if (m_magic.startsWith(MAGIC_VALUE)){
@@ -38,22 +36,23 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
             qDebug() << "ERROR: Wrong format of the config file: " << filePath;
             return false;
         }
-        file.close();
         if (deserialize(data)){
             if (m_loadversion>=2){
                 QByteArray compressedfiles;
                 //tmp path
                 QString outpath = m_tmppath + QDir::separator() + m_data->testdate;
+//                qDebug() << "outpath: " << outpath;
+                emit updateDataPath(outpath);
                 in >> compressedfiles;
                 return filesFromStore(compressedfiles, outpath);
             }else {
                 return true;
             }
         }else {
-            qDebug() << "ERROR: Wrong format of the data: " << filePath;
+//            qDebug() << "ERROR: Wrong format of the data: " << filePath;
             return false;
         }
-
+        file.close();
     } else {
         file.close();
         qDebug() << "Wrong format of " << filePath;
@@ -150,7 +149,7 @@ QByteArray QIPConfig::filesToStore(QStringList &inputFiles) const
 
         // Compress the file content
         QByteArray compressedData = qCompress(fileContent, 9);
-        qDebug() << "name:" <<name;
+//        qDebug() << "filesToStore name:" << name;
         out << name << compressedData;
 
         inputFile.close();
@@ -170,11 +169,6 @@ bool QIPConfig::filesFromStore(QByteArray &inputData, const QString &outputFolde
         }
     }
 
-    // QFile inputFile(filename);
-    // if (!inputFile.open(QIODevice::ReadOnly)) {
-    //     qCritical() << "Cannot open input file for reading:" << inputFile.errorString();
-    //     return false;
-    // }
     QDataStream in(inputData);
     while (!in.atEnd()) {
         QString name;
@@ -192,11 +186,8 @@ bool QIPConfig::filesFromStore(QByteArray &inputData, const QString &outputFolde
             qWarning() << "Cannot open output file" << name << "for writing:" << outputFile.errorString();
             continue;
         }
-
         outputFile.write(fileContent);
         outputFile.close();
     }
-
-    // inputFile.close();
     return true;
 }

@@ -31,23 +31,24 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     QString settingfilepath =  QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    // /home/jimmy/.local/share/alphanetworks/qiperfconsole
     QDir d{settingfilepath};
     if (!d.exists()){
         if(!d.mkpath(settingfilepath)){
             qDebug() << "ERROR: mkdir " + settingfilepath + " Fail";
         }
     }
-    QString settingfilename = settingfilepath + "/" + QIPERFC_NAME + ".ini";
+    QString settingfilename = settingfilepath + QDir::separator() + QIPERFC_NAME + ".ini";
     m_TestStartTime = QDateTime();
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     m_clipboard = QApplication::clipboard();
     ui->setupUi(this);
 
     m_logpath = logpath + "data";
-    QDir dir(m_logpath);
-    if (!dir.exists()){
+    QDir logdir(m_logpath);
+    if (!logdir.exists()){
         qDebug() << "create path: " << m_logpath;
-        dir.mkpath(".");
+        logdir.mkpath(".");
     }
 //    ui->menubar->installEventFilter(this);
 //    ui->menuTest->setVisible(false);
@@ -58,7 +59,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_frm_option = new dlgOption(m_settings);
     initStatusbar();
     loadSettings();
-    m_qipconfig = new QIPConfig(d.absolutePath()+QDir::separator()+"data");
+    m_qipconfig = new QIPConfig(logdir.absolutePath());
+    connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
     //UI actions
     initActions();
     //dataTimer = QTimer();
@@ -196,13 +198,18 @@ bool QIperfC::save(QString filename)
         QString starttime="";
         if (m_TestStartTime.isValid()){
             starttime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
-            //m_logpath + "/" + starttime;
-            QString tmp = m_logpath + "/" + starttime;
+            QString tmp = m_logpath + QDir::separator() + starttime;
             QDir d(tmp);
-            qDebug() << "path: " << tmp << " :files: " << d.entryList(QDir::Files);
-
+//            qDebug() << "path: " << tmp << " :files: " << d.entryList(QDir::Files);
+            QStringList filelist;
+            foreach(auto s, d.entryList(QDir::Files)){
+//                qDebug() << "save file: " << tmp+ QDir::separator()+s;
+                filelist.append(tmp+ QDir::separator()+s);
+            }
+            m_qipconfig->setTPCfg(b, env, starttime, filelist);
+        }else{
+            m_qipconfig->setTPCfg(b, env);
         }
-        m_qipconfig->setTPCfg(b, env);
         m_qipconfig->saveToFile(filename);
         return true;
     }else {
@@ -323,7 +330,7 @@ void QIperfC::onStart()
     m_TestStartTime = QDateTime::currentDateTime();
     m_tpplot->setStartTime(m_TestStartTime);
     QString startTime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
-    m_datapath = m_logpath + "/" + startTime;
+    m_datapath = m_logpath + QDir::separator() + startTime;
     QDir d(m_datapath);
     if (!d.exists()){
         d.mkpath(".");
@@ -1005,6 +1012,13 @@ void QIperfC::onPlotContextMenuRequest(QPoint pos)
 
     menu->popup(m_tpplot->mapToGlobal(pos));
 
+}
+
+void QIperfC::onUpdateDataPath(QString datapath)
+{
+    m_datapath = datapath;
+    m_dlgrecord->setRootPath(datapath);
+    ui->actionShowLog->setEnabled(true);
 }
 
 void QIperfC::initActions()
