@@ -8,7 +8,8 @@ TP::TP(QString id, QString data, TP *parent)
     m_id=id;
 //    m_itemDatas << id;
     m_jsondata = "";
-    if (data!=""){
+    if (data!="" && data !="Root"){
+        qDebug() << "TP data: "  << data;
         this->loadData(data);
     }else{
         m_itemDatas.append(m_id);
@@ -143,6 +144,7 @@ void TP::loadData(QString data)
     m_client = o_client["bind"].toString();
     m_mgrclient = o_client["manager"].toString();
     m_port = o_client["port"].toInt();
+    qDebug() << "loadData m_port: " << m_port;
     m_duration = o_client["duration"].toInt();
     m_omit = o_client["omit"].toInt();
 
