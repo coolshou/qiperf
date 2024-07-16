@@ -122,6 +122,7 @@ private slots:
     void onDisconnected(QString serverip);
     void onPlotContextMenuRequest(QPoint pos);
     void onUpdateDataPath(QString datapath);
+    void onUpdateTPCfg(QByteArray tpcfg);
 
 private:
     Ui::MainWindow *ui;

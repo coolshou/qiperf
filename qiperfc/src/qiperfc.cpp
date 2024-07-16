@@ -61,6 +61,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     loadSettings();
     m_qipconfig = new QIPConfig(logdir.absolutePath());
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
+    connect(m_qipconfig, &QIPConfig::updateTPCfg, this, &QIperfC::onUpdateTPCfg);
     //UI actions
     initActions();
     //dataTimer = QTimer();
@@ -176,8 +177,10 @@ bool QIperfC::load(QString filename)
         }
     }
     if (m_qipconfig->loadFromFile(filename)){
-        QByteArray b = m_qipconfig->getTPCfg();
-        m_tpmgr->loaddata(b);
+        //QByteArray b = m_qipconfig->getTPCfg();
+        //m_tpmgr->loaddata(b);
+        //TODO: load record to plot
+
         return true;
     }else{
         qDebug() << "load file " << filename << " Fail!!";
@@ -1019,6 +1022,11 @@ void QIperfC::onUpdateDataPath(QString datapath)
     m_datapath = datapath;
     m_dlgrecord->setRootPath(datapath);
     ui->actionShowLog->setEnabled(true);
+}
+
+void QIperfC::onUpdateTPCfg(QByteArray tpcfg)
+{
+    m_tpmgr->loaddata(tpcfg);
 }
 
 void QIperfC::initActions()

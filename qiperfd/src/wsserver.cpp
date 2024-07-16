@@ -265,7 +265,7 @@ void WSServer::onBytesWritten(qint64 bytes)
     {
         if (m_sendtype==WSServer::sendtype::file){
             QString target = pClient->peerAddress().toString();
-            qDebug() << "onBytesWritten: " << target << " size: " << QString::number(bytes);
+//            qDebug() << "onBytesWritten: " << target << " size: " << QString::number(bytes);
             sendNextChunk(target);
         }
     }
@@ -316,7 +316,7 @@ void WSServer::sendNextChunk(QString target)
     qint64 rc;
     buffer.append(m_currentFile->read(m_chunkSize - buffer.size()));
     rc = client->sendBinaryMessage(buffer);
-    qDebug() << "Sent chunk of size:" << buffer.size() << "for file:" << m_fileName;
+//    qDebug() << "Sent chunk of size:" << buffer.size() << "for file:" << m_fileName;
     if (rc != buffer.size()){
         qDebug() << "send chunk of size error: \nexpect: " << QString::number(buffer.size()) <<
                     "\nactually: " << QString::number(rc);

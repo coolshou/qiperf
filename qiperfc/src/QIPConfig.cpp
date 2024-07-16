@@ -1,6 +1,11 @@
 #include "QIPConfig.h"
 
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+
 #include <QDebug>
+
 
 const QByteArray QIPConfig::MAGIC_VALUE = ".QIP";
 const qint32 QIPConfig::VERSION = 2;
@@ -14,8 +19,12 @@ QIPConfig::QIPConfig(QString tmppath, QObject *parent):
     m_data->tpcfg = "";
     m_data->env = "";
     m_data->testdate = "";
-
-
+    //client data parser
+    m_ciperfwrapper = new IperfWrapper(this);
+    connect(m_ciperfwrapper, &IperfWrapper::sendThroughput, this, &QIPConfig::onThroughputData);
+    //server data parser
+    m_siperfwrapper = new IperfWrapper(this);
+//    connect(m_siperfwrapper, &IperfWrapper::sendThroughput, this, &QIPConfig::onThroughputData);
 }
 
 bool QIPConfig::loadFromFile(const QString &filePath) {
@@ -23,6 +32,7 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
     if (!file.open(QIODevice::ReadOnly)) {
         return false;
     }
+    bool rc=false;
 //    QDataStream in(file.readAll());
     QDataStream in(&file);
     in >> m_magic;
@@ -41,10 +51,12 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
                 QByteArray compressedfiles;
                 //tmp path
                 QString outpath = m_tmppath + QDir::separator() + m_data->testdate;
-//                qDebug() << "outpath: " << outpath;
                 emit updateDataPath(outpath);
                 in >> compressedfiles;
-                return filesFromStore(compressedfiles, outpath);
+                rc = filesFromStore(compressedfiles, outpath);
+                if (rc){
+                    rc = parserTPCfgLogFiles(outpath);
+                }
             }else {
                 return true;
             }
@@ -53,6 +65,7 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
             return false;
         }
         file.close();
+        return rc;
     } else {
         file.close();
         qDebug() << "Wrong format of " << filePath;
@@ -103,6 +116,11 @@ void QIPConfig::setTPCfg(QByteArray tpcfg, QString env, QString testdate, QStrin
     }
 }
 
+void QIPConfig::onThroughputData(int idx, QString sInterval, QString data)
+{
+    qDebug() << "onThroughputData: " << idx << " sInterval: " << sInterval << " data: " << data;
+}
+
 QByteArray QIPConfig::serialize() const {
     QByteArray data;
     QDataStream out(&data, QIODevice::WriteOnly);
@@ -122,6 +140,7 @@ bool QIPConfig::deserialize(const QByteArray &data) {
     in.setVersion(QDataStream::Qt_5_15); // Set the stream version
 
     in >> m_data->tpcfg;
+    emit updateTPCfg(m_data->tpcfg.toUtf8());
     if (m_loadversion>=2){
         in >> m_data->env;
         in >> m_data->testdate;
@@ -173,12 +192,9 @@ bool QIPConfig::filesFromStore(QByteArray &inputData, const QString &outputFolde
     while (!in.atEnd()) {
         QString name;
         QByteArray compressedData;
-
         in >> name >> compressedData;
-
         // Decompress the file content
         QByteArray fileContent = qUncompress(compressedData);
-
         // Optionally write the decompressed data to a file or process it as needed
         QString outputFilePath = dir.filePath(name);
         QFile outputFile(outputFilePath);
@@ -190,4 +206,43 @@ bool QIPConfig::filesFromStore(QByteArray &inputData, const QString &outputFolde
         outputFile.close();
     }
     return true;
+}
+
+bool QIPConfig::parserTPCfgLogFiles(QString logpath)
+{
+    //use m_data->tpcfg to parser all log file to setup throughput plot chart
+    if (m_data->tpcfg.size()>0){
+//        qDebug() << "parserTPCfgLogFiles tpcfg: " << m_data->tpcfg;
+        QJsonDocument doc=QJsonDocument::fromJson(m_data->tpcfg.toUtf8());
+        QJsonObject jClient;
+        QJsonObject jServer;
+        QJsonArray arr = doc.array();
+        foreach(auto jObj, arr){
+            if (jObj["Action"].toString() == "IPERF_ADD"){
+                qDebug() << "jObj: " << jObj;
+                //client
+                jClient = jObj["client"].toObject();
+                QString clientip = jClient["bind"].toString();
+                bool bidir = jClient["bidir"].toBool();
+                bool reverse = jClient["reverse"].toBool();
+                QString protocal = jClient["protocal"].toString();
+                int parallel = jClient["parallel"].toInt();
+                QString version = jClient["version"].toString();
+
+                //m_iperfwrapper->setSetting(m_refrow, m_servermode, m_parallel, m_bidir, m_bidirtag);
+
+                //server
+                jServer = jObj["server"].toObject();
+                QString serverip = jServer["bind"].toString();
+                QString serverport = jServer["port"].toString();
+                QString serverfile = serverip + "_" +serverport+ ".log";
+                QString clientfile = clientip + "-" + serverfile;
+
+                //m_iperfwrapper->setSetting(m_refrow, m_servermode, m_parallel, m_bidir, m_bidirtag);
+            }
+        }
+
+        qDebug() << "parserTPCfgLogFiles logpath: " << logpath;
+    }
+    return false;
 }

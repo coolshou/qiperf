@@ -4,7 +4,8 @@
 #include <QtCore>
 #include <QObject>
 #include <QByteArray>
-// #include <QJsonArray>
+
+#include "../src/iperfwrapper.h"
 
 class QIPConfigData {
 
@@ -28,6 +29,10 @@ public:
 
 signals:
     void updateDataPath(QString datapath);
+    void updateTPCfg(QByteArray tpcfg);
+
+private slots:
+    void onThroughputData(int idx, QString sInterval,  QString data);
 
 private:
     static const QByteArray MAGIC_VALUE;
@@ -37,6 +42,8 @@ private:
     bool deserialize(const QByteArray &data);
     QByteArray filesToStore(QStringList &inputFiles) const;
     bool filesFromStore(QByteArray &inputData, const QString &outputFolder) const;
+    bool parserTPCfgLogFiles(QString logpath);
+
     // QByteArray storefiles(const QStringList &inputFiles) const;
     // Configuration data
     QString m_tmppath;
@@ -44,7 +51,8 @@ private:
     uint32_t m_version;
     uint32_t m_loadversion;
     QIPConfigData *m_data; //compress zip/tar ?
-
+    IperfWrapper *m_ciperfwrapper;
+    IperfWrapper *m_siperfwrapper;
 
 };
 
