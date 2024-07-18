@@ -4,6 +4,8 @@
 #include <QIcon>
 #include <QMenu>
 #include <QAction>
+#include <QStandardPaths>
+#include "comm.h"
 
 #include <QDebug>
 
@@ -27,6 +29,9 @@ MyTray::MyTray(QObject *parent):QObject(parent)
             this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 
     trayicon->show();
+    QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    QString qiperfdlog = tmp + "/qiperf/"+QString(QIPERFD_NAME)+".log" ;
+
 }
 
 void MyTray::hideIconTray()

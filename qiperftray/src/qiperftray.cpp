@@ -17,9 +17,12 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     //  sudo =>      /etc/xdg/alphanetworks/qiperftray.conf
     //UserScope: /home/jimmy/.config/alphanetworks/qiperftray.conf
     //  sudo =>       /root/.config/alphanetworks/qiperftray.conf
-
+    //Windows:
+    //  /c:/user/<xxx>/appdata/local/temp/qiperf/
     ui->setupUi(this);
     loadcfg();
+    //TODO: get install path!! or exec path?
+
     setWindowFlags(Qt::WindowTitleHint|Qt::Dialog);
 #if defined (Q_OS_LINUX)
     setFixedSize(500,300);
@@ -69,13 +72,37 @@ void QIperfTray::statusmsg(QString msg)
     ui->statusBar->showMessage(msg);
 }
 
+void QIperfTray::startQiperfd()
+{
+    //TODO: start Qiperfd service
+    // nssm.exe start "qiperfd"
+    //sudo systemctl start qiperfd.service
+}
+
+void QIperfTray::stopQiperfd()
+{
+    //TODO: stop Qiperfd service
+    // nssm.exe stop "qiperfd"
+    //sudo systemctl stop qiperfd.service
+}
+
+void QIperfTray::restartQiperfd()
+{
+    //restart Qiperfd service
+}
+
+void QIperfTray::statusQiperfd()
+{
+    //get status of qiperfd, 0: stop , 1: running
+}
+
 void QIperfTray::onNewMessage(const QString msg)
 {
     qInfo() << "onNewMessage:" << msg;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError){
-        onError("");
+//        onError("");
         // handle return message
         QVariantMap result = doc.toVariant().toMap();
         QString act = result["CMD"].toString();
@@ -85,7 +112,7 @@ void QIperfTray::onNewMessage(const QString msg)
             ui->cb_mgr_ifnames->clear();
             ui->cb_mgr_ifnames->addItems(ifnames);
             QString ifname =  result["ifname"].toString();
-            qDebug() << "current ifname:" << ifname << Qt::endl;
+//            qDebug() << "current ifname:" << ifname << Qt::endl;
             int curidx = ui->cb_mgr_ifnames->currentIndex();
             int fidx =ui->cb_mgr_ifnames->findText(ifname);
             if (curidx != fidx){
@@ -94,11 +121,11 @@ void QIperfTray::onNewMessage(const QString msg)
         }else if (QString::compare(act, CMD_STATUS, Qt::CaseInsensitive)==0){
             QVariantMap status = result[CMD_STATUS].toMap();
             QString works = status["iperfworkers"].toString();
-            qDebug() << "CMD_STATUS:" << status << Qt::endl;
+//            qDebug() << "CMD_STATUS:" << status << Qt::endl;
             statusmsg("iperf: " + works);
 
         }else {
-            qDebug() << "onNewMessage:" << msg << Qt::endl;
+//            qDebug() << "onNewMessage:" << msg << Qt::endl;
             ui->te_msg->setText(msg.toUtf8());
         }
     }else {
@@ -109,6 +136,7 @@ void QIperfTray::onNewMessage(const QString msg)
 void QIperfTray::onError(QString msg)
 {
     if (!msg.isEmpty()){
+//        qDebug() << "onError: " << msg;
         ui->te_error->setText(msg);
         ui->te_error->setVisible(true);
     } else {
@@ -134,7 +162,7 @@ void QIperfTray::onSetMgrIfname()
     QJsonDocument doc;
     doc.setObject(jobj);
     QString strjson(doc.toJson(QJsonDocument::Compact));
-    qDebug()<< "onSetMgrIfname:" << strjson << Qt::endl;
+//    qDebug()<< "onSetMgrIfname:" << strjson << Qt::endl;
     pclient->send_MessageToServer(strjson);
 }
 

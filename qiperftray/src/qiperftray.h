@@ -26,6 +26,10 @@ public:
     void loadcfg();
     void savecfg();
     void statusmsg(QString msg);
+    void startQiperfd();
+    void stopQiperfd();
+    void restartQiperfd();
+    void statusQiperfd();
 
 public slots:
     void onTrayIconActivated();
