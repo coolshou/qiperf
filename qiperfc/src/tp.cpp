@@ -3,7 +3,7 @@
 #include <QPixmap>
 
 TP::TP(QString id, QString data, TP *parent)
-    :m_parentItem(parent), m_id(id)
+    :m_id(id), m_parentItem(parent)
 {
     m_id=id;
 //    m_itemDatas << id;
@@ -11,11 +11,6 @@ TP::TP(QString id, QString data, TP *parent)
     if (data!="" && data !="Root"){
         qDebug() << "TP data: "  << data;
         this->loadData(data);
-    }else{
-        m_itemDatas.append(m_id);
-        for(auto i=(int)TP::server;i<TP::comment;i++){
-            m_itemDatas.append("");
-        }
     }
     m_datatype = 0;
     m_Tx = 0;
@@ -162,13 +157,15 @@ void TP::loadData(QString data)
     m_mgrserver = o_server["manager"].toString();
 
     m_itemDatas.clear();
-    m_itemDatas.append(m_id);
-    m_itemDatas.append(m_server);
-    m_itemDatas.append(m_direction);
-    m_itemDatas.append(m_client);
-    m_itemDatas.append(""); //throughput
-    m_itemDatas.append(""); //lost rate
-    m_itemDatas.append(""); //comment
+    m_itemDatas.insert(cols::id,  m_id);
+    m_itemDatas.insert(cols::server, m_server);
+    m_itemDatas.insert(cols::dir, m_direction);
+    m_itemDatas.insert(cols::client, m_client);
+    m_itemDatas.insert(cols::throughput, "");
+    m_itemDatas.insert(cols::mintp, "");
+    m_itemDatas.insert(cols::maxtp, "");
+    m_itemDatas.insert(cols::lostrate, "");
+    m_itemDatas.insert(cols::comment, "");
 
     m_jsondata = data;
 }

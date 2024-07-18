@@ -27,8 +27,10 @@ public:
         dir=2,
         client=3,
         throughput=4,
-        lostrate=5,
-        comment=6
+        mintp = 5,
+        maxtp = 6,
+        lostrate=7,
+        comment=8
     };
     Q_ENUM(cols)
     void appendChild(TP *child);
@@ -80,12 +82,12 @@ signals:
 
 private:
     int m_datatype; // item type, 0: init, 1: for config root item, 2: throughput data
+    QString m_id; // reference id
     QList<TP *> m_childItems;
-    QList<QVariant> m_itemDatas;
+    QList<QVariant> m_itemDatas={m_id, QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant()};
     TP *m_parentItem;
 //    EndPointType::Type m_type;
     QString m_jsondata;
-    QString m_id; // reference id
     int m_version; //iperf version
     QString m_server; // target server ip
     QString m_mgrserver; // target manger server ip

@@ -77,6 +77,10 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
             return QString("Client");
         case TP::cols::throughput:
             return QString("TPUT");
+        case TP::cols::mintp:
+            return QString("Min \nTPUT");
+        case TP::cols::maxtp:
+            return QString("Max \nTPUT");
         case TP::cols::lostrate:
             return QString("Lost Rate (%)");
         case TP::cols::comment:

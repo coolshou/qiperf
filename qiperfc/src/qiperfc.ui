@@ -86,6 +86,9 @@
            <attribute name="headerShowSortIndicator" stdset="0">
             <bool>false</bool>
            </attribute>
+           <attribute name="headerStretchLastSection">
+            <bool>true</bool>
+           </attribute>
           </widget>
           <widget class="QWidget" name="widget_console" native="true">
            <property name="minimumSize">
