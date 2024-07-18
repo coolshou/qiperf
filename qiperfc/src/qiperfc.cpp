@@ -77,17 +77,34 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
 
     ui->tv_throughput->setModel(m_tpmgr);
+
+    /* TODO: set specify column font size,
+    // current not inherent other setting
+    header = new CustomHeaderView(Qt::Horizontal, ui->tv_throughput);
+    int s = header->getFontSize();
+    header->setColumnSize(int(TP::mintp), s/2);
+    header->setColumnSize(int(TP::maxtp), s/2);
+    ui->tv_throughput->setHeader(header);
+    // set specify column font size
+//    QHeaderView *header = ui->tv_throughput->header();
+//    QFont font = header->font();
+//    qDebug() << "font size: " << font.pointSize();
+//    font.setPointSize(28); // Set the desired font size
+//    header->setStyleSheet(QString("QHeaderView::section:nth-child(%1) { font-size: %2pt; }").arg(1).arg(font.pointSize()));
+    // end set font size
+
+    */
     ui->tv_throughput->setColumnWidth(TP::cols::id, 100);
     ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
     ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
     ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
     ui->tv_throughput->setColumnWidth(TP::cols::lostrate, 110);
+
     TooltipEventFilter* filter = new TooltipEventFilter(ui->tv_throughput);
     connect(filter, &TooltipEventFilter::doCopy, this, &QIperfC::onCopy);
     connect(filter, &TooltipEventFilter::doPaste, this, &QIperfC::onPaste);
     connect(filter, &TooltipEventFilter::doDelete, this, &QIperfC::onDelete);
     ui->tv_throughput->viewport()->installEventFilter(filter);
-//    ui->tv_throughput->installEventFilter(this);
     ui->tv_throughput->setRootIsDecorated(true); //show folding icon
 //    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
 //    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());

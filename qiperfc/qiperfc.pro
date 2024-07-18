@@ -47,6 +47,7 @@ SOURCES += \
     lib/qcustomplot.cpp \
     src/QIPConfig.cpp \
     src/codeeditor.cpp \
+    src/customheaderview.cpp \
     src/dlgiperf.cpp \
     src/dlgoption.cpp \
     src/dlgrecord.cpp \
@@ -79,6 +80,7 @@ HEADERS += \
     lib/qcustomplot.h \
     src/QIPConfig.h \
     src/codeeditor.h \
+    src/customheaderview.h \
     src/dlgiperf.h \
     src/dlgoption.h \
     src/dlgrecord.h \

@@ -27,6 +27,7 @@
 #include "dlgoption.h"
 #include "dlgrecord.h"
 #include "tooltipeventfilter.h"
+#include "customheaderview.h"
 
 #if (TEST_WS==1)
 #include "wsclient.h"
@@ -126,6 +127,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    CustomHeaderView *header;
     QString m_logpath;
     QClipboard *m_clipboard;
     FormQIperfds *m_frm_qiperfds;
