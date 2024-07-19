@@ -54,6 +54,7 @@ SOURCES += \
     src/dlgrecord.cpp \
     src/dlgtest.cpp \
     src/endpointmgr.cpp \
+    src/fileserver.cpp \
     src/formqiperfds.cpp \
     src/htmlwriter.cpp \
     src/main.cpp \
@@ -87,6 +88,7 @@ HEADERS += \
     src/dlgrecord.h \
     src/dlgtest.h \
     src/endpointmgr.h \
+    src/fileserver.h \
     src/formqiperfds.h \
     src/htmlwriter.h \
     src/qiperfc.h \

@@ -135,6 +135,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     pclient->SetAppHandle(qApp);
 
     m_dlgrecord = new DlgRecord(this);
+    m_fileserver = new FileServer(QIPERF_FILEPORT);
+
     // control remote qiperfd?
 #if (TEST_JSONRPC==1)
     qDebug() << "test jcon rpc server" << Qt::endl;
@@ -355,6 +357,7 @@ void QIperfC::onStart()
     if (!d.exists()){
         d.mkpath(".");
     }
+    m_fileserver->setRootPath(m_datapath);
 
     emit updateStarttime(startTime);
     //if (m_tpmgr->children().count()>0) {

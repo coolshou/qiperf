@@ -35,6 +35,7 @@ SOURCES += \
     $$PWD/../src/endpointtype.cpp \
     $$PWD/../src/icmpping.cpp \
     $$PWD/../src/iperfwrapper.cpp \
+    src/fileclient.cpp \
     src/iperfworker.cpp \
     src/main.cpp \
     src/myinfo.cpp \
@@ -56,6 +57,7 @@ HEADERS += \
     $$PWD/../src/comm.h \
     $$PWD/../src/versions.h \
     $$PWD/../src/iperfwrapper.h \
+    src/fileclient.h \
     src/iperfworker.h \
     src/myinfo.h \
     src/myservice.h \

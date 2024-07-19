@@ -28,6 +28,7 @@
 #include "dlgrecord.h"
 #include "tooltipeventfilter.h"
 #include "customheaderview.h"
+#include "fileserver.h"
 
 #if (TEST_WS==1)
 #include "wsclient.h"
@@ -165,6 +166,8 @@ private:
     QIPConfig *m_qipconfig;
     int m_WaitServerReady;
     QString m_datapath;
+
+    FileServer *m_fileserver;
 
 };
 #endif // QIPERFC_H
