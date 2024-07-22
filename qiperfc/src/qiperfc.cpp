@@ -404,7 +404,7 @@ void QIperfC::onStart()
             }
             //tell server add iperf server
             cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
-            qInfo() << "server cmd:"<< serverIP << " CMD_IPERF_ADD:" << tp->getServer() << ":" << tp->getPort() ;
+//            qInfo() << "server cmd:"<< serverIP << " CMD_IPERF_ADD:" << tp->getServer() << ":" << tp->getPort() ;
             rs = m_wss[serverIP]->sendText(cmd);
             if (rs<=0){
                 emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
@@ -435,7 +435,7 @@ void QIperfC::onStart()
             }
             //tell client add iperf client
             cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
-            qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
+//            qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
             rs = m_wsc[clientIP]->sendText(cmd);
             if (rs<=0){
                 emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());

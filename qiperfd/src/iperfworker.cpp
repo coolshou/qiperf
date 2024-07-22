@@ -209,7 +209,6 @@ void IperfWorker::onStarted()
     }
     m_running = true;
     m_iperfwrapper->setSetting(m_refrow, m_servermode, m_parallel, m_bidir, m_bidirtag);
-    qInfo() << "start m_selfdestructor:";
     m_selfdestructor->start();
     emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
 }
@@ -268,8 +267,6 @@ void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
         m_logfile->flush();
         m_logfile->close();
         filename = m_logfile->fileName();
-        qDebug() << "TODO: send file back: " << filename;
-
         delete m_logfile;
         m_logfile = nullptr;
     }
