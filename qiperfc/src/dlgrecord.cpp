@@ -32,7 +32,7 @@ void DlgRecord::setRootPath(QString rootpath)
     ui->tvLogFiles->setRootIndex(idx);
     ui->tvLogFiles->setColumnWidth(0, 400);
     ui->tvLogFiles->setColumnWidth(3, 150);
-    setWindowTitle(rootpath);
+    setWindowTitle(QDir::toNativeSeparators(rootpath));
 }
 
 void DlgRecord::close()
@@ -78,8 +78,6 @@ void DlgRecord::onItemDClicked(QModelIndex idx)
             }else{
                 m_logfiles[filename]->activateWindow();
             }
-
-
         }
     }
 }
