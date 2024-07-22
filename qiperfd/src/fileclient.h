@@ -4,41 +4,35 @@
 #include <QObject>
 #include <QTcpSocket>
 #include <QFile>
+#include <QQueue>
 
 class FileClient : public QObject
 {
     Q_OBJECT
 public:
     explicit FileClient(quint16 port, QString targetaddress="127.0.0.1", QObject *parent = nullptr);
+    ~FileClient();
     void initTCP(quint16 port, QString targetaddress);
-    void sendFile(QString filename);
+    void enqueueFile(QString filename);
+    QString getTargetAddress();
 
 signals:
 private slots:
-//    void connectServer();
-//    void receiveData();
-    void updateFileProgress(qint64 numBytes);
-    void updateFileProgress();
+    void onConnected();
+    void onBytesWritten(qint64 bytes);
+    void onDisconnected();
 
 private:
-//    QTcpSocket *tcpSocket;  // for text message exchange
+    void sendNextFile();
     QTcpSocket *fileSocket;  //for file transfer
-
+    QQueue<QString> m_fileQueue;
+    QFile *m_currentFile;
     qint64 m_chunkSize;
     qint64 m_port;
     QString m_targetaddress;
 
     quint64 totalBytes;
-    quint64 bytesWritten;
-    qint64 bytestoWrite;
-    qint64 filenameSize;
     quint64 bytesReceived;
-
-    QString m_filename;
-
-    QFile *m_localFile;
-    QByteArray outBlock;
-    QByteArray inBlock;
 };
 
 #endif // FILECLIENT_H

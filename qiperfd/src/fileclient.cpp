@@ -1,117 +1,125 @@
 #include "fileclient.h"
 
 #include <QDataStream>
+#include <QFileInfo>
 
 #include <QDebug>
 
 FileClient::FileClient(quint16 port, QString targetaddress, QObject *parent)
-    : QObject{parent}, m_chunkSize(64 * 1024)
+    : QObject{parent}, m_currentFile(nullptr), m_chunkSize(64 * 1024)
     , m_port(port), m_targetaddress(targetaddress)
 {
     initTCP(m_port, m_targetaddress);
 
     totalBytes = 0;
-    bytestoWrite = 0;
-    bytesWritten = 0;
     bytesReceived = 0;
-    filenameSize = 0;
+}
+
+FileClient::~FileClient()
+{
+    if (m_currentFile) {
+        m_currentFile->close();
+        delete m_currentFile;
+    }
+    fileSocket->close();
 }
 
 void FileClient::initTCP(quint16 port, QString targetaddress)
 {
+    if (!targetaddress.contains(m_targetaddress)){
+        m_targetaddress = targetaddress;
+    }
+    if (port !=m_port) {
+        m_port = port;
+    }
     fileSocket = new QTcpSocket(this);
     fileSocket->abort();
+    connect(fileSocket, &QTcpSocket::connected, this, &FileClient::onConnected);
+    connect(fileSocket, &QTcpSocket::disconnected, this, &FileClient::onDisconnected);
+    connect(fileSocket, &QTcpSocket::bytesWritten, this, &FileClient::onBytesWritten);
+
+    qDebug() << "FileClient connect to " << targetaddress << " port: " << port;
     fileSocket->connectToHost(targetaddress, port);
-    connect(fileSocket, SIGNAL(bytesWritten(qint64)), this, SLOT(updateFileProgress(qint64)));
-    connect(fileSocket, SIGNAL(readyRead()), this, SLOT(updateFileProgress()));
+
 
 }
 
-void FileClient::sendFile(QString filename)
+void FileClient::enqueueFile(QString filename)
 {
-    m_localFile = new QFile(filename);
-    if (!m_localFile->open(QFile::ReadOnly))
-    {
-        qDebug() << tr("Client:open file error!");
+    qDebug()<< "file to send(enqueueFile): " << filename;
+    m_fileQueue.append(filename);
+    if (fileSocket->state() == QTcpSocket::ConnectedState && !m_currentFile) {
+        //If the client is connected and not currently transferring a file, it will start sending the next file in the queue
+        sendNextFile();
+    }else {
+        qDebug() << "fileSocket->state(): " << (int)fileSocket->state() << "  (3=ConnectedState)" ;
+        if (m_currentFile){
+            qDebug() << "m_currentFile: " << m_currentFile->fileName();
+        }
+    }
+}
+
+QString FileClient::getTargetAddress()
+{
+    return m_targetaddress;
+}
+
+void FileClient::onConnected()
+{
+    qDebug() << "Connected to server";
+    // Start sending the first file if there's any in the queue
+    if (!m_currentFile) {
+        sendNextFile();
+    }
+}
+
+void FileClient::onBytesWritten(qint64 bytes)
+{
+    Q_UNUSED(bytes);
+    if (m_currentFile && m_currentFile->isOpen()) {
+        QByteArray buffer = m_currentFile->read(m_chunkSize); // Read in chunks of 64KB
+        if (buffer.isEmpty()) {
+            QString filename = m_currentFile->fileName();
+            m_currentFile->close();
+            delete m_currentFile;
+            m_currentFile = nullptr;
+            qDebug() << "[onBytesWritten]File transfer completed: " << filename;
+            sendNextFile(); // Proceed to the next file in the queue
+        } else {
+            fileSocket->write(buffer);
+        }
+    }
+}
+
+void FileClient::onDisconnected()
+{
+    qDebug() << "Disconnected from server";
+    if (m_currentFile) {
+        m_currentFile->close();
+        delete m_currentFile;
+        m_currentFile = nullptr;
+    }
+}
+
+void FileClient::sendNextFile()
+{
+    if (m_fileQueue.isEmpty()) {
+        qDebug() << "All files have been sent";
         return;
     }
-    totalBytes = m_localFile->size();
-    QDataStream sendout(&outBlock, QIODevice::WriteOnly);
-    sendout.setVersion(QDataStream::Qt_5_15);
-    QString currentFileName = filename.right(filename.size() - filename.lastIndexOf('/') - 1);
 
-    qDebug() << sizeof(currentFileName);
-        sendout << qint64(0) << qint64(0) << currentFileName;
-    totalBytes += outBlock.size();
-    sendout.device()->seek(0);
-    sendout << totalBytes << qint64((outBlock.size() - sizeof(qint64)* 2));
-
-    bytestoWrite = totalBytes - fileSocket->write(outBlock);
-    outBlock.resize(0);
-}
-
-void FileClient::updateFileProgress(qint64 numBytes)
-{
-     bytesWritten += numBytes;
-
-    if (bytestoWrite > 0)
-    {
-        outBlock = m_localFile->read(qMin(bytestoWrite, m_chunkSize));
-        bytestoWrite -= (fileSocket->write(outBlock));
-        outBlock.resize(0);
+    QString filePath = m_fileQueue.dequeue();
+    m_currentFile = new QFile(filePath);
+    if (!m_currentFile->open(QIODevice::ReadOnly)) {
+        qWarning() << "Cannot open file" << filePath << ":" << m_currentFile->errorString();
+        delete m_currentFile;
+        m_currentFile = nullptr;
+        sendNextFile(); // Try to send the next file
+        return;
     }
-    else
-        m_localFile->close();
 
-    qDebug() << "send/Total: " << bytesWritten << "/" << totalBytes;
-
-    if (bytesWritten == totalBytes)
-    {
-        m_localFile->close();
-        //fileSocket->close();
-    }
-}
-
-void FileClient::updateFileProgress()
-{
-    QDataStream inFile(fileSocket);
-    inFile.setVersion(QDataStream::Qt_5_15);
-
-    if (bytesReceived <= sizeof(qint64)* 2)
-    {
-        if ((fileSocket->bytesAvailable() >= (qint64)(sizeof(qint64)) * 2) && (filenameSize == 0))
-        {
-            inFile >> totalBytes >> filenameSize;
-            bytesReceived += sizeof(qint64)* 2;
-        }
-        if ((fileSocket->bytesAvailable() >= filenameSize) && (filenameSize != 0))
-        {
-            inFile >> m_filename;
-            bytesReceived += filenameSize;
-            m_localFile = new QFile(m_filename);
-            if (!m_localFile->open(QFile::WriteOnly))
-            {
-                qDebug() << "Server::open file error!";
-                return;
-            }
-        }
-        else
-            return;
-    }
-    if (bytesReceived < totalBytes)
-    {
-        bytesReceived += fileSocket->bytesAvailable();
-        inBlock = fileSocket->readAll();
-        m_localFile->write(inBlock);
-        inBlock.resize(0);
-    }
-    if (bytesReceived == totalBytes)
-    {
-        qDebug() << "Receive file successfully! " << m_localFile->fileName();
-        bytesReceived = 0;
-        totalBytes = 0;
-        filenameSize = 0;
-        m_localFile->close();
-        //fileSocket->close();
-    }
+    QFileInfo fileInfo(*m_currentFile);
+    QString header = QString("FILE:%1:%2\n").arg(fileInfo.fileName()).arg(fileInfo.size());
+    qDebug() << "header: " << header;
+    fileSocket->write(header.toUtf8());
 }

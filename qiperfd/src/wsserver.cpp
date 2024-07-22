@@ -177,6 +177,7 @@ void WSServer::addFileToSend(QString filename, QString target)
         delete file;
 //        continue;
     }
+    qDebug() << "send file: " << file << " TO: " << m_currentClient;
     m_files.enqueue(file);
     m_sendtype=WSServer::sendtype::file;
     sendNextChunk(m_currentClient);
@@ -190,6 +191,7 @@ void WSServer::onNewConnection()
     QString sfrom = pSocket->peerAddress().toString();
     onLog("Client  " + sfrom + " connected");
     if (!m_clients.contains(sfrom)) {
+        emit newClient(pSocket->peerAddress());
         connect(pSocket, &QWebSocket::textMessageReceived, this, &WSServer::processTextMessage);
         connect(pSocket, &QWebSocket::binaryMessageReceived, this, &WSServer::processBinaryMessage);
         connect(pSocket, &QWebSocket::disconnected, this, &WSServer::socketDisconnected);

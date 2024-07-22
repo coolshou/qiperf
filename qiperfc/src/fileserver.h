@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QDebug>
 
+#include "filesaveSocket.h"
 
 class FileServer : public QObject
 {
@@ -16,6 +17,10 @@ class FileServer : public QObject
 public:
     explicit FileServer(quint16 port, QObject *parent = nullptr);
     void setRootPath(QString pathname);
+public slots:
+//    void slotReceive(NLTcpSocket *socket);
+    void slotReceive(QTcpSocket *socket);
+    void slotDisconnectSocket(QTcpSocket *socket);
 protected:
 
 private slots:
@@ -23,17 +28,18 @@ private slots:
     void updateFileProgress();
     void displayError(QAbstractSocket::SocketError socketError);
     void sendFile(QString filename);
+//    void updateFileProgress(qint64 numBytes);
 
 signals:
 private:
     QTcpServer *fileserver;
-    QTcpSocket *filesocket;
+//    QTcpSocket *filesocket;
     QString m_rootpath;
     qint64 m_chunkSize;
     quint64 totalBytes;
     quint64 bytesReceived;
     qint64 filenameSize;
-    qint64 bytesWritten;
+    quint64 bytesWritten;
     qint64  bytestoWrite;
     QString m_filename;
 

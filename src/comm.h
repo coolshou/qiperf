@@ -12,6 +12,7 @@
 #define QIPERFD_PORT 47014
 #define QIPERFD_BPORT 47015  //broadcast
 #define QIPERFD_WSPORT 47016  //websocket port
+#define QIPERF_FILEPORT 47016 //FileServer Port
 #define RPC_PORT 57025
 
 #define QIPERFC_NAME  "qiperfconsole"

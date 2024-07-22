@@ -57,6 +57,7 @@
 #include <QMap>
 #include <QWebSocket>
 #include <QWebSocketProtocol>
+#include <QHostAddress>
 #include <QList>
 #include <QFile>
 #include <QQueue>
@@ -86,6 +87,7 @@ public slots:
     void sendTextResult(QString msg);
 signals:
     void actMessage(QString msg);
+    void newClient(QHostAddress addr);
 
 private Q_SLOTS:
     void onNewConnection();

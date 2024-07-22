@@ -9,6 +9,7 @@
 #include <QString>
 #include <QDateTime>
 #include "iperfwrapper.h"
+#include "fileclient.h"
 
 //#include <QCloseEvent> # require gui
 
@@ -75,7 +76,7 @@ protected:
 //    void closeEvent(QCloseEvent *event);
 private slots:
     void onWSactMessage(QString msg); //procress websocket action message
-
+    void onNewClient(QHostAddress addr); //
 private:
     QString tmpfilepath;
     IperfWrapper *m_iperfwrapper;
@@ -101,6 +102,7 @@ private:
     QMap<int, int> m_runstatus; //record thread idx run status, 0: stop , 1: running
     bool bReportTPData; // report throughput data
     QMap<QString, QMap<QString, QString>> m_directions; // starttime, bindkey, dir_tag: direction tag for each test
+    FileClient *m_fileclient;
 };
 
 #endif // QIPERFD_H

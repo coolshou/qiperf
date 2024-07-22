@@ -14,7 +14,7 @@
 #include <QDebug>
 
 QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
-    : QObject{parent}
+    : QObject{parent}, m_fileclient(nullptr)
 {
     bReportTPData = false;
     onLog(QString(QIPERFD_NAME) + ":" + QIPERFD_VERSION);
@@ -56,14 +56,15 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     m_udpsrv->setSendMsg(info); // broadcast
 
 #if (TEST_WS==1)
-    //
+    // websocket server : receive/handle cmd from qiperfc
     m_wsserver = new WSServer(QIPERFD_WSPORT); // websocket listen
     connect(m_wsserver, &WSServer::actMessage, this ,&QIperfd::onWSactMessage);
+    connect(m_wsserver, &WSServer::newClient, this ,&QIperfd::onNewClient);
     connect(this, &QIperfd::iperfStarted, m_wsserver, &WSServer::sendTextResult);
 #endif
-
+    // pipserver : interact with systemtray GUI (qiperftray)
     m_pserver=pserver;
-    // systemtray GUI interaction interface
+
     // iperf control interface, accept add/del iperf setting from remote
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 #if defined(Q_OS_ANDROID) || defined(Q_OS_WIN32)
@@ -72,7 +73,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 #if defined(Q_OS_LINUX)
     // linux/android path
 #if !defined(Q_OS_ANDROID)
-    QString tmp_path = "/qiperf";
+    QString tmp_path = QString(QDir::separator()) + "qiperf";
     QDir dir(tmp + tmp_path);
     if (!dir.exists())
     {
@@ -81,17 +82,17 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 #else
     QString tmp_path = "";
 #endif
-    m_iperfexe2 = tmp + tmp_path + "/iperf2";
+    m_iperfexe2 = tmp + tmp_path + QDir::separator() + "iperf2";
     if (QFileInfo::exists(m_iperfexe2))
     {
         QFile::remove(m_iperfexe2);
     }
-    m_iperfexe21 = tmp + tmp_path + "/iperf2.1";
+    m_iperfexe21 = tmp + tmp_path + QDir::separator() + "iperf2.1";
     if (QFileInfo::exists(m_iperfexe21))
     {
         QFile::remove(m_iperfexe21);
     }
-    m_iperfexe3 = tmp + tmp_path + "/iperf3";
+    m_iperfexe3 = tmp + tmp_path + QDir::separator() + "iperf3";
     if (QFileInfo::exists(m_iperfexe3))
     {
         QFile::remove(m_iperfexe3);
@@ -149,11 +150,11 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
         }
     }
 #elif defined(Q_OS_WIN32)
-    // windows, multi files
+    // windows, iperf files
 
-    m_iperfexe2 = apppath + "/windows/x86/iperf2.exe";
-    m_iperfexe21 = apppath + "/windows/x86/iperf2.1.exe";
-    m_iperfexe3 = apppath + "/windows/" + arch + "/iperf3.exe";
+    m_iperfexe2 = apppath + QDir::separator() + "windows" +QDir::separator() + "x86"+QDir::separator() + "iperf2.exe";
+    m_iperfexe21 = apppath + QDir::separator() + "windows"+ QDir::separator() + "x86"+QDir::separator() + "iperf2.1.exe";
+    m_iperfexe3 = apppath + QDir::separator() + "windows" +QDir::separator() + arch + QDir::separator() + "iperf3.exe";
 #else
     qDebug() << " Not Support platform!!" << Qt::endl;
 #endif
@@ -635,7 +636,11 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport, 
     m_wsserver->sendTextResult(msg);
     if (!filename.isEmpty()){
         if(QFileInfo::exists(filename)){
-            m_wsserver->addFileToSend(filename);
+//            m_fileclient->sendFile(filename);
+            m_fileclient->enqueueFile(filename);
+//            m_wsserver->addFileToSend(filename);
+        }else{
+            qDebug() << "file to send not Exist: " << filename;
         }
     }
     del(idx);
@@ -709,4 +714,14 @@ void QIperfd::onWSactMessage(QString msg)
         qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;
         qDebug() << "\n==========";
     }
+}
+
+void QIperfd::onNewClient(QHostAddress addr)
+{
+//    qDebug() << "onNewClient: "  << addr.toString();
+    if (m_fileclient){
+        qDebug() << "m_fileclient exist: " << m_fileclient->getTargetAddress() << " new: " << addr.toString();
+    }
+    //TODO: multi file client
+    m_fileclient = new FileClient(QIPERF_FILEPORT, addr.toString());
 }
