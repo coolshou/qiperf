@@ -285,7 +285,7 @@ void IperfWorker::parserStdOut(QString msg)
     if (m_version==3){
         m_iperfwrapper->parserIperf3(msg);
     }else if (m_version==2){
-
+        qDebug() << "TODO: parser iperf2 output";
     }else {
         qDebug() << "parserStdOut: Not support iperf version:" <<m_version;
     }
