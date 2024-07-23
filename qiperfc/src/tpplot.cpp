@@ -34,9 +34,13 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata)
     // TODO: add single x/y data to graphic
     QCPGraph *graph = getGraph(idx);
     // enlarge/shrink y range
-    if ((ydata >= yAxis->range().upper) or
-            (ydata*1.1 < yAxis->range().upper)){
-        int aval = round(ydata*1.1);
+    if ((ydata >= yAxis->range().upper) ){
+        int aval;
+        if (ydata < 100){
+            aval= round(ydata*1.5);
+        }else{
+            aval= round(ydata*1.1);
+        }
         yAxis->setRange(0, aval);
     }
     if (xdata >= xAxis->range().upper){

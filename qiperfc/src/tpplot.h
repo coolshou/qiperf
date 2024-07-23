@@ -38,7 +38,7 @@ private:
     QScrollArea *legendScrollArea;
     QWidget *legendContainer;
     QVBoxLayout *legendLayout;
-    int m_yAxisMaxDefault=1000; // 100 Mbps
+    int m_yAxisMaxDefault=100; // 100 Mbps
     int m_xAxisMaxDefault=30; // 30sec
 };
 
