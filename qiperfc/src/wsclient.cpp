@@ -93,7 +93,10 @@ qint64 WSClient::sendText(QString message)
 bool WSClient::isConnected()
 {
     // TODO: is isValid() ok for check the websocket connected!!??
-    return m_webSocket.isValid();
+//    if (m_webSocket!=nullptr){
+        return m_webSocket.isValid();
+//    }
+//    return false;
 }
 
 

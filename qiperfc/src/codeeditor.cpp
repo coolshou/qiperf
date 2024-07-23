@@ -107,10 +107,11 @@ void CodeEditor::load(QString filename)
 {
     setWindowTitle(filename);
     QFile file(filename);
-    file.open(QIODevice::Text | QFile::ReadOnly);
-    QString content = QString::fromUtf8(file.readAll());
-    this->setPlainText(content);
-    file.close();
+    if (file.open(QIODevice::Text | QFile::ReadOnly)){
+        QString content = QString::fromUtf8(file.readAll());
+        this->setPlainText(content);
+        file.close();
+    }
 }
 
 //![extraAreaWidth]

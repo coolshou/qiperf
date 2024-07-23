@@ -37,7 +37,7 @@ QVariant EndPointMgr::data(const QModelIndex &index, int role) const
 //        qDebug() << "data not DisplayRole:" << index << Qt::endl;
         return QVariant();
     }
-
+    qDebug() << "EndPointMgr::data: " << index  << " flasg: " << flags(index);
 //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
     EndPoint *item = static_cast<EndPoint*>(index.internalPointer());
 //    EndPoint *item = itemFromIndex(index);
@@ -159,19 +159,25 @@ bool EndPointMgr::add(QString id, QString data)
     if (isExist(id)){
         QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
         QJsonObject jsonObject = doc.object();
-        bool update = jsonObject["update"].toBool();
+//        bool update = jsonObject["update"].toBool();
+        //TODO: update information of endpoint
         EndPoint* ep = getEndPoint(id);
-        if (update){
-            qDebug() << "TODO update EndPointMgr::add: Exist(" << id << ") " << Qt::endl;
+//        if (update){
+//            qDebug() << "TODO update EndPointMgr::add: Exist(" << id << ") " << Qt::endl;
             //TODO: do data update!
             ep->loadData(data);
             ep->updateTimeStemp();
-        }
+            //TODO: update UI value from endpoint
+            //QModelIndex midx = indexFromItem(ep);
+            //qDebug() << "update midx: " << midx << " ep:" << ep;
+//            m_endpoints[id]
+//        }
         return false;
     } else {
         //new endpoint
         //qDebug() << "EndPointMgr::add: (" << id << ") " << data << Qt::endl;
         EndPoint* ep = new EndPoint(id, data, rootItem);
+//        ep->setFlags(Qt::NoItemFlags);
         int ibegin = rootItem->childCount();
         int iend = rootItem->childCount()+1;
         QModelIndex midx = indexFromItem(rootItem);
