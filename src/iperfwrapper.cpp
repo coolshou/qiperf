@@ -141,6 +141,7 @@ void IperfWrapper::parserIperf3(QString linedata)
             sTag="c";
         }
         int iparallel = m_parallel.toInt();
+//        qDebug() << "iparallel: " << QString::number(iparallel);
         if (m_bidir){
             //bidir mode
             // in bidir only get [Rx*]
@@ -165,10 +166,9 @@ void IperfWrapper::parserIperf3(QString linedata)
         //"0.00-1.00   sec   111 MBytes   931 Mbits/sec"
         QStringList data = linedata.split(" ", Qt::SkipEmptyParts);
         QString sInterval  = data[0]; // Interval
-//            qDebug() << "idx:" << idx << " ,Interval:" << sInterval
-//                     << " ,Bitrate:" << irec->m_value  << " ,unit:" << irec->m_unit;
+//            qDebug() << "data:" << data;
         if (!m_tpdatas.contains(sInterval)){
-//                qDebug() << "new data: " << sInterval;
+//            qDebug() << "new data: " << sInterval;
             QJsonArray lst =QJsonArray();
             m_tpdatas.insert(sInterval, lst);
         }
@@ -184,13 +184,13 @@ void IperfWrapper::parserIperf3(QString linedata)
                 // ignore [SUM] line
                 qInfo() << "==linedata==SUM==  " << linedata;
             }else{
-//                    qDebug() << "m_parallel: " << iparallel << "m_tpdatas length: " << m_tpdatas[sInterval].count();
+//                qDebug() << "m_parallel: " << QString::number(iparallel) << "m_tpdatas length: " << m_tpdatas[sInterval].count();
                 if (linedata.contains("receiver")){
                     irec.insert("AVG", true); //final data is the average of throughput
                 }
-                QJsonDocument d;
-                d.setObject(irec);
-                qDebug() << "irec: " << d.toJson(QJsonDocument::Compact);
+//                QJsonDocument d;
+//                d.setObject(irec);
+//                qDebug() << "irec: " << d.toJson(QJsonDocument::Compact);
                 m_tpdatas[sInterval].append(irec);
             }
 
@@ -204,7 +204,7 @@ void IperfWrapper::parserIperf3(QString linedata)
             if (sInterval.contains("-")){
                 sInterval = sInterval.right(sInterval.indexOf("-"));
             }
-            qDebug() << QString::number(m_idx) << " : " << sInterval << " : " << doc.toJson(QJsonDocument::Compact);
+//            qDebug() << "sendThroughput:" << QString::number(m_idx) << " : " << sInterval << " : " << doc.toJson(QJsonDocument::Compact);
             emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
             //clear record
 //            QMap<QString, QJsonArray>().swap(m_tpdatas); // looks ok?

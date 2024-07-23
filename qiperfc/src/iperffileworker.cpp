@@ -10,7 +10,7 @@ IperfFileWorker::IperfFileWorker(QString version, QString protocal,
 {
     m_thread = new QThread();
     m_iperfwrapper= new IperfWrapper();
-    m_iperfwrapper->setSetting(idx, servermode, QString(parallel), bidir, bidirtag);
+    m_iperfwrapper->setSetting(idx, servermode, QString::number(parallel), bidir, bidirtag);
     m_iperfwrapper->setFile(filename);
     m_iperfwrapper->setIperf(version, protocal);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfFileWorker::onThroughputData);

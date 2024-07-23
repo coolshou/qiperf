@@ -59,11 +59,6 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_frm_option = new dlgOption(m_settings);
     initStatusbar();
     loadSettings();
-    m_qipconfig = new QIPConfig(logdir.absolutePath());
-    connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
-    connect(m_qipconfig, &QIPConfig::updateTPCfg, this, &QIperfC::onUpdateTPCfg);
-    connect(m_qipconfig, &QIPConfig::onThroughput, this, &QIperfC::onIperfTPdata);
-
     //UI actions
     initActions();
     //dataTimer = QTimer();
@@ -73,13 +68,17 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     iTimeout = 10*100;
     //
     m_tpmgr = new TPMgr(this);
-
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &QIperfC::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::rowsRemoved, this, &QIperfC::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
 
-    ui->tv_throughput->setModel(m_tpmgr);
+    m_qipconfig = new QIPConfig(logdir.absolutePath());
+    connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
+    connect(m_qipconfig, &QIPConfig::updateTPCfg, this, &QIperfC::onUpdateTPCfg);
+//    connect(m_qipconfig, &QIPConfig::onThroughput, this, &QIperfC::onIperfTPdata);
+    connect(m_qipconfig, &QIPConfig::onThroughput, m_tpmgr, &TPMgr::onIperfTPdata);
 
+    ui->tv_throughput->setModel(m_tpmgr);
     /* TODO: set specify column font size,
     // current not inherent other setting
     header = new CustomHeaderView(Qt::Horizontal, ui->tv_throughput);
