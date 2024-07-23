@@ -1,5 +1,7 @@
 #include "filesaveSocket.h"
 
+#include <QHostAddress>
+
 FileSaveSocket::FileSaveSocket (QString pathname, QTcpSocket* socket)
     :m_rootpath(pathname)
 {
@@ -55,14 +57,14 @@ void FileSaveSocket::onClientDisconnected()
 {
     QTcpSocket *clientSocket = qobject_cast<QTcpSocket*>(sender());
     if (clientSocket) {
-        qDebug() << "Client disconnected";
+        qInfo() << "Client disconnected: " << clientSocket->peerAddress().toString();
         clientSocket->deleteLater();
     }
 }
 
 QString FileSaveSocket::getData()
 {
-    qDebug()<< "NLTcpSocket::getData: canReadLine: " << tcpSocket->canReadLine();
+    qDebug()<< "FileSaveSocket::getData: canReadLine: " << tcpSocket->canReadLine();
     QByteArray ba = tcpSocket->readLine();
     qDebug() << ba;
     return QString(ba);
