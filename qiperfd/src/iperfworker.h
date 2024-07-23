@@ -55,8 +55,8 @@ private slots:
 //    void parserIperf3(QString msg);
 
 private:
-    int m_selfdestructorTime;
-    QTimer *m_selfdestructor;
+    int m_selfdestructionTime;
+    QTimer *m_selfdestruction;
     int m_delaystart;
     int m_refrow;// refrow
     int m_idx;
