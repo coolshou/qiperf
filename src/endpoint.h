@@ -13,7 +13,8 @@ class EndPoint
 {
 //    Q_OBJECT
 public:
-//    explicit EndPoint(const QList<QVariant> &data, EndPoint *parentItem = nullptr);
+    //explicit EndPoint(const QList<QVariant> &data, EndPoint *parentItem = nullptr);
+    //explicit EndPoint(QString id, QString data, QObject *parent = nullptr);
     explicit EndPoint(QString id, QString data, EndPoint *parentItem = nullptr);
     ~EndPoint() ;//override;
 
@@ -26,7 +27,7 @@ public:
     int row() const;
     EndPoint *parentItem();
 
-    //explicit EndPoint(QString id, QString data, QObject *parent = nullptr);
+
 
     QString getID();
     void loadData(QString data);
