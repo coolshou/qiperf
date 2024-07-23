@@ -1,9 +1,12 @@
 #include "iperfwrapper.h"
 
+#include <QCoreApplication>
+#include <QEventLoop>
 #include <QVariantMap>
 #include <QString>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QFile>
 
 #include <QDebug>
 
@@ -126,7 +129,7 @@ void IperfWrapper::parserIperf3(QString linedata)
         //TODO: final sumary
 
     }else{
-//            qDebug() << "parserIperf3: " << msg;
+//        qDebug() << "parserIperf3: " << linedata;
         QString sDir = nullptr;
         int iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
         QString idx = linedata.mid(1,3).trimmed();  // extract [ idx]
@@ -139,8 +142,8 @@ void IperfWrapper::parserIperf3(QString linedata)
         }
         int iparallel = m_parallel.toInt();
         if (m_bidir){
-//                iparallel = m_parallel.toInt()*2; // bidir ;
-            // in bidir only get
+            //bidir mode
+            // in bidir only get [Rx*]
             iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
             sDir = linedata.mid(1,iS-1).trimmed();// server:[TX-S][RX-S], client:[TX-C][RX-C]
             linedata = linedata.right(linedata.length()-iS-1);
@@ -153,7 +156,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                 linedata = linedata.trimmed();
 //                    qDebug() << "bidir msg:" << msg;
             }else {
-                //ignore Tx part data
+//                qInfo() << "ignore Tx part data";
                 return;
             }
         }else{
@@ -178,14 +181,19 @@ void IperfWrapper::parserIperf3(QString linedata)
                 irec.insert("dir", sDir);  // direction
             }
             if (idx.contains("SUM", Qt::CaseInsensitive)){
+                // ignore [SUM] line
                 qInfo() << "==linedata==SUM==  " << linedata;
             }else{
 //                    qDebug() << "m_parallel: " << iparallel << "m_tpdatas length: " << m_tpdatas[sInterval].count();
                 if (linedata.contains("receiver")){
                     irec.insert("AVG", true); //final data is the average of throughput
                 }
+                QJsonDocument d;
+                d.setObject(irec);
+                qDebug() << "irec: " << d.toJson(QJsonDocument::Compact);
                 m_tpdatas[sInterval].append(irec);
             }
+
         }
         if ((m_tpdatas[sInterval].count()>=iparallel)&&
              !idx.contains("SUM", Qt::CaseInsensitive)){
@@ -196,6 +204,7 @@ void IperfWrapper::parserIperf3(QString linedata)
             if (sInterval.contains("-")){
                 sInterval = sInterval.right(sInterval.indexOf("-"));
             }
+            qDebug() << QString::number(m_idx) << " : " << sInterval << " : " << doc.toJson(QJsonDocument::Compact);
             emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
             //clear record
 //            QMap<QString, QJsonArray>().swap(m_tpdatas); // looks ok?
@@ -211,6 +220,47 @@ void IperfWrapper::setSetting(int idx, bool servermode, QString parallel, bool b
     m_parallel = parallel;
     m_bidir = bidir;
     m_bidirtag = bidirtag;
+}
+
+void IperfWrapper::setFile(QString filename)
+{
+    m_filename = filename;
+}
+
+void IperfWrapper::setIperf(QString version, QString protocal)
+{
+    m_version = version;
+    m_protocal = protocal;
+}
+
+void IperfWrapper::work()
+{
+    //log run
+    QFile file(m_filename);
+    if(file.exists()){
+        qDebug() <<"start IperfWrapper::work: " << m_filename ;
+        if (file.open(QIODevice::ReadOnly)){
+            QTextStream in(&file);
+            while (!in.atEnd())
+            {
+                QString line = in.readLine();
+                if (m_version=="3"){
+                    parserIperf3(line);
+                }else if (m_version=="2"){
+                    qDebug() << "[IperfWrapper::work]TODO: parser iperf2 output";
+                }else {
+                    qDebug() << "[IperfWrapper::work]: Not support iperf version:" <<m_version;
+                }
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
+            }
+            file.close();
+            qDebug() << "finish file parser: " << m_filename;
+        }else{
+            qDebug() << "open file " << m_filename << " Fail!!";
+        }
+    }else{
+        qDebug() << "file not exist: " << m_filename;
+    }
 }
 
 /*iperf3 output format

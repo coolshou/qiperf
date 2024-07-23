@@ -5,7 +5,8 @@
 #include <QObject>
 #include <QByteArray>
 
-#include "../src/iperfwrapper.h"
+//#include "../src/iperfwrapper.h"
+#include "../src/iperffileworker.h"
 
 class QIPConfigData {
 
@@ -26,10 +27,10 @@ public:
     uint32_t getVersion();
     QByteArray getTPCfg();
     void setTPCfg(QByteArray tpcfg, QString env="", QString testdate="", QStringList datafilenames={});
-
 signals:
     void updateDataPath(QString datapath);
     void updateTPCfg(QByteArray tpcfg);
+    void onThroughput(QString refrow, QString sInterval, QString datas); // refrow, sInterval, throughput data
 
 private slots:
     void onThroughputData(int idx, QString sInterval,  QString data);
@@ -51,8 +52,9 @@ private:
     uint32_t m_version;
     uint32_t m_loadversion;
     QIPConfigData *m_data; //compress zip/tar ?
-    IperfWrapper *m_ciperfwrapper;
-    IperfWrapper *m_siperfwrapper;
+//    IperfWrapper *m_ciperfwrapper;
+//    IperfWrapper *m_siperfwrapper;
+    QList<IperfFileWorker *> m_fileworkers;
 
 };
 

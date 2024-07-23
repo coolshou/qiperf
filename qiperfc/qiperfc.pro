@@ -58,6 +58,7 @@ SOURCES += \
     src/fileserver.cpp \
     src/formqiperfds.cpp \
     src/htmlwriter.cpp \
+    src/iperffileworker.cpp \
     src/main.cpp \
     src/qiperfc.cpp \
     src/rpctp.cpp \
@@ -93,6 +94,7 @@ HEADERS += \
     src/fileserver.h \
     src/formqiperfds.h \
     src/htmlwriter.h \
+    src/iperffileworker.h \
     src/qiperfc.h \
     src/rpctp.h \
     src/tp.h \

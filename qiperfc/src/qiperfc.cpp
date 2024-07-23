@@ -62,6 +62,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_qipconfig = new QIPConfig(logdir.absolutePath());
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
     connect(m_qipconfig, &QIPConfig::updateTPCfg, this, &QIperfC::onUpdateTPCfg);
+    connect(m_qipconfig, &QIPConfig::onThroughput, this, &QIperfC::onIperfTPdata);
+
     //UI actions
     initActions();
     //dataTimer = QTimer();
