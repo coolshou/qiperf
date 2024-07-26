@@ -21,8 +21,7 @@ HEADERS += \
     $$PWD/../src/pipeclient.h \
     $$PWD/../src/versions.h \
     src/mytray.h \
-    src/qiperftray.h \
-    src/versions.h
+    src/qiperftray.h
 
 FORMS += \
     src/qiperftray.ui
