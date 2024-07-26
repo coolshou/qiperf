@@ -320,6 +320,14 @@ void TP::setComment(QString comment)
 
 void TP::setThroughput(QString value)
 {
+    if ((m_itemDatas[TP::mintp].toDouble()==0 && (value.toDouble()>0))||
+            (value.toFloat() < m_itemDatas[TP::mintp].toDouble())){
+        m_itemDatas[TP::mintp] = value;
+    }
+    if (m_itemDatas[TP::maxtp]==""||
+            (value.toFloat() > m_itemDatas[TP::maxtp].toDouble())){
+        m_itemDatas[TP::maxtp] = value;
+    }
     m_itemDatas[TP::throughput] = value;
 }
 
@@ -327,8 +335,20 @@ void TP::setThroughput(QString dir, QString value)
 {
     if (dir.contains("Tx")){
         m_Tx = value.toDouble();
+        if (m_minTx==0 || (m_minTx> value.toDouble())){
+            m_minTx = value.toDouble();
+        }
+        if (m_maxTx < value.toDouble()){
+            m_maxTx = value.toDouble();
+        }
     }else{
         m_Rx = value.toDouble();
+        if (m_minRx==0 || (m_minRx> value.toDouble())){
+            m_minRx = value.toDouble();
+        }
+        if (m_maxRx < value.toDouble()){
+            m_maxRx = value.toDouble();
+        }
     }
 }
 
@@ -361,6 +381,26 @@ QString TP::getTxRxThroughput()
    }else{
        return "";
    }
+}
+
+QString TP::getMinThroughput()
+{
+    double v = m_minTx+m_minRx;
+    if (v>0){
+        return QString::number(v);
+    }else{
+        return "";
+    }
+}
+
+QString TP::getMaxThroughput()
+{
+    double v = m_maxTx+m_maxRx;
+    if (v>0){
+        return QString::number(v);
+    }else{
+        return "";
+    }
 }
 
 QString TP::getLostRate()

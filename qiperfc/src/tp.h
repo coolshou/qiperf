@@ -76,6 +76,8 @@ public:
     void setDataType(int datatype);
     int getDataType();
     QString getTxRxThroughput();
+    QString getMinThroughput();
+    QString getMaxThroughput();
     QString getLostRate();
 
 signals:
@@ -84,7 +86,7 @@ private:
     int m_datatype; // item type, 0: init, 1: for config root item, 2: throughput data
     QString m_id; // reference id
     QList<TP *> m_childItems;
-    QList<QVariant> m_itemDatas={m_id, QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant()};
+    QList<QVariant> m_itemDatas={m_id, QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant()}; //id, server ip, dir, client ip, throughput, min throughput, max throughput, lost rate, comment
     TP *m_parentItem;
 //    EndPointType::Type m_type;
     QString m_jsondata;
@@ -103,6 +105,10 @@ private:
     QString m_lastnoticetime; // last get notice time string, eq: 2023.17.06.12:22:07.905
     double m_Tx; //record Tx throughput
     double m_Rx; //record Rx throughput
+    double m_minTx;//record min Tx throughput
+    double m_maxTx;//record max Tx throughput
+    double m_minRx;//record min Rx throughput
+    double m_maxRx;//record max Rx throughput
     int m_lostpacket; // record lost packet
     int m_totalpacket; // record total packet
 };

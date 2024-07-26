@@ -49,7 +49,12 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             //special case of throughput data (sum of all iperf  --parallel value)
             return QVariant(item->getTxRxThroughput());
         }
-
+        if (index.column()== TP::cols::mintp) {
+            return QVariant(item->getMinThroughput());
+        }
+        if (index.column()== TP::cols::maxtp) {
+            return QVariant(item->getMaxThroughput());
+        }
     }
     if (index.column()== TP::cols::lostrate) {
         //TODO: special case of loserate date
@@ -489,7 +494,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         }
         value = jObj["value"].toString();
         sum = sum + value.toDouble();
-        this->addTPdata(refrow, sInterval, jObj["idx"].toString(), value,
+        addTPdata(refrow, sInterval, jObj["idx"].toString(), value,
                 jObj["unit"].toString(), dir);
         // chart data
         emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
