@@ -238,7 +238,7 @@ void IperfWrapper::work()
     //log run
     QFile file(m_filename);
     if(file.exists()){
-        qDebug() <<"start IperfWrapper::work: " << m_filename ;
+//        qDebug() <<"start IperfWrapper::work: " << m_filename ;
         if (file.open(QIODevice::ReadOnly)){
             QTextStream in(&file);
             while (!in.atEnd())
@@ -254,7 +254,7 @@ void IperfWrapper::work()
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
             }
             file.close();
-            qDebug() << "finish file parser: " << m_filename;
+//            qDebug() << "finish file parser: " << m_filename;
         }else{
             qDebug() << "open file " << m_filename << " Fail!!";
         }

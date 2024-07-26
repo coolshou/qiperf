@@ -238,12 +238,12 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                 int serverport = jServer["port"].toInt();
                 QString serverfile = logpath + QDir::separator() + serverip + "_" +QString::number(serverport)+ ".log";
                 QString clientfile = logpath + QDir::separator() + clientip + "-" + serverip + "_" +QString::number(clientport)+ ".log";
-                qDebug() << "clientip: " << clientip << " client port"<< clientport << " serverip:" << serverip << " port: " << serverport;
+//                qDebug() << "clientip: " << clientip << " client port"<< clientport << " serverip:" << serverip << " port: " << serverport;
 
                 if (!bidir){
                     if (!reverse){
                         //iperf server record file
-                        qDebug() << "serverfile: " << serverfile;
+//                        qDebug() << "serverfile: " << serverfile;
                         IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                    idx, true, parallel,
                                                                    bidir, "Tx", serverfile);
@@ -252,7 +252,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                         ifw->start();
                     }else{
                         //iperf client record file
-                        qDebug() << "clientfile: " << clientfile;
+//                        qDebug() << "clientfile: " << clientfile;
                         IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                    idx, false, parallel,
                                                                    bidir, "Rx", clientfile);
