@@ -78,6 +78,7 @@ public:
     QString getTxRxThroughput();
     QString getMinThroughput();
     QString getMaxThroughput();
+    void clearThroughput();
     QString getLostRate();
 
 signals:

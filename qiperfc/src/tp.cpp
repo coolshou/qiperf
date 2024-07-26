@@ -403,6 +403,16 @@ QString TP::getMaxThroughput()
     }
 }
 
+void TP::clearThroughput()
+{
+    m_Tx = 0;
+    m_Rx = 0;
+    m_minTx = 0;
+    m_maxTx = 0;
+    m_minRx = 0;
+    m_maxRx = 0;
+}
+
 QString TP::getLostRate()
 {
     if (m_totalpacket>0){

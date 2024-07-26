@@ -278,8 +278,9 @@ void TPMgr::clear(){
     if (rootItem->haveChilds()){
         foreach(auto tp, rootItem->getChilds()){
             tp->removeChildren(0, tp->childCount());
-            tp->setThroughput("Tx", 0);
-            tp->setThroughput("Rx", 0);
+            tp->clearThroughput();
+//            tp->setThroughput("Tx", 0);
+//            tp->setThroughput("Rx", 0);
             tp->resetData();
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
