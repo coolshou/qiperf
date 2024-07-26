@@ -265,7 +265,25 @@ void DlgIperf::onAccepted()
         //TODO: use style to hightlight some item:  *{border: 3px solid red;}
         return;
     }
-
+    if(ui->cb_version->currentText()=="3"){
+        if (ui->chk_bidir->isChecked()){
+            if (ui->sb_parallel->value()>10){
+                QMessageBox::warning(this, tr("WARNING!!"),
+                                     tr("In bidirectional mode, The parallel number should not over 10 (iperf3 under window may have problem)!!"),  QMessageBox::Ok);
+                ui->sb_parallel->setValue(10);
+                ui->sb_parallel->setFocus();
+                return;
+            }
+        }else{
+            if (ui->sb_parallel->value()>20){
+                QMessageBox::warning(this, tr("WARNING!!"),
+                                     tr("In bidirectional mode, The parallel number should not over 20 (iperf3 under window may have problem)!!"),  QMessageBox::Ok);
+                ui->sb_parallel->setValue(20);
+                ui->sb_parallel->setFocus();
+                return;
+            }
+        }
+    }
 
     //check target and client in same protocal type
     if(addr_target.protocol()!=addr_client.protocol()){
