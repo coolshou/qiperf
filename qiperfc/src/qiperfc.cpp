@@ -679,6 +679,7 @@ void QIperfC::onClear(){
     //clear all test date, config setting remain unchanged
     if (m_tpmgr->rootChildCount()>0) {
         m_tpmgr->clear();
+        ui->tv_throughput->collapseAll();
     }
     m_tpplot->clear();
     m_TestStartTime = QDateTime();
