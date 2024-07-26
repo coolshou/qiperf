@@ -163,7 +163,10 @@ void IperfWrapper::parserIperf3(QString linedata)
         }else{
             sDir = m_bidirtag;
         }
+        // TCP:
         //"0.00-1.00   sec   111 MBytes   931 Mbits/sec"
+        // UDP:
+        // 0.00-1.00   sec  4.18 GBytes  35.9 Gbits/sec  0.001 ms  0/137110 (0%)
         QStringList data = linedata.split(" ", Qt::SkipEmptyParts);
         QString sInterval  = data[0]; // Interval
 //            qDebug() << "data:" << data;
@@ -177,6 +180,18 @@ void IperfWrapper::parserIperf3(QString linedata)
             irec.insert("idx", idx+sTag);  // parallel num
             irec.insert("value", data[4]);  // Bitrate
             irec.insert("unit", data[5]);  // Bitrate unit
+            if (m_protocal.contains("UDP")){
+                irec.insert("jitter", data[6]);
+                irec.insert("jitter_unit", data[7]);
+                QStringList pkts = data[8].split("/");
+                if (pkts.count()==2){
+                    irec.insert("packet_lost", pkts[0]);
+                    irec.insert("packet_total", pkts[1]);
+                }else{
+                    qDebug() << "Unknown data format: " << data[8];
+                }
+
+            }
             if (!sDir.isNull()){
                 irec.insert("dir", sDir);  // direction
             }

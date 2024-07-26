@@ -494,6 +494,9 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             dir=jObj["dir"].toString();
         }
         value = jObj["value"].toString();
+        //packet lost;
+        QString pkt_lost = jObj["packet_lost"].toString();
+        QString pkt_total = jObj["packet_total"].toString();
         sum = sum + value.toDouble();
         addTPdata(refrow, sInterval, jObj["idx"].toString(), value,
                 jObj["unit"].toString(), dir);
