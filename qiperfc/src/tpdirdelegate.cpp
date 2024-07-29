@@ -28,6 +28,6 @@ void TPDirDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         }
     }
     else {
-        QStyledItemDelegate::paint(painter, option, index); //this will draw text too
+        QStyledItemDelegate::paint(painter, option, index); //this is original paint, it will draw all include text
     }
 }

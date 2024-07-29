@@ -36,7 +36,6 @@ void TPFoldingDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 
         QRect rect = opt.rect;
         int width = style->pixelMetric(QStyle::PM_IndicatorWidth, &branchOption, opt.widget);
-        qDebug() << "TPFoldingDelegate width:" << width;
         int height = style->pixelMetric(QStyle::PM_IndicatorHeight, &branchOption, opt.widget);
 //        int x = rect.x() + opt.rect.width() / 2 - width / 2;
         int y = rect.y() + opt.rect.height() / 2 - height / 2;
