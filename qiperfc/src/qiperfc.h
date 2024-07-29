@@ -63,6 +63,7 @@ public slots:
     void onOpen();
     void onSave();
     void on_Clear();
+    void onAddIperf();
     void onPairAdd();
     void onPairEdit();
     void onPairDelete();
@@ -109,6 +110,7 @@ private:
 
 private slots:
     void initActions();
+    void initToolbar();
     void initStatusbar();
     void onUpdateStarttime(QString stime);
     void onUpdateStatus(QString msg);
@@ -156,7 +158,7 @@ private:
     QLabel *m_status_label;
     QLabel *m_label_qiperfd;
     TPMgr *m_tpmgr;
-    TPDirDelegate *tpdrdelegate;
+    TPDirDelegate *tpdirdelegate;
 
     QDateTime m_TestStartTime;
     int bErrorStop;

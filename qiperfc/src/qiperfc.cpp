@@ -61,6 +61,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     loadSettings();
     //UI actions
     initActions();
+    initToolbar();
     //dataTimer = QTimer();
     initCustomPlote();
     connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
@@ -113,8 +114,9 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemDClicked); //edit item on double click
 
     //TODO: slow update text/image?
-    tpdrdelegate = new TPDirDelegate(this);
-    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdrdelegate);
+    tpdirdelegate = new TPDirDelegate(ui->tv_throughput);
+//    tpdirdelegate = new TPDirDelegate(this);
+    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdirdelegate);
 
     QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
     connect(ism, &QItemSelectionModel::selectionChanged, this, &QIperfC::onTPselectionChanged);
@@ -302,7 +304,7 @@ void QIperfC::on_Clear()
     onClear();
 }
 
-void QIperfC::onPairAdd()
+void QIperfC::onAddIperf()
 {
     // on_pair_add
     dlgiperf->updateUI();
@@ -313,6 +315,11 @@ void QIperfC::onPairAdd()
 //        qDebug()<< "on_pairAdd: \n" << rs;
         m_tpmgr->add(rs);
     }
+
+}
+
+void QIperfC::onPairAdd()
+{
 }
 
 void QIperfC::onPairEdit()
@@ -1061,7 +1068,8 @@ void QIperfC::initActions()
     connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(onCopy()));
     connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(onPaste()));
 
-    connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(onPairAdd()));
+//    connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(onPairAdd()));
+    connect(ui->actionAddIperf, SIGNAL(triggered()), this, SLOT(onAddIperf()));
     connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(onPairEdit()));
     connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(onPairDelete()));
     connect(ui->actionSwap, SIGNAL(triggered()), this, SLOT(onPairSwap()));
@@ -1080,6 +1088,16 @@ void QIperfC::initActions()
     //test
     connect(ui->actionTest, SIGNAL(triggered()), this, SLOT(onTest()));
 
+}
+
+void QIperfC::initToolbar()
+{
+    QMenu *menuAdd = new QMenu(this);
+    menuAdd->addAction(ui->actionAddIperf);
+
+    ui->actionAdd->setMenu(menuAdd);
+
+    ui->toolBar->insertAction(ui->actionEdit, ui->actionAdd);
 }
 
 void QIperfC::initStatusbar()
