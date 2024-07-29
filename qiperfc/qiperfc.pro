@@ -168,7 +168,7 @@ CONFIG(release, debug|release) {
 }
 unix:!android {
     MIME.files += \
-        qiperfc.xml
+        alphanetworks-qiperfc.xml
     MIME.path += \
         "/usr/share/mime/packages/"
 
