@@ -18,7 +18,6 @@
 #include <QTreeView>
 #include <QToolTip>
 
-#include "tpdirdelegate.h"
 #include "endpointact.h"
 #include "tp.h"
 #include "versions.h"
@@ -117,6 +116,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     tpdirdelegate = new TPDirDelegate(ui->tv_throughput);
 //    tpdirdelegate = new TPDirDelegate(this);
     ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdirdelegate);
+    tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
+    ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
 
     QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
     connect(ism, &QItemSelectionModel::selectionChanged, this, &QIperfC::onTPselectionChanged);

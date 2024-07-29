@@ -20,6 +20,7 @@
 #include "endpointmgr.h"
 #include "tpmgr.h"
 #include "tpdirdelegate.h"
+#include "tpfoldingdelegate.h"
 #include "QIPConfig.h"
 #include "tpplot.h"
 #include "formqiperfds.h"
@@ -159,6 +160,7 @@ private:
     QLabel *m_label_qiperfd;
     TPMgr *m_tpmgr;
     TPDirDelegate *tpdirdelegate;
+    TPFoldingDelegate *tpfoldingdelegate;
 
     QDateTime m_TestStartTime;
     int bErrorStop;
