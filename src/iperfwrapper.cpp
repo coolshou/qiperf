@@ -181,16 +181,20 @@ void IperfWrapper::parserIperf3(QString linedata)
             irec.insert("value", data[4]);  // Bitrate
             irec.insert("unit", data[5]);  // Bitrate unit
             if (m_protocal.contains("UDP")){
-                irec.insert("jitter", data[6]);
-                irec.insert("jitter_unit", data[7]);
-                QStringList pkts = data[8].split("/");
-                if (pkts.count()==2){
-                    irec.insert("packet_lost", pkts[0]);
-                    irec.insert("packet_total", pkts[1]);
+                if (data.length() >=9) {
+                    irec.insert("jitter", data[6]);
+                    irec.insert("jitter_unit", data[7]);
+                    QStringList pkts = data[8].split("/");
+                    if (pkts.count()==2){
+//                        qInfo() << "packet_lost/packet_total = " << pkts[0] << " / " << pkts[1];
+                        irec.insert("packet_lost", pkts[0]);
+                        irec.insert("packet_total", pkts[1]);
+                    }else{
+                        qDebug() << "Unknown data format of packet lost: " << data[8];
+                    }
                 }else{
-                    qDebug() << "Unknown data format: " << data[8];
+                    //qDebug() << "Unknown data format: " << data;
                 }
-
             }
             if (!sDir.isNull()){
                 irec.insert("dir", sDir);  // direction

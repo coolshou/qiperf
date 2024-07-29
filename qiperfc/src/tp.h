@@ -79,6 +79,7 @@ public:
     QString getMinThroughput();
     QString getMaxThroughput();
     void clearThroughput();
+    void setLostRate(QString pkt_lost, QString pkt_total);
     QString getLostRate();
 
 signals:

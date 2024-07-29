@@ -71,7 +71,9 @@ public:
     void setItem(const QModelIndex& index, TP *item);
     int swapDirection(QModelIndex midx);
     void addComment(QString midx, QString comment);
-    void addTPdata(QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir=nullptr);
+    void addTPdata(QString midx, QString sInterval, QString idx,
+                   QString value, QString unit, QString dir=nullptr,
+                   QString pkt_lost="", QString pkt_total="");
     TP *getItemByIdx(QString midx, TP *item=nullptr);
     QMap<QString, QStringList> getBindkeys(); // get all Bindkeys (managerIP: IP_Port, IP_Port ...)
     bool isBindkeyExist(QString managerIP, QString bindkey, QModelIndex exc_idx);

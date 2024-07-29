@@ -22,7 +22,7 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
                          QObject *parent)
     : QObject{parent}
 {
-    m_delaystart =0; //TODO:
+    m_delaystart =0; //TODO: m_delaystart
     m_logfile = nullptr;
     m_logtextstream = nullptr;
     m_iperflogpath = "";
@@ -174,6 +174,9 @@ void IperfWorker::setExtra(QString parallel, QString protocal)
 {
     m_parallel=parallel;
     m_protocal=protocal;
+    if (m_iperfwrapper){
+        m_iperfwrapper->setIperf(QString::number(m_version), m_protocal);
+    }
 }
 
 void IperfWorker::toLogFile(QString msg)

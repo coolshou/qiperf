@@ -11,8 +11,7 @@ TP::TP(QString id, QString data, TP *parent)
         loadData(data);
     }
     m_datatype = 0;
-    m_Tx = 0;
-    m_Rx = 0;
+    clearThroughput();
     m_lostpacket = 0;
     m_totalpacket = 0;
 }
@@ -413,6 +412,16 @@ void TP::clearThroughput()
     m_maxRx = 0;
 }
 
+void TP::setLostRate(QString pkt_lost, QString pkt_total)
+{
+    if (pkt_lost.toInt()>=0){
+        m_lostpacket = pkt_lost.toInt();
+    }
+    if (pkt_total.toInt()>0){
+        m_totalpacket = pkt_total.toInt();
+    }
+}
+
 QString TP::getLostRate()
 {
     if (m_totalpacket>0){
@@ -421,9 +430,11 @@ QString TP::getLostRate()
             return QString::number(v) +
                     "("+ QString::number(m_lostpacket) +"/"+ QString::number(m_totalpacket) +")";
         }else{
+            qDebug() << "lost/total:" << QString::number(m_lostpacket) << " / " << QString::number(m_totalpacket);
             return QString();
         }
     }else{
+        qDebug() << "m_totalpacket:" << QString::number(m_totalpacket);
         return QString();
     }
 }

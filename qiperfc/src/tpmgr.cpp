@@ -43,7 +43,8 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
 //    return QVariant();
     //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
 
-    TP *item = static_cast<TP*>(index.internalPointer());
+    TP *item = getItem(index);
+//    TP *item = static_cast<TP*>(index.internalPointer());
     if (item->getDataType()==TPMgrData::config){
         if (index.column()== TP::cols::throughput) {
             //special case of throughput data (sum of all iperf  --parallel value)
@@ -57,6 +58,8 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
         }
     }
     if (index.column()== TP::cols::lostrate) {
+
+        qDebug() << item->row() << " getLostRate:" << item->getLostRate();
         //TODO: special case of loserate date
         return QVariant(item->getLostRate());
     }
@@ -319,7 +322,7 @@ void TPMgr::setItem(const QModelIndex &index, TP *item)
     if (index.isValid()) {
         qDebug() << "setItem:" << index << " item:" << item;
 //        rootItem->appendChild();
-        // TODO:
+        // TODO: setItem
     }
 }
 
@@ -348,8 +351,11 @@ void TPMgr::addComment(QString midx, QString comment)
     emit dataChanged(QModelIndex(),QModelIndex());
 }
 
-void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir)
+void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
+                      QString value, QString unit, QString dir,
+                      QString pkt_lost, QString pkt_total)
 {
+    //add throughput item
     Q_UNUSED(sInterval)
     Q_UNUSED(unit)
 
@@ -363,10 +369,24 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx, QString valu
         c = new TP(midx+"_"+idx, "", tp);
         c->setThroughput(value);
         c->setDirection(dir);
+        c->setDataType(TPMgrData::TP);
+        if (!pkt_lost.isEmpty()){
+            if (!pkt_total.isEmpty()){
+                qDebug() << "new pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+                c->setLostRate(pkt_lost, pkt_total);
+            }
+        }
         tp->appendChild(c); // add iperf pair config item to parent item
 //        c->setExpanded(true);
     }else{
         c->setThroughput(value);
+        if (!pkt_lost.isEmpty()){
+            if (!pkt_total.isEmpty()){
+                qDebug() << "row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+                c->setLostRate(pkt_lost, pkt_total);
+            }
+        }
+
     }
 }
 
@@ -498,9 +518,10 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         //packet lost;
         QString pkt_lost = jObj["packet_lost"].toString();
         QString pkt_total = jObj["packet_total"].toString();
+//        qDebug() << "pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
         sum = sum + value.toDouble();
         addTPdata(refrow, sInterval, jObj["idx"].toString(), value,
-                jObj["unit"].toString(), dir);
+                jObj["unit"].toString(), dir, pkt_lost, pkt_total);
         // chart data
         emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
         QCoreApplication::processEvents(QEventLoop::AllEvents);
