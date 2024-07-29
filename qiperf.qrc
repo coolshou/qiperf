@@ -26,5 +26,7 @@
         <file alias="pair-del">images/pairdel.png</file>
         <file alias="pair-edit">images/pairedit.png</file>
         <file alias="iperf3">images/iperf3.png</file>
+        <file alias="folding/close">images/fclose.png</file>
+        <file alias="folding/open">images/fopen.png</file>
     </qresource>
 </RCC>

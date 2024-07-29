@@ -63,6 +63,7 @@ SOURCES += \
     src/qiperfc.cpp \
     src/rpctp.cpp \
     src/tp.cpp \
+    src/tpfoldingdelegate.cpp \
     src/tpmgr.cpp \
     src/tpdirdelegate.cpp \
     src/tpplot.cpp \
@@ -98,6 +99,7 @@ HEADERS += \
     src/qiperfc.h \
     src/rpctp.h \
     src/tp.h \
+    src/tpfoldingdelegate.h \
     src/tpmgr.h \
     src/tpdirdelegate.h \
     src/tpplot.h \
