@@ -116,8 +116,9 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     tpdirdelegate = new TPDirDelegate(ui->tv_throughput);
 //    tpdirdelegate = new TPDirDelegate(this);
     ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdirdelegate);
-    tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
-    ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
+    // TODO: why debug build do not show folding icon!!
+//    tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
+//    ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
 
     QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
     connect(ism, &QItemSelectionModel::selectionChanged, this, &QIperfC::onTPselectionChanged);
@@ -1176,12 +1177,16 @@ void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
 void QIperfC::onItemDClicked(QModelIndex idx)
 {
     TP *tp = m_tpmgr->getItem(idx);
-    dlgiperf->loadJsonCfg(tp->saveData());
-    dlgiperf->setExcIdx(idx);
-    int rc = dlgiperf->exec();// show dlgiperf
-    if (rc == QDialog::Accepted){
-        QString rs= dlgiperf->getJsonCfg();
-        tp->loadData(rs);
-        m_tpmgr->setItem(idx, tp);
+    qDebug() << "getDataType: " << tp->getDataType();
+    if (tp->getDataType() == TPMgrData::config) {
+        // only iperf pair config can be edit
+        dlgiperf->loadJsonCfg(tp->saveData());
+        dlgiperf->setExcIdx(idx);
+        int rc = dlgiperf->exec();// show dlgiperf
+        if (rc == QDialog::Accepted){
+            QString rs= dlgiperf->getJsonCfg();
+            tp->loadData(rs);
+            m_tpmgr->setItem(idx, tp);
+        }
     }
 }
