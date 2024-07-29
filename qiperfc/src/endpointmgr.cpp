@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QCoreApplication>
 #include <QEventLoop>
+#include <QFlags>
 
 #include "comm.h"
 
@@ -37,10 +38,14 @@ QVariant EndPointMgr::data(const QModelIndex &index, int role) const
 //        qDebug() << "data not DisplayRole:" << index << Qt::endl;
         return QVariant();
     }
-    qDebug() << "EndPointMgr::data: " << index  << " flasg: " << flags(index);
 //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
     EndPoint *item = static_cast<EndPoint*>(index.internalPointer());
-//    EndPoint *item = itemFromIndex(index);
+    if (index.row()==0 && index.column()==0){
+
+//        qDebug() << "EndPointMgr::data: " << index  << " flasg: " << flags(index) << " value:" << item->data(index.column());
+    }
+
+    //    EndPoint *item = itemFromIndex(index);
     return item->data(index.column());
 }
 
@@ -49,6 +54,15 @@ Qt::ItemFlags EndPointMgr::flags(const QModelIndex &index) const
     if (!index.isValid())
         return Qt::NoItemFlags;
 
+    //    EndPoint *item = static_cast<EndPoint*>(index.internalPointer());
+    // TODO: use item's data to change enable/disable status of item
+//    if (index.row()==0){
+//        Qt::ItemFlags flags(QAbstractItemModel::flags(index));
+//        flags = flags & ~Qt::ItemIsEnabled; // disable
+//        flags = flags | Qt::ItemIsEnabled; // enable
+////        qDebug() << " after flags: " << flags;
+//        return flags;
+//    }
     return QAbstractItemModel::flags(index);
 }
 

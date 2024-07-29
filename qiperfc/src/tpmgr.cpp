@@ -97,6 +97,7 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
 
     return QVariant();
 }
+
 int TPMgr::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())

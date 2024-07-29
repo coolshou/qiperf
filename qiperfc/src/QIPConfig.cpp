@@ -218,7 +218,6 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
         int idx=0;
         foreach(auto jObj, arr){
             if (jObj["Action"].toString() == "IPERF_ADD"){
-//                qDebug() << "jObj: " << jObj;
                 //client
                 jClient = jObj["client"].toObject();
                 QString clientip = jClient["bind"].toString();
@@ -228,22 +227,15 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                 int parallel = jClient["parallel"].toInt();
                 QString version = jClient["version"].toString();
                 int clientport = jClient["port"].toInt();
-
-//                qDebug() << "protocal: " << protocal << " version: " << version;
-//                qDebug() << "bidir: " << bidir << " reverse: " << reverse << " parallel: " << parallel;
-
                 //server
                 jServer = jObj["server"].toObject();
                 QString serverip = jServer["bind"].toString();
                 int serverport = jServer["port"].toInt();
                 QString serverfile = logpath + QDir::separator() + serverip + "_" +QString::number(serverport)+ ".log";
                 QString clientfile = logpath + QDir::separator() + clientip + "-" + serverip + "_" +QString::number(clientport)+ ".log";
-//                qDebug() << "clientip: " << clientip << " client port"<< clientport << " serverip:" << serverip << " port: " << serverport;
-
                 if (!bidir){
                     if (!reverse){
                         //iperf server record file
-//                        qDebug() << "serverfile: " << serverfile;
                         IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                    idx, true, parallel,
                                                                    bidir, "Tx", serverfile);
@@ -252,7 +244,6 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                         ifw->start();
                     }else{
                         //iperf client record file
-//                        qDebug() << "clientfile: " << clientfile;
                         IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                    idx, false, parallel,
                                                                    bidir, "Rx", clientfile);
@@ -261,32 +252,24 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                         ifwc->start();
                     }
                 }else{
-                    //if (!reverse){
-                        qDebug() << "serverfile: " << serverfile;
-                        IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
-                                                                   idx, true, parallel,
-                                                                   bidir, "Tx", serverfile);
-                        m_fileworkers.append(ifw);
-                        connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
-                        ifw->start();
-                        qDebug() << "clientfile: " << clientfile;
-                        IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
-                                                                   idx, false, parallel,
-                                                                   bidir, "Rx", clientfile);
-                        m_fileworkers.append(ifwc);
-                        connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
-                        ifwc->start();
-                    //}else{
-
-                    //}
+                    IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
+                                                               idx, true, parallel,
+                                                               bidir, "Tx", serverfile);
+                    m_fileworkers.append(ifw);
+                    connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
+                    ifw->start();
+                    IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
+                                                               idx, false, parallel,
+                                                               bidir, "Rx", clientfile);
+                    m_fileworkers.append(ifwc);
+                    connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
+                    ifwc->start();
                 }
                 idx = idx +1;
             }
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
-
-//        qDebug() << "parserTPCfgLogFiles logpath: " << logpath;
-
+        return true;
     }
     return false;
 }
