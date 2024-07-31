@@ -419,6 +419,8 @@ void TP::setLostRate(QString pkt_lost, QString pkt_total)
     }
     if (pkt_total.toInt()>0){
         m_totalpacket = pkt_total.toInt();
+    }else{
+        m_totalpacket = 0;
     }
 }
 
