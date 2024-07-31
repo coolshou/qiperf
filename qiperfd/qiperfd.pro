@@ -144,7 +144,7 @@ unix:!android {
     IMAGES_FILES.path += /usr/share/pixmaps/
     #
     INSTALLS += SERVICE_FILES IMAGES_FILES
-    contains(QT_ARCH, aarch64) {
+    contains(QT_ARCH, aarch64||arm64) {
         B_ARCH="arm64"
         RESOURCES += \
             linux-arm64.qrc
