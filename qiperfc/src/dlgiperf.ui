@@ -492,8 +492,11 @@
            <property name="alignment">
             <set>Qt::AlignCenter</set>
            </property>
+           <property name="maximum">
+            <number>999</number>
+           </property>
            <property name="value">
-            <number>4</number>
+            <number>256</number>
            </property>
           </widget>
          </item>
@@ -636,7 +639,7 @@
          <item row="7" column="3">
           <widget class="QComboBox" name="cb_unit_windowsize">
            <property name="currentText">
-            <string>M</string>
+            <string>K</string>
            </property>
            <item>
             <property name="text">

@@ -25,6 +25,8 @@ public:
     void getCpuMemInfo(QString &cpuModel, QString &totalMemory);
     void getMotherboardInfo(QString &vendor, QString &model, QString &serial);
     QString getDriverVersion(const QString &interfaceName, QString &drivername);
+    quint64 getSysBufferSize();
+    void setSysBufferSize(quint64 buff);
 
 #if defined(Q_OS_LINUX)
 
@@ -45,6 +47,7 @@ private:
     QString getCPUModel();
 #if defined(Q_OS_LINUX)
     QString readSysFile(const QString &path);
+    void writeSysFile(const QString &path, QString value);
     QString readFileContent(const QString &filePath);
 #endif
 #if defined(Q_OS_WIN32)

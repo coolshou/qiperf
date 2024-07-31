@@ -50,6 +50,14 @@ enum class IPERF_VER {
     V3=3   //3.14
 };
 
+#define READ_BUFFER_SIZE_PATH "/proc/sys/net/core/rmem_max"
+#define WRITE_BUFFER_SIZE_PATH "/proc/sys/net/core/wmem_max"
+
+enum class BUFFER_SIZES {
+    KB=1024,
+    MB=1048576
+};
+
 //TEST
 #define TEST_JSONRPC 0
 #define TEST_PLOT_DATA 0

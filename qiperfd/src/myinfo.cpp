@@ -26,6 +26,7 @@
 #include "endpointtype.h"
 #include "endpointact.h"
 #include "version.h"
+#include "comm.h"
 
 #include <QDebug>
 
@@ -274,6 +275,46 @@ QString MyInfo::getDriverVersion(const QString &interfaceName, QString &driverna
     return QString();
 }
 
+quint64 MyInfo::getSysBufferSize()
+{   //return support Max buffer size in KB
+
+#if defined(Q_OS_LINUX)
+    // /proc/sys/net/core/rmem_max
+    // /proc/sys/net/core/wmem_max
+    // ubuntu 24.04
+    // sysctl show net.core.wmem_max  => 212992/1024 => 208K => Max -w 416K
+    // -w 4M
+    QString rbuf = readSysFile(READ_BUFFER_SIZE_PATH);
+    QString wbuf = readSysFile(WRITE_BUFFER_SIZE_PATH);
+    qDebug() << "rbuf: " << rbuf << " wbuf: " << wbuf;
+    quint64 irbuf = static_cast<quint64>((rbuf.toInt()/static_cast<int>(BUFFER_SIZES::KB))*2);
+    quint64 iwbuf = static_cast<quint64>((wbuf.toInt()/static_cast<int>(BUFFER_SIZES::KB))*2);
+    if (irbuf > iwbuf) {
+        return iwbuf;
+    }else{
+        return irbuf;
+    }
+#else
+    qDebug() << "getSysBufferSize: Not support platform: " << QSysInfo::productType();
+#endif
+}
+
+void MyInfo::setSysBufferSize(quint64 buff)
+{
+#if defined(Q_OS_LINUX)
+    // max 416K
+    // sudo sysctl net.core.wmem_max=2097152
+    // sudo sysctl net.core.rmem_max=2097152
+    //# allow TCP with buffers up to 64MB
+    //net.core.rmem_max = 67108864
+    //net.core.wmem_max = 67108864
+    writeSysFile(READ_BUFFER_SIZE_PATH, QString::number(buff/2));
+    writeSysFile(WRITE_BUFFER_SIZE_PATH, QString::number(buff/2));
+#else
+    qDebug() << "setSysBufferSize: Not support platform: " << QSysInfo::productType();
+#endif
+}
+
 QString MyInfo::readSysFile(const QString &path) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -284,10 +325,25 @@ QString MyInfo::readSysFile(const QString &path) {
     QTextStream in(&file);
     //only read one line
     QString content = in.readLine().trimmed();
-    content.truncate(content.lastIndexOf("\u0000"));// raspiberry 3 fix
+    // qDebug() << "content.lastIndexOf: " << content.lastIndexOf("\u0000");
+    //content.truncate(content.lastIndexOf("\u0000"));// raspiberry 3 fix =>  may cause problem!!
+    // qDebug() << path << " : " << content;
     file.close();
 
     return content;
+}
+
+void MyInfo::writeSysFile(const QString &path, QString value)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning() << "Cannot open file" << path << ":" << file.errorString();
+        return ;
+    }
+    QTextStream out(&file);
+    out << value;
+    out.flush();
+    file.close();
 }
 QString MyInfo::readFileContent(const QString &filePath) {
     QFile file(filePath);

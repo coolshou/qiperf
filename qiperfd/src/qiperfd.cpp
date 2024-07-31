@@ -50,6 +50,10 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     m_myinfo = new MyInfo(mgr_ifname);
     connect(this, &QIperfd::setMgrIfname, m_myinfo, &MyInfo::setIfname);
     QString info = m_myinfo->collectInfo();
+    quint64 buffsize = m_myinfo->getSysBufferSize();
+    qDebug() << "Max socket buffer sizes: " << buffsize << " K";
+    qDebug() << "TODO: set Max socket buffer sizes to ?";
+    // m_myinfo->setSysBufferSize(4*static_cast<uint>(BUFFER_SIZES::MB));
     // notice qiperfc info
     m_udpsrv = new UdpSrv(QIPERFD_BPORT, getManagerInterface(), m_myinfo);
     connect(this, &QIperfd::setMgrIfname, m_udpsrv, &UdpSrv::setIfname);
