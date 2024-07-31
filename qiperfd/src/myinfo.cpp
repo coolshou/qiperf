@@ -284,6 +284,7 @@ QString MyInfo::readSysFile(const QString &path) {
     QTextStream in(&file);
     //only read one line
     QString content = in.readLine().trimmed();
+    content.truncate(content.lastIndexOf("\u0000"));// raspiberry 3 fix
     file.close();
 
     return content;
