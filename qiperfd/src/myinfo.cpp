@@ -301,9 +301,25 @@ QString MyInfo::readFileContent(const QString &filePath) {
     return content;
 }
 void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial) {
-    vendor = readSysFile("/sys/class/dmi/id/board_vendor");
-    model = readSysFile("/sys/class/dmi/id/board_name");
-    serial = readSysFile("/sys/class/dmi/id/board_serial");
+    // respiberry 3 does not have /sys/class/dmi
+    QFile f("/proc/device-tree/name");
+    if (f.exists()){
+        vendor = readSysFile("/proc/device-tree/name");
+    }else{
+        vendor = readSysFile("/sys/class/dmi/id/board_vendor");
+    }
+    f.setFileName("/proc/device-tree/model");
+    if (f.exists()){
+        model = readSysFile("/proc/device-tree/model");
+    }else{
+        model = readSysFile("/sys/class/dmi/id/board_name");
+    }
+    f.setFileName("/proc/device-tree/serial-number");
+    if (f.exists()){
+        serial = readSysFile("/proc/device-tree/serial-number");
+    }else{
+        serial = readSysFile("/sys/class/dmi/id/board_serial");
+    }
 
     qInfo() << "Motherboard Vendor:" << vendor;
     qInfo() << "Motherboard Model:" << model;
@@ -314,6 +330,9 @@ QString MyInfo::getCPUModel() {
     QStringList lines = cpuInfo.split('\n');
     for (const QString &line : lines) {
         if (line.startsWith("model name")) {
+            return line.split(':').last().trimmed();
+        }
+        if (line.startsWith("Model")) {
             return line.split(':').last().trimmed();
         }
     }
