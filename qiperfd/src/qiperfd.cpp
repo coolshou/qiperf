@@ -103,6 +103,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 #else
     QFile i2File(":/linux/iperf2");
 #endif
+    qDebug() << "iperf2 exist: " << i2File.exists();
     //    onLog("iperf2: " + i2File.fileName());
     if (!i2File.open(QIODevice::ReadOnly))
     {
@@ -130,6 +131,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 #else
     QFile i3File(":/linux/iperf3");
 #endif
+    qDebug() << "iperf3 exist: " << i3File.exists();
     if (!i3File.open(QIODevice::ReadOnly))
     {
         onLog("could not open " + i3File.fileName());
