@@ -5,6 +5,7 @@
 #include <QHostInfo>
 #include <QNetworkInterface>
 #include <QDir>
+#include <QFile>
 
 #if defined(Q_OS_LINUX)
 #include <unistd.h> //readlink
@@ -222,7 +223,11 @@ int MyInfo::getEndpointType()
         rc = static_cast<int>(EndPointType::iOS);
         break;
     case 5: //debian/FreeBSD
-        rc = static_cast<int>(EndPointType::FreeBSD);
+        if (QFile::exists("/usr/bin/freebsd-version")) {
+            rc = static_cast<int>(EndPointType::FreeBSD);
+        }else{
+            rc = static_cast<int>(EndPointType::Linux);
+        }
         break;
     case 6:
         rc = static_cast<int>(EndPointType::Unknown);
