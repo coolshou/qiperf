@@ -82,6 +82,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 #else
     QString tmp_path = "";
 #endif
+    //TODO: check we have newer version of iperf, remove old !!
     m_iperfexe2 = tmp + tmp_path + QDir::separator() + "iperf2";
     if (QFileInfo::exists(m_iperfexe2))
     {
@@ -97,6 +98,36 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     {
         QFile::remove(m_iperfexe3);
     }
+
+    QFile i2File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf2");
+    if (i2File.exists()) {
+        // make file execuable
+        if (i2File.copy(m_iperfexe2)){
+            QFile iperf2File(m_iperfexe2);
+            iperf2File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+                                  QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
+                                  QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
+        }else{
+            qDebug() << "copy file " << " to " << m_iperfexe2 << " fail";
+        }
+    }else{
+        qDebug() << i2File.fileName() << " NOT EXIST!!";
+    }
+    QFile i3File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf3");
+    if(i3File.exists()){
+        if (i3File.copy(m_iperfexe3)){
+            QFile iperf3File(m_iperfexe3);
+            iperf3File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
+                                      QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
+        }else{
+            qDebug() << "copy file " << " to " << m_iperfexe3 << " fail";
+        }
+    }else{
+        qDebug() << i3File.fileName() << " NOT EXIST!!";
+    }
+
+    if (0){
 // iperf2
 #if defined(Q_OS_ANDROID)
     QFile i2File(":/android/" + arch + "/iperf");
@@ -150,6 +181,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
                                       QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
                                       QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
         }
+    }
     }
 #elif defined(Q_OS_WIN32)
     // windows, iperf files
