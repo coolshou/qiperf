@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QTimer>
 //#include <QCustomPlot>
-#include "lib/qcustomplot.h"
+#include "../lib/qcustomplot.h"
 #include "comm.h"
 //#include <QPrivateSignal>
 

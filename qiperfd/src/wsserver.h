@@ -55,8 +55,8 @@
 #include <QtCore/QByteArray>
 #include <QtNetwork/QSslError>
 #include <QMap>
-#include <QWebSocket>
-#include <QWebSocketProtocol>
+#include <QtWebSockets/QWebSocket>
+#include <QtWebSockets/QWebSocketProtocol>
 #include <QHostAddress>
 #include <QList>
 #include <QFile>

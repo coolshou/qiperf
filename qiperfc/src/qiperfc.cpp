@@ -1,5 +1,4 @@
 #include "qiperfc.h"
-#include "qiperfc.h"
 #include "ui_qiperfc.h"
 #include "../src/comm.h"
 
