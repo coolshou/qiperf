@@ -327,15 +327,22 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     qInfo() << "Motherboard Serial Number:" << serial;
 }
 QString MyInfo::getCPUModel() {
+    QString hardware=nullptr;
+    QString revision=nullptr;
     QString cpuInfo = readFileContent("/proc/cpuinfo");
     QStringList lines = cpuInfo.split('\n');
     for (const QString &line : lines) {
         if (line.startsWith("model name")) {
             return line.split(':').last().trimmed();
         }
-        if (line.startsWith("Model")) {
-            return line.split(':').last().trimmed();
+        if (line.startsWith("Hardware")) {
+            hardware = line.split(':').last().trimmed();
+        }else if (line.startsWith("Revision")) {
+            revision = line.split(":").at(1).trimmed();
         }
+    }
+    if (!hardware.isNull()){
+        return hardware + " " + revision;
     }
     return QString("Unknown CPU model");
 }
