@@ -11,27 +11,15 @@ void TPPlot::setStartTime(QDateTime startTime)
 
 }
 
-void TPPlot::addTPDatas(QString sInterval, QString idx, QString datas)
-{
-    Q_UNUSED(sInterval)
-    Q_UNUSED(idx)
-    Q_UNUSED(datas)
-    //TODO:
-//    foreach (auto data, datas){
-
-//    }
-}
-
-void TPPlot::onIperfTPdata(QString sInterval, QString idx, QString data)
+void TPPlot::onIperfTPdata(QString sInterval, QString idx, QString data, QString lostrate)
 {
     double x = sInterval.toDouble();
     double y = data.toDouble();
-    addTPData(idx, x, y);
+    addTPData(idx, x, y, lostrate.toInt());
 }
 
-void TPPlot::addTPData(QString idx, double xdata, double ydata)
+void TPPlot::addTPData(QString idx, double xdata, double ydata, int lostrate)
 {
-    // TODO: add single x/y data to graphic
     QCPGraph *graph = getGraph(idx);
     // enlarge/shrink y range
     if ((ydata >= yAxis->range().upper) ){
@@ -46,7 +34,13 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata)
     if (xdata >= xAxis->range().upper){
         xAxis->setRange(0, xdata+30);
     }
+    // add x/y data to graphic
     graph->addData(xdata, ydata);
+    //lost rate
+    if (lostrate>0){
+        QCPBars *g_lostrate = getLostRateGraph(idx);
+        g_lostrate->addData(xdata, lostrate);
+    }
     this->replot();
 }
 
@@ -55,8 +49,11 @@ QCPGraph *TPPlot::getGraph(QString idx)
     QPen graphPen;
     QCPGraph *g;
     if (!m_graphs.contains(idx)){
-        g = this->addGraph();
-        graphPen = newColorPen(rand()%245+10, rand()%245+10, rand()%245+10, 1);
+        g = this->addGraph(xAxis, yAxis);
+        int R = rand()%245+10;
+        int G =rand()%245+10;
+        int B =rand()%245+10;
+        graphPen = newColorPen(R, G, B, 1);
         g->setPen(graphPen);
         g->setLineStyle(QCPGraph::lsLine);
     }else{
@@ -66,6 +63,34 @@ QCPGraph *TPPlot::getGraph(QString idx)
     g->setName(idx);
     m_graphs.insert(idx,g);
     return g;
+}
+
+QCPBars *TPPlot::getLostRateGraph(QString idx)
+{
+    QPen graphPen;
+    QCPGraph *g;
+    QCPBars *g_lostrate;
+    if (!m_lostgraphs.contains(idx)){
+        if (m_graphs.contains(idx)){
+            g = m_graphs.value(idx);
+            graphPen = g->pen();
+        } else {
+            int R = rand()%245+10;
+            int G =rand()%245+10;
+            int B =rand()%245+10;
+            graphPen = newColorPen(R, G, B, 1);
+        }
+        g_lostrate = new QCPBars(xAxis, yAxis2);
+//        g_lostrate = this->addGraph(xAxis, yAxis2);
+        g_lostrate->setPen(graphPen);
+        g_lostrate->setBrush(graphPen.color());
+
+    }else{
+        g_lostrate = m_lostgraphs.value(idx);
+    }
+    g_lostrate->setName(idx+ " Lost Rate");
+    m_lostgraphs.insert(idx,g_lostrate);
+    return g_lostrate;
 }
 
 void TPPlot::clear()
@@ -78,9 +103,13 @@ void TPPlot::clear()
 //        qDebug() <<"removeGraph: " << g;
 //        this->removeGraph(g);
 //    }
-//    m_graphs.clear();
     this->clearGraphs();
     m_graphs.clear();
+    for (auto it = m_lostgraphs.begin(); it != m_lostgraphs.end(); ++it) {
+        this->removePlottable(it.value());
+//        delete it.value();
+    }
+    m_lostgraphs.clear();
     //axis reset
     xAxis->setRange(0, m_xAxisMaxDefault);
     yAxis->setRange(0, m_yAxisMaxDefault);
@@ -134,7 +163,7 @@ void TPPlot::initCustomPlot()
         this->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
     }
     // make left and bottom axes transfer their ranges to right and top axes:
-    connect(xAxis, SIGNAL(rangeChanged(QCPRange)), xAxis2, SLOT(setRange(QCPRange)));
+//    connect(xAxis, SIGNAL(rangeChanged(QCPRange)), xAxis2, SLOT(setRange(QCPRange)));
 //    connect(yAxis, SIGNAL(rangeChanged(QCPRange)), yAxis2, SLOT(setRange(QCPRange)));
 
 #if TEST_PLOT_DATA==1

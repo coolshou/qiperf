@@ -391,17 +391,16 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
         c->setDataType(TPMgrData::TP);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
-                qDebug() << c << " new pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+//                qDebug() << c << " new pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
         tp->appendChild(c); // add iperf pair config item to parent item
-//        c->setExpanded(true);
     }else{
         c->setThroughput(value);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
-                qDebug() << c << " row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+//                qDebug() << c << " row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
@@ -528,6 +527,9 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
     //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
     QString dir=nullptr;
     double sum=0;
+    quint64 sum_lost=0;
+    quint64 sum_total=0;
+    quint64 lost_rate=0;
     foreach (auto jObj, jArr){
         QString value="";
         if (!jObj["dir"].isUndefined()){
@@ -537,18 +539,26 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         //packet lost;
         QString pkt_lost = jObj["packet_lost"].toString();
         QString pkt_total = jObj["packet_total"].toString();
+        if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
+            lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
+        }
 //        qDebug() << "pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
         sum = sum + value.toDouble();
+        sum_lost = sum_lost + pkt_lost.toDouble();
+        sum_total = sum_total + pkt_total.toDouble();
+
         addTPdata(refrow, sInterval, jObj["idx"].toString(), value,
                 jObj["unit"].toString(), dir, pkt_lost, pkt_total);
         // chart data
-        emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
+        emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(),
+                jObj["value"].toString(), QString::number(lost_rate));
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     // signal dataChanged when all throughput data update!!
     TP *tp = getItemByIdx(refrow);
     if (!(tp==nullptr)){
         tp->setThroughput(dir ,QString::number(sum));
+        tp->setLostRate(QString::number(sum_lost), QString::number(sum_total));
     }
 
     emit dataChanged(QModelIndex(),QModelIndex());
