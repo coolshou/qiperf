@@ -207,9 +207,9 @@ void IperfWrapper::parserIperf3(QString linedata)
                 if (linedata.contains("receiver")){
                     irec.insert("AVG", true); //final data is the average of throughput
                 }
-//                QJsonDocument d;
-//                d.setObject(irec);
-//                qDebug() << "irec: " << d.toJson(QJsonDocument::Compact);
+//                qDebug() << "sInterval: " << sInterval <<
+//                            " irec: " << irec["packet_lost"].toString() <<
+//                            " / " << irec["packet_total"].toString();
                 m_tpdatas[sInterval].append(irec);
             }
 
@@ -219,11 +219,18 @@ void IperfWrapper::parserIperf3(QString linedata)
             QJsonArray arr = m_tpdatas[sInterval];
             QJsonDocument doc;
             doc.setArray(arr);
-//                qDebug() << "m_tpdatas: " << doc.toJson(QJsonDocument::Compact);
+//            qDebug() << "sInterval: " << sInterval;
             if (sInterval.contains("-")){
-                sInterval = sInterval.right(sInterval.indexOf("-"));
+//                sInterval = sInterval.right(sInterval.indexOf("-"));
+                QStringList ls_int = sInterval.split("-");
+                if (ls_int.length()==2){
+                    sInterval = ls_int[1];
+                }else{
+                    qDebug() << "unknown format of sInterval: " << sInterval;
+                }
             }
-//            qDebug() << "sendThroughput:" << QString::number(m_idx) << " : " << sInterval << " : " << doc.toJson(QJsonDocument::Compact);
+//            qDebug() << "sendThroughput:" << QString::number(m_idx) << " : " <<
+//                        sInterval << " : " << doc.toJson(QJsonDocument::Compact);
             emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
             //clear record
 //            QMap<QString, QJsonArray>().swap(m_tpdatas); // looks ok?
