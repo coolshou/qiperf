@@ -397,7 +397,6 @@ void QIperfC::onStart()
                 connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                 connect(m_wss[serverIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
                 connect(m_wss[serverIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
-//                connect(m_wss[serverIP], &WSClient::iperfTPdata, this, &QIperfC::onIperfTPdata);
                 connect(m_wss[serverIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
                 itimeout = iTimeout;
                 while (! m_wss[serverIP]->isConnected() && itimeout>0){
@@ -428,7 +427,6 @@ void QIperfC::onStart()
                 connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                 connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
                 connect(m_wsc[clientIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
-//                connect(m_wsc[clientIP], &WSClient::iperfTPdata, this, &QIperfC::onIperfTPdata);
                 connect(m_wsc[clientIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
                 itimeout = iTimeout;
                 while (! m_wsc[clientIP]->isConnected()&& itimeout>0){
@@ -546,6 +544,8 @@ void QIperfC::onStart()
 
         //TODO: wait all test done!!
         while (maxtestduration>0){
+            qDebug() << "m_status_server:" << m_status_server.count() <<
+                        " m_status_client: " << m_status_client.count();
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             QThread::msleep(1000);
             maxtestduration --;
@@ -553,25 +553,6 @@ void QIperfC::onStart()
         }
         //TODO: check all test done!!
 
-        //clear all websocket
-//        for (auto key: m_wss.keys()){
-//            QCoreApplication::processEvents(QEventLoop::AllEvents);
-//            rs = m_wss[key]->sendText(CMD_IPERF_CLEAR);
-//            if (rs<=0){
-//                emit errorStop(4, "clear iperf server config:" + key);
-////                qDebug() << "rs: " << rs << " key:" << key;
-//            }
-//            m_wss.remove(key);
-//        }
-//        for (auto key: m_wsc.keys()){
-//            QCoreApplication::processEvents(QEventLoop::AllEvents);
-//            rs = m_wsc[key]->sendText(CMD_IPERF_CLEAR);
-//            if (rs<=0){
-//                emit errorStop(4, "clear iperf client config:" + key);
-////                qDebug() << "rs: " << rs << " key:" << key;
-//            }
-//            m_wsc.remove(key);
-//        }
 
         onStop();
 
@@ -980,34 +961,34 @@ void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err, QString
 
 }
 
-void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString datas)
-{
-    //receive iperf throughput data
-    QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8());
-    QJsonArray jArr = doc.array();//.object();
-    foreach (auto jObj, jArr){
-        bool avg=false;
-        QString dir=nullptr;
-        if (!jObj["dir"].isUndefined()){
-            dir=jObj["dir"].toString();
-        }
-        if (!jObj["AVG"].isUndefined()){
-            avg=jObj["AVG"].toBool();
-        }
-        // iperf sInterval = 0.00-1.00 format
-        if (sInterval.contains("-")){
-            sInterval = sInterval.right(sInterval.indexOf("-"));
-        }
-        //TODO treeview data
-        m_tpmgr->addTPdata(refrow, sInterval, jObj["idx"].toString(),
-                jObj["value"].toString(), jObj["unit"].toString(), dir);
-        // chart data
-        if (!avg){
-            m_tpplot->onIperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
-        }
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
-    }
-}
+//void QIperfC::onIperfTPdata(QString refrow, QString sInterval, QString datas)
+//{
+//    //receive iperf throughput data
+//    QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8());
+//    QJsonArray jArr = doc.array();//.object();
+//    foreach (auto jObj, jArr){
+//        bool avg=false;
+//        QString dir=nullptr;
+//        if (!jObj["dir"].isUndefined()){
+//            dir=jObj["dir"].toString();
+//        }
+//        if (!jObj["AVG"].isUndefined()){
+//            avg=jObj["AVG"].toBool();
+//        }
+//        // iperf sInterval = 0.00-1.00 format
+//        if (sInterval.contains("-")){
+//            sInterval = sInterval.right(sInterval.indexOf("-"));
+//        }
+//        //TODO treeview data
+//        m_tpmgr->addTPdata(refrow, sInterval, jObj["idx"].toString(),
+//                jObj["value"].toString(), jObj["unit"].toString(), dir);
+//        // chart data
+//        if (!avg){
+//            m_tpplot->onIperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(), jObj["value"].toString());
+//        }
+//        QCoreApplication::processEvents(QEventLoop::AllEvents);
+//    }
+//}
 
 void QIperfC::onDisconnected(QString serverip)
 {
