@@ -422,6 +422,11 @@ void TP::setLostRate(QString pkt_lost, QString pkt_total)
     }else{
         m_totalpacket = 0;
     }
+    if (m_totalpacket>0){
+        m_itemDatas[TP::lostrate] = QString::number((m_lostpacket/m_totalpacket)*100)+"\n("+
+                QString::number(m_lostpacket)+"/"+QString::number(m_totalpacket)+")";
+        qDebug() << "mid: " << m_id << " row:" << row() << "LostRate: " << m_itemDatas[TP::lostrate].toString();
+    }
 }
 
 QString TP::getLostRate()
@@ -436,7 +441,7 @@ QString TP::getLostRate()
             return QString();
         }
     }else{
-        qDebug() << "m_totalpacket:" << QString::number(m_totalpacket);
+//        qDebug() << "m_totalpacket:" << QString::number(m_totalpacket);
         return QString();
     }
 }

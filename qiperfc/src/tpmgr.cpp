@@ -19,11 +19,20 @@ TPMgr::~TPMgr()
 {
     //    delete rootItem;
 }
-QVariant TPMgr::data(const QModelIndex &index, int role) const
+QVariant TPMgr::data(const QModelIndex &idx, int role) const
 {
-    if (!index.isValid()){
-        qDebug() << "data index.isValid: " << index ;
+    if (!idx.isValid()){
+        qDebug() << "data index.isValid: " << idx ;
         return QVariant();
+    }
+    if (role == Qt::TextAlignmentRole){
+        if ((idx.column() == TP::cols::throughput)||
+            (idx.column() == TP::cols::mintp)||
+            (idx.column() == TP::cols::maxtp)||
+            (idx.column() == TP::cols::lostrate)){
+            // align text data to center
+            return Qt::AlignCenter;
+        }
     }
 
 //    if ((role == Qt::DecorationRole) && (index.column()==TP::cols::id)) {
@@ -43,27 +52,32 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
 //    return QVariant();
     //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
 
-    TP *item = getItem(index);
+    TP *item = getItem(idx);
 //    TP *item = static_cast<TP*>(index.internalPointer());
     if (item->getDataType()==TPMgrData::config){
-        if (index.column()== TP::cols::throughput) {
+        if (idx.column()== TP::cols::throughput) {
             //special case of throughput data (sum of all iperf  --parallel value)
             return QVariant(item->getTxRxThroughput());
         }
-        if (index.column()== TP::cols::mintp) {
+        if (idx.column()== TP::cols::mintp) {
             return QVariant(item->getMinThroughput());
         }
-        if (index.column()== TP::cols::maxtp) {
+        if (idx.column()== TP::cols::maxtp) {
             return QVariant(item->getMaxThroughput());
         }
+        if (idx.column()== TP::cols::lostrate) {
+            //TODO: all child's lostrate sum?
+//            return QVariant(item->getMaxThroughput());
+        }
     }
-    if (index.column()== TP::cols::lostrate) {
-
-        qDebug() << item->row() << " getLostRate:" << item->getLostRate();
-        //TODO: special case of loserate date
-        return QVariant(item->getLostRate());
-    }
-    return item->data(index.column());
+//    if (idx.column()== TP::cols::lostrate) {
+//        QModelIndex id = index(idx.row(), TP::cols::id, idx.parent());
+//        TP *item = getItem(id);
+//        qDebug() << item << " "<< item->row() << " getLostRate:" << item->getLostRate();
+//        //TODO: special case of loserate date
+//        return QVariant(item->getLostRate());
+//    }
+    return item->data(idx.column());
 }
 
 QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
@@ -71,6 +85,11 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
 {
 //    if (role != Qt::DisplayRole)
 //        return QVariant();
+    if (role == Qt::TextAlignmentRole){
+        if (section != TP::cols::comment){
+            return Qt::AlignCenter;
+        }
+    }
     // show header
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole){
         switch (section)
@@ -86,11 +105,11 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
         case TP::cols::throughput:
             return QString("TPUT");
         case TP::cols::mintp:
-            return QString("Min \nTPUT");
+            return QString("Min\nTPUT");
         case TP::cols::maxtp:
-            return QString("Max \nTPUT");
+            return QString("Max\nTPUT");
         case TP::cols::lostrate:
-            return QString("Lost Rate (%)");
+            return QString("Lost Rate %\n(lost/total)");
         case TP::cols::comment:
             return QString("comment");
         default:
@@ -125,12 +144,12 @@ QModelIndex TPMgr::index(int row, int column, const QModelIndex &parent) const
     return QModelIndex();
 }
 
-QModelIndex TPMgr::parent(const QModelIndex &index) const
+QModelIndex TPMgr::parent(const QModelIndex &idx) const
 {
-    if (!index.isValid())
+    if (!idx.isValid())
         return QModelIndex();
 
-    TP *childItem = static_cast<TP*>(index.internalPointer());
+    TP *childItem = static_cast<TP*>(idx.internalPointer());
     TP *parentItem = childItem->parentItem();
 
     if (parentItem == rootItem)
@@ -372,7 +391,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
         c->setDataType(TPMgrData::TP);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
-                qDebug() << "new pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+                qDebug() << c << " new pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
@@ -382,7 +401,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
         c->setThroughput(value);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
-                qDebug() << "row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+                qDebug() << c << " row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
