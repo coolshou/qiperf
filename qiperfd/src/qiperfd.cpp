@@ -102,7 +102,10 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     {
         QFile::remove(m_iperfexe3);
     }
-
+// iperf2
+#if defined(Q_OS_ANDROID)
+    QFile i2File(":/android/" + arch + "/iperf");
+#else
     QFile i2File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf2");
     if (i2File.exists()) {
         // make file execuable
@@ -117,6 +120,11 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     }else{
         qDebug() << i2File.fileName() << " NOT EXIST!!";
     }
+#endif
+// iperf3
+#if defined(Q_OS_ANDROID)
+    QFile i3File(":/android/" + arch + "/iperf3");
+#else
     QFile i3File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf3");
     if(i3File.exists()){
         if (i3File.copy(m_iperfexe3)){
@@ -130,63 +138,8 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     }else{
         qDebug() << i3File.fileName() << " NOT EXIST!!";
     }
+#endif
 
-    if (0){
-// iperf2
-#if defined(Q_OS_ANDROID)
-    QFile i2File(":/android/" + arch + "/iperf");
-#else
-    QFile i2File(":/linux/iperf2");
-#endif
-    qDebug() << "iperf2 exist: " << i2File.exists();
-    //    onLog("iperf2: " + i2File.fileName());
-    if (!i2File.open(QIODevice::ReadOnly))
-    {
-        onLog("could not open " + i2File.fileName());
-    }
-    else
-    {
-        if (!i2File.copy(m_iperfexe2))
-        {
-            onLog("copy iperf2 " + i2File.fileName() + " to " + m_iperfexe2 + " fail");
-        }
-        else
-        {
-            // make file execuable
-            QFile iperf2File(m_iperfexe2);
-            iperf2File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
-                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
-                                      QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
-            // QFileDevice::WriteOwner|QFileDevice::WriteGroup|QFileDevice::WriteOther
-        }
-    }
-// iperf3
-#if defined(Q_OS_ANDROID)
-    QFile i3File(":/android/" + arch + "/iperf3");
-#else
-    QFile i3File(":/linux/iperf3");
-#endif
-    qDebug() << "iperf3 exist: " << i3File.exists();
-    if (!i3File.open(QIODevice::ReadOnly))
-    {
-        onLog("could not open " + i3File.fileName());
-    }
-    else
-    {
-        if (!i3File.copy(m_iperfexe3))
-        {
-            onLog("copy iperf3 " + i3File.fileName() + " to " + m_iperfexe3 + " fail");
-        }
-        else
-        {
-            // make file execuable
-            QFile iperf3File(m_iperfexe3);
-            iperf3File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
-                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
-                                      QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
-        }
-    }
-    }
 #elif defined(Q_OS_WIN32)
     // windows, iperf files
 
