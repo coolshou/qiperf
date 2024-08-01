@@ -337,6 +337,8 @@ void QIperfC::onPairDelete()
     if (!m_tpmgr->removeRow(cur.row(), cur.parent())){
         QMessageBox::information(this, "ERROR", "Can not remove test pair: " + cur.data().toString());
     }
+    m_tpmgr->clear();
+    m_tpplot->clear();
 }
 
 void QIperfC::onPairSwap()
@@ -346,7 +348,15 @@ void QIperfC::onPairSwap()
         m_tpmgr->swapDirection(midx);
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
-//    ui->tv_throughput->update();
+}
+
+void QIperfC::onPairSwapIP()
+{
+    QModelIndexList mls= ui->tv_throughput->selectionModel()->selectedRows();
+    foreach (QModelIndex midx, mls) {
+        m_tpmgr->swapIPDirection(midx);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
 }
 
 void QIperfC::onStart()
@@ -1055,6 +1065,7 @@ void QIperfC::initActions()
     connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(onPairEdit()));
     connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(onPairDelete()));
     connect(ui->actionSwap, SIGNAL(triggered()), this, SLOT(onPairSwap()));
+    connect(ui->actionSwapIP, SIGNAL(triggered()), this, SLOT(onPairSwapIP()));
 
     // run
     connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
@@ -1132,6 +1143,7 @@ void QIperfC::onTPselectionChanged(const QItemSelection &selected, const QItemSe
     ui->actionDelete->setEnabled(bAct);
     ui->actionEdit->setEnabled(bAct);
     ui->actionSwap->setEnabled(bAct);
+    ui->actionSwapIP->setEnabled(bAct);
 }
 
 void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
@@ -1157,7 +1169,6 @@ void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
 void QIperfC::onItemDClicked(QModelIndex idx)
 {
     TP *tp = m_tpmgr->getItem(idx);
-    qDebug() << "getDataType: " << tp->getDataType();
     if (tp->getDataType() == TPMgrData::config) {
         // only iperf pair config can be edit
         dlgiperf->loadJsonCfg(tp->saveData());

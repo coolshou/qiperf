@@ -187,8 +187,14 @@ int TP::getVersion()
 }
 
 QString TP::getServer()
-{
+{   // return Iperf server bind ip address
     return m_itemDatas[TP::server].toString();
+}
+
+void TP::setServer(QString addr)
+{
+    m_itemDatas[TP::server] = addr;
+    m_server = addr;
 }
 
 QString TP::getServerArgs()
@@ -213,8 +219,14 @@ QString TP::getBindKey(bool smode)
 }
 
 QString TP::getClient()
-{
+{   // return Iperf client bind ip address
     return m_itemDatas[TP::client].toString();
+}
+
+void TP::setClient(QString addr)
+{
+    m_itemDatas[TP::client] = addr;
+    m_client = addr;
 }
 
 QString TP::getClientArgs()
@@ -239,9 +251,41 @@ QString TP::getMgrServer()
     return m_mgrserver;
 }
 
+void TP::setMgrServer(QString addr)
+{
+    m_mgrserver = addr;
+}
+
 QString TP::getMgrClient()
 {
     return m_mgrclient;
+}
+
+void TP::setMgrClient(QString addr)
+{
+    m_mgrclient = addr;
+}
+
+void TP::swapServerClient(QString mgrServer, QString server, QString mgrClient, QString client)
+{   //update server/client ip address in json
+
+    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8());
+    QJsonObject jsonRoot = doc.object();
+    QJsonObject o_server = jsonRoot["server"].toObject();
+    o_server["manager"] = mgrServer;
+    setMgrServer(mgrServer);
+    o_server["bind"] = server;
+    setServer(server);
+    jsonRoot["server"] = o_server;
+    QJsonObject o_client = jsonRoot["client"].toObject();
+    o_client["manager"] = mgrClient;
+    setMgrClient(mgrClient);
+    o_client["bind"] = client;
+    o_client["target"] = server;
+    setClient(client);
+    jsonRoot["client"] = o_client;
+    doc.setObject(jsonRoot);
+    m_jsondata =doc.toJson(QJsonDocument::Compact);
 }
 
 QString TP::getThroughput()

@@ -70,6 +70,7 @@ public:
     QModelIndex getRootItemIdx();
     void setItem(const QModelIndex& index, TP *item);
     int swapDirection(QModelIndex midx);
+    int swapIPDirection(QModelIndex midx);
     void addComment(QString midx, QString comment);
     void addTPdata(QString midx, QString sInterval, QString idx,
                    QString value, QString unit, QString dir=nullptr,

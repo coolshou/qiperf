@@ -69,6 +69,7 @@ public slots:
     void onPairEdit();
     void onPairDelete();
     void onPairSwap();
+    void onPairSwapIP();
     void onStart();
     void onStop();
     void onClear();

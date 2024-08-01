@@ -203,6 +203,7 @@
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
    <addaction name="actionSwap"/>
+   <addaction name="actionSwapIP"/>
    <addaction name="separator"/>
    <addaction name="actionStart"/>
    <addaction name="actionStop"/>
@@ -437,6 +438,21 @@
    </property>
    <property name="toolTip">
     <string>Add Iperf</string>
+   </property>
+  </action>
+  <action name="actionSwapIP">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/pair-swap-ip</normaloff>:/pair-swap-ip</iconset>
+   </property>
+   <property name="text">
+    <string>Swap IP</string>
+   </property>
+   <property name="toolTip">
+    <string>Swap Traffic direction by IP</string>
    </property>
   </action>
  </widget>

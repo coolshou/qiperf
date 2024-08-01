@@ -56,13 +56,18 @@ public:
     QString saveData();
     int getVersion();
     QString getServer();
+    void setServer(QString addr);
     QString getServerArgs();
     QString getBindKey(bool s=true);
     QString getClient();
+    void setClient(QString addr);
     QString getClientArgs();
     QString getDirection();
     QString getMgrServer(); //manager server ip
+    void setMgrServer(QString addr);
     QString getMgrClient(); //manager client ip
+    void setMgrClient(QString addr);
+    void swapServerClient(QString mgrServer, QString server, QString mgrClient, QString client);
     QString getThroughput(); //
     int getWaitTime();
     int setDirection(DirType direction);

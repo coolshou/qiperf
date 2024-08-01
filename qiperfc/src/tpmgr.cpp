@@ -358,6 +358,19 @@ int TPMgr::swapDirection(QModelIndex midx)
     return 0;
 }
 
+int TPMgr::swapIPDirection(QModelIndex midx)
+{
+    TP *tp= getItem(midx);
+    QString server = tp->getServer();
+    QString mgrServer = tp->getMgrServer();
+    QString client = tp->getClient();
+    QString mgrclient =tp->getMgrClient();
+    tp->swapServerClient(mgrclient, client, mgrServer, server);
+
+    emit dataChanged(QModelIndex(),QModelIndex());
+    return 0;
+}
+
 void TPMgr::addComment(QString midx, QString comment)
 {
     TP *tp = getItemByIdx(midx);
@@ -530,13 +543,15 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
     quint64 sum_lost=0;
     quint64 sum_total=0;
     quint64 lost_rate=0;
+    bool isAvg=false;
     foreach (auto jObj, jArr){
+        isAvg = jObj["AVG"].toBool();
         QString value="";
         if (!jObj["dir"].isUndefined()){
             dir=jObj["dir"].toString();
         }
         value = jObj["value"].toString();
-        //packet lost;
+        // packet lost rate
         QString pkt_lost = jObj["packet_lost"].toString();
         QString pkt_total = jObj["packet_total"].toString();
         if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
@@ -546,21 +561,22 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         sum = sum + value.toDouble();
         sum_lost = sum_lost + pkt_lost.toDouble();
         sum_total = sum_total + pkt_total.toDouble();
-
-        addTPdata(refrow, sInterval, jObj["idx"].toString(), value,
-                jObj["unit"].toString(), dir, pkt_lost, pkt_total);
-        // chart data
-        emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(),
-                jObj["value"].toString(), QString::number(lost_rate));
+        if (!isAvg) {
+            addTPdata(refrow, sInterval, jObj["idx"].toString(), value,
+                    jObj["unit"].toString(), dir, pkt_lost, pkt_total);
+            // chart data
+            emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(),
+                    jObj["value"].toString(), QString::number(lost_rate));
+        }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
-    // signal dataChanged when all throughput data update!!
+    // update  test pair config row's sum value
     TP *tp = getItemByIdx(refrow);
     if (!(tp==nullptr)){
         tp->setThroughput(dir ,QString::number(sum));
         tp->setLostRate(QString::number(sum_lost), QString::number(sum_total));
     }
-
+    // signal dataChanged when all throughput data update!!
     emit dataChanged(QModelIndex(),QModelIndex());
 
 }
