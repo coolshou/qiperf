@@ -28,5 +28,6 @@
         <file alias="iperf3">images/iperf3.png</file>
         <file alias="folding/close">images/fclose.png</file>
         <file alias="folding/open">images/fopen.png</file>
+        <file alias="pair-swap-ip">images/iperf-swap-ip.png</file>
     </qresource>
 </RCC>
