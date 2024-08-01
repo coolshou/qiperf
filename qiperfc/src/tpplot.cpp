@@ -95,19 +95,10 @@ QCPBars *TPPlot::getLostRateGraph(QString idx)
 
 void TPPlot::clear()
 {
-//    qDebug() <<"graphCount: " << this->graphCount();
-//    for( int g=0; g<this->graphCount(); g++ )
-//    {
-//        QCoreApplication::processEvents(QEventLoop::AllEvents);
-//        this->graph(g)->data()->clear();
-//        qDebug() <<"removeGraph: " << g;
-//        this->removeGraph(g);
-//    }
     this->clearGraphs();
     m_graphs.clear();
     for (auto it = m_lostgraphs.begin(); it != m_lostgraphs.end(); ++it) {
         this->removePlottable(it.value());
-//        delete it.value();
     }
     m_lostgraphs.clear();
     //axis reset
@@ -165,30 +156,6 @@ void TPPlot::initCustomPlot()
     // make left and bottom axes transfer their ranges to right and top axes:
 //    connect(xAxis, SIGNAL(rangeChanged(QCPRange)), xAxis2, SLOT(setRange(QCPRange)));
 //    connect(yAxis, SIGNAL(rangeChanged(QCPRange)), yAxis2, SLOT(setRange(QCPRange)));
-
-#if TEST_PLOT_DATA==1
-    if (1) {
-        QPen graphPen;
-        this->addGraph();
-        this->graph(0)->setName("TP1");
-        graphPen = newColorPen(rand()%245+10, rand()%245+10, rand()%245+10, 1);
-        this->graph(0)->setPen(graphPen);
-
-        this->addGraph();
-        this->graph(1)->setName("TP2");
-        graphPen = newColorPen(rand()%245+10, rand()%245+10, rand()%245+10, 1);
-        this->graph(1)->setPen(graphPen);
-        // setup a timer that repeatedly calls MainWindow::realtimeDataSlot:
-        connect(&dataTimer, SIGNAL(timeout()), this, SLOT(realtimeDataSlot()));
-        dataTimer.start(1000); // Interval 0 means to refresh as fast as possible => 15% CPU (i5-8500 CPU @ 3.00GHz)
-        // Interval 1000 => 1 s  => 0.13% CPU (i5-8500 CPU @ 3.00GHz)
-    }
-    if (0){
-        addRandomGraph();
-        addRandomGraph();
-    }
-    this->rescaleAxes();
-#endif
 
 }
 void TPPlot::addRandomGraph()

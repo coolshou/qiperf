@@ -60,7 +60,6 @@ enum class BUFFER_SIZES {
 
 //TEST
 #define TEST_JSONRPC 0
-#define TEST_PLOT_DATA 0
 #define TEST_WS 1
 #define USE_JSONRPC 0
 
