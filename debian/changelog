@@ -1,7 +1,7 @@
 qiperf (0.4.11308.02-1) unstable; urgency=medium
 
   * fix: limit iperf3 parallel pair number to 20 (--bidir 10) to avoid throughput problem under windows
-  * default: iperf3 send/receive socket buffer sizes to 4M (-w 4M)
+  * default: iperf3 send/receive socket buffer sizes to 256K (-w 256K)
   * update show Min/Max throughput
   * fix: collapse folding on clear throughput date
   * fix: many GUI bug fix
