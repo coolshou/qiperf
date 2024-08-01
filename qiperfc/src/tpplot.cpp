@@ -81,7 +81,6 @@ QCPBars *TPPlot::getLostRateGraph(QString idx)
             graphPen = newColorPen(R, G, B, 1);
         }
         g_lostrate = new QCPBars(xAxis, yAxis2);
-//        g_lostrate = this->addGraph(xAxis, yAxis2);
         g_lostrate->setPen(graphPen);
         g_lostrate->setBrush(graphPen.color());
 
