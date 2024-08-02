@@ -7,6 +7,9 @@ TP::TP(QString id, QString data, TP *parent)
 {
     m_id=id;
     m_jsondata = "";
+    m_itemDatas={m_id, "", "", "", // id, server, dir ,client
+                 "", "", "", //throughput, min tput, max tput
+                 "", "", }; // lost rate, comment
     if (data!="" && data !="Root"){
         loadData(data);
     }
@@ -133,7 +136,7 @@ void TP::loadData(QString data)
 
     QJsonObject o_client = jsonRoot["client"].toObject();
     m_version = o_client["version"].toInt();
-    m_client = o_client["bind"].toString();
+    QString client = o_client["bind"].toString();
     m_mgrclient = o_client["manager"].toString();
     m_port = o_client["port"].toInt();
     m_duration = o_client["duration"].toInt();
@@ -149,19 +152,19 @@ void TP::loadData(QString data)
     }
 
     QJsonObject o_server = jsonRoot["server"].toObject();
-    m_server = o_client["target"].toString();
+    QString server = o_client["target"].toString();
     m_mgrserver = o_server["manager"].toString();
 
-    m_itemDatas.clear();
-    m_itemDatas.insert(cols::id,  m_id);
-    m_itemDatas.insert(cols::server, m_server);
-    m_itemDatas.insert(cols::dir, m_direction);
-    m_itemDatas.insert(cols::client, m_client);
-    m_itemDatas.insert(cols::throughput, "");
-    m_itemDatas.insert(cols::mintp, "");
-    m_itemDatas.insert(cols::maxtp, "");
-    m_itemDatas.insert(cols::lostrate, "");
-    m_itemDatas.insert(cols::comment, "");
+    //m_itemDatas.clear();// this will remove all data => m_itemDatas.length()=0
+    m_itemDatas[int(TP::id)] = m_id;
+    m_itemDatas[int(TP::server)] = server;
+    m_itemDatas[int(TP::dir)] = m_direction;
+    m_itemDatas[int(TP::client)] = client;
+    m_itemDatas[int(TP::throughput)] = "";
+    m_itemDatas[int(TP::mintp)] = "";
+    m_itemDatas[int(TP::maxtp)] = "";
+    m_itemDatas[int(TP::lostrate)] = "";
+    m_itemDatas[int(TP::comment)] = "";
 
     m_jsondata = data;
 }
@@ -188,13 +191,13 @@ int TP::getVersion()
 
 QString TP::getServer()
 {   // return Iperf server bind ip address
-    return m_itemDatas[TP::server].toString();
+    return m_itemDatas[int(TP::server)].toString();
 }
 
 void TP::setServer(QString addr)
 {
-    m_itemDatas[TP::server] = addr;
-    m_server = addr;
+    m_itemDatas[int(TP::server)] = addr;
+//    m_server = addr;
 }
 
 QString TP::getServerArgs()
@@ -212,21 +215,22 @@ QString TP::getServerArgs()
 QString TP::getBindKey(bool smode)
 {
     if (smode){
-        return m_server+"_"+QString::number(m_port);
+        return m_itemDatas[int(TP::server)].toString() + "_" + QString::number(m_port);
     }else{
-        return m_client + "-" + m_server + "_" + QString::number(m_port);;
+        return m_itemDatas[int(TP::client)].toString() + "-" +
+                m_itemDatas[int(TP::server)].toString() + "_" + QString::number(m_port);;
     }
 }
 
 QString TP::getClient()
 {   // return Iperf client bind ip address
-    return m_itemDatas[TP::client].toString();
+    return m_itemDatas[int(TP::client)].toString();
 }
 
 void TP::setClient(QString addr)
 {
-    m_itemDatas[TP::client] = addr;
-    m_client = addr;
+    m_itemDatas[int(TP::client)] = addr;
+//    m_client = addr;
 }
 
 QString TP::getClientArgs()
@@ -349,29 +353,29 @@ int TP::getPort()
 void TP::setComment(QString comment)
 {
     QString m;
-    if (m_itemDatas[TP::comment].isValid()){
-        if (m_itemDatas[TP::comment].toString()!=""){
-            m = m_itemDatas[TP::comment].toString() + "\n" + comment;
+    if (m_itemDatas[int(TP::comment)].isValid()){
+        if (m_itemDatas[int(TP::comment)].toString()!=""){
+            m = m_itemDatas[int(TP::comment)].toString() + "\n" + comment;
         }else{
             m = comment;
         }
     }else{
         m = comment;
     }
-    m_itemDatas[TP::comment] = m;
+    m_itemDatas[int(TP::comment)] = m;
 }
 
 void TP::setThroughput(QString value)
 {
-    if ((m_itemDatas[TP::mintp].toDouble()==0 && (value.toDouble()>0))||
-            (value.toFloat() < m_itemDatas[TP::mintp].toDouble())){
-        m_itemDatas[TP::mintp] = value;
+    if ((m_itemDatas[int(TP::mintp)].toDouble()==0 && (value.toDouble()>0))||
+            (value.toFloat() < m_itemDatas[int(TP::mintp)].toDouble())){
+        m_itemDatas[int(TP::mintp)] = value;
     }
-    if (m_itemDatas[TP::maxtp]==""||
-            (value.toFloat() > m_itemDatas[TP::maxtp].toDouble())){
-        m_itemDatas[TP::maxtp] = value;
+    if (m_itemDatas[int(TP::maxtp)]==""||
+            (value.toFloat() > m_itemDatas[int(TP::maxtp)].toDouble())){
+        m_itemDatas[int(TP::maxtp)] = value;
     }
-    m_itemDatas[TP::throughput] = value;
+    m_itemDatas[int(TP::throughput)] = value;
 }
 
 void TP::setThroughput(QString dir, QString value)
@@ -467,9 +471,9 @@ void TP::setLostRate(QString pkt_lost, QString pkt_total)
         m_totalpacket = 0;
     }
     if (m_totalpacket>0){
-        m_itemDatas[TP::lostrate] = QString::number((m_lostpacket/m_totalpacket)*100)+" ("+
+        m_itemDatas[int(TP::lostrate)] = QString::number((m_lostpacket/m_totalpacket)*100)+" ("+
                 QString::number(m_lostpacket)+"/"+QString::number(m_totalpacket)+")";
-//        qDebug() << "mid: " << m_id << " row:" << row() << "LostRate: " << m_itemDatas[TP::lostrate].toString();
+//        qDebug() << "mid: " << m_id << " row:" << row() << "LostRate: " << m_itemDatas[int(TP::lostrate)].toString();
     }
 }
 
