@@ -23,10 +23,6 @@
 #include "qiperfd.h"
 #include "../src/comm.h"
 
-#if (USE_JSONRPC==1)
-#include <jcon/json_rpc_websocket_server.h>
-#include "myservice.h"
-#endif
 #if defined(Q_OS_LINUX)
 #include "../QCtrlSignals/src/QCtrlSignals"
 #endif
@@ -47,27 +43,6 @@ int isNotRoot()
     return 0;
 }
 
-
-#if (USE_JSONRPC==1)
-jcon::JsonRpcServer* startServer(QObject* parent,
-                                 bool allow_notifications = false, QIperfd* qiperfd=nullptr)
-{
-    jcon::JsonRpcServer* rpc_server;
-    qDebug() << "Starting JsonRpc WebSocket server";
-    rpc_server = new jcon::JsonRpcWebSocketServer(parent);
-
-    if (allow_notifications)
-        rpc_server->enableSendNotification(true);
-
-    auto service1 = new MyService(qiperfd);
-    QObject::connect(service1, SIGNAL(sig_setManagerInterface(QString)), qiperfd, SLOT(setManagerInterface(QString)));
-//    auto service2 = new NotificationService;
-    rpc_server->registerServices({ service1 });
-//    rpc_server->registerServices({ service1, service2 });
-    rpc_server->listen(RPC_PORT);
-    return rpc_server;
-}
-#endif
 static QTextStream output_ts;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -149,14 +124,7 @@ int main(int argc, char *argv[])
                 qDebug() << "connect pipeMessage fail" << Qt::endl;
             }
         }
-
-#if (USE_JSONRPC==1)
-        auto server = startServer(nullptr, true, &qiperfd);
-#endif
         rc = app.exec();
-#if (USE_JSONRPC==1)
-        delete server;
-#endif
     }
     return rc;
 }
