@@ -58,9 +58,22 @@ enum class BUFFER_SIZES {
     MB=1048576
 };
 
+// linux default 64
+#define BYPASS_HOTSPOT_TTL 65
+#define IPv4_TTL_PATH "/proc/sys/net/ipv4/ip_default_ttl"
+#define IPv6_TTL_PATH "/proc/sys/net/ipv6/conf/all/hop_limit"
+// Windows : default 128
+//netsh interface ipv4 set global defaultcurhoplimit=65
+//netsh interface ipv6 set global defaultcurhoplimit=65
+// 預設躍點限制
+// netsh interface ipv4 show global
+// PowerShell 提示鍵入 Get-Command -Module NetTCPIP
+// show ttl value
+// (Get-NetIPv4Protocol).DefaultHopLimit
+// (Get-NetIPv6Protocol).DefaultHopLimit
+
+
 //TEST
 #define TEST_WS 1
-#define USE_JSONRPC 0
-
 
 #endif // COMM_H

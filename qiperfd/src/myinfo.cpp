@@ -315,6 +315,17 @@ void MyInfo::setSysBufferSize(quint64 buff)
 #endif
 }
 
+void MyInfo::getTTL()
+{
+#if defined(Q_OS_LINUX)
+    QString v4buf = readSysFile(IPv4_TTL_PATH);
+    QString v6buf = readSysFile(IPv6_TTL_PATH);
+    qDebug () << "IPv4 ttl: " << v4buf << " IPv6 ttl:" << v6buf;
+#else
+    qDebug() << "getTTL: Not support platform: " << QSysInfo::productType();
+#endif
+}
+
 QString MyInfo::readSysFile(const QString &path) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {

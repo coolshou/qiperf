@@ -27,6 +27,7 @@ public:
     QString getDriverVersion(const QString &interfaceName, QString &drivername);
     quint64 getSysBufferSize();
     void setSysBufferSize(quint64 buff);
+    void getTTL();
 
 #if defined(Q_OS_LINUX)
 
