@@ -34,10 +34,6 @@
 #if (TEST_WS==1)
 #include "wsclient.h"
 #endif
-#if (TEST_JSONRPC==1)
-#include "jcon/json_rpc_websocket_client.h"
-#include "rpctp.h"
-#endif
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -83,10 +79,6 @@ public slots:
     void onErrorStop(int err, QString msg);
     void on_notice(QString send_addr, QString msg);
     void onQuit();
-#if (TEST_JSONRPC==1)
-    int createRPC_Server(TP tp, QString host="127.0.0.1", int rpc_port=RPC_PORT);
-    int createRPC_Client(TP tp, QString host="127.0.0.1", int rpc_port=RPC_PORT);
-#endif
     void notificationReceived(const QString key, const QVariant value);
     //test
     void onTest();
@@ -104,11 +96,9 @@ protected:
 private:
     void updateRunStatus(bool bStart);
     void initCustomPlote();
-//    QPen newColorPen(int r, int g, int b, int width);
     void resetError();
     void saveSettings();
     void loadSettings();
-
 
 private slots:
     void initActions();
@@ -124,11 +114,12 @@ private slots:
     void onRPC_error(int code, const QString& message);
     void onIperfStarted(QString smode, QString ipport);
     void onIperfStoped(QString refrow, QString err_no, QString err, QString ipport);
-//    void onIperfTPdata(QString refrow, QString sInterval, QString data);
     void onDisconnected(QString serverip);
     void onPlotContextMenuRequest(QPoint pos);
     void onUpdateDataPath(QString datapath);
     void onUpdateTPCfg(QByteArray tpcfg);
+    int getStatusServers();
+    int getStatusClients();
 
 private:
     Ui::MainWindow *ui;
@@ -148,11 +139,6 @@ private:
     QMap<QString, WSClient *> m_wsc; // websocket client list for manager iperf client
     QMap<QString, int> m_status_server; // store server status, 0: init, 1: running, 2: error?
     QMap<QString, int> m_status_client; // store client status, 0: init, 1: running, 2: error?
-#endif
-#if (TEST_JSONRPC==1)
-    jcon::JsonRpcWebSocketClient *rpc_client;
-    QMap<QString, RpcTp *> map_qiperfds_server; // manager all qiperfd <manager ip, rpc_client> for iperf server
-    QMap<QString, RpcTp *> map_qiperfds_client; // manager all qiperfd <manager ip, rpc_client> for iperf client
 #endif
     UdpReceiver *m_receiver;
     EndPointMgr *m_endpointmgr;

@@ -2,9 +2,6 @@
 #define MYSERVICE_H
 
 #include <QObject>
-#if (TEST_JSONRPC==1)
-#include <jcon/json_rpc_websocket_server.h>
-#endif
 #include "qiperfd.h"
 
 class MyService : public QObject

@@ -174,18 +174,12 @@
     </property>
     <addaction name="actionTest"/>
    </widget>
-   <widget class="QMenu" name="menuAdd_mon">
-    <property name="title">
-     <string>Add_mon</string>
-    </property>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuRun"/>
    <addaction name="menuOption"/>
    <addaction name="menuHelp"/>
    <addaction name="menuTest"/>
-   <addaction name="menuAdd_mon"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">

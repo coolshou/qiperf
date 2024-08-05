@@ -23,7 +23,6 @@ win32:unix:!android:{
 #CONFIG += c++17
 
 include(../qiperf.pri)
-#include(../jcon-cpp.pri)
 unix {
 #include(../sigwatch.pri)
 }
@@ -61,7 +60,6 @@ SOURCES += \
     src/iperffileworker.cpp \
     src/main.cpp \
     src/qiperfc.cpp \
-    src/rpctp.cpp \
     src/tp.cpp \
     src/tpfoldingdelegate.cpp \
     src/tpmgr.cpp \
@@ -97,7 +95,6 @@ HEADERS += \
     src/htmlwriter.h \
     src/iperffileworker.h \
     src/qiperfc.h \
-    src/rpctp.h \
     src/tp.h \
     src/tpfoldingdelegate.h \
     src/tpmgr.h \
