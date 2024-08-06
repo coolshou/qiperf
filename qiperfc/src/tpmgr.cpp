@@ -13,7 +13,7 @@ TPMgr::TPMgr(QObject *parent)
 //    item = invisibleRootItem();
     rootItem = new TP(("Root"), ("Root"), nullptr);
     rootItem->setDataType(TPMgrData::root);
-
+    m_intervals.clear();
 }
 TPMgr::~TPMgr()
 {
@@ -293,6 +293,7 @@ void TPMgr::reset(){
     m_tps.clear();
     rootItem = new TP(("Root"), ("Root"));
     endResetModel();
+    m_intervals.clear();
 }
 
 void TPMgr::clear(){
@@ -302,8 +303,6 @@ void TPMgr::clear(){
         foreach(auto tp, rootItem->getChilds()){
             tp->removeChildren(0, tp->childCount());
             tp->clearThroughput();
-//            tp->setThroughput("Tx", 0);
-//            tp->setThroughput("Rx", 0);
             tp->resetData();
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
@@ -539,12 +538,15 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
     QJsonArray jArr = doc.array();//.object();
     //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
     QString dir=nullptr;
+    QString idx;
+    double fInterval = sInterval.toDouble();
     double sum=0;
     quint64 sum_lost=0;
     quint64 sum_total=0;
     quint64 lost_rate=0;
     bool isAvg=false;
     foreach (auto jObj, jArr){
+        idx = jObj["idx"].toString();
         isAvg = jObj["AVG"].toBool();
         QString value="";
         if (!jObj["dir"].isUndefined()){
@@ -561,10 +563,14 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         sum = sum + value.toDouble();
         sum_lost = sum_lost + pkt_lost.toDouble();
         sum_total = sum_total + pkt_total.toDouble();
+        if (fInterval >= m_intervals.value(idx, 0.0)){
+//            qDebug() << "sInterval:" << sInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
+            addTPdata(refrow, sInterval, idx, value,
+                jObj["unit"].toString(), dir, pkt_lost, pkt_total);
+            m_intervals[idx] = fInterval;
+        }
         if (!isAvg) {
-            addTPdata(refrow, sInterval, jObj["idx"].toString(), value,
-                    jObj["unit"].toString(), dir, pkt_lost, pkt_total);
-            // chart data
+            // chart data ( with out Average data)
             emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(),
                     jObj["value"].toString(), QString::number(lost_rate));
         }
@@ -573,8 +579,13 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
     // update  test pair config row's sum value
     TP *tp = getItemByIdx(refrow);
     if (!(tp==nullptr)){
-        tp->setThroughput(dir ,QString::number(sum));
-        tp->setLostRate(QString::number(sum_lost), QString::number(sum_total));
+        if (fInterval >= m_intervals.value(refrow, 0.0)){
+            //do not update sum when current m_intervals is larger sInterval
+//            qDebug() << "refrow:"<< refrow <<" isAvg:" << isAvg << " sInterval:" << sInterval << " sum:" << sum << " sum lost:" << sum_lost << " sum total:" << sum_total;
+            tp->setThroughput(dir ,QString::number(sum));
+            tp->setLostRate(QString::number(sum_lost), QString::number(sum_total));
+            m_intervals[refrow] = fInterval;
+        }
     }
     // signal dataChanged when all throughput data update!!
     emit dataChanged(QModelIndex(),QModelIndex());

@@ -168,74 +168,80 @@ void IperfWrapper::parserIperf3(QString linedata)
         // UDP:
         // 0.00-1.00   sec  4.18 GBytes  35.9 Gbits/sec  0.001 ms  0/137110 (0%)
         QStringList data = linedata.split(" ", Qt::SkipEmptyParts);
-        QString sInterval  = data[0]; // Interval
-//            qDebug() << "data:" << data;
-        if (!m_tpdatas.contains(sInterval)){
-//            qDebug() << "new data: " << sInterval;
-            QJsonArray lst =QJsonArray();
-            m_tpdatas.insert(sInterval, lst);
-        }
-        if (m_tpdatas[sInterval].count()<iparallel){
-            QJsonObject irec = QJsonObject();
-            irec.insert("idx", idx+sTag);  // parallel num
-            irec.insert("value", data[4]);  // Bitrate
-            irec.insert("unit", data[5]);  // Bitrate unit
-            if (m_protocal.contains("UDP")){
-                if (data.length() >=9) {
-                    irec.insert("jitter", data[6]);
-                    irec.insert("jitter_unit", data[7]);
-                    QStringList pkts = data[8].split("/");
-                    if (pkts.count()==2){
-//                        qInfo() << "packet_lost/packet_total = " << pkts[0] << " / " << pkts[1];
-                        irec.insert("packet_lost", pkts[0]);
-                        irec.insert("packet_total", pkts[1]);
+        if (data.length()>=6){
+            QString sInterval  = data[0]; // Interval
+    //            qDebug() << "data:" << data;
+            if (!m_tpdatas.contains(sInterval)){
+    //            qDebug() << "new data: " << sInterval;
+                QJsonArray lst =QJsonArray();
+                m_tpdatas.insert(sInterval, lst);
+            }
+            if (m_tpdatas[sInterval].count()<iparallel){
+                QJsonObject irec = QJsonObject();
+                irec.insert("idx", idx+sTag);  // parallel num
+                irec.insert("value", data[4]);  // Bitrate
+                irec.insert("unit", data[5]);  // Bitrate unit
+                if (m_protocal.contains("UDP")){
+                    if (data.length() >=9) {
+                        irec.insert("jitter", data[6]);
+                        irec.insert("jitter_unit", data[7]);
+                        QStringList pkts = data[8].split("/");
+                        if (pkts.count()==2){
+    //                        qInfo() << "packet_lost/packet_total = " << pkts[0] << " / " << pkts[1];
+                            irec.insert("packet_lost", pkts[0]);
+                            irec.insert("packet_total", pkts[1]);
+                        }else{
+                            qDebug() << "Unknown data format of packet lost: " << data[8];
+                        }
                     }else{
-                        qDebug() << "Unknown data format of packet lost: " << data[8];
+                        //qDebug() << "Unknown data format: " << data;
                     }
+                }
+                if (!sDir.isNull()){
+                    irec.insert("dir", sDir);  // direction
+                }
+                if (idx.contains("SUM", Qt::CaseInsensitive)){
+                    // ignore [SUM] line
+                    qInfo() << "==linedata==SUM==  " << linedata;
                 }else{
-                    //qDebug() << "Unknown data format: " << data;
+    //                qDebug() << "m_parallel: " << QString::number(iparallel) << "m_tpdatas length: " << m_tpdatas[sInterval].count();
+                    if (linedata.contains("receiver")){
+                        irec.insert("AVG", true); //final data is the average of throughput
+                    }
+    //                qDebug() << "sInterval: " << sInterval <<
+    //                            " irec: " << irec["packet_lost"].toString() <<
+    //                            " / " << irec["packet_total"].toString();
+                    m_tpdatas[sInterval].append(irec);
                 }
-            }
-            if (!sDir.isNull()){
-                irec.insert("dir", sDir);  // direction
-            }
-            if (idx.contains("SUM", Qt::CaseInsensitive)){
-                // ignore [SUM] line
-                qInfo() << "==linedata==SUM==  " << linedata;
-            }else{
-//                qDebug() << "m_parallel: " << QString::number(iparallel) << "m_tpdatas length: " << m_tpdatas[sInterval].count();
-                if (linedata.contains("receiver")){
-                    irec.insert("AVG", true); //final data is the average of throughput
-                }
-//                qDebug() << "sInterval: " << sInterval <<
-//                            " irec: " << irec["packet_lost"].toString() <<
-//                            " / " << irec["packet_total"].toString();
-                m_tpdatas[sInterval].append(irec);
-            }
 
-        }
-        if ((m_tpdatas[sInterval].count()>=iparallel)&&
-             !idx.contains("SUM", Qt::CaseInsensitive)){
-            QJsonArray arr = m_tpdatas[sInterval];
-            QJsonDocument doc;
-            doc.setArray(arr);
-//            qDebug() << "sInterval: " << sInterval;
-            if (sInterval.contains("-")){
-//                sInterval = sInterval.right(sInterval.indexOf("-"));
-                QStringList ls_int = sInterval.split("-");
-                if (ls_int.length()==2){
-                    sInterval = ls_int[1];
-                }else{
-                    qDebug() << "unknown format of sInterval: " << sInterval;
-                }
             }
-//            qDebug() << "sendThroughput:" << QString::number(m_idx) << " : " <<
-//                        sInterval << " : " << doc.toJson(QJsonDocument::Compact);
-            emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
-            //clear record
-//            QMap<QString, QJsonArray>().swap(m_tpdatas); // looks ok?
-            m_tpdatas.remove(sInterval);
+            if ((m_tpdatas[sInterval].count()>=iparallel)&&
+                 !idx.contains("SUM", Qt::CaseInsensitive)){
+                QJsonArray arr = m_tpdatas[sInterval];
+                QJsonDocument doc;
+                doc.setArray(arr);
+    //            qDebug() << "sInterval: " << sInterval;
+                if (sInterval.contains("-")){
+    //                sInterval = sInterval.right(sInterval.indexOf("-"));
+                    QStringList ls_int = sInterval.split("-");
+                    if (ls_int.length()==2){
+                        sInterval = ls_int[1];
+                    }else{
+                        qDebug() << "unknown format of sInterval: " << sInterval;
+                    }
+                }
+    //            qDebug() << "sendThroughput:" << QString::number(m_idx) << " : " <<
+    //                        sInterval << " : " << doc.toJson(QJsonDocument::Compact);
+//                qDebug() << "sInterval:" << sInterval << " doc:" ;
+                emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
+                //clear record
+    //            QMap<QString, QJsonArray>().swap(m_tpdatas); // looks ok?
+                m_tpdatas.remove(sInterval);
+            }
+        } else {
+            qDebug() << "parserIperf3: unknown format of line: " << linedata;
         }
+
     }
 }
 
@@ -271,7 +277,9 @@ void IperfWrapper::work()
             {
                 QString line = in.readLine();
                 if (m_version=="3"){
-                    parserIperf3(line);
+                    if (line!=""){
+                        parserIperf3(line);
+                    }
                 }else if (m_version=="2"){
                     qDebug() << "[IperfWrapper::work]TODO: parser iperf2 output";
                 }else {

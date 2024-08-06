@@ -143,12 +143,12 @@ void TP::loadData(QString data)
     m_omit = o_client["omit"].toInt();
 
 //    QString m_mclient = o_client["manager"].toString();
-    m_direction = QVariant::fromValue(DirType::Tx).toString();
+    QString direction = QVariant::fromValue(DirType::Tx).toString();
     if (o_client["bidir"].toBool()){
-        m_direction=QVariant::fromValue(DirType::TR).toString();
+        direction=QVariant::fromValue(DirType::TR).toString();
     }
     if (o_client["reverse"].toBool()){
-        m_direction=QVariant::fromValue(DirType::Rx).toString();
+        direction=QVariant::fromValue(DirType::Rx).toString();
     }
 
     QJsonObject o_server = jsonRoot["server"].toObject();
@@ -156,15 +156,15 @@ void TP::loadData(QString data)
     m_mgrserver = o_server["manager"].toString();
 
     //m_itemDatas.clear();// this will remove all data => m_itemDatas.length()=0
-    m_itemDatas[int(TP::id)] = m_id;
-    m_itemDatas[int(TP::server)] = server;
-    m_itemDatas[int(TP::dir)] = m_direction;
-    m_itemDatas[int(TP::client)] = client;
-    m_itemDatas[int(TP::throughput)] = "";
-    m_itemDatas[int(TP::mintp)] = "";
-    m_itemDatas[int(TP::maxtp)] = "";
-    m_itemDatas[int(TP::lostrate)] = "";
-    m_itemDatas[int(TP::comment)] = "";
+    m_itemDatas.replace(int(TP::cols::id) , m_id);
+    m_itemDatas.replace(int(TP::cols::server), server);
+    m_itemDatas.replace(int(TP::cols::dir), direction);
+    m_itemDatas.replace(int(TP::cols::client), client);
+    m_itemDatas.replace(int(TP::cols::throughput), "");
+    m_itemDatas.replace(int(TP::cols::mintp), "");
+    m_itemDatas.replace(int(TP::cols::maxtp), "");
+    m_itemDatas.replace(int(TP::cols::lostrate), "");
+    m_itemDatas.replace(int(TP::cols::comment), "");
 
     m_jsondata = data;
 }
@@ -247,7 +247,7 @@ QString TP::getClientArgs()
 
 QString TP::getDirection()
 {
-    return m_direction;
+    return m_itemDatas[int(TP::dir)].toString();
 }
 
 QString TP::getMgrServer()
@@ -305,7 +305,7 @@ int TP::getWaitTime()
 
 int TP::setDirection(DirType direction)
 {
-    m_direction = QVariant::fromValue(direction).toString();
+    QString sdirection = QVariant::fromValue(direction).toString();
 
     QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8());
     QJsonObject jsonRoot = doc.object();
@@ -326,7 +326,7 @@ int TP::setDirection(DirType direction)
     jsonRoot["client"]=o_client;
     doc.setObject(jsonRoot);
     m_jsondata =doc.toJson(QJsonDocument::Compact);
-    setData(TP::cols::dir, m_direction);
+    setData(TP::cols::dir, sdirection);
 
     return 0;
 }

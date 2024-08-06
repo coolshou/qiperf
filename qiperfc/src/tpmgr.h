@@ -90,7 +90,7 @@ private:
     TP *rootItem;
     QList<TP*> m_tps; //QList of tp, data
     QFileIconProvider iconProvider;
-
+    QMap<QString, double> m_intervals;
 };
 
 #endif // TPMGR_H

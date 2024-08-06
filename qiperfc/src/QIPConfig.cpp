@@ -22,14 +22,15 @@ QIPConfig::QIPConfig(QString tmppath, QObject *parent):
 }
 
 bool QIPConfig::loadFromFile(const QString &filePath) {
+    qDeleteAll(m_fileworkers);
     m_fileworkers.clear();
+
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "Can not read file: " << QDir::toNativeSeparators(filePath);
         return false;
     }
     bool rc=false;
-//    QDataStream in(file.readAll());
     QDataStream in(&file);
     in >> m_magic;
     in >> m_loadversion;
@@ -46,19 +47,24 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
             if (m_loadversion>=2){
                 QByteArray compressedfiles;
                 //tmp path
-                QString outpath = m_tmppath + QDir::separator() + m_data->testdate;
-                emit updateDataPath(outpath);
-                in >> compressedfiles;
-                rc = filesFromStore(compressedfiles, outpath);
-                if (rc){
-                    rc = parserTPCfgLogFiles(outpath);
+                if (m_data->testdate != "") {
+//                    qDebug() << "m_data->testdate: " << m_data->testdate;
+                    QString outpath = m_tmppath + QDir::separator() + m_data->testdate;
+                    emit updateDataPath(outpath);
+                    in >> compressedfiles;
+                    rc = filesFromStore(compressedfiles, outpath);
+                    if (rc){
+                        rc = parserTPCfgLogFiles(outpath);
+                    }
+                }else{
+                    rc = true;
                 }
             }else {
-                return true;
+                rc = true;
             }
         }else {
 //            qDebug() << "ERROR: Wrong format of the data: " << filePath;
-            return false;
+            rc = false;
         }
         file.close();
         return rc;
@@ -115,7 +121,7 @@ void QIPConfig::setTPCfg(QByteArray tpcfg, QString env, QString testdate, QStrin
 
 void QIPConfig::onThroughputData(int idx, QString sInterval, QString data)
 {
-//    qDebug() << "onThroughputData: " << idx << " sInterval: " << sInterval << " data: " << data;
+//    qDebug() << "QIPConfig::onThroughputData: " << idx << " sInterval: " << sInterval << " data: " << data;
     emit onThroughput(QString::number(idx), sInterval, data);
 }
 
@@ -208,6 +214,7 @@ bool QIPConfig::filesFromStore(QByteArray &inputData, const QString &outputFolde
 
 bool QIPConfig::parserTPCfgLogFiles(QString logpath)
 {
+//    qDebug() << "parserTPCfgLogFiles m_fileworkers:" << m_fileworkers.length();
     //use m_data->tpcfg to parser all log file to setup throughput plot chart
     if (m_data->tpcfg.size()>0){
 //        qDebug() << "parserTPCfgLogFiles tpcfg: " << m_data->tpcfg;

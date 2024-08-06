@@ -44,10 +44,11 @@ void FileSaveSocket::onReadyRead()
 
             m_localFile->write(buffer);
             if (bytesReceived == m_fileSize) {
+                qInfo() << "File received:" << m_localFile->fileName();
                 m_localFile->close();
                 delete m_localFile;
                 m_localFile = nullptr;
-                qInfo() << "File received:" << m_filename;
+
             }
         }
     }

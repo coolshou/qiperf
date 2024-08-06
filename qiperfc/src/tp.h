@@ -93,15 +93,13 @@ private:
     int m_datatype; // item type, 0: init, 1: for config root item, 2: throughput data
     QString m_id; // reference id
     QList<TP *> m_childItems;
-    QList<QVariant> m_itemDatas;//={m_id, QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant(), QVariant()}; //id, server ip, dir, client ip, throughput, min throughput, max throughput, lost rate, comment
+    QList<QVariant> m_itemDatas;// id, server ip, dir, client ip, throughput, min throughput, max throughput, lost rate, comment
     TP *m_parentItem;
 //    EndPointType::Type m_type;
     QString m_jsondata;
     int m_version; //iperf version
-    //QString m_server; // target server ip
     QString m_mgrserver; // target manger server ip
-    QString m_direction; //direction: 0,1,2,
-    //QString m_client; // client ip
+//    QString m_direction; //direction: 0,1,2,
     QString m_mgrclient; // manager client ip
     int m_port; //port number
     int m_duration; //test duration in sec

@@ -29,13 +29,26 @@ void FileServer::setRootPath(QString pathname)
     m_rootpath = pathname;
 }
 
+void FileServer::close()
+{
+    m_filesocks.clear();
+}
+
+int FileServer::getSockets()
+{
+    return m_filesocks.length();
+}
+
 void FileServer::acceptFileConnection()
 {
     bytesWritten = 0;
 
     QTcpSocket *filesocket = fileserver->nextPendingConnection();
+    qDebug() << "new FileSaveSocket " << filesocket << " (" << filesocket->peerAddress().toString() << ") with rootpath: " << m_rootpath;
     FileSaveSocket *customSocket = new FileSaveSocket(m_rootpath, filesocket);
-    connect(customSocket, SIGNAL(dataReady(QTcpSocket*)),this, SLOT(slotReceive(QTcpSocket*)));
+    m_filesocks.append(customSocket);
+//    m_filesocks.insert(filesocket->peerAddress().toString(),customSocket);
+//    connect(customSocket, SIGNAL(dataReady(QTcpSocket*)),this, SLOT(slotReceive(QTcpSocket*)));
 }
 void FileServer::slotReceive(QTcpSocket* socket)
 {
@@ -51,7 +64,7 @@ void FileServer::sendFile(QString filename)
         return;
     }
 
-    this->totalBytes = m_localFile->size();
+    totalBytes = m_localFile->size();
     QDataStream sendout(&outBlock, QIODevice::WriteOnly);
     sendout.setVersion(QDataStream::Qt_5_15);
     QString currentFileName = filename.right(filename.size() - filename.lastIndexOf('/') - 1);

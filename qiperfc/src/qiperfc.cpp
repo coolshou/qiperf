@@ -539,7 +539,7 @@ void QIperfC::onStart()
                             " client:" << m_status_client;
                 break;
             }else if(getStatusServers()==0 && getStatusClients()==0) {
-                qDebug() << "All test end, stop early";
+                //qDebug() << "All test end, stop early";
                 break;
             }
             QCoreApplication::processEvents(QEventLoop::AllEvents);
@@ -572,6 +572,10 @@ void QIperfC::onStop(){
                 m_wss[key]->sendText(cmd);
             }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    if (m_fileserver->getSockets()>0){
+        qDebug() << "clear m_fileserver";
+        m_fileserver->close();
     }
     updateRunStatus(false);
     //TODO: stop the running test!!

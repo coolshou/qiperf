@@ -668,7 +668,7 @@ void QIperfd::onWSactMessage(QString msg)
         cut = msg.indexOf(':', 0);
         QString refrow = msg.left(cut);
         msg = msg.right(msg.length()-cut-1);
-
+        qDebug()<< "CMD_IPERF_ADD: " << msg;
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
             add(refrow, doc.toVariant().toMap());

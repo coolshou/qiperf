@@ -33,6 +33,8 @@ void IperfFileWorker::onThroughputData(int idx, QString sInterval, QString data)
     if(m_bidirtag.isEmpty()){
         qDebug() << "No m_bidirtag, not reprot ThroughputData: ("<<sInterval<<")" << data;
     }else{
+//        qDebug() << "sInterval:" << sInterval;
+        //DEBUG: this will not get in line order => cause data show on UI not final data!!
         emit onThroughput(idx, sInterval, data);
     }
 }

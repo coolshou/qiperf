@@ -46,7 +46,7 @@ void FileClient::initTCP(quint16 port, QString targetaddress)
 
 void FileClient::enqueueFile(QString filename)
 {
-    qDebug()<< "file to send(enqueueFile): " << filename;
+    qInfo()<< "file to send(enqueueFile): " << filename;
     m_fileQueue.append(filename);
     if (fileSocket->state() == QTcpSocket::ConnectedState && !m_currentFile) {
         //If the client is connected and not currently transferring a file, it will start sending the next file in the queue
@@ -54,7 +54,7 @@ void FileClient::enqueueFile(QString filename)
     }else {
         qDebug() << "fileSocket->state(): " << (int)fileSocket->state() << "  (3=ConnectedState)" ;
         if (m_currentFile){
-            qDebug() << "m_currentFile: " << m_currentFile->fileName();
+            qDebug() << "enqueueFile m_currentFile: " << m_currentFile->fileName();
         }
     }
 }
@@ -83,7 +83,7 @@ void FileClient::onBytesWritten(qint64 bytes)
             m_currentFile->close();
             delete m_currentFile;
             m_currentFile = nullptr;
-            qDebug() << "[onBytesWritten]File transfer completed: " << filename;
+            qInfo() << "[onBytesWritten]File transfer completed: " << filename;
             sendNextFile(); // Proceed to the next file in the queue
         } else {
             fileSocket->write(buffer);
@@ -104,7 +104,7 @@ void FileClient::onDisconnected()
 void FileClient::sendNextFile()
 {
     if (m_fileQueue.isEmpty()) {
-        qDebug() << "All files have been sent";
+        qInfo() << "All files have been sent";
         return;
     }
 
@@ -120,6 +120,6 @@ void FileClient::sendNextFile()
 
     QFileInfo fileInfo(*m_currentFile);
     QString header = QString("FILE:%1:%2\n").arg(fileInfo.fileName()).arg(fileInfo.size());
-    qDebug() << "header: " << header;
+//    qDebug() << "header: " << header;
     fileSocket->write(header.toUtf8());
 }
