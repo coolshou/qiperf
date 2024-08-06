@@ -20,6 +20,7 @@ public:
     void setRootPath(QString rootpath);
 public slots:
     void close();
+    void onClosing(QString filename);
 
 protected:
     void changeEvent(QEvent *e) override;

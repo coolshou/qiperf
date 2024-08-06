@@ -105,6 +105,7 @@ int CodeEditor::lineNumberAreaWidth()
 
 void CodeEditor::load(QString filename)
 {
+    m_filename = filename;
     setWindowTitle(filename);
     QFile file(filename);
     if (file.open(QIODevice::Text | QFile::ReadOnly)){
@@ -112,6 +113,12 @@ void CodeEditor::load(QString filename)
         this->setPlainText(content);
         file.close();
     }
+}
+
+void CodeEditor::closeEvent(QCloseEvent *event)
+{
+    emit Closing(m_filename); // send signal before closing.
+    QPlainTextEdit::closeEvent(event);
 }
 
 //![extraAreaWidth]

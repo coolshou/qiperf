@@ -1,9 +1,6 @@
 #include "dlgrecord.h"
 #include "ui_dlgrecord.h"
 
-#include <QAbstractItemModel>
-
-
 #include <QDebug>
 
 DlgRecord::DlgRecord(QWidget *parent) :
@@ -46,6 +43,13 @@ void DlgRecord::close()
 
 }
 
+void DlgRecord::onClosing(QString filename)
+{
+    if (m_logfiles.contains(filename)){
+        m_logfiles.remove(filename);
+    }
+}
+
 void DlgRecord::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
@@ -73,10 +77,13 @@ void DlgRecord::onItemDClicked(QModelIndex idx)
             QString filename = m_rootpath + QDir::separator() + itm[0].toString();
             if (!m_logfiles.contains(filename)){
                 m_logfiles[filename] = new CodeEditor();
+                connect(m_logfiles[filename], &CodeEditor::Closing, this, &DlgRecord::onClosing);
                 m_logfiles[filename]->load(filename);
                 m_logfiles[filename]->show();
             }else{
-                m_logfiles[filename]->activateWindow();
+                qDebug() << "activateWindow: " << filename;
+                m_logfiles[filename]->setWindowState((m_logfiles[filename]->windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
+                m_logfiles[filename]->raise();
             }
         }
     }

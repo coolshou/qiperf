@@ -74,8 +74,11 @@ public:
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
     void load(QString filename);
+signals:
+    void Closing(QString filename);
 
 protected:
+    void closeEvent(QCloseEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
 private slots:
@@ -85,6 +88,7 @@ private slots:
 
 private:
     QWidget *lineNumberArea;
+    QString m_filename;
 };
 
 //![codeeditordefinition]
