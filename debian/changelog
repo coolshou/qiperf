@@ -1,16 +1,13 @@
-qiperf (0.4.11308.02-1) unstable; urgency=medium
+qiperf (0.4.11308.06-1) unstable; urgency=medium
 
   * fix: limit iperf3 parallel pair number to 20 (--bidir 10) to avoid throughput problem under windows
   * default: iperf3 send/receive socket buffer sizes to 256K (-w 256K)
   * update show Min/Max throughput
   * fix: collapse folding on clear throughput date
   * fix: many GUI bug fix
-
   * add show UDP packet lost rate
 
-  * add export test reqult to html file
-
- -- coolshou <jimmy_yeh@alphanetworks.com>  Fri, 2 Aug 2024 17:40:07 +0800
+ -- coolshou <jimmy_yeh@alphanetworks.com>  Tue, 6 Aug 2024 17:40:07 +0800
 
 qiperf (0.3.11307.23-1) unstable; urgency=medium
 
