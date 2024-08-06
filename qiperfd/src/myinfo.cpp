@@ -299,22 +299,6 @@ quint64 MyInfo::getSysBufferSize()
 #endif
 }
 
-void MyInfo::setSysBufferSize(quint64 buff)
-{
-#if defined(Q_OS_LINUX)
-    // max 416K
-    // sudo sysctl net.core.wmem_max=2097152
-    // sudo sysctl net.core.rmem_max=2097152
-    //# allow TCP with buffers up to 64MB
-    //net.core.rmem_max = 67108864
-    //net.core.wmem_max = 67108864
-    writeSysFile(READ_BUFFER_SIZE_PATH, QString::number(buff/2));
-    writeSysFile(WRITE_BUFFER_SIZE_PATH, QString::number(buff/2));
-#else
-    qDebug() << "setSysBufferSize: Not support platform: " << QSysInfo::productType();
-#endif
-}
-
 void MyInfo::getTTL()
 {
 #if defined(Q_OS_LINUX)
@@ -426,6 +410,21 @@ QString MyInfo::getTotalMemory() {
 }
 #endif
 
+void MyInfo::setSysBufferSize(quint64 buff)
+{
+#if defined(Q_OS_LINUX)
+    // max 416K
+    // sudo sysctl net.core.wmem_max=2097152
+    // sudo sysctl net.core.rmem_max=2097152
+    //# allow TCP with buffers up to 64MB
+    //net.core.rmem_max = 67108864
+    //net.core.wmem_max = 67108864
+    writeSysFile(READ_BUFFER_SIZE_PATH, QString::number(buff/2));
+    writeSysFile(WRITE_BUFFER_SIZE_PATH, QString::number(buff/2));
+#else
+    qDebug() << "setSysBufferSize: Not support platform: " << QSysInfo::productType();
+#endif
+}
 void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory) {
     cpuModel = getCPUModel();
     totalMemory = getTotalMemory();
