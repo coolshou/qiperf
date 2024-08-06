@@ -275,30 +275,6 @@ QString MyInfo::getDriverVersion(const QString &interfaceName, QString &driverna
     return QString();
 }
 
-quint64 MyInfo::getSysBufferSize()
-{   //return support Max buffer size in KB
-
-#if defined(Q_OS_LINUX)
-    // /proc/sys/net/core/rmem_max
-    // /proc/sys/net/core/wmem_max
-    // ubuntu 24.04
-    // sysctl show net.core.wmem_max  => 212992/1024 => 208K => Max -w 416K
-    // -w 4M
-    QString rbuf = readSysFile(READ_BUFFER_SIZE_PATH);
-    QString wbuf = readSysFile(WRITE_BUFFER_SIZE_PATH);
-    qDebug() << "rbuf: " << rbuf << " wbuf: " << wbuf;
-    quint64 irbuf = static_cast<quint64>((rbuf.toInt()/static_cast<int>(BUFFER_SIZES::KB))*2);
-    quint64 iwbuf = static_cast<quint64>((wbuf.toInt()/static_cast<int>(BUFFER_SIZES::KB))*2);
-    if (irbuf > iwbuf) {
-        return iwbuf;
-    }else{
-        return irbuf;
-    }
-#else
-    qDebug() << "getSysBufferSize: Not support platform: " << QSysInfo::productType();
-#endif
-}
-
 void MyInfo::getTTL()
 {
 #if defined(Q_OS_LINUX)
@@ -409,6 +385,30 @@ QString MyInfo::getTotalMemory() {
     return QString("Unknown Memory");
 }
 #endif
+
+quint64 MyInfo::getSysBufferSize()
+{   //return support Max buffer size in KB
+
+#if defined(Q_OS_LINUX)
+    // /proc/sys/net/core/rmem_max
+    // /proc/sys/net/core/wmem_max
+    // ubuntu 24.04
+    // sysctl show net.core.wmem_max  => 212992/1024 => 208K => Max -w 416K
+    // -w 4M
+    QString rbuf = readSysFile(READ_BUFFER_SIZE_PATH);
+    QString wbuf = readSysFile(WRITE_BUFFER_SIZE_PATH);
+    qDebug() << "rbuf: " << rbuf << " wbuf: " << wbuf;
+    quint64 irbuf = static_cast<quint64>((rbuf.toInt()/static_cast<int>(BUFFER_SIZES::KB))*2);
+    quint64 iwbuf = static_cast<quint64>((wbuf.toInt()/static_cast<int>(BUFFER_SIZES::KB))*2);
+    if (irbuf > iwbuf) {
+        return iwbuf;
+    }else{
+        return irbuf;
+    }
+#else
+    qDebug() << "getSysBufferSize: Not support platform: " << QSysInfo::productType();
+#endif
+}
 
 void MyInfo::setSysBufferSize(quint64 buff)
 {
