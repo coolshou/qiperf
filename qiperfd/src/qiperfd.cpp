@@ -361,6 +361,7 @@ void QIperfd::del(int idx)
     }
     if (m_iperfworkers.contains(idx))
     {
+        qDebug() << "remove m_iperfworkers:" << idx;
         m_iperfworkers.remove(idx);
     }
 
