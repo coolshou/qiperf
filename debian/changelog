@@ -1,3 +1,15 @@
+qiperf (0.5.11308.28-1) unstable; urgency=medium
+
+TODO
+  * Add export test reqult to html file
+  * Add delay start time for iperf test
+  * Add import iperf3 raw log file to show throughput chart
+  * Add enable/disable specify iperf test pair
+  * Fix throughput chart's legend area with scroll bar to fit all legend
+  * Fix throughput unit string fit iperf config/result
+
+ -- coolshou <coolshou2060@gmail.com>  Tue, 06 Aug 2024 10:25:52 +0800
+
 qiperf (0.4.11308.06-1) unstable; urgency=medium
 
   * fix: limit iperf3 parallel pair number to 20 (--bidir 10) to avoid throughput problem under windows
