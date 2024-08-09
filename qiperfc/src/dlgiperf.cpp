@@ -70,6 +70,8 @@ QString DlgIperf::getJsonCfg()
             serverObj.insert("bind", ui->cb_target_ip->currentText());
         }
         serverObj.insert("fmtreport", ui->cb_fmtreport->currentText());
+
+        serverObj.insert("delaytime", ui->sb_delaytime->value());
         mainObj.insert("server", serverObj);
 
     }
@@ -99,9 +101,10 @@ QString DlgIperf::getJsonCfg()
     clientObj.insert("mss", ui->sb_mss->value());
     clientObj.insert("interval", ui->sb_interval->value());
     clientObj.insert("fmtreport", ui->cb_fmtreport->currentText());
-
     clientObj.insert("reverse", ui->chk_reverse->isChecked());
     clientObj.insert("bidir", ui->chk_bidir->isChecked());
+
+    clientObj.insert("delaytime", ui->sb_delaytime->value());
     mainObj.insert("client", clientObj);
     QJsonDocument doc(mainObj);
     QString strJson(doc.toJson(QJsonDocument::Compact));
@@ -123,6 +126,8 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
     ui->sb_parallel->setValue(serverObj["parallel"].toInt());
     ui->chk_bidir->setChecked(serverObj["bidir"].toBool());
     ui->sb_interval->setValue(serverObj["interval"].toInt());
+
+    ui->sb_delaytime->setValue(serverObj["delaytime"].toInt());
 
     QJsonObject clientObj = mainObj["client"].toObject();
     ui->cb_mclient_ip->setCurrentText(clientObj["manager"].toString());
