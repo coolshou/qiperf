@@ -66,7 +66,6 @@ QString FileClient::getTargetAddress()
 
 void FileClient::onConnected()
 {
-    qDebug() << "Connected to server";
     // Start sending the first file if there's any in the queue
     if (!m_currentFile) {
         sendNextFile();
@@ -104,7 +103,7 @@ void FileClient::onDisconnected()
 void FileClient::sendNextFile()
 {
     if (m_fileQueue.isEmpty()) {
-        qInfo() << "All files have been sent";
+        qInfo() << "No Queue file";
         return;
     }
 
