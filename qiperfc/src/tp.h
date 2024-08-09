@@ -70,6 +70,7 @@ public:
     void swapServerClient(QString mgrServer, QString server, QString mgrClient, QString client);
     QString getThroughput(); //
     int getWaitTime();
+    int getDelaytime();
     int setDirection(DirType direction);
     int setDirection(QString direction);
     int getPort();
@@ -104,6 +105,7 @@ private:
     int m_port; //port number
     int m_duration; //test duration in sec
     int m_omit; //test omit time in sec
+    int m_delaytime; // delay time
     QString m_tp; // throughput value
     QString m_comment; // comment
 

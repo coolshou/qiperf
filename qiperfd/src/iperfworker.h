@@ -20,6 +20,7 @@ public:
     explicit IperfWorker(int idx, int version, QString cmd, QString arg="-s",
                          uint port=5201, QString bindaddr="0.0.0.0", QString target="",
                          bool bidir=false, bool reverse=false, int interval=1,
+                         int delaystart=0,
                          QObject *parent = nullptr);
     ~IperfWorker() override;
     void setStop();
@@ -57,10 +58,17 @@ private slots:
 private:
     int m_selfdestructionTime;
     QTimer *m_selfdestruction;
-    int m_delaystart;
     int m_refrow;// refrow
     int m_idx;
     int m_version; // iperf version 2 or 3
+    QString m_cmd; //iperf exec full path
+    uint m_port;  //iperf port
+    QString m_bindaddr; // iperf bind address
+    QString m_target; //target address
+    bool m_bidir=false;
+    bool m_reverse=false;
+    int m_interval=1;  // report interval
+    int m_delaystart;
     QObject *m_parent;
     IperfWrapper *m_iperfwrapper;
     bool m_stop;  //user stop;
@@ -68,18 +76,13 @@ private:
     bool m_servermode=false;
     QString m_parallel="0";
     QString m_protocal="TCP";
-    bool m_bidir=false;
-    bool m_reverse=false;
-    int m_interval=1;  // report interval
+
     QString m_iperfexe; // iperf exec name
     QString m_iperflogpath;
     QString m_bidirtag;
     QFile *m_logfile;
     QTextStream *m_logtextstream;
-    uint m_port;  //iperf port
-    QString m_bindaddr; // iperf bind address
-    QString m_target; //target address
-    QString m_cmd; //iperf exec full path
+
     QStringList m_arguments;  //iperf args
     QProcess *m_iperf; // iperf procress
     QMap<QString, QJsonArray> m_tpdatas;

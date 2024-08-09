@@ -287,7 +287,7 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
 int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint port,
                  QString bndaddr, QString target,
                  QString parallel, QString protocal, bool bidir, bool reverse,
-                 int interval)
+                 int interval, int delaytime)
 { // add a IperfWorker to run iperf server/client
     // TODO: check host/port used?
     QThread *iperf_th = new QThread();
@@ -297,7 +297,7 @@ int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint 
     //    int idx = m_threads.count()-1;
     IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port,
                                            bndaddr, target, bidir, reverse,
-                                           interval);
+                                           interval, delaytime);
     iperfer->setRefRow(refrow);
     iperfer->setExtra(parallel, protocal);
 //    connect(iperfer, &IperfWorker::onStdout, this, &QIperfd::readStdOut);
@@ -335,6 +335,7 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
     bool bidir = jsondata["bidir"].toBool(); // for server mode use
     bool reverse = jsondata["reverse"].toBool(); // for server mode use
     int interval = jsondata["interval"].toInt();
+    int delaytime = jsondata["delaytime"].toInt();
 
     //conver json data format to iperf args
     QString args;
@@ -348,7 +349,7 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
         return -1;
     }
     return add(refrow, ver, cmd, args, port, binaddr,
-               target, parallel, protocal, bidir, reverse, interval);
+               target, parallel, protocal, bidir, reverse, interval, delaytime);
 }
 
 void QIperfd::del(int idx)

@@ -170,9 +170,7 @@ void IperfWrapper::parserIperf3(QString linedata)
         QStringList data = linedata.split(" ", Qt::SkipEmptyParts);
         if (data.length()>=6){
             QString sInterval  = data[0]; // Interval
-    //            qDebug() << "data:" << data;
             if (!m_tpdatas.contains(sInterval)){
-    //            qDebug() << "new data: " << sInterval;
                 QJsonArray lst =QJsonArray();
                 m_tpdatas.insert(sInterval, lst);
             }
@@ -208,21 +206,15 @@ void IperfWrapper::parserIperf3(QString linedata)
                     if (linedata.contains("receiver")){
                         irec.insert("AVG", true); //final data is the average of throughput
                     }
-    //                qDebug() << "sInterval: " << sInterval <<
-    //                            " irec: " << irec["packet_lost"].toString() <<
-    //                            " / " << irec["packet_total"].toString();
                     m_tpdatas[sInterval].append(irec);
                 }
-
             }
             if ((m_tpdatas[sInterval].count()>=iparallel)&&
                  !idx.contains("SUM", Qt::CaseInsensitive)){
                 QJsonArray arr = m_tpdatas[sInterval];
                 QJsonDocument doc;
                 doc.setArray(arr);
-    //            qDebug() << "sInterval: " << sInterval;
                 if (sInterval.contains("-")){
-    //                sInterval = sInterval.right(sInterval.indexOf("-"));
                     QStringList ls_int = sInterval.split("-");
                     if (ls_int.length()==2){
                         sInterval = ls_int[1];
@@ -230,18 +222,17 @@ void IperfWrapper::parserIperf3(QString linedata)
                         qDebug() << "unknown format of sInterval: " << sInterval;
                     }
                 }
-    //            qDebug() << "sendThroughput:" << QString::number(m_idx) << " : " <<
-    //                        sInterval << " : " << doc.toJson(QJsonDocument::Compact);
 //                qDebug() << "sInterval:" << sInterval << " doc:" ;
+                if (m_delaytime>0){
+                    sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
+                }
                 emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
                 //clear record
-    //            QMap<QString, QJsonArray>().swap(m_tpdatas); // looks ok?
                 m_tpdatas.remove(sInterval);
             }
         } else {
             qDebug() << "parserIperf3: unknown format of line: " << linedata;
         }
-
     }
 }
 
@@ -263,6 +254,11 @@ void IperfWrapper::setIperf(QString version, QString protocal)
 {
     m_version = version;
     m_protocal = protocal;
+}
+
+void IperfWrapper::setDelaytime(int delaytime)
+{
+    m_delaytime = delaytime;
 }
 
 void IperfWrapper::work()

@@ -141,7 +141,7 @@ void TP::loadData(QString data)
     m_port = o_client["port"].toInt();
     m_duration = o_client["duration"].toInt();
     m_omit = o_client["omit"].toInt();
-
+    m_delaytime = o_client["delaytime"].toInt();
 //    QString m_mclient = o_client["manager"].toString();
     QString direction = QVariant::fromValue(DirType::Tx).toString();
     if (o_client["bidir"].toBool()){
@@ -301,6 +301,11 @@ int TP::getWaitTime()
 {
     //omit time + test duration
     return m_omit + m_duration;
+}
+
+int TP::getDelaytime()
+{
+    return m_delaytime;
 }
 
 int TP::setDirection(DirType direction)

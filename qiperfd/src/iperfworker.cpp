@@ -10,6 +10,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDir>
+#include <QDateTime>
 
 //#include <QOverload>
 
@@ -19,23 +20,27 @@
 IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
                          uint port, QString bindaddr, QString target,
                          bool bidir, bool reverse, int interval,
+                         int delaystart,
                          QObject *parent)
-    : QObject{parent}
+    : QObject{parent}, m_idx(idx), m_version(version), m_cmd(cmd), m_port(port),
+      m_bindaddr(bindaddr), m_target(target), m_bidir(bidir), m_reverse(reverse),
+      m_interval(interval), m_delaystart(delaystart), m_parent(parent)
 {
-    m_delaystart =0; //TODO: m_delaystart
+//    m_delaystart =delaystart; //TODO: m_delaystart
     m_logfile = nullptr;
     m_logtextstream = nullptr;
     m_iperflogpath = "";
-    m_idx = idx; // thread index
+//    m_idx = idx; // thread index
     m_iperfwrapper = new IperfWrapper(this);
+    m_iperfwrapper->setDelaytime(delaystart);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfWorker::onThroughputData);
 //    this->deleteLater(); //this will cause stdout not flush??
-    m_parent = parent;
-    m_version = version;
-    m_bidir = bidir;
-    m_reverse = reverse;
+//    m_parent = parent;
+//    m_version = version;
+//    m_bidir = bidir;
+//    m_reverse = reverse;
 //    emit log(QString("arg:"+arg));
-    m_cmd = cmd; //iperf exec fullpath
+//    m_cmd = cmd; //iperf exec fullpath
     m_arguments = arg.split(" ");
     if (m_arguments.contains("-s")){
         m_servermode=true;
@@ -43,9 +48,9 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
             m_arguments.append("--one-off"); //handle one client connection then exit
         }
     }
-    m_port = port;
-    m_bindaddr = bindaddr;
-    m_target = target;
+//    m_port = port;
+//    m_bindaddr = bindaddr;
+//    m_target = target;
     if (m_version>=static_cast<int>(IPERF_VER::V3)){
         m_arguments.append("--forceflush");
     }
@@ -70,9 +75,9 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
             }
         }
     }
-    m_interval = interval;
+//    m_interval = interval;
     qDebug() << "[" << getBindKey() << "] reg m_bidirtag:" << m_bidirtag << " interval:" << m_interval;
-    m_selfdestructionTime = (10+m_interval) * 1000; //10 sec + report interval
+    m_selfdestructionTime = (10+m_interval+m_delaystart) * 1000; //10 sec + report interval
     m_selfdestruction = new QTimer(this);
     m_selfdestruction->setInterval(m_selfdestructionTime);
     connect(m_selfdestruction, &QTimer::timeout, this, &IperfWorker::onSelfDestructor);
@@ -89,24 +94,33 @@ IperfWorker::~IperfWorker()
 }
 
 void IperfWorker::work()
-{
-    //this code run in another thread
+{   //this code run in another thread
     m_stop = false;
-
     //create iperf procress
     m_iperf =  new QProcess(m_parent);
     m_iperf->setProgram(m_cmd);
     m_iperf->setArguments(m_arguments);
-
-//    m_iperf->start();
     connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
     connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
 //    connect(m_iperf, &QProcess::readyRead, this, &IperfWorker::readyReadStdOut);
     connect(m_iperf, &QProcess::started, this, &IperfWorker::onStarted);
     connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
-    //errorOccurred(QProcess::ProcessError error)
 
-//    m_iperf->start(m_cmd, m_arguments, QProcess::Unbuffered | QProcess::ReadWrite);
+    qDebug() << "m_delaystart: " << m_delaystart;
+    if (m_delaystart>0){
+        emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
+        QDateTime waitStartTime = QDateTime::currentDateTime();
+        QDateTime waitEndTime = QDateTime::currentDateTime();
+        int iWait = waitStartTime.secsTo(waitEndTime);
+        while (iWait < m_delaystart){
+            qDebug() << "wait " << m_delaystart-iWait << " to start iperf";
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            QThread::msleep(100);
+            waitEndTime = QDateTime::currentDateTime();
+            iWait = waitStartTime.secsTo(waitEndTime);
+        }
+    }
+
     m_iperf->start();
     if (m_iperf->waitForStarted()){
         emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
@@ -120,7 +134,6 @@ void IperfWorker::work()
         emit log(m_idx, "iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "));
         emit log(m_idx, m_iperf->readAllStandardError());
     }
-    //    emit finished(m_iperf->exitCode(), m_iperf->exitStatus());
 }
 
 bool IperfWorker::isRunning()
@@ -141,6 +154,7 @@ void IperfWorker::setStop()
     if (m_iperf->waitForFinished(1000)){
         emit log(m_idx, "iperf killed");
     }else{
+        qDebug() << "terminate iperf id: " << QString::number(m_iperf->processId());
         m_iperf->terminate();
     }
 //    emit finished(m_refrow, 0, 2, getBindKey());
@@ -213,7 +227,9 @@ void IperfWorker::onStarted()
     m_running = true;
     m_iperfwrapper->setSetting(m_refrow, m_servermode, m_parallel, m_bidir, m_bidirtag);
     m_selfdestruction->start();
-    emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
+    if (m_delaystart==0){
+        emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
+    }
 }
 
 void IperfWorker::readyReadStdOut()

@@ -17,6 +17,8 @@ public:
     void setSetting(int idx, bool servermode, QString parallel, bool bidir, QString bidirtag);
     void setFile(QString filename);
     void setIperf(QString version, QString protocal);
+    void setDelaytime(int delaytime);
+
 public slots:
     void work();
 signals:
@@ -34,6 +36,7 @@ private:
     QMap<QString, QJsonArray> m_tpdatas;
     QString m_version;
     QString m_protocal;
+    int m_delaytime;
 };
 
 #endif // IPERFWRAPPER_H

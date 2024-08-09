@@ -239,36 +239,44 @@ void QIperfC::onNew()
 
 void QIperfC::onOpen()
 {
-    //TODO: load test config file
+    QString path;
+    if (!m_oldsavepath.isNull()){
+        path = m_oldsavepath;
+    }else {
+        path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    }
     QString fileName = QFileDialog::getOpenFileName(this,
-             tr("Open QIperf file"),
-            QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
-            tr(QIPERF_EXT_FILTER));
+             tr("Open QIperf file"), path , tr(QIPERF_EXT_FILTER));
     QFileInfo fi(fileName);
     QString ext = fi.suffix();
     if (ext.compare(QIPERF_EXT)!=0){
         qDebug() << "Not support file format: " << fileName;
         return;
     }
-    load(fileName);
+    if (load(fileName)){
+        m_oldsavepath = fi.path();
+    }
 }
 
 void QIperfC::onSave()
 {
-    //TODO: save test config file
+    QString path;
+    if (!m_oldsavepath.isNull()){
+        path = m_oldsavepath;
+    }else {
+        path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    }
     QString fileName = QFileDialog::getSaveFileName(this,
-             tr("Save QIperf "),
-            QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
-            tr(QIPERF_EXT_FILTER));
-    //TODO: zip/tar file to save all data include throughput result...
+             tr("Save QIperf "), path, tr(QIPERF_EXT_FILTER));
     QFileInfo fi(fileName);
     QString ext = fi.suffix();
     if (ext.compare(QIPERF_EXT)!=0){
-//        fileName = fileName + QIPERF_EXT
         fileName = fi.path() + fi.baseName() + "."+ QIPERF_EXT;
     }
     qInfo() << "save file: " << fileName ;
-    save(fileName);
+    if (save(fileName)){
+        m_oldsavepath = fi.path();
+    }
 
 }
 
@@ -366,6 +374,7 @@ void QIperfC::onStart()
         qint64 rs=0;
         int maxtestduration=0; // max wait test time
         int iwait=0;
+        int idelaytime=0;
         int itimeout;
         int refrow;
         foreach (TP *tp, tps) {
@@ -374,6 +383,10 @@ void QIperfC::onStart()
             iwait = tp->getWaitTime();
             if (iwait> maxtestduration){
                 maxtestduration = iwait+5;
+            }
+            idelaytime = tp->getDelaytime();
+            if (idelaytime>0) {
+                maxtestduration = maxtestduration + idelaytime;
             }
             refrow = tp->row();
             QString serverIP = tp->getMgrServer();
@@ -396,6 +409,8 @@ void QIperfC::onStart()
                     emit errorStop(1,"Wait connect to " +s+ " timeout");
                     break;
                 }
+            }else{
+                m_wss[serverIP]->setDatapath(m_datapath);
             }
             //tell server add iperf server
             cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
@@ -511,6 +526,7 @@ void QIperfC::onStart()
                 if (m_status_server[key]!=TPStatus::started){
                     ds.append(key);
                 }
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
             }
             qDebug() << "server not readey: " << ds.join(",");
             emit errorStop(4, "Iperf server not readey:" +  ds.join(","));
@@ -558,26 +574,31 @@ void QIperfC::onStart()
 void QIperfC::onStop(){
     QString cmd="";
     foreach (auto key, m_wsc.keys()){
-            if (m_wsc[key]){
-                cmd = QString(CMD_IPERF_STOP)+":" + key;
-                qDebug() << m_wsc[key] << " m_wsc send cmd: " << cmd;
-                m_wsc[key]->sendText(cmd);
-            }
+        if (m_wsc[key]){
+            cmd = QString(CMD_IPERF_STOP)+":" + key;
+            qDebug() << m_wsc[key] << " m_wsc send cmd: " << cmd;
+            m_wsc[key]->sendText(cmd);
+//            m_wsc.remove(key);
+        }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
+//    m_wsc.clear();
     foreach (auto key, m_wss.keys()){
-            if (m_wss[key]){
-                cmd = QString(CMD_IPERF_STOP)+":" + key;
-                qDebug() << m_wss[key] <<  "m_wss send cmd: " << cmd;
-                m_wss[key]->sendText(cmd);
-            }
+        if (m_wss[key]){
+            cmd = QString(CMD_IPERF_STOP)+":" + key;
+            qDebug() << m_wss[key] <<  "m_wss send cmd: " << cmd;
+            m_wss[key]->sendText(cmd);
+//            m_wss.remove(key);
+        }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
+//    m_wss.clear();
     if (m_fileserver->getSockets()>0){
-        qDebug() << "clear m_fileserver";
+//        qDebug() << "clear m_fileserver";
         m_fileserver->close();
     }
     updateRunStatus(false);
+    m_tpmgr->clear();
     //TODO: stop the running test!!
     QString endtime = getNowString();
     QDateTime enddatetime = QDateTime::fromString(endtime,DATETIME_NOW_FORMAT);
@@ -790,10 +811,11 @@ void QIperfC::saveSettings()
     m_settings->beginGroup("MainWindow");
     m_settings->setValue("geometry", saveGeometry());
     m_settings->setValue("windowState", saveState());
+    m_settings->setValue("oldsavepath", m_oldsavepath);
     m_settings->sync(); // forces to write the settings to storage
     m_settings->endGroup();
     m_settings->beginGroup("Iperf");
-//    m_settings->value("WaitServerReady", 10).toInt();
+    m_settings->setValue("WaitServerReady", m_WaitServerReady);
     m_settings->endGroup();
     m_settings->sync();
 }
@@ -809,6 +831,8 @@ void QIperfC::loadSettings()
     move(x,y);
     restoreGeometry(m_settings->value("geometry", newrect).toByteArray());
     restoreState(m_settings->value("windowState").toByteArray());
+    m_oldsavepath = m_settings->value("oldsavepath",
+                                      QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
     m_settings->endGroup();
     m_settings->beginGroup("Iperf");
     m_WaitServerReady =m_settings->value("WaitServerReady", 10).toInt();
@@ -849,14 +873,13 @@ void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err, QString
 //        emit errorStop(2, "onIperfStoped: ["+ipport+"]("+err_no+"):"+err);
     }else{
         // qiperf notify no error end:
-//        qDebug() << "onIperfStoped:" << refrow << " ipport:" << ipport << " err_no:" << err_no << " : " << err;
         if (m_status_server.contains(ipport)){
             m_status_server[ipport]=TPStatus::init;
-            qDebug() << "m_status_server[ipport]: " << m_status_server[ipport];
+            qDebug() << "m_status_server[" << ipport << "]: " << m_status_server[ipport];
         }
         if (m_status_client.contains(ipport)){
             m_status_client[ipport]=TPStatus::init;
-            qDebug() << "m_status_client[ipport]: " << m_status_client[ipport];
+            qDebug() << "m_status_client[" << ipport << "]: " << m_status_client[ipport];
         }
     }
 }

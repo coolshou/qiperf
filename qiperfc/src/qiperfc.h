@@ -159,6 +159,6 @@ private:
     QString m_datapath;
 
     FileServer *m_fileserver;
-
+    QString m_oldsavepath=nullptr;
 };
 #endif // QIPERFC_H
