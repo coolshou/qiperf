@@ -308,6 +308,7 @@ void TPMgr::clear(){
         }
         emit dataChanged(QModelIndex(),QModelIndex());
     }
+    m_intervals.clear();
 }
 
 TP *TPMgr::getItem(const QModelIndex &index) const
