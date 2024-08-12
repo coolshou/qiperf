@@ -593,9 +593,9 @@ void QIperfC::onStop(){
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
-    if (m_fileserver->getSockets()>0){
-        m_fileserver->close();
-    }
+//    if (m_fileserver->getSockets()>0){
+//        m_fileserver->close();
+//    }
     updateRunStatus(false);
     QString endtime = getNowString();
     QDateTime enddatetime = QDateTime::fromString(endtime,DATETIME_NOW_FORMAT);
