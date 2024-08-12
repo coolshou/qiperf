@@ -1,13 +1,15 @@
 #include "filesaveSocket.h"
 
 #include <QHostAddress>
+#include <QDebug>
 
 FileSaveSocket::FileSaveSocket (QString pathname, QTcpSocket* socket)
-    :m_rootpath(pathname)
 {
+    setRootpath(pathname);
     tcpSocket = socket;
     connect(tcpSocket, &QTcpSocket::readyRead, this, &FileSaveSocket::onReadyRead);
     connect(tcpSocket, &QTcpSocket::disconnected, this, &FileSaveSocket::onClientDisconnected);
+
 }
 
 FileSaveSocket::~FileSaveSocket ()
@@ -44,7 +46,7 @@ void FileSaveSocket::onReadyRead()
 
             m_localFile->write(buffer);
             if (bytesReceived == m_fileSize) {
-                qInfo() << "File received:" << m_localFile->fileName();
+                qInfo() << "FileSaveSocket::onReadyRead File received:" << m_localFile->fileName();
                 m_localFile->close();
                 delete m_localFile;
                 m_localFile = nullptr;
@@ -78,5 +80,6 @@ void FileSaveSocket :: write(QString data)
 
 void FileSaveSocket::setRootpath(QString rootpath)
 {
+//    qDebug() << "FileSaveSocket::setRootpath: "  << rootpath;
     m_rootpath = rootpath;
 }
