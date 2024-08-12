@@ -220,7 +220,6 @@ void WSClient::onBinaryMessageReceived(const QByteArray &message) {
         }
         m_files[from]->write(message.mid(nullIndex + 1));
     } else {
-        qDebug() << "onBinaryMessageReceived: m_files "<< m_files[from] << "exist: write: " << message;
         m_files[from]->write(message);
     }
 
