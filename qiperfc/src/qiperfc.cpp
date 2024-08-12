@@ -280,15 +280,16 @@ void QIperfC::onSave()
 
 }
 
-void QIperfC::on_Clear()
+bool QIperfC::on_Clear()
 {
+    // this will clean iperf test pair config
     if (m_tpmgr->rootChildCount()>0) {
         //this will clear all item include root!!
         m_tpmgr->reset();
     }else{
         qDebug() << "on_Clear No child";
     }
-    onClear();
+    return onClear();
 }
 
 void QIperfC::onAddIperf()
@@ -347,6 +348,9 @@ void QIperfC::onPairSwapIP()
 
 void QIperfC::onStart()
 {
+    if (!onClear()){
+        return;
+    }
     ui->actionShowLog->setEnabled(true);
     resetError();
     //TODO: clear old test record!!
@@ -578,38 +582,35 @@ void QIperfC::onStop(){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
             qDebug() << m_wsc[key] << " m_wsc send cmd: " << cmd;
             m_wsc[key]->sendText(cmd);
-//            m_wsc.remove(key);
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
-//    m_wsc.clear();
     foreach (auto key, m_wss.keys()){
         if (m_wss[key]){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
             qDebug() << m_wss[key] <<  "m_wss send cmd: " << cmd;
             m_wss[key]->sendText(cmd);
-//            m_wss.remove(key);
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
-//    m_wss.clear();
     if (m_fileserver->getSockets()>0){
-//        qDebug() << "clear m_fileserver";
         m_fileserver->close();
     }
     updateRunStatus(false);
-    m_tpmgr->clear();
-    //TODO: stop the running test!!
     QString endtime = getNowString();
     QDateTime enddatetime = QDateTime::fromString(endtime,DATETIME_NOW_FORMAT);
     emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(m_TestStartTime.secsTo(enddatetime))+" sec)");
-    //stop test
-//    m_tpmgr->stop();
-    // check all client endpoint stop
-    // force stop all client endpoint
 }
 
-void QIperfC::onClear(){
+bool QIperfC::onClear(){
+    if (m_TestStartTime.isValid()){
+        int ret = QMessageBox::information(this, "NOTICE", "Previous test record will be clear, Continious?", QMessageBox::Ok|QMessageBox::Cancel);
+        if (ret == QMessageBox::Cancel){
+            // test cancel
+            return false;
+        }
+    }
+
     //clear all test date, config setting remain unchanged
     if (m_tpmgr->rootChildCount()>0) {
         m_tpmgr->clear();
@@ -620,6 +621,7 @@ void QIperfC::onClear(){
     emit updateStatus("");
     emit updateStarttime("");
     ui->actionShowLog->setEnabled(false);
+    return true;
 }
 
 void QIperfC::onShowLog()

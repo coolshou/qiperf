@@ -59,7 +59,7 @@ public slots:
     void onNew();
     void onOpen();
     void onSave();
-    void on_Clear();
+    bool on_Clear();
     void onAddIperf();
     void onPairAdd();
     void onPairEdit();
@@ -68,7 +68,7 @@ public slots:
     void onPairSwapIP();
     void onStart();
     void onStop();
-    void onClear();
+    bool onClear();
     void onShowLog();
     void onConfig();
     void onCopy();
