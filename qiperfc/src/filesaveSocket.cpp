@@ -75,3 +75,8 @@ void FileSaveSocket :: write(QString data)
 {
     tcpSocket->write(data.toStdString().c_str());
 }
+
+void FileSaveSocket::setRootpath(QString rootpath)
+{
+    m_rootpath = rootpath;
+}

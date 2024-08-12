@@ -70,6 +70,7 @@ public:
     explicit WSClient(QString serverip, const QUrl &url, QString datapath, QObject *parent = nullptr);
     qint64 sendText(QString message);
     bool isConnected();
+    void setDatapath(QString datapath);
 
 public slots:
     void onError(QAbstractSocket::SocketError error);

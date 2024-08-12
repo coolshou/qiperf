@@ -73,7 +73,8 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject 
 //    qDebug() << "WSClient open websocket:" << url << Qt::endl;
     m_serverip = serverip;
     m_url = url;
-    m_datapath = datapath + QDir::separator();
+//    m_datapath = datapath + QDir::separator();
+    setDatapath(datapath);
     m_webSocket.open(m_url);
 }
 //! [constructor]
@@ -96,7 +97,15 @@ bool WSClient::isConnected()
 //    if (m_webSocket!=nullptr){
         return m_webSocket.isValid();
 //    }
-//    return false;
+        //    return false;
+}
+
+void WSClient::setDatapath(QString datapath)
+{
+    if (!datapath.endsWith(QDir::separator())) {
+            datapath.append(QDir::separator());
+    }
+    m_datapath = datapath;
 }
 
 
@@ -241,6 +250,6 @@ void WSClient::onSslErrors(const QList<QSslError> &errors)
 void WSClient::onError(QAbstractSocket::SocketError error)
 {
     qDebug() << "onError:" << error;
-
+    //TODO: handle websocket not connect issue
 }
 

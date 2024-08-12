@@ -3,6 +3,7 @@
 #include <QDataStream>
 #include <QDir>
 
+#include <QDebug>
 
 
 FileServer::FileServer(quint16 port, QObject *parent)
@@ -11,6 +12,7 @@ FileServer::FileServer(quint16 port, QObject *parent)
 //    filesocket = new QTcpSocket(this);
     fileserver = new QTcpServer(this);
     fileserver->listen(QHostAddress::Any, port);
+    qDebug() << "FileServer listen on: " << port;
     connect(fileserver, SIGNAL(newConnection()), this, SLOT(acceptFileConnection()));
     bytesReceived = 0;
     totalBytes = 0;
@@ -27,6 +29,10 @@ void FileServer::setRootPath(QString pathname)
         }
     }
     m_rootpath = pathname;
+    //update all FileSaveSocket's m_rootpath
+    foreach(auto *fsock, m_filesocks){
+        fsock->setRootpath(m_rootpath);
+    }
 }
 
 void FileServer::close()
@@ -44,7 +50,7 @@ void FileServer::acceptFileConnection()
     bytesWritten = 0;
 
     QTcpSocket *filesocket = fileserver->nextPendingConnection();
-    qDebug() << "new FileSaveSocket " << filesocket << " (" << filesocket->peerAddress().toString() << ") with rootpath: " << m_rootpath;
+    qDebug() << "new Fix second time run test no throughput value on UI " << filesocket << " (" << filesocket->peerAddress().toString() << ") with rootpath: " << m_rootpath;
     FileSaveSocket *customSocket = new FileSaveSocket(m_rootpath, filesocket);
     m_filesocks.append(customSocket);
 //    m_filesocks.insert(filesocket->peerAddress().toString(),customSocket);

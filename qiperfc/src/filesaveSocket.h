@@ -14,6 +14,7 @@ public:
         ~FileSaveSocket();
         QString getData();
         void write(QString data);
+        void setRootpath(QString rootpath);
 
 private slots:
         void onReadyRead();
