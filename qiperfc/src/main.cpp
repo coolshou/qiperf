@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     if (!dir.exists())
         dir.mkpath(".");
     QString logfile = logfilePath + "qiperfc.log";
+    qDebug() << "logfile:  " << logfile;
     // TODO: check log file exist, backup it
     QFile outFile(logfile);
     if (! outFile.open(QIODevice::WriteOnly | QIODevice::Append)){
