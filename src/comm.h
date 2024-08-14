@@ -3,9 +3,12 @@
 
 #define QIPERF_DOMAIN "alphanetworks.com"
 #define QIPERF_ORG "alphanetworks"
+
+#define QIPERFC_NAME  "qiperfconsole"
 #define QIPERF_NAME  "qiperf"
 #define QIPERFD_NAME  "qiperfd"
 #define QIPERFTRAY_NAME  "qiperftray"
+
 #define QIPERF_EXT "qip"
 #define QIPERF_EXT_FILTER "qiperf (*.qip)"
 
@@ -15,7 +18,6 @@
 #define QIPERF_FILEPORT 47017 //FileServer Port
 #define RPC_PORT 57025
 
-#define QIPERFC_NAME  "qiperfconsole"
 
 #define CMD_OK     "OK"
 #define CMD_FAIL   "FAIL"

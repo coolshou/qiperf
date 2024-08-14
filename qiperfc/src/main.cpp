@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     //log file
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 
-    QString logfilePath = tmp + QDir::separator() + "qiperf" + QDir::separator();
+    QString logfilePath = tmp + QDir::separator() + QIPERFC_NAME + QDir::separator();
     QDir dir(logfilePath);
     if (!dir.exists())
         dir.mkpath(".");
@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
     QFile outFile(logfile);
     if (! outFile.open(QIODevice::WriteOnly | QIODevice::Append)){
         qDebug() << "open file " << logfile << " Fail" << Qt::endl;
+        return -1;
     } else {
         output_ts.setDevice(&outFile);
     }
