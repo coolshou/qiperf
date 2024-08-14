@@ -218,7 +218,7 @@ bool QIperfC::save(QString filename)
         m_qipconfig->saveToFile(filename);
         return true;
     }else {
-        qDebug() << "NO throughput config to save" << Qt::endl;
+        qDebug() << "NO throughput config to save";
         return false;
     }
 }
@@ -235,8 +235,14 @@ void QIperfC::onNewMessage(const QString msg)
 
 void QIperfC::onNew()
 {
-    //TODO: check tp config exist?
+    ui->actionSave->setEnabled(false);
     on_Clear();
+    if (m_tpmgr->rootChildCount()>0) {
+        //this will clear all item include root!!
+        m_tpmgr->reset();
+    }else{
+        qDebug() << "on_Clear No child";
+    }
 }
 
 void QIperfC::onOpen()
@@ -258,6 +264,7 @@ void QIperfC::onOpen()
     if (load(fileName)){
         m_oldsavepath = fi.path();
     }
+    ui->actionSave->setEnabled(true);
 }
 
 void QIperfC::onSave()
@@ -285,12 +292,7 @@ void QIperfC::onSave()
 bool QIperfC::on_Clear()
 {
     // this will clean iperf test pair config
-    if (m_tpmgr->rootChildCount()>0) {
-        //this will clear all item include root!!
-        m_tpmgr->reset();
-    }else{
-        qDebug() << "on_Clear No child";
-    }
+
     return onClear();
 }
 
@@ -1029,6 +1031,7 @@ void QIperfC::initActions()
     connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(onNew()));
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(onSave()));
+    ui->actionSave->setEnabled(false);
     // edit
     connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(onCopy()));
     connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(onPaste()));
