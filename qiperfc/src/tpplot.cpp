@@ -15,10 +15,10 @@ void TPPlot::onIperfTPdata(QString sInterval, QString idx, QString data, QString
 {
     double x = sInterval.toDouble();
     double y = data.toDouble();
-    addTPData(idx, x, y, lostrate.toInt());
+    addTPData(idx, x, y, lostrate.toDouble());
 }
 
-void TPPlot::addTPData(QString idx, double xdata, double ydata, int lostrate)
+void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
 {
     QCPGraph *graph = getGraph(idx);
     // enlarge/shrink y range

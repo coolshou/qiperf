@@ -559,7 +559,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
     double sum=0;
     quint64 sum_lost=0;
     quint64 sum_total=0;
-    quint64 lost_rate=0;
+    double lost_rate=0;
     bool isAvg=false;
     foreach (auto jObj, jArr){
         idx = jObj["idx"].toString();
@@ -587,6 +587,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         }
         if (!isAvg) {
             // chart data ( with out Average data)
+//            qDebug() << sInterval <<" lost_rate: " << lost_rate;
             emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(),
                     jObj["value"].toString(), QString::number(lost_rate));
         }
