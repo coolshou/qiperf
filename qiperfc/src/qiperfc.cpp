@@ -247,6 +247,7 @@ void QIperfC::onNew()
 
 void QIperfC::onOpen()
 {
+    onNew();
     QString path;
     if (!m_oldsavepath.isNull()){
         path = m_oldsavepath;
