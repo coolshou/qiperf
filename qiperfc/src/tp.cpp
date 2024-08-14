@@ -1,22 +1,26 @@
 #include "tp.h"
 #include <QJsonDocument>
 #include <QPixmap>
+#include <QVariant>
 
 TP::TP(QString id, QString data, TP *parent)
     :m_id(id), m_parentItem(parent)
 {
     m_id=id;
     m_jsondata = "";
+//    setEnabled();
+    m_enabled = true;
+    m_datatype = 0;
+    m_lostpacket = 0;
+    m_totalpacket = 0;
+    clearThroughput();
+
     m_itemDatas={m_id, "", "", "", // id, server, dir ,client
                  "", "", "", //throughput, min tput, max tput
                  "", "", }; // lost rate, comment
     if (data!="" && data !="Root"){
         loadData(data);
     }
-    m_datatype = 0;
-    clearThroughput();
-    m_lostpacket = 0;
-    m_totalpacket = 0;
 }
 
 void TP::appendChild(TP *item)
@@ -133,7 +137,7 @@ void TP::loadData(QString data)
 {
     QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
     QJsonObject jsonRoot = doc.object();
-
+    m_enabled = jsonRoot["enabled"].toBool();
     QJsonObject o_client = jsonRoot["client"].toObject();
     m_version = o_client["version"].toInt();
     QString client = o_client["bind"].toString();
@@ -174,10 +178,8 @@ QString TP::getJsonData(){
 }
 void TP::resetData(){
     //reset (clear) test data
-//    clear();
     QString d = getJsonData();
     loadData(d);
-
 }
 QString TP::saveData()
 {
@@ -497,4 +499,38 @@ QString TP::getLostRate()
 //        qDebug() << "m_totalpacket:" << QString::number(m_totalpacket);
         return QString();
     }
+}
+
+void TP::setEnabled()
+{
+    m_enabled = true;
+    updateJson("enabled", m_enabled);
+}
+
+void TP::setDisabled()
+{
+    m_enabled = false;
+    updateJson("enabled", m_enabled);
+}
+
+bool TP::getEnabled()
+{
+    return m_enabled;
+}
+void TP::updateJson(QString key, QVariant value){
+    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8());
+    QJsonObject jsonRoot = doc.object();
+    if (value.canConvert<bool>()){
+        jsonRoot[key] = value.toBool();
+    }else if (value.canConvert<QString>()) {
+        jsonRoot[key] = value.toString();
+    }else if (value.canConvert<int>()) {
+        jsonRoot[key] = value.toInt();
+    }else {
+        qDebug() << "not support type of value: " << value << " type: "<< value.typeName();
+    }
+    doc.setObject(jsonRoot);
+//    qDebug() << "updateJson:jsonRoot" << jsonRoot;
+    m_jsondata =doc.toJson(QJsonDocument::Compact);
+//    qDebug() << "updateJson:m_jsondata:" << m_jsondata;
 }

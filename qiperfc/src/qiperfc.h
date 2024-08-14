@@ -11,6 +11,7 @@
 #include <QObject>
 #include <QSettings>
 #include <QClipboard>
+#include <QMenu>
 
 #include "comm.h"
 #include "pipeclient.h"
@@ -101,6 +102,7 @@ private:
     void loadSettings();
 
 private slots:
+    void initMenus();
     void initActions();
     void initToolbar();
     void initStatusbar();
@@ -115,11 +117,14 @@ private slots:
     void onIperfStarted(QString smode, QString ipport);
     void onIperfStoped(QString refrow, QString err_no, QString err, QString ipport);
     void onDisconnected(QString serverip);
+    void onTPUTContextMenu(QPoint pos);
     void onPlotContextMenuRequest(QPoint pos);
     void onUpdateDataPath(QString datapath);
     void onUpdateTPCfg(QByteArray tpcfg);
     int getStatusServers();
     int getStatusClients();
+    void onEnableItem(bool checked);
+    void onDisableItem(bool checked);
 
 private:
     Ui::MainWindow *ui;
@@ -158,6 +163,9 @@ private:
     int m_WaitServerReady;
     QString m_datapath;
 
+    QMenu *m_tpmenu; //right menu for m_tpmgr
+    QAction *m_aEnable; //
+    QAction *m_aDisable;
     FileServer *m_fileserver;
     QString m_oldsavepath=nullptr;
 };

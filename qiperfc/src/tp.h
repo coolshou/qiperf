@@ -87,6 +87,9 @@ public:
     void clearThroughput();
     void setLostRate(QString pkt_lost, QString pkt_total);
     QString getLostRate();
+    void setEnabled();
+    void setDisabled();
+    bool getEnabled();
 
 signals:
 
@@ -118,6 +121,8 @@ private:
     double m_maxRx;//record max Rx throughput
     int m_lostpacket; // record lost packet
     int m_totalpacket; // record total packet
+    bool m_enabled; // enable/disable item
+    void updateJson(QString key, QVariant value);
 };
 
 #endif // TP_H

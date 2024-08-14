@@ -16,6 +16,7 @@
 #include <QEventLoop>
 #include <QTreeView>
 #include <QToolTip>
+#include <QAction>
 
 #include "endpointact.h"
 #include "tp.h"
@@ -59,6 +60,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     loadSettings();
     //UI actions
     initActions();
+    initMenus();
     initToolbar();
     //dataTimer = QTimer();
     initCustomPlote();
@@ -108,7 +110,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 //    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
 //    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
     ui->tv_throughput->expandAll();// will show folding icon when have child item??
-
+    ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu
+    connect(ui->tv_throughput, &QTreeView::customContextMenuRequested, this, &QIperfC::onTPUTContextMenu);
     connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemDClicked); //edit item on double click
 
     //TODO: slow update text/image?
@@ -197,7 +200,6 @@ bool QIperfC::save(QString filename)
         QStringList pcs = m_tpmgr->getPCs();
         QString env= m_endpointmgr->getPCsInfo(pcs);
 //        qDebug() << "env: " << env;
-//        m_qipconfig->setTPCfg(b );
         QString starttime="";
         if (m_TestStartTime.isValid()){
             starttime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
@@ -383,94 +385,83 @@ void QIperfC::onStart()
         int refrow;
         foreach (TP *tp, tps) {
             QCoreApplication::processEvents(QEventLoop::AllEvents);
-            //RPC to control all server endpoint (iperf server)
-            iwait = tp->getWaitTime();
-            if (iwait> maxtestduration){
-                maxtestduration = iwait+5;
-            }
-            idelaytime = tp->getDelaytime();
-            if (idelaytime>0) {
-                maxtestduration = maxtestduration + idelaytime;
-            }
-            refrow = tp->row();
-            QString serverIP = tp->getMgrServer();
-            //TODO: detect manager server is pingable
-            if (!m_wss.contains(serverIP)) {
-                s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
-//                qDebug() << "server websocket url: " << s << Qt::endl;
-                m_wss[serverIP]=new WSClient(serverIP, QUrl(s), m_datapath);
-                connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
-                connect(m_wss[serverIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
-                connect(m_wss[serverIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
-                connect(m_wss[serverIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
-                itimeout = iTimeout;
-                while (! m_wss[serverIP]->isConnected() && itimeout>0){
-                    QThread::msleep(10);
-                    QCoreApplication::processEvents(QEventLoop::AllEvents);
-                    itimeout--;
+            if (tp->getEnabled()){
+                //RPC to control all server endpoint (iperf server)
+                iwait = tp->getWaitTime();
+                if (iwait> maxtestduration){
+                    maxtestduration = iwait+5;
                 }
-                if (itimeout<=0){
-                    emit errorStop(1,"Wait connect to " +s+ " timeout");
+                idelaytime = tp->getDelaytime();
+                if (idelaytime>0) {
+                    maxtestduration = maxtestduration + idelaytime;
+                }
+                refrow = tp->row();
+                QString serverIP = tp->getMgrServer();
+                //TODO: detect manager server is pingable
+                if (!m_wss.contains(serverIP)) {
+                    s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
+    //                qDebug() << "server websocket url: " << s << Qt::endl;
+                    m_wss[serverIP]=new WSClient(serverIP, QUrl(s), m_datapath);
+                    connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
+                    connect(m_wss[serverIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
+                    connect(m_wss[serverIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
+                    connect(m_wss[serverIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
+                    itimeout = iTimeout;
+                    while (! m_wss[serverIP]->isConnected() && itimeout>0){
+                        QThread::msleep(10);
+                        QCoreApplication::processEvents(QEventLoop::AllEvents);
+                        itimeout--;
+                    }
+                    if (itimeout<=0){
+                        emit errorStop(1,"Wait connect to " +s+ " timeout");
+                        break;
+                    }
+                }else{
+                    m_wss[serverIP]->setDatapath(m_datapath);
+                }
+                //tell server add iperf server
+                cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
+    //            qInfo() << "server cmd:"<< serverIP << " CMD_IPERF_ADD:" << tp->getServer() << ":" << tp->getPort() ;
+                rs = m_wss[serverIP]->sendText(cmd);
+                if (rs<=0){
+                    emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
                     break;
                 }
-            }else{
-                m_wss[serverIP]->setDatapath(m_datapath);
-            }
-            //tell server add iperf server
-            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
-//            qInfo() << "server cmd:"<< serverIP << " CMD_IPERF_ADD:" << tp->getServer() << ":" << tp->getPort() ;
-            rs = m_wss[serverIP]->sendText(cmd);
-            if (rs<=0){
-                emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
-                break;
-            }
-            m_status_server[tp->getBindKey(true)]=TPStatus::init; // init server of BindKey status 0
-            //RPC to control all client endpoint (iperf client)
-            QString clientIP = tp->getMgrClient();
-            //TODO: detect manager client is pingable
-            if (!m_wsc.contains(clientIP)) {
-                s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
-                m_wsc[clientIP]=new WSClient(clientIP, QUrl(s), m_datapath);
-                connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
-                connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
-                connect(m_wsc[clientIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
-                connect(m_wsc[clientIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
-                itimeout = iTimeout;
-                while (! m_wsc[clientIP]->isConnected()&& itimeout>0){
-                    QThread::msleep(10);
-                    QCoreApplication::processEvents(QEventLoop::AllEvents);
-                    itimeout--;
+                m_status_server[tp->getBindKey(true)]=TPStatus::init; // init server of BindKey status 0
+                //RPC to control all client endpoint (iperf client)
+                QString clientIP = tp->getMgrClient();
+                //TODO: detect manager client is pingable
+                if (!m_wsc.contains(clientIP)) {
+                    s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
+                    m_wsc[clientIP]=new WSClient(clientIP, QUrl(s), m_datapath);
+                    connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
+                    connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
+                    connect(m_wsc[clientIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
+                    connect(m_wsc[clientIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
+                    itimeout = iTimeout;
+                    while (! m_wsc[clientIP]->isConnected()&& itimeout>0){
+                        QThread::msleep(10);
+                        QCoreApplication::processEvents(QEventLoop::AllEvents);
+                        itimeout--;
+                    }
+                    if (itimeout<=0){
+                        emit errorStop(1,"Wait connect to " +s+ "timeout");
+                        break;
+                    }
                 }
-                if (itimeout<=0){
-                    emit errorStop(1,"Wait connect to " +s+ "timeout");
+                //tell client add iperf client
+                cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
+    //            qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
+                rs = m_wsc[clientIP]->sendText(cmd);
+                if (rs<=0){
+                    emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
                     break;
                 }
+                m_status_client[tp->getBindKey(false)]=TPStatus::init;// init client of BindKey status 0
+            } else {
+                qDebug() << "Ignore disabled TP test pair: " << tp;
             }
-            //tell client add iperf client
-            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
-//            qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
-            rs = m_wsc[clientIP]->sendText(cmd);
-            if (rs<=0){
-                emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
-                break;
-            }
-            m_status_client[tp->getBindKey(false)]=TPStatus::init;// init client of BindKey status 0
 
-            // TODO. set websocket to  report throughput
-//            QString di = tp->getDirection();
-//            if (di== QVariant::fromValue(TP::DirType::Tx).toString()){
-//                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(true));
-//                m_wsc[clientIP]->sendText(QString(CMD_IPERF_UNREG)+":"+startTime+":"+tp->getBindKey(false));
-//            }else if (di== QVariant::fromValue(TP::DirType::Rx).toString()){
-//                m_wss[serverIP]->sendText(QString(CMD_IPERF_UNREG)+":"+startTime+":"+tp->getBindKey(true));
-//                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(false));
-//            }else if (di== QVariant::fromValue(TP::DirType::TR).toString()){
-//                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(true));
-//                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(false));
-//            }else {
-//                m_wss[serverIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Rx:"+tp->getBindKey(true));
-//                m_wsc[clientIP]->sendText(QString(CMD_IPERF_REG)+":"+startTime+":Tx:"+tp->getBindKey(false));
-//            }
         }
         //TODO: record which should report iperf throughput value
 
@@ -653,6 +644,7 @@ void QIperfC::onCopy()
 {
     if (ui->tv_throughput->hasFocus()){
         QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
+//        qDebug() << "onCopy:" << idxs;
         TP *tp;
         QString s="";
         foreach(auto idx, idxs){
@@ -660,6 +652,8 @@ void QIperfC::onCopy()
             s = s + "\n" + tp->getJsonData();
         }
         m_clipboard->setText(s);
+    }else {
+        qDebug() << "tv_throughput no hasFocus";
     }
 }
 
@@ -668,6 +662,8 @@ void QIperfC::onPaste()
     if (ui->tv_throughput->hasFocus()){
         QString clip = m_clipboard->text();
         m_tpmgr->onPaste(clip);
+    }else {
+        qDebug() << "tv_throughput no hasFocus";
     }
 }
 
@@ -842,6 +838,22 @@ void QIperfC::loadSettings()
     m_settings->endGroup();
 }
 
+void QIperfC::initMenus()
+{
+    m_tpmenu = new QMenu();
+    m_aEnable = new QAction("Enable select item");
+    connect(m_aEnable, &QAction::triggered, this, &QIperfC::onEnableItem);
+    m_aDisable = new QAction("Disable select item");
+    connect(m_aDisable, &QAction::triggered, this, &QIperfC::onDisableItem);
+//    aDisable->setEnabled(false);
+    m_tpmenu->addAction(ui->actionCopy);
+    m_tpmenu->addAction(ui->actionPaste);
+    m_tpmenu->addSeparator();
+    m_tpmenu->addAction(m_aEnable);
+    m_tpmenu->addAction(m_aDisable);
+
+}
+
 void QIperfC::onRPC_result(const QVariant &result)
 {
     qDebug() << "onRPC_result: " << result << Qt::endl;
@@ -895,6 +907,28 @@ void QIperfC::onDisconnected(QString serverip)
     if (m_wsc.contains(serverip)){
         m_wsc.remove(serverip);
     }
+}
+
+void QIperfC::onTPUTContextMenu(QPoint pos)
+{
+    // if select multi items
+    QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
+    if (idxs.length()>1){
+        m_aEnable->setEnabled(true);
+        m_aDisable->setEnabled(true);
+    } else {
+        //TODO: check select item status enable/disable menu item
+        QModelIndex midx = ui->tv_throughput->indexAt(pos);
+        TP *tp = m_tpmgr->getItem(midx);
+        if (tp->getEnabled()){
+            m_aEnable->setEnabled(false);
+            m_aDisable->setEnabled(true);
+        }else{
+            m_aEnable->setEnabled(true);
+            m_aDisable->setEnabled(false);
+        }
+    }
+    m_tpmenu->popup(ui->tv_throughput->mapToGlobal(pos));
 }
 
 void QIperfC::onPlotContextMenuRequest(QPoint pos)
@@ -951,6 +985,41 @@ int QIperfC::getStatusClients()
         sum += value;
     }
     return sum;
+}
+
+void QIperfC::onEnableItem(bool checked)
+{
+    Q_UNUSED(checked)
+//     ui->tv_throughput->SelectItems;
+    QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedIndexes();
+    qDebug() << "onEnableItem:" << idxs;
+    if (idxs.length()>0){
+        TP *tp;
+        QString s="";
+
+        foreach(auto idx, idxs){
+            tp = m_tpmgr->getItem(idx);
+            qDebug() << "onEnableItem: " << tp;
+            tp->setEnabled();
+        }
+    }
+
+}
+
+void QIperfC::onDisableItem(bool checked)
+{
+    Q_UNUSED(checked)
+    QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
+    qDebug() << "onDisableItem:" << idxs;
+    if (idxs.length()>0){
+        TP *tp;
+        QString s="";
+
+        foreach(auto idx, idxs){
+            tp = m_tpmgr->getItem(idx);
+            tp->setDisabled();
+        }
+    }
 }
 
 void QIperfC::initActions()

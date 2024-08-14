@@ -3,7 +3,9 @@
 #include <QJsonArray>
 #include <QCoreApplication>
 #include <QEventLoop>
-
+#include <QWidget>
+#include <QPalette>
+#include <QColor>
 
 #include "tp.h"
 
@@ -14,6 +16,10 @@ TPMgr::TPMgr(QObject *parent)
     rootItem = new TP(("Root"), ("Root"), nullptr);
     rootItem->setDataType(TPMgrData::root);
     m_intervals.clear();
+
+    QWidget widget;
+    QPalette palette = widget.palette();
+    m_disabledTextColor = palette.color(QPalette::Disabled, QPalette::Text);
 }
 TPMgr::~TPMgr()
 {
@@ -34,6 +40,13 @@ QVariant TPMgr::data(const QModelIndex &idx, int role) const
             return Qt::AlignCenter;
         }
     }
+    TP *item = getItem(idx);
+    if (role == Qt::ForegroundRole){
+        // when item is disabled, grayout text
+        if (! item->getEnabled()) {
+            return m_disabledTextColor;
+        }
+    }
 
 //    if ((role == Qt::DecorationRole) && (index.column()==TP::cols::id)) {
 //        //show a custom icon!!
@@ -52,7 +65,7 @@ QVariant TPMgr::data(const QModelIndex &idx, int role) const
 //    return QVariant();
     //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
 
-    TP *item = getItem(idx);
+
 //    TP *item = static_cast<TP*>(index.internalPointer());
     if (item->getDataType()==TPMgrData::config){
         if (idx.column()== TP::cols::throughput) {
@@ -181,6 +194,8 @@ bool TPMgr::add(QString data)
     tp->setDataType(TPMgrData::config);
     rootItem->appendChild(tp);
     endInsertRows();
+//    qDebug() << "TPMgr::add: " << tp->getEnabled();
+
     return true;
 }
 QModelIndex TPMgr::indexFromItem(TP *item){

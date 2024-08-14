@@ -50,11 +50,13 @@ public:
     // // editable data model
     // setData() const override; // require emit dataChanged()
     // flags() const override;  //return ItemIsEditable
+//    Qt::ItemFlags flags(const QModelIndex &idx) const override;
     // // header display mathod
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     //setHeaderData() const override;  // require emit headerDataChanged()
     //
     bool removeRows(int position, int rows, const QModelIndex &parent) override;
+
     // ======
     bool add(QString data);
     QModelIndex indexFromItem(TP *item);
@@ -91,6 +93,7 @@ private:
     QList<TP*> m_tps; //QList of tp, data
     QFileIconProvider iconProvider;
     QMap<QString, double> m_intervals;
+    QColor m_disabledTextColor;
 };
 
 #endif // TPMGR_H
