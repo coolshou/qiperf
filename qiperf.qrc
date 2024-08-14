@@ -29,5 +29,9 @@
         <file alias="folding/close">images/fclose.png</file>
         <file alias="folding/open">images/fopen.png</file>
         <file alias="pair-swap-ip">images/iperf-swap-ip.png</file>
+        <file alias="disableRT">images/disableRT.png</file>
+        <file alias="disableRx">images/disableRx.png</file>
+        <file alias="disableTR">images/disableTR.png</file>
+        <file alias="disableTx">images/disableTx.png</file>
     </qresource>
 </RCC>
