@@ -52,7 +52,7 @@ QString DlgIperf::getJsonCfg()
     //return Json config of iperf pair from UI's value
     QJsonObject mainObj;
     mainObj.insert("Action", CMD_IPERF_ADD);
-
+    mainObj.insert("enabled", true);
 //    if (ui->gb_control_server->isChecked())
     {
         //server
