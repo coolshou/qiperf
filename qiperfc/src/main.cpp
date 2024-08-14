@@ -13,6 +13,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QMessageLogContext>
+#include <QMessageBox>
 #include <qlogging.h>
 
 static QTextStream output_ts;
@@ -54,15 +55,19 @@ int main(int argc, char *argv[])
     QString logfile = logfilePath + "qiperfc.log";
     qDebug() << "logfile:  " << logfile;
     // TODO: check log file exist, backup it
+
+    qInstallMessageHandler(myMessageOutput);
+    QApplication app(argc, argv);
     QFile outFile(logfile);
     if (! outFile.open(QIODevice::WriteOnly | QIODevice::Append)){
-        qDebug() << "open file " << logfile << " Fail" << Qt::endl;
+        QString s =  "open file " + logfile + " Fail" ;
+        qDebug() << s << Qt::endl;
+        QMessageBox::warning(nullptr, "ERROR", s);
         return -1;
     } else {
         output_ts.setDevice(&outFile);
     }
-    qInstallMessageHandler(myMessageOutput);
-    QApplication app(argc, argv);
+
 #if defined(Q_OS_LINUX) && TEST_SIGWATCH
     UnixSignalWatcher sigwatch;
     sigwatch.watchForSignal(SIGINT);
