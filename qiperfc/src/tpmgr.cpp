@@ -68,6 +68,11 @@ QVariant TPMgr::data(const QModelIndex &idx, int role) const
 
 //    TP *item = static_cast<TP*>(index.internalPointer());
     if (item->getDataType()==TPMgrData::config){
+        if (idx.column()== TP::cols::dir) {
+            if (!item->getEnabled()){
+                return QVariant("disable"+item->data(idx.column()).toString());
+            }
+        }
         if (idx.column()== TP::cols::throughput) {
             //special case of throughput data (sum of all iperf  --parallel value)
             return QVariant(item->getTxRxThroughput());
@@ -256,7 +261,7 @@ QByteArray TPMgr::savedata()
 {
     QJsonArray jsonarr;
     //save all data in json string
-    if(this->rootChildCount() > 0){
+    if(rootChildCount() > 0){
         for (int row = 0; row < rootItem->childCount(); ++row){
             TP *tp = rootItem->child(row);
             QJsonDocument jsonDoc= QJsonDocument::fromJson(tp->saveData().toUtf8());
@@ -265,7 +270,7 @@ QByteArray TPMgr::savedata()
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }else {
-        qDebug() << "TPMgr::savedata: No data to save" << Qt::endl;
+        qDebug() << "TPMgr::savedata: No data to save";
     }
     QJsonDocument doc(jsonarr);
     return doc.toJson(QJsonDocument::Compact);
