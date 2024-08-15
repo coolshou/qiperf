@@ -48,7 +48,6 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
                 QByteArray compressedfiles;
                 //tmp path
                 if (m_data->testdate != "") {
-//                    qDebug() << "m_data->testdate: " << m_data->testdate;
                     QString outpath = m_tmppath + QDir::separator() + m_data->testdate;
                     emit updateDataPath(outpath);
                     in >> compressedfiles;
@@ -57,9 +56,11 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
                         rc = parserTPCfgLogFiles(outpath);
                     }
                 }else{
+                    qDebug() << "no test record date";
                     rc = true;
                 }
             }else {
+                qDebug() << "config file version is old: " << m_loadversion;
                 rc = true;
             }
         }else {
@@ -117,6 +118,12 @@ void QIPConfig::setTPCfg(QByteArray tpcfg, QString env, QString testdate, QStrin
         m_data->testdate = testdate;
         m_data->datafilenames = datafilenames;
     }
+}
+
+void QIPConfig::clear()
+{ //clear test data
+    m_data->testdate = "";
+
 }
 
 void QIPConfig::onThroughputData(int idx, QString sInterval, QString data)

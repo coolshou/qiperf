@@ -180,10 +180,6 @@ bool QIperfC::load(QString filename)
         }
     }
     if (m_qipconfig->loadFromFile(filename)){
-        //QByteArray b = m_qipconfig->getTPCfg();
-        //m_tpmgr->loaddata(b);
-        //TODO: load record to plot
-
         return true;
     }else{
         qDebug() << "load file " << filename << " Fail!!";
@@ -205,10 +201,8 @@ bool QIperfC::save(QString filename)
             starttime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
             QString tmp = m_logpath + QDir::separator() + starttime;
             QDir d(tmp);
-//            qDebug() << "path: " << tmp << " :files: " << d.entryList(QDir::Files);
             QStringList filelist;
             foreach(auto s, d.entryList(QDir::Files)){
-//                qDebug() << "save file: " << tmp+ QDir::separator()+s;
                 filelist.append(tmp+ QDir::separator()+s);
             }
             m_qipconfig->setTPCfg(b, env, starttime, filelist);
@@ -283,7 +277,7 @@ void QIperfC::onSave()
     if (ext.compare(QIPERF_EXT)!=0){
         fileName = fi.path() + fi.baseName() + "."+ QIPERF_EXT;
     }
-    qInfo() << "save file: " << fileName ;
+//    qInfo() << "save file: " << fileName ;
     if (save(fileName)){
         m_oldsavepath = fi.path();
     }
@@ -612,6 +606,7 @@ bool QIperfC::onClear(){
     }
     m_tpplot->clear();
     m_TestStartTime = QDateTime();
+    m_qipconfig->clear();
     emit updateStatus("");
     emit updateStarttime("");
     ui->actionShowLog->setEnabled(false);

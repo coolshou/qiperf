@@ -27,10 +27,13 @@ public:
     uint32_t getVersion();
     QByteArray getTPCfg();
     void setTPCfg(QByteArray tpcfg, QString env="", QString testdate="", QStringList datafilenames={});
+    void clear();
+
 signals:
     void updateDataPath(QString datapath);
     void updateTPCfg(QByteArray tpcfg);
     void onThroughput(QString refrow, QString sInterval, QString datas); // refrow, sInterval, throughput data
+
 
 private slots:
     void onThroughputData(int idx, QString sInterval,  QString data);
