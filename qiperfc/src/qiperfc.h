@@ -60,6 +60,7 @@ public slots:
     void onNew();
     void onOpen();
     void onSave();
+    void onImportIperf3Log();
     bool on_Clear();
     void onAddIperf();
     void onPairAdd();

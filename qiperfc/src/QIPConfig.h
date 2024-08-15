@@ -28,6 +28,7 @@ public:
     QByteArray getTPCfg();
     void setTPCfg(QByteArray tpcfg, QString env="", QString testdate="", QStringList datafilenames={});
     void clear();
+    bool importIperf3Log(QString filename);
 
 signals:
     void updateDataPath(QString datapath);

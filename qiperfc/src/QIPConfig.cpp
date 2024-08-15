@@ -126,6 +126,29 @@ void QIPConfig::clear()
 
 }
 
+bool QIPConfig::importIperf3Log(QString filename)
+{
+    QFile inputFile(filename);
+    if (!inputFile.open(QIODevice::ReadOnly)) {
+        qWarning() << "Can not read file: " << QDir::toNativeSeparators(filename);
+        return false;
+    }
+    QTextStream in(&inputFile);
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+        //TODO: header parser, to get following info
+        // QString version, QString protocal,
+        // int idx, bool servermode, int parallel,
+        // bool bidir, QString bidirtag , QString filename,
+
+        qDebug() << "line: " << line;
+    }
+    inputFile.close();
+    //TODO: use IperfFileWorker to do parser
+    return true;
+}
+
 void QIPConfig::onThroughputData(int idx, QString sInterval, QString data)
 {
 //    qDebug() << "QIPConfig::onThroughputData: " << idx << " sInterval: " << sInterval << " data: " << data;

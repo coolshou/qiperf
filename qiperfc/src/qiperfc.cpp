@@ -284,6 +284,22 @@ void QIperfC::onSave()
 
 }
 
+void QIperfC::onImportIperf3Log()
+{
+    qDebug() << "TODO:  Import Iperf3 Log file to throughput chart";
+    QString path;
+    if (!m_oldsavepath.isNull()){
+        path = m_oldsavepath;
+    }else {
+        path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    }
+    QString fileName = QFileDialog::getOpenFileName(this,
+             tr("Open Iperf3 log file"), path , tr(IPERF_EXT_FILTER));
+    if(!m_qipconfig->importIperf3Log(fileName)){
+        qDebug() << "Import file: " << fileName << " Fail!!";
+    }
+}
+
 bool QIperfC::on_Clear()
 {
     // this will clean iperf test pair config
@@ -320,11 +336,11 @@ void QIperfC::onPairEdit()
 void QIperfC::onPairDelete()
 {
     QModelIndex cur = ui->tv_throughput->selectionModel()->currentIndex();
-    if (!m_tpmgr->removeRow(cur.row(), cur.parent())){
-        QMessageBox::information(this, "ERROR", "Can not remove test pair: " + cur.data().toString());
+    TP *tp = m_tpmgr->getItem(cur);
+    foreach(TP *p, tp->getChilds()){
+        m_tpplot->del(p->getID());
     }
-    m_tpmgr->clear();
-    m_tpplot->clear();
+    m_tpmgr->removeRow(cur.row());
 }
 
 void QIperfC::onPairSwap()
@@ -846,6 +862,7 @@ void QIperfC::initMenus()
 //    aDisable->setEnabled(false);
     m_tpmenu->addAction(ui->actionCopy);
     m_tpmenu->addAction(ui->actionPaste);
+    m_tpmenu->addAction(ui->actionDelete);
     m_tpmenu->addSeparator();
     m_tpmenu->addAction(m_aEnable);
     m_tpmenu->addAction(m_aDisable);
@@ -990,14 +1007,11 @@ void QIperfC::onEnableItem(bool checked)
     Q_UNUSED(checked)
 //     ui->tv_throughput->SelectItems;
     QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedIndexes();
-    qDebug() << "onEnableItem:" << idxs;
     if (idxs.length()>0){
         TP *tp;
         QString s="";
-
         foreach(auto idx, idxs){
             tp = m_tpmgr->getItem(idx);
-            qDebug() << "onEnableItem: " << tp;
             tp->setEnabled();
         }
     }
@@ -1008,7 +1022,6 @@ void QIperfC::onDisableItem(bool checked)
 {
     Q_UNUSED(checked)
     QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
-    qDebug() << "onDisableItem:" << idxs;
     if (idxs.length()>0){
         TP *tp;
         QString s="";
@@ -1028,6 +1041,8 @@ void QIperfC::initActions()
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(onSave()));
     ui->actionSave->setEnabled(false);
+    connect(ui->actionIperf3Log, SIGNAL(triggered()), this, SLOT(onImportIperf3Log()));
+
     // edit
     connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(onCopy()));
     connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(onPaste()));

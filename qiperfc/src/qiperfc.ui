@@ -127,11 +127,19 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <widget class="QMenu" name="menuImport">
+     <property name="title">
+      <string>Import</string>
+     </property>
+     <addaction name="actionIperf3Log"/>
+    </widget>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="separator"/>
     <addaction name="actionExport"/>
+    <addaction name="separator"/>
+    <addaction name="menuImport"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -153,6 +161,7 @@
     </property>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
+    <addaction name="actionDelete"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -450,6 +459,11 @@
    </property>
    <property name="toolTip">
     <string>Swap Traffic direction by IP</string>
+   </property>
+  </action>
+  <action name="actionIperf3Log">
+   <property name="text">
+    <string>Iperf3 log</string>
    </property>
   </action>
  </widget>
