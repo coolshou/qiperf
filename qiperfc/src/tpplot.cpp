@@ -20,6 +20,7 @@ void TPPlot::onIperfTPdata(QString sInterval, QString idx, QString data, QString
 
 void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
 {
+//    qDebug() << "addTPData: idx: " << idx;
     QCPGraph *graph = getGraph(idx);
     // enlarge/shrink y range
     if ((ydata >= yAxis->range().upper) ){
@@ -41,7 +42,32 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
         QCPBars *g_lostrate = getLostRateGraph(idx);
         g_lostrate->addData(xdata, lostrate);
     }
-    this->replot();
+    replot();
+}
+
+void TPPlot::del(QString idx)
+{
+    if (m_lostgraphs.contains(idx)){
+        QCPBars *b =  m_lostgraphs.take(idx);
+        if (removePlottable(b)){
+            //TODO: why actually del but return false?
+//                qDebug() << "removePlottable QCPBars fail: " << idx;
+        }
+    }else{
+       qDebug() << "QCPBars not exist:" << idx;
+    }
+    if (m_graphs.contains(idx)){
+//        QCPGraph *g= m_graphs.value(idx);
+        QCPGraph *g= m_graphs.take(idx);
+        if (removeGraph(g)){
+            //TODO: why actually del but return false?
+//            qDebug() << "removeGraph fail: " << idx;
+        }
+    }else{
+        qDebug() << "QCPGraph not exist:" << idx;
+    }
+
+    replot();
 }
 
 QCPGraph *TPPlot::getGraph(QString idx)
@@ -49,7 +75,7 @@ QCPGraph *TPPlot::getGraph(QString idx)
     QPen graphPen;
     QCPGraph *g;
     if (!m_graphs.contains(idx)){
-        g = this->addGraph(xAxis, yAxis);
+        g = addGraph(xAxis, yAxis);
         int R = rand()%245+10;
         int G =rand()%245+10;
         int B =rand()%245+10;
@@ -61,7 +87,9 @@ QCPGraph *TPPlot::getGraph(QString idx)
     }
 //    qDebug() << "getGraph: " << idx << " g:" << g;
     g->setName(idx);
-    m_graphs.insert(idx,g);
+    if (!m_graphs.contains(idx)){
+        m_graphs.insert(idx,g);
+    }
     return g;
 }
 
@@ -88,23 +116,25 @@ QCPBars *TPPlot::getLostRateGraph(QString idx)
         g_lostrate = m_lostgraphs.value(idx);
     }
     g_lostrate->setName(idx+ " Lost Rate");
-    m_lostgraphs.insert(idx,g_lostrate);
+    if (!m_lostgraphs.contains(idx)){
+        m_lostgraphs.insert(idx,g_lostrate);
+    }
     return g_lostrate;
 }
 
 void TPPlot::clear()
 {
-    this->clearGraphs();
+    clearGraphs();
     m_graphs.clear();
     for (auto it = m_lostgraphs.begin(); it != m_lostgraphs.end(); ++it) {
-        this->removePlottable(it.value());
+        removePlottable(it.value());
     }
     m_lostgraphs.clear();
     //axis reset
     xAxis->setRange(0, m_xAxisMaxDefault);
     yAxis->setRange(0, m_yAxisMaxDefault);
 
-    this->replot();
+    replot();
 }
 
 void TPPlot::initCustomPlot()

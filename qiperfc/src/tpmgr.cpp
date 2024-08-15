@@ -228,6 +228,12 @@ QModelIndex TPMgr::indexFromItem(TP *item){
     return ix;
 }
 
+void TPMgr::del(QModelIndex idx)
+{
+    rootItem->removeChildren(idx.row(), 0);
+    qDebug() << "TPMgr::del : childCount:" << rootItem->childCount() << " del:" << idx;
+}
+
 int TPMgr::rootChildCount()
 {
     return rootItem->childCount();
@@ -245,13 +251,13 @@ QList<TP *> TPMgr::getChilds()
     return m_tps;
 }
 
-bool TPMgr::removeRows(int position, int rows, const QModelIndex &parent)
+bool TPMgr::removeRows(int row, int count, const QModelIndex &parent)
 {
     TP *parentItem = getItem(parent);
     bool success = true;
 
-    beginRemoveRows(parent, position, position + rows - 1);
-    success = parentItem->removeChildren(position, rows);
+    beginRemoveRows(parent, row, row + count - 1);
+    success = parentItem->removeChildren(row, count);
     endRemoveRows();
 
     return success;

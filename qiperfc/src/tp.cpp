@@ -103,17 +103,16 @@ TP *TP::parentItem()
 
 bool TP::removeChildren(int position, int count)
 {
-    if (position < 0 || position + count > m_childItems.size())
-    return false;
+    if (position < 0 || position + count > m_childItems.size()){
+        return false;
+    }
+//    qDebug() << "position:" << position << " count:" << count;
 
-//    qDeleteAll(m_childItems);
-    m_childItems.clear();
-//    for (int row = position; row < count; ++row){
-//        TP *tp =m_childItems.takeAt(row);
-//        delete tp;
-//        tp=nullptr;
-//    }
-
+    for (int row = position; row < (position+count); ++row){
+        TP *tp =m_childItems.takeAt(row);
+        delete tp;
+        tp=nullptr;
+    }
     return true;
 }
 

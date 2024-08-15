@@ -18,6 +18,7 @@ public:
     explicit TPPlot(QWidget *parent = nullptr);
     void setStartTime(QDateTime startTime);
     void addTPData(QString idx, double xdata, double ydata, double lostrate);  //
+    void del(QString idx);
     QCPGraph *getGraph(QString idx); // get QCPGraph by index
     QCPBars *getLostRateGraph(QString idx);
     void clear();

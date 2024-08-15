@@ -55,11 +55,13 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     //setHeaderData() const override;  // require emit headerDataChanged()
     //
-    bool removeRows(int position, int rows, const QModelIndex &parent) override;
+//    bool removeRow(int row, const QModelIndex &parent = QModelIndex()) override;
+    bool removeRows(int row, int count, const QModelIndex &parent) override;
 
     // ======
     bool add(QString data);
     QModelIndex indexFromItem(TP *item);
+    void del(QModelIndex idx);
     int rootChildCount();
     QList<TP*> getChilds();
     QByteArray savedata();
