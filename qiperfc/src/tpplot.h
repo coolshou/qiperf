@@ -25,19 +25,19 @@ public slots:
     void onIperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);  //
 
 private slots:
-    void realtimeDataSlot(QPrivateSignal sig);
+//    void realtimeDataSlot(QPrivateSignal sig);
 
 private:
     void initCustomPlot();
-    void addRandomGraph();
+//    void addRandomGraph();
     QPen newColorPen(int r, int g, int b, int width);
     QDateTime m_starttime;
-    QTimer dataTimer;
+//    QTimer dataTimer;
     QMap<QString, QCPGraph *> m_graphs; // throughput graphs
     QMap<QString, QCPBars *> m_lostgraphs; // lost rate graphs
-    QScrollArea *legendScrollArea;
-    QWidget *legendContainer;
-    QVBoxLayout *legendLayout;
+//    QScrollArea *legendScrollArea;
+//    QWidget *legendContainer;
+//    QVBoxLayout *legendLayout;
     int m_yAxisMaxDefault=10; // 10 Mbps
     int m_xAxisMaxDefault=30; // 30sec
 };

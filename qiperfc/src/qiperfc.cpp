@@ -62,7 +62,6 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     initActions();
     initMenus();
     initToolbar();
-    //dataTimer = QTimer();
     initCustomPlote();
     connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
 
@@ -235,7 +234,7 @@ void QIperfC::onNew()
         //this will clear all item include root!!
         m_tpmgr->reset();
     }else{
-        qDebug() << "on_Clear No child";
+        qDebug() << "onNew rootChildCount No child";
     }
 }
 
