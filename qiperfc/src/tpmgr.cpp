@@ -327,10 +327,13 @@ void TPMgr::clear(){
     // TODO: when there is child the folding icon will not remove after clear!!
     if (rootItem->haveChilds()){
         foreach(auto tp, rootItem->getChilds()){
-            tp->removeChildren(0, tp->childCount());
+            if (tp->haveChilds()){
+                tp->removeChildren(0, tp->childCount());
+            }
             tp->clearThroughput();
             tp->resetData();
             QCoreApplication::processEvents(QEventLoop::AllEvents);
+
         }
         emit dataChanged(QModelIndex(),QModelIndex());
     }
