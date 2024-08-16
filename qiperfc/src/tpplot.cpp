@@ -160,27 +160,29 @@ void TPPlot::initCustomPlot()
 
 //    this->replot();
     // legend
-    this->legend->setVisible(true);
-    if (0){//TODO: not good on layout
+    legend->setVisible(true);
+    if (1){//TODO: not good on layout
         // Add the QCustomPlot legend to the container
         QCPLayoutGrid *subLayout = new QCPLayoutGrid;
         //TODO: position the legend outside of the graph!!
         //
-        this->plotLayout()->addElement(0, 1, subLayout);
-        this->plotLayout()->setColumnStretchFactor(0, 1);
-        this->plotLayout()->setColumnStretchFactor(1, 0.1); // col 1
-        this->plotLayout()->setRowStretchFactor(0, 1); // row 0
-    //    subLayout->addElement(0, 0, new QCPLayoutElement); // row 0
-        subLayout->addElement(0, 0, this->legend); // row 0
+        plotLayout()->addElement(0, 1, subLayout);
+        plotLayout()->setColumnStretchFactor(0, 1);
+        plotLayout()->setColumnStretchFactor(1, 0.1); // col 1
+        plotLayout()->setRowStretchFactor(0, 1); // row 0
+        subLayout->addElement(0, 0, legend); // row 0
+        subLayout->addElement(0, 1, new QCPLayoutElement); // row 0 col 0
         subLayout->addElement(1, 0, new QCPLayoutElement); // row 1
-        subLayout->setRowStretchFactor(1, 0.001);
-    //    this->plotLayout()->setRowStretchFactor(2, 0.001);
+        subLayout->setColumnStretchFactor(0, 1);
+        subLayout->setColumnStretchFactor(1, 0.01);
+        subLayout->setRowStretchFactor(0, 1);
+        subLayout->setRowStretchFactor(1, 0.01);
 
         QFont legendFont = font();
-        legendFont.setPointSize(10);
-        this->legend->setFont(legendFont);
-        this->legend->setSelectedFont(legendFont);
-        this->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
+        legendFont.setPointSize(8);
+        legend->setFont(legendFont);
+        legend->setSelectedFont(legendFont);
+        legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
     }
     // make left and bottom axes transfer their ranges to right and top axes:
 //    connect(xAxis, SIGNAL(rangeChanged(QCPRange)), xAxis2, SLOT(setRange(QCPRange)));

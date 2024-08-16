@@ -9,8 +9,6 @@
 #include "comm.h"
 //#include <QPrivateSignal>
 
-
-
 class TPPlot : public QCustomPlot
 {
     Q_OBJECT
