@@ -47,7 +47,6 @@ void PipeClient::send_MessageToServer(QString message)
         out.setVersion(QDataStream::Qt_5_15);
         out << m_message;
         out.device()->seek(0);
-        qDebug() << "m_message:" << m_message;
         m_socket->write(block);
         m_socket->flush();
         m_message="";
@@ -60,19 +59,6 @@ void PipeClient::socket_connected()
 {   //when socket connected, send m_message to server
     qDebug() << "socket connetcted";
     emit sigError("");
-//    if (!m_message.isEmpty()){
-//        QByteArray block;
-//        QDataStream out(&block, QIODevice::WriteOnly);
-//        out.setVersion(QDataStream::Qt_5_15);
-//        out << m_message;
-//        out.device()->seek(0);
-//        qDebug() << "m_message:" << m_message;
-//        m_socket->write(block);
-//        m_socket->flush();
-//        m_message="";
-//    }else{
-//        qDebug() << "no m_message";
-//    }
 }
 
 void PipeClient::socket_disconnected()
