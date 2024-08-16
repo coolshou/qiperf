@@ -4,7 +4,12 @@ QT += printsupport # require by qcustomplot
 #CONFIG += release
 CONFIG += debug
 
+QT += opengl
 DEFINES += QCUSTOMPLOT_USE_OPENGL # qcustomplot use OPENGL
+unix:!android {
+    INCLUDEPATH +=/usr/include/GL/
+    LIBS += -L -lglut -lOpenGL
+}
 win32: {
     LIBS += \
         -lOpengl32 \
