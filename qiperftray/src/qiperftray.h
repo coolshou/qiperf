@@ -10,7 +10,7 @@
 
 #include "src/mytray.h"
 #include "pipeclient.h"
-
+#include "../src/dlgshowlog.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -35,6 +35,10 @@ public slots:
     void onTrayIconActivated();
     void onSetMgrIfname();
     void onGetMgrIfname();
+    void onStart();
+    void onStop();
+    void onRestart();
+    void onShowLog();
     void onAbout();
 
 protected:
@@ -43,7 +47,7 @@ private slots:
     void onTimeout();
     void onNewMessage(const QString msg);
     void onError(QString msg);
-
+    void initActions();
 
 private:
     QSettings cfg;
@@ -52,5 +56,7 @@ private:
     MyTray *m_tray;
     PipeClient *pclient;
     QTimer *statuser; //timer to check daemon
+    DlgShowLog *m_dlgshowlog;
+    QString m_qiperfdlog;
 };
 #endif // QIPERFTRAY_H

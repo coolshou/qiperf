@@ -4,6 +4,8 @@
 #include "comm.h"
 #include "version.h"
 #include <QMessageBox>
+#include <QStandardPaths>
+#include <QDir>
 
 #include <QDebug>
 
@@ -21,6 +23,13 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     //  /c:/user/<xxx>/appdata/local/temp/qiperf/
     ui->setupUi(this);
     loadcfg();
+    //qiperfd log path
+    QString qiperfd =  QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    m_qiperfdlog = qiperfd + QDir::separator() + QIPERF_NAME + QDir::separator() + QIPERFD_NAME + ".log";
+    m_dlgshowlog = new DlgShowLog(m_qiperfdlog);
+
+    qDebug() << "m_qiperfdlog: " << m_qiperfdlog;
+
     //TODO: get install path!! or exec path?
 
     setWindowFlags(Qt::WindowTitleHint|Qt::Dialog);
@@ -39,7 +48,7 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     QObject::connect(ui->pb_getMgrIfname, SIGNAL(clicked()), this, SLOT(onGetMgrIfname()));
     onGetMgrIfname();
 
-    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
+    initActions();
 
     statuser = new QTimer();
     QObject::connect(statuser, SIGNAL(timeout()), this, SLOT(onTimeout()));
@@ -98,7 +107,6 @@ void QIperfTray::statusQiperfd()
 
 void QIperfTray::onNewMessage(const QString msg)
 {
-    qInfo() << "onNewMessage:" << msg;
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError){
@@ -129,7 +137,19 @@ void QIperfTray::onNewMessage(const QString msg)
             ui->te_msg->setText(msg.toUtf8());
         }
     }else {
-        qDebug() << "onNewMessage: ERROR :" << error.errorString() << Qt::endl;
+        if (msg.contains("：")) {
+            qInfo() << "onNewMessage:" << msg;
+            QStringList ds = msg.split("：");
+            if (ds.length()==2){
+                if (ds.value(0)==QIPERFDLOG){
+                    m_dlgshowlog->appendNewLine(ds.value(1));
+                }
+            }else {
+                qDebug() << "onNewMessage: Unknown format :" << msg;
+            }
+        }else {
+            qDebug() << "onNewMessage: ERROR :" << error.errorString();
+        }
     }
 }
 
@@ -142,6 +162,15 @@ void QIperfTray::onError(QString msg)
     } else {
         ui->te_error->setVisible(false);
     }
+}
+
+void QIperfTray::initActions()
+{
+    connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
+    connect(ui->actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
+    connect(ui->actionRestart, SIGNAL(triggered()), this, SLOT(onRestart()));
+    connect(ui->actionShowLog, SIGNAL(triggered()), this, SLOT(onShowLog()));
+    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
 }
 
 void QIperfTray::onTrayIconActivated()
@@ -169,6 +198,30 @@ void QIperfTray::onSetMgrIfname()
 void QIperfTray::onGetMgrIfname()
 {
     pclient->send_MessageToServer(CMD_IFNAMES);
+}
+
+void QIperfTray::onStart()
+{
+    //tell qiperfd start
+    pclient->send_MessageToServer(CMD_QIPERFD_START);
+}
+
+void QIperfTray::onStop()
+{
+    //tell qiperfd stop
+    pclient->send_MessageToServer(CMD_QIPERFD_STOP);
+}
+
+void QIperfTray::onRestart()
+{
+    onStop();
+    onStart();
+}
+
+void QIperfTray::onShowLog()
+{
+    // show a dialog to show qiperfd log file continious
+    m_dlgshowlog->show();
 }
 
 void QIperfTray::onAbout()

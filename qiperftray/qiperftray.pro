@@ -12,6 +12,8 @@ include(../qiperf.pri)
 
 SOURCES += \
     $$PWD/../src/pipeclient.cpp \
+    $$PWD/../src/dlgshowlog.cpp \
+    $$PWD/../src/filewatcher.cpp \
     src/main.cpp \
     src/mytray.cpp \
     src/qiperftray.cpp
@@ -20,10 +22,13 @@ HEADERS += \
     $$PWD/../src/comm.h \
     $$PWD/../src/pipeclient.h \
     $$PWD/../src/versions.h \
+    $$PWD/../src/dlgshowlog.h \
+    $$PWD/../src/filewatcher.h \
     src/mytray.h \
     src/qiperftray.h
 
 FORMS += \
+    $$PWD/../src/dlgshowlog.ui \
     src/qiperftray.ui
 
 # Default rules for deployment.

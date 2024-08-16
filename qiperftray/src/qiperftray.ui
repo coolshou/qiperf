@@ -14,7 +14,7 @@
    <string>QIperfd Tray</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../qiperf.qrc">
+   <iconset resource="../../../../../../../../../../../mnt/SOFT/sdb1/myTools/network/throughput/iperf/qiperf/qiperf.qrc">
     <normaloff>:/qiperf</normaloff>:/qiperf</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -84,6 +84,16 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuService">
+    <property name="title">
+     <string>Service</string>
+    </property>
+    <addaction name="actionStart"/>
+    <addaction name="actionStop"/>
+    <addaction name="actionRestart"/>
+    <addaction name="actionShowLog"/>
+   </widget>
+   <addaction name="menuService"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="actionAbout">
@@ -91,9 +101,29 @@
     <string>About</string>
    </property>
   </action>
+  <action name="actionStart">
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionRestart">
+   <property name="text">
+    <string>Restart</string>
+   </property>
+  </action>
+  <action name="actionShowLog">
+   <property name="text">
+    <string>Show Log</string>
+   </property>
+  </action>
  </widget>
  <resources>
-  <include location="../../qiperf.qrc"/>
+  <include location="../../../../../../../../../../../mnt/SOFT/sdb1/myTools/network/throughput/iperf/qiperf/qiperf.qrc"/>
  </resources>
  <connections/>
 </ui>

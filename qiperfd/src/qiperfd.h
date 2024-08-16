@@ -11,6 +11,8 @@
 #include "iperfwrapper.h"
 #include "fileclient.h"
 
+#include "../src/filewatcher.h"
+
 //#include <QCloseEvent> # require gui
 
 #if defined(Q_OS_LINUX)
@@ -68,6 +70,8 @@ public slots:
     void onFinished(int idx, int exitCode, int exitStatus, QString ipport, QString filename);
     void onThroughput(int idx, QString sInterval, QString data); // idx, refrow, throughput data
     void onQuit();
+    void onNewLine(QString line);
+
 signals:
     void setMgrIfname(QString ifname);
     void iperfStarted(QString bindkey); // iperf thrad started
@@ -79,6 +83,7 @@ private slots:
     void onWSactMessage(QString msg); //procress websocket action message
     void onNewClient(QHostAddress addr); //
 private:
+    QString tmppath;
     QString tmpfilepath;
     IperfWrapper *m_iperfwrapper;
     QSettings *cfg;
@@ -104,6 +109,8 @@ private:
     bool bReportTPData; // report throughput data
     QMap<QString, QMap<QString, QString>> m_directions; // starttime, bindkey, dir_tag: direction tag for each test
     FileClient *m_fileclient;
+    FileWatcher *m_filewatcher;
+
 };
 
 #endif // QIPERFD_H

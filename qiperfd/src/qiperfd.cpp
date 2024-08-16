@@ -18,7 +18,9 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 {
     bReportTPData = false;
     onLog(QString(QIPERFD_NAME) + ":" + QIPERFD_VERSION);
-    tmpfilepath =  QStandardPaths::writableLocation(QStandardPaths::TempLocation)+"/"+ QIPERF_NAME + "/data";
+    tmppath = QStandardPaths::writableLocation(QStandardPaths::TempLocation)+
+            QDir::separator()+QIPERF_NAME+QDir::separator();
+    tmpfilepath = tmppath + "data";
     QDir d(tmpfilepath);
     if (!d.exists()){
         if(!d.mkpath(tmpfilepath)){
@@ -152,6 +154,8 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 
     // system service manager
     //     qDebug() << "finish contrust" << Qt::endl;
+    m_filewatcher = new FileWatcher(tmppath+QIPERFD_NAME+".log");
+    connect(m_filewatcher, &FileWatcher::onNewLine, this, &QIperfd::onNewLine);
 }
 
 QIperfd::~QIperfd()
@@ -520,6 +524,14 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
 //        qDebug() << "send ifnames: (" << idx << "): " << backmsg  << Qt::endl;
         m_pserver->send_MessageBack(idx, backmsg);
     }
+    else if (QString::compare(msg, CMD_QIPERFD_START, Qt::CaseInsensitive) == 0)
+    {
+
+    }
+    else if (QString::compare(msg, CMD_QIPERFD_STOP, Qt::CaseInsensitive) == 0)
+    {
+
+    }
     else
     {
         qDebug() << "handle json: " << msg << Qt::endl;
@@ -655,6 +667,11 @@ void QIperfd::onQuit()
     onLog("onQuit");
     savecfg();
     qApp->quit();
+}
+
+void QIperfd::onNewLine(QString line)
+{
+    m_pserver->sendMessage(QIPERFDLOG+QString("：")+line);
 }
 
 void QIperfd::onWSactMessage(QString msg)

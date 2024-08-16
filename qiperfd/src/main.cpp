@@ -78,16 +78,16 @@ int main(int argc, char *argv[])
         //log file
         QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 
-        QString logfilePath = tmp + "/qiperf/";
+        QString logfilePath = tmp + QDir::separator() + QIPERF_NAME + QDir::separator();
         QDir dir(logfilePath);
         if (!dir.exists())
             dir.mkpath(".");
-        QString logfile = logfilePath + "qiperfd.log";
+        QString logfile = logfilePath + QIPERFD_NAME + ".log";
         // TODO: check log file exist, backup it
-        qDebug() << "logfile: " << logfile <<  Qt::endl;
+        qDebug() << "logfile: " << logfile;
         QFile outFile(logfile);
         if (! outFile.open(QIODevice::WriteOnly | QIODevice::Append)){
-            qDebug() << "open file " << logfile << " Fail" << Qt::endl;
+            qDebug() << "open file " << logfile << " Fail";
         } else {
             output_ts.setDevice(&outFile);
         }
@@ -119,9 +119,9 @@ int main(int argc, char *argv[])
         } else
         {
             QIperfd *qiperfd = new QIperfd(m_pserver);
-            QMetaObject::Connection rc = QObject::connect(m_pserver, SIGNAL(pipeMessage(int,QString)), qiperfd, SLOT(onPipeMessage(int,QString)));
+            QMetaObject::Connection rc = QObject::connect(m_pserver, &PipeServer::pipeMessage, qiperfd, &QIperfd::onPipeMessage);
             if (!rc){
-                qDebug() << "connect pipeMessage fail" << Qt::endl;
+                qDebug() << "connect pipeMessage fail";
             }
         }
         rc = app.exec();

@@ -50,7 +50,7 @@ int PipeServer::init()
     qInfo() << m_pid <<",start PipeServer listen on: " << m_servername;
     m_server->setSocketOptions(QLocalServer::WorldAccessOption);
     m_server->listen(m_servername);
-    connect(m_server, SIGNAL(newConnection()), this, SLOT(socket_new_connection()));
+    connect(m_server, &QLocalServer::newConnection, this, &PipeServer::socket_new_connection);
     return 0;
 }
 
@@ -87,6 +87,16 @@ void PipeServer::delay(int millisecondsWait)
     t.connect(&t, &QTimer::timeout, &loop, &QEventLoop::quit);
     t.start(millisecondsWait);
     loop.exec();
+}
+
+void PipeServer::sendMessage(QString message)
+{
+    // TODO: current only send message bake to first m_locals
+    if (m_locals->count()>0){
+        send_MessageBack(0, message);
+    }else {
+        qDebug() << "sendMessage: NO m_locals";
+    }
 }
 
 void PipeServer::socket_new_connection()

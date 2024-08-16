@@ -1,0 +1,32 @@
+#ifndef DLGSHOWLOG_H
+#define DLGSHOWLOG_H
+
+#include <QDialog>
+//#include "filewatcher.h"
+
+namespace Ui {
+class DlgShowLog;
+}
+
+class DlgShowLog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit DlgShowLog(const QString &filePath,QWidget *parent = nullptr);
+    ~DlgShowLog();
+
+public slots:
+    void appendNewLine(QString line);
+
+protected:
+    void changeEvent(QEvent *e);
+private slots:
+    void onClear(bool checked);
+private:
+    Ui::DlgShowLog *ui;
+//    FileWatcher *m_filewatcher;
+
+};
+
+#endif // DLGSHOWLOG_H

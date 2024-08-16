@@ -22,6 +22,7 @@ public:
     int init();
     void sendARGS(QStringList args);
     inline void delay(int millisecondsWait);
+    void sendMessage(QString message);
 
 signals:
     void messageReceived(QString);

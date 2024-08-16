@@ -40,11 +40,11 @@ int main(int argc, char *argv[])
     //log file
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 
-    QString logfilePath = tmp + "/qiperf/";
+    QString logfilePath = tmp + QDir::separator() + QIPERFTRAY_NAME + QDir::separator();
     QDir dir(logfilePath);
     if (!dir.exists())
         dir.mkpath(".");
-    QString logfile = logfilePath + "qiperftray.log";
+    QString logfile = logfilePath + QIPERFTRAY_NAME + ".log";
     // TODO: check log file exist, backup it
     QFile outFile(logfile);
     if (! outFile.open(QIODevice::WriteOnly | QIODevice::Append)){
