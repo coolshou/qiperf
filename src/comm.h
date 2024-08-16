@@ -7,10 +7,13 @@
 #define QIPERFC_NAME  "qiperfconsole"
 #define QIPERF_NAME  "qiperf"
 #define QIPERFD_NAME  "qiperfd"
+#define QIPERFDLOG "QIPERFDLOG"
+
 #define QIPERFTRAY_NAME  "qiperftray"
 
 #define QIPERF_EXT "qip"
 #define QIPERF_EXT_FILTER "qiperf (*.qip)"
+#define IPERF_EXT_FILTER "iperf (*.*)"
 
 #define QIPERFD_PORT 47014
 #define QIPERFD_BPORT 47015  //broadcast
@@ -23,6 +26,8 @@
 #define CMD_FAIL   "FAIL"
 #define CMD_ARGS   "ARGS"   // send args: eq: -k: kill qiperfd
 #define CMD_STATUS "STATUS"
+#define CMD_QIPERFD_START "QIPERFD_START"
+#define CMD_QIPERFD_STOP  "QIPERFD_STOP"
 #define CMD_IFNAMES "IFNAMES"  //Get all interfaces
 #define CMD_SET_IFNAME "SET_IFNAME"  //Get all interfaces
 #define CMD_RUNNING "RUNNING"  //get any iperf running status
