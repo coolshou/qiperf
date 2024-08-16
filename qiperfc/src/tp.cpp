@@ -106,13 +106,8 @@ bool TP::removeChildren(int position, int count)
     if (position < 0 || position + count > m_childItems.size()){
         return false;
     }
-//    qDebug() << "position:" << position << " count:" << count;
+    m_childItems.erase(m_childItems.begin()+position, m_childItems.begin()+count);
 
-    for (int row = position; row < (position+count); ++row){
-        TP *tp =m_childItems.takeAt(row);
-        delete tp;
-        tp=nullptr;
-    }
     return true;
 }
 
