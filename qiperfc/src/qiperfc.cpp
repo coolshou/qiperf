@@ -303,7 +303,6 @@ void QIperfC::onImportIperf3Log()
 bool QIperfC::on_Clear()
 {
     // this will clean iperf test pair config
-
     return onClear();
 }
 
@@ -614,7 +613,6 @@ bool QIperfC::onClear(){
             return false;
         }
     }
-
     //clear all test date, config setting remain unchanged
     if (m_tpmgr->rootChildCount()>0) {
         m_tpmgr->clear();
@@ -810,6 +808,7 @@ void QIperfC::initCustomPlote()
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &QIperfC::onPlotContextMenuRequest);
     ui->hl_console->addWidget(m_tpplot);
+
 }
 
 void QIperfC::resetError()
