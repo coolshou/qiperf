@@ -2,7 +2,8 @@ Source: qiperf
 Section: network
 Priority: optional
 Maintainer: coolshou <coolshou2060@gmail.com>
-Build-Depends: debhelper-compat (= 13), qtbase5-dev, make, qt5-qmake
+Build-Depends: debhelper-compat (= 13), qtbase5-dev | qt6-base-dev, make,
+    qt5-qmake | qmake6
 Standards-Version: 4.6.0
 Homepage: https://github.com/coolshou/qiperf.git
 #Vcs-Browser: https://salsa.debian.org/debian/qiperf
