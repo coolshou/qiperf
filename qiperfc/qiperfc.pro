@@ -43,11 +43,11 @@ INCLUDEPATH += \
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    $$PWD/../src/pipeclient.cpp \
-    $$PWD/../src/endpoint.cpp \
-    $$PWD/../src/endpointtype.cpp \
-    $$PWD/../src/endpointact.cpp \
-    $$PWD/../src/iperfwrapper.cpp \
+    ../src/pipeclient.cpp \
+    ../src/endpoint.cpp \
+    ../src/endpointtype.cpp \
+    ../src/endpointact.cpp \
+    ../src/iperfwrapper.cpp \
     lib/axistag.cpp \
     lib/qcustomplot.cpp \
     src/QIPConfig.cpp \
@@ -77,13 +77,13 @@ SOURCES += \
     # ../qiperfd/src/wsserver.cpp \
 
 HEADERS += \
-    $$PWD/../src/pipeclient.h \
-    $$PWD/../src/comm.h \
-    $$PWD/../src/endpoint.h \
-    $$PWD/../src/endpointtype.h \
-    $$PWD/../src/versions.h \
-    $$PWD/../src/endpointact.h \
-    $$PWD/../src/iperfwrapper.h \
+    ../src/pipeclient.h \
+    ../src/comm.h \
+    ../src/endpoint.h \
+    ../src/endpointtype.h \
+    ../src/versions.h \
+    ../src/endpointact.h \
+    ../src/iperfwrapper.h \
     lib/axistag.h \
     lib/qcustomplot.h \
     src/QIPConfig.h \

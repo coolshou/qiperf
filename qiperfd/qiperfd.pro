@@ -32,10 +32,10 @@ win32:{
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    $$PWD/../src/endpointtype.cpp \
-    $$PWD/../src/icmpping.cpp \
-    $$PWD/../src/iperfwrapper.cpp \
-    $$PWD/../src/filewatcher.cpp \
+    ../src/endpointtype.cpp \
+    ../src/icmpping.cpp \
+    ../src/iperfwrapper.cpp \
+    ../src/filewatcher.cpp \
     src/fileclient.cpp \
     src/iperfworker.cpp \
     src/main.cpp \
@@ -53,12 +53,12 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    $$PWD/../src/endpointtype.h \
-    $$PWD/../src/icmpping.h \
-    $$PWD/../src/comm.h \
-    $$PWD/../src/versions.h \
-    $$PWD/../src/iperfwrapper.h \
-    $$PWD/../src/filewatcher.h \
+    ../src/endpointtype.h \
+    ../src/icmpping.h \
+    ../src/comm.h \
+    ../src/versions.h \
+    ../src/iperfwrapper.h \
+    ../src/filewatcher.h \
     src/fileclient.h \
     src/iperfworker.h \
     src/myinfo.h \
