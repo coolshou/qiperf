@@ -18,7 +18,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../../../../../../../../../mnt/SOFT/sdb1/myTools/network/throughput/iperf/qiperf/images/logfile.png</normaloff>../../../../../../../../../../mnt/SOFT/sdb1/myTools/network/throughput/iperf/qiperf/images/logfile.png</iconset>
+    <normaloff>../../images/logfile.png</normaloff>../../images/logfile.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
