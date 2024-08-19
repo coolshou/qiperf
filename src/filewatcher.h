@@ -18,8 +18,10 @@ private slots:
     void readFile();
 
 private:
+    void log(QString message);
     QString m_filePath;
-    QFileSystemWatcher m_fileWatcher;
+    QFileSystemWatcher *m_fileWatcher;
+    qint64 m_filepos;
 };
 
 #endif // FILEWATCHER_H

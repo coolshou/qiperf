@@ -5,15 +5,22 @@
 #include <QTextStream>
 #include <QCoreApplication>
 #include <QEventLoop>
-#include <QDebug>
+
+#include <stdio.h>
 
 FileWatcher::FileWatcher(const QString &filePath, QObject *parent)
     : QObject{parent}, m_filePath(filePath)
 {
+    m_filepos = 0;
+    m_fileWatcher = new QFileSystemWatcher();
     // Set up file watcher
-    m_fileWatcher.addPath(filePath);
+    if(!m_fileWatcher->addPath(filePath)){
+        // qDebug() <<"FileWatcher FAIL: " <<filePath;
+        log("FileWatcher FAIL: " + filePath);
+    }
+
     // Connect signals
-    connect(&m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &FileWatcher::onFileChanged);
+    connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &FileWatcher::onFileChanged);
     // Initial read
     readFile();
 }
@@ -23,7 +30,11 @@ void FileWatcher::onFileChanged(const QString &path)
     // Delay the read to ensure the file has finished writing
     QTimer::singleShot(100, this, &FileWatcher::readFile);
     // Re-add the file to the watcher in case it was deleted and recreated
-    m_fileWatcher.addPath(path);
+    if (!m_fileWatcher->addPath(path)){
+        // qDebug() <<
+        QString  msg = "onFileChanged addPath FAIL: " + path;
+        log(msg);
+    }
 }
 
 void FileWatcher::readFile()
@@ -33,13 +44,22 @@ void FileWatcher::readFile()
         // DO NOT ADD any qDebug() in here, it will loop output to file
         QTextStream in(&file);
         while (!in.atEnd()) {
+            in.seek(m_filepos);
             QString line = in.readLine();
             emit onNewLine(line);
             QCoreApplication::processEvents(QEventLoop::AllEvents);
+            m_filepos = in.pos();
         }
     } else {
         QString s = "Failed to open file for reading:" + m_filePath;
-        qWarning() << s;
+        // qWarning() << s;
+        log(s);
         emit onNewLine(s);
     }
+}
+
+void FileWatcher::log(QString message)
+{
+    printf("%s\n", message.toStdString().c_str());
+    fflush(stdout);
 }
