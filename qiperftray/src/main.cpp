@@ -11,6 +11,9 @@
 #include <QMessageLogContext>
 #include <qlogging.h>
 
+#include <stdio.h>
+
+
 static QTextStream output_ts;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -32,6 +35,12 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
         break;
     case QtFatalMsg:
         output_ts << QString("FATAL: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
+        break;
+    default:
+        // qDebug() << msg << " (" << context.line << ")";
+        QString m = msg + " :"+ file +"(" + QString::number(context.line) + ")";
+        printf("%s\n", m.toStdString().c_str());
+        fflush(stdout);
         break;
     }
 }
