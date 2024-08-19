@@ -7,8 +7,11 @@ DlgShowLog::DlgShowLog(const QString &filePath, QWidget *parent) :
 {
     ui->setupUi(this);
     // TODO: we do not have right to read /tmp/qiperf/ folder, require
-    //m_filewatcher= new FileWatcher(filePath);
-    //connect(m_filewatcher, &FileWatcher::onNewLine, this, &DlgShowLog::appendNewLine);
+    if (!filePath.isEmpty()){
+        m_filewatcher= new FileWatcher(filePath);
+        connect(m_filewatcher, &FileWatcher::onNewLine, this, &DlgShowLog::appendNewLine);
+    }
+
     setWindowTitle(filePath);
     connect(ui->pbClear, &QPushButton::clicked, this, &DlgShowLog::onClear);
     connect(ui->pbClose, &QPushButton::clicked, this, &DlgShowLog::close);
@@ -40,4 +43,8 @@ void DlgShowLog::onClear(bool checked)
 void DlgShowLog::appendNewLine(QString line)
 {
     ui->te_log->append(line);
+    if (ui->cb_scrollbuttom->isChecked()){
+        ui->te_log->moveCursor(QTextCursor::EndOfLine);
+
+    }
 }

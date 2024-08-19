@@ -2,7 +2,7 @@
 #define DLGSHOWLOG_H
 
 #include <QDialog>
-//#include "filewatcher.h"
+#include "filewatcher.h"
 
 namespace Ui {
 class DlgShowLog;
@@ -14,18 +14,18 @@ class DlgShowLog : public QDialog
 
 public:
     explicit DlgShowLog(const QString &filePath,QWidget *parent = nullptr);
-    ~DlgShowLog();
+    ~DlgShowLog() override;
 
 public slots:
     void appendNewLine(QString line);
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
 private slots:
     void onClear(bool checked);
 private:
     Ui::DlgShowLog *ui;
-//    FileWatcher *m_filewatcher;
+    FileWatcher *m_filewatcher;
 
 };
 
