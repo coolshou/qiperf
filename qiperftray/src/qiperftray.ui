@@ -123,7 +123,7 @@
   </action>
  </widget>
  <resources>
-  <include location="../../../../../../../../../../../mnt/SOFT/sdb1/myTools/network/throughput/iperf/qiperf/qiperf.qrc"/>
+  <include location="../../qiperf.qrc"/>
  </resources>
  <connections/>
 </ui>
