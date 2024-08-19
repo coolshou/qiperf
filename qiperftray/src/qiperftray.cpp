@@ -227,7 +227,7 @@ void QIperfTray::onShowLog()
 void QIperfTray::onAbout()
 {
     QMessageBox::about(this, "About", QString(QIPERFTRAY_NAME)+
-                       " v"+QString(QIPERFTRAY_VERSION)+"\n"
+                       " v"+QString(VERSION)+"\n"
                        "Auther: Jimmy Yeh\n"
                        "URL: https://github.com/coolshou/qiperf");
 }
