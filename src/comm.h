@@ -28,6 +28,7 @@
 #define CMD_STATUS "STATUS"
 #define CMD_QIPERFD_START "QIPERFD_START"
 #define CMD_QIPERFD_STOP  "QIPERFD_STOP"
+#define CMD_QIPERFD_RESTART "QIPERFD_RESTART"
 #define CMD_IFNAMES "IFNAMES"  //Get all interfaces
 #define CMD_SET_IFNAME "SET_IFNAME"  //Get all interfaces
 #define CMD_RUNNING "RUNNING"  //get any iperf running status

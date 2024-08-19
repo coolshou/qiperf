@@ -6,6 +6,7 @@
 #include <QNetworkInterface>
 #include <QDir>
 #include <QEventLoop>
+#include <QProcess>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
@@ -153,8 +154,9 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 #endif
 
     // system service manager
-    //     qDebug() << "finish contrust" << Qt::endl;
-    m_filewatcher = new FileWatcher(tmppath+QIPERFD_NAME+".log");
+    QString qiperfdlog = tmppath+QIPERFD_NAME+".log";
+    qDebug() << "FileWatcher: " << qiperfdlog;
+    m_filewatcher = new FileWatcher(qiperfdlog);
     connect(m_filewatcher, &FileWatcher::onNewLine, this, &QIperfd::onNewLine);
 }
 
@@ -473,6 +475,31 @@ bool QIperfd::isRunning(int idx)
     return false;
 }
 
+bool QIperfd::restartQIperfd()
+{
+#if defined(Q_OS_LINUX)
+    #if !defined(Q_OS_ANDROID)
+        //QString cmd = "systemctl start qiperfd";
+        // QProcess p = QProcess();
+        // p.setProgram("systemctl");
+        // p.setArguments({"start", "qiperfd"});
+        // p.start();
+        const QStringList arguments ={"restart", "qiperfd"};
+        // QTimer::singleShot(100, [=]() {
+            qApp->quit();
+            QProcess::startDetached("systemctl", arguments);
+    // });
+
+    #else
+
+    #endif
+#else
+    //windows
+
+#endif
+
+}
+
 void QIperfd::setManagerInterface(QString ifname)
 {
     mgr_ifname = ifname;
@@ -524,17 +551,14 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
 //        qDebug() << "send ifnames: (" << idx << "): " << backmsg  << Qt::endl;
         m_pserver->send_MessageBack(idx, backmsg);
     }
-    else if (QString::compare(msg, CMD_QIPERFD_START, Qt::CaseInsensitive) == 0)
+    else if (QString::compare(msg, CMD_QIPERFD_RESTART, Qt::CaseInsensitive) == 0)
     {
-
-    }
-    else if (QString::compare(msg, CMD_QIPERFD_STOP, Qt::CaseInsensitive) == 0)
-    {
-
+        qDebug() << "CMD_QIPERFD_RESTART: " << msg;
+        restartQIperfd();
     }
     else
     {
-        qDebug() << "handle json: " << msg << Qt::endl;
+        qDebug() << "handle json: " << msg ;
         // json format message
         QJsonParseError error;
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);

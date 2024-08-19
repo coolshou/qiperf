@@ -59,6 +59,7 @@ public:
     void stopAll();  // stop all iperfs
     void clear(); //clear all iperf setting
     bool isRunning(int idx); //check if iperf is running
+    bool restartQIperfd();
 
 public slots:
     void setManagerInterface(QString ifname);

@@ -166,8 +166,8 @@ void QIperfTray::onError(QString msg)
 
 void QIperfTray::initActions()
 {
-    connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
-    connect(ui->actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
+    // connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
+    // connect(ui->actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
     connect(ui->actionRestart, SIGNAL(triggered()), this, SLOT(onRestart()));
     connect(ui->actionShowLog, SIGNAL(triggered()), this, SLOT(onShowLog()));
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
@@ -214,8 +214,8 @@ void QIperfTray::onStop()
 
 void QIperfTray::onRestart()
 {
-    onStop();
-    onStart();
+    //tell qiperfd stop
+    pclient->send_MessageToServer(CMD_QIPERFD_RESTART);
 }
 
 void QIperfTray::onShowLog()
