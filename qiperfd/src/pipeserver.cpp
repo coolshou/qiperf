@@ -153,6 +153,7 @@ void PipeServer::send_MessageBack(int idx, QString message)
             if (rs==-1){
                 qInfo() << "ERROR: send_MessageBack:" << message;
             }
+
             socket->flush();
         }
     } else{

@@ -49,6 +49,7 @@ void FileWatcher::readFile()
             emit onNewLine(line);
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             m_filepos = in.pos();
+            //log("m_filepos: "+ QString::number(m_filepos));
         }
     } else {
         QString s = "Failed to open file for reading:" + m_filePath;

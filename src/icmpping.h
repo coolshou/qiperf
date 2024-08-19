@@ -3,7 +3,7 @@
 
 #include <QObject>
 #if defined(Q_OS_LINUX)
-#include <oping.h>
+// #include <oping.h>
 #endif
 
 class IcmpPing : public QObject

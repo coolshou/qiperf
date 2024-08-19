@@ -11,7 +11,7 @@ include(../qiperf.pri)
 unix {
 include(../QCtrlSignals/qctrlsignals.pri)
 #include(../sigwatch.pri)
-include(../oping.pri)
+
 }
 unix:!android {
     #LIBS += -lsystemd
