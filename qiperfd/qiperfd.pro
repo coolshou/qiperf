@@ -33,6 +33,7 @@ win32:{
 SOURCES += \
     ../src/endpointtype.cpp \
     ../src/icmpping.cpp \
+    ../src/icmpwrapper.cpp \
     ../src/iperfwrapper.cpp \
     ../src/filewatcher.cpp \
     src/fileclient.cpp \
@@ -55,6 +56,7 @@ HEADERS += \
     ../src/endpointtype.h \
     ../src/icmpping.h \
     ../src/comm.h \
+    ../src/icmpwrapper.h \
     ../src/versions.h \
     ../src/iperfwrapper.h \
     ../src/filewatcher.h \
