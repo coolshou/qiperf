@@ -13,12 +13,14 @@
 #include <QObject>
 #include <QString>
 #include <QTextStream>
+#include <QFileInfo>
 #include <QDateTime>
 #include <QFile>
 #include <QDir>
 #include <QStandardPaths>
 #include <QMessageLogContext>
 #include <qlogging.h>
+#include <stdio.h>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
@@ -67,7 +69,14 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     case QtFatalMsg:
         output_ts << QString("FATAL: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
         break;
+    default:
+        // qDebug() << msg << " (" << context.line << ")";
+        QString m = msg + " :"+ file +"(" + QString::number(context.line) + ")";
+        printf("%s\n", m.toStdString().c_str());
+        fflush(stdout);
+        break;
     }
+    output_ts.flush(); //empty all data from its write buffer into the device
 }
 
 int main(int argc, char *argv[])
@@ -83,13 +92,21 @@ int main(int argc, char *argv[])
         if (!dir.exists())
             dir.mkpath(".");
         QString logfile = logfilePath + QIPERFD_NAME + ".log";
-        // TODO: check log file exist, backup it
         qDebug() << "logfile: " << logfile;
+        if (QFile::exists(logfile)){
+            // check log file exist, backup it
+            QFileInfo finfo(logfile);
+            QDateTime oldtime =  finfo.fileTime(QFileDevice::FileModificationTime);
+            qDebug() << "logfile ModificationTime: "  << oldtime;
+            QString baklogfile =  logfilePath + QIPERFD_NAME + "_" + oldtime.toString("yyyy-MM-dd_hhmmss.zzz")+ ".log";
+            QFile::rename(logfile, baklogfile);
+        }
         QFile outFile(logfile);
         if (! outFile.open(QIODevice::WriteOnly | QIODevice::Append)){
             qDebug() << "open file " << logfile << " Fail";
         } else {
             output_ts.setDevice(&outFile);
+            //output_ts = new QTextStream(&outFile);
         }
         qInstallMessageHandler(myMessageOutput);
 
