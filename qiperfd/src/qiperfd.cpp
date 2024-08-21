@@ -475,7 +475,7 @@ bool QIperfd::isRunning(int idx)
     return false;
 }
 
-bool QIperfd::restartQIperfd()
+void QIperfd::restartQIperfd()
 {
 #if defined(Q_OS_LINUX)
     #if !defined(Q_OS_ANDROID)
@@ -744,6 +744,12 @@ void QIperfd::onWSactMessage(QString msg)
         startAll();
     }else if (act.startsWith(CMD_IPERF_STOP)){
         stopAll();
+    }else if (act.startsWith(CMD_PING)){
+        qDebug()<< "CMD_PING";
+        cut = msg.indexOf(':', 0);
+        QString refrow = msg.left(cut);
+        msg = msg.right(msg.length()-cut-1);
+        m_icmpping = new IcmpPing(refrow, msg, nullptr);
     }else {
         qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;
         qDebug() << "\n==========";
