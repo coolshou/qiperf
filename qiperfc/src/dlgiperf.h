@@ -43,6 +43,7 @@ protected:
 //    void closeEvent(QCloseEvent *event) override;
 
 private:
+    bool isRequireConfigMet();
     Ui::DlgIperf *ui;
     TPMgr *m_tpmgr;
     QStringList mgrls; //manager ip address list

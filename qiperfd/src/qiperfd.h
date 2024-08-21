@@ -12,6 +12,7 @@
 #include "fileclient.h"
 
 #include "../src/filewatcher.h"
+#include "../src/icmpping.h"
 
 //#include <QCloseEvent> # require gui
 
@@ -59,7 +60,7 @@ public:
     void stopAll();  // stop all iperfs
     void clear(); //clear all iperf setting
     bool isRunning(int idx); //check if iperf is running
-    bool restartQIperfd();
+    void restartQIperfd();
 
 public slots:
     void setManagerInterface(QString ifname);
@@ -99,7 +100,7 @@ private:
     QString m_iperfexe21; //iperf2.1
     QString m_iperfexe3; //iperf3
     QMap<int, IperfWorker*> m_iperfworkers;
-    QMap<int, QThread*> m_threads;
+    QMap<int, QThread*> m_threads; // iperfworker's thread
 //    QList<IperfWorker*> m_iperfworkers;
 //    QList<QThread*> m_threads;
     QString mgr_ifname; //manager interface name
@@ -111,7 +112,7 @@ private:
     QMap<QString, QMap<QString, QString>> m_directions; // starttime, bindkey, dir_tag: direction tag for each test
     FileClient *m_fileclient;
     FileWatcher *m_filewatcher;
-
+    IcmpPing *m_icmpping;
 };
 
 #endif // QIPERFD_H

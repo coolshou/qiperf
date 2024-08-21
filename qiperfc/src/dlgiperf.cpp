@@ -207,6 +207,84 @@ void DlgIperf::changeEvent(QEvent *e)
     }
 }
 
+bool DlgIperf::isRequireConfigMet()
+{
+    //check require fields value
+    QHostAddress addr_target;
+    bool bok = addr_target.setAddress(ui->cb_target_ip->currentText());
+    if (!bok){
+        QMessageBox::warning(this, tr("WARNING!!"),
+                             tr("Please specify iperf server ip address!!"),
+                             QMessageBox::Ok);
+        ui->cb_target_ip->setFocus();
+        return false;
+    }
+    QHostAddress addr_client;
+    bok =addr_client.setAddress(ui->cb_client_bind_ip->currentText());
+    if (!bok){
+        QMessageBox::warning(this, tr("WARNING!!"),
+                             tr("Please specify iperf client bind ip address!!"),
+                             QMessageBox::Ok);
+        ui->cb_client_bind_ip->setFocus();
+        return false;
+    }
+
+    if (ui->cb_mserver_ip->currentText() == ui->cb_mclient_ip->currentText()){
+        QMessageBox::warning(this, tr("WARNING!!"),
+                             tr("Forbid setting same address of Manager Server and Manager Client!!"),
+                             QMessageBox::Ok);
+        ui->cb_mclient_ip->setFocus();
+        //TODO: use style to hightlight some item:  *{border: 3px solid red;}
+        return false;
+    }
+    if(ui->cb_version->currentText()=="3"){
+        if (ui->chk_bidir->isChecked()){
+            if (ui->sb_parallel->value()>10){
+                QMessageBox::warning(this, tr("WARNING!!"),
+                                     tr("In bidirectional mode, The parallel number should not over 10 (iperf3 under window may have problem)!!"),  QMessageBox::Ok);
+                ui->sb_parallel->setValue(10);
+                ui->sb_parallel->setFocus();
+                return false;
+            }
+        }else{
+            if (ui->sb_parallel->value()>20){
+                QMessageBox::warning(this, tr("WARNING!!"),
+                                     tr("In bidirectional mode, The parallel number should not over 20 (iperf3 under window may have problem)!!"),  QMessageBox::Ok);
+                ui->sb_parallel->setValue(20);
+                ui->sb_parallel->setFocus();
+                return false;
+            }
+        }
+    }
+
+    //check target and client in same protocal type
+    if(addr_target.protocol()!=addr_client.protocol()){
+        QMessageBox::warning(this, tr("WARNING!!"),
+                             tr("Please specify same protocol type of target IP and client IP!!"),
+                             QMessageBox::Ok);
+        // TODO: show multi focus color on following item
+        ui->cb_target_ip->setFocus();
+        ui->cb_client_bind_ip->setFocus();
+        return false;
+    }
+    // TODO: check duplicate <target ip>:<port> binding!!
+    QString bindkey = ui->cb_target_ip->currentText()+"_"+ QString::number(ui->sb_port->value());
+    if (m_tpmgr->isBindkeyExist(ui->cb_mserver_ip->currentText(), bindkey, m_excIdx))
+    {
+        QString msg = ui->cb_mserver_ip->currentText() + " already have " + bindkey+ "\n Please use other value of port";
+        QMessageBox::warning(this, tr("ERROR!!"), tr(msg.toUtf8()),
+                             QMessageBox::Ok);
+        ui->sb_port->setFocus();
+        return false;
+    }
+
+    if ((addr_client.protocol()==QAbstractSocket::IPv6Protocol)&&
+            (addr_target.protocol()==QAbstractSocket::IPv6Protocol)){
+        b_ipv6=true;
+    }
+    return true;
+}
+
 void DlgIperf::updateUI()
 {
     //update UI of manager ip address
@@ -241,82 +319,10 @@ void DlgIperf::ChangeVersion(const QString ver)
 
 void DlgIperf::onAccepted()
 {
-    bool close=true;
-    //check require fields value
-    QHostAddress addr_target;
-    bool bok = addr_target.setAddress(ui->cb_target_ip->currentText());
-    if (!bok){
-        QMessageBox::warning(this, tr("WARNING!!"),
-                             tr("Please specify iperf server ip address!!"),
-                             QMessageBox::Ok);
-        ui->cb_target_ip->setFocus();
-        return;
-    }
-    QHostAddress addr_client;
-    bok =addr_client.setAddress(ui->cb_client_bind_ip->currentText());
-    if (!bok){
-        QMessageBox::warning(this, tr("WARNING!!"),
-                             tr("Please specify iperf client bind ip address!!"),
-                             QMessageBox::Ok);
-        ui->cb_client_bind_ip->setFocus();
-        return;
-    }
-
-    if (ui->cb_mserver_ip->currentText() == ui->cb_mclient_ip->currentText()){
-        QMessageBox::warning(this, tr("WARNING!!"),
-                             tr("Forbid setting same address of Manager Server and Manager Client!!"),
-                             QMessageBox::Ok);
-        ui->cb_mclient_ip->setFocus();
-        //TODO: use style to hightlight some item:  *{border: 3px solid red;}
-        return;
-    }
-    if(ui->cb_version->currentText()=="3"){
-        if (ui->chk_bidir->isChecked()){
-            if (ui->sb_parallel->value()>10){
-                QMessageBox::warning(this, tr("WARNING!!"),
-                                     tr("In bidirectional mode, The parallel number should not over 10 (iperf3 under window may have problem)!!"),  QMessageBox::Ok);
-                ui->sb_parallel->setValue(10);
-                ui->sb_parallel->setFocus();
-                return;
-            }
-        }else{
-            if (ui->sb_parallel->value()>20){
-                QMessageBox::warning(this, tr("WARNING!!"),
-                                     tr("In bidirectional mode, The parallel number should not over 20 (iperf3 under window may have problem)!!"),  QMessageBox::Ok);
-                ui->sb_parallel->setValue(20);
-                ui->sb_parallel->setFocus();
-                return;
-            }
-        }
-    }
-
-    //check target and client in same protocal type
-    if(addr_target.protocol()!=addr_client.protocol()){
-        QMessageBox::warning(this, tr("WARNING!!"),
-                             tr("Please specify same protocol type of target IP and client IP!!"),
-                             QMessageBox::Ok);
-        // TODO: show multi focus color on following item
-        ui->cb_target_ip->setFocus();
-        ui->cb_client_bind_ip->setFocus();
-        return;
-    }
-    // TODO: check duplicate <target ip>:<port> binding!!
-    QString bindkey = ui->cb_target_ip->currentText()+"_"+ QString::number(ui->sb_port->value());
-    if (m_tpmgr->isBindkeyExist(ui->cb_mserver_ip->currentText(), bindkey, m_excIdx))
-    {
-        QString msg = ui->cb_mserver_ip->currentText() + " already have " + bindkey+ "\n Please use other value of port";
-        QMessageBox::warning(this, tr("ERROR!!"), tr(msg.toUtf8()),
-                             QMessageBox::Ok);
-        ui->sb_port->setFocus();
-        return;
-    }
-
-    if ((addr_client.protocol()==QAbstractSocket::IPv6Protocol)&&
-            (addr_target.protocol()==QAbstractSocket::IPv6Protocol)){
-        b_ipv6=true;
-    }
-    if (close){
+    if (isRequireConfigMet()){
         accept();
+    }else{
+        return;
     }
 }
 

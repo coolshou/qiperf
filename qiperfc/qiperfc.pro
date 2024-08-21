@@ -48,6 +48,8 @@ SOURCES += \
     ../src/endpointtype.cpp \
     ../src/endpointact.cpp \
     ../src/iperfwrapper.cpp \
+    ../src/icmpping.cpp \
+    ../src/icmpwrapper.cpp \
     lib/axistag.cpp \
     lib/qcustomplot.cpp \
     src/QIPConfig.cpp \
@@ -55,6 +57,7 @@ SOURCES += \
     src/customheaderview.cpp \
     src/dlgiperf.cpp \
     src/dlgoption.cpp \
+    src/dlgping.cpp \
     src/dlgrecord.cpp \
     src/dlgtest.cpp \
     src/endpointmgr.cpp \
@@ -84,6 +87,9 @@ HEADERS += \
     ../src/versions.h \
     ../src/endpointact.h \
     ../src/iperfwrapper.h \
+    ../src/icmpping.h \
+    ../src/icmpwrapper.h \
+    ../src/myfunc.h \
     lib/axistag.h \
     lib/qcustomplot.h \
     src/QIPConfig.h \
@@ -91,6 +97,7 @@ HEADERS += \
     src/customheaderview.h \
     src/dlgiperf.h \
     src/dlgoption.h \
+    src/dlgping.h \
     src/dlgrecord.h \
     src/dlgtest.h \
     src/endpointmgr.h \
@@ -114,6 +121,7 @@ HEADERS += \
 FORMS += \
     src/dlgiperf.ui \
     src/dlgoption.ui \
+    src/dlgping.ui \
     src/dlgrecord.ui \
     src/dlgtest.ui \
     src/formqiperfds.ui \

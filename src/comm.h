@@ -49,6 +49,10 @@
 #define CMD_IPERF_TP_FILE  "IPERF_TP_FILE"  // iperf throughput data filename with full path
 #define CMD_IPERF_GET_TP_FILE  "IPERF_GET_TP_FILE"  // get iperf throughput data file
 
+// ping
+#define CMD_PING        "PING"
+
+
 #define DATETIME_NOW_FORMAT "yyyy-MM-dd_hhmmss.zzz"
 
 enum class IPERF_VER {
