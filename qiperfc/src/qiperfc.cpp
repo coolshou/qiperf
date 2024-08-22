@@ -49,12 +49,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
         qDebug() << "create path: " << m_logpath;
         logdir.mkpath(".");
     }
-//    ui->menubar->installEventFilter(this);
-//    ui->menuTest->setVisible(false);
-//    ui->menuTest->setEnabled(false);
-//    ui->toolBar->installEventFilter(this);
     m_dlgtest = new DlgTest();
-    m_frm_qiperfds = new FormQIperfds();
     m_frm_option = new dlgOption(m_settings);
     initStatusbar();
     loadSettings();
@@ -62,68 +57,16 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     initActions();
     initMenus();
     initToolbar();
-    initCustomPlote();
+    initThroughputChart();
+    initPingChart();
     connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
 
     iTimeout = 10*100;
     //
-    m_tpmgr = new TPMgr(this);
-    connect(m_tpmgr, &TPMgr::rowsInserted, this, &QIperfC::onTPDataUpdate);
-    connect(m_tpmgr, &TPMgr::rowsRemoved, this, &QIperfC::onTPDataUpdate);
-    connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
-
     m_qipconfig = new QIPConfig(logdir.absolutePath());
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
     connect(m_qipconfig, &QIPConfig::updateTPCfg, this, &QIperfC::onUpdateTPCfg);
     connect(m_qipconfig, &QIPConfig::onThroughput, m_tpmgr, &TPMgr::onIperfTPdata);
-
-    ui->tv_throughput->setModel(m_tpmgr);
-    /* TODO: set specify column font size,
-    // current not inherent other setting
-    header = new CustomHeaderView(Qt::Horizontal, ui->tv_throughput);
-    int s = header->getFontSize();
-    header->setColumnSize(int(TP::mintp), s/2);
-    header->setColumnSize(int(TP::maxtp), s/2);
-    ui->tv_throughput->setHeader(header);
-    // set specify column font size
-//    QHeaderView *header = ui->tv_throughput->header();
-//    QFont font = header->font();
-//    qDebug() << "font size: " << font.pointSize();
-//    font.setPointSize(28); // Set the desired font size
-//    header->setStyleSheet(QString("QHeaderView::section:nth-child(%1) { font-size: %2pt; }").arg(1).arg(font.pointSize()));
-    // end set font size
-
-    */
-    ui->tv_throughput->setColumnWidth(TP::cols::id, 100);
-    ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
-    ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
-    ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
-    ui->tv_throughput->setColumnWidth(TP::cols::lostrate, 110);
-
-    TooltipEventFilter* filter = new TooltipEventFilter(ui->tv_throughput);
-    connect(filter, &TooltipEventFilter::doCopy, this, &QIperfC::onCopy);
-    connect(filter, &TooltipEventFilter::doPaste, this, &QIperfC::onPaste);
-    connect(filter, &TooltipEventFilter::doDelete, this, &QIperfC::onDelete);
-    ui->tv_throughput->viewport()->installEventFilter(filter);
-    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
-//    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
-//    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
-    ui->tv_throughput->expandAll();// will show folding icon when have child item??
-    ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu
-    connect(ui->tv_throughput, &QTreeView::customContextMenuRequested, this, &QIperfC::onTPUTContextMenu);
-    connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemDClicked); //edit item on double click
-
-    //TODO: slow update text/image?
-    tpdirdelegate = new TPDirDelegate(ui->tv_throughput);
-//    tpdirdelegate = new TPDirDelegate(this);
-    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdirdelegate);
-    // TODO: why debug build do not show folding icon!!
-//    tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
-//    ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
-
-    QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
-    connect(ism, &QItemSelectionModel::selectionChanged, this, &QIperfC::onTPselectionChanged);
-//    ui->tv_throughput->header()->setVisible(true);
 
     m_endpointmgr = new EndPointMgr(this);
     m_frm_qiperfds->setModel(m_endpointmgr);
@@ -142,6 +85,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_dlgrecord = new DlgRecord(this);
     m_fileserver = new FileServer(QIPERF_FILEPORT);
 
+    dp = new DlgPing(this);
 }
 
 QIperfC::~QIperfC()
@@ -317,6 +261,15 @@ void QIperfC::onAddIperf()
         m_tpmgr->add(rs);
     }
 
+}
+void QIperfC::onAddPing()
+{
+    QString strJson;
+    if (dp->exec()== QDialog::Accepted){
+        strJson = dp->getJsonstr();
+        qDebug() << "strJson:" << strJson;
+        //TODO: add to ping treeview/chart
+    }
 }
 
 void QIperfC::onPairAdd()
@@ -761,7 +714,40 @@ void QIperfC::notificationReceived(const QString key, const QVariant value)
 
 void QIperfC::onTest()
 {
-    m_dlgtest->show();
+    QString strJson;
+    if (dp->exec()== QDialog::Accepted){
+        strJson = dp->getJsonstr();
+        qDebug() << "strJson:" << strJson;
+    }
+    //    m_dlgtest->show();
+
+if(1){
+//    QJsonDocument doc = QJsonDocument();
+//    QJsonObject objRoot = doc.object();
+//    objRoot.insert("target", "192.168.0.1");
+//    objRoot.insert("count", 4);
+//    objRoot.insert("timeout", 3);
+//    objRoot.insert("interval", 1);
+//    objRoot.insert("packetsize", 32);
+//    objRoot.insert("source", "192.168.0.47");
+//    objRoot.insert("ttl", 64);
+//    doc.setObject(objRoot);
+//    strJson =doc.toJson(QJsonDocument::Compact);
+    m_icmpping = new IcmpPing("0", strJson, nullptr);
+} else{
+    m_icmpping = new IcmpPing("0", "192.168.0.1", 10, 3, 1, 64, "192.168.0.47", 64, nullptr);
+}
+    m_icmpping->start();
+
+    if (0){
+        // test remote ping
+
+        QString s = "ws://192.168.70.147:"+QString::number(QIPERFD_WSPORT);
+        ws= new WSClient("192.168.70.147", QUrl(s), m_datapath);
+        QString cmd = QString(CMD_PING)+":"+QString::number(0)+":"+strJson;
+        qDebug() << "onTest cmd:" << cmd;
+        ws->sendText(cmd);
+    }
 }
 
 void QIperfC::closeEvent(QCloseEvent *event)
@@ -801,13 +787,73 @@ void QIperfC::updateRunStatus(bool bStart)
     ui->actionClear->setEnabled(!bStart);
 }
 
-void QIperfC::initCustomPlote()
+void QIperfC::initThroughputChart()
 {
+    m_frm_qiperfds = new FormQIperfds();
+    // throughput chart
     m_tpplot=new TPPlot(ui->widget_console);
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &QIperfC::onPlotContextMenuRequest);
     ui->hl_console->addWidget(m_tpplot);
 
+    m_tpmgr = new TPMgr(this);
+    connect(m_tpmgr, &TPMgr::rowsInserted, this, &QIperfC::onTPDataUpdate);
+    connect(m_tpmgr, &TPMgr::rowsRemoved, this, &QIperfC::onTPDataUpdate);
+    connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
+
+    ui->tv_throughput->setModel(m_tpmgr);
+    /* TODO: set specify column font size,
+    // current not inherent other setting
+    header = new CustomHeaderView(Qt::Horizontal, ui->tv_throughput);
+    int s = header->getFontSize();
+    header->setColumnSize(int(TP::mintp), s/2);
+    header->setColumnSize(int(TP::maxtp), s/2);
+    ui->tv_throughput->setHeader(header);
+    // set specify column font size
+//    QHeaderView *header = ui->tv_throughput->header();
+//    QFont font = header->font();
+//    qDebug() << "font size: " << font.pointSize();
+//    font.setPointSize(28); // Set the desired font size
+//    header->setStyleSheet(QString("QHeaderView::section:nth-child(%1) { font-size: %2pt; }").arg(1).arg(font.pointSize()));
+    // end set font size
+
+    */
+    ui->tv_throughput->setColumnWidth(TP::cols::id, 100);
+    ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
+    ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
+    ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
+    ui->tv_throughput->setColumnWidth(TP::cols::lostrate, 110);
+
+    TooltipEventFilter* filter = new TooltipEventFilter(ui->tv_throughput);
+    connect(filter, &TooltipEventFilter::doCopy, this, &QIperfC::onCopy);
+    connect(filter, &TooltipEventFilter::doPaste, this, &QIperfC::onPaste);
+    connect(filter, &TooltipEventFilter::doDelete, this, &QIperfC::onDelete);
+    ui->tv_throughput->viewport()->installEventFilter(filter);
+    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
+//    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
+//    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
+    ui->tv_throughput->expandAll();// will show folding icon when have child item??
+    ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu
+    connect(ui->tv_throughput, &QTreeView::customContextMenuRequested, this, &QIperfC::onTPUTContextMenu);
+    connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemDClicked); //edit item on double click
+
+    //TODO: slow update text/image?
+    tpdirdelegate = new TPDirDelegate(ui->tv_throughput);
+//    tpdirdelegate = new TPDirDelegate(this);
+    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdirdelegate);
+    // TODO: why debug build do not show folding icon!!
+//    tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
+//    ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
+
+    QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
+    connect(ism, &QItemSelectionModel::selectionChanged, this, &QIperfC::onTPselectionChanged);
+//    ui->tv_throughput->header()->setVisible(true);
+}
+
+void QIperfC::initPingChart()
+{
+
+    // ping chart
 }
 
 void QIperfC::resetError()
@@ -1047,6 +1093,8 @@ void QIperfC::initActions()
 
 //    connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(onPairAdd()));
     connect(ui->actionAddIperf, SIGNAL(triggered()), this, SLOT(onAddIperf()));
+    connect(ui->actionAddPing, SIGNAL(triggered()), this, SLOT(onAddPing()));
+
     connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(onPairEdit()));
     connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(onPairDelete()));
     connect(ui->actionSwap, SIGNAL(triggered()), this, SLOT(onPairSwap()));
@@ -1072,6 +1120,7 @@ void QIperfC::initToolbar()
 {
     QMenu *menuAdd = new QMenu(this);
     menuAdd->addAction(ui->actionAddIperf);
+    menuAdd->addAction(ui->actionAddPing);
 
     ui->actionAdd->setMenu(menuAdd);
 

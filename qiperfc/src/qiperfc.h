@@ -31,7 +31,9 @@
 #include "tooltipeventfilter.h"
 #include "customheaderview.h"
 #include "fileserver.h"
+#include "dlgping.h"
 
+#include "../src/icmpping.h"
 #if (TEST_WS==1)
 #include "wsclient.h"
 #endif
@@ -97,7 +99,8 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 private:
     void updateRunStatus(bool bStart);
-    void initCustomPlote();
+    void initThroughputChart();
+    void initPingChart();
     void resetError();
     void saveSettings();
     void loadSettings();
@@ -126,6 +129,7 @@ private slots:
     int getStatusClients();
     void onEnableItem(bool checked);
     void onDisableItem(bool checked);
+    void onAddPing();
 
 private:
     Ui::MainWindow *ui;
@@ -145,6 +149,7 @@ private:
     QMap<QString, WSClient *> m_wsc; // websocket client list for manager iperf client
     QMap<QString, int> m_status_server; // store server status, 0: init, 1: running, 2: error?
     QMap<QString, int> m_status_client; // store client status, 0: init, 1: running, 2: error?
+    WSClient *ws;
 #endif
     UdpReceiver *m_receiver;
     EndPointMgr *m_endpointmgr;
@@ -169,5 +174,9 @@ private:
     QAction *m_aDisable;
     FileServer *m_fileserver;
     QString m_oldsavepath=nullptr;
+
+    //TEST icmp
+    IcmpPing *m_icmpping;
+    DlgPing *dp;
 };
 #endif // QIPERFC_H

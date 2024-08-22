@@ -110,6 +110,30 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_ping">
+       <attribute name="title">
+        <string>Ping</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QSplitter" name="splitter_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <widget class="QTreeView" name="tv_ping"/>
+          <widget class="QWidget" name="widget" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>150</height>
+            </size>
+           </property>
+           <layout class="QHBoxLayout" name="hl_ping"/>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -464,6 +488,14 @@
   <action name="actionIperf3Log">
    <property name="text">
     <string>Iperf3 log</string>
+   </property>
+  </action>
+  <action name="actionAddPing">
+   <property name="text">
+    <string>Add Ping</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Ping</string>
    </property>
   </action>
  </widget>
