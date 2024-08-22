@@ -67,6 +67,7 @@ SOURCES += \
     src/htmlwriter.cpp \
     src/iperffileworker.cpp \
     src/main.cpp \
+    src/pingplot.cpp \
     src/qiperfc.cpp \
     src/tp.cpp \
     src/tpfoldingdelegate.cpp \
@@ -106,6 +107,7 @@ HEADERS += \
     src/formqiperfds.h \
     src/htmlwriter.h \
     src/iperffileworker.h \
+    src/pingplot.h \
     src/qiperfc.h \
     src/tp.h \
     src/tpfoldingdelegate.h \

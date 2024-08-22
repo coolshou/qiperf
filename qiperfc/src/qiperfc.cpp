@@ -69,6 +69,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_qipconfig, &QIPConfig::onThroughput, m_tpmgr, &TPMgr::onIperfTPdata);
 
     m_endpointmgr = new EndPointMgr(this);
+    m_frm_qiperfds = new FormQIperfds();
     m_frm_qiperfds->setModel(m_endpointmgr);
 
     dlgiperf = new DlgIperf(m_tpmgr, this);
@@ -789,7 +790,6 @@ void QIperfC::updateRunStatus(bool bStart)
 
 void QIperfC::initThroughputChart()
 {
-    m_frm_qiperfds = new FormQIperfds();
     // throughput chart
     m_tpplot=new TPPlot(ui->widget_console);
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -852,8 +852,9 @@ void QIperfC::initThroughputChart()
 
 void QIperfC::initPingChart()
 {
-
     // ping chart
+    m_pingplot = new PingPlot(ui->widget_ping);
+    ui->hl_ping->addWidget(m_pingplot);
 }
 
 void QIperfC::resetError()

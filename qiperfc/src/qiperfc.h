@@ -32,6 +32,7 @@
 #include "customheaderview.h"
 #include "fileserver.h"
 #include "dlgping.h"
+#include "pingplot.h"
 
 #include "../src/icmpping.h"
 #if (TEST_WS==1)
@@ -141,6 +142,7 @@ private:
     DlgTest *m_dlgtest;
     DlgRecord *m_dlgrecord; //TODO: store final test result
     TPPlot *m_tpplot;
+    PingPlot *m_pingplot;
     QSettings *m_settings;
     DlgIperf * dlgiperf;  // dialog of iperf config
     PipeClient *pclient;

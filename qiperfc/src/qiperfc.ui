@@ -40,7 +40,7 @@
     <item>
      <widget class="QTabWidget" name="tw_qiperfd">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_console">
        <attribute name="title">
@@ -121,7 +121,7 @@
            <enum>Qt::Vertical</enum>
           </property>
           <widget class="QTreeView" name="tv_ping"/>
-          <widget class="QWidget" name="widget" native="true">
+          <widget class="QWidget" name="widget_ping" native="true">
            <property name="minimumSize">
             <size>
              <width>0</width>
