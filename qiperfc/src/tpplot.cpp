@@ -191,38 +191,6 @@ void TPPlot::initCustomPlot()
 //    connect(yAxis, SIGNAL(rangeChanged(QCPRange)), yAxis2, SLOT(setRange(QCPRange)));
 
 }
-//void TPPlot::addRandomGraph()
-//{ // Test QCustomPlot
-//  int n = 50; // number of points in graph
-//    double xScale = (rand()/static_cast<double>(RAND_MAX) + 0.5)*2;
-//  double yScale = (rand()/static_cast<double>(RAND_MAX) + 0.5)*2;
-//    double xOffset = (rand()/static_cast<double>(RAND_MAX) - 0.5)*4;
-//  double yOffset = (rand()/static_cast<double>(RAND_MAX) - 0.5)*10;
-//    double r1 = (rand()/static_cast<double>(RAND_MAX) - 0.5)*2;
-//  double r2 = (rand()/static_cast<double>(RAND_MAX) - 0.5)*2;
-//    double r3 = (rand()/static_cast<double>(RAND_MAX) - 0.5)*2;
-//  double r4 = (rand()/static_cast<double>(RAND_MAX) - 0.5)*2;
-//  QVector<double> x(n), y(n);
-//  for (int i=0; i<n; i++)
-//  {
-//        x[i] = (i/static_cast<double>(n)-0.5)*10.0*xScale + xOffset;
-//    y[i] = (qSin(x[i]*r1*5)*qSin(qCos(x[i]*r2)*r4*3)+r3*qCos(qSin(x[i])*r4*2))*yScale + yOffset;
-//  }
-
-//  this->addGraph();
-//  this->graph()->setName(QString("New graph %1").arg(this->graphCount()-1));
-//  this->graph()->setData(x, y);
-//  this->graph()->setLineStyle(QCPGraph::lsLine);
-////  this->graph()->setLineStyle((QCPGraph::LineStyle)(rand()%5+1));
-////  if (rand()%100 > 50)
-////    this->graph()->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)(rand()%14+1)));
-//  QPen graphPen;
-////  graphPen.setColor(QColor(rand()%245+10, rand()%245+10, rand()%245+10));
-////  graphPen.setWidthF(rand()/(double)RAND_MAX*2+1);
-//  graphPen = newColorPen(rand()%245+10, rand()%245+10, rand()%245+10, 1);
-//  this->graph()->setPen(graphPen);
-//  this->replot();
-//}
 
 QPen TPPlot::newColorPen(int r, int g, int b, int width)
 {
@@ -231,18 +199,3 @@ QPen TPPlot::newColorPen(int r, int g, int b, int width)
     graphPen.setWidthF(width);
     return graphPen;
 }
-
-//void TPPlot::realtimeDataSlot(QPrivateSignal sig)
-//{ //test live data
-//    Q_UNUSED(sig)
-//    static double time = 0;
-//    time += 1;
-//    double value = QRandomGenerator::global()->generate() % 1000; // Simulated data value
-//    double value2 = QRandomGenerator::global()->generate() % 1000;
-//    // Add the data point to the graph
-//    this->graph(0)->addData(time, value);
-//    this->graph(1)->addData(time, value2);
-
-//    xAxis->setRange(time, 120, Qt::AlignRight);
-//    this->replot();
-//}
