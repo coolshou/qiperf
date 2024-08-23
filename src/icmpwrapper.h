@@ -156,16 +156,20 @@ public:
     void start();
     void stop();
     void work();
+#ifdef _WIN32
+    static void init_winsock_lib(void)
+    static void init_winsock_extensions(socket_t sockfd)
+#endif
 
 public slots:
     void onStarted();
     void onStoped(int idx);
-    void onTTL(uint16_t seq, double ttl, const char *checksum=nullptr);
+    void onResponseTime(uint16_t seq, double responseTime, const char *checksum=nullptr);
 
 signals:
     void started();
     void finished(int idx);
-    void ttl(uint16_t seq, double ttl, const char *checksum=nullptr);
+    void icmpResponseTime(uint16_t seq, double responseTime, const char *checksum=nullptr);
     void icmpResponse(const QString& message);
     void errorResponse(const QString& message);
 
@@ -181,7 +185,7 @@ private:
     QString m_source;
     int m_ttl;
     int ip_version; // TODO
-    QMap<uint16_t, double> m_ttls; // idx, ttl: -1 fail
+    QMap<uint16_t, double> m_results; // idx, response Time: -1 fail
     // TODO: size
     int showtimestemp = 0;
     const char *timestempformat = NULL;

@@ -69,46 +69,7 @@ static uint64_t utime(void)
 #endif
 }
 
-#ifdef _WIN32
 
-static void init_winsock_lib(void)
-{
-    int error;
-    WSADATA wsa_data;
-
-    error = WSAStartup(MAKEWORD(2, 2), &wsa_data);
-    if (error != 0) {
-        fprintf(stderr, "Failed to initialize WinSock: %d\n", error);
-        exit(EXIT_FAILURE);
-    }
-}
-
-static void init_winsock_extensions(socket_t sockfd)
-{
-    int error;
-    GUID recvmsg_id = WSAID_WSARECVMSG;
-    DWORD size;
-
-    /*
-     * Obtain a pointer to the WSARecvMsg (recvmsg) function.
-     */
-    error = WSAIoctl(sockfd,
-                     SIO_GET_EXTENSION_FUNCTION_POINTER,
-                     &recvmsg_id,
-                     sizeof(recvmsg_id),
-                     &WSARecvMsg,
-                     sizeof(WSARecvMsg),
-                     &size,
-                     NULL,
-                     NULL);
-    if (error == SOCKET_ERROR) {
-        psockerror("WSAIoctl");
-//        exit(EXIT_FAILURE);
-        return;
-    }
-}
-
-#endif /* _WIN32 */
 
 static uint16_t compute_checksum(const char *buf, size_t size)
 {
@@ -143,7 +104,7 @@ IcmpWrapper::IcmpWrapper(int idx,QString target, quint64 count, uint64_t timeout
     m_seq = 0;
     QObject::connect(this, &IcmpWrapper::started, this, &IcmpWrapper::onStarted);
     QObject::connect(this, &IcmpWrapper::finished, this, &IcmpWrapper::onStoped);
-    QObject::connect(this, &IcmpWrapper::ttl, this, &IcmpWrapper::onTTL);
+    QObject::connect(this, &IcmpWrapper::icmpResponseTime, this, &IcmpWrapper::onResponseTime);
     timestempformat=QString("%Y%m%d_%H:%M:%S").toStdString().c_str();
     running=true;
     int protocal=-1;
@@ -274,7 +235,7 @@ void IcmpWrapper::work()
                     current_time(timestempformat);
                 }
                 //timeout
-                emit ttl(sequence, -1);
+                emit icmpResponseTime(sequence, -1);
                 goto next;
             }
             if (n > 0) {
@@ -318,7 +279,7 @@ void IcmpWrapper::work()
                                       .arg(recv_sequence)
                                       .arg((double)delay / 1000.0)
                                       .arg(received_ttl));
-                    emit ttl(recv_sequence, (double)delay / 1000.0, " ");
+                    emit icmpResponseTime(recv_sequence, (double)delay / 1000.0, " ");
                     break;
                 }else{
                     emit errorResponse(QString("Received ICMP echo reply from %1 with invalid checksum")
@@ -354,18 +315,18 @@ void IcmpWrapper::onStarted()
 void IcmpWrapper::onStoped(int idx)
 {
     Q_UNUSED(idx)
-    qDebug() << "onStoped: " << m_ttls;
+    qDebug() << "onStoped: " << m_results;
 }
 
-void IcmpWrapper::onTTL(uint16_t seq, double rtime, const char *checksum)
+void IcmpWrapper::onResponseTime(uint16_t seq, double responseTime, const char *checksum)
 {
-    if (rtime>=0){
+    if (responseTime>=0){
         qDebug() << QString("Reply from %1: seq=%2, time=%3, %4").arg(m_target)
-                   .arg(seq).arg(rtime).arg(checksum);
+                   .arg(seq).arg(responseTime).arg(checksum);
     }else {
         qDebug() << QString("Request timed out: seq=%1").arg(seq);
     }
-    m_ttls.insert(seq, rtime);
+    m_results.insert(seq, responseTime);
 }
 
 int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
@@ -670,7 +631,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
                             current_time(timestempformat);
                         }
                         //timeout
-                        emit ttl(seq, -1);
+                        emit icmpResponseTime(seq, -1);
                         goto next;
                     } else {
                         /* No data available yet, try to receive again. */
@@ -784,7 +745,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
 //                   (double)delay / 1000.0,
 //                   reply_checksum != checksum ? " (bad checksum)" : "");
 //            fflush(stdout);
-            emit ttl(seq, (double)delay / 1000.0, reply_checksum != checksum ? " (bad checksum)":"");
+            emit icmpResponseTime(seq, (double)delay / 1000.0, reply_checksum != checksum ? " (bad checksum)":"");
             break;
         }
 
@@ -811,7 +772,7 @@ exit_error:
 
 void IcmpWrapper::getTTLs()
 {
-    qDebug() << "getTTLs" << m_ttls;
+    qDebug() << "getTTLs" << m_results;
 }
 
 QByteArray IcmpWrapper::createIcmpPacket(int packet_id, int sequence) {
@@ -890,3 +851,44 @@ void IcmpWrapper::current_time(const char *timestempformat) {
     //strftime(buffer, sizeof(buffer), &timestempformat, timeinfo);
     printf("%s", buffer);
 }
+
+#ifdef _WIN32
+
+static void IcmpWrapper::init_winsock_lib(void)
+{
+    int error;
+    WSADATA wsa_data;
+
+    error = WSAStartup(MAKEWORD(2, 2), &wsa_data);
+    if (error != 0) {
+        fprintf(stderr, "Failed to initialize WinSock: %d\n", error);
+        exit(EXIT_FAILURE);
+    }
+}
+
+static void IcmpWrapper::init_winsock_extensions(socket_t sockfd)
+{
+    int error;
+    GUID recvmsg_id = WSAID_WSARECVMSG;
+    DWORD size;
+
+    /*
+     * Obtain a pointer to the WSARecvMsg (recvmsg) function.
+     */
+    error = WSAIoctl(sockfd,
+                     SIO_GET_EXTENSION_FUNCTION_POINTER,
+                     &recvmsg_id,
+                     sizeof(recvmsg_id),
+                     &WSARecvMsg,
+                     sizeof(WSARecvMsg),
+                     &size,
+                     NULL,
+                     NULL);
+    if (error == SOCKET_ERROR) {
+        psockerror("WSAIoctl");
+//        exit(EXIT_FAILURE);
+        return;
+    }
+}
+
+#endif /* _WIN32 */
