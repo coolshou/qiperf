@@ -1,14 +1,32 @@
 qiperf (0.5.11308.28-1) unstable; urgency=medium
 
-TODO
-  * Add export test reqult to html file
+  * Fix second time run test no throughput value on UI
+  * Fix second time run test save raw log file to wrong folder
   * Add delay start time for iperf test
-  * Add import iperf3 raw log file to show throughput chart
   * Add enable/disable specify iperf test pair
+  * Fix clear record did not fully clear record data
+  * Fix delete pair will clear all test pairs
+
+
+  * Fix open 3 times many cause throughput plot wrong
+
+  TODO
+  * Add export test reqult to html file
+  * Add import iperf3 raw log file to show throughput chart
   * Fix throughput chart's legend area with scroll bar to fit all legend
   * Fix throughput unit string fit iperf config/result
+  * Add select throughput chart's legend item, also hilight the line. vice versa.
+  * Add corss arrow on throughput chart under mouse and show value of the serial point
 
- -- coolshou <coolshou2060@gmail.com>  Tue, 06 Aug 2024 10:25:52 +0800
+
+  * Add wireless sta rssi/linkrate monitor
+  * Add serial console monitor tool
+        with custom command to collect data for analyze/plotChart
+  * Add telnet/ssh monitor tool
+
+  * Add ping monitor tool
+
+ -- coolshou <coolshou2060@gmail.com>  Wed, 28 Aug 2024 10:25:52 +0800
 
 qiperf (0.4.11308.06-1) unstable; urgency=medium
 
