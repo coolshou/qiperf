@@ -200,6 +200,8 @@ void WSServer::onNewConnection()
 
         m_clients[sfrom] =  pSocket;
         m_currentClient = sfrom;
+    }else{
+        onLog("m_clients already contain:" + sfrom);
     }
 
 }
