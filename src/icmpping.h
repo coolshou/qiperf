@@ -24,9 +24,12 @@ public:
 public slots:
 //    void onTTL(uint16_t seq, int ttl);
     void onFinished(int idx);
+    void onResponseTime(uint16_t seq, double responseTime, const char *checksum=nullptr);
+
 signals:
     void pingSuccess(int responseTime);
     void pingFailed();
+    void icmpResponseTime(QString refrow, uint16_t seq, double responseTime, const char *checksum=nullptr);
 
 private:
     void init(QString target, int count=4, uint64_t timeout=3,

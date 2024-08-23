@@ -27,7 +27,7 @@ IcmpPing::IcmpPing(QString refrow, QString config, QObject *parent)
         m_source = jobj.value("source").toString(); // TODO: ping from source
         m_ttl = jobj.value("ttl").toInt();
 //        IcmpPing(refrow, target, count, timeout, interval, packetsize , source, parent);
-        init(m_target, m_count, m_timeout, m_interval, m_packetsize, m_source);
+        init(m_target, m_count, m_timeout, m_interval, m_packetsize, m_source, m_ttl);
 
     }else{
         qDebug() << QString("CMD_PING: ERROR: %1\nparser json: %2").arg(error.errorString())
@@ -44,7 +44,7 @@ IcmpPing::IcmpPing(QString refrow, QString target, int count,uint64_t timeout,
       m_ttl(ttl)
 {
     // TODO: count -1 : continious?
-    init(m_target, m_count, m_timeout, m_interval, m_packetsize, m_source);
+    init(m_target, m_count, m_timeout, m_interval, m_packetsize, m_source, m_ttl);
 }
 
 void IcmpPing::init(QString target, int count, uint64_t timeout, uint interval,
@@ -54,8 +54,10 @@ void IcmpPing::init(QString target, int count, uint64_t timeout, uint interval,
 
     QThread *m_thread = new QThread();
     IcmpWrapper *m_icmpwapper = new IcmpWrapper(idx, target , count , timeout,
-                                                interval, packetsize, source);
+                                                interval, packetsize, source,
+                                                ttl);
     connect(m_icmpwapper, &IcmpWrapper::finished, this, &IcmpPing::onFinished);
+    connect(m_icmpwapper, &IcmpWrapper::icmpResponseTime, this, &IcmpPing::onResponseTime);
     connect(m_icmpwapper, &IcmpWrapper::icmpResponse, [](const QString& message){
         qDebug() << message;
     });
@@ -85,6 +87,11 @@ void IcmpPing::onFinished(int idx)
     if (m_threads.contains(idx)){
         m_threads.take(idx);
     }
+}
+
+void IcmpPing::onResponseTime(uint16_t seq, double responseTime, const char *checksum)
+{
+    emit icmpResponseTime(m_refrow, seq, responseTime, checksum);
 }
 
 
