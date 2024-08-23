@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QAbstractItemModel>
+#include <QSortFilterProxyModel>
 
 namespace Ui {
 class FormQIperfds;
@@ -22,6 +23,7 @@ protected:
 
 private:
     Ui::FormQIperfds *ui;
+    QSortFilterProxyModel *proxyModel;
 };
 
 #endif // FORMQIPERFDS_H
