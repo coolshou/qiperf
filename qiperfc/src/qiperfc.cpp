@@ -339,6 +339,7 @@ void QIperfC::onStart()
     if (m_tpmgr->rootChildCount()>0) {
         updateRunStatus(true);
         //start test
+        // list of throughput test pair
         QList<TP *> tps = m_tpmgr->getChilds();
         QString s;
         QString cmd;
@@ -429,6 +430,7 @@ void QIperfC::onStart()
 
         }
         //TODO: record which should report iperf throughput value
+        // TODO: list of ping test
 
         if(bErrorStop>0){
             qDebug() << "Some error happen!!";
@@ -719,25 +721,11 @@ void QIperfC::onTest()
     if (dp->exec()== QDialog::Accepted){
         strJson = dp->getJsonstr();
         qDebug() << "strJson:" << strJson;
+        m_icmpping = new IcmpPing("0", strJson, nullptr);
+    } else{
+        m_icmpping = new IcmpPing("0", "192.168.0.1", 10, 3, 1, 64, "192.168.0.47", 64, nullptr);
     }
-    //    m_dlgtest->show();
-
-if(1){
-//    QJsonDocument doc = QJsonDocument();
-//    QJsonObject objRoot = doc.object();
-//    objRoot.insert("target", "192.168.0.1");
-//    objRoot.insert("count", 4);
-//    objRoot.insert("timeout", 3);
-//    objRoot.insert("interval", 1);
-//    objRoot.insert("packetsize", 32);
-//    objRoot.insert("source", "192.168.0.47");
-//    objRoot.insert("ttl", 64);
-//    doc.setObject(objRoot);
-//    strJson =doc.toJson(QJsonDocument::Compact);
-    m_icmpping = new IcmpPing("0", strJson, nullptr);
-} else{
-    m_icmpping = new IcmpPing("0", "192.168.0.1", 10, 3, 1, 64, "192.168.0.47", 64, nullptr);
-}
+//    connect(m_icmpping, &IcmpPing::icmpResponseTime, this, );
     m_icmpping->start();
 
     if (0){
@@ -852,6 +840,10 @@ void QIperfC::initThroughputChart()
 
 void QIperfC::initPingChart()
 {
+    if (!m_testping){
+//        ui->tab_ping->setVisible(false);
+        ui->tabwidget->setTabVisible(1, false);
+    }
     // ping chart
     m_pingplot = new PingPlot(ui->widget_ping);
     ui->hl_ping->addWidget(m_pingplot);
@@ -894,6 +886,9 @@ void QIperfC::loadSettings()
     m_settings->beginGroup("Iperf");
     m_WaitServerReady =m_settings->value("WaitServerReady", 10).toInt();
 //    m_frm_option->setWaitServerReady();
+    m_settings->endGroup();
+    m_settings->beginGroup("test");
+    m_testping = m_settings->value("testping", false).toBool();
     m_settings->endGroup();
 }
 
@@ -1094,6 +1089,9 @@ void QIperfC::initActions()
 
 //    connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(onPairAdd()));
     connect(ui->actionAddIperf, SIGNAL(triggered()), this, SLOT(onAddIperf()));
+    if (!m_testping){
+        ui->actionAddPing->setVisible(false);
+    }
     connect(ui->actionAddPing, SIGNAL(triggered()), this, SLOT(onAddPing()));
 
     connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(onPairEdit()));

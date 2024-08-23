@@ -144,6 +144,7 @@ private:
     TPPlot *m_tpplot;
     PingPlot *m_pingplot;
     QSettings *m_settings;
+    bool m_testping;
     DlgIperf * dlgiperf;  // dialog of iperf config
     PipeClient *pclient;
 #if (TEST_WS==1)
