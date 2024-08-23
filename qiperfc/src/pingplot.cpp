@@ -2,7 +2,7 @@
 
 PingPlot::PingPlot(QWidget *parent):QCustomPlot(parent)
 {
-
+    initCustomPlot();
 }
 
 void PingPlot::initCustomPlot()
@@ -17,7 +17,7 @@ void PingPlot::initCustomPlot()
 
     //set axis Label
     xAxis->setLabel("Time(Sec)");
-    yAxis->setLabel("Response time");
+    yAxis->setLabel("Response(Sec)");
     yAxis2->setLabel("Lost Rate(%)");
     yAxis2->setTickLabels(true);
     //set axis range
@@ -25,4 +25,6 @@ void PingPlot::initCustomPlot()
     xAxis->setRange(0, m_xAxisMaxDefault);
     yAxis->setRange(0, m_yAxisMaxDefault);
     yAxis2->setRange(0, 100); // %
+    // legend
+    legend->setVisible(true);
 }

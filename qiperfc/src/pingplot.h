@@ -12,7 +12,7 @@ public:
     explicit PingPlot(QWidget *parent = nullptr);
 private:
     void initCustomPlot();
-    int m_yAxisMaxDefault=10; // 10 Mbps
+    int m_yAxisMaxDefault=5; // 10 Mbps
     int m_xAxisMaxDefault=30; // 30sec
 
 };
