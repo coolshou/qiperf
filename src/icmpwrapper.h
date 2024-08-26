@@ -99,7 +99,9 @@ typedef struct cmsghdr cmsghdr_t;
         WSASocketW(af, type, protocol, NULL, 0, 0)
     #define close_socket closesocket
     #define getpid _getpid
-    #define usleep(usec) Sleep((DWORD)((usec) / 1000))
+    #ifndef usleep
+        #define usleep(usec) Sleep((DWORD)((usec) / 1000))
+    #endif
 #else
     #define close_socket close
 #endif
