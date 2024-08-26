@@ -141,7 +141,9 @@ void IcmpWrapper::work()
         u_long opt_value = 1;
         if (ioctlsocket(sockfd, FIONBIO, &opt_value) != 0) {
             psockerror("ioctlsocket");
-            goto exit_error;
+            emit errorResponse(QString("set socket ioctlsocket error"));
+//            goto exit_error;
+            return;
         }
     }
 #else /* _WIN32 */
@@ -265,7 +267,6 @@ next:
         sequence++;
     }
 
-exit_error:
     close_socket(sockfd);
 //    emit icmpResponse("ICMP sending stopped.");
     emit finished(m_idx);
@@ -807,6 +808,7 @@ unsigned short IcmpWrapper::calculateChecksum(void *b, int len) {
 }
 
 void IcmpWrapper::current_time(const char *timestempformat) {
+    Q_UNUSED(timestempformat) // TODO: custom timestemp format
     time_t rawtime;
     struct tm *timeinfo;
     char buffer[80];
