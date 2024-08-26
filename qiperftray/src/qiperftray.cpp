@@ -1,4 +1,5 @@
 #include "qiperftray.h"
+#include "qiperftray.h"
 #include "ui_qiperftray.h"
 
 #include "comm.h"
@@ -23,12 +24,12 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     //  /c:/user/<xxx>/appdata/local/temp/qiperf/
     ui->setupUi(this);
     loadcfg();
-    //qiperfd log path
-    QString qiperfd =  QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-    m_qiperfdlog = qiperfd + QDir::separator() + QIPERF_NAME + QDir::separator() + QIPERFD_NAME + ".log";
-    m_dlgshowlog = new DlgShowLog(m_qiperfdlog);
+    //qiperfd log path, this will get wrong path if qiperfd is run under administrator => c:\windows\temp
+//    QString qiperfd =  QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+//    m_qiperfdlog = qiperfd + QDir::separator() + QIPERF_NAME + QDir::separator() + QIPERFD_NAME + ".log";
+    m_dlgshowlog = new DlgShowLog();
 
-    qDebug() << "m_qiperfdlog: " << m_qiperfdlog;
+//    qDebug() << "m_qiperfdlog: " << m_qiperfdlog;
 
     //TODO: get install path!! or exec path?
 
@@ -47,7 +48,7 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     QObject::connect(ui->pb_setMgrIfname, SIGNAL(clicked()), this, SLOT(onSetMgrIfname()));
     QObject::connect(ui->pb_getMgrIfname, SIGNAL(clicked()), this, SLOT(onGetMgrIfname()));
     onGetMgrIfname();
-
+    getQiperfdLogFile();
     initActions();
 
     statuser = new QTimer();
@@ -105,6 +106,11 @@ void QIperfTray::statusQiperfd()
     //get status of qiperfd, 0: stop , 1: running
 }
 
+void QIperfTray::getQiperfdLogFile()
+{
+    pclient->send_MessageToServer(CMD_GET_LOGFILENAME);
+}
+
 void QIperfTray::onNewMessage(const QString msg)
 {
     QJsonParseError error;
@@ -143,12 +149,16 @@ void QIperfTray::onNewMessage(const QString msg)
             if (ds.length()==2){
                 if (ds.value(0)==QIPERFDLOG){
                     m_dlgshowlog->appendNewLine(ds.value(1));
+                }else if (ds.value(0)==CMD_GET_LOGFILENAME){
+                    m_qiperfdlog = ds.value(1);
+                    qDebug() << "m_qiperfdlog: " << m_qiperfdlog;
+                    m_dlgshowlog->setLogFile(m_qiperfdlog);
                 }
             }else {
                 qDebug() << "onNewMessage: Unknown format :" << msg;
             }
         }else {
-            qDebug() << "onNewMessage: ERROR :" << error.errorString();
+            qDebug() << "onNewMessage: ERROR format of msg: ' " << msg << " '";
         }
     }
 }

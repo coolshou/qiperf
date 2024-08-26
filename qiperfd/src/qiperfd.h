@@ -86,6 +86,7 @@ private slots:
     void onNewClient(QHostAddress addr); //
 private:
     QString tmppath;
+    QString qiperfdlog;
     QString tmpfilepath;
     IperfWrapper *m_iperfwrapper;
     QSettings *cfg;

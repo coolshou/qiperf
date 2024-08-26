@@ -154,7 +154,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 #endif
 
     // system service manager
-    QString qiperfdlog = tmppath+QIPERFD_NAME+".log";
+    qiperfdlog = tmppath+QIPERFD_NAME+".log";
     qDebug() << "FileWatcher: " << qiperfdlog;
     m_filewatcher = new FileWatcher(qiperfdlog);
     connect(m_filewatcher, &FileWatcher::onNewLine, this, &QIperfd::onNewLine);
@@ -555,6 +555,11 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
     {
         qDebug() << "CMD_QIPERFD_RESTART: " << msg;
         restartQIperfd();
+    }
+    else if (QString::compare(msg, CMD_GET_LOGFILENAME, Qt::CaseInsensitive) == 0)
+    {
+        QString backmsg = QString(CMD_GET_LOGFILENAME)+"："+ qiperfdlog;
+        m_pserver->send_MessageBack(idx, backmsg);
     }
     else
     {

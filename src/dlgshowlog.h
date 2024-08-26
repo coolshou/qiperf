@@ -13,8 +13,9 @@ class DlgShowLog : public QDialog
     Q_OBJECT
 
 public:
-    explicit DlgShowLog(const QString &filePath,QWidget *parent = nullptr);
+    explicit DlgShowLog(const QString &filePath=nullptr,QWidget *parent = nullptr);
     ~DlgShowLog() override;
+    void setLogFile(const QString &filePath);
 
 public slots:
     void appendNewLine(QString line);

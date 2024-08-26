@@ -30,6 +30,7 @@ public:
     void stopQiperfd();
     void restartQiperfd();
     void statusQiperfd();
+    void getQiperfdLogFile();
 
 public slots:
     void onTrayIconActivated();

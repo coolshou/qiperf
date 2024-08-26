@@ -1,18 +1,16 @@
 #include "dlgshowlog.h"
 #include "ui_dlgshowlog.h"
 
+#include <QDebug>
+
 DlgShowLog::DlgShowLog(const QString &filePath, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DlgShowLog)
 {
     ui->setupUi(this);
-    // TODO: we do not have right to read /tmp/qiperf/ folder, require
     if (!filePath.isEmpty()){
-        m_filewatcher= new FileWatcher(filePath);
-        connect(m_filewatcher, &FileWatcher::onNewLine, this, &DlgShowLog::appendNewLine);
+        setLogFile(filePath);
     }
-
-    setWindowTitle(filePath);
     connect(ui->pbClear, &QPushButton::clicked, this, &DlgShowLog::onClear);
     connect(ui->pbClose, &QPushButton::clicked, this, &DlgShowLog::close);
 }
@@ -20,6 +18,18 @@ DlgShowLog::DlgShowLog(const QString &filePath, QWidget *parent) :
 DlgShowLog::~DlgShowLog()
 {
     delete ui;
+}
+
+void DlgShowLog::setLogFile(const QString &filePath)
+{
+    // TODO: we do not have right to read /tmp/qiperf/ folder, require
+    if (!filePath.isEmpty()){
+        m_filewatcher= new FileWatcher(filePath);
+        connect(m_filewatcher, &FileWatcher::onNewLine, this, &DlgShowLog::appendNewLine);
+        setWindowTitle(filePath);
+    }else{
+        qDebug() << "log file not specify:";
+    }
 }
 
 void DlgShowLog::changeEvent(QEvent *e)
