@@ -2,7 +2,6 @@
 
 #include <QCoreApplication>
 #include <QEventLoop>
-#include <QThread>
 #include <QAbstractSocket>
 
 #include "myfunc.h"
@@ -299,6 +298,7 @@ next:
         sequence++;
     }
 
+exit_error:
     close(sockfd);
 //    emit icmpResponse("ICMP sending stopped.");
     emit finished(m_idx);
@@ -852,43 +852,4 @@ void IcmpWrapper::current_time(const char *timestempformat) {
     printf("%s", buffer);
 }
 
-#ifdef _WIN32
 
-static void IcmpWrapper::init_winsock_lib(void)
-{
-    int error;
-    WSADATA wsa_data;
-
-    error = WSAStartup(MAKEWORD(2, 2), &wsa_data);
-    if (error != 0) {
-        fprintf(stderr, "Failed to initialize WinSock: %d\n", error);
-        exit(EXIT_FAILURE);
-    }
-}
-
-static void IcmpWrapper::init_winsock_extensions(socket_t sockfd)
-{
-    int error;
-    GUID recvmsg_id = WSAID_WSARECVMSG;
-    DWORD size;
-
-    /*
-     * Obtain a pointer to the WSARecvMsg (recvmsg) function.
-     */
-    error = WSAIoctl(sockfd,
-                     SIO_GET_EXTENSION_FUNCTION_POINTER,
-                     &recvmsg_id,
-                     sizeof(recvmsg_id),
-                     &WSARecvMsg,
-                     sizeof(WSARecvMsg),
-                     &size,
-                     NULL,
-                     NULL);
-    if (error == SOCKET_ERROR) {
-        psockerror("WSAIoctl");
-//        exit(EXIT_FAILURE);
-        return;
-    }
-}
-
-#endif /* _WIN32 */
