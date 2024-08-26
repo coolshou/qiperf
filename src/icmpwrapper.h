@@ -202,7 +202,35 @@ struct icmp {
     uint16_t icmp_id;
     uint16_t icmp_seq;
 };
-
+struct iphdr {
+    unsigned char ihl : 4;
+    unsigned char version : 4;
+    unsigned char tos;
+    unsigned short tot_len;
+    unsigned short id;
+    unsigned short frag_off;
+    unsigned char ttl;
+    unsigned char protocol;
+    unsigned short check;
+    unsigned int saddr;
+    unsigned int daddr;
+};
+struct icmphdr {
+    unsigned char type;
+    unsigned char code;
+    unsigned short checksum;
+    union {
+        struct {
+            unsigned short id;
+            unsigned short sequence;
+        } echo;
+        unsigned int gateway;
+        struct {
+            unsigned short __unused;
+            unsigned short mtu;
+        } frag;
+    } un;
+};
 #endif /* _WIN32 || __CYGWIN__ */
 
 struct ip6_pseudo_hdr {
