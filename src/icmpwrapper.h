@@ -16,9 +16,10 @@
 #include <getopt.h>
 
 #ifdef _WIN32
-//#ifndef _WIN32_WINNT
+#ifdef _WIN32_WINNT
+    #undef _WIN32_WINNT
+#endif
     #define _WIN32_WINNT 0x0601 /* for inet_XtoY functions on MinGW */
-//#endif
 
 #include <process.h>  /* _getpid() */
 #include <winsock2.h>
