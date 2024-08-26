@@ -12,40 +12,7 @@
 *  send ICMP packet requirt root/administrator right
 */
 
-#ifdef _WIN32
 
-/**
- * psockerror() is like perror() but for the Windows Sockets API.
- */
-static void psockerror(const char *s)
-{
-    char *message = NULL;
-    DWORD format_flags = FORMAT_MESSAGE_FROM_SYSTEM
-        | FORMAT_MESSAGE_IGNORE_INSERTS
-        | FORMAT_MESSAGE_ALLOCATE_BUFFER
-        | FORMAT_MESSAGE_MAX_WIDTH_MASK;
-    DWORD result;
-
-    result = FormatMessageA(format_flags,
-                            NULL,
-                            WSAGetLastError(),
-                            0,
-                            (char *)&message,
-                            0,
-                            NULL);
-    if (result > 0) {
-        fprintf(stderr, "%s: %s\n", s, message);
-        LocalFree(message);
-    } else {
-        fprintf(stderr, "%s: Unknown error\n", s);
-    }
-}
-
-#else /* _WIN32 */
-
-#define psockerror perror
-
-#endif /* !_WIN32 */
 
 /**
  * Returns a timestamp with microsecond resolution.

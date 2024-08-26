@@ -96,6 +96,41 @@ typedef struct cmsghdr cmsghdr_t;
 #define REQUEST_INTERVAL 1000000  //microsecond, us => 1sec
 
 #ifdef _WIN32
+
+/**
+ * psockerror() is like perror() but for the Windows Sockets API.
+ */
+static void psockerror(const char *s)
+{
+    char *message = NULL;
+    DWORD format_flags = FORMAT_MESSAGE_FROM_SYSTEM
+        | FORMAT_MESSAGE_IGNORE_INSERTS
+        | FORMAT_MESSAGE_ALLOCATE_BUFFER
+        | FORMAT_MESSAGE_MAX_WIDTH_MASK;
+    DWORD result;
+
+    result = FormatMessageA(format_flags,
+                            NULL,
+                            WSAGetLastError(),
+                            0,
+                            (char *)&message,
+                            0,
+                            NULL);
+    if (result > 0) {
+        fprintf(stderr, "%s: %s\n", s, message);
+        LocalFree(message);
+    } else {
+        fprintf(stderr, "%s: Unknown error\n", s);
+    }
+}
+
+#else /* _WIN32 */
+
+#define psockerror perror
+
+#endif /* !_WIN32 */
+
+#ifdef _WIN32
     #define socket(af, type, protocol) \
         WSASocketW(af, type, protocol, NULL, 0, 0)
     #define close_socket closesocket
