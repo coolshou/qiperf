@@ -157,8 +157,8 @@ public:
     void stop();
     void work();
 #ifdef _WIN32
-    static void init_winsock_lib(void)
-    static void init_winsock_extensions(socket_t sockfd)
+    static void init_winsock_lib(void);
+    static void init_winsock_extensions(socket_t sockfd);
 #endif
 
 public slots:
