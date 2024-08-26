@@ -179,7 +179,7 @@ void IcmpWrapper::work()
                        (struct sockaddr*)&dest_addr, sizeof(dest_addr));
         if (error <= 0) {
             emit errorResponse(QString("Failed to send packet: %1").arg(strerror(errno)));
-            close(sockfd);
+            close_socket(sockfd);
             emit finished(m_idx);
             return;
         }
@@ -266,7 +266,7 @@ next:
     }
 
 exit_error:
-    close(sockfd);
+    close_socket(sockfd);
 //    emit icmpResponse("ICMP sending stopped.");
     emit finished(m_idx);
 }
