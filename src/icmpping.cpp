@@ -1,10 +1,10 @@
 #include "icmpping.h"
 
-#if defined(Q_OS_WIN32)
-#include "winsock2.h"
-#include "iphlpapi.h"
-#include "icmpapi.h"
-#endif
+//#if defined(Q_OS_WIN32)
+//#include "winsock2.h"
+//#include "iphlpapi.h"
+//#include "icmpapi.h"
+//#endif
 
 #include <QJsonDocument>
 #include <QJsonObject>
