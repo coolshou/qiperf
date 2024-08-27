@@ -488,7 +488,7 @@ Function un.install_qiperfc
     ${EndIf}
     ${nsProcess::Unload}
     ; Remove an application from the firewall exception list
-    SimpleFC::RemoveApplication "$INSTDIR\${QIPER0FC_NAME}"
+    SimpleFC::RemoveApplication "$INSTDIR\${QIPERFC_NAME}"
     Pop $0 ; return error(1)/success(0)
 
 FunctionEnd
