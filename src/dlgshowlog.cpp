@@ -1,5 +1,6 @@
 #include "dlgshowlog.h"
 #include "ui_dlgshowlog.h"
+#include <QDir>
 
 #include <QDebug>
 
@@ -26,7 +27,7 @@ void DlgShowLog::setLogFile(const QString &filePath)
     if (!filePath.isEmpty()){
         m_filewatcher= new FileWatcher(filePath);
         connect(m_filewatcher, &FileWatcher::onNewLine, this, &DlgShowLog::appendNewLine);
-        setWindowTitle(filePath);
+        setWindowTitle(QDir::toNativeSeparators(filePath));
     }else{
         qDebug() << "log file not specify:";
     }
