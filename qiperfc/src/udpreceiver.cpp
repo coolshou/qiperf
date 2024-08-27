@@ -7,7 +7,10 @@ UdpReceiver::UdpReceiver(quint16 port, QObject *parent)
 {
     m_socket = new QUdpSocket(this);
     connect(m_socket, SIGNAL(readyRead()), this, SLOT(dataReceived()));
-    m_socket->bind(port, QUdpSocket::ShareAddress);
+    if (!m_socket->bind(port, QUdpSocket::ShareAddress)){
+        qDebug() << "QUdpSocket bind port: " << QString::number(port) << " Fail";
+    }
+
 }
 
 void UdpReceiver::dataReceived()
