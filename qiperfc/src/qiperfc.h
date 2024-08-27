@@ -134,6 +134,7 @@ private slots:
     void onEnableItem(bool checked);
     void onDisableItem(bool checked);
     void onAddPing();
+    void onError(QString msg);
 
 private:
     Ui::MainWindow *ui;

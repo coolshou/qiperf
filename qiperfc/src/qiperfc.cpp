@@ -77,6 +77,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     //
     m_receiver = new UdpReceiver(QIPERFD_BPORT,this);
     connect(m_receiver, &UdpReceiver::notice, this, &QIperfC::on_notice);
+    connect(m_receiver, &UdpReceiver::error, this, &QIperfC::onError);
 
     // control local qiperfd?
 //    pclient = new PipeClient(QIPERFD_NAME);
@@ -279,6 +280,11 @@ void QIperfC::onAddPing()
         qDebug() << "strJson:" << strJson;
         //TODO: add to ping treeview/chart
     }
+}
+
+void QIperfC::onError(QString msg)
+{
+    QMessageBox::warning(this, "ERROR", msg);
 }
 
 void QIperfC::onPairAdd()
