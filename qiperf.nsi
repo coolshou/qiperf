@@ -418,7 +418,7 @@ FunctionEnd
 
 Function install_qiperfd
     ; Add an application to the firewall exception list - All Networks - All IP Version - Enabled
-    SimpleFC::AddApplication "qiperfd" "$INSTDIR\${QIPERFD_NAME}" 0 2 "" 1
+    SimpleFC::AddApplication "qiperfd daemon" "$INSTDIR\${QIPERFD_NAME}" 0 2 "" 1
     Pop $0 ; return error(1)/success(0)
 
     # install qiperfd  service & start it
