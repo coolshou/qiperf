@@ -79,8 +79,10 @@ void UdpSrv::update_addr()
 //        qDebug() << "m_baddr:" << m_baddr.toString() << Qt::endl;
 //        if (!(socket->ConnectedState == QAbstractSocket::UnconnectedState)) {
             onLog("update_addr: m_addr:" + m_addr.toString());
-            socket->bind(m_addr); // now interface
+            socket->bind(m_addr, QUdpSocket::ShareAddress); // now interface
 //        }
+    }else{
+        qDebug() << "Did not find any address for interface: " << m_ifname;
     }
 }
 
