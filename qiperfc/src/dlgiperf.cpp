@@ -4,6 +4,7 @@
 
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonParseError>
 #include <QJsonArray>
 #include <QHostAddress>
 #include <QMessageBox>
@@ -113,39 +114,44 @@ QString DlgIperf::getJsonCfg()
 
 void DlgIperf::loadJsonCfg(QString jsoncfg)
 {
-    QJsonDocument doc=QJsonDocument::fromJson(jsoncfg.toUtf8());
-    QJsonObject mainObj = doc.object();
-    QJsonObject serverObj = mainObj["server"].toObject();
-    ui->cb_version->setCurrentText(serverObj["version"].toString());
-    ui->sb_port->setValue(serverObj["port"].toInt());
-    ui->cb_mserver_ip->setCurrentText(serverObj["manager"].toString());
-    if (!serverObj["bind"].toString().isEmpty()){
-        ui->chk_server_bind_ip->setChecked(true);
+    QJsonParseError error;
+    QJsonDocument doc=QJsonDocument::fromJson(jsoncfg.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError) {
+        QJsonObject mainObj = doc.object();
+        QJsonObject serverObj = mainObj["server"].toObject();
+        ui->cb_version->setCurrentText(serverObj["version"].toString());
+        ui->sb_port->setValue(serverObj["port"].toInt());
+        ui->cb_mserver_ip->setCurrentText(serverObj["manager"].toString());
+        if (!serverObj["bind"].toString().isEmpty()){
+            ui->chk_server_bind_ip->setChecked(true);
+        }
+        ui->cb_protocal->setCurrentText(serverObj["protocal"].toString());
+        ui->sb_parallel->setValue(serverObj["parallel"].toInt());
+        ui->chk_bidir->setChecked(serverObj["bidir"].toBool());
+        ui->sb_interval->setValue(serverObj["interval"].toInt());
+
+        ui->sb_delaytime->setValue(serverObj["delaytime"].toInt());
+
+        QJsonObject clientObj = mainObj["client"].toObject();
+        ui->cb_mclient_ip->setCurrentText(clientObj["manager"].toString());
+        ui->cb_client_bind_ip->setCurrentText(clientObj["bind"].toString());
+        ui->cb_target_ip->setCurrentText(clientObj["target"].toString());
+        ui->sb_duration->setValue(clientObj["duration"].toInt());
+        ui->sb_omit->setValue(clientObj["omit"].toInt());
+        ui->sb_bitrate->setValue(clientObj["bitrate"].toInt());
+        ui->cb_unit_bitrate->setCurrentText(clientObj["unit_bitrate"].toString());
+        ui->sb_windowsize->setValue(clientObj["windowsize"].toInt());
+        ui->cb_unit_windowsize->setCurrentText(clientObj["unit_windowsize"].toString());
+        ui->sb_buffer->setValue(clientObj["buffer"].toInt());
+        ui->cb_unit_buffer->setCurrentText(clientObj["unit_buffer"].toString());
+        ui->sb_dscp->setValue(clientObj["dscp"].toInt());
+        ui->sb_tos->setValue(clientObj["tos"].toInt());
+        ui->sb_mss->setValue(clientObj["mss"].toInt());
+        ui->cb_fmtreport->setCurrentText(clientObj["fmtreport"].toString());
+        ui->chk_reverse->setChecked(clientObj["reverse"].toBool());
+    }else{
+        qDebug() << "Wrong format of loadJsonCfg:(" << error.errorString() << ")\n" << jsoncfg;
     }
-    ui->cb_protocal->setCurrentText(serverObj["protocal"].toString());
-    ui->sb_parallel->setValue(serverObj["parallel"].toInt());
-    ui->chk_bidir->setChecked(serverObj["bidir"].toBool());
-    ui->sb_interval->setValue(serverObj["interval"].toInt());
-
-    ui->sb_delaytime->setValue(serverObj["delaytime"].toInt());
-
-    QJsonObject clientObj = mainObj["client"].toObject();
-    ui->cb_mclient_ip->setCurrentText(clientObj["manager"].toString());
-    ui->cb_client_bind_ip->setCurrentText(clientObj["bind"].toString());
-    ui->cb_target_ip->setCurrentText(clientObj["target"].toString());
-    ui->sb_duration->setValue(clientObj["duration"].toInt());
-    ui->sb_omit->setValue(clientObj["omit"].toInt());
-    ui->sb_bitrate->setValue(clientObj["bitrate"].toInt());
-    ui->cb_unit_bitrate->setCurrentText(clientObj["unit_bitrate"].toString());
-    ui->sb_windowsize->setValue(clientObj["windowsize"].toInt());
-    ui->cb_unit_windowsize->setCurrentText(clientObj["unit_windowsize"].toString());
-    ui->sb_buffer->setValue(clientObj["buffer"].toInt());
-    ui->cb_unit_buffer->setCurrentText(clientObj["unit_buffer"].toString());
-    ui->sb_dscp->setValue(clientObj["dscp"].toInt());
-    ui->sb_tos->setValue(clientObj["tos"].toInt());
-    ui->sb_mss->setValue(clientObj["mss"].toInt());
-    ui->cb_fmtreport->setCurrentText(clientObj["fmtreport"].toString());
-    ui->chk_reverse->setChecked(clientObj["reverse"].toBool());
 
 }
 
@@ -163,34 +169,43 @@ bool DlgIperf::add(QString mgr, QString mdata)
 {
     if (add(mgr)){
         QStringList ds;
-        QJsonDocument doc=QJsonDocument::fromJson(mdata.toUtf8());
-        QJsonObject obj = doc.object();
-        QJsonObject data;
-        QJsonArray addrs;
-        QString mif = obj["Manager"].toString();
-        if (obj.contains("Net")){
-            QJsonObject net = obj["Net"].toObject();
-            foreach(const QString& key, net.keys()) {
-                if (key != mif){
-                    data = net.value(key).toObject();
-                    if (data.contains("address")) {
-                        addrs= data.value("address").toArray();
-                        if (!addrs.empty()){
-                            foreach(auto addr, addrs){
-                                if (addr.isArray()){
-                                    ds.append(addr[0].toString());
+        QJsonParseError error;
+        QJsonDocument doc=QJsonDocument::fromJson(mdata.toUtf8(), &error);
+        if (error.error == QJsonParseError::NoError) {
+            QJsonObject obj = doc.object();
+            QJsonObject data;
+            QJsonArray addrs;
+            QString mif = obj["Manager"].toString();
+            if (obj.contains("Net")){
+                QJsonObject net = obj["Net"].toObject();
+                foreach(const QString& key, net.keys()) {
+                    if (key != mif){
+                        data = net.value(key).toObject();
+                        if (data.contains("address")) {
+                            addrs= data.value("address").toArray();
+                            if (!addrs.empty()){
+                                foreach(auto addr, addrs){
+                                    if (addr.isArray()){
+                                        ds.append(addr[0].toString());
+                                    }
+                                    QCoreApplication::processEvents(QEventLoop::AllEvents);
                                 }
-                                QCoreApplication::processEvents(QEventLoop::AllEvents);
                             }
                         }
                     }
+                    QCoreApplication::processEvents(QEventLoop::AllEvents);
                 }
-                QCoreApplication::processEvents(QEventLoop::AllEvents);
             }
+        }else{
+            qDebug() << "Wrong format of add:(" << error.errorString() << ")\n" << mdata;
         }
-        ds.sort(Qt::CaseInsensitive);
-        m_ips.insert(mgr, ds);
-        return true;
+        if (ds.length()>0){
+            ds.sort(Qt::CaseInsensitive);
+            m_ips.insert(mgr, ds);
+            return true;
+        }else{
+            return false;
+        }
     }
     return false;
 }

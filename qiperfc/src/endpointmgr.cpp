@@ -1,6 +1,7 @@
 #include "endpointmgr.h"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonParseError>
 #include <QJsonArray>
 #include <QDateTime>
 #include <QCoreApplication>
@@ -171,21 +172,26 @@ bool EndPointMgr::add(QString id, QString data)
 
     //check id exist
     if (isExist(id)){
-        QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
-        QJsonObject jsonObject = doc.object();
-//        bool update = jsonObject["update"].toBool();
-        //TODO: update information of endpoint
-        EndPoint* ep = getEndPoint(id);
-//        if (update){
-//            qDebug() << "TODO update EndPointMgr::add: Exist(" << id << ") " << Qt::endl;
-            //TODO: do data update!
-            ep->loadData(data);
-            ep->updateTimeStemp();
-            //TODO: update UI value from endpoint
-            //QModelIndex midx = indexFromItem(ep);
-            //qDebug() << "update midx: " << midx << " ep:" << ep;
-//            m_endpoints[id]
-//        }
+        QJsonParseError error;
+        QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8(), &error);
+        if (error.error == QJsonParseError::NoError) {
+            QJsonObject jsonObject = doc.object();
+    //        bool update = jsonObject["update"].toBool();
+            //TODO: update information of endpoint
+            EndPoint* ep = getEndPoint(id);
+    //        if (update){
+    //            qDebug() << "TODO update EndPointMgr::add: Exist(" << id << ") " << Qt::endl;
+                //TODO: do data update!
+                ep->loadData(data);
+                ep->updateTimeStemp();
+                //TODO: update UI value from endpoint
+                //QModelIndex midx = indexFromItem(ep);
+                //qDebug() << "update midx: " << midx << " ep:" << ep;
+    //            m_endpoints[id]
+    //        }
+        }else{
+            qDebug() << "wrong format (" << error.errorString() << "\n" << data;
+        }
         return false;
     } else {
         //new endpoint

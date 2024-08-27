@@ -66,23 +66,27 @@ void EndPoint::loadData(QString data)
 //    QList<EndPoint *> parents;
 //    qDebug() << "loadData:" << m_parentItem << Qt::endl;
     //TODO: parser data
-    QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
+    QJsonParseError error;
+    QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8(), &error);
     QJsonObject jsonRoot = doc.object();
-    m_type = static_cast<EndPointType::Type>(jsonRoot["Type"].toInt());
-    EndPointType *ept = new EndPointType();
-    QString sType = ept->getTypeString(m_type);
-    m_Manager = jsonRoot["Manager"].toString();
-//    bool update = jsonRoot["update"].toBool();
-    OS_name = jsonRoot["OS"].toString();
-    OS_version = jsonRoot["OSVer"].toString();
-    m_itemDatas << m_id << m_Manager << sType << OS_name << OS_version;
-    //    parents.last()->appendChild(new EndPoint(m_id, data, parents.last()));
-    //TODO: get address of each interface....
-    if (!jsonRoot["Net"].isNull()){
-        oNet = jsonRoot["Net"].toObject();
-//        qDebug() << "TODO: oNet:" << oNet << Qt::endl;
+    if (error.error == QJsonParseError::NoError){
+        m_type = static_cast<EndPointType::Type>(jsonRoot["Type"].toInt());
+        EndPointType *ept = new EndPointType();
+        QString sType = ept->getTypeString(m_type);
+        m_Manager = jsonRoot["Manager"].toString();
+    //    bool update = jsonRoot["update"].toBool();
+        OS_name = jsonRoot["OS"].toString();
+        OS_version = jsonRoot["OSVer"].toString();
+        m_itemDatas << m_id << m_Manager << sType << OS_name << OS_version;
+        //    parents.last()->appendChild(new EndPoint(m_id, data, parents.last()));
+        //TODO: get address of each interface....
+        if (!jsonRoot["Net"].isNull()){
+            oNet = jsonRoot["Net"].toObject();
+    //        qDebug() << "TODO: oNet:" << oNet << Qt::endl;
+        }
+    }else{
+        qDebug() << "EndPoint::loadData wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
     }
-
 }
 
 QString EndPoint::getJsonData()

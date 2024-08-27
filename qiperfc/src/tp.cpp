@@ -1,5 +1,6 @@
 #include "tp.h"
 #include <QJsonDocument>
+#include <QJsonParseError>
 #include <QPixmap>
 #include <QVariant>
 
@@ -129,41 +130,45 @@ QString TP::getID()
 
 void TP::loadData(QString data)
 {
-    QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8());
-    QJsonObject jsonRoot = doc.object();
-    m_enabled = jsonRoot["enabled"].toBool();
-    QJsonObject o_client = jsonRoot["client"].toObject();
-    m_version = o_client["version"].toInt();
-    QString client = o_client["bind"].toString();
-    m_mgrclient = o_client["manager"].toString();
-    m_port = o_client["port"].toInt();
-    m_duration = o_client["duration"].toInt();
-    m_omit = o_client["omit"].toInt();
-    m_delaytime = o_client["delaytime"].toInt();
-//    QString m_mclient = o_client["manager"].toString();
-    QString direction = QVariant::fromValue(DirType::Tx).toString();
-    if (o_client["bidir"].toBool()){
-        direction=QVariant::fromValue(DirType::TR).toString();
+    QJsonParseError error;
+    QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError){
+        QJsonObject jsonRoot = doc.object();
+        m_enabled = jsonRoot["enabled"].toBool();
+        QJsonObject o_client = jsonRoot["client"].toObject();
+        m_version = o_client["version"].toInt();
+        QString client = o_client["bind"].toString();
+        m_mgrclient = o_client["manager"].toString();
+        m_port = o_client["port"].toInt();
+        m_duration = o_client["duration"].toInt();
+        m_omit = o_client["omit"].toInt();
+        m_delaytime = o_client["delaytime"].toInt();
+    //    QString m_mclient = o_client["manager"].toString();
+        QString direction = QVariant::fromValue(DirType::Tx).toString();
+        if (o_client["bidir"].toBool()){
+            direction=QVariant::fromValue(DirType::TR).toString();
+        }
+        if (o_client["reverse"].toBool()){
+            direction=QVariant::fromValue(DirType::Rx).toString();
+        }
+
+        QJsonObject o_server = jsonRoot["server"].toObject();
+        QString server = o_client["target"].toString();
+        m_mgrserver = o_server["manager"].toString();
+
+        //m_itemDatas.clear();// this will remove all data => m_itemDatas.length()=0
+        m_itemDatas.replace(int(TP::cols::id) , m_id);
+        m_itemDatas.replace(int(TP::cols::server), server);
+        m_itemDatas.replace(int(TP::cols::dir), direction);
+        m_itemDatas.replace(int(TP::cols::client), client);
+        m_itemDatas.replace(int(TP::cols::throughput), "");
+        m_itemDatas.replace(int(TP::cols::mintp), "");
+        m_itemDatas.replace(int(TP::cols::maxtp), "");
+        m_itemDatas.replace(int(TP::cols::lostrate), "");
+        m_itemDatas.replace(int(TP::cols::comment), "");
+    }else{
+        qDebug() << "TP::loadData wrong format (" << error.errorString() << "\n" << data;
     }
-    if (o_client["reverse"].toBool()){
-        direction=QVariant::fromValue(DirType::Rx).toString();
-    }
-
-    QJsonObject o_server = jsonRoot["server"].toObject();
-    QString server = o_client["target"].toString();
-    m_mgrserver = o_server["manager"].toString();
-
-    //m_itemDatas.clear();// this will remove all data => m_itemDatas.length()=0
-    m_itemDatas.replace(int(TP::cols::id) , m_id);
-    m_itemDatas.replace(int(TP::cols::server), server);
-    m_itemDatas.replace(int(TP::cols::dir), direction);
-    m_itemDatas.replace(int(TP::cols::client), client);
-    m_itemDatas.replace(int(TP::cols::throughput), "");
-    m_itemDatas.replace(int(TP::cols::mintp), "");
-    m_itemDatas.replace(int(TP::cols::maxtp), "");
-    m_itemDatas.replace(int(TP::cols::lostrate), "");
-    m_itemDatas.replace(int(TP::cols::comment), "");
-
     m_jsondata = data;
 }
 
@@ -198,14 +203,21 @@ void TP::setServer(QString addr)
 
 QString TP::getServerArgs()
 {
-    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8());
-    QJsonObject jsonRoot = fulldoc.object();
+    QJsonParseError error;
+    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError){
+        QJsonObject jsonRoot = fulldoc.object();
 
-    QJsonObject o_server = jsonRoot["server"].toObject();
-    o_server["server"]=true;
-    QJsonDocument doc(o_server);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-    return strJson;
+        QJsonObject o_server = jsonRoot["server"].toObject();
+        o_server["server"]=true;
+
+        QJsonDocument doc(o_server);
+        QString strJson(doc.toJson(QJsonDocument::Compact));
+        return strJson;
+    }else{
+        qDebug() << "getServerArgs wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+        return "";
+    }
 }
 
 QString TP::getBindKey(bool smode)
@@ -231,14 +243,20 @@ void TP::setClient(QString addr)
 
 QString TP::getClientArgs()
 {
-    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8());
-    QJsonObject jsonRoot = fulldoc.object();
+    QJsonParseError error;
+    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError){
+        QJsonObject jsonRoot = fulldoc.object();
 
-    QJsonObject o_client = jsonRoot["client"].toObject();
-    o_client["server"]=false;
-    QJsonDocument doc(o_client);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-    return strJson;
+        QJsonObject o_client = jsonRoot["client"].toObject();
+        o_client["server"]=false;
+        QJsonDocument doc(o_client);
+        QString strJson(doc.toJson(QJsonDocument::Compact));
+        return strJson;
+    }else{
+        qDebug() << "getClientArgs wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+        return "";
+    }
 }
 
 QString TP::getDirection()
@@ -268,24 +286,28 @@ void TP::setMgrClient(QString addr)
 
 void TP::swapServerClient(QString mgrServer, QString server, QString mgrClient, QString client)
 {   //update server/client ip address in json
-
-    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8());
-    QJsonObject jsonRoot = doc.object();
-    QJsonObject o_server = jsonRoot["server"].toObject();
-    o_server["manager"] = mgrServer;
-    setMgrServer(mgrServer);
-    o_server["bind"] = server;
-    setServer(server);
-    jsonRoot["server"] = o_server;
-    QJsonObject o_client = jsonRoot["client"].toObject();
-    o_client["manager"] = mgrClient;
-    setMgrClient(mgrClient);
-    o_client["bind"] = client;
-    o_client["target"] = server;
-    setClient(client);
-    jsonRoot["client"] = o_client;
-    doc.setObject(jsonRoot);
-    m_jsondata =doc.toJson(QJsonDocument::Compact);
+    QJsonParseError error;
+    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError){
+        QJsonObject jsonRoot = doc.object();
+        QJsonObject o_server = jsonRoot["server"].toObject();
+        o_server["manager"] = mgrServer;
+        setMgrServer(mgrServer);
+        o_server["bind"] = server;
+        setServer(server);
+        jsonRoot["server"] = o_server;
+        QJsonObject o_client = jsonRoot["client"].toObject();
+        o_client["manager"] = mgrClient;
+        setMgrClient(mgrClient);
+        o_client["bind"] = client;
+        o_client["target"] = server;
+        setClient(client);
+        jsonRoot["client"] = o_client;
+        doc.setObject(jsonRoot);
+        m_jsondata =doc.toJson(QJsonDocument::Compact);
+    }else{
+        qDebug() << "swapServerClient wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+    }
 }
 
 QString TP::getThroughput()
@@ -307,29 +329,34 @@ int TP::getDelaytime()
 int TP::setDirection(DirType direction)
 {
     QString sdirection = QVariant::fromValue(direction).toString();
+    QJsonParseError error;
+    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError){
+        QJsonObject jsonRoot = doc.object();
+        QJsonObject o_client = jsonRoot["client"].toObject();
+        if (direction == DirType::Tx){
+            o_client["bidir"]=false;
+            o_client["reverse"]=false;
+        }else if (direction == DirType::Rx){
+            o_client["bidir"]=false;
+            o_client["reverse"]=true;
+        }else if (direction == DirType::TR){
+            o_client["bidir"]=true;
+            o_client["reverse"]=false;
+        }else {
+            o_client["bidir"]=true;
+            o_client["reverse"]=true;
+        }
+        jsonRoot["client"]=o_client;
+        doc.setObject(jsonRoot);
+        m_jsondata =doc.toJson(QJsonDocument::Compact);
+        setData(TP::cols::dir, sdirection);
 
-    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8());
-    QJsonObject jsonRoot = doc.object();
-    QJsonObject o_client = jsonRoot["client"].toObject();
-    if (direction == DirType::Tx){
-        o_client["bidir"]=false;
-        o_client["reverse"]=false;
-    }else if (direction == DirType::Rx){
-        o_client["bidir"]=false;
-        o_client["reverse"]=true;
-    }else if (direction == DirType::TR){
-        o_client["bidir"]=true;
-        o_client["reverse"]=false;
-    }else {
-        o_client["bidir"]=true;
-        o_client["reverse"]=true;
+        return 0;
+    }else{
+        qDebug() << "setDirection wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+        return 1;
     }
-    jsonRoot["client"]=o_client;
-    doc.setObject(jsonRoot);
-    m_jsondata =doc.toJson(QJsonDocument::Compact);
-    setData(TP::cols::dir, sdirection);
-
-    return 0;
 }
 
 int TP::setDirection(QString direction)
@@ -515,19 +542,24 @@ bool TP::getEnabled()
     return m_enabled;
 }
 void TP::updateJson(QString key, QVariant value){
-    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8());
-    QJsonObject jsonRoot = doc.object();
-    if (value.canConvert<bool>()){
-        jsonRoot[key] = value.toBool();
-    }else if (value.canConvert<QString>()) {
-        jsonRoot[key] = value.toString();
-    }else if (value.canConvert<int>()) {
-        jsonRoot[key] = value.toInt();
-    }else {
-        qDebug() << "not support type of value: " << value << " type: "<< value.typeName();
+    QJsonParseError error;
+    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError){
+        QJsonObject jsonRoot = doc.object();
+        if (value.canConvert<bool>()){
+            jsonRoot[key] = value.toBool();
+        }else if (value.canConvert<QString>()) {
+            jsonRoot[key] = value.toString();
+        }else if (value.canConvert<int>()) {
+            jsonRoot[key] = value.toInt();
+        }else {
+            qDebug() << "not support type of value: " << value << " type: "<< value.typeName();
+        }
+        doc.setObject(jsonRoot);
+    //    qDebug() << "updateJson:jsonRoot" << jsonRoot;
+        m_jsondata =doc.toJson(QJsonDocument::Compact);
+    //    qDebug() << "updateJson:m_jsondata:" << m_jsondata;
+    }else{
+        qDebug() << "updateJson wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
     }
-    doc.setObject(jsonRoot);
-//    qDebug() << "updateJson:jsonRoot" << jsonRoot;
-    m_jsondata =doc.toJson(QJsonDocument::Compact);
-//    qDebug() << "updateJson:m_jsondata:" << m_jsondata;
 }
