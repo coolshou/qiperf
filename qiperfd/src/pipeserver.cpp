@@ -94,9 +94,9 @@ void PipeServer::sendMessage(QString message)
     // TODO: current only send message bake to first m_locals
     if (m_locals->count()>0){
         send_MessageBack(0, message);
-    }else {
+    }/*else {
         qDebug() << "sendMessage: NO m_locals";
-    }
+    }*/
 }
 
 void PipeServer::socket_new_connection()
