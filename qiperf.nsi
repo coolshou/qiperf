@@ -183,6 +183,8 @@ Section "qiperf daemon" SECTION_Daemon
         CreateShortCut "$SMPROGRAMS\qiperf\Uninstall.lnk" "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
 
         WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode" "0"
+        # set QIPERFTRAY_NAME run on system boot
+        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "${QIPERFTRAY_NAME}" '"$INSTDIR\${QIPERFTRAY_NAME}"'
 
         Call install_qiperfd
 SectionEnd
@@ -415,12 +417,17 @@ init.done:
 FunctionEnd
 
 Function install_qiperfd
-  # install qiperfd  service & start it
-   Exec '"$INSTDIR\nssm.exe" install "qiperfd" "$INSTDIR\${QIPERFD_NAME}"'
-   Exec '"$INSTDIR\nssm.exe" start "qiperfd" '
+    ; Add an application to the firewall exception list - All Networks - All IP Version - Enabled
+    SimpleFC::AddApplication "qiperfd" "$INSTDIR\${QIPERFD_NAME}" 0 2 "" 1
+    Pop $0 ; return error(1)/success(0)
+
+    # install qiperfd  service & start it
+    Exec '"$INSTDIR\nssm.exe" install "qiperfd" "$INSTDIR\${QIPERFD_NAME}"'
+    Exec '"$INSTDIR\nssm.exe" start "qiperfd" '
 FunctionEnd
 
 Function un.install_qiperfd
+
     # uninstall qiperfd  service
     Exec '"$INSTDIR\nssm.exe" stop "qiperfd" '
     Exec '"$INSTDIR\nssm.exe" remove "qiperfd" confirm'
@@ -457,6 +464,15 @@ Function un.install_qiperfd
         DetailPrint "${SERVICE_WRAPPER} was not found to be running"
     ${EndIf}
     ${nsProcess::Unload}
+
+    !ifdef WIN64
+            SetRegView 64
+    !endif
+    ; Remove startup run
+    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Run\${QIPERFTRAY_NAME}"
+    ; Remove an application from the firewall exception list
+    SimpleFC::RemoveApplication "$INSTDIR\${QIPERFD_NAME}"
+    Pop $0 ; return error(1)/success(0)
 
 FunctionEnd
 
