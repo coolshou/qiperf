@@ -7,7 +7,6 @@
 #include <signal.h>
 #include <QFileInfo>
 #include <QJsonValue>
-#include <QJsonDocument>
 #include <QJsonObject>
 #include <QDir>
 #include <QDateTime>
