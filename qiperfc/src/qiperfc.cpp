@@ -179,9 +179,9 @@ void QIperfC::onNew()
     if (m_tpmgr->rootChildCount()>0) {
         //this will clear all item include root!!
         m_tpmgr->reset();
-    }else{
+    }/*else{
         qDebug() << "onNew rootChildCount No child";
-    }
+    }*/
 }
 
 void QIperfC::onOpen()
@@ -689,6 +689,7 @@ void QIperfC::on_notice(QString send_addr, QString msg)
                         if (dlgiperf->add(send_addr, msg)){
                             dlgiperf->updateUI();
                         }
+                        // TODO: ping dialog
                     }
                     emit updateEndpointNum(m_endpointmgr->getTotalEndpoints());
                 }
