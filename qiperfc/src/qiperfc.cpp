@@ -88,6 +88,13 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 
     dp = new DlgPing(this);
     m_dlgshowlog=new DlgShowLog(logpath+QIPERFC_NAME+".log");
+    connect(this, &QIperfC::closeAll, m_dlgshowlog, &DlgShowLog::close);
+//    connect(this, &QIperfC::closeAll, dp, &DlgPing::close); // model mode, no need
+    connect(this, &QIperfC::closeAll, m_dlgrecord, &DlgRecord::close);
+//    connect(this, &QIperfC::closeAll, dlgiperf, &DlgIperf::close);// model mode, no need
+    connect(this, &QIperfC::closeAll, m_frm_qiperfds, &FormQIperfds::close);
+//    connect(this, &QIperfC::closeAll, m_frm_option, &dlgOption::close);// model mode, no need
+    connect(this, &QIperfC::closeAll, m_dlgtest, &DlgTest::close);
 }
 
 QIperfC::~QIperfC()
@@ -753,6 +760,7 @@ void QIperfC::closeEvent(QCloseEvent *event)
     Q_UNUSED(event);
 
     saveSettings();
+    emit closeAll();
 }
 
 bool QIperfC::eventFilter(QObject *obj, QEvent *event)

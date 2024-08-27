@@ -96,6 +96,7 @@ signals:
     void errorStop(int err, QString msg); // signal when test error
     void testStarted(); // signal when test started
     void testStoped(int err); // signal when test stoped, 0: no error
+    void closeAll(); // send signal to close all dialog
 
 protected:
     void closeEvent(QCloseEvent *event)override;
