@@ -178,6 +178,8 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="actionAbout"/>
+    <addaction name="separator"/>
+    <addaction name="actionShowDebugLog"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -496,6 +498,11 @@
    </property>
    <property name="toolTip">
     <string>Add Ping</string>
+   </property>
+  </action>
+  <action name="actionShowDebugLog">
+   <property name="text">
+    <string>Debug log</string>
    </property>
   </action>
  </widget>

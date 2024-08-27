@@ -17,8 +17,8 @@
    <string>Log viewer</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>../../images/logfile.png</normaloff>../../images/logfile.png</iconset>
+   <iconset resource="../qiperf.qrc">
+    <normaloff>:/logfile</normaloff>:/logfile</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -108,6 +108,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../qiperf.qrc"/>
+ </resources>
  <connections/>
 </ui>

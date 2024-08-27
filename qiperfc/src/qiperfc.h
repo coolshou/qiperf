@@ -14,7 +14,7 @@
 #include <QMenu>
 
 #include "comm.h"
-#include "pipeclient.h"
+//#include "pipeclient.h"
 #include "dlgiperf.h"
 #include "udpreceiver.h"
 //#include "tpchart.h"
@@ -33,6 +33,7 @@
 #include "fileserver.h"
 #include "dlgping.h"
 #include "pingplot.h"
+#include "dlgshowlog.h"
 
 #include "../src/icmpping.h"
 #if (TEST_WS==1)
@@ -80,6 +81,7 @@ public slots:
     void onPaste();
     void onDelete();
     void onAbout();
+    void onShowDebugLog();
     void aboutQCustomPlot();
     void onErrorStop(int err, QString msg);
     void on_notice(QString send_addr, QString msg);
@@ -146,7 +148,7 @@ private:
     QSettings *m_settings;
     bool m_testping;
     DlgIperf * dlgiperf;  // dialog of iperf config
-    PipeClient *pclient;
+//    PipeClient *pclient;
 #if (TEST_WS==1)
     QMap<QString, WSClient *> m_wss; // websocket client list for manager iperf server
     QMap<QString, WSClient *> m_wsc; // websocket client list for manager iperf client
@@ -178,6 +180,7 @@ private:
     FileServer *m_fileserver;
     QString m_oldsavepath=nullptr;
 
+    DlgShowLog *m_dlgshowlog;
     //TEST icmp
     IcmpPing *m_icmpping;
     DlgPing *dp;

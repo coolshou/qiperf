@@ -79,14 +79,15 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_receiver, &UdpReceiver::notice, this, &QIperfC::on_notice);
 
     // control local qiperfd?
-    pclient = new PipeClient(QIPERFD_NAME);
-    connect(pclient, SIGNAL(newMessage(QString)), this, SLOT(onNewMessage(QString)));
-    pclient->SetAppHandle(qApp);
+//    pclient = new PipeClient(QIPERFD_NAME);
+//    connect(pclient, SIGNAL(newMessage(QString)), this, SLOT(onNewMessage(QString)));
+//    pclient->SetAppHandle(qApp);
 
     m_dlgrecord = new DlgRecord(this);
     m_fileserver = new FileServer(QIPERF_FILEPORT);
 
     dp = new DlgPing(this);
+    m_dlgshowlog=new DlgShowLog(logpath+QIPERFC_NAME+".log");
 }
 
 QIperfC::~QIperfC()
@@ -644,7 +645,12 @@ void QIperfC::onAbout()
     QMessageBox::about(this, "About", QString(QIPERFC_NAME)+
                        " v"+QString(QIPERFC_VERSION)+"\n"
                        "Auther: Jimmy Yeh\n"
-                       "URL: https://github.com/coolshou/qiperf");
+                                                     "URL: https://github.com/coolshou/qiperf");
+}
+
+void QIperfC::onShowDebugLog()
+{
+    m_dlgshowlog->exec();
 }
 
 void QIperfC::aboutQCustomPlot()
@@ -667,10 +673,11 @@ void QIperfC::onErrorStop(int err, QString msg)
 void QIperfC::on_notice(QString send_addr, QString msg)
 {
     //receive qiperfd notices
-    QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8());
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError){
     // check validity of the document
-    if(!doc.isNull())
-    {
+//    if(!doc.isNull()) {
         QJsonObject obj = doc.object();
         int act = obj["ACT"].toInt();
         switch (act){
@@ -697,7 +704,7 @@ void QIperfC::on_notice(QString send_addr, QString msg)
                 break;
         }
     } else {
-        qDebug() << "TODO on_notice invalid message: from(" << send_addr << ") " << msg << Qt::endl;
+        qDebug() << "TODO on_notice invalid message: from(" << send_addr << ") " << msg;
     }
 }
 
@@ -1110,6 +1117,8 @@ void QIperfC::initActions()
 
     //help
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
+    connect(ui->actionShowDebugLog, SIGNAL(triggered()), this, SLOT(onShowDebugLog()));
+
     //test
     connect(ui->actionTest, SIGNAL(triggered()), this, SLOT(onTest()));
 

@@ -14,7 +14,7 @@
    <string>QIperfd Tray</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../../../../../../mnt/data/download/work/qiperf/qiperf.qrc">
+   <iconset resource="../../qiperf.qrc">
     <normaloff>:/qiperf</normaloff>:/qiperf</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -54,6 +54,7 @@
       <property name="font">
        <font>
         <pointsize>18</pointsize>
+        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
@@ -74,7 +75,7 @@
      <x>0</x>
      <y>0</y>
      <width>528</width>
-     <height>23</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
@@ -120,7 +121,7 @@
   </action>
  </widget>
  <resources>
-  <include location="../../../../../../../mnt/data/download/work/qiperf/qiperf.qrc"/>
+  <include location="../../qiperf.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -44,6 +44,8 @@ INCLUDEPATH += \
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../src/dlgshowlog.cpp \
+    ../src/filewatcher.cpp \
     ../src/pipeclient.cpp \
     ../src/endpoint.cpp \
     ../src/endpointtype.cpp \
@@ -82,6 +84,8 @@ SOURCES += \
     # ../qiperfd/src/wsserver.cpp \
 
 HEADERS += \
+    ../src/dlgshowlog.h \
+    ../src/filewatcher.h \
     ../src/pipeclient.h \
     ../src/comm.h \
     ../src/endpoint.h \
@@ -122,6 +126,7 @@ HEADERS += \
     # ../qiperfd/src/wsserver.h \
 
 FORMS += \
+    ../src/dlgshowlog.ui \
     src/dlgiperf.ui \
     src/dlgoption.ui \
     src/dlgping.ui \
