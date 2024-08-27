@@ -52,9 +52,16 @@ int main(int argc, char *argv[])
     QDir dir(logfilePath);
     if (!dir.exists())
         dir.mkpath(".");
-    QString logfile = logfilePath + "qiperfc.log";
+    QString logfile = logfilePath + QIPERFC_NAME + ".log";
     qDebug() << "logfile:  " << logfile;
-    // TODO: check log file exist, backup it
+    if (QFile::exists(logfile)){
+        // check log file exist, backup it
+        QFileInfo finfo(logfile);
+        QDateTime oldtime =  finfo.fileTime(QFileDevice::FileModificationTime);
+        qDebug() << "logfile ModificationTime: "  << oldtime;
+        QString baklogfile =  logfilePath + QIPERFC_NAME + "_" + oldtime.toString("yyyy-MM-dd_hhmmss.zzz")+ ".log";
+        QFile::rename(logfile, baklogfile);
+    }
 
     qInstallMessageHandler(myMessageOutput);
     QApplication app(argc, argv);
