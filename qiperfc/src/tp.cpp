@@ -99,7 +99,7 @@ int TP::setData(int column, QVariant var)
 
 TP *TP::parentItem()
 {
-        return m_parentItem;
+    return m_parentItem;
 }
 
 bool TP::removeChildren(int position, int count)

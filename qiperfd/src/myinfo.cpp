@@ -692,7 +692,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
         hr = pClsObj->Get(L"Manufacturer", 0, &vtProp, 0, 0);
         if (SUCCEEDED(hr) && vtProp.vt == VT_BSTR) {
             vendor = QString::fromWCharArray(vtProp.bstrVal);
-            qDebug() << "Motherboard Manufacturer:" << vendor;
+            qInfo() << "Motherboard Manufacturer:" << vendor;
         }
         VariantClear(&vtProp);
 
@@ -700,7 +700,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
         hr = pClsObj->Get(L"Product", 0, &vtProp, 0, 0);
         if (SUCCEEDED(hr) && vtProp.vt == VT_BSTR) {
             model = QString::fromWCharArray(vtProp.bstrVal);
-            qDebug() << "Motherboard Model:" << model;
+            qInfo() << "Motherboard Model:" << model;
         }
         VariantClear(&vtProp);
 
@@ -708,7 +708,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
         hr = pClsObj->Get(L"SerialNumber", 0, &vtProp, 0, 0);
         if (SUCCEEDED(hr) && vtProp.vt == VT_BSTR) {
             serial = QString::fromWCharArray(vtProp.bstrVal);
-            qDebug() << "Motherboard Serial Number:" << serial;
+            qInfo() << "Motherboard Serial Number:" << serial;
         }
         VariantClear(&vtProp);
 

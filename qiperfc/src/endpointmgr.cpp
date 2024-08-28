@@ -195,7 +195,7 @@ bool EndPointMgr::add(QString id, QString data)
         return false;
     } else {
         //new endpoint
-        //qDebug() << "EndPointMgr::add: (" << id << ") " << data << Qt::endl;
+//        qDebug() << "EndPointMgr::add: (" << id << ") " << data;
         EndPoint* ep = new EndPoint(id, data, rootItem);
 //        ep->setFlags(Qt::NoItemFlags);
         int ibegin = rootItem->childCount();

@@ -282,7 +282,7 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
         if (name.compare(iface.humanReadableName()) == 0)
         {
             ifname = iface.name();
-            qDebug() << "getIfNameByHumanReadableName:" << ifname << " from: " <<name << Qt::endl;
+//            qDebug() << "getIfNameByHumanReadableName:" << ifname << " from: " <<name << Qt::endl;
             break;
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
