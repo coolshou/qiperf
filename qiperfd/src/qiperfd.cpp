@@ -155,7 +155,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 
     // system service manager
     qiperfdlog = tmppath+QIPERFD_NAME+".log";
-    qDebug() << "FileWatcher: " << qiperfdlog;
+    qDebug() << "FileWatcher: " << QDir::toNativeSeparators(qiperfdlog);
     m_filewatcher = new FileWatcher(qiperfdlog);
     connect(m_filewatcher, &FileWatcher::onNewLine, this, &QIperfd::onNewLine);
 }
