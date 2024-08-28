@@ -69,7 +69,8 @@ void EndPoint::loadData(QString data)
     QJsonParseError error;
     QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8(), &error);
     QJsonObject jsonRoot = doc.object();
-    if (error.error == QJsonParseError::NoError){
+//    if (error.error == QJsonParseError::NoError){
+    {
         m_type = static_cast<EndPointType::Type>(jsonRoot["Type"].toInt());
         EndPointType *ept = new EndPointType();
         QString sType = ept->getTypeString(m_type);
@@ -84,9 +85,9 @@ void EndPoint::loadData(QString data)
             oNet = jsonRoot["Net"].toObject();
     //        qDebug() << "TODO: oNet:" << oNet << Qt::endl;
         }
-    }else{
+    }/*else{
         qDebug() << "EndPoint::loadData wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
-    }
+    }*/
 }
 
 QString EndPoint::getJsonData()
