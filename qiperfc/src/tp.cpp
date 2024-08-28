@@ -350,7 +350,7 @@ int TP::setDirection(DirType direction)
         jsonRoot["client"]=o_client;
         doc.setObject(jsonRoot);
         m_jsondata =doc.toJson(QJsonDocument::Compact);
-        setData(TP::cols::dir, sdirection);
+//        setData(TP::cols::dir, sdirection);
 
         return 0;
     }else{
@@ -361,14 +361,17 @@ int TP::setDirection(DirType direction)
 
 int TP::setDirection(QString direction)
 {
-    if (direction.contains("Tx")){
-        setDirection(TP::Tx);
-    }else if (direction.contains("Rx")){
-        setDirection(TP::Rx);
-    }else if (direction.contains("TR")){
-        setDirection(TP::TR);
-    }else {
-        setDirection(TP::RT);
+    setData(TP::cols::dir, direction);
+    if (!m_jsondata.isEmpty()){
+        if (direction.contains("Tx")){
+            setDirection(TP::Tx);
+        }else if (direction.contains("Rx")){
+            setDirection(TP::Rx);
+        }else if (direction.contains("TR")){
+            setDirection(TP::TR);
+        }else {
+            setDirection(TP::RT);
+        }
     }
     return 0;
 }
