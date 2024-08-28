@@ -269,6 +269,7 @@ void QIperfC::onAddIperf()
         QString rs= dlgiperf->getJsonCfg();
 //        qDebug()<< "on_pairAdd: \n" << rs;
         m_tpmgr->add(rs);
+        ui->actionSave->setEnabled(true);
     }
 
 }
@@ -279,16 +280,13 @@ void QIperfC::onAddPing()
         strJson = dp->getJsonstr();
         qDebug() << "strJson:" << strJson;
         //TODO: add to ping treeview/chart
+        ui->actionSave->setEnabled(true);
     }
 }
 
 void QIperfC::onError(QString msg)
 {
     QMessageBox::warning(this, "ERROR", msg);
-}
-
-void QIperfC::onPairAdd()
-{
 }
 
 void QIperfC::onPairEdit()
@@ -333,6 +331,7 @@ void QIperfC::onStart()
         return;
     }
     ui->actionShowLog->setEnabled(true);
+    ui->actionSave->setEnabled(true);
     resetError();
     //TODO: clear old test record!!
     m_status_server.clear();
@@ -1109,7 +1108,6 @@ void QIperfC::initActions()
     connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(onCopy()));
     connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(onPaste()));
 
-//    connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(onPairAdd()));
     connect(ui->actionAddIperf, SIGNAL(triggered()), this, SLOT(onAddIperf()));
     if (!m_testping){
         ui->actionAddPing->setVisible(false);

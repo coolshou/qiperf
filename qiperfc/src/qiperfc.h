@@ -67,7 +67,6 @@ public slots:
     void onImportIperf3Log();
     bool on_Clear();
     void onAddIperf();
-    void onPairAdd();
     void onPairEdit();
     void onPairDelete();
     void onPairSwap();
