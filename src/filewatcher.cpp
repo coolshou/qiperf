@@ -22,7 +22,8 @@ FileWatcher::FileWatcher(const QString &filePath, QObject *parent)
     // Connect signals
     connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &FileWatcher::onFileChanged);
     // Initial read
-    readFile();
+//    readFile();
+    QTimer::singleShot(3000, this, &FileWatcher::readFile);
 }
 
 void FileWatcher::onFileChanged(const QString &path)
