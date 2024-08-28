@@ -301,16 +301,22 @@ QStringList TPMgr::getPCs()
 
 bool TPMgr::loaddata(QByteArray data)
 {
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(data);
-    QJsonArray jsonarr = jsonDoc.array();
-    foreach (const QJsonValue &value, jsonarr) {
-        QJsonObject obj = value.toObject();
-        QJsonDocument doc(obj);
-        QString strJson(doc.toJson(QJsonDocument::Compact));
-        add(strJson);
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    QJsonParseError error;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &error);
+    if (error.error == QJsonParseError::NoError){
+        QJsonArray jsonarr = jsonDoc.array();
+        foreach (const QJsonValue &value, jsonarr) {
+            QJsonObject obj = value.toObject();
+            QJsonDocument doc(obj);
+            QString strJson(doc.toJson(QJsonDocument::Compact));
+            add(strJson);
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+        }
+        return true;
+    }else{
+        qDebug() << "TPMgr::loaddata wrong format:(" << error.errorString() <<")\n" << data;
+        return false;
     }
-    return true;
 }
 
 void TPMgr::reset(){
@@ -564,61 +570,67 @@ void TPMgr::onPaste(QString data)
 
 void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
-    QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8());
-    QJsonArray jArr = doc.array();//.object();
-    //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
-    QString dir=nullptr;
-    QString idx;
     double fInterval = sInterval.toDouble();
-    double sum=0;
-    quint64 sum_lost=0;
-    quint64 sum_total=0;
-    double lost_rate=0;
-    bool isAvg=false;
-    foreach (auto jObj, jArr){
-        idx = jObj["idx"].toString();
-        isAvg = jObj["AVG"].toBool();
-        QString value="";
-        if (!jObj["dir"].isUndefined()){
-            dir=jObj["dir"].toString();
+    QJsonParseError error;
+    QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError) {
+        QJsonArray jArr = doc.array();//.object();
+        //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
+        QString dir=nullptr;
+        QString idx;
+
+        double sum=0;
+        quint64 sum_lost=0;
+        quint64 sum_total=0;
+        double lost_rate=0;
+        bool isAvg=false;
+        foreach (auto jObj, jArr){
+            idx = jObj["idx"].toString();
+            isAvg = jObj["AVG"].toBool();
+            QString value="";
+            if (!jObj["dir"].isUndefined()){
+                dir=jObj["dir"].toString();
+            }
+            value = jObj["value"].toString();
+            // packet lost rate
+            QString pkt_lost = jObj["packet_lost"].toString();
+            QString pkt_total = jObj["packet_total"].toString();
+            if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
+                lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
+            }
+    //        qDebug() << "pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+            sum = sum + value.toDouble();
+            sum_lost = sum_lost + pkt_lost.toDouble();
+            sum_total = sum_total + pkt_total.toDouble();
+            if (fInterval >= m_intervals.value(idx, 0.0)){
+    //            qDebug() << "sInterval:" << sInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
+                addTPdata(refrow, sInterval, idx, value,
+                    jObj["unit"].toString(), dir, pkt_lost, pkt_total);
+                m_intervals[idx] = fInterval;
+            }
+            if (!isAvg) {
+                // chart data ( with out Average data)
+    //            qDebug() << sInterval <<" lost_rate: " << lost_rate;
+                emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(),
+                        jObj["value"].toString(), QString::number(lost_rate));
+            }
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
-        value = jObj["value"].toString();
-        // packet lost rate
-        QString pkt_lost = jObj["packet_lost"].toString();
-        QString pkt_total = jObj["packet_total"].toString();
-        if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
-            lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
+        // update  test pair config row's sum value
+        TP *tp = getItemByIdx(refrow);
+        if (!(tp==nullptr)){
+            if (fInterval >= m_intervals.value(refrow, 0.0)){
+                //do not update sum when current m_intervals is larger sInterval
+    //            qDebug() << "refrow:"<< refrow <<" isAvg:" << isAvg << " sInterval:" << sInterval << " sum:" << sum << " sum lost:" << sum_lost << " sum total:" << sum_total;
+                tp->setThroughput(dir ,QString::number(sum));
+                tp->setLostRate(QString::number(sum_lost), QString::number(sum_total));
+                m_intervals[refrow] = fInterval;
+            }
         }
-//        qDebug() << "pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
-        sum = sum + value.toDouble();
-        sum_lost = sum_lost + pkt_lost.toDouble();
-        sum_total = sum_total + pkt_total.toDouble();
-        if (fInterval >= m_intervals.value(idx, 0.0)){
-//            qDebug() << "sInterval:" << sInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
-            addTPdata(refrow, sInterval, idx, value,
-                jObj["unit"].toString(), dir, pkt_lost, pkt_total);
-            m_intervals[idx] = fInterval;
-        }
-        if (!isAvg) {
-            // chart data ( with out Average data)
-//            qDebug() << sInterval <<" lost_rate: " << lost_rate;
-            emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(),
-                    jObj["value"].toString(), QString::number(lost_rate));
-        }
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        // signal dataChanged when all throughput data update!!
+        emit dataChanged(QModelIndex(),QModelIndex());
+    }else {
+        qDebug() << "TPMgr::onIperfTPdata wrong format:(" << error.errorString() << "\n" << datas;
     }
-    // update  test pair config row's sum value
-    TP *tp = getItemByIdx(refrow);
-    if (!(tp==nullptr)){
-        if (fInterval >= m_intervals.value(refrow, 0.0)){
-            //do not update sum when current m_intervals is larger sInterval
-//            qDebug() << "refrow:"<< refrow <<" isAvg:" << isAvg << " sInterval:" << sInterval << " sum:" << sum << " sum lost:" << sum_lost << " sum total:" << sum_total;
-            tp->setThroughput(dir ,QString::number(sum));
-            tp->setLostRate(QString::number(sum_lost), QString::number(sum_total));
-            m_intervals[refrow] = fInterval;
-        }
-    }
-    // signal dataChanged when all throughput data update!!
-    emit dataChanged(QModelIndex(),QModelIndex());
 
 }
