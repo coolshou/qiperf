@@ -4,6 +4,7 @@
 #include <QAbstractItemModel>
 #include <QObject>
 #include <QVariant>
+#include <QColor>
 
 #include "pingitem.h"
 
@@ -19,8 +20,14 @@ public:
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &idx, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+
+    //ext
+    PingItem *getItem(const QModelIndex& index) const;
+
+
 private:
     PingItem *rootItem;
+    QColor m_disabledTextColor;
 };
 
 #endif // PINGMGR_H

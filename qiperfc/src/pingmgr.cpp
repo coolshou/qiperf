@@ -1,9 +1,16 @@
 #include "pingmgr.h"
 
+#include <QWidget>
+#include <QPalette>
+
+#include <QDebug>
+
 PingMgr::PingMgr(QObject *parent)
     : QAbstractItemModel{parent}
 {
-
+    QWidget widget;
+    QPalette palette = widget.palette();
+    m_disabledTextColor = palette.color(QPalette::Disabled, QPalette::Text);
 }
 
 QModelIndex PingMgr::index(int row, int column, const QModelIndex &parent) const
@@ -56,6 +63,25 @@ int PingMgr::columnCount(const QModelIndex &parent) const
     return rootItem->columnCount();
 }
 
+QVariant PingMgr::data(const QModelIndex &idx, int role) const
+{
+    if (!idx.isValid()){
+        return QVariant();
+    }
+    PingItem *item = getItem(idx);
+    if (role == Qt::ForegroundRole){
+        // when item is disabled, grayout text
+        if (! item->getEnabled()) {
+            return m_disabledTextColor;
+        }
+    }
+    if (role != Qt::DisplayRole) {
+        //this will show text data!!
+        return QVariant();
+    }
+    return item->data(idx.column());
+}
+
 QVariant PingMgr::headerData(int section, Qt::Orientation orientation, int role) const
 {
     // show header
@@ -84,4 +110,17 @@ QVariant PingMgr::headerData(int section, Qt::Orientation orientation, int role)
     }
 
     return QVariant();
+}
+
+PingItem *PingMgr::getItem(const QModelIndex &index) const
+{
+    if (index.isValid()) {
+        PingItem* item = static_cast<PingItem*>(index.internalPointer());
+        if (item){
+            return item;
+        }else{
+            qDebug() << "getItem: no item??";
+        }
+    }
+    return rootItem;
 }

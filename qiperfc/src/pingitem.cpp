@@ -4,6 +4,7 @@ PingItem::PingItem(QString id, QObject *parent)
     : QObject{parent}
 {
     m_id = id;
+    m_enabled = true;
     m_itemDatas={m_id, "", "", "", // id, source, target, response
                  "", "", "", // min response, max response, lost rate
                  "", }; // comment
@@ -19,6 +20,14 @@ PingItem *PingItem::child(int row)
 PingItem *PingItem::parentItem()
 {
     return m_parentItem;
+}
+
+QVariant PingItem::data(int column) const
+{
+    if (column < 0 || column >= m_itemDatas.size()){
+        return QVariant();
+    }
+    return m_itemDatas.at(column);
 }
 
 int PingItem::row() const
@@ -48,4 +57,9 @@ int PingItem::childCount() const
 int PingItem::columnCount() const
 {
     return m_itemDatas.count();
+}
+
+bool PingItem::getEnabled()
+{
+    return m_enabled;
 }

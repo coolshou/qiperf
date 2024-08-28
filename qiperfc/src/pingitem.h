@@ -23,10 +23,12 @@ public:
     explicit PingItem(QString id, QObject *parent = nullptr);
     PingItem *child(int row);
     PingItem *parentItem();
+    QVariant data(int column) const;
     int row() const;
     bool haveChilds();
     int childCount() const;
     int columnCount() const;
+    bool getEnabled();
 
 signals:
 
@@ -35,6 +37,7 @@ private:
     QList<PingItem *> m_childItems;
     QList<QVariant> m_itemDatas;
     PingItem *m_parentItem;
+    bool m_enabled; // enable/disable item
 };
 
 #endif // PINGITEM_H
