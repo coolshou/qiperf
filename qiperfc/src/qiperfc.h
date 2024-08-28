@@ -32,6 +32,7 @@
 #include "customheaderview.h"
 #include "fileserver.h"
 #include "dlgping.h"
+#include "pingmgr.h"
 #include "pingplot.h"
 #include "dlgshowlog.h"
 
@@ -185,5 +186,6 @@ private:
     //TEST icmp
     IcmpPing *m_icmpping;
     DlgPing *dp;
+    PingMgr *m_pingmgr;
 };
 #endif // QIPERFC_H

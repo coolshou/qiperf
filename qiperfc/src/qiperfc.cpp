@@ -865,6 +865,7 @@ void QIperfC::initPingChart()
 //        ui->tab_ping->setVisible(false);
         ui->tabwidget->setTabVisible(1, false);
     }
+    m_pingmgr = new PingMgr();
     // ping chart
     m_pingplot = new PingPlot(ui->widget_ping);
     ui->hl_ping->addWidget(m_pingplot);

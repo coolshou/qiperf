@@ -70,6 +70,8 @@ SOURCES += \
     src/htmlwriter.cpp \
     src/iperffileworker.cpp \
     src/main.cpp \
+    src/pingitem.cpp \
+    src/pingmgr.cpp \
     src/pingplot.cpp \
     src/qiperfc.cpp \
     src/tp.cpp \
@@ -112,6 +114,8 @@ HEADERS += \
     src/formqiperfds.h \
     src/htmlwriter.h \
     src/iperffileworker.h \
+    src/pingitem.h \
+    src/pingmgr.h \
     src/pingplot.h \
     src/qiperfc.h \
     src/tp.h \
