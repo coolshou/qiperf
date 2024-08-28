@@ -13,6 +13,8 @@ UdpReceiver::UdpReceiver(quint16 port, QObject *parent)
         QString msg = "UdpReceiver:QUdpSocket bind port: " + QString::number(port) + " Fail";
         msg = msg + "\n It will not receive " + QIPERFD_NAME + " information message";
         emit error(msg);
+    }else{
+        qDebug() << "UdpReceiver bind to port:" << port;
     }
 
 }

@@ -35,8 +35,9 @@
 #include "pingmgr.h"
 #include "pingplot.h"
 #include "dlgshowlog.h"
-
+#if (TEST_ICMP==1)
 #include "../src/icmpping.h"
+#endif
 #if (TEST_WS==1)
 #include "wsclient.h"
 #endif
@@ -183,9 +184,11 @@ private:
     QString m_oldsavepath=nullptr;
 
     DlgShowLog *m_dlgshowlog;
+#if (TEST_ICMP==1)
     //TEST icmp
     IcmpPing *m_icmpping;
     DlgPing *dp;
+#endif
     PingMgr *m_pingmgr;
 };
 #endif // QIPERFC_H

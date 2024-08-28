@@ -86,8 +86,9 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 
     m_dlgrecord = new DlgRecord(this);
     m_fileserver = new FileServer(QIPERF_FILEPORT);
-
+#if (TEST_ICMP==1)
     dp = new DlgPing(this);
+#endif
     m_dlgshowlog=new DlgShowLog(logpath+QIPERFC_NAME+".log");
     connect(this, &QIperfC::closeAll, m_dlgshowlog, &DlgShowLog::close);
 //    connect(this, &QIperfC::closeAll, dp, &DlgPing::close); // model mode, no need
@@ -276,12 +277,14 @@ void QIperfC::onAddIperf()
 void QIperfC::onAddPing()
 {
     QString strJson;
+#if (TEST_ICMP==1)
     if (dp->exec()== QDialog::Accepted){
         strJson = dp->getJsonstr();
         qDebug() << "strJson:" << strJson;
         //TODO: add to ping treeview/chart
         ui->actionSave->setEnabled(true);
     }
+#endif
 }
 
 void QIperfC::onError(QString msg)
@@ -739,6 +742,7 @@ void QIperfC::notificationReceived(const QString key, const QVariant value)
 void QIperfC::onTest()
 {
     QString strJson;
+#if (TEST_ICMP==1)
     if (dp->exec()== QDialog::Accepted){
         strJson = dp->getJsonstr();
         qDebug() << "strJson:" << strJson;
@@ -748,7 +752,7 @@ void QIperfC::onTest()
     }
 //    connect(m_icmpping, &IcmpPing::icmpResponseTime, this, );
     m_icmpping->start();
-
+#endif
     if (0){
         // test remote ping
 
