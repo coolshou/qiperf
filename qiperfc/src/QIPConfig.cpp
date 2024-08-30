@@ -182,7 +182,7 @@ bool QIPConfig::deserialize(const QByteArray &data) {
     if (m_loadversion>=2){
         in_de >> m_data->env;
         in_de >> m_data->testdate;
-        qDebug() << "m_data env:" << m_data->env;
+//        qDebug() << "m_data env:" << m_data->env;
         qDebug() << "m_data testdate:" << m_data->testdate;
         emit updateStartDateTime(QDateTime::fromString(m_data->testdate));
     }
@@ -263,12 +263,13 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
             QJsonObject jClient;
             QJsonObject jServer;
             QJsonArray arr = doc.array();
-            qDebug() << "QIPConfig::parserTPCfgLogFiles: " << arr;
+//            qDebug() << "QIPConfig::parserTPCfgLogFiles: " << arr;
             int idx=0;
 //            foreach(auto jObj, arr){
             for(QJsonArray::const_iterator it=arr.constBegin(); it!=arr.constEnd(); ++it){
                 //TODO: other type of "Action"
                 QJsonObject jObj = it->toObject();
+                qDebug() << "QIPConfig QJsonObject: " << jObj;
                 if (jObj["Action"].toString() == "IPERF_ADD" && jObj["enabled"].toBool(true)){
                         //client
                     jClient = jObj["client"].toObject();
