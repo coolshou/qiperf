@@ -34,7 +34,7 @@ signals:
     void updateDataPath(QString datapath);
     void updateTPCfg(QByteArray tpcfg);
     void onThroughput(QString refrow, QString sInterval, QString datas); // refrow, sInterval, throughput data
-
+    void updateStartDateTime(QDateTime datetime);
 
 private slots:
     void onThroughputData(int idx, QString sInterval,  QString data);

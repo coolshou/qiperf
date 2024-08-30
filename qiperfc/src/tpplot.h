@@ -14,7 +14,6 @@ class TPPlot : public QCustomPlot
     Q_OBJECT
 public:
     explicit TPPlot(QWidget *parent = nullptr);
-    void setStartTime(QDateTime startTime);
     void addTPData(QString idx, double xdata, double ydata, double lostrate);  //
     void del(QString idx);
     QCPGraph *getGraph(QString idx); // get QCPGraph by index
@@ -23,6 +22,7 @@ public:
 
 public slots:
     void onIperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);  //
+    void setStartTime(QDateTime startTime);
 
 private slots:
 //    void realtimeDataSlot(QPrivateSignal sig);

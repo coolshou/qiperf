@@ -67,6 +67,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
     connect(m_qipconfig, &QIPConfig::updateTPCfg, this, &QIperfC::onUpdateTPCfg);
     connect(m_qipconfig, &QIPConfig::onThroughput, m_tpmgr, &TPMgr::onIperfTPdata);
+    connect(m_qipconfig, &QIPConfig::updateStartDateTime, m_tpplot, &TPPlot::setStartTime);
 
     m_endpointmgr = new EndPointMgr(this);
     m_frm_qiperfds = new FormQIperfds();
@@ -195,7 +196,7 @@ void QIperfC::onNew()
 
 void QIperfC::onOpen()
 {
-    onNew();
+//    onNew();
     QString path;
     if (!m_oldsavepath.isNull()){
         path = m_oldsavepath;
@@ -210,6 +211,8 @@ void QIperfC::onOpen()
         qDebug() << "Not support file format: " << fileName;
         return;
     }
+    doClear();
+    onNew();
     if (load(fileName)){
         m_oldsavepath = fi.path();
     }
@@ -584,17 +587,7 @@ bool QIperfC::onClear(){
             return false;
         }
     }
-    //clear all test date, config setting remain unchanged
-    if (m_tpmgr->rootChildCount()>0) {
-        m_tpmgr->clear();
-        ui->tv_throughput->collapseAll();
-    }
-    m_tpplot->clear();
-    m_TestStartTime = QDateTime();
-    m_qipconfig->clear();
-    emit updateStatus("");
-    emit updateStarttime("");
-    ui->actionShowLog->setEnabled(false);
+    doClear();
     return true;
 }
 
@@ -919,6 +912,21 @@ void QIperfC::loadSettings()
     m_settings->beginGroup("test");
     m_testping = m_settings->value("testping", false).toBool();
     m_settings->endGroup();
+}
+
+void QIperfC::doClear()
+{
+    //clear all test date, config setting remain unchanged
+    if (m_tpmgr->rootChildCount()>0) {
+        m_tpmgr->clear();
+        ui->tv_throughput->collapseAll();
+    }
+    m_tpplot->clear();
+    m_TestStartTime = QDateTime();
+    m_qipconfig->clear();
+    emit updateStatus("");
+    emit updateStarttime("");
+    ui->actionShowLog->setEnabled(false);
 }
 
 void QIperfC::initMenus()

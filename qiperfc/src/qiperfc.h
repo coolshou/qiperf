@@ -109,6 +109,7 @@ private:
     void resetError();
     void saveSettings();
     void loadSettings();
+    void doClear();
 
 private slots:
     void initMenus();
