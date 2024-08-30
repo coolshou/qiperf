@@ -584,17 +584,19 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         quint64 sum_total=0;
         double lost_rate=0;
         bool isAvg=false;
-        foreach (auto jObj, jArr){
-            idx = jObj["idx"].toString();
-            isAvg = jObj["AVG"].toBool();
+//        foreach (QJsonObject jObj, jArr){
+        for (QJsonArray::const_iterator it=jArr.constBegin(); it!=jArr.constEnd(); ++it) {
+            QJsonObject jObj= it->toObject();
+            idx = jObj.value("idx").toString();
+            isAvg = jObj.value("AVG").toBool();
             QString value="";
-            if (!jObj["dir"].isUndefined()){
-                dir=jObj["dir"].toString();
+            if (!jObj.value("dir").isUndefined()){
+                dir=jObj.value("dir").toString();
             }
-            value = jObj["value"].toString();
+            value = jObj.value("value").toString();
             // packet lost rate
-            QString pkt_lost = jObj["packet_lost"].toString();
-            QString pkt_total = jObj["packet_total"].toString();
+            QString pkt_lost = jObj.value("packet_lost").toString();
+            QString pkt_total = jObj.value("packet_total").toString();
             if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
                 lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
             }
@@ -605,14 +607,14 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             if (fInterval >= m_intervals.value(idx, 0.0)){
     //            qDebug() << "sInterval:" << sInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
                 addTPdata(refrow, sInterval, idx, value,
-                    jObj["unit"].toString(), dir, pkt_lost, pkt_total);
+                    jObj.value("unit").toString(), dir, pkt_lost, pkt_total);
                 m_intervals[idx] = fInterval;
             }
             if (!isAvg) {
                 // chart data ( with out Average data)
     //            qDebug() << sInterval <<" lost_rate: " << lost_rate;
-                emit IperfTPdata(sInterval, refrow + "_" + jObj["idx"].toString(),
-                        jObj["value"].toString(), QString::number(lost_rate));
+                emit IperfTPdata(sInterval, refrow + "_" + jObj.value("idx").toString(),
+                        jObj.value("value").toString(), QString::number(lost_rate));
             }
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
