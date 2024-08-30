@@ -61,7 +61,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     initPingChart();
     connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
 
-    iTimeout = 10*100;
+    iTimeout = 10*1000; //10sec
     //
     m_qipconfig = new QIPConfig(logdir.absolutePath());
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
@@ -391,18 +391,18 @@ void QIperfC::onStart()
                     connect(m_wss[serverIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
                     connect(m_wss[serverIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
                     connect(m_wss[serverIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
-                    itimeout = iTimeout;
-                    while (! m_wss[serverIP]->isConnected() && itimeout>0){
-                        QThread::msleep(10);
-                        QCoreApplication::processEvents(QEventLoop::AllEvents);
-                        itimeout--;
-                    }
-                    if (itimeout<=0){
-                        emit errorStop(1,"Wait connect to " +s+ " timeout");
-                        break;
-                    }
                 }else{
                     m_wss[serverIP]->setDatapath(m_datapath);
+                }
+                itimeout = iTimeout;
+                while (! m_wss[serverIP]->isConnected() && itimeout>0){
+                    QThread::msleep(10);
+                    QCoreApplication::processEvents(QEventLoop::AllEvents);
+                    itimeout--;
+                }
+                if (itimeout<=0){
+                    emit errorStop(1,"Wait connect to " +s+ " timeout");
+                    break;
                 }
                 //tell server add iperf server
                 cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
@@ -423,16 +423,18 @@ void QIperfC::onStart()
                     connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
                     connect(m_wsc[clientIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
                     connect(m_wsc[clientIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
-                    itimeout = iTimeout;
-                    while (! m_wsc[clientIP]->isConnected()&& itimeout>0){
-                        QThread::msleep(10);
-                        QCoreApplication::processEvents(QEventLoop::AllEvents);
-                        itimeout--;
-                    }
-                    if (itimeout<=0){
-                        emit errorStop(1,"Wait connect to " +s+ "timeout");
-                        break;
-                    }
+                }else{
+                    m_wsc[clientIP]->setDatapath(m_datapath);
+                }
+                itimeout = iTimeout;
+                while (! m_wsc[clientIP]->isConnected()&& itimeout>0){
+                    QThread::msleep(10);
+                    QCoreApplication::processEvents(QEventLoop::AllEvents);
+                    itimeout--;
+                }
+                if (itimeout<=0){
+                    emit errorStop(1,"Wait connect to " +s+ "timeout");
+                    break;
                 }
                 //tell client add iperf client
                 cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
