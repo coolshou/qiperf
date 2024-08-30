@@ -57,6 +57,7 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
                     rc = filesFromStore(compressedfiles, outpath);
                     if (rc){
                         rc = parserTPCfgLogFiles(outpath);
+                        qDebug() << "parserTPCfgLogFiles end:" << rc;
                     }
                 }else{
                     qDebug() << "no test record date";
@@ -296,6 +297,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 m_fileworkers.append(ifw);
                                 connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 ifw->start();
+                            }else{
+                                qDebug() << "not exist serverfile:" << serverfile;
                             }
                         }else{
                             if (d.exists(clientfile)){
@@ -306,6 +309,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 m_fileworkers.append(ifwc);
                                 connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 ifwc->start();
+                            }else{
+                                qDebug() << "not exist clientfile:" << clientfile;
                             }
                         }
                     }else{
@@ -316,6 +321,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             m_fileworkers.append(ifw);
                             connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             ifw->start();
+                        }else{
+                            qDebug() << "bidir: not exist serverfile:" << serverfile;
                         }
                         if (d.exists(clientfile)){
                             IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
@@ -324,6 +331,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             m_fileworkers.append(ifwc);
                             connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             ifwc->start();
+                        }else{
+                            qDebug() << "bidir: not exist clientfile:" << clientfile;
                         }
                     }
                 }
