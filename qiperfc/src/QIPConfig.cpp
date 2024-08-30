@@ -271,20 +271,21 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                 //TODO: other type of "Action"
                 QJsonObject jObj = it->toObject();
                 qDebug() << "QIPConfig QJsonObject: " << jObj;
-                if (jObj["Action"].toString() == "IPERF_ADD" && jObj["enabled"].toBool(true)){
+                if (jObj.value("Action").toString() == "IPERF_ADD" &&
+                        jObj.value("enabled").toBool(true)){
                         //client
-                    jClient = jObj["client"].toObject();
-                    QString clientip = jClient["bind"].toString();
-                    bool bidir = jClient["bidir"].toBool();
-                    bool reverse = jClient["reverse"].toBool();
-                    QString protocal = jClient["protocal"].toString();
-                    int parallel = jClient["parallel"].toInt();
-                    QString version = jClient["version"].toString();
-                    int clientport = jClient["port"].toInt();
+                    jClient = jObj.value("client").toObject();
+                    QString clientip = jClient.value("bind").toString();
+                    bool bidir = jClient.value("bidir").toBool();
+                    bool reverse = jClient.value("reverse").toBool();
+                    QString protocal = jClient.value("protocal").toString();
+                    int parallel = jClient.value("parallel").toInt();
+                    QString version = jClient.value("version").toString();
+                    int clientport = jClient.value("port").toInt();
                     //server
-                    jServer = jObj["server"].toObject();
-                    QString serverip = jServer["bind"].toString();
-                    int serverport = jServer["port"].toInt();
+                    jServer = jObj.value("server").toObject();
+                    QString serverip = jServer.value("bind").toString();
+                    int serverport = jServer.value("port").toInt();
                     QString serverfile = logpath + QDir::separator() + serverip + "_" +QString::number(serverport)+ ".log";
                     QString clientfile = logpath + QDir::separator() + clientip + "-" + serverip + "_" +QString::number(clientport)+ ".log";
                     if (!bidir){
