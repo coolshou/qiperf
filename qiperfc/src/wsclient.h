@@ -95,7 +95,7 @@ private Q_SLOTS:
 private:
     QString m_datapath;
     QString m_serverip;
-    QWebSocket m_webSocket;
+    QWebSocket *m_webSocket;
     QUrl m_url;
     QMap<QString, QFile *> m_files; // accept file from different source
     qint64 m_chunkSize = 64 * 1024;

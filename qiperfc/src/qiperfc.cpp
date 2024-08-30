@@ -61,7 +61,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     initPingChart();
     connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
 
-    iTimeout = 10*1000; //10sec
+    iTimeout = 10*100;
     //
     m_qipconfig = new QIPConfig(logdir.absolutePath());
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
@@ -395,7 +395,7 @@ void QIperfC::onStart()
                     m_wss[serverIP]->setDatapath(m_datapath);
                 }
                 itimeout = iTimeout;
-                while (! m_wss[serverIP]->isConnected() && itimeout>0){
+                while (! m_wss[serverIP]->isConnected() && itimeout>0 && (bErrorStop==0)){
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                     itimeout--;
@@ -405,6 +405,10 @@ void QIperfC::onStart()
                 if (itimeout<=0){
                     emit errorStop(1,"Wait connect to " +s+ " timeout");
                     break;
+                }
+                if(bErrorStop>0){
+                    qDebug() << "Some error happen!!";
+                    return;
                 }
                 //tell server add iperf server
                 cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
@@ -429,7 +433,7 @@ void QIperfC::onStart()
                     m_wsc[clientIP]->setDatapath(m_datapath);
                 }
                 itimeout = iTimeout;
-                while (! m_wsc[clientIP]->isConnected()&& itimeout>0){
+                while (! m_wsc[clientIP]->isConnected()&& itimeout>0&& (bErrorStop==0)){
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                     itimeout--;
@@ -439,6 +443,10 @@ void QIperfC::onStart()
                 if (itimeout<=0){
                     emit errorStop(1,"Wait connect to " +s+ "timeout");
                     break;
+                }
+                if(bErrorStop>0){
+                    qDebug() << "Some error happen!!";
+                    return;
                 }
                 //tell client add iperf client
                 cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();

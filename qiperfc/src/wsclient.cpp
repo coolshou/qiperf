@@ -58,32 +58,32 @@ QT_USE_NAMESPACE
 
 //! [constructor]
 WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject *parent) :
-    QObject(parent)
+    QObject(parent), m_webSocket(new QWebSocket)
 {
-    connect(&m_webSocket, &QWebSocket::connected, this, &WSClient::onConnected);
-    connect(&m_webSocket, &QWebSocket::disconnected, this, &WSClient::onDisconnected);
-    //connect(&m_webSocket, &QWebSocket::errorOccurred, this, &WSClient::onErrorOccurred); // QT6.5
-    connect(&m_webSocket, &QWebSocket::aboutToClose, this, &WSClient::onAboutToClose);
-    connect(&m_webSocket, &QWebSocket::stateChanged, this, &WSClient::onStateChanged);
-    connect(&m_webSocket, QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
+    connect(m_webSocket, &QWebSocket::connected, this, &WSClient::onConnected);
+    connect(m_webSocket, &QWebSocket::disconnected, this, &WSClient::onDisconnected);
+    //connect(m_webSocket, &QWebSocket::errorOccurred, this, &WSClient::onErrorOccurred); // QT6.5
+    connect(m_webSocket, &QWebSocket::aboutToClose, this, &WSClient::onAboutToClose);
+    connect(m_webSocket, &QWebSocket::stateChanged, this, &WSClient::onStateChanged);
+    connect(m_webSocket, QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
             this, &WSClient::onSslErrors);
-    connect(&m_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &WSClient::onError);
-    connect(&m_webSocket, &QWebSocket::textMessageReceived, this, &WSClient::onTextMessageReceived);
-    connect(&m_webSocket, &QWebSocket::binaryMessageReceived, this, &WSClient::onBinaryMessageReceived);
+    connect(m_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &WSClient::onError);
+    connect(m_webSocket, &QWebSocket::textMessageReceived, this, &WSClient::onTextMessageReceived);
+    connect(m_webSocket, &QWebSocket::binaryMessageReceived, this, &WSClient::onBinaryMessageReceived);
 //    qDebug() << "WSClient open websocket:" << url << Qt::endl;
     m_serverip = serverip;
     m_url = url;
 //    m_datapath = datapath + QDir::separator();
     setDatapath(datapath);
-    m_webSocket.open(m_url);
+    m_webSocket->open(m_url);
 }
 //! [constructor]
 
 qint64 WSClient::sendText(QString message)
 {
     qint64 rc=0;
-    if (m_webSocket.isValid()){
-        rc = m_webSocket.sendTextMessage(message);
+    if (m_webSocket->isValid()){
+        rc = m_webSocket->sendTextMessage(message);
         if (rc <=0){
             qDebug() << "error sendText size=" << rc << ", " << message;
         }
@@ -95,7 +95,7 @@ bool WSClient::isConnected()
 {
     // TODO: is isValid() ok for check the websocket connected!!??
 //    if (m_webSocket!=nullptr){
-        return m_webSocket.isValid();
+        return m_webSocket->isValid();
 //    }
         //    return false;
 }
@@ -243,7 +243,7 @@ void WSClient::onSslErrors(const QList<QSslError> &errors)
     // WARNING: Never ignore SSL errors in production code.
     // The proper way to handle self-signed certificates is to add a custom root
     // to the CA store.
-    m_webSocket.ignoreSslErrors();
+    m_webSocket->ignoreSslErrors();
 }
 
 void WSClient::onError(QAbstractSocket::SocketError error)
