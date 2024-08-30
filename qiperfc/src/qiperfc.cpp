@@ -674,6 +674,7 @@ void QIperfC::onErrorStop(int err, QString msg)
 {
     bErrorStop = err;
     m_ErrorMSG = msg;
+    qDebug() << "onErrorStop: (" <<bErrorStop <<") " << m_ErrorMSG;
     emit updateStarttime("");
     emit updateStatus(msg);
     updateRunStatus(false);
