@@ -291,6 +291,7 @@ void IperfWrapper::work()
     }else{
         qDebug() << "file not exist: " << m_filename;
     }
+    emit workFinished();
 }
 
 /*iperf3 output format

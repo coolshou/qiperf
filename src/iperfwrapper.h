@@ -23,7 +23,7 @@ public slots:
     void work();
 signals:
     void sendThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
-
+    void workFinished();
 private:
 
 private:
