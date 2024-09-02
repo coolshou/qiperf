@@ -45,7 +45,6 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
             qDebug() << "ERROR: Wrong format of the config file: " << filePath;
             return false;
         }
-        qDebug() << "deserialize";
         if (deserialize(data)){
             if (m_loadversion>=2){
                 QByteArray compressedfiles;
@@ -57,7 +56,6 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
                     rc = filesFromStore(compressedfiles, outpath);
                     if (rc){
                         rc = parserTPCfgLogFiles(outpath);
-                        qDebug() << "parserTPCfgLogFiles end:" << rc;
                     }
                 }else{
                     qDebug() << "no test record date";
@@ -71,7 +69,6 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
 //            qDebug() << "ERROR: Wrong format of the data: " << filePath;
             rc = false;
         }
-        qDebug() << "close:" << filePath;
         file.close();
         qDebug() << "close end" ;
         return rc;
@@ -186,7 +183,7 @@ bool QIPConfig::deserialize(const QByteArray &data) {
         in_de >> m_data->env;
         in_de >> m_data->testdate;
 //        qDebug() << "m_data env:" << m_data->env;
-        qDebug() << "m_data testdate:" << m_data->testdate;
+//        qDebug() << "m_data testdate:" << m_data->testdate;
         emit updateStartDateTime(QDateTime::fromString(m_data->testdate));
     }
     return !in_de.status();
@@ -272,7 +269,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
             for(QJsonArray::const_iterator it=arr.constBegin(); it!=arr.constEnd(); ++it){
                 //TODO: other type of "Action"
                 QJsonObject jObj = it->toObject();
-                qDebug() << "QIPConfig QJsonObject: " << jObj;
+//                qDebug() << "QIPConfig QJsonObject: " << jObj;
                 if (jObj.value("Action").toString() == "IPERF_ADD" &&
                         jObj.value("enabled").toBool(true)){
                         //client
