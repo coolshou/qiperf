@@ -73,6 +73,7 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
         }
         qDebug() << "close:" << filePath;
         file.close();
+        qDebug() << "close end" ;
         return rc;
     } else {
         file.close();
