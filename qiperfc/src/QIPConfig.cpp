@@ -66,15 +66,14 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
                 rc = true;
             }
         }else {
-//            qDebug() << "ERROR: Wrong format of the data: " << filePath;
+            qDebug() << "ERROR: Wrong format of the data: " << filePath;
             rc = false;
         }
         file.close();
-        qDebug() << "close end" ;
         return rc;
     } else {
-        file.close();
         qDebug() << "Wrong format of " << filePath;
+        file.close();
         return false;
     }
 }
