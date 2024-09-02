@@ -19,7 +19,9 @@ IperfFileWorker::IperfFileWorker(QString version, QString protocal,
 //    connect(m_thread, &QThread::finished, m_iperfwrapper, &IperfWrapper::onFinished);
     m_iperfwrapper->moveToThread(m_thread);
     QObject::connect(m_iperfwrapper, &IperfWrapper::workFinished, m_thread, &QThread::quit);
-    QObject::connect(m_iperfwrapper, &IperfWrapper::workFinished, m_thread, &QThread::deleteLater);
+    QObject::connect(m_iperfwrapper, &IperfWrapper::workFinished, m_iperfwrapper, &IperfWrapper::deleteLater);
+    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
+
 }
 
 void IperfFileWorker::start()
