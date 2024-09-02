@@ -132,7 +132,7 @@ void IperfWrapper::parserIperf3(QString linedata)
 //        qDebug() << "parserIperf3: " << linedata;
         QString sDir = nullptr;
         int iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
-        QString idx = linedata.mid(1,3).trimmed();  // extract [ idx]
+        QString idx = linedata.mid(1,iS-1).trimmed();  // extract [ idx]
         linedata = linedata.right(linedata.length()-iS-1);
         QString sTag="";
         if (m_servermode){
