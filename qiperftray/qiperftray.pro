@@ -39,7 +39,23 @@ else: unix:!android: target.path = /opt/qiperfd/bin
 RESOURCES += \
     ../qiperf.qrc
 
-VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFTRAY_VERSION\"" | awk -F\' \'  \'{print $3}\' | awk -F\'\"\'  \'{print $2}\')
+# Define a function to extract the version
+defineReplace(extract_version) {
+    line_number = $$1
+    # Read the contents of the file into a variable
+    contents = $$cat($$PWD/../src/versions.h)
+    # Split the file contents into lines
+    lines = $$split(contents, "\n")
+    # Get the specific line (line numbers are zero-based, so we subtract 1)
+    result = $$member(lines, $$line_number)
+    # Extract the version
+    version = $$replace(result, \", )
+    # Return the extracted version
+    return($$version)
+}
+
+VERSION = $$extract_version(26)
+#VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFTRAY_VERSION\"" | awk -F\' \'  \'{print $3}\' | awk -F\'\"\'  \'{print $2}\')
 message(QIPERFTRAY_VERSION: $$VERSION)
 
 win32 {
