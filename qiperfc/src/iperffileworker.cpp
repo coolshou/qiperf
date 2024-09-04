@@ -1,5 +1,12 @@
 #include "iperffileworker.h"
 
+#include <QCoreApplication>
+#include <QEventLoop>
+#include <QJsonParseError>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+
 IperfFileWorker::IperfFileWorker(QString version, QString protocal,
                                  int idx, bool servermode, int parallel,
                                  bool bidir, QString bidirtag , QString filename,
@@ -14,13 +21,13 @@ IperfFileWorker::IperfFileWorker(QString version, QString protocal,
     m_iperfwrapper->setFile(filename);
     m_iperfwrapper->setIperf(version, protocal);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfFileWorker::onThroughputData);
-
+    connect(m_iperfwrapper, &IperfWrapper::progress, this, &IperfFileWorker::onProgress);
     connect(m_thread, &QThread::started, m_iperfwrapper, &IperfWrapper::work);
-//    connect(m_thread, &QThread::finished, m_iperfwrapper, &IperfWrapper::onFinished);
     m_iperfwrapper->moveToThread(m_thread);
-    QObject::connect(m_iperfwrapper, &IperfWrapper::workFinished, m_thread, &QThread::quit);
-    QObject::connect(m_iperfwrapper, &IperfWrapper::workFinished, m_iperfwrapper, &IperfWrapper::deleteLater);
-    QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
+    connect(m_iperfwrapper, &IperfWrapper::workFinished, this, &IperfFileWorker::onWorkFinished);
+    connect(m_iperfwrapper, &IperfWrapper::workFinished, m_thread, &QThread::quit);
+    connect(m_iperfwrapper, &IperfWrapper::workFinished, m_iperfwrapper, &IperfWrapper::deleteLater);
+    connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
 
 }
 
@@ -31,13 +38,74 @@ void IperfFileWorker::start()
     }
 }
 
-void IperfFileWorker::onThroughputData(int idx, QString sInterval, QString data)
+void IperfFileWorker::onProgress(int currentlineno)
+{
+    emit progress(currentlineno);
+}
+
+void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data)
 {
     if(m_bidirtag.isEmpty()){
         qDebug() << "No m_bidirtag, not reprot ThroughputData: ("<<sInterval<<")" << data;
     }else{
-//        qDebug() << "sInterval:" << sInterval;
-        //DEBUG: this will not get in line order => cause data show on UI not final data!!
-        emit onThroughput(idx, sInterval, data);
+        //collect all data value
+
+        QJsonParseError error;
+        //data:  "[{\"dir\":\"Rx\",\"idx\":\"5c\",\"jitter\":\"0.094\",\"jitter_unit\":\"ms\",\"packet_lost\":\"0\",\"packet_total\":\"8564\",\"unit\":\"Mbits/sec\",\"value\":\"25.0\"}]"
+        QJsonDocument doc=QJsonDocument::fromJson(data.toUtf8(), &error);
+        if (error.error == QJsonParseError::NoError) {
+            QJsonArray jArr = doc.array();
+            double fInterval = sInterval.toDouble();
+            for (QJsonArray::const_iterator it=jArr.constBegin(); it!=jArr.constEnd(); ++it) {
+                QJsonObject jObj= it->toObject();
+                // QJsonObject jObj = doc.object();
+                bool avg= jObj.value("AVG").toBool();
+                QString dir= jObj.value("dir").toString();
+                QString idx = QString::number(midx) + "_"+ jObj.value("idx").toString();
+                double value = jObj.value("value").toDouble();
+                QString unit = jObj.value("unit").toString();
+                int pkt_lost = jObj.value("packet_lost").toInt();
+                int pkt_total = jObj.value("packet_total").toInt();
+                QString jitter = jObj.value("jitter").toString(); //TODO jitter
+                QString jitter_unit = jObj.value("jitter_unit").toString(); //TODO jitter_unit
+                double lostrate=0.0;
+                if (pkt_total>0){
+                    lostrate = (pkt_lost/pkt_total)*100;
+                }
+                Q_UNUSED(dir)
+                Q_UNUSED(unit)
+                Q_UNUSED(jitter)
+                Q_UNUSED(jitter_unit)
+                if (avg){
+                    // AVG value
+                    emit updateTPAvg(idx, fInterval, value, pkt_lost, pkt_total, lostrate);
+                } else {
+                    TPData *tpdata = new TPData();
+                    if ((m_datas.keys().length() > 0) && (m_datas.keys().contains(idx))){
+                        tpdata = m_datas.value(idx);
+                    }else {
+                        m_datas.insert(idx, tpdata);
+                    }
+                    tpdata->timeDatas.append(fInterval);
+                    tpdata->valueDatas.append(value);
+                    tpdata->packetLost.append(pkt_lost);
+                    tpdata->packetTotal.append(pkt_total);
+                    tpdata->lostrate.append(lostrate);
+                }
+            }
+        }
+        else {
+            qDebug() << "TPMgr::onIperfTPdata wrong format:(" << error.errorString() << "\n" << data;
+            return;
+        }
     }
+}
+
+void IperfFileWorker::onWorkFinished()
+{
+    qDebug() << "onWorkFinished: keys: " << m_datas.keys() << " values: " << m_datas.values();
+   foreach(QString idx, m_datas.keys()){
+       emit updateTPDatas(idx, m_datas.value(idx)->timeDatas, m_datas.value(idx)->valueDatas,
+                          m_datas.value(idx)->packetLost, m_datas.value(idx)->packetTotal, m_datas.value(idx)->lostrate);
+   }
 }

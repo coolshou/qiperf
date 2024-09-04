@@ -311,9 +311,11 @@ int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint 
     connect(iperfer, &IperfWorker::log, this, &QIperfd::onIperfLog);
     connect(iperfer, &IperfWorker::started, this, &QIperfd::onStarted);
     connect(iperfer, &IperfWorker::finished, this, &QIperfd::onFinished);
+    connect(iperfer, &IperfWorker::finished, iperfer, &IperfWorker::deleteLater);
     connect(iperfer, &IperfWorker::onThroughput, this, &QIperfd::onThroughput);
     iperfer->moveToThread(iperf_th);
     connect(iperf_th, &QThread::started, iperfer, &IperfWorker::work);
+    connect(iperf_th, &QThread::finished, iperf_th, &QThread::deleteLater);
     connect(this, &QIperfd::setStop, iperfer, &IperfWorker::setStop);
 
     //    m_iperfworkers.append(iperfer);

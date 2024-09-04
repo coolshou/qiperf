@@ -66,7 +66,10 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_qipconfig = new QIPConfig(logdir.absolutePath());
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
     connect(m_qipconfig, &QIPConfig::updateTPCfg, this, &QIperfC::onUpdateTPCfg);
-    connect(m_qipconfig, &QIPConfig::onThroughput, m_tpmgr, &TPMgr::onIperfTPdata);
+//    connect(m_qipconfig, &QIPConfig::onThroughput, m_tpmgr, &TPMgr::onIperfTPdata);
+    connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpmgr, &TPMgr::onUpdateTPDatas);
+    connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpplot, &TPPlot::onUpdateTPDatas);
+    connect(m_qipconfig, &QIPConfig::progress, this, &QIperfC::onProgress);
     connect(m_qipconfig, &QIPConfig::updateStartDateTime, m_tpplot, &TPPlot::setStartTime);
 
     m_endpointmgr = new EndPointMgr(this);
@@ -140,7 +143,6 @@ bool QIperfC::load(QString filename)
         qDebug() << "load file " << filename << " Fail!!";
     }
     return false;
-
 }
 
 bool QIperfC::save(QString filename)
@@ -1074,6 +1076,15 @@ void QIperfC::onUpdateDataPath(QString datapath)
 void QIperfC::onUpdateTPCfg(QByteArray tpcfg)
 {
     m_tpmgr->loaddata(tpcfg);
+}
+
+void QIperfC::onProgress(int currentlineno)
+{
+    if (currentlineno>0){
+        onUpdateStatus("Procress line "+ QString::number(currentlineno));
+    }else{
+        onUpdateStatus("");
+    }
 }
 
 int QIperfC::getStatusServers()

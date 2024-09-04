@@ -614,7 +614,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                 // chart data ( with out Average data)
     //            qDebug() << sInterval <<" lost_rate: " << lost_rate;
                 emit IperfTPdata(sInterval, refrow + "_" + jObj.value("idx").toString(),
-                        jObj.value("value").toString(), QString::number(lost_rate));
+                        jObj.value("value").toString(), QString::number(lost_rate, 'f', 4));
             }
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
@@ -635,4 +635,9 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         qDebug() << "TPMgr::onIperfTPdata wrong format:(" << error.errorString() << "\n" << datas;
     }
 
+}
+
+void TPMgr::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas)
+{
+    qDebug() << "TODO: TPMgr::onUpdateTPDatas, just show last value";
 }

@@ -87,6 +87,8 @@ public:
 
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
+    void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas);
+
 signals:
     void IperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);// time, idx, throughput value, lost rate
 

@@ -270,9 +270,12 @@ void IperfWrapper::work()
 //        qDebug() <<"start IperfWrapper::work: " << m_filename ;
         if (file.open(QIODevice::ReadOnly)){
             QTextStream in(&file);
+            int lineNumber = 0;
             while (!in.atEnd())
             {
                 QString line = in.readLine();
+                lineNumber++;
+                emit progress(lineNumber);
                 if (m_version=="3"){
                     if (line!=""){
                         parserIperf3(line);
@@ -283,10 +286,11 @@ void IperfWrapper::work()
                     qDebug() << "[IperfWrapper::work]: Not support iperf version:" <<m_version;
                 }
 //                QCoreApplication::processEvents(QEventLoop::AllEvents);
-                QThread::msleep(18);// slow down to avoid app crash under windows
+//                QThread::msleep(18);// slow down to avoid app crash under windows
             }
             file.close();
 //            qDebug() << "finish file parser: " << m_filename;
+            emit progress(-1);
         }else{
             qDebug() << "open file " << m_filename << " Fail!!";
         }

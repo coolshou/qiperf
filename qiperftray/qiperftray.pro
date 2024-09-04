@@ -78,20 +78,20 @@ win32 {
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/../$${TARGET}_$${QT_ARCH}))
 
     DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
-CONFIG(release, debug|release) {
-    release: iperfbin.commands = \
-        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Release/$${TARGET}.exe)) $$DIST_FILE
-}else {
-    debug: iperfbin.commands = \
-    $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Debug/$${TARGET}.exe)) $$DIST_FILE
-}
+#CONFIG(release, debug|release) {
+#    release: iperfbin.commands = \
+#        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Release/$${TARGET}.exe)) $$DIST_FILE
+#}else {
+#    debug: iperfbin.commands = \
+#    $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Debug/$${TARGET}.exe)) $$DIST_FILE
+#}
     deploy.commands = \
         windeployqt $$DIST_FILE
 
-    first.depends = $(first) iperfbin deploy
+    first.depends = $(first)  deploy
     export(first.depends)
-    export(iperfbin.commands)
-    QMAKE_EXTRA_TARGETS += first iperfbin deploy
+#    export(iperfbin.commands)
+    QMAKE_EXTRA_TARGETS += first deploy
 
 }
 unix:!android {

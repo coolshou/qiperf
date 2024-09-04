@@ -29,16 +29,21 @@ public:
     void setTPCfg(QByteArray tpcfg, QString env="", QString testdate="", QStringList datafilenames={});
     void clear();
     bool importIperf3Log(QString filename);
-
+public slots:
+    void onProgress(int currentlineno);
 signals:
     void updateDataPath(QString datapath);
     void updateTPCfg(QByteArray tpcfg);
     void onThroughput(QString refrow, QString sInterval, QString datas); // refrow, sInterval, throughput data
     void updateStartDateTime(QDateTime datetime);
+    void updateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
+                            QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
+    void progress(int currentlineno);
 
 private slots:
     void onThroughputData(int idx, QString sInterval,  QString data);
-
+    void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
+                        QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
 private:
     static const QByteArray MAGIC_VALUE;
     static const qint32 VERSION;

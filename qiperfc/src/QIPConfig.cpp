@@ -152,10 +152,21 @@ bool QIPConfig::importIperf3Log(QString filename)
     return true;
 }
 
+void QIPConfig::onProgress(int currentlineno)
+{
+    emit progress(currentlineno);
+}
+
 void QIPConfig::onThroughputData(int idx, QString sInterval, QString data)
 {
 //    qDebug() << "QIPConfig::onThroughputData: " << idx << " sInterval: " << sInterval << " data: " << data;
     emit onThroughput(QString::number(idx), sInterval, data);
+}
+
+void QIPConfig::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
+                                QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate)
+{
+    emit updateTPDatas(refrow, timedatas, valuedatas, packetlosts, packettotals, lostrate);
 }
 
 QByteArray QIPConfig::serialize() const {
@@ -295,6 +306,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                                                            bidir, "Tx", serverfile);
                                 m_fileworkers.append(ifw);
                                 connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
+                                connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
+                                connect(ifw, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
                                 ifw->start();
                             }else{
                                 qDebug() << "not exist serverfile:" << serverfile;
@@ -307,6 +320,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                                                            bidir, "Rx", clientfile);
                                 m_fileworkers.append(ifwc);
                                 connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
+                                connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
+                                connect(ifwc, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
                                 ifwc->start();
                             }else{
                                 qDebug() << "not exist clientfile:" << clientfile;
@@ -319,6 +334,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                                                        bidir, "Tx", serverfile);
                             m_fileworkers.append(ifw);
                             connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
+                            connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
+                            connect(ifw, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
                             ifw->start();
                         }else{
                             qDebug() << "bidir: not exist serverfile:" << serverfile;
@@ -329,6 +346,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                                                        bidir, "Rx", clientfile);
                             m_fileworkers.append(ifwc);
                             connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
+                            connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
+                            connect(ifwc, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
                             ifwc->start();
                         }else{
                             qDebug() << "bidir: not exist clientfile:" << clientfile;

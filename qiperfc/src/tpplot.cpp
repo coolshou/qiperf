@@ -1,5 +1,7 @@
 #include "tpplot.h"
 
+#include <numeric>
+
 TPPlot::TPPlot(QWidget *parent):QCustomPlot(parent)
 {
     initCustomPlot();
@@ -9,6 +11,34 @@ void TPPlot::setStartTime(QDateTime startTime)
 {
     m_starttime = startTime;
 
+}
+
+void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
+                             QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate)
+{
+    qDebug() << "onUpdateTPDatas:" << refrow;
+    QCPGraph *graph = getGraph(refrow);
+
+    double minT = *std::min_element(timedatas.begin(), timedatas.end());
+    double maxT = *std::max_element(timedatas.begin(), timedatas.end());
+    xAxis->setRange(minT-30, maxT+30);
+
+    double minV = *std::min_element(valuedatas.begin(), valuedatas.end());
+    double maxV = *std::max_element(valuedatas.begin(), valuedatas.end());
+    yAxis->setRange(minV*0.9, maxV*1.1);
+
+    graph->setData(timedatas, valuedatas);
+    //TODO: lostrate
+
+    // Calculate the sum
+    int sum = std::accumulate(packettotals.begin(), packettotals.end(), 0);
+    if (sum>0){
+        int lost = std::accumulate(packetlosts.begin(), packetlosts.end(), 0);
+        qDebug() << "lost: " << QString::number(lost) << " total: " << QString::number(sum);
+        QCPBars *g_lostrate = getLostRateGraph(refrow);
+        g_lostrate->setData(timedatas, lostrate);
+    }
+    this->replot();
 }
 
 void TPPlot::onIperfTPdata(QString sInterval, QString idx, QString data, QString lostrate)
@@ -40,6 +70,7 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
     //lost rate
     if (lostrate>0){
         QCPBars *g_lostrate = getLostRateGraph(idx);
+        qDebug() << "g_lostrate: " << xdata << " value:" << lostrate;
         g_lostrate->addData(xdata, lostrate);
     }
     replot();
@@ -100,6 +131,7 @@ QCPBars *TPPlot::getLostRateGraph(QString idx)
     QCPBars *g_lostrate;
     if (!m_lostgraphs.contains(idx)){
         if (m_graphs.contains(idx)){
+            // use same color as throughput chart
             g = m_graphs.value(idx);
             graphPen = g->pen();
         } else {

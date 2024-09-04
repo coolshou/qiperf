@@ -4,9 +4,8 @@
 
 #include <QObject>
 #include <QTimer>
-//#include <QCustomPlot>
 #include "../lib/qcustomplot.h"
-#include "comm.h"
+// #include "comm.h"
 //#include <QPrivateSignal>
 
 class TPPlot : public QCustomPlot
@@ -23,6 +22,8 @@ public:
 public slots:
     void onIperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);  //
     void setStartTime(QDateTime startTime);
+    void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
+                         QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
 
 private slots:
 //    void realtimeDataSlot(QPrivateSignal sig);

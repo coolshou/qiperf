@@ -24,6 +24,7 @@ public slots:
 signals:
     void sendThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
     void workFinished();
+    void progress(int currentlineno);
 private:
 
 private:

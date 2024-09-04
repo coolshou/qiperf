@@ -3,8 +3,18 @@
 
 #include <QObject>
 #include <QThread>
+#include <QVector>
 
 #include "iperfwrapper.h"
+class TPData: public QObject
+{
+public:
+    QVector<double> timeDatas;
+    QVector<double> valueDatas;
+    QVector<int> packetLost;
+    QVector<int> packetTotal;
+    QVector<double> lostrate;
+};
 
 class IperfFileWorker : public QObject
 {
@@ -15,10 +25,18 @@ public:
                              bool bidir, QString bidirtag , QString filename,
                              QObject *parent = nullptr);
     void start();
+public slots:
+    void onProgress(int currentlineno);
+
 signals:
     void onThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
+    void updateTPDatas(QString idx, QVector<double> timedatas, QVector<double> valuedatas,
+                        QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
+    void updateTPAvg(QString idx, double time, double value, int packetlost, int packettotal, double lostrate);
+    void progress(int currentlineno);
 private slots:
-    void onThroughputData(int idx, QString sInterval,  QString data);
+    void onThroughputData(int midx, QString sInterval,  QString data);
+    void onWorkFinished();
 private:
     QThread *m_thread;
     IperfWrapper *m_iperfwrapper;
@@ -31,6 +49,7 @@ private:
     bool m_bidir;
     QString m_bidirtag;
     QString m_filename;
+    QMap<QString, TPData*> m_datas;
 };
 
 #endif // IPERFFILEWORKER_H
