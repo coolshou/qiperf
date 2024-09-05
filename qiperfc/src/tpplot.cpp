@@ -14,7 +14,7 @@ void TPPlot::setStartTime(QDateTime startTime)
 }
 
 void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
-                             QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate)
+                             QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates)
 {
     // qDebug() << "onUpdateTPDatas:" << refrow << " times:" << timedatas << " values: " << valuedatas;
     QCPGraph *graph = getGraph(refrow);
@@ -33,10 +33,13 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
     // Calculate the sum
     int sum = std::accumulate(packettotals.begin(), packettotals.end(), 0);
     if (sum>0){
-        int lost = std::accumulate(packetlosts.begin(), packetlosts.end(), 0);
-        qDebug() << "lost: " << QString::number(lost) << " total: " << QString::number(sum);
+        // int lost = std::accumulate(packetlosts.begin(), packetlosts.end(), 0);
+        // qDebug() << "sum lost: " << QString::number(lost) << " total: " << QString::number(sum);
         QCPBars *g_lostrate = getLostRateGraph(refrow);
-        g_lostrate->setData(timedatas, lostrate);
+        // qDebug() << "timedatas: " << timedatas.length() << " rates:" << lostrates.length();
+        // qDebug() << "timedatas: " << timedatas;
+        // qDebug() << "lostrate: " << lostrates;
+        g_lostrate->setData(timedatas, lostrates);
     }
     this->replot();
 }
@@ -140,8 +143,9 @@ QCPBars *TPPlot::getLostRateGraph(QString idx)
             int B =rand()%245+10;
             graphPen = newColorPen(R, G, B, 1);
         }
+        QPen redPen = newColorPen(255, 0, 0, 2);
         g_lostrate = new QCPBars(xAxis, yAxis2);
-        g_lostrate->setPen(graphPen);
+        g_lostrate->setPen(redPen);
         g_lostrate->setBrush(graphPen.color());
 
     }else{

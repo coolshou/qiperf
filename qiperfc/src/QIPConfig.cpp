@@ -157,9 +157,13 @@ void QIPConfig::onProgress(int currentlineno)
     emit progress(currentlineno);
 }
 
-void QIPConfig::onUpdateTPAvg(QString idx, double time, double value, int packetlost, int packettotal, double lostrate)
+void QIPConfig::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
+                              QString value, QString unit, QString dir,
+                              QString pkt_lost, QString pkt_total)
 {
-    emit updateTPAvg(idx, time,value, packetlost, packettotal, lostrate);
+    emit updateTPAvg(midx, sInterval, idx,
+                     value, unit, dir,
+                     pkt_lost, pkt_total);
 }
 
 void QIPConfig::onThroughputData(int idx, QString sInterval, QString data)

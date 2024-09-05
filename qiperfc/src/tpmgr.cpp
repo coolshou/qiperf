@@ -439,7 +439,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
         c->setDataType(TPMgrData::TP);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
-//                qDebug() << c << " new pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+               qDebug() << c << " new pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
@@ -448,7 +448,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
         c->setThroughput(value);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
-//                qDebug() << c << " row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+               qDebug() << c << " row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
@@ -642,9 +642,11 @@ void TPMgr::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<d
     qDebug() << "TODO: TPMgr::onUpdateTPDatas, just show last value";
 }
 
-void TPMgr::onUpdateTPAvg(QString idx, double time, double value, int packetlost, int packettotal, double lostrate)
+void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
+                          QString value, QString unit, QString dir,
+                          QString pkt_lost, QString pkt_total)
 {
     qDebug() << "onUpdateTPAvg: " << idx << " time:" << time << " : " << value
-             << " lost/total:" << packetlost << "/" << packettotal
-             << "  rate:"  << lostrate;
+             << " lost/total:" << pkt_lost << "/" << pkt_total;
+    addTPdata(midx, sInterval, idx, value, unit, dir, pkt_lost, pkt_total);
 }

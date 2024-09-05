@@ -64,21 +64,25 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
                 QString idx = QString::number(midx) + "_"+ jObj.value("idx").toString();
                 double tpvalue = jObj.value("value").toString().toDouble(); // jsondata value is string, need toString() then can convert to double!!
                 QString unit = jObj.value("unit").toString();
-                int pkt_lost = jObj.value("packet_lost").toString().toInt(); // jsondata value is string, need toString() then can convert to int!!
+                double pkt_lost = jObj.value("packet_lost").toString().toDouble(); // jsondata value is string, need toString() then can convert to int!!
                 int pkt_total = jObj.value("packet_total").toString().toInt(); // jsondata value is string, need toString() then can convert to int!!
                 QString jitter = jObj.value("jitter").toString();                   //TODO jitter
                 QString jitter_unit = jObj.value("jitter_unit").toString();         //TODO jitter_unit
                 double lostrate=0.0;
                 if (pkt_total>0){
                     lostrate = (pkt_lost/pkt_total)*100;
+                    // qDebug() << sInterval << " pkt_lost" << pkt_lost << " pkt_total:" << pkt_total << " ==" << lostrate;
+                    if (lostrate>0){
+                        qDebug() << "sInterval: " << sInterval << " lostrate" << lostrate;
+                    }
                 }
-                Q_UNUSED(dir)
-                Q_UNUSED(unit)
                 Q_UNUSED(jitter)
                 Q_UNUSED(jitter_unit)
                 if (avg){
                     // AVG value
-                    emit updateTPAvg(idx, fInterval, tpvalue, pkt_lost, pkt_total, lostrate);
+                    //QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir, QString pkt_lost, QString pkt_total
+                    emit updateTPAvg(QString::number(midx), sInterval, jObj.value("idx").toString(), QString::number(tpvalue),
+                                     unit, dir, QString::number(pkt_lost), QString::number(pkt_total));
                 } else {
                     TPData *tpdata = new TPData();
                     if ((m_datas.keys().length() > 0) && (m_datas.keys().contains(idx))){
