@@ -641,3 +641,10 @@ void TPMgr::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<d
 {
     qDebug() << "TODO: TPMgr::onUpdateTPDatas, just show last value";
 }
+
+void TPMgr::onUpdateTPAvg(QString idx, double time, double value, int packetlost, int packettotal, double lostrate)
+{
+    qDebug() << "onUpdateTPAvg: " << idx << " time:" << time << " : " << value
+             << " lost/total:" << packetlost << "/" << packettotal
+             << "  rate:"  << lostrate;
+}

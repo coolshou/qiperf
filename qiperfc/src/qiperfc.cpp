@@ -68,6 +68,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_qipconfig, &QIPConfig::updateTPCfg, this, &QIperfC::onUpdateTPCfg);
 //    connect(m_qipconfig, &QIPConfig::onThroughput, m_tpmgr, &TPMgr::onIperfTPdata);
     connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpmgr, &TPMgr::onUpdateTPDatas);
+    connect(m_qipconfig, &QIPConfig::updateTPAvg, m_tpmgr, &TPMgr::onUpdateTPAvg);
     connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpplot, &TPPlot::onUpdateTPDatas);
     connect(m_qipconfig, &QIPConfig::progress, this, &QIperfC::onProgress);
     connect(m_qipconfig, &QIPConfig::updateStartDateTime, m_tpplot, &TPPlot::setStartTime);

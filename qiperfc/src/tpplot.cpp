@@ -16,7 +16,7 @@ void TPPlot::setStartTime(QDateTime startTime)
 void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
                              QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate)
 {
-    qDebug() << "onUpdateTPDatas:" << refrow;
+    // qDebug() << "onUpdateTPDatas:" << refrow << " times:" << timedatas << " values: " << valuedatas;
     QCPGraph *graph = getGraph(refrow);
 
     double minT = *std::min_element(timedatas.begin(), timedatas.end());

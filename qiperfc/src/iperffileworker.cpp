@@ -55,19 +55,19 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
         QJsonDocument doc=QJsonDocument::fromJson(data.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
             QJsonArray jArr = doc.array();
+            // qDebug() << "IperfFileWorker::onThroughputData: " << sInterval << " : "<< data;
             double fInterval = sInterval.toDouble();
             for (QJsonArray::const_iterator it=jArr.constBegin(); it!=jArr.constEnd(); ++it) {
                 QJsonObject jObj= it->toObject();
-                // QJsonObject jObj = doc.object();
                 bool avg= jObj.value("AVG").toBool();
                 QString dir= jObj.value("dir").toString();
                 QString idx = QString::number(midx) + "_"+ jObj.value("idx").toString();
-                double value = jObj.value("value").toDouble();
+                double tpvalue = jObj.value("value").toString().toDouble(); // jsondata value is string, need toString() then can convert to double!!
                 QString unit = jObj.value("unit").toString();
-                int pkt_lost = jObj.value("packet_lost").toInt();
-                int pkt_total = jObj.value("packet_total").toInt();
-                QString jitter = jObj.value("jitter").toString(); //TODO jitter
-                QString jitter_unit = jObj.value("jitter_unit").toString(); //TODO jitter_unit
+                int pkt_lost = jObj.value("packet_lost").toString().toInt(); // jsondata value is string, need toString() then can convert to int!!
+                int pkt_total = jObj.value("packet_total").toString().toInt(); // jsondata value is string, need toString() then can convert to int!!
+                QString jitter = jObj.value("jitter").toString();                   //TODO jitter
+                QString jitter_unit = jObj.value("jitter_unit").toString();         //TODO jitter_unit
                 double lostrate=0.0;
                 if (pkt_total>0){
                     lostrate = (pkt_lost/pkt_total)*100;
@@ -78,7 +78,7 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
                 Q_UNUSED(jitter_unit)
                 if (avg){
                     // AVG value
-                    emit updateTPAvg(idx, fInterval, value, pkt_lost, pkt_total, lostrate);
+                    emit updateTPAvg(idx, fInterval, tpvalue, pkt_lost, pkt_total, lostrate);
                 } else {
                     TPData *tpdata = new TPData();
                     if ((m_datas.keys().length() > 0) && (m_datas.keys().contains(idx))){
@@ -87,7 +87,8 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
                         m_datas.insert(idx, tpdata);
                     }
                     tpdata->timeDatas.append(fInterval);
-                    tpdata->valueDatas.append(value);
+
+                    tpdata->valueDatas.append(tpvalue);
                     tpdata->packetLost.append(pkt_lost);
                     tpdata->packetTotal.append(pkt_total);
                     tpdata->lostrate.append(lostrate);
@@ -103,7 +104,6 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
 
 void IperfFileWorker::onWorkFinished()
 {
-    qDebug() << "onWorkFinished: keys: " << m_datas.keys() << " values: " << m_datas.values();
    foreach(QString idx, m_datas.keys()){
        emit updateTPDatas(idx, m_datas.value(idx)->timeDatas, m_datas.value(idx)->valueDatas,
                           m_datas.value(idx)->packetLost, m_datas.value(idx)->packetTotal, m_datas.value(idx)->lostrate);

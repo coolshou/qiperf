@@ -157,6 +157,11 @@ void QIPConfig::onProgress(int currentlineno)
     emit progress(currentlineno);
 }
 
+void QIPConfig::onUpdateTPAvg(QString idx, double time, double value, int packetlost, int packettotal, double lostrate)
+{
+    emit updateTPAvg(idx, time,value, packetlost, packettotal, lostrate);
+}
+
 void QIPConfig::onThroughputData(int idx, QString sInterval, QString data)
 {
 //    qDebug() << "QIPConfig::onThroughputData: " << idx << " sInterval: " << sInterval << " data: " << data;
@@ -307,6 +312,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 m_fileworkers.append(ifw);
                                 connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
+                                connect(ifw, &IperfFileWorker::updateTPAvg, this, &QIPConfig::onUpdateTPAvg);
                                 connect(ifw, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
                                 ifw->start();
                             }else{
@@ -321,6 +327,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 m_fileworkers.append(ifwc);
                                 connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
+                                connect(ifwc, &IperfFileWorker::updateTPAvg, this, &QIPConfig::onUpdateTPAvg);
                                 connect(ifwc, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
                                 ifwc->start();
                             }else{
@@ -335,6 +342,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             m_fileworkers.append(ifw);
                             connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
+                            connect(ifw, &IperfFileWorker::updateTPAvg, this, &QIPConfig::onUpdateTPAvg);
                             connect(ifw, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
                             ifw->start();
                         }else{
@@ -347,6 +355,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             m_fileworkers.append(ifwc);
                             connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
+                            connect(ifwc, &IperfFileWorker::updateTPAvg, this, &QIPConfig::onUpdateTPAvg);
                             connect(ifwc, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
                             ifwc->start();
                         }else{

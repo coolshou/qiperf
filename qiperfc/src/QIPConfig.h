@@ -31,6 +31,7 @@ public:
     bool importIperf3Log(QString filename);
 public slots:
     void onProgress(int currentlineno);
+    void onUpdateTPAvg(QString idx, double time, double value, int packetlost, int packettotal, double lostrate);
 signals:
     void updateDataPath(QString datapath);
     void updateTPCfg(QByteArray tpcfg);
@@ -38,6 +39,7 @@ signals:
     void updateStartDateTime(QDateTime datetime);
     void updateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
                             QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
+    void updateTPAvg(QString idx, double time, double value, int packetlost, int packettotal, double lostrate);
     void progress(int currentlineno);
 
 private slots:
