@@ -413,6 +413,7 @@ void TP::setThroughput(QString dir, QString value)
 {
     if (dir.contains("Tx")){
         m_Tx = value.toDouble();
+        // qDebug() << "setThroughput:m_Tx: " << m_Tx;
         if (m_minTx==0 || (m_minTx> value.toDouble())){
             m_minTx = value.toDouble();
         }
@@ -421,6 +422,7 @@ void TP::setThroughput(QString dir, QString value)
         }
     }else{
         m_Rx = value.toDouble();
+        // qDebug() << "setThroughput:m_Rx: " << m_Rx;
         if (m_minRx==0 || (m_minRx> value.toDouble())){
             m_minRx = value.toDouble();
         }
@@ -428,6 +430,7 @@ void TP::setThroughput(QString dir, QString value)
             m_maxRx = value.toDouble();
         }
     }
+    setThroughput(value);
 }
 
 void TP::updateTimeStemp()
@@ -454,7 +457,8 @@ int TP::getDataType()
 QString TP::getTxRxThroughput()
 {
    double v = m_Tx+m_Rx;
-   if (v>0){
+    // qDebug() << "getTxRxThroughput: " << v;
+    if (v>0){
        return QString::number(v);
    }else{
        return "";
@@ -516,8 +520,8 @@ QString TP::getLostRate()
     if (m_totalpacket>0){
         double v = (static_cast<double>(m_lostpacket) / m_totalpacket)*100;
         if (v>0){
-            return QString::number(v) +
-                    "("+ QString::number(m_lostpacket) +"/"+ QString::number(m_totalpacket) +")";
+            return QString::number(v);
+            // +"("+ QString::number(m_lostpacket) +"/"+ QString::number(m_totalpacket) +")";
         }else{
             qDebug() << "lost/total:" << QString::number(m_lostpacket) << " / " << QString::number(m_totalpacket);
             return QString();

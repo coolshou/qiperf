@@ -73,19 +73,38 @@ QVariant TPMgr::data(const QModelIndex &idx, int role) const
                 return QVariant("disable"+item->data(idx.column()).toString());
             }
         }
-        if (idx.column()== TP::cols::throughput) {
+        if ((idx.column() == TP::cols::throughput)||
+            (idx.column() == TP::cols::mintp) ||
+            (idx.column() == TP::cols::maxtp) ||
+            (idx.column() == TP::cols::lostrate)){
+            // TODO: this will keeps calc! not good
             //special case of throughput data (sum of all iperf  --parallel value)
-            return QVariant(item->getTxRxThroughput());
-        }
-        if (idx.column()== TP::cols::mintp) {
-            return QVariant(item->getMinThroughput());
-        }
-        if (idx.column()== TP::cols::maxtp) {
-            return QVariant(item->getMaxThroughput());
-        }
-        if (idx.column()== TP::cols::lostrate) {
-            //TODO: all child's lostrate sum?
-//            return QVariant(item->getMaxThroughput());
+            double tpvalue=0.0;
+            double tpMinvalue=0.0;
+            double tpMaxvalue=0.0;
+            double tpLostrate=0.0;
+            QList<TP *> tps=item->getChilds();
+            foreach(TP *tp, tps){
+                qDebug() << "TP: " << tp->getTxRxThroughput();
+                tpvalue = tpvalue + tp->getTxRxThroughput().toDouble();
+                tpMinvalue = tpMinvalue + tp->getMinThroughput().toDouble();
+                tpMaxvalue = tpMaxvalue + tp->getMaxThroughput().toDouble();
+                tpLostrate = tpLostrate + tp->getLostRate().toDouble();
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
+            }
+            if (idx.column()== TP::cols::throughput) {
+
+                return QVariant(tpvalue);
+            }
+            if (idx.column()== TP::cols::mintp) {
+                return QVariant(tpMinvalue);
+            }
+            if (idx.column()== TP::cols::maxtp) {
+                return QVariant(tpMaxvalue);
+            }
+            if (idx.column()== TP::cols::lostrate) {
+                return QVariant(tpLostrate);
+            }
         }
     }
 //    if (idx.column()== TP::cols::lostrate) {
@@ -434,7 +453,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
     TP *c = getItemByIdx(midx+"_"+idx, tp); //iperf pair config item
     if (c==nullptr){
         c = new TP(midx+"_"+idx, "", tp);
-        c->setThroughput(value);
+        c->setThroughput(dir, value);
         c->setDirection(dir);
         c->setDataType(TPMgrData::TP);
         if (!pkt_lost.isEmpty()){
@@ -445,7 +464,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
         }
         tp->appendChild(c); // add iperf pair config item to parent item
     }else{
-        c->setThroughput(value);
+        c->setThroughput(dir, value);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
                qDebug() << c << " row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
@@ -637,9 +656,11 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 
 }
 
-void TPMgr::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas)
+void TPMgr::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
+                            QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate)
 {
     qDebug() << "TODO: TPMgr::onUpdateTPDatas, just show last value";
+    addTPdata(refrow, sInterval, idx, value, unit, dir, pkt_lost, pkt_total);
 }
 
 void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,

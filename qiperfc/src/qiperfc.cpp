@@ -66,7 +66,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_qipconfig = new QIPConfig(logdir.absolutePath());
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
     connect(m_qipconfig, &QIPConfig::updateTPCfg, this, &QIperfC::onUpdateTPCfg);
-    connect(m_qipconfig, &QIPConfig::updateTPAvg, m_tpmgr, &TPMgr::addTPdata);
+    connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpmgr, &TPMgr::onUpdateTPDatas);
+    connect(m_qipconfig, &QIPConfig::updateTPAvg, m_tpmgr, &TPMgr::addTPdata); // this only get last avg, which may cause min/max value wrong!!
     connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpplot, &TPPlot::onUpdateTPDatas);
     connect(m_qipconfig, &QIPConfig::progress, this, &QIperfC::onProgress);
     connect(m_qipconfig, &QIPConfig::updateStartDateTime, m_tpplot, &TPPlot::setStartTime);

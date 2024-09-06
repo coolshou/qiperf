@@ -87,7 +87,8 @@ public:
 
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
-    void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas);
+    void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
+                         QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
     void onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                        QString value, QString unit, QString dir,
                        QString pkt_lost, QString pkt_total);

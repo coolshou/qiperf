@@ -285,7 +285,7 @@ void IperfWrapper::work()
                 }else {
                     qDebug() << "[IperfWrapper::work]: Not support iperf version:" <<m_version;
                 }
-//                QCoreApplication::processEvents(QEventLoop::AllEvents);
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
 //                QThread::msleep(18);// slow down to avoid app crash under windows
             }
             file.close();
