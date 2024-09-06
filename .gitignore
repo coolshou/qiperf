@@ -21,3 +21,4 @@
 /debian/files
 /.qmake.stash
 /Makefile
+/.qtc_clangd/*
