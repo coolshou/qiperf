@@ -19,6 +19,7 @@ signals:
     void doCopy();
     void doPaste();
     void doDelete();
+    void doRefresh();
 
 protected:
     bool eventFilter(QObject* obj, QEvent* event) override;

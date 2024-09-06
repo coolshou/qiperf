@@ -5,6 +5,7 @@
 #include <QFileSystemModel>
 
 #include "codeeditor.h"
+#include "tooltipeventfilter.h"
 
 namespace Ui {
 class DlgRecord;
@@ -28,13 +29,14 @@ protected:
 
 private slots:
     void onItemDClicked(QModelIndex idx);
+    void onRefresh();
 
 private:
     Ui::DlgRecord *ui;
     QFileSystemModel *m_fileModel;
     QString m_rootpath;
     QMap<QString, CodeEditor*> m_logfiles;
-
+    // TooltipEventFilter *m_filter;
 };
 
 #endif // DLGRECORD_H

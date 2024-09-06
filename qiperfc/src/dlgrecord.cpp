@@ -14,6 +14,9 @@ DlgRecord::DlgRecord(QWidget *parent) :
     m_fileModel->setFilter(QDir::NoDotAndDotDot | QDir::Files);
     ui->tvLogFiles->setModel(m_fileModel);
     connect(ui->tvLogFiles, &QTreeView::doubleClicked, this, &DlgRecord::onItemDClicked); //edit item on double click
+    // TooltipEventFilter *m_filter = new TooltipEventFilter(ui->tvLogFiles);
+    // connect(m_filter, &TooltipEventFilter::doRefresh, this, &DlgRecord::onRefresh);
+    // ui->tvLogFiles->viewport()->installEventFilter(m_filter);
 }
 
 DlgRecord::~DlgRecord()
@@ -87,4 +90,10 @@ void DlgRecord::onItemDClicked(QModelIndex idx)
             }
         }
     }
+}
+
+void DlgRecord::onRefresh()
+{
+    qDebug() << "onRefresh";
+    m_fileModel->setRootPath(m_rootpath);
 }

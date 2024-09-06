@@ -33,6 +33,9 @@ bool TooltipEventFilter::eventFilter(QObject *obj, QEvent *event) {
             qDebug() << "doDelete" ;
             emit doDelete();
         }
+        // if(keyEvent->key() == Qt::Key_F5){       //F5
+        //     emit doRefresh();
+        // }
     }
     return QObject::eventFilter(obj, event);
 }
