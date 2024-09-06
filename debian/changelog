@@ -7,6 +7,7 @@ qiperf (0.5.11309.06-1) unstable; urgency=medium
   * Fix clear record did not fully clear record data
   * Fix delete pair will clear all test pairs
   * Fix open multi times many cause throughput plot wrong
+  * Fix open saved qip file (with iperf raw data) cause app crash under Windows
 
  -- coolshou <coolshou2060@gmail.com>  Fri, 06 Sep 2024 10:00:00 +0800
 
