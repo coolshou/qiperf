@@ -84,7 +84,6 @@ void DlgRecord::onItemDClicked(QModelIndex idx)
                 m_logfiles[filename]->load(filename);
                 m_logfiles[filename]->show();
             }else{
-                qDebug() << "activateWindow: " << filename;
                 m_logfiles[filename]->setWindowState((m_logfiles[filename]->windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
                 m_logfiles[filename]->raise();
             }
