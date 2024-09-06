@@ -85,6 +85,8 @@ public:
     QString getMinThroughput();
     QString getMaxThroughput();
     void clearThroughput();
+    int getLostPackets();
+    int getTotalPackets();
     void setLostRate(QString pkt_lost, QString pkt_total);
     QString getLostRate();
     void setEnabled();

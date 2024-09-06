@@ -398,7 +398,7 @@ void TP::setComment(QString comment)
 
 void TP::setThroughput(QString value)
 {
-    if ((m_itemDatas[int(TP::mintp)].toDouble()==0 && (value.toDouble()>0))||
+    if ((m_itemDatas[int(TP::mintp)].toDouble()<=0 && (value.toDouble()>0))||
             (value.toFloat() < m_itemDatas[int(TP::mintp)].toDouble())){
         m_itemDatas[int(TP::mintp)] = value;
     }
@@ -493,6 +493,16 @@ void TP::clearThroughput()
     m_maxTx = 0;
     m_minRx = 0;
     m_maxRx = 0;
+}
+
+int TP::getLostPackets()
+{
+    return m_lostpacket;
+}
+
+int TP::getTotalPackets()
+{
+    return m_totalpacket;
 }
 
 void TP::setLostRate(QString pkt_lost, QString pkt_total)

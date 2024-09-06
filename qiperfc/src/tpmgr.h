@@ -8,6 +8,7 @@
 #include <QJsonObject>
 #include <QMap>
 #include <QFileIconProvider>
+#include <QTimer>
 #include "tp.h"
 
 class TPStatus: public QObject
@@ -96,12 +97,16 @@ public slots:
 signals:
     void IperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);// time, idx, throughput value, lost rate
 
+private slots:
+    void onUpdater();
+
 private:
     TP *rootItem;
     QList<TP*> m_tps; //QList of tp, data
     QFileIconProvider iconProvider;
     QMap<QString, double> m_intervals;
     QColor m_disabledTextColor;
+    QTimer *m_updater;
 };
 
 #endif // TPMGR_H
