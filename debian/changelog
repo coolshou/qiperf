@@ -1,13 +1,14 @@
-qiperf (0.5.11308.29-1) unstable; urgency=medium
+qiperf (0.5.11309.06-1) unstable; urgency=medium
 
-  * Fix second time run test no throughput value on UI
-  * Fix second time run test save raw log file to wrong folder
   * Add delay start time for iperf test
   * Add enable/disable specify iperf test pair
+  * Fix second time run test no throughput value on UI
+  * Fix second time run test save raw log file to wrong folder
   * Fix clear record did not fully clear record data
   * Fix delete pair will clear all test pairs
+  * Fix open multi times many cause throughput plot wrong
 
- -- coolshou <coolshou2060@gmail.com>  Thu, 29 Aug 2024 10:25:52 +0800
+ -- coolshou <coolshou2060@gmail.com>  Fri, 06 Sep 2024 10:00:00 +0800
 
 qiperf (0.4.11308.06-1) unstable; urgency=medium
 
