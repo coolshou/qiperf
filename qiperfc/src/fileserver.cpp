@@ -11,7 +11,7 @@ FileServer::FileServer(quint16 port, QObject *parent)
 {
 //    filesocket = new QTcpSocket(this);
     fileserver = new QTcpServer(this);
-    fileserver->listen(QHostAddress::Any, port);
+    fileserver->listen(QHostAddress::AnyIPv4, port);
     qDebug() << "FileServer listen on: " << port;
     connect(fileserver, SIGNAL(newConnection()), this, SLOT(acceptFileConnection()));
     bytesReceived = 0;
