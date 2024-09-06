@@ -126,7 +126,7 @@ private slots:
     void onRPC_error(int code, const QString& message);
     void onIperfStarted(QString smode, QString ipport);
     void onIperfStoped(QString refrow, QString err_no, QString err, QString ipport);
-    void onDisconnected(QString serverip);
+    void onDisconnected(QString targetip);
     void onTPUTContextMenu(QPoint pos);
     void onPlotContextMenuRequest(QPoint pos);
     void onUpdateDataPath(QString datapath);

@@ -1007,14 +1007,14 @@ void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err, QString
     }
 }
 
-void QIperfC::onDisconnected(QString serverip)
+void QIperfC::onDisconnected(QString targetip)
 {
-    qDebug() << "onDisconnected: " << serverip;
-    if (m_wss.contains(serverip)){
-        m_wss.remove(serverip);
+    qDebug() << "onDisconnected: " << targetip;
+    if (m_wss.contains(targetip)){
+        m_wss.remove(targetip);
     }
-    if (m_wsc.contains(serverip)){
-        m_wsc.remove(serverip);
+    if (m_wsc.contains(targetip)){
+        m_wsc.remove(targetip);
     }
 }
 

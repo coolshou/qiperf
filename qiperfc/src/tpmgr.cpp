@@ -23,7 +23,7 @@ TPMgr::TPMgr(QObject *parent)
     m_updater = new QTimer();
     // m_updater->setInterval(1000); //1 sec
     connect(m_updater, &QTimer::timeout, this, &TPMgr::onUpdater);
-    m_updater->start(1000); // 1 sec
+    m_updater->start(1000); // 1 sec, TODO: why slow to show up the throughput/lost rate in cfg row??
 }
 TPMgr::~TPMgr()
 {
@@ -412,11 +412,10 @@ int TPMgr::swapDirection(QModelIndex midx)
 {
     TP *tp= getItem(midx);
     if (tp->getDirection().contains("Tx")){
-        tp->setDirection(TP::DirType::Rx);
+        tp->setDirection("Rx");
     }else if (tp->getDirection().contains("Rx")){
-        tp->setDirection(TP::DirType::Tx);
+        tp->setDirection("Tx");
     }
-//    qDebug() << "after: " << tp->data(TP::cols::dir) << " midx: " <<midx;
     emit dataChanged(QModelIndex(),QModelIndex());
     return 0;
 }

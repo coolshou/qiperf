@@ -135,6 +135,7 @@ void TP::loadData(QString data)
     if (error.error == QJsonParseError::NoError){
         QJsonObject jsonRoot = doc.object();
         m_enabled = jsonRoot["enabled"].toBool();
+        //client
         QJsonObject o_client = jsonRoot["client"].toObject();
         m_version = o_client["version"].toInt();
         QString client = o_client["bind"].toString();
@@ -151,7 +152,7 @@ void TP::loadData(QString data)
         if (o_client["reverse"].toBool()){
             direction=QVariant::fromValue(DirType::Rx).toString();
         }
-
+        // server
         QJsonObject o_server = jsonRoot["server"].toObject();
         QString server = o_client["target"].toString();
         m_mgrserver = o_server["manager"].toString();
@@ -328,7 +329,7 @@ int TP::getDelaytime()
 
 int TP::setDirection(DirType direction)
 {
-    QString sdirection = QVariant::fromValue(direction).toString();
+    // QString sdirection = QVariant::fromValue(direction).toString();
     QJsonParseError error;
     QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError){
@@ -350,8 +351,7 @@ int TP::setDirection(DirType direction)
         jsonRoot["client"]=o_client;
         doc.setObject(jsonRoot);
         m_jsondata =doc.toJson(QJsonDocument::Compact);
-//        setData(TP::cols::dir, sdirection);
-
+        // setData(TP::cols::dir, sdirection);
         return 0;
     }else{
         qDebug() << "setDirection wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
@@ -520,7 +520,7 @@ void TP::setLostRate(QString pkt_lost, QString pkt_total)
 
         QString s= QString::number(lr*100)+
                 " ("+QString::number(m_lostpacket)+"/"+QString::number(m_totalpacket)+")";
-
+        //TODO: only show rate, move lost/total to tooltip?
         m_itemDatas[int(TP::lostrate)] = s;
     }
 }
