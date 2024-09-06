@@ -456,7 +456,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
 
     TP *tp = getItemByIdx(midx); //parent item
     if (tp==nullptr){
-        qDebug() << "addTPdata: no parent iperf pair?? (midx=" << midx << ")" << idx;
+        // qDebug() << "addTPdata: no parent iperf pair?? (midx=" << midx << ")" << idx;
         return;
     }
     TP *c = getItemByIdx(midx+"_"+idx, tp); //iperf pair config item
@@ -467,7 +467,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
         c->setDataType(TPMgrData::TP);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
-               qDebug() << c << " new pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+               // qDebug() << c << " new pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
@@ -476,7 +476,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
         c->setThroughput(dir, value);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
-               qDebug() << c << " row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+               // qDebug() << c << " row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
@@ -532,7 +532,7 @@ QMap<QString, QStringList> TPMgr::getBindkeys()
 
 bool TPMgr::isBindkeyExist(QString managerIP, QString bindkey, QModelIndex exc_idx)
 {
-    QString mip;
+    // QString mip;
     QString sbindkey;
     foreach (auto tp, this->getChilds()){
         if (exc_idx.isValid()){
