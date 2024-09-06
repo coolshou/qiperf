@@ -89,7 +89,7 @@ WSServer::WSServer(quint16 port, QObject *parent) :
                                               QWebSocketServer::NonSecureMode,
                                               this);
 
-    if (m_pWebSocketServer->listen(QHostAddress::Any, port))
+    if (m_pWebSocketServer->listen(QHostAddress::AnyIPv4, port))
     {
         qInfo() << "WS Server listening on port" << port;
         connect(m_pWebSocketServer, &QWebSocketServer::newConnection,

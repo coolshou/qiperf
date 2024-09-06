@@ -401,8 +401,8 @@ void QIperfC::onStart()
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                     itimeout--;
-                    emit updateStatus(" wait WSClient connect to "+serverIP+
-                                      "("+ QString::number(itimeout)+ ")");
+                    emit updateStatus(" wait WSClient connect to server "+serverIP+":"+QString::number(QIPERFD_WSPORT)+
+                                      " ("+ QString::number(itimeout)+ ")");
                 }
                 if (itimeout<=0){
                     emit errorStop(1,"Wait connect to " +s+ " timeout");
@@ -439,8 +439,8 @@ void QIperfC::onStart()
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                     itimeout--;
-                    emit updateStatus(" wait WSClient connect to "+clientIP+
-                                      "("+ QString::number(itimeout)+ ")");
+                    emit updateStatus(" wait WSClient connect to client "+clientIP+":"+QString::number(QIPERFD_WSPORT)+
+                                      " ("+ QString::number(itimeout)+ ")");
                 }
                 if (itimeout<=0){
                     emit errorStop(1,"Wait connect to " +s+ "timeout");
