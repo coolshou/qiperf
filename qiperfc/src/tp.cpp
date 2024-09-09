@@ -134,28 +134,28 @@ void TP::loadData(QString data)
     QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError){
         QJsonObject jsonRoot = doc.object();
-        m_enabled = jsonRoot["enabled"].toBool();
+        m_enabled = jsonRoot.value("enabled").toBool(true);
         //client
-        QJsonObject o_client = jsonRoot["client"].toObject();
-        m_version = o_client["version"].toInt();
-        QString client = o_client["bind"].toString();
-        m_mgrclient = o_client["manager"].toString();
-        m_port = o_client["port"].toInt();
-        m_duration = o_client["duration"].toInt();
-        m_omit = o_client["omit"].toInt();
-        m_delaytime = o_client["delaytime"].toInt();
+        QJsonObject o_client = jsonRoot.value("client").toObject();
+        m_version = o_client.value("version").toInt();
+        QString client = o_client.value("bind").toString();
+        m_mgrclient = o_client.value("manager").toString();
+        m_port = o_client.value("port").toInt();
+        m_duration = o_client.value("duration").toInt();
+        m_omit = o_client.value("omit").toInt();
+        m_delaytime = o_client.value("delaytime").toInt();
     //    QString m_mclient = o_client["manager"].toString();
         QString direction = QVariant::fromValue(DirType::Tx).toString();
-        if (o_client["bidir"].toBool()){
+        if (o_client.value("bidir").toBool()){
             direction=QVariant::fromValue(DirType::TR).toString();
         }
-        if (o_client["reverse"].toBool()){
+        if (o_client.value("reverse").toBool()){
             direction=QVariant::fromValue(DirType::Rx).toString();
         }
         // server
-        QJsonObject o_server = jsonRoot["server"].toObject();
-        QString server = o_client["target"].toString();
-        m_mgrserver = o_server["manager"].toString();
+        QJsonObject o_server = jsonRoot.value("server").toObject();
+        QString server = o_client.value("target").toString();
+        m_mgrserver = o_server.value("manager").toString();
 
         //m_itemDatas.clear();// this will remove all data => m_itemDatas.length()=0
         m_itemDatas.replace(int(TP::cols::id) , m_id);
@@ -349,6 +349,21 @@ int TP::setDirection(DirType direction)
             o_client["reverse"]=true;
         }
         jsonRoot["client"]=o_client;
+        QJsonObject o_server = jsonRoot["server"].toObject();
+        if (direction == DirType::Tx){
+            o_server["bidir"]=false;
+            o_server["reverse"]=false;
+        }else if (direction == DirType::Rx){
+            o_server["bidir"]=false;
+            o_server["reverse"]=true;
+        }else if (direction == DirType::TR){
+            o_server["bidir"]=true;
+            o_server["reverse"]=false;
+        }else {
+            o_server["bidir"]=true;
+            o_server["reverse"]=true;
+        }
+        jsonRoot["server"]=o_server;
         doc.setObject(jsonRoot);
         m_jsondata =doc.toJson(QJsonDocument::Compact);
         // setData(TP::cols::dir, sdirection);
