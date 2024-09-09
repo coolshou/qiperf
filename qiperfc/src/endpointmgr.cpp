@@ -36,7 +36,6 @@ QVariant EndPointMgr::data(const QModelIndex &index, int role) const
     }
 
     if (role != Qt::DisplayRole) {
-//        qDebug() << "data not DisplayRole:" << index << Qt::endl;
         return QVariant();
     }
 //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
@@ -86,6 +85,8 @@ QVariant EndPointMgr::headerData(int section, Qt::Orientation orientation,
                 return QString("OS Ver");
             case EndPointMgr::status:
                 return QString("Last seen");
+            case EndPointMgr::version:
+                return QString("Version");
             default:
                 return QVariant();
         }

@@ -45,6 +45,7 @@ private:
     QString m_id; // reference id, Win/Linux/MacOS: manager IP, android: adb devices id, (TODO: iOS:?)
     QString OS_version; // store OS version
     QString OS_name; // store OS name
+    QString qiperfd_ver; // store qiperfd version
     QString m_Manager; // manager interface
     // net (eth/wifi) inerfaces:
     // (TODO)mobile interfaces

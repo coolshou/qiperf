@@ -78,7 +78,8 @@ void EndPoint::loadData(QString data)
     //    bool update = jsonRoot["update"].toBool();
         OS_name = jsonRoot["OS"].toString();
         OS_version = jsonRoot["OSVer"].toString();
-        m_itemDatas << m_id << m_Manager << sType << OS_name << OS_version;
+        qiperfd_ver = jsonRoot["qiperfd"].toString();
+        m_itemDatas << m_id << m_Manager << sType << OS_name << OS_version << "" << qiperfd_ver;
         //    parents.last()->appendChild(new EndPoint(m_id, data, parents.last()));
         //TODO: get address of each interface....
         if (!jsonRoot["Net"].isNull()){

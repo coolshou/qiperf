@@ -21,7 +21,8 @@ public:
         type=2,
         os=3,
         osver=4,
-        status=5
+        status=5,
+        version=6
     };
     Q_ENUM(cols)
 
