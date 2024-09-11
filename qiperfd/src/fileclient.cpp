@@ -40,8 +40,6 @@ void FileClient::initTCP(quint16 port, QString targetaddress)
 
     qDebug() << "FileClient connect to " << targetaddress << " port: " << port;
     fileSocket->connectToHost(targetaddress, port);
-
-
 }
 
 void FileClient::enqueueFile(QString filename)

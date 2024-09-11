@@ -2,6 +2,8 @@
 
 #include <QHostAddress>
 #include <QDebug>
+#include <QCoreApplication>
+#include <QEventLoop>
 
 FileSaveSocket::FileSaveSocket (QString pathname, QTcpSocket* socket)
 {
@@ -50,9 +52,10 @@ void FileSaveSocket::onReadyRead()
                 m_localFile->close();
                 delete m_localFile;
                 m_localFile = nullptr;
-
+                emit finished();
             }
         }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
 
@@ -60,7 +63,7 @@ void FileSaveSocket::onClientDisconnected()
 {
     QTcpSocket *clientSocket = qobject_cast<QTcpSocket*>(sender());
     if (clientSocket) {
-        qInfo() << "Client disconnected: " << clientSocket->peerAddress().toString();
+        qDebug() << "Client disconnected: " << clientSocket->peerAddress().toString();
         clientSocket->deleteLater();
     }
 }

@@ -13,7 +13,8 @@ FileServer::FileServer(quint16 port, QObject *parent)
     fileserver = new QTcpServer(this);
     fileserver->listen(QHostAddress::AnyIPv4, port);
     qDebug() << "FileServer listen on: " << port;
-    connect(fileserver, SIGNAL(newConnection()), this, SLOT(acceptFileConnection()));
+    connect(fileserver, &QTcpServer::newConnection, this, &FileServer::acceptFileConnection);
+    // connect(fileserver, &QTcpServer:, this, SLOT(acceptFileConnection()));
     bytesReceived = 0;
     totalBytes = 0;
     filenameSize = 0;
@@ -54,11 +55,23 @@ void FileServer::acceptFileConnection()
     FileSaveSocket *customSocket = new FileSaveSocket(m_rootpath, filesocket);
     m_filesocks.append(customSocket);
 //    m_filesocks.insert(filesocket->peerAddress().toString(),customSocket);
-//    connect(customSocket, SIGNAL(dataReady(QTcpSocket*)),this, SLOT(slotReceive(QTcpSocket*)));
+    connect(customSocket, &FileSaveSocket::finished,this, &FileServer::onFinished);
 }
 void FileServer::slotReceive(QTcpSocket* socket)
 {
     Q_UNUSED(socket);
+}
+
+void FileServer::onFinished()
+{
+    FileSaveSocket *socket = qobject_cast<FileSaveSocket *>(sender());
+    if (socket) {
+        // qDebug() << "FileServer::onFinished():";// << socket->peerAddress().toString();
+        if(m_filesocks.contains(socket)){
+            int rc = m_filesocks.removeAll(socket);
+            qDebug() << "FileServer::onFinished():removeAll: " << rc;
+        }
+    }
 }
 
 void FileServer::sendFile(QString filename)

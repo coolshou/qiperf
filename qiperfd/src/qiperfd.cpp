@@ -311,11 +311,13 @@ int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint 
     connect(iperfer, &IperfWorker::log, this, &QIperfd::onIperfLog);
     connect(iperfer, &IperfWorker::started, this, &QIperfd::onStarted);
     connect(iperfer, &IperfWorker::finished, this, &QIperfd::onFinished);
-    connect(iperfer, &IperfWorker::finished, iperfer, &IperfWorker::deleteLater);
+    // connect(iperfer, &IperfWorker::finished, iperfer, &IperfWorker::deleteLater);
     connect(iperfer, &IperfWorker::onThroughput, this, &QIperfd::onThroughput);
-    iperfer->moveToThread(iperf_th);
+
     connect(iperf_th, &QThread::started, iperfer, &IperfWorker::work);
     connect(iperf_th, &QThread::finished, iperf_th, &QThread::deleteLater);
+    connect(iperf_th, &QThread::finished, iperfer, &IperfWorker::deleteLater);
+    iperfer->moveToThread(iperf_th);
     connect(this, &QIperfd::setStop, iperfer, &IperfWorker::setStop);
 
     //    m_iperfworkers.append(iperfer);
@@ -366,6 +368,7 @@ void QIperfd::del(int idx)
     //
     if (m_threads.contains(idx))
     {
+        qDebug() << "QIperfd::del m_threads:" << idx;
         m_threads.remove(idx);
     }
     if (m_iperfworkers.contains(idx))
@@ -418,22 +421,25 @@ int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host
 
 void QIperfd::start(int idx)
 {
-    QThread *th = m_threads.value(idx);
-    m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath+"/"+s_starttime);
-    th->start();
+    try{
+        QThread *th = m_threads.value(idx);
+        m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath+QDir::separator()+s_starttime);
+        th->start();
+    }catch (const std::exception &e) {
+        // Handle the exception and show an error message
+        qDebug() << "Exception Caught" << e.what();
+    }
 }
 void QIperfd::startAll()
 {
-    QString tmp = tmpfilepath+"/"+s_starttime;
+    QString tmp = tmpfilepath+QDir::separator()+s_starttime;
     QDir d(tmp);
     if (!d.exists()){
         d.mkpath(tmp);
     }
     // start all thread
-//    for (int i = 0; i < m_threads.count(); ++i)
     for (auto it = m_threads.begin(); it != m_threads.end(); ++it)
     {
-//        start(i);
         start(it.key());
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
@@ -481,22 +487,20 @@ void QIperfd::restartQIperfd()
 {
 #if defined(Q_OS_LINUX)
     #if !defined(Q_OS_ANDROID)
-        //QString cmd = "systemctl start qiperfd";
-        // QProcess p = QProcess();
-        // p.setProgram("systemctl");
-        // p.setArguments({"start", "qiperfd"});
-        // p.start();
+        // cmd = "systemctl restart qiperfd";
         const QStringList arguments ={"restart", "qiperfd"};
-        // QTimer::singleShot(100, [=]() {
-            qApp->quit();
-            QProcess::startDetached("systemctl", arguments);
-    // });
-
+        qApp->quit();
+        QProcess::startDetached("systemctl", arguments);
     #else
-
+    qDebug() << "TODO: restart android qiperfd service"
     #endif
 #else
-    //windows
+    //windows,PS: Stop-Service -Name "SERVICE-NAME"
+    // get all service status: sc queryex state=all type=service
+    // stop: net stop "SERVICE-NAME"
+    // start: net start "SERVICE-NAME"
+    // restart: net stop [service name] && net start [service name]
+
 
 #endif
 
@@ -668,10 +672,11 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport, 
     QString msg = QString(CMD_IPERF_STOPED)+":"+ QString::number(idx);
     msg = msg + ":" + QString::number(exitCode)+  ":" + QString::number(exitStatus);
     msg = msg + ":" + ipport;
-    onLog("TODO: onFinished: " + msg);
+    onLog("onFinished: " + msg);
     m_wsserver->sendTextResult(msg);
     if (!filename.isEmpty()){
         if(QFileInfo::exists(filename)){
+            qDebug() << "enqueueFile: " << filename;
 //            m_fileclient->sendFile(filename);
             m_fileclient->enqueueFile(filename);
 //            m_wsserver->addFileToSend(filename);

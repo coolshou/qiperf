@@ -248,7 +248,8 @@ void WSClient::onSslErrors(const QList<QSslError> &errors)
 
 void WSClient::onError(QAbstractSocket::SocketError error)
 {
-    qDebug() << "onError:" << error;
+    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    qDebug() << "WSClient::onError:" << error << " peerAddress:" << pClient->peerAddress().toString();
     //TODO: handle websocket not connect issue
 }
 

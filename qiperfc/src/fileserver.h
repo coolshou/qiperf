@@ -22,7 +22,7 @@ public:
 
 public slots:
     void slotReceive(QTcpSocket *socket);
-
+    void onFinished();
 protected:
 
 private slots:

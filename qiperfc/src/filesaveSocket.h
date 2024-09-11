@@ -23,6 +23,7 @@ signals:
         void dataReady(QTcpSocket *socket);
         void socketConnected(FileSaveSocket *socket);
         void socketDisconnected(FileSaveSocket *socket);
+        void finished(); //file transfer finish
 private:
     QTcpSocket* tcpSocket;
     QString m_rootpath;

@@ -52,11 +52,11 @@ QVariant TPMgr::data(const QModelIndex &idx, int role) const
         }
     }
 
-//    if ((role == Qt::DecorationRole) && (index.column()==TP::cols::id)) {
-//        //show a custom icon!!
-//        qDebug() << "show DecorationRole folder";
-//        return iconProvider.icon(QFileIconProvider::Folder);
-//    }
+   // if ((role == Qt::DecorationRole) && (idx.column()==TP::cols::id)) {
+   //     //show a custom icon!!
+   //     qDebug() << "show DecorationRole folder";
+   //     return iconProvider.icon(QFileIconProvider::Folder);
+   // }
     if (role != Qt::DisplayRole) {
         //this will show text data!!
         //        qDebug() << "data not DisplayRole:" << index << Qt::endl;
@@ -123,6 +123,7 @@ QVariant TPMgr::data(const QModelIndex &idx, int role) const
 //        //TODO: special case of loserate date
 //        return QVariant(item->getLostRate());
 //    }
+
     return item->data(idx.column());
 }
 
@@ -675,7 +676,7 @@ void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                           QString value, QString unit, QString dir,
                           QString pkt_lost, QString pkt_total)
 {
-    qDebug() << "onUpdateTPAvg: " << idx << " time:" << time << " : " << value
+    qDebug() << "onUpdateTPAvg: " << idx << " time:" << sInterval << " : " << value
              << " lost/total:" << pkt_lost << "/" << pkt_total;
     addTPdata(midx, sInterval, idx, value, unit, dir, pkt_lost, pkt_total);
 }
