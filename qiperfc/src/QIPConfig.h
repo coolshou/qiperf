@@ -7,6 +7,7 @@
 
 //#include "../src/iperfwrapper.h"
 #include "../src/iperffileworker.h"
+#include "tpplot.h"
 
 class QIPConfigData {
 
@@ -29,6 +30,8 @@ public:
     void setTPCfg(QByteArray tpcfg, QString env="", QString testdate="", QStringList datafilenames={});
     void clear();
     bool importIperf3Log(QString filename);
+    bool exportToFile(QString filename, TPPlot *tpplot, int tpwidth=0, int tpheigth=0);
+
 public slots:
     void onProgress(int currentlineno);
     void onUpdateTPAvg(QString midx, QString sInterval, QString idx,

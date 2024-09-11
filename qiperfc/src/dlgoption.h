@@ -20,6 +20,8 @@ public:
     void updatecfg();
     void setWaitServerReady(int val);
     int getWaitServerReady();
+    void setTPsize(int width, int heigth);
+
 signals:
     void ipaddressUpdated(QString ipaddress, int port);
 

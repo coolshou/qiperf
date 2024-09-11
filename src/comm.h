@@ -13,7 +13,9 @@
 
 #define QIPERF_EXT "qip"
 #define QIPERF_EXT_FILTER "qiperf (*.qip)"
-#define IPERF_EXT_FILTER "iperf (*.*)"
+#define ALL_EXT_FILTER "All (*.*)"
+#define HTML_EXT "html"
+#define HTML_EXT_FILTER "html (*.html)"
 
 #define QIPERFD_PORT 47014
 #define QIPERFD_BPORT 47015  //broadcast

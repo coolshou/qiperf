@@ -253,7 +253,7 @@ void QIperfC::onImportIperf3Log()
         path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
     }
     QString fileName = QFileDialog::getOpenFileName(this,
-             tr("Open Iperf3 log file"), path , tr(IPERF_EXT_FILTER));
+             tr("Open Iperf3 log file"), path , tr(ALL_EXT_FILTER));
     if(!m_qipconfig->importIperf3Log(fileName)){
         qDebug() << "Import file: " << fileName << " Fail!!";
     }
@@ -561,7 +561,6 @@ void QIperfC::onStart()
             waitEndTime = QDateTime::currentDateTime();
             iWait = waitStartTime.secsTo(waitEndTime);
         }
-        qDebug() << "finally stop ";
         onStop();
     } else {
         QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");
@@ -904,6 +903,8 @@ void QIperfC::saveSettings()
     m_settings->endGroup();
     m_settings->beginGroup("Iperf");
     m_settings->setValue("WaitServerReady", m_WaitServerReady);
+    m_settings->setValue("TPExportWidth", m_TPExportWidth);
+    m_settings->setValue("TPExportHeigth", m_TPExportHeigth);
     m_settings->endGroup();
     m_settings->sync();
 }
@@ -924,6 +925,8 @@ void QIperfC::loadSettings()
     m_settings->endGroup();
     m_settings->beginGroup("Iperf");
     m_WaitServerReady =m_settings->value("WaitServerReady", 10).toInt();
+    m_TPExportWidth =m_settings->value("TPExportWidth", 1280).toInt();
+    m_TPExportHeigth =m_settings->value("TPExportHeigth", 180).toInt();
 //    m_frm_option->setWaitServerReady();
     m_settings->endGroup();
     m_settings->beginGroup("test");
@@ -944,6 +947,49 @@ void QIperfC::doClear()
     emit updateStatus("");
     emit updateStarttime("");
     ui->actionShowLog->setEnabled(false);
+}
+
+void QIperfC::onExport()
+{
+    if (m_TestStartTime.isValid()){
+        //export test record to html file
+        QString path;
+        if (!m_oldsavepath.isNull()){
+            path = m_oldsavepath;
+        }else {
+            path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+        }
+        QString fileName = QFileDialog::getSaveFileName(this,
+                                                        tr("Export Result to html"), path, tr(HTML_EXT_FILTER));
+        QFileInfo fi(fileName);
+        // QString img = fi.path() +QDir::separator()+ fi.baseName()+".png";
+        QString ext = fi.suffix();
+        if (ext.compare(HTML_EXT)!=0){
+            fileName = fi.path() +QDir::separator()+ fi.baseName() + "."+ HTML_EXT;
+        }
+        //prepare throughput config data
+        if (m_tpmgr->rootChildCount()>0) {
+            QByteArray b = m_tpmgr->savedata();
+            QStringList pcs = m_tpmgr->getPCs();
+            QString env= m_endpointmgr->getPCsInfo(pcs);
+            //        qDebug() << "env: " << env;
+            QString starttime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
+            QString tmp = m_logpath + QDir::separator() + starttime;
+            QDir d(tmp);
+            QStringList filelist;
+            foreach(auto s, d.entryList(QDir::Files)){
+                filelist.append(tmp+ QDir::separator()+s);
+            }
+            m_qipconfig->setTPCfg(b, env, starttime, filelist);
+            if (!m_qipconfig->exportToFile(fileName, m_tpplot)){
+                qDebug() << "Export to " << fileName << " Fail!";
+            }
+        }else{
+            qDebug() << "NO throughput config to save";
+        }
+    }else {
+        qDebug() << "NO throughput record to save";
+    }
 }
 
 void QIperfC::initMenus()
@@ -985,6 +1031,8 @@ void QIperfC::onIperfStarted(QString smode, QString ipport)
 
 void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err, QString ipport)
 {
+    qDebug() << "onIperfStoped:" << refrow << " : " << ipport <<
+        " err_no:" << err_no << " err:" << err;
     if (err_no.toInt()>0){
         m_tpmgr->addComment(refrow, "["+ ipport +"]Error:" +err);
         if (m_status_server.contains(ipport)){
@@ -995,14 +1043,15 @@ void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err, QString
         }
 //        emit errorStop(2, "onIperfStoped: ["+ipport+"]("+err_no+"):"+err);
     }else{
+
         // qiperf notify no error end:
         if (m_status_server.contains(ipport)){
+            // qDebug() << "m_status_server[" << ipport << "]: " << m_status_server[ipport];
             m_status_server[ipport]=TPStatus::init;
-            qDebug() << "m_status_server[" << ipport << "]: " << m_status_server[ipport];
         }
         if (m_status_client.contains(ipport)){
+            // qDebug() << "m_status_client[" << ipport << "]: " << m_status_client[ipport];
             m_status_client[ipport]=TPStatus::init;
-            qDebug() << "m_status_client[" << ipport << "]: " << m_status_client[ipport];
         }
     }
 }
@@ -1145,6 +1194,7 @@ void QIperfC::initActions()
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(onSave()));
     ui->actionSave->setEnabled(false);
     connect(ui->actionIperf3Log, SIGNAL(triggered()), this, SLOT(onImportIperf3Log()));
+    connect(ui->actionExport, &QAction::triggered, this, &QIperfC::onExport);
 
     // edit
     connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(onCopy()));

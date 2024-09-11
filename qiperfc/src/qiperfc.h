@@ -111,6 +111,7 @@ private:
     void loadSettings();
     void doClear();
 
+
 private slots:
     void initMenus();
     void initActions();
@@ -138,6 +139,7 @@ private slots:
     void onDisableItem(bool checked);
     void onAddPing();
     void onError(QString msg);
+    void onExport();
 
 private:
     Ui::MainWindow *ui;
@@ -177,6 +179,8 @@ private:
     QString m_tpcfgname; //tp config file name
     QIPConfig *m_qipconfig;
     int m_WaitServerReady;
+    int m_TPExportWidth;
+    int m_TPExportHeigth;
     QString m_datapath;
 
     QMenu *m_tpmenu; //right menu for m_tpmgr

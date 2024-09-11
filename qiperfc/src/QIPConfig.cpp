@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 #include <QDir>
+#include <QPixmap>
 
 #include <QDebug>
 
@@ -150,6 +151,20 @@ bool QIPConfig::importIperf3Log(QString filename)
     inputFile.close();
     //TODO: use IperfFileWorker to do parser
     return true;
+}
+
+bool QIPConfig::exportToFile(QString filename, TPPlot *tpplot, int tpwidth, int tpheigth)
+{
+    //TODO: how to constructure html file!!
+
+    //TODO: following is just a test to save plot to png file!!
+    QString img = filename.replace(".html", ".png");
+    qDebug() << "save throughput plot to png: " << img;
+    QPixmap tp = tpplot->toPixmap(tpwidth, tpheigth); //TODO: into html file
+    if (!tp.save(img)){
+        // if (!tpplot->savePng(img)){
+        qDebug() << "throughput plot save to " << img << " Fail!";
+    }
 }
 
 void QIPConfig::onProgress(int currentlineno)
