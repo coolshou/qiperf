@@ -61,6 +61,7 @@
 #include <QList>
 #include <QFile>
 #include <QQueue>
+#include "myinfo.h"
 
 QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
@@ -75,7 +76,7 @@ public:
     };
     Q_ENUM(sendtype)
 
-    explicit WSServer(quint16 port, QObject *parent = nullptr);
+    explicit WSServer(quint16 port, QString mgr_ifname, MyInfo *myinfo, QObject *parent = nullptr);
     ~WSServer() override;
     QList<QString> getClients(); //return current connected client list
     qint64 sendTextMessage(QString msg, QString target=nullptr); // send message to client
@@ -85,11 +86,13 @@ public:
 
 public slots:
     void sendTextResult(QString msg);
+    bool setIfname(QString mgr_ifname);
 signals:
     void actMessage(QString msg);
     void newClient(QHostAddress addr);
+    void onUpdateInterface();
 
-private Q_SLOTS:
+private slots:
     void onNewConnection();
     void processTextMessage(QString message);
     void processBinaryMessage(QByteArray message);
@@ -100,6 +103,7 @@ private Q_SLOTS:
 
 private:
     void sendNextChunk(QString target);
+    void updateListen();
     QWebSocketServer *m_pWebSocketServer;
 //    QList<QWebSocket *> m_clients;
     QMap<QString, QWebSocket *> m_clients;
@@ -111,7 +115,10 @@ private:
     QQueue<QFile *> m_files; // multi file to send
     qint64 m_chunkSize;
     bool m_filenameSent = false;
-
+    int m_port;
+    QHostAddress m_addr;
+    QString m_ifname;
+    MyInfo *m_myinfo;
 };
 
 #endif //WSSERVER_H

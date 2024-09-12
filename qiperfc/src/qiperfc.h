@@ -174,6 +174,7 @@ private:
 
     QDateTime m_TestStartTime;
     int bErrorStop;
+    bool bUserStop;
     int iTimeout; // default wait websocket timeout 10
     QString m_ErrorMSG;
     QString m_tpcfgname; //tp config file name

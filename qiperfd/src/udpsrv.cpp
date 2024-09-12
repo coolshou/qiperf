@@ -33,7 +33,7 @@ void UdpSrv::setIfname(QString mgr_ifname)
 {
     m_ifname = mgr_ifname;
     update_addr();
-    qInfo() << "setIfname:" << mgr_ifname;
+    qInfo() << "UdpSrv::setIfname:" << mgr_ifname;
 }
 
 void UdpSrv::readyRead()

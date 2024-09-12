@@ -28,7 +28,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
             onLog("ERROR: mkdir "+ tmpfilepath+ " Fail");
         }
     }
-    onLog("tmpfilepath: "+ tmpfilepath);
+    // onLog("tmpfilepath: "+ tmpfilepath);
     // TODO: setting
     cfg = new QSettings(QSettings::IniFormat, QSettings::SystemScope,
                               QIPERF_ORG, QIPERFD_NAME);
@@ -64,10 +64,11 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 
 #if (TEST_WS==1)
     // websocket server : receive/handle cmd from qiperfc
-    m_wsserver = new WSServer(QIPERFD_WSPORT); // websocket listen
+    m_wsserver = new WSServer(QIPERFD_WSPORT, getManagerInterface(), m_myinfo); // websocket listen
     connect(m_wsserver, &WSServer::actMessage, this ,&QIperfd::onWSactMessage);
     connect(m_wsserver, &WSServer::newClient, this ,&QIperfd::onNewClient);
     connect(this, &QIperfd::iperfStarted, m_wsserver, &WSServer::sendTextResult);
+    connect(this, &QIperfd::setMgrIfname, m_wsserver, &WSServer::setIfname);
 #endif
     // pipserver : interact with systemtray GUI (qiperftray)
     m_pserver=pserver;
@@ -182,7 +183,7 @@ void QIperfd::onLog(QString text)
 
 void QIperfd::loadcfg(QString apppath)
 {
-    onLog(",loadcfg: (apppath:" + apppath + ")");
+    // onLog(",loadcfg: (apppath:" + apppath + ")");
     cfg->beginGroup("main");
     cfg->setValue("Path", apppath);
     cfg->endGroup();

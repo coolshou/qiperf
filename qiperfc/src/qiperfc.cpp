@@ -338,6 +338,7 @@ void QIperfC::onStart()
     if (!onClear()){
         return;
     }
+    bUserStop = false;
     ui->actionShowLog->setEnabled(true);
     ui->actionSave->setEnabled(true);
     resetError();
@@ -397,7 +398,7 @@ void QIperfC::onStart()
                     m_wss[serverIP]->setDatapath(m_datapath);
                 }
                 itimeout = iTimeout;
-                while (! m_wss[serverIP]->isConnected() && itimeout>0 && (bErrorStop==0)){
+                while (! m_wss[serverIP]->isConnected() && itimeout>0 && (bErrorStop==0)&& (bUserStop==false)){
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                     itimeout--;
@@ -410,6 +411,10 @@ void QIperfC::onStart()
                 }
                 if(bErrorStop>0){
                     qDebug() << "Some error happen!!";
+                    return;
+                }
+                if(bUserStop){
+                    qDebug() << "User Stop on wait server websocket connected!!";
                     return;
                 }
                 //tell server add iperf server
@@ -435,7 +440,7 @@ void QIperfC::onStart()
                     m_wsc[clientIP]->setDatapath(m_datapath);
                 }
                 itimeout = iTimeout;
-                while (! m_wsc[clientIP]->isConnected()&& itimeout>0&& (bErrorStop==0)){
+                while (! m_wsc[clientIP]->isConnected()&& itimeout>0&& (bErrorStop==0)&& (bUserStop==false)){
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                     itimeout--;
@@ -448,6 +453,10 @@ void QIperfC::onStart()
                 }
                 if(bErrorStop>0){
                     qDebug() << "Some error happen!!";
+                    return;
+                }
+                if(bUserStop){
+                    qDebug() << "User Stop on wait client websocket connected!!";
                     return;
                 }
                 //tell client add iperf client
@@ -492,7 +501,7 @@ void QIperfC::onStart()
         int iwaittime;
         int chk=0;
         bool bServerReady=false;
-        while (!bServerReady){ //TODO: timeout!!!
+        while (!bServerReady && (bUserStop==false)){ //TODO: timeout!!!
             QThread::sleep(1);
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             chk=0;
@@ -516,6 +525,10 @@ void QIperfC::onStart()
                 // timeout
                 break;
             }
+        }
+        if(bUserStop){
+            qDebug() << "User Stop on wait ServerReady!!";
+            return;
         }
         if (!bServerReady){
             QStringList ds;
@@ -545,7 +558,7 @@ void QIperfC::onStart()
         QDateTime waitStartTime = QDateTime::currentDateTime();
         QDateTime waitEndTime = QDateTime::currentDateTime();
         int iWait = waitStartTime.secsTo(waitEndTime);
-        while (iWait < maxtestduration){
+        while ((iWait < maxtestduration) && (bUserStop==false)){
             if ((getStatusServers()>m_status_server.keys().length()) ||
                 (getStatusClients()>m_status_client.keys().length())) {
                 qDebug() << "Some problem happen!! abort!! server:" << m_status_server <<
@@ -585,6 +598,7 @@ void QIperfC::onStop(){
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
+    bUserStop=true;
 //    if (m_fileserver->getSockets()>0){
 //        m_fileserver->close();
 //    }

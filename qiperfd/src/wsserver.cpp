@@ -63,8 +63,8 @@
 QT_USE_NAMESPACE
 
 //! [constructor]
-WSServer::WSServer(quint16 port, QObject *parent) :
-    QObject(parent),
+WSServer::WSServer(quint16 port, QString mgr_ifname, MyInfo *myinfo, QObject *parent) :
+    QObject(parent),m_port(port),m_ifname(mgr_ifname), m_myinfo(myinfo),
     m_pWebSocketServer(nullptr)
 {
     /*
@@ -85,19 +85,13 @@ WSServer::WSServer(quint16 port, QObject *parent) :
     sslConfiguration.setPrivateKey(sslKey);
     m_pWebSocketServer->setSslConfiguration(sslConfiguration);
     */
+
     m_pWebSocketServer = new QWebSocketServer(QStringLiteral("WS Server"),
                                               QWebSocketServer::NonSecureMode,
                                               this);
+    connect(this , &WSServer::onUpdateInterface, this, &WSServer::updateListen);
+    setIfname(mgr_ifname);
 
-    if (m_pWebSocketServer->listen(QHostAddress::AnyIPv4, port))
-    {
-        qInfo() << "WS Server listening on port" << port;
-        connect(m_pWebSocketServer, &QWebSocketServer::newConnection,
-                this, &WSServer::onNewConnection);
-        connect(m_pWebSocketServer, &QWebSocketServer::sslErrors,
-                this, &WSServer::onSslErrors);
-        connect(m_pWebSocketServer, &QWebSocketServer::serverError, this, &WSServer::onServerError);
-    }
 }
 //! [constructor]
 
@@ -328,13 +322,44 @@ void WSServer::sendNextChunk(QString target)
 
 }
 
+void WSServer::updateListen()
+{
+    if (m_pWebSocketServer->isListening()){
+        m_pWebSocketServer->close();
+        disconnect(m_pWebSocketServer,&QWebSocketServer::newConnection, 0 ,0);
+        disconnect(m_pWebSocketServer,&QWebSocketServer::sslErrors, 0 ,0);
+        disconnect(m_pWebSocketServer,&QWebSocketServer::serverError, 0 ,0);
+    }
+    if (m_pWebSocketServer->listen(m_addr, m_port))
+    {
+        qInfo() << "WS Server listening on port" << m_port << " URL:" << m_pWebSocketServer->serverUrl();
+        connect(m_pWebSocketServer, &QWebSocketServer::newConnection, this, &WSServer::onNewConnection);
+        connect(m_pWebSocketServer, &QWebSocketServer::sslErrors, this, &WSServer::onSslErrors);
+        connect(m_pWebSocketServer, &QWebSocketServer::serverError, this, &WSServer::onServerError);
+    }
+}
+
 void WSServer::sendTextResult(QString msg)
 {
     //send Test back to client
-
     qint64 rc = sendTextMessage(msg);
     if (rc<0){
         qDebug() << "sendTextResult: sendTextMessage return size:(" << rc << "):" << msg;
+    }
+}
+
+bool WSServer::setIfname(QString mgr_ifname)
+{
+    m_ifname = mgr_ifname;
+    QList<QHostAddress> addrs;
+    addrs = m_myinfo->getIPfromIfname(m_ifname);
+    if (addrs.length()>0){
+        m_addr = addrs[0]; // ip address
+        emit onUpdateInterface();
+        return true;
+    }else{
+        qDebug() <<"setIfname: Did not get IP Address from interface:" << mgr_ifname;
+        return false;
     }
 }
 
