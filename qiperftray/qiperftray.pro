@@ -91,7 +91,7 @@ CONFIG(release, debug|release) {
     first.depends = $(first) iperfbin deploy
     export(first.depends)
     export(iperfbin.commands)
-    QMAKE_EXTRA_TARGETS += first deploy
+    QMAKE_EXTRA_TARGETS += first iperfbin deploy
 
 }
 unix:!android {
