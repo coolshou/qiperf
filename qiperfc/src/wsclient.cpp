@@ -93,11 +93,18 @@ qint64 WSClient::sendText(QString message)
 
 bool WSClient::isConnected()
 {
-    // TODO: is isValid() ok for check the websocket connected!!??
-//    if (m_webSocket!=nullptr){
-        return m_webSocket->isValid();
-//    }
-        //    return false;
+    if (m_webSocket!=nullptr){
+        if (m_webSocket->state() == QAbstractSocket::ConnectedState){
+            return true;
+        }else{
+            return false;
+        }
+        // TODO: is isValid() ok for check the websocket connected!!??
+        // return m_webSocket->isValid(); // qwebsocket is ready to read/write
+    }else {
+        qDebug() << "ERROR: m_webSocket not exist";
+        return false;
+    }
 }
 
 void WSClient::setDatapath(QString datapath)
@@ -112,8 +119,7 @@ void WSClient::setDatapath(QString datapath)
 //! [onConnected]
 void WSClient::onConnected()
 {
-//    qDebug() << "WebSocket connected: " << m_url;
-
+    qDebug() << "WebSocket connected: " << m_url;
 }
 //! [onConnected]
 //!
@@ -136,8 +142,8 @@ void WSClient::onAboutToClose()
 
 void WSClient::onStateChanged(QAbstractSocket::SocketState state)
 {
-//    qDebug() << "WebSocket onStateChanged: "  << m_url << " : " << state;
-    Q_UNUSED(state)
+    // qDebug() << "WebSocket onStateChanged: "  << m_url << " : " << state;
+   Q_UNUSED(state)
 }
 
 
