@@ -61,7 +61,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     initPingChart();
     connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
 
-    iTimeout = 10*100;
+    iTimeout = 10*1000;//10sec
     //
     m_qipconfig = new QIPConfig(logdir.absolutePath());
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
