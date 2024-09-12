@@ -167,6 +167,10 @@ VERSION = $$extract_version(20)
 #VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFC_VERSION\"" | awk -F\' \'  \'{print $3}\' | awk -F\'\"\'  \'{print $2}\')
 message(QIPERFC_VERSION: $$VERSION)
 
+TEMPLATE_FILES.files += \
+        template/result.html
+
+
 win32 {
     #VER = $$system(findstr /c:"\"define QIPERFD_VERSION\"" $$PWD/../src/versions.h)
     #VERSION = 0.2.11306.27 # major.minor.patch.build
@@ -204,6 +208,9 @@ CONFIG(release, debug|release) {
     export(iperfbin.commands)
     QMAKE_EXTRA_TARGETS += first iperfbin deploy
 
+    TEMPLATE_FILES.path += $${DIST_DIRECTORY}/template/
+    INSTALLS += TEMPLATE_FILES
+
 }
 unix:!android {
     MIME.files += \
@@ -225,5 +232,9 @@ unix:!android {
         ../images/qiperf.png
     IMAGES.path += \
         "/usr/share/pixmaps/"
-    INSTALLS += MIME ICONS DESKTOP IMAGES
+
+    TEMPLATE_FILES.path += /opt/$${TARGET}/template/
+
+    INSTALLS += MIME ICONS DESKTOP IMAGES TEMPLATE_FILES
 }
+

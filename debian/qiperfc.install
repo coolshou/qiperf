@@ -3,3 +3,4 @@ images/qiperfc.png  /usr/share/pixmaps/
 debian/tmp/opt/qiperfc/bin/qiperfc /opt/qiperf/bin/
 debian/tmp/usr/share/mime/packages/alphanetworks-qiperfc.xml /usr/share/mime/packages/
 images/qiperfc.png /usr/share/icons/
+debian/tmp/opt/qiperfc/template/result.html /opt/qiperf/template/

@@ -204,6 +204,8 @@ Section "qiperf console" SECTION_Console
 !endif
     File "${QIPERFC_NAME}"
     File "Qt5PrintSupport.dll"
+    SetOutPath "$INSTDIR\template\"
+    File "template\result.html"
     SetOutPath "$INSTDIR\printsupport\"
     File "printsupport\windowsprintersupport.dll"
     !cd ..
@@ -337,6 +339,7 @@ Section Uninstall
     Delete "$INSTDIR\${QIPERFC_NAME}"
     Delete "$INSTDIR\Qt5PrintSupport.dll"
     Delete "$INSTDIR\printsupport\windowsprintersupport.dll"
+    Delete "$INSTDIR\template\result.html"
 
     ; Remove remaining directories
     RMDir "$SMPROGRAMS\qiperf"
@@ -350,6 +353,7 @@ Section Uninstall
     RMDir "$INSTDIR\imageformats\"
     RMDir "$INSTDIR\iconengines\"
     RMDir "$INSTDIR\bearer\"
+    RMDir "$INSTDIR\template"
     RMDir "$INSTDIR\"
 
     ${unregisterExtension} ".qip" "Quick Iperf config File"
