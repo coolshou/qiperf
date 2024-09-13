@@ -167,7 +167,7 @@ VERSION = $$extract_version(20)
 #VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFC_VERSION\"" | awk -F\' \'  \'{print $3}\' | awk -F\'\"\'  \'{print $2}\')
 message(QIPERFC_VERSION: $$VERSION)
 
-TEMPLATE_FILES.files += \
+template.files += \
         template/result.html
 
 
@@ -201,13 +201,16 @@ CONFIG(release, debug|release) {
     deploy.commands = \
         windeployqt $$DIST_FILE
 
-    TEMPLATE_FILES.path += $${DIST_DIRECTORY}/template/
-    INSTALLS += TEMPLATE_FILES
+    #template.path += $${DIST_DIRECTORY}/template/
+    template.commands = \
+        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/template/result.html)) $${DIST_DIRECTORY}/template/
+    # INSTALLS += template
 
-    first.depends = $(first) iperfbin TEMPLATE_FILES deploy
+    first.depends = $(first) iperfbin template deploy
     export(first.depends)
     export(iperfbin.commands)
-    QMAKE_EXTRA_TARGETS += first iperfbin TEMPLATE_FILES deploy
+    export(template.commands)
+    QMAKE_EXTRA_TARGETS += first iperfbin template deploy
 
 }
 unix:!android {
@@ -231,8 +234,8 @@ unix:!android {
     IMAGES.path += \
         "/usr/share/pixmaps/"
 
-    TEMPLATE_FILES.path += /opt/$${TARGET}/template/
+    template.path += /opt/$${TARGET}/template/
 
-    INSTALLS += MIME ICONS DESKTOP IMAGES TEMPLATE_FILES
+    INSTALLS += MIME ICONS DESKTOP IMAGES template
 }
 
