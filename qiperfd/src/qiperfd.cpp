@@ -678,9 +678,7 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport, 
     if (!filename.isEmpty()){
         if(QFileInfo::exists(filename)){
             qDebug() << "enqueueFile: " << filename;
-//            m_fileclient->sendFile(filename);
             m_fileclient->enqueueFile(filename);
-//            m_wsserver->addFileToSend(filename);
         }else{
             qDebug() << "file to send not Exist: " << filename;
         }

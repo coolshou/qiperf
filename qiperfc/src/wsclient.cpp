@@ -58,8 +58,11 @@ QT_USE_NAMESPACE
 
 //! [constructor]
 WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject *parent) :
-    QObject(parent), m_webSocket(new QWebSocket)
+    QObject(parent),m_serverip(serverip),m_url(url),m_datapath(datapath),
+    m_webSocket(nullptr)
 {
+    m_webSocket = new QWebSocket();
+
     connect(m_webSocket, &QWebSocket::connected, this, &WSClient::onConnected);
     connect(m_webSocket, &QWebSocket::disconnected, this, &WSClient::onDisconnected);
     //connect(m_webSocket, &QWebSocket::errorOccurred, this, &WSClient::onErrorOccurred); // QT6.5
@@ -71,10 +74,11 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject 
     connect(m_webSocket, &QWebSocket::textMessageReceived, this, &WSClient::onTextMessageReceived);
     connect(m_webSocket, &QWebSocket::binaryMessageReceived, this, &WSClient::onBinaryMessageReceived);
 //    qDebug() << "WSClient open websocket:" << url << Qt::endl;
-    m_serverip = serverip;
-    m_url = url;
+    // m_serverip = serverip;
+    // m_url = url;
 //    m_datapath = datapath + QDir::separator();
     setDatapath(datapath);
+    qDebug() << "m_webSocket->open(m_url): " << m_url;
     m_webSocket->open(m_url);
 }
 //! [constructor]

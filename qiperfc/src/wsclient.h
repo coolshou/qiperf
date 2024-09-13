@@ -93,10 +93,10 @@ private Q_SLOTS:
     void onBinaryMessageReceived(const QByteArray &message);
 
 private:
-    QString m_datapath;
     QString m_serverip;
-    QWebSocket *m_webSocket;
     QUrl m_url;
+    QString m_datapath;
+    QWebSocket *m_webSocket;
     QMap<QString, QFile *> m_files; // accept file from different source
     qint64 m_chunkSize = 64 * 1024;
 };

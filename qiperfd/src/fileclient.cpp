@@ -2,6 +2,7 @@
 
 #include <QDataStream>
 #include <QFileInfo>
+#include <QDir>
 
 #include <QDebug>
 
@@ -46,6 +47,9 @@ void FileClient::enqueueFile(QString filename)
 {
     qInfo()<< "file to send(enqueueFile): " << filename;
     m_fileQueue.append(filename);
+    if (fileSocket->state() == QTcpSocket::UnconnectedState){
+        fileSocket->connectToHost(m_targetaddress, m_port);
+    }
     if (fileSocket->state() == QTcpSocket::ConnectedState && !m_currentFile) {
         //If the client is connected and not currently transferring a file, it will start sending the next file in the queue
         sendNextFile();
@@ -76,6 +80,7 @@ void FileClient::onBytesWritten(qint64 bytes)
     if (m_currentFile && m_currentFile->isOpen()) {
         QByteArray buffer = m_currentFile->read(m_chunkSize); // Read in chunks of 64KB
         if (buffer.isEmpty()) {
+            //no more data to send
             QString filename = m_currentFile->fileName();
             m_currentFile->close();
             delete m_currentFile;
@@ -102,9 +107,10 @@ void FileClient::sendNextFile()
 {
     if (m_fileQueue.isEmpty()) {
         qInfo() << "No Queue file";
+        // qInfo() << "No Queue file, fileSocket->close()";
+        // fileSocket->close();//this may cause qiperfc crash?
         return;
     }
-
     QString filePath = m_fileQueue.dequeue();
     m_currentFile = new QFile(filePath);
     if (!m_currentFile->open(QIODevice::ReadOnly)) {
@@ -114,9 +120,9 @@ void FileClient::sendNextFile()
         sendNextFile(); // Try to send the next file
         return;
     }
-
     QFileInfo fileInfo(*m_currentFile);
+    // QList ls = fileInfo.absolutePath().split(QDir::separator());
+    // qDebug() <<"path: " << ls.value(ls.count()-1);
     QString header = QString("FILE:%1:%2\n").arg(fileInfo.fileName()).arg(fileInfo.size());
-//    qDebug() << "header: " << header;
     fileSocket->write(header.toUtf8());
 }

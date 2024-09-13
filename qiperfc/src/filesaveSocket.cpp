@@ -32,6 +32,7 @@ void FileSaveSocket::onReadyRead()
                     m_filename = headerParts[1];
                     m_fileSize = headerParts[2].toLongLong();
                     QString filePath = m_rootpath + QDir::separator() + m_filename;
+                    // qDebug() << "FileSaveSocket::onReadyRead NEW file: " << filePath;
                     bytesReceived = 0;
                     m_localFile = new QFile(filePath);
                     if (!m_localFile->open(QIODevice::WriteOnly)) {
@@ -48,7 +49,7 @@ void FileSaveSocket::onReadyRead()
 
             m_localFile->write(buffer);
             if (bytesReceived == m_fileSize) {
-                qInfo() << "FileSaveSocket::onReadyRead File received:" << m_localFile->fileName();
+                qDebug() << "FileSaveSocket::onReadyRead File finish received:" << m_localFile->fileName();
                 m_localFile->close();
                 delete m_localFile;
                 m_localFile = nullptr;
@@ -63,8 +64,9 @@ void FileSaveSocket::onClientDisconnected()
 {
     QTcpSocket *clientSocket = qobject_cast<QTcpSocket*>(sender());
     if (clientSocket) {
-        qDebug() << "Client disconnected: " << clientSocket->peerAddress().toString();
+        // qDebug() << "FileSaveSocket::onClientDisconnected: Client disconnected: " << clientSocket->peerAddress().toString();
         clientSocket->deleteLater();
+        emit socketDisconnected(this);
     }
 }
 
@@ -83,6 +85,6 @@ void FileSaveSocket :: write(QString data)
 
 void FileSaveSocket::setRootpath(QString rootpath)
 {
-//    qDebug() << "FileSaveSocket::setRootpath: "  << rootpath;
+    // qDebug() << "FileSaveSocket::setRootpath: "  << rootpath;
     m_rootpath = rootpath;
 }

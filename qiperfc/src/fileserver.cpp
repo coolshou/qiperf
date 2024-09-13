@@ -2,6 +2,8 @@
 
 #include <QDataStream>
 #include <QDir>
+#include <QCoreApplication>
+#include <QEventLoop>
 
 #include <QDebug>
 
@@ -30,14 +32,20 @@ void FileServer::setRootPath(QString pathname)
         }
     }
     m_rootpath = pathname;
+    // qDebug()  << "FileServer::setRootPath: m_filesocks.count: " << m_filesocks.count();
     //update all FileSaveSocket's m_rootpath
-    foreach(auto *fsock, m_filesocks){
-        fsock->setRootpath(m_rootpath);
-    }
+    // foreach(auto *fsock, m_filesocks){
+    //     fsock->setRootpath(m_rootpath);
+    //     QCoreApplication::processEvents(QEventLoop::AllEvents);
+    // }
 }
 
 void FileServer::close()
 {
+    foreach (auto fs, m_filesocks) {
+        fs->close();
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
     m_filesocks.clear();
 }
 
@@ -51,11 +59,14 @@ void FileServer::acceptFileConnection()
     bytesWritten = 0;
 
     QTcpSocket *filesocket = fileserver->nextPendingConnection();
-//    qDebug() << "acceptFileConnection " << filesocket << " (" << filesocket->peerAddress().toString() << ") with rootpath: " << m_rootpath;
-    FileSaveSocket *customSocket = new FileSaveSocket(m_rootpath, filesocket);
-    m_filesocks.append(customSocket);
-//    m_filesocks.insert(filesocket->peerAddress().toString(),customSocket);
-    connect(customSocket, &FileSaveSocket::finished,this, &FileServer::onFinished);
+    if (!m_filesocks.contains(filesocket)){
+        connect(filesocket, &QTcpSocket::disconnected, this, &FileServer::onClientDisconnected);
+        // qDebug() << "acceptFileConnection " << filesocket << " (" << filesocket->peerAddress().toString() << ") with rootpath: " << m_rootpath;
+        FileSaveSocket *customSocket = new FileSaveSocket(m_rootpath, filesocket);
+        // qDebug() << "current m_filesocks count: " << m_filesocks.count();
+        m_filesocks.append(filesocket);
+        connect(customSocket, &FileSaveSocket::finished,this, &FileServer::onFinished);
+    }
 }
 void FileServer::slotReceive(QTcpSocket* socket)
 {
@@ -64,10 +75,12 @@ void FileServer::slotReceive(QTcpSocket* socket)
 
 void FileServer::onFinished()
 {
-    FileSaveSocket *socket = qobject_cast<FileSaveSocket *>(sender());
+    // FileSaveSocket *socket = qobject_cast<FileSaveSocket *>(sender());
+    QTcpSocket *socket = qobject_cast<QTcpSocket *>(sender());
     if (socket) {
         // qDebug() << "FileServer::onFinished():";// << socket->peerAddress().toString();
         if(m_filesocks.contains(socket)){
+
             int rc = m_filesocks.removeAll(socket);
             qDebug() << "FileServer::onFinished():removeAll: " << rc;
         }
@@ -97,4 +110,16 @@ void FileServer::sendFile(QString filename)
     qDebug() << "TODO: send to which socket???";
     //bytestoWrite = totalBytes - filesocket->write(outBlock);
     outBlock.resize(0);
+}
+
+// void FileServer::onClientDisconnected(FileSaveSocket *socket)
+void FileServer::onClientDisconnected()
+{
+    // client has disconnected, so remove from list
+    QTcpSocket *pClient = static_cast<QTcpSocket *>(QObject::sender());
+    // int rc= m_filesocks.removeAll(socket);
+    int rc= m_filesocks.removeAll(pClient);
+    if (rc >1){
+        qDebug() << "FileServer::onClientDisconnected:remove more the one socket:" << rc << " !!!!";
+    }
 }

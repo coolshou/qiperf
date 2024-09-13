@@ -30,6 +30,8 @@ private slots:
 //    void updateFileProgress();
 //    void displayError(QAbstractSocket::SocketError socketError);
     void sendFile(QString filename);
+    // void onClientDisconnected(FileSaveSocket *socket);
+    void onClientDisconnected();
 
 signals:
 private:
@@ -41,7 +43,8 @@ private:
     quint64 bytesWritten;
     qint64  bytestoWrite;
     QString m_filename;
-    QList<FileSaveSocket *> m_filesocks; // list of FileSaveSocket
+    // QList<FileSaveSocket *> m_filesocks; // list of FileSaveSocket
+    QList<QTcpSocket *> m_filesocks; // list of FileSaveSocket
 //    QMap<QString, FileSaveSocket *> m_filesocks; // list of FileSaveSocket
     QFile *m_localFile;
 //    QByteArray inBlock;
