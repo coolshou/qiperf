@@ -1,4 +1,4 @@
-qiperf (0.5.11309.12-1) unstable; urgency=medium
+qiperf (0.5.11309.13-1) unstable; urgency=medium
 
   * Add delay start time for iperf test
   * Add enable/disable specify iperf test pair
@@ -9,7 +9,7 @@ qiperf (0.5.11309.12-1) unstable; urgency=medium
   * Fix open multi times many cause throughput plot wrong
   * Fix open saved qip file (with iperf raw data) cause app crash under Windows
 
- -- coolshou <coolshou2060@gmail.com>  Thu, 12 Sep 2024 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Fri, 13 Sep 2024 10:00:00 +0800
 
 qiperf (0.4.11308.06-1) unstable; urgency=medium
 
