@@ -354,11 +354,10 @@ void QIperfC::onStart()
     if (!d.exists()){
         d.mkpath(".");
     }
-    qDebug() << "QIperfC::onStart(): m_datapath" << m_datapath;
+    // qDebug() << "QIperfC::onStart(): m_datapath" << m_datapath;
     m_fileserver->setRootPath(m_datapath);
 
     emit updateStarttime(startTime);
-    //if (m_tpmgr->children().count()>0) {
     if (m_tpmgr->rootChildCount()>0) {
         updateRunStatus(true);
         //start test
