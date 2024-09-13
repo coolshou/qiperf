@@ -172,8 +172,6 @@ TEMPLATE_FILES.files += \
 
 
 win32 {
-    #VER = $$system(findstr /c:"\"define QIPERFD_VERSION\"" $$PWD/../src/versions.h)
-    #VERSION = 0.2.11306.27 # major.minor.patch.build
     # windows resources
     #    CONFIG += embed_manifest_exe
 
@@ -203,13 +201,13 @@ CONFIG(release, debug|release) {
     deploy.commands = \
         windeployqt $$DIST_FILE
 
-    first.depends = $(first) iperfbin deploy
-    export(first.depends)
-    export(iperfbin.commands)
-    QMAKE_EXTRA_TARGETS += first iperfbin deploy
-
     TEMPLATE_FILES.path += $${DIST_DIRECTORY}/template/
     INSTALLS += TEMPLATE_FILES
+
+    first.depends = $(first) iperfbin TEMPLATE_FILES deploy
+    export(first.depends)
+    export(iperfbin.commands)
+    QMAKE_EXTRA_TARGETS += first iperfbin TEMPLATE_FILES deploy
 
 }
 unix:!android {
