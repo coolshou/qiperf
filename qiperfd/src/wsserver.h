@@ -57,6 +57,7 @@
 #include <QMap>
 #include <QtWebSockets/QWebSocket>
 #include <QtWebSockets/QWebSocketProtocol>
+#include <QWebSocketServer>
 #include <QHostAddress>
 #include <QList>
 #include <QFile>

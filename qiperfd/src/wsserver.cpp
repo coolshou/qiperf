@@ -58,6 +58,8 @@
 #include <QEventLoop>
 #include <QFileInfo>
 
+#include "comm.h"
+
 #include <QDebug>
 
 QT_USE_NAMESPACE
@@ -86,7 +88,7 @@ WSServer::WSServer(quint16 port, QString mgr_ifname, MyInfo *myinfo, QObject *pa
     m_pWebSocketServer->setSslConfiguration(sslConfiguration);
     */
 
-    m_pWebSocketServer = new QWebSocketServer(QStringLiteral("WS Server"),
+    m_pWebSocketServer = new QWebSocketServer(QStringLiteral(QIPERFD_WSNAME),
                                               QWebSocketServer::NonSecureMode,
                                               this);
     connect(this , &WSServer::onUpdateInterface, this, &WSServer::updateListen);
@@ -238,6 +240,8 @@ void WSServer::socketDisconnected()
         if (m_clients.contains(sfrom)) {
             m_clients.remove(sfrom);
 //            m_clients.removeAll(pClient);
+        }else{
+            qDebug() << "m_clients does not have " << sfrom;
         }
         pClient->deleteLater();
         pClient = nullptr;

@@ -20,6 +20,7 @@
 #define QIPERFD_PORT 47014
 #define QIPERFD_BPORT 47015  //broadcast
 #define QIPERFD_WSPORT 47016  //websocket port
+#define QIPERFD_WSNAME "WS Server"
 #define QIPERF_FILEPORT 47017 //FileServer Port
 #define RPC_PORT 57025
 
