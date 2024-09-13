@@ -354,6 +354,7 @@ void QIperfC::onStart()
     if (!d.exists()){
         d.mkpath(".");
     }
+    qDebug() << "QIperfC::onStart(): m_datapath" << m_datapath;
     m_fileserver->setRootPath(m_datapath);
 
     emit updateStarttime(startTime);
@@ -363,7 +364,7 @@ void QIperfC::onStart()
         //start test
         // list of throughput test pair
         QList<TP *> tps = m_tpmgr->getChilds();
-        QString s;
+        QString s; // websocket url
         QString cmd;
         qint64 rs=0;
         int maxtestduration=0; // max wait test time
@@ -387,8 +388,9 @@ void QIperfC::onStart()
                 QString serverIP = tp->getMgrServer();
                 //TODO: detect manager server is pingable
                 if (!m_wss.contains(serverIP)) {
+                    //TODO: can not work with interface with DHCP under Windows??
                     s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
-    //                qDebug() << "server websocket url: " << s << Qt::endl;
+                    // qDebug() << "server websocket url: " << s;
                     m_wss[serverIP]=new WSClient(serverIP, QUrl(s), m_datapath);
                     connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                     connect(m_wss[serverIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
@@ -402,8 +404,7 @@ void QIperfC::onStart()
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                     itimeout--;
-                    emit updateStatus(" wait WSClient connect to server "+serverIP+":"+QString::number(QIPERFD_WSPORT)+
-                                      " ("+ QString::number(itimeout)+ ")");
+                    emit updateStatus(" wait WSClient connect to server: "+ s);
                 }
                 if (itimeout<=0){
                     emit errorStop(1,"Wait connect to " +s+ " timeout");
@@ -444,8 +445,7 @@ void QIperfC::onStart()
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                     itimeout--;
-                    emit updateStatus(" wait WSClient connect to client "+clientIP+":"+QString::number(QIPERFD_WSPORT)+
-                                      " ("+ QString::number(itimeout)+ ")");
+                    emit updateStatus(" wait WSClient connect to client: "+s);
                 }
                 if (itimeout<=0){
                     emit errorStop(1,"Wait connect to " +s+ "timeout");
@@ -1203,43 +1203,43 @@ void QIperfC::initActions()
 {
     // init actions
     // file
-    connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(onNew()));
-    connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(onOpen()));
-    connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(onSave()));
+    connect(ui->actionNew, &QAction::triggered, this, &QIperfC::onNew);
+    connect(ui->actionOpen, &QAction::triggered, this, &QIperfC::onOpen);
+    connect(ui->actionSave, &QAction::triggered, this, &QIperfC::onSave);
     ui->actionSave->setEnabled(false);
-    connect(ui->actionIperf3Log, SIGNAL(triggered()), this, SLOT(onImportIperf3Log()));
+    connect(ui->actionIperf3Log, &QAction::triggered, this, &QIperfC::onImportIperf3Log);
     connect(ui->actionExport, &QAction::triggered, this, &QIperfC::onExport);
 
     // edit
-    connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(onCopy()));
-    connect(ui->actionPaste, SIGNAL(triggered()), this, SLOT(onPaste()));
+    connect(ui->actionCopy, &QAction::triggered, this, &QIperfC::onCopy);
+    connect(ui->actionPaste, &QAction::triggered, this, &QIperfC::onPaste);
 
-    connect(ui->actionAddIperf, SIGNAL(triggered()), this, SLOT(onAddIperf()));
+    connect(ui->actionAddIperf, &QAction::triggered, this, &QIperfC::onAddIperf);
     if (!m_testping){
         ui->actionAddPing->setVisible(false);
     }
-    connect(ui->actionAddPing, SIGNAL(triggered()), this, SLOT(onAddPing()));
+    connect(ui->actionAddPing, &QAction::triggered, this, &QIperfC::onAddPing);
 
-    connect(ui->actionEdit, SIGNAL(triggered()), this, SLOT(onPairEdit()));
-    connect(ui->actionDelete, SIGNAL(triggered()), this, SLOT(onPairDelete()));
-    connect(ui->actionSwap, SIGNAL(triggered()), this, SLOT(onPairSwap()));
-    connect(ui->actionSwapIP, SIGNAL(triggered()), this, SLOT(onPairSwapIP()));
+    connect(ui->actionEdit, &QAction::triggered, this, &QIperfC::onPairEdit);
+    connect(ui->actionDelete, &QAction::triggered, this, &QIperfC::onPairDelete);
+    connect(ui->actionSwap, &QAction::triggered, this, &QIperfC::onPairSwap);
+    connect(ui->actionSwapIP, &QAction::triggered, this, &QIperfC::onPairSwapIP);
 
     // run
-    connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
-    connect(ui->actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
-    connect(ui->actionClear, SIGNAL(triggered()), this, SLOT(onClear()));
-    connect(ui->actionShowLog, SIGNAL(triggered()), this, SLOT(onShowLog()));
+    connect(ui->actionStart, &QAction::triggered, this, &QIperfC::onStart);
+    connect(ui->actionStop, &QAction::triggered, this, &QIperfC::onStop);
+    connect(ui->actionClear, &QAction::triggered, this, &QIperfC::onClear);
+    connect(ui->actionShowLog, &QAction::triggered, this, &QIperfC::onShowLog);
 
     //option
-    connect(ui->actionConfig, SIGNAL(triggered()), this, SLOT(onConfig()));
+    connect(ui->actionConfig, &QAction::triggered, this, &QIperfC::onConfig);
 
     //help
-    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
-    connect(ui->actionShowDebugLog, SIGNAL(triggered()), this, SLOT(onShowDebugLog()));
+    connect(ui->actionAbout, &QAction::triggered, this, &QIperfC::onAbout);
+    connect(ui->actionShowDebugLog, &QAction::triggered, this, &QIperfC::onShowDebugLog);
 
     //test
-    connect(ui->actionTest, SIGNAL(triggered()), this, SLOT(onTest()));
+    connect(ui->actionTest, &QAction::triggered, this, &QIperfC::onTest);
 
 }
 
