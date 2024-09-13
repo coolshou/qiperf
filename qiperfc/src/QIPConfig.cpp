@@ -6,6 +6,9 @@
 #include <QJsonParseError>
 #include <QDir>
 #include <QPixmap>
+#include <QByteArray>
+#include <QIODevice>
+#include <QBuffer>
 
 #include <QDebug>
 
@@ -165,6 +168,21 @@ bool QIPConfig::exportToFile(QString filename, TPPlot *tpplot, int tpwidth, int 
         // if (!tpplot->savePng(img)){
         qDebug() << "throughput plot save to " << img << " Fail!";
     }
+}
+
+QString QIPConfig::imageToBase64(const QImage &image, const char *format)
+{
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    buffer.open(QIODevice::WriteOnly);
+
+    // Save the image to the buffer
+    image.save(&buffer, format);
+
+    // Encode the buffer content to Base64
+    QString base64String = byteArray.toBase64();
+
+    return base64String;
 }
 
 void QIPConfig::onProgress(int currentlineno)
