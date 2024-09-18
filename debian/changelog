@@ -9,6 +9,7 @@ qiperf (0.5.11309.18-1) unstable; urgency=medium
   * Fix open multi times many cause throughput plot wrong
   * Fix open saved qip file (with iperf raw data) cause app crash under Windows
   * Add detectSystemProxy() and force not use system proxy on control qiperfd
+  * Add select throughput chart's legend item, also hilight the line. vice versa.
 
  -- coolshou <coolshou2060@gmail.com>  Wed, 18 Sep 2024 10:00:00 +0800
 
