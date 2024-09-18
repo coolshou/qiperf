@@ -205,7 +205,7 @@ Section "qiperf console" SECTION_Console
     File "${QIPERFC_NAME}"
     File "Qt5PrintSupport.dll"
     SetOutPath "$INSTDIR\template\"
-    File "qiperfc\template\result.html"
+    File "..\qiperfc\template\result.html"
     SetOutPath "$INSTDIR\printsupport\"
     File "printsupport\windowsprintersupport.dll"
     !cd ..
