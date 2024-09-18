@@ -18,7 +18,7 @@ TP::TP(QString id, QString data, TP *parent)
 
     m_itemDatas={m_id, "", "", "", // id, server, dir ,client
                  "", "", "", //throughput, min tput, max tput
-                 "", "", }; // lost rate, comment
+                 "", ""}; // lost rate, comment
     if (data!="" && data !="Root"){
         loadData(data);
     }

@@ -399,14 +399,26 @@ void QIperfC::onStart()
                     m_wss[serverIP]->setDatapath(m_datapath);
                 }
                 itimeout = iTimeout;
-                while (! m_wss[serverIP]->isConnected() && itimeout>0 && (bErrorStop==0)&& (bUserStop==false)){
+                while (itimeout>0 && (bErrorStop==0)&& (bUserStop==false)){
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
+                    //m_wss.contains(serverIP) && ! m_wss[serverIP]->isConnected() &&
+                    if (m_wss.contains(serverIP)){
+                        if (m_wss.value(serverIP)->isConnected()){
+                            break;
+                        }
+                    }else{
+                        bErrorStop = 1;
+                        tp->setComment("ERROR: "+serverIP+" not connected");
+                        emit errorStop(2, "ERROR: "+serverIP+" not connected");
+                        break;
+                    }
                     itimeout--;
-                    emit updateStatus(" wait WSClient connect to server: "+ s);
+                    emit updateStatus(" wait WSClient connect to server: "+ s +
+                                      " ("+ QString::number(itimeout) +")");
                 }
                 if (itimeout<=0){
-                    emit errorStop(1,"Wait connect to " +s+ " timeout");
+                    emit errorStop(1,"ERROR: Wait connect to " +s+ " timeout");
                     break;
                 }
                 if(bErrorStop>0){
@@ -443,11 +455,21 @@ void QIperfC::onStart()
                 while (! m_wsc[clientIP]->isConnected()&& itimeout>0&& (bErrorStop==0)&& (bUserStop==false)){
                     QThread::msleep(10);
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
+                    if (m_wsc.contains(clientIP)){
+                        if (m_wsc.value(clientIP)->isConnected()){
+                            break;
+                        }
+                    }else{
+                        bErrorStop = 1;
+                        tp->setComment("ERROR: "+clientIP+" not connected");
+                        emit errorStop(2, "ERROR: "+clientIP+" not connected");
+                        break;
+                    }
                     itimeout--;
                     emit updateStatus(" wait WSClient connect to client: "+s);
                 }
                 if (itimeout<=0){
-                    emit errorStop(1,"Wait connect to " +s+ "timeout");
+                    emit errorStop(1,"ERROR: Wait connect to " +s+ "timeout");
                     break;
                 }
                 if(bErrorStop>0){
