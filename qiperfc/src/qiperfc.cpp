@@ -536,7 +536,7 @@ void QIperfC::onStart()
                 bServerReady=true;
             }
             newDT = QDateTime::currentDateTime();
-            iwaittime = m_WaitServerReady-oldDT.secsTo(newDT);
+            iwaittime = m_WaitServerReady - oldDT.secsTo(newDT);
             emit updateStatus(" wait server ready: "+ QString::number(chk)+ "/"+
                               QString::number(m_status_server.keys().length())+
                               ":"+ QString::number(iwaittime));
