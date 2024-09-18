@@ -387,11 +387,11 @@ Function .onInit
 
 init.uninst:
     ClearErrors
-${If} ${Silent}
+#${If} ${Silent}
     ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "QuietUninstallString"
-${Else}
-    ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "UninstallString"
-${EndIf}
+#${Else}
+#    ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "UninstallString"
+#${EndIf}
     IfErrors init.done
     strcpy $OLD_VERSION $R0
     #ExecWait "$R0"
