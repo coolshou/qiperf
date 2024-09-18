@@ -27,7 +27,7 @@ public slots:
 
 private slots:
 //    void realtimeDataSlot(QPrivateSignal sig);
-
+    void selectionChanged();
 private:
     void initCustomPlot();
 //    void addRandomGraph();

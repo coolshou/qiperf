@@ -44,6 +44,23 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
     this->replot();
 }
 
+void TPPlot::selectionChanged()
+{
+    /* synchronize the selection of the graphs with the selection state of the respective
+ legend item belonging to that graph. So the user can select a graph by either clicking on the graph itself
+ or on its legend item.*/
+    // synchronize selection of graphs with selection of corresponding legend items:
+    for(int i=0; i < this->graphCount(); i++){
+        QCPGraph *graph = this->graph(i);
+        QCPPlottableLegendItem *item = this->legend->itemWithPlottable(graph);
+        if ((item->selected() or graph->selected())){
+            item->setSelected(true);
+            graph->setSelection(QCPDataSelection(graph->data()->dataRange()));
+        }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+}
+
 void TPPlot::onIperfTPdata(QString sInterval, QString idx, QString data, QString lostrate)
 {
     double x = sInterval.toDouble();
@@ -225,7 +242,7 @@ void TPPlot::initCustomPlot()
     // make left and bottom axes transfer their ranges to right and top axes:
 //    connect(xAxis, SIGNAL(rangeChanged(QCPRange)), xAxis2, SLOT(setRange(QCPRange)));
 //    connect(yAxis, SIGNAL(rangeChanged(QCPRange)), yAxis2, SLOT(setRange(QCPRange)));
-
+    connect(this, &QCustomPlot::selectionChangedByUser, this,  &TPPlot::selectionChanged);
 }
 
 QPen TPPlot::newColorPen(int r, int g, int b, int width)
