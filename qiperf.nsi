@@ -248,6 +248,8 @@ SectionEnd
 ;Uninstall section
 Section Uninstall
     Call un.install_qiperfd
+    ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode"
+    strcpy $OLD_INSTALL_MODE $R0
     ${If} $OLD_INSTALL_MODE  == "1"
     Call un.install_qiperfc
     ${EndIf}
