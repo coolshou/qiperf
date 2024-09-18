@@ -62,6 +62,9 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject 
     m_webSocket(nullptr)
 {
     m_webSocket = new QWebSocket();
+    m_webSocket->setProxy(QNetworkProxy::NoProxy); // avoid to use proxy
+    QNetworkProxy qnp = m_webSocket->proxy();
+    qDebug() << "proxy hostName: " << qnp.hostName() << " capabilities(): " << qnp.capabilities();
 
     connect(m_webSocket, &QWebSocket::connected, this, &WSClient::onConnected);
     connect(m_webSocket, &QWebSocket::disconnected, this, &WSClient::onDisconnected);
