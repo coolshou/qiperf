@@ -71,7 +71,11 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpplot, &TPPlot::onUpdateTPDatas);
     connect(m_qipconfig, &QIPConfig::progress, this, &QIperfC::onProgress);
     connect(m_qipconfig, &QIPConfig::updateStartDateTime, m_tpplot, &TPPlot::setStartTime);
-
+    QString proxyhost="";
+    quint16 proxyport=0;
+    if (m_qipconfig->detectSystemProxy(proxyhost, proxyport)){
+        onError("Detect system have proxy setting (proxy="+ proxyhost +":"+QString::number(proxyport)+"), which may cause qiperfd control problem!!");
+    }
     m_endpointmgr = new EndPointMgr(this);
     m_frm_qiperfds = new FormQIperfds();
     m_frm_qiperfds->setModel(m_endpointmgr);

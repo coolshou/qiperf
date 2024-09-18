@@ -9,6 +9,10 @@
 #include <QByteArray>
 #include <QIODevice>
 #include <QBuffer>
+#include <QNetworkProxyQuery>
+#include <QNetworkProxy>
+#include <QNetworkProxyFactory>
+#include <QUrl>
 
 #include <QDebug>
 
@@ -183,6 +187,28 @@ QString QIPConfig::imageToBase64(const QImage &image, const char *format)
     QString base64String = byteArray.toBase64();
 
     return base64String;
+}
+
+bool QIPConfig::detectSystemProxy(QString &hostname, quint16 &port)
+{
+    QNetworkProxyQuery npq(QUrl("http://www.google.com"));
+    QList<QNetworkProxy> listOfProxies = QNetworkProxyFactory::systemProxyForQuery(npq);
+    if(!listOfProxies.isEmpty()) {
+        QNetworkProxy proxy = listOfProxies.first();  // Take the first proxy (if multiple proxies are available)
+        if (proxy.type() != QNetworkProxy::NoProxy) {
+            qDebug() << "Proxy found!";
+            hostname = proxy.hostName();
+            qDebug() << "Proxy Host:" << hostname;
+            port = proxy.port();
+            qDebug() << "Proxy Port:" << port;
+            qDebug() << "Proxy Type:" << proxy.type();
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        return false;
+    }
 }
 
 void QIPConfig::onProgress(int currentlineno)
