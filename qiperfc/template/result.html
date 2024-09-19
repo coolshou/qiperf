@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+	<meta charset="utf-8" />
 	<title>Result</title>
 	<sytle src="result.css"></sytle>
 <style type="text/css">
@@ -135,13 +136,14 @@
 
 </style>
     </head>
-    <body>
+    <body style="width:1024px">
 	<!--config-->
-	<h1>Config</h1>
-	<div class="table">
+	<h1 id="title">Result</h1>
+	<h2>Config</h2>
+	<div class="table" id="Config">
         <div class="table-tr">
             <div class="table-th" style="width:10%">Iperf server</div>
-            <div class="table-th" style="width:5%">Direction</div>
+            <div class="table-th" style="width:64px">Direction</div>
             <div class="table-th" style="width:10%">Iperf client</div>
 	    <div class="table-th" style="width:15%">Throughput</div>
 	    <div class="table-th" style="width:15%">Packet lost rate(%)</div>
@@ -159,8 +161,8 @@
     </div>
 
 	<!--chart-->
-	<h1>Charts</h1>
-	<div class="tabs">
+	<h2>Charts</h2>
+	<div class="tabs"  id="Charts">
 	    <!-- Tab 1 -->
 	    <input type="radio" name="tab" id="tab1" checked>
 	    <label for="tab1">Throughput</label>
@@ -180,8 +182,8 @@
 	</div>
 
 	<!--Host info-->
-	<h1>Host Info</h1>
-	<div class="table">
+	<h2>Host Info</h2>
+	<div class="table"   id="HostInfo">
         <div class="table-tr">
             <div class="table-th" style="width:10%">IP</div>
             <div class="table-th" style="width:10%">OS</div>
@@ -200,8 +202,8 @@
 	-->
     </div>
 	<!--detail raw data-->
-	<h1>Raw data</h1>
-	<div class="table">
+	<h2>Raw data</h2>
+	<div class="table"  id="RawData">
 	    <div class="table-tr">
 		<div class="table-th" style="width:10%">Name</div>
 		<div class="table-th">Raw Data</div>
