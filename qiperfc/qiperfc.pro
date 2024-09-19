@@ -1,6 +1,7 @@
 QT += core gui
 QT += network websockets
 QT += printsupport # require by qcustomplot
+QT += webenginewidgets
 #CONFIG += release
 CONFIG += debug
 
@@ -64,10 +65,10 @@ SOURCES += \
     src/dlgrecord.cpp \
     src/dlgtest.cpp \
     src/endpointmgr.cpp \
+    src/exporthtml.cpp \
     src/filesaveSocket.cpp \
     src/fileserver.cpp \
     src/formqiperfds.cpp \
-    src/htmlwriter.cpp \
     src/iperffileworker.cpp \
     src/main.cpp \
     src/pingitem.cpp \
@@ -109,10 +110,10 @@ HEADERS += \
     src/dlgrecord.h \
     src/dlgtest.h \
     src/endpointmgr.h \
+    src/exporthtml.h \
     src/filesaveSocket.h \
     src/fileserver.h \
     src/formqiperfds.h \
-    src/htmlwriter.h \
     src/iperffileworker.h \
     src/pingitem.h \
     src/pingmgr.h \

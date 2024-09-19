@@ -35,6 +35,8 @@
 #include "pingmgr.h"
 #include "pingplot.h"
 #include "dlgshowlog.h"
+#include "exporthtml.h"
+
 #if (TEST_ICMP==1)
 #include "../src/icmpping.h"
 #endif
@@ -88,6 +90,7 @@ public slots:
     void on_notice(QString send_addr, QString msg);
     void onQuit();
     void notificationReceived(const QString key, const QVariant value);
+    void setStartTime(QDateTime startTime);
     //test
     void onTest();
 signals:

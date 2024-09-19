@@ -66,6 +66,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_qipconfig = new QIPConfig(logdir.absolutePath());
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
     connect(m_qipconfig, &QIPConfig::updateTPCfg, this, &QIperfC::onUpdateTPCfg);
+    connect(m_qipconfig, &QIPConfig::updateStartDateTime, this, &QIperfC::setStartTime);
     // connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpmgr, &TPMgr::onUpdateTPDatas);
     connect(m_qipconfig, &QIPConfig::updateTPAvg, m_tpmgr, &TPMgr::addTPdata); // this only set last avg, which may cause min/max value wrong!!
     connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpplot, &TPPlot::onUpdateTPDatas);
@@ -789,6 +790,11 @@ void QIperfC::notificationReceived(const QString key, const QVariant value)
                      << "Value:" << value << Qt::endl;
 }
 
+void QIperfC::setStartTime(QDateTime startTime)
+{
+    m_TestStartTime = startTime;
+}
+
 void QIperfC::onTest()
 {
     QString strJson;
@@ -992,6 +998,8 @@ void QIperfC::onExport()
 {
     if (m_TestStartTime.isValid()){
         //export test record to html file
+        QString templatefile = qApp->applicationDirPath()+QDir::separator()+"template"+QDir::separator()+"result.html";
+
         QString path;
         if (!m_oldsavepath.isNull()){
             path = m_oldsavepath;
@@ -1006,28 +1014,34 @@ void QIperfC::onExport()
         if (ext.compare(HTML_EXT)!=0){
             fileName = fi.path() +QDir::separator()+ fi.baseName() + "."+ HTML_EXT;
         }
-        //prepare throughput config data
-        if (m_tpmgr->rootChildCount()>0) {
-            QByteArray b = m_tpmgr->savedata();
-            QStringList pcs = m_tpmgr->getPCs();
-            QString env= m_endpointmgr->getPCsInfo(pcs);
-            //        qDebug() << "env: " << env;
-            QString starttime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
-            QString tmp = m_logpath + QDir::separator() + starttime;
-            QDir d(tmp);
-            QStringList filelist;
-            foreach(auto s, d.entryList(QDir::Files)){
-                filelist.append(tmp+ QDir::separator()+s);
-            }
-            m_qipconfig->setTPCfg(b, env, starttime, filelist);
-            if (!m_qipconfig->exportToFile(fileName, m_tpplot)){
-                qDebug() << "Export to " << fileName << " Fail!";
-            }
-        }else{
-            qDebug() << "NO throughput config to save";
-        }
+
+        ExportHtml *eh = new ExportHtml(templatefile);
+        eh->processdata(m_tpmgr, m_tpplot);
+
+        eh->save(fileName);
+
+        // //prepare throughput config data
+        // if (m_tpmgr->rootChildCount()>0) {
+        //     QByteArray b = m_tpmgr->savedata();
+        //     QStringList pcs = m_tpmgr->getPCs();
+        //     QString env= m_endpointmgr->getPCsInfo(pcs);
+        //     //        qDebug() << "env: " << env;
+        //     QString starttime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
+        //     QString tmp = m_logpath + QDir::separator() + starttime;
+        //     QDir d(tmp);
+        //     QStringList filelist;
+        //     foreach(auto s, d.entryList(QDir::Files)){
+        //         filelist.append(tmp+ QDir::separator()+s);
+        //     }
+        //     m_qipconfig->setTPCfg(b, env, starttime, filelist);
+        //     if (!m_qipconfig->exportToFile(fileName, m_tpplot)){
+        //         qDebug() << "Export to " << fileName << " Fail!";
+        //     }
+        // }else{
+        //     qDebug() << "NO throughput config to save";
+        // }
     }else {
-        qDebug() << "NO throughput record to save";
+        qDebug() << "NO throughput record to Export";
     }
 }
 
