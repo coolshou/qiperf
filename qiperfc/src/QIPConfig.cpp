@@ -246,8 +246,8 @@ bool QIPConfig::deserialize(const QByteArray &data) {
         in_de >> m_data->env;
         in_de >> m_data->testdate;
 //        qDebug() << "m_data env:" << m_data->env;
-//        qDebug() << "m_data testdate:" << m_data->testdate;
-        emit updateStartDateTime(QDateTime::fromString(m_data->testdate));
+        // qDebug() << "m_data testdate:" << m_data->testdate;
+        emit updateStartDateTime(QDateTime::fromString(m_data->testdate, DATETIME_NOW_FORMAT));
     }
     return !in_de.status();
 }

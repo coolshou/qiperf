@@ -792,6 +792,7 @@ void QIperfC::notificationReceived(const QString key, const QVariant value)
 
 void QIperfC::setStartTime(QDateTime startTime)
 {
+    qDebug() << "QIperfC::setStartTime: " << startTime.toString(DATETIME_NOW_FORMAT);
     m_TestStartTime = startTime;
 }
 
@@ -1041,7 +1042,7 @@ void QIperfC::onExport()
         //     qDebug() << "NO throughput config to save";
         // }
     }else {
-        qDebug() << "NO throughput record to Export";
+        qDebug() << "NO throughput record to Export : TestStartTime: " << m_TestStartTime.toString(DATETIME_NOW_FORMAT);
     }
 }
 

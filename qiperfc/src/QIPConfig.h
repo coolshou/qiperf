@@ -8,6 +8,7 @@
 //#include "../src/iperfwrapper.h"
 #include "../src/iperffileworker.h"
 #include "tpplot.h"
+#include "comm.h"
 
 class QIPConfigData {
 
