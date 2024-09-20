@@ -9,13 +9,19 @@
 #include <QBuffer>
 #include <QIODevice>
 #include <QList>
+#include <QPixmap>
 
-ExportHtml::ExportHtml(QString templatefile, QWidget *parent)
-    : QWidget{parent}, m_templatefile(templatefile)
+ExportHtml::ExportHtml(QString templatefile, QString savefile,int width, int heigth,
+                       QWidget *parent)
+    : QWidget{parent}, m_templatefile(templatefile), m_savefile(savefile),
+    m_width(width), m_heigth(heigth)
 {
+    // m_ok = false;
+    connect(this, &ExportHtml::ready, this, &ExportHtml::procressData);
     QNetworkProxyFactory::setUseSystemConfiguration(false); // not use system proxy
     QVBoxLayout *layout = new QVBoxLayout(this);
     webView = new QWebEngineView(this);
+    connect(webView, &QWebEngineView::loadFinished, this, &ExportHtml::onLoadFinished);
     webView->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
     QPushButton *addButton = new QPushButton("add Tag", this);
     layout->addWidget(webView);
@@ -51,9 +57,14 @@ void ExportHtml::AddDivRow(QString pId, QList<QString> values)
     js.append(QString("var pTag = document.getElementById('%1');").arg(pId));
     js.append("var trTag = document.createElement('div');trTag.classList.add('table-tr');");
     int idx=0;
+    int count = values.count();
+    QString td="td";
     foreach (QString value, values) {
         js.append(QString("var tdTag%1 = document.createElement('div');").arg(idx));
-        js.append(QString("tdTag%1.classList.add('table-td');").arg(idx));
+        if (idx == count) {
+            td="tdr";
+        }
+        js.append(QString("tdTag%1.classList.add('table-%2');").arg(idx).arg(td));
         js.append(QString("tdTag%1.innerHTML = '%2';").arg(idx).arg(value));
         js.append(QString("trTag.appendChild(tdTag%1);").arg(idx));
         idx++;
@@ -63,9 +74,41 @@ void ExportHtml::AddDivRow(QString pId, QList<QString> values)
     webView->page()->runJavaScript(js);
 }
 
+void ExportHtml::AddDivPng(QString pId, QString sImg)
+{
+    QString js = "";
+    // add <style> tag to <head>
+    js.append(QString("const style = document.createElement('style');"));
+    js.append(QString("style.textContent = '.%1  { background-image: url(\"data:image/png;base64,%2\");\
+background-repeat: no-repeat;\
+background-attachment: inherit;\
+background-size: contain;\
+background-position: center;\
+width: 100%;\
+height: 100%;\
+display: block;}';").arg(pId).arg(sImg));
+    js.append(QString("document.head.appendChild(style);"));
+//    qDebug() << "JS: " << js;
+    webView->page()->runJavaScript(js);
+}
+
 void ExportHtml::save(QString filename)
 {
-    webView->page()->save(filename, QWebEngineDownloadItem::CompleteHtmlSaveFormat);
+    //try javascript
+    webView->page()->runJavaScript("document.documentElement.outerHTML", [filename](const QVariant &v) {
+        QFile file(filename);
+        if(!file.open(QFile::WriteOnly | QFile::Text)){
+            qDebug() << "Cannot create a file";
+            return;
+        }
+        QTextStream stream(&file);
+        stream << v.toString();
+        file.close();
+    });
+
+    // webView->page()->save(filename, QWebEngineDownloadItem::CompleteHtmlSaveFormat); // BAD: have extra comment in <head> "<!-- saved from url ... -->", saved file size become large!!
+    // webView->page()->save(filename, QWebEngineDownloadItem::MimeHtmlSaveFormat); // BAD wrong format
+    // webView->page()->save(filename, QWebEngineDownloadItem::SingleHtmlSaveFormat); //BAD, did not show record
 }
 
 QString ExportHtml::imageToBase64(const QImage &image, const char *format)
@@ -83,20 +126,10 @@ QString ExportHtml::imageToBase64(const QImage &image, const char *format)
     return base64String;
 }
 
-void ExportHtml::processdata(TPMgr *tpmgr, TPPlot *m_tpplot)
+void ExportHtml::setData(TPMgr *tpmgr, TPPlot *tpplot)
 {
-    QList<QString> ls;
-    QList<TP *> tps= tpmgr->getChilds();
-    foreach (TP *tp, tps) {
-        ls.append(tp->getServer());
-        ls.append(tp->getDirection());
-        ls.append(tp->getClient());
-        ls.append(tp->getThroughput());
-        ls.append(tp->getLostRate());
-        ls.append(tp->getClientArgs());
-    }
-    AddDivRow("Config", ls);
-
+    m_tpmgr = tpmgr;
+    m_tpplot =  tpplot;
 }
 
 void ExportHtml::editTitleTag()
@@ -122,4 +155,48 @@ void ExportHtml::onAddTag()
 
     save("/home/jimmy/SOFT/soft/myTools/QT/html/htmeditor/build/Qt_5_15_3-Debug/test.html");
 
+}
+
+void ExportHtml::onLoadFinished(bool isOk)
+{
+    qDebug() << "onLoadFinished:" << isOk;
+    // m_ok = isOk;
+    if (isOk) {
+        emit ready();
+    }
+}
+
+void ExportHtml::procressData()
+{
+    QList<QString> ls;
+    QList<TP *> tps= m_tpmgr->getChilds();
+    foreach (TP *tp, tps) {
+        ls.append(tp->getServer());
+        ls.append(dirToDiv(tp->getDirection()));
+        ls.append(tp->getClient());
+        ls.append(tp->getThroughput());
+        ls.append(tp->getLostRate());
+        ls.append(""); // ls.append(tp->getClientArgs());// TODO, convert to iperf args
+    }
+    AddDivRow("Config", ls);
+    //chart
+    QPixmap chat = m_tpplot->toPixmap(m_width, m_heigth);
+    QString sImg = imageToBase64(chat.toImage());
+    AddDivPng("tpchart", sImg);
+    //host info
+    //raw data
+    save(m_savefile);
+}
+
+QString ExportHtml::dirToDiv(QString dir)
+{
+    if (dir.contains("Tx")){
+        return "<div class=\"dirTx\"></div>";
+    } else if (dir.contains("Rx")){
+        return "<div class=\"dirRx\"></div>";
+    } else if (dir.contains("TR")){
+        return "<div class=\"dirTR\"></div>";
+    } else {
+        return "<div class=\"dirRT\"></div>";
+    }
 }

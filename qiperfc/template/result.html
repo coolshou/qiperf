@@ -3,13 +3,16 @@
     <head>
 	<meta charset="utf-8" />
 	<title>Result</title>
-	<sytle src="result.css"></sytle>
 <style type="text/css">
-.table, .table * {margin: 0 auto; padding: 0;font-size: 14px;font-family: Arial, 宋體, Helvetica, sans-serif;table-layout: fixed;;}
-.table {display: table; width: 80%; border-collapse: collapse;}
+#wrapper {
+      width: 1024px;
+      margin: 0 auto;
+}
+.table {display: table; width: 95%; border-collapse: collapse;}
 .table-tr {display: table-row; height: 30px;}
 .table-th {display: table-cell;font-weight: bold;height: 100%;border: 1px solid gray;text-align: center;vertical-align: middle;background-color:#E5E5E5;}
-.table-td {display: table-cell; height: 100%;border: 1px solid gray; text-align: center;vertical-align: middle;}
+.table-td {display: table-cell; height: 100%;border: 1px solid gray; text-align: center;vertical-align: middle;padding: 5px;}
+.table-tdr {display: table-cell; height: 100%;border: 1px solid gray; text-align: center;vertical-align: middle;word-wrap: anywhere;}
 .rawdata {overflow: auto;text-align: left;height:200px}
 </style>
 <!--tab css-->
@@ -55,19 +58,7 @@
 	display: block;
 }
 </style>
-<style type="text/css">
-.tpchart {
-	background-image: url("data:image/png;base64,");
-	background-repeat: no-repeat;
-	background-attachment: inherit;
-	background-size: contain;
-	background-position: center;
-	width: 100%;
-	height: 300px;
-	display: block;
-}
 
-</style>
 <style type="text/css">
 :root {
   --primary-text-color: #222;
@@ -79,8 +70,7 @@
 .tabs {
   display: flex;
   flex-wrap: wrap;
-  margin: 2rem auto;
-  max-width: 80%
+  max-width: 95%
 }
 
 .tabs label {
@@ -136,7 +126,8 @@
 
 </style>
     </head>
-    <body style="width:1024px">
+    <body >
+     <div id="wrapper">
 	<!--config-->
 	<h1 id="title">Result</h1>
 	<h2>Config</h2>
@@ -147,7 +138,7 @@
             <div class="table-th" style="width:10%">Iperf client</div>
 	    <div class="table-th" style="width:15%">Throughput</div>
 	    <div class="table-th" style="width:15%">Packet lost rate(%)</div>
-	    <div class="table-th">Parameter</div>
+	    <div class="table-th" >Parameter</div>
         </div>
 	<!--
         <div class="table-tr">
@@ -168,7 +159,6 @@
 	    <label for="tab1">Throughput</label>
 	    <div class="tab-content" id="content1">
 		<div class="tpchart"></div>
-	    <!--<img src="tp.png"></img>-->
 	    </div>
 	    <!-- Tab 2 -->
 	    <!--
@@ -218,5 +208,6 @@
 	    </div>
 	    -->
 	</div>
+    </div>
     </body>
 </html>

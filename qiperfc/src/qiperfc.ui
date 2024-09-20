@@ -144,7 +144,7 @@
      <x>0</x>
      <y>0</y>
      <width>984</width>
-     <height>29</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -418,8 +418,12 @@
    </property>
   </action>
   <action name="actionExport">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/exporthtml</normaloff>:/exporthtml</iconset>
+   </property>
    <property name="text">
-    <string>Export(TODO)</string>
+    <string>Export</string>
    </property>
   </action>
   <action name="actionClear">
@@ -488,6 +492,10 @@
    </property>
   </action>
   <action name="actionIperf3Log">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/iperf3</normaloff>:/iperf3</iconset>
+   </property>
    <property name="text">
     <string>Iperf3 log</string>
    </property>

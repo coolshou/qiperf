@@ -13,22 +13,35 @@ class ExportHtml : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ExportHtml(QString templatefile, QWidget *parent = nullptr);
+    explicit ExportHtml(QString templatefile, QString savefile, int width, int heigth,
+                        QWidget *parent = nullptr);
     ~ExportHtml();
     void loadhtml(QString filename);
     void AddDivRow(QString pId, QList<QString> values);
+    void AddDivPng(QString pId, QString sImg);
     void save(QString filename);
     QString imageToBase64(const QImage &image, const char *format = "PNG");
-    void processdata(TPMgr *tpmgr, TPPlot *m_tpplot);
+    void setData(TPMgr *tpmgr, TPPlot *tpplot);
 
 public slots:
     void editTitleTag();
     void onAddTag();
+    void onLoadFinished(bool isOk);
+    void procressData();
 
 signals:
+    void ready();
+
 private:
     QString m_templatefile;
+    QString m_savefile;
+    int m_width;
+    int m_heigth;
     QWebEngineView *webView;
+    // bool m_ok;
+    TPMgr *m_tpmgr;
+    TPPlot *m_tpplot;
+    QString dirToDiv(QString dir);
 };
 
 #endif // EXPORTHTML_H
