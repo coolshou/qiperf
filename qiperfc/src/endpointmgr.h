@@ -6,6 +6,7 @@
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
+#include <QJsonArray>
 
 #include "../src/endpoint.h"
 
@@ -45,7 +46,7 @@ public:
     bool isExist(QString id);
     int getTotalEndpoints();
     QString getPCsInfo(QStringList pcs);
-
+    QJsonArray getPCsInfos(QStringList pcs);
 
 private:
     EndPoint* getEndPoint(QString id);

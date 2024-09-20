@@ -4,10 +4,12 @@
 #include <QWidget>
 #include <QWebEngineView>
 #include <QString>
+#include <QJsonArray>
 
 #include "tpmgr.h"
 #include "tp.h"
 #include "tpplot.h"
+#include "iperfwrapper.h"
 
 class ExportHtml : public QWidget
 {
@@ -21,7 +23,7 @@ public:
     void AddDivPng(QString pId, QString sImg);
     void save(QString filename);
     QString imageToBase64(const QImage &image, const char *format = "PNG");
-    void setData(TPMgr *tpmgr, TPPlot *tpplot);
+    void setData(TPMgr *tpmgr, TPPlot *tpplot, QJsonArray pcs);
 
 public slots:
     void editTitleTag();
@@ -41,6 +43,8 @@ private:
     // bool m_ok;
     TPMgr *m_tpmgr;
     TPPlot *m_tpplot;
+    QJsonArray m_pcs;
+    IperfWrapper *m_iperfwrapper;
     QString dirToDiv(QString dir);
 };
 

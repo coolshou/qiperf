@@ -71,7 +71,7 @@ void EndPoint::loadData(QString data)
     QJsonObject jsonRoot = doc.object();
 //    if (error.error == QJsonParseError::NoError){
     {
-        m_type = static_cast<EndPointType::Type>(jsonRoot["Type"].toInt());
+        m_type = static_cast<EndPointType::Type>(jsonRoot.value("Type").toInt());
         EndPointType *ept = new EndPointType();
         QString sType = ept->getTypeString(m_type);
         m_Manager = jsonRoot["Manager"].toString();

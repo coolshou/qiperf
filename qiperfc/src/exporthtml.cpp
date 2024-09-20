@@ -11,11 +11,14 @@
 #include <QList>
 #include <QPixmap>
 
+
+
 ExportHtml::ExportHtml(QString templatefile, QString savefile,int width, int heigth,
                        QWidget *parent)
     : QWidget{parent}, m_templatefile(templatefile), m_savefile(savefile),
     m_width(width), m_heigth(heigth)
 {
+    m_iperfwrapper = new IperfWrapper();
     // m_ok = false;
     connect(this, &ExportHtml::ready, this, &ExportHtml::procressData);
     QNetworkProxyFactory::setUseSystemConfiguration(false); // not use system proxy
@@ -23,11 +26,11 @@ ExportHtml::ExportHtml(QString templatefile, QString savefile,int width, int hei
     webView = new QWebEngineView(this);
     connect(webView, &QWebEngineView::loadFinished, this, &ExportHtml::onLoadFinished);
     webView->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
-    QPushButton *addButton = new QPushButton("add Tag", this);
+    // QPushButton *addButton = new QPushButton("add Tag", this);
     layout->addWidget(webView);
-    layout->addWidget(addButton);
+    // layout->addWidget(addButton);
 
-    connect(addButton, &QPushButton::clicked, this, &ExportHtml::onAddTag);
+    // connect(addButton, &QPushButton::clicked, this, &ExportHtml::onAddTag);
 
     setLayout(layout);
     loadhtml(m_templatefile);
@@ -55,13 +58,13 @@ void ExportHtml::AddDivRow(QString pId, QList<QString> values)
 {
     QString js = "";
     js.append(QString("var pTag = document.getElementById('%1');").arg(pId));
-    js.append("var trTag = document.createElement('div');trTag.classList.add('table-tr');");
+    js.append(QString("var trTag = document.createElement('div');trTag.classList.add('table-tr');"));
     int idx=0;
     int count = values.count();
     QString td="td";
     foreach (QString value, values) {
         js.append(QString("var tdTag%1 = document.createElement('div');").arg(idx));
-        if (idx == count) {
+        if (idx == (count-1)) {
             td="tdr";
         }
         js.append(QString("tdTag%1.classList.add('table-%2');").arg(idx).arg(td));
@@ -69,7 +72,7 @@ void ExportHtml::AddDivRow(QString pId, QList<QString> values)
         js.append(QString("trTag.appendChild(tdTag%1);").arg(idx));
         idx++;
     }
-    js.append("pTag.appendChild(trTag);");
+    js.append(QString("pTag.appendChild(trTag);"));
     // qDebug() << "JS: " << js;
     webView->page()->runJavaScript(js);
 }
@@ -126,10 +129,11 @@ QString ExportHtml::imageToBase64(const QImage &image, const char *format)
     return base64String;
 }
 
-void ExportHtml::setData(TPMgr *tpmgr, TPPlot *tpplot)
+void ExportHtml::setData(TPMgr *tpmgr, TPPlot *tpplot, QJsonArray pcs)
 {
     m_tpmgr = tpmgr;
     m_tpplot =  tpplot;
+    m_pcs = pcs;
 }
 
 void ExportHtml::editTitleTag()
@@ -140,7 +144,7 @@ void ExportHtml::editTitleTag()
 }
 
 void ExportHtml::onAddTag()
-{
+{   // TEST date
     QString tagId = "Config";
     QList<QString> list;
     list<< "TEST" << "<div class=\"dirTR\"></div>" << "127.0.0.1" <<
@@ -171,19 +175,26 @@ void ExportHtml::procressData()
     QList<QString> ls;
     QList<TP *> tps= m_tpmgr->getChilds();
     foreach (TP *tp, tps) {
+        ls.clear();
         ls.append(tp->getServer());
         ls.append(dirToDiv(tp->getDirection()));
         ls.append(tp->getClient());
         ls.append(tp->getThroughput());
         ls.append(tp->getLostRate());
-        ls.append(""); // ls.append(tp->getClientArgs());// TODO, convert to iperf args
+        //ls.append("");
+        ls.append(m_iperfwrapper->toIperf3args(tp->getClientArgsMap()));// TODO, convert to iperf args
+        AddDivRow("Config", ls);
     }
-    AddDivRow("Config", ls);
+
     //chart
     QPixmap chat = m_tpplot->toPixmap(m_width, m_heigth);
     QString sImg = imageToBase64(chat.toImage());
     AddDivPng("tpchart", sImg);
     //host info
+    for(QJsonArray::const_iterator it=m_pcs.constBegin(); it!=m_pcs.constEnd(); ++it){
+        QJsonObject jObj = it->toObject();
+        qDebug() << "PCS:" << jObj;
+    }
     //raw data
     save(m_savefile);
 }

@@ -249,14 +249,31 @@ QString TP::getClientArgs()
     if (error.error == QJsonParseError::NoError){
         QJsonObject jsonRoot = fulldoc.object();
 
-        QJsonObject o_client = jsonRoot["client"].toObject();
-        o_client["server"]=false;
+        QJsonObject o_client = jsonRoot.value("client").toObject();
+        o_client.value("server")=false;
         QJsonDocument doc(o_client);
         QString strJson(doc.toJson(QJsonDocument::Compact));
         return strJson;
     }else{
         qDebug() << "getClientArgs wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
         return "";
+    }
+}
+
+QVariantMap TP::getClientArgsMap()
+{
+    QJsonParseError error;
+    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError){
+        QJsonObject jsonRoot = fulldoc.object();
+
+        QJsonObject o_client = jsonRoot.value("client").toObject();
+        o_client.value("server")=false;
+        QJsonDocument doc(o_client);
+        return doc.toVariant().toMap();
+    }else{
+        qDebug() << "getClientArgs wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+        return QVariantMap();
     }
 }
 

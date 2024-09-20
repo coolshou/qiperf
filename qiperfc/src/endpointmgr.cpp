@@ -2,7 +2,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
-#include <QJsonArray>
 #include <QDateTime>
 #include <QCoreApplication>
 #include <QEventLoop>
@@ -239,8 +238,18 @@ int EndPointMgr::getTotalEndpoints()
 QString EndPointMgr::getPCsInfo(QStringList pcs)
 {
     //return json string format of pcs info
+    QJsonArray arr=getPCsInfos(pcs);
+    QJsonDocument doc;
+    doc.setArray(arr);
+
+    return QString(doc.toJson());
+}
+
+QJsonArray EndPointMgr::getPCsInfos(QStringList pcs)
+{
+    //return QJsonArray format of pcs info
     QStringList targetpcs;
-//    qDebug() << "getPCsInfo: " << pcs;
+    //    qDebug() << "getPCsInfo: " << pcs;
     foreach(auto pc, pcs){
         QStringList ds = pc.split(";");
         if (ds.length()==2){
@@ -259,18 +268,15 @@ QString EndPointMgr::getPCsInfo(QStringList pcs)
     QStringList targetds;
     foreach(EndPoint *ep, m_endpoints){
         if (targetpcs.contains(ep->getID())){
-//            qDebug() << "ID: " << ep->getID();
-//            qDebug() << "data: " << ep->getJsonData();
+            //            qDebug() << "ID: " << ep->getID();
+            //            qDebug() << "data: " << ep->getJsonData();
             targetds.append(ep->getJsonData());
 
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     QJsonArray arr= QJsonArray::fromStringList(targetds);
-    QJsonDocument doc;
-    doc.setArray(arr);
-
-    return QString(doc.toJson());
+    return arr;
 }
 
 EndPoint* EndPointMgr::getEndPoint(QString id)

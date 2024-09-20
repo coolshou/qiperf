@@ -143,7 +143,8 @@ private slots:
     void onAddPing();
     void onError(QString msg);
     void onExport();
-
+    void onWidthChanged(int width);
+    void onHeigthChanged(int heigth);
 private:
     Ui::MainWindow *ui;
     CustomHeaderView *header;

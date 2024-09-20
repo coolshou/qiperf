@@ -62,6 +62,7 @@ public:
     QString getClient();
     void setClient(QString addr);
     QString getClientArgs();
+    QVariantMap getClientArgsMap();
     QString getDirection();
     QString getMgrServer(); //manager server ip
     void setMgrServer(QString addr);
