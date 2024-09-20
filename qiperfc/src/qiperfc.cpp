@@ -51,6 +51,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     }
     m_dlgtest = new DlgTest();
     m_frm_option = new dlgOption(m_settings);
+    connect(m_frm_option, &dlgOption::widthChanged, this, &QIperfC::onWidthChanged);
+    connect(m_frm_option, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);
     initStatusbar();
     loadSettings();
     //UI actions
@@ -1015,9 +1017,10 @@ void QIperfC::onExport()
         if (ext.compare(HTML_EXT)!=0){
             fileName = fi.path() +QDir::separator()+ fi.baseName() + "."+ HTML_EXT;
         }
+        QStringList pcs = m_tpmgr->getPCs();
 
         ExportHtml *eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth);
-        eh->setData(m_tpmgr, m_tpplot);
+        eh->setData(m_tpmgr, m_tpplot, m_endpointmgr->getPCsInfos(pcs));
         // QThread::sleep(1);//TODO: any better way to wait page loaded??
         // eh->setData(m_tpmgr, m_tpplot);
 
@@ -1026,8 +1029,6 @@ void QIperfC::onExport()
         // //prepare throughput config data
         // if (m_tpmgr->rootChildCount()>0) {
         //     QByteArray b = m_tpmgr->savedata();
-        //     QStringList pcs = m_tpmgr->getPCs();
-        //     QString env= m_endpointmgr->getPCsInfo(pcs);
         //     //        qDebug() << "env: " << env;
         //     QString starttime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
         //     QString tmp = m_logpath + QDir::separator() + starttime;
@@ -1046,6 +1047,16 @@ void QIperfC::onExport()
     }else {
         qDebug() << "NO throughput record to Export : TestStartTime: " << m_TestStartTime.toString(DATETIME_NOW_FORMAT);
     }
+}
+
+void QIperfC::onWidthChanged(int width)
+{
+    m_TPExportWidth = width;
+}
+
+void QIperfC::onHeigthChanged(int heigth)
+{
+    m_TPExportHeigth = heigth;
 }
 
 void QIperfC::initMenus()

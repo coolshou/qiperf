@@ -12,7 +12,8 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     loadcfg(cfg);
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &dlgOption::onAccept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &dlgOption::onReject);
-
+    connect(ui->sb_width_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onWidthChange);
+    connect(ui->sb_heigth_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onHeigthChange);
 }
 
 dlgOption::~dlgOption()
@@ -23,8 +24,12 @@ dlgOption::~dlgOption()
 void dlgOption::loadcfg(QSettings *cfg)
 {
     //load cfg to ui
-    cfg->beginGroup("iperf");
+    cfg->beginGroup("Iperf");
+    ui->sb_WaitServerReady->setValue(cfg->value("WaitServerReady", 10).toInt());
+    ui->sb_width_tp->setValue(cfg->value("TPExportWidth", 1280).toInt());
+    ui->sb_heigth_tp->setValue(cfg->value("TPExportHeigth", 500).toInt());
     cfg->endGroup();
+
     cfg->beginGroup("agent");
     int midx = ui->cb_minterfaces->findText(cfg->value("managerifname", "").toString());
     if (midx>=0){
@@ -99,5 +104,15 @@ void dlgOption::onAccept()
 {
     updatecfg();
     this->close();
+}
+
+void dlgOption::onWidthChange(int width)
+{
+    emit widthChanged(width);
+}
+
+void dlgOption::onHeigthChange(int heigth)
+{
+    emit heigthChanged(heigth);
 }
 

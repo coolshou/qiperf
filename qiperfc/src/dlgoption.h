@@ -24,14 +24,17 @@ public:
 
 signals:
     void ipaddressUpdated(QString ipaddress, int port);
+    void widthChanged(int width);
+    void heigthChanged(int heigth);
 
 protected:
     void changeEvent(QEvent *e) override;
 
 private slots:
     void onReject();
-
     void onAccept();
+    void onWidthChange(int width);
+    void onHeigthChange(int heigth);
 
 private:
     Ui::DlgOption *ui;
