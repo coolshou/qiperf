@@ -413,6 +413,10 @@
    </property>
   </action>
   <action name="actionNew">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/new</normaloff>:/new</iconset>
+   </property>
    <property name="text">
     <string>New</string>
    </property>
@@ -509,6 +513,10 @@
    </property>
   </action>
   <action name="actionShowDebugLog">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/debugging</normaloff>:/debugging</iconset>
+   </property>
    <property name="text">
     <string>Debug log</string>
    </property>
