@@ -792,7 +792,7 @@ void QIperfC::notificationReceived(const QString key, const QVariant value)
 
 void QIperfC::setStartTime(QDateTime startTime)
 {
-    qDebug() << "QIperfC::setStartTime: " << startTime.toString(DATETIME_NOW_FORMAT);
+    // qDebug() << "QIperfC::setStartTime: " << startTime.toString(DATETIME_NOW_FORMAT);
     m_TestStartTime = startTime;
 }
 
@@ -1016,10 +1016,12 @@ void QIperfC::onExport()
             fileName = fi.path() +QDir::separator()+ fi.baseName() + "."+ HTML_EXT;
         }
 
-        ExportHtml *eh = new ExportHtml(templatefile);
-        eh->processdata(m_tpmgr, m_tpplot);
+        ExportHtml *eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth);
+        eh->setData(m_tpmgr, m_tpplot);
+        // QThread::sleep(1);//TODO: any better way to wait page loaded??
+        // eh->setData(m_tpmgr, m_tpplot);
 
-        eh->save(fileName);
+        // eh->save(fileName);
 
         // //prepare throughput config data
         // if (m_tpmgr->rootChildCount()>0) {
