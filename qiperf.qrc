@@ -33,5 +33,6 @@
         <file alias="disableRx">images/disableRx.png</file>
         <file alias="disableTR">images/disableTR.png</file>
         <file alias="disableTx">images/disableTx.png</file>
+        <file alias="exporthtml">images/exporthtml.png</file>
     </qresource>
 </RCC>
