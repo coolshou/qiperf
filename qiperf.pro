@@ -32,8 +32,10 @@ DEBIAN.files += \
     debian/qiperfd.preinst \
     debian/qiperftray.control \
     debian/qiperftray.install \
-    debian/qiperftray.links
+    debian/qiperftray.links \
+    TODO \
     test.sh
+
 
 NSIS.files += \
     qiperf.nsi

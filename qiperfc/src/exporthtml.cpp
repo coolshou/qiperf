@@ -10,8 +10,9 @@
 #include <QIODevice>
 #include <QList>
 #include <QPixmap>
-
-
+#include <QJsonDocument>
+#include <QJsonParseError>
+#include <QJsonObject>
 
 ExportHtml::ExportHtml(QString templatefile, QString savefile,int width, int heigth,
                        QWidget *parent)
@@ -67,8 +68,8 @@ void ExportHtml::AddDivRow(QString pId, QList<QString> values)
         if (idx == (count-1)) {
             td="tdr";
         }
-        js.append(QString("tdTag%1.classList.add('table-%2');").arg(idx).arg(td));
-        js.append(QString("tdTag%1.innerHTML = '%2';").arg(idx).arg(value));
+        js.append(QString("tdTag%1.classList.add('table-%2');").arg(QString::number(idx), td));
+        js.append(QString("tdTag%1.innerHTML = '%2';").arg(QString::number(idx), value));
         js.append(QString("trTag.appendChild(tdTag%1);").arg(idx));
         idx++;
     }
@@ -89,10 +90,15 @@ background-size: contain;\
 background-position: center;\
 width: 100%;\
 height: 100%;\
-display: block;}';").arg(pId).arg(sImg));
+display: block;}';").arg(pId, sImg));
     js.append(QString("document.head.appendChild(style);"));
 //    qDebug() << "JS: " << js;
     webView->page()->runJavaScript(js);
+}
+
+void ExportHtml::AddDivHostInfo(QString pId)
+{
+    // add host Info list
 }
 
 void ExportHtml::save(QString filename)
@@ -129,11 +135,17 @@ QString ExportHtml::imageToBase64(const QImage &image, const char *format)
     return base64String;
 }
 
-void ExportHtml::setData(TPMgr *tpmgr, TPPlot *tpplot, QJsonArray pcs)
+void ExportHtml::setData(TPMgr *tpmgr, TPPlot *tpplot, QString pcs)
 {
     m_tpmgr = tpmgr;
     m_tpplot =  tpplot;
-    m_pcs = pcs;
+    QJsonParseError error;
+    QJsonDocument doc=QJsonDocument::fromJson(pcs.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError){
+        m_pcs = doc.array();
+    }else{
+        qDebug() << "ExportHtml::setData Wrong format: " << error.errorString();
+    }
 }
 
 void ExportHtml::editTitleTag()
@@ -163,8 +175,7 @@ void ExportHtml::onAddTag()
 
 void ExportHtml::onLoadFinished(bool isOk)
 {
-    qDebug() << "onLoadFinished:" << isOk;
-    // m_ok = isOk;
+    // qDebug() << "onLoadFinished:" << isOk;
     if (isOk) {
         emit ready();
     }
@@ -172,17 +183,25 @@ void ExportHtml::onLoadFinished(bool isOk)
 
 void ExportHtml::procressData()
 {
+    QStringList ips;
     QList<QString> ls;
     QList<TP *> tps= m_tpmgr->getChilds();
     foreach (TP *tp, tps) {
         ls.clear();
-        ls.append(tp->getServer());
+        QString s = tp->getServer();
+        if (!ips.contains(s)) {
+            ips.append(s);
+        }
+        ls.append(s);
         ls.append(dirToDiv(tp->getDirection()));
-        ls.append(tp->getClient());
-        ls.append(tp->getThroughput());
+        QString c = tp->getClient();
+        if (!ips.contains(c)) {
+            ips.append(c);
+        }
+        ls.append(c);
+        ls.append(tp->getThroughput());// TODO: Min/Max throughput?
         ls.append(tp->getLostRate());
-        //ls.append("");
-        ls.append(m_iperfwrapper->toIperf3args(tp->getClientArgsMap()));// TODO, convert to iperf args
+        ls.append(m_iperfwrapper->toIperf3args(tp->getClientArgsMap()));
         AddDivRow("Config", ls);
     }
 
@@ -191,9 +210,23 @@ void ExportHtml::procressData()
     QString sImg = imageToBase64(chat.toImage());
     AddDivPng("tpchart", sImg);
     //host info
-    for(QJsonArray::const_iterator it=m_pcs.constBegin(); it!=m_pcs.constEnd(); ++it){
-        QJsonObject jObj = it->toObject();
-        qDebug() << "PCS:" << jObj;
+    // QJsonDocument doc = QJsonDocument();
+    // qDebug() << "pcs:" << m_pcs;
+    // for(QJsonArray::const_iterator it=m_pcs.constBegin(); it!=m_pcs.constEnd(); ++it){
+    qDebug() << "procressData:" << m_pcs;
+    for(int i = 0; i < m_pcs.size(); ++i) {
+        qDebug() << "m_pcs[i]: " <<    m_pcs[i].isString();//.isArray();//.isObject();// String??
+        // QJsonObject jObj = m_pcs[i].toObject();
+        qDebug() << "jObj:" << m_pcs[i];
+        // qDebug() << "CPU: " <<  jObj.value("CPU").toString();
+        // qDebug() << "OS: " << jObj.value("OS").toString();
+        // qDebug() << "OSVer: " << jObj.value("OSVer").toString();
+        // QJsonObject jNet = jObj.value("Net").toObject();
+        // QString strNet = QJsonDocument(jNet).toJson(QJsonDocument::Compact);
+        // qDebug() << "strNet: " << strNet;
+        // jNet.
+        //doc.setObject(jObj);
+        //qDebug() << "PCS:" << doc.toJson(QJsonDocument::Compact);
     }
     //raw data
     save(m_savefile);

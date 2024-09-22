@@ -21,9 +21,10 @@ public:
     void loadhtml(QString filename);
     void AddDivRow(QString pId, QList<QString> values);
     void AddDivPng(QString pId, QString sImg);
+    void AddDivHostInfo(QString pId);
     void save(QString filename);
     QString imageToBase64(const QImage &image, const char *format = "PNG");
-    void setData(TPMgr *tpmgr, TPPlot *tpplot, QJsonArray pcs);
+    void setData(TPMgr *tpmgr, TPPlot *tpplot, QString pcs);
 
 public slots:
     void editTitleTag();

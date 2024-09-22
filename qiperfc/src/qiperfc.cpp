@@ -1018,9 +1018,9 @@ void QIperfC::onExport()
             fileName = fi.path() +QDir::separator()+ fi.baseName() + "."+ HTML_EXT;
         }
         QStringList pcs = m_tpmgr->getPCs();
-
+        // qDebug() << "pcs:" << pcs;
         ExportHtml *eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth);
-        eh->setData(m_tpmgr, m_tpplot, m_endpointmgr->getPCsInfos(pcs));
+        eh->setData(m_tpmgr, m_tpplot, m_endpointmgr->getPCsInfo(pcs));
         // QThread::sleep(1);//TODO: any better way to wait page loaded??
         // eh->setData(m_tpmgr, m_tpplot);
 

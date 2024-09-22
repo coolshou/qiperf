@@ -155,6 +155,10 @@
      <property name="title">
       <string>Import</string>
      </property>
+     <property name="icon">
+      <iconset resource="../../qiperf.qrc">
+       <normaloff>:/import</normaloff>:/import</iconset>
+     </property>
      <addaction name="actionIperf3Log"/>
     </widget>
     <addaction name="actionNew"/>

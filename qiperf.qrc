@@ -36,5 +36,6 @@
         <file alias="exporthtml">images/exporthtml.png</file>
         <file alias="new">images/new.png</file>
         <file alias="debugging">images/debugging.png</file>
+        <file alias="import">images/import.png</file>
     </qresource>
 </RCC>

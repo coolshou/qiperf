@@ -74,16 +74,16 @@ void EndPoint::loadData(QString data)
         m_type = static_cast<EndPointType::Type>(jsonRoot.value("Type").toInt());
         EndPointType *ept = new EndPointType();
         QString sType = ept->getTypeString(m_type);
-        m_Manager = jsonRoot["Manager"].toString();
-    //    bool update = jsonRoot["update"].toBool();
-        OS_name = jsonRoot["OS"].toString();
-        OS_version = jsonRoot["OSVer"].toString();
-        qiperfd_ver = jsonRoot["qiperfd"].toString();
+        m_Manager = jsonRoot.value("Manager").toString();
+    //    bool update = jsonRoot.value("update").toBool();
+        OS_name = jsonRoot.value("OS").toString();
+        OS_version = jsonRoot.value("OSVer").toString();
+        qiperfd_ver = jsonRoot.value("qiperfd").toString();
         m_itemDatas << m_id << m_Manager << sType << OS_name << OS_version << "" << qiperfd_ver;
         //    parents.last()->appendChild(new EndPoint(m_id, data, parents.last()));
         //TODO: get address of each interface....
-        if (!jsonRoot["Net"].isNull()){
-            oNet = jsonRoot["Net"].toObject();
+        if (!jsonRoot.value("Net").isNull()){
+            oNet = jsonRoot.value("Net").toObject();
     //        qDebug() << "TODO: oNet:" << oNet << Qt::endl;
         }
     }/*else{

@@ -1,3 +1,9 @@
+qiperf (0.6.11310.04-1) unstable; urgency=medium
+
+  * Add export test result to html file
+
+ -- coolshou <coolshou2060@gmail.com>  Wed, 18 Sep 2024 16:21:36 +0800
+
 qiperf (0.5.11309.18-1) unstable; urgency=medium
 
   * Add delay start time for iperf test
