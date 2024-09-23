@@ -4,3 +4,6 @@
 [submodule "QCtrlSignals"]
 	path = QCtrlSignals
 	url = https://github.com/coolshou/QCtrlSignals.git
+[submodule "qiperfd/lib/QUSB"]
+	path = qiperfd/lib/QUSB
+	url = https://github.com/coolshou/QUSB.git
