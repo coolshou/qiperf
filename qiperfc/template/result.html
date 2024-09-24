@@ -125,6 +125,36 @@
 }
 
 </style>
+<style>
+.watermark{
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  user-select: none; /* Non-prefixed version for chorme, opera and*/
+  -ms-user-select: none; /* Internet Explorer, Edge */
+  -moz-user-select: none; /* Firefox */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+}
+body:before{
+  content: 'Alphanetworks Inc.';
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+
+  color: #0023f2;
+  font-size: 100px;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  opacity: 0.1;
+  transform: rotate(-45deg);
+}
+</style>
     </head>
     <body >
      <div id="wrapper">
@@ -210,5 +240,6 @@
 	    -->
 	</div>
     </div>
+    <div class="watermark">Alphanetworks Inc.</div>
     </body>
 </html>
