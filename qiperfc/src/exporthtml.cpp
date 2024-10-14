@@ -79,7 +79,8 @@ void ExportHtml::AddDivRow(QString pId, QList<QString> values)
 }
 
 void ExportHtml::AddDivPng(QString pId, QString sImg)
-{
+{   //pID: css tag name
+    //sImg: base64 encode image string
     QString js = "";
     // add <style> tag to <head>
     js.append(QString("const style = document.createElement('style');"));
