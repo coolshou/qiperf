@@ -76,6 +76,8 @@ QVariant EndPointMgr::headerData(int section, Qt::Orientation orientation,
                 return QString(QIPERFD_NAME);
             case EndPointMgr::ifname:
                 return QString("Manager Interface");
+            case EndPointMgr::hostname:
+                return QString("Hostname");
             case EndPointMgr::type:
                 return QString("Type");
             case EndPointMgr::os:

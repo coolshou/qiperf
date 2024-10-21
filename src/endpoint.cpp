@@ -1,10 +1,13 @@
 #include "endpoint.h"
 #include <QJsonDocument>
 
+#include "../src/endpointmgr.h"
 
 EndPoint::EndPoint(QString id, QString data, EndPoint *parent)
     :m_parentItem(parent), m_id(id)
 {
+    // m_itemDatas(EndPointMgr::cols::version+1 ,QVariant(""));
+    // m_itemDatas.reserve(EndPointMgr::cols::version+1);
     this->loadData(data);
 }
 
@@ -75,11 +78,20 @@ void EndPoint::loadData(QString data)
         EndPointType *ept = new EndPointType();
         QString sType = ept->getTypeString(m_type);
         m_Manager = jsonRoot.value("Manager").toString();
+        m_HostName = jsonRoot.value("HostName").toString();
+
     //    bool update = jsonRoot.value("update").toBool();
         OS_name = jsonRoot.value("OS").toString();
         OS_version = jsonRoot.value("OSVer").toString();
         qiperfd_ver = jsonRoot.value("qiperfd").toString();
-        m_itemDatas << m_id << m_Manager << sType << OS_name << OS_version << "" << qiperfd_ver;
+        m_itemDatas.insert(EndPointMgr::cols::name,  m_id);
+        m_itemDatas.insert(EndPointMgr::cols::ifname, m_Manager);
+        m_itemDatas.insert(EndPointMgr::cols::hostname, m_HostName);
+        m_itemDatas.insert(EndPointMgr::cols::type, sType);
+        m_itemDatas.insert(EndPointMgr::cols::os, OS_name);
+        m_itemDatas.insert(EndPointMgr::cols::osver, OS_version);
+        m_itemDatas.insert(EndPointMgr::cols::status, "");
+        m_itemDatas.insert(EndPointMgr::cols::version, qiperfd_ver);
         //    parents.last()->appendChild(new EndPoint(m_id, data, parents.last()));
         //TODO: get address of each interface....
         if (!jsonRoot.value("Net").isNull()){

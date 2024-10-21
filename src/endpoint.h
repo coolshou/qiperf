@@ -47,6 +47,7 @@ private:
     QString OS_name; // store OS name
     QString qiperfd_ver; // store qiperfd version
     QString m_Manager; // manager interface
+    QString m_HostName;
     // net (eth/wifi) inerfaces:
     // (TODO)mobile interfaces
     QString m_lastnoticetime; // last get notice time string, eq: 2023.17.06.12:22:07.905

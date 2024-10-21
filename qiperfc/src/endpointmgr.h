@@ -19,11 +19,12 @@ public:
     enum cols{
         name=0,
         ifname=1,
-        type=2,
-        os=3,
-        osver=4,
-        status=5,
-        version=6
+        hostname=2,
+        type=3,
+        os=4,
+        osver=5,
+        status=6,
+        version=7
     };
     Q_ENUM(cols)
 
