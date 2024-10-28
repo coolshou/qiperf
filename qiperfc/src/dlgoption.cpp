@@ -14,6 +14,7 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &dlgOption::onReject);
     connect(ui->sb_width_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onWidthChange);
     connect(ui->sb_heigth_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onHeigthChange);
+    connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
 }
 
 dlgOption::~dlgOption()
@@ -28,6 +29,8 @@ void dlgOption::loadcfg(QSettings *cfg)
     ui->sb_WaitServerReady->setValue(cfg->value("WaitServerReady", 10).toInt());
     ui->sb_width_tp->setValue(cfg->value("TPExportWidth", 1280).toInt());
     ui->sb_heigth_tp->setValue(cfg->value("TPExportHeigth", 500).toInt());
+    ui->cb_TPGroup->setChecked(cfg->value("TPGroup", false).toBool());
+    // ui->cb_TPGroup->
     cfg->endGroup();
 
     cfg->beginGroup("agent");
@@ -48,6 +51,7 @@ void dlgOption::updatecfg()
     m_cfg->setValue("WaitServerReady", ui->sb_WaitServerReady->value());
     m_cfg->setValue("TPExportWidth", ui->sb_width_tp->value());
     m_cfg->setValue("TPExportHeigth", ui->sb_heigth_tp->value());
+    m_cfg->setValue("TPGroup", ui->cb_TPGroup->isChecked());
     m_cfg->endGroup();
 
     m_cfg->beginGroup("agent");
@@ -114,5 +118,16 @@ void dlgOption::onWidthChange(int width)
 void dlgOption::onHeigthChange(int heigth)
 {
     emit heigthChanged(heigth);
+}
+
+void dlgOption::onStateChanged(int state)
+{
+    if (state == Qt::Checked){
+        emit showGroup(true);
+        m_cfg->setValue("Iperf/TPGroup", true);
+    }else{
+        emit showGroup(false);
+        m_cfg->setValue("Iperf/TPGroup", false);
+    }
 }
 

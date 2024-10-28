@@ -4,6 +4,8 @@
 //#include <QWidget>
 #include <QDialog>
 #include <QSettings>
+#include <QCheckBox>
+
 namespace Ui {
 class DlgOption;
 }
@@ -26,6 +28,7 @@ signals:
     void ipaddressUpdated(QString ipaddress, int port);
     void widthChanged(int width);
     void heigthChanged(int heigth);
+    void showGroup(bool bShow);
 
 protected:
     void changeEvent(QEvent *e) override;
@@ -35,6 +38,7 @@ private slots:
     void onAccept();
     void onWidthChange(int width);
     void onHeigthChange(int heigth);
+    void onStateChanged(int state);
 
 private:
     Ui::DlgOption *ui;
