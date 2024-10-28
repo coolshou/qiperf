@@ -89,6 +89,6 @@ void PipeClient::socket_error(QLocalSocket::LocalSocketError err)
         emit sigError(t);
     } else {
         qDebug() << "socket_error:" << err << Qt::endl;
-        emit sigError(QString(err));
+        emit sigError(QString::number(err));
     }
 }

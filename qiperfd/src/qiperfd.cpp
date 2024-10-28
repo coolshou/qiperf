@@ -618,7 +618,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
             }
             else
             {
-                onLog("TODO: handle new json message:(" + QString(idx) + ")" + (msg));
+                onLog("TODO: handle new json message:(" + QString::number(idx) + ")" + (msg));
             }
         }
         else

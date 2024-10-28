@@ -54,8 +54,13 @@
 #include <QPainter>
 #include <QTextBlock>
 #include <QStyle>
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+#include <QScreen>
+#else
 #include <QDesktopWidget>
+#endif
 #include <QIcon>
+#include <QFile>
 
 //![constructor]
 
@@ -63,12 +68,18 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
     setWindowIcon(QIcon(":logfile"));
     setReadOnly(true);
-//    setGeometry(0,0,1024,768);
-    QDesktopWidget *desktop = QApplication::desktop();
     int WIDTH = 1024;
     int HEIGHT = 768;
+//    setGeometry(0,0,1024,768);
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    QScreen *pscreen = QApplication::primaryScreen();
+    int x = (pscreen->geometry().width() - WIDTH) / 2;
+    int y = (pscreen->geometry().height() - HEIGHT) / 2;
+#else
+    QDesktopWidget *desktop = QApplication::desktop();
     int x = (desktop->width() - WIDTH) / 2;
     int y = (desktop->height() - HEIGHT) / 2;
+#endif
     setGeometry(x,y,WIDTH, HEIGHT);
 
     lineNumberArea = new LineNumberArea(this);
@@ -108,7 +119,7 @@ void CodeEditor::load(QString filename)
     m_filename = filename;
     setWindowTitle(filename);
     QFile file(filename);
-    if (file.open(QIODevice::Text | QFile::ReadOnly)){
+    if (file.open(QIODevice::Text | QIODevice::ReadOnly)){
         QString content = QString::fromUtf8(file.readAll());
         this->setPlainText(content);
         file.close();

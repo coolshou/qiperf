@@ -57,7 +57,7 @@ void UdpSrv::onTimeout()
                                        //m_baddr, m_port);
 
         if (length<0){
-            qInfo() << "ERROR writeDatagram ("<< QString(socket->error()) <<"):" << socket->errorString();
+            qInfo() << "ERROR writeDatagram ("<< QString::number(socket->error()) <<"):" << socket->errorString();
             return;
         }
         // don't clear, let it keeps sending
