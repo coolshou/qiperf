@@ -105,6 +105,9 @@ private slots:
 private:
     void sendNextChunk(QString target);
     void updateListen();
+    int m_port;
+    QString m_ifname;
+    MyInfo *m_myinfo;
     QWebSocketServer *m_pWebSocketServer;
 //    QList<QWebSocket *> m_clients;
     QMap<QString, QWebSocket *> m_clients;
@@ -116,10 +119,7 @@ private:
     QQueue<QFile *> m_files; // multi file to send
     qint64 m_chunkSize;
     bool m_filenameSent = false;
-    int m_port;
     QHostAddress m_addr;
-    QString m_ifname;
-    MyInfo *m_myinfo;
 };
 
 #endif //WSSERVER_H
