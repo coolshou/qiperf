@@ -106,14 +106,14 @@ void IperfWorker::work()
         connect(m_iperf, &QProcess::started, this, &IperfWorker::onStarted);
         connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
 
-        qDebug() << "m_delaystart: " << m_delaystart;
+        qDebug() << "m_delaystart: " << QString::number(m_delaystart);
         if (m_delaystart>0){
             emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
             QDateTime waitStartTime = QDateTime::currentDateTime();
             QDateTime waitEndTime = QDateTime::currentDateTime();
             int iWait = waitStartTime.secsTo(waitEndTime);
             while (iWait < m_delaystart){
-                qDebug() << "wait " << m_delaystart-iWait << " to start iperf";
+                qDebug() << "wait " << QString::number(m_delaystart-iWait) << " to start iperf";
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
                 QThread::msleep(100);
                 waitEndTime = QDateTime::currentDateTime();
