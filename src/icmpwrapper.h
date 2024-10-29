@@ -13,7 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <getopt.h>
+
+//#include <getopt.h>
 
 #ifdef _WIN32
 #ifdef _WIN32_WINNT
