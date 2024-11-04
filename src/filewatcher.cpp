@@ -31,11 +31,14 @@ void FileWatcher::onFileChanged(const QString &path)
     // Delay the read to ensure the file has finished writing
     QTimer::singleShot(100, this, &FileWatcher::readFile);
     // Re-add the file to the watcher in case it was deleted and recreated
-    if (!m_fileWatcher->addPath(path)){
-        // qDebug() <<
-        QString  msg = "onFileChanged addPath FAIL: " + path;
-        log(msg);
+    if (!m_fileWatcher->files().contains(path)){
+        if (!m_fileWatcher->addPath(path)){
+            // qDebug() <<
+            QString  msg = "onFileChanged addPath FAIL: " + path;
+            log(msg);
+        }
     }
+
 }
 
 void FileWatcher::readFile()
