@@ -64,7 +64,7 @@ public:
     QModelIndex indexFromItem(TP *item);
     void del(QModelIndex idx);
     int rootChildCount();
-    QList<TP*> getChilds();
+    QList<TP*> getChilds(bool showAll=true);
     QByteArray savedata();
     QStringList getPCs();
     bool loaddata(QByteArray data);

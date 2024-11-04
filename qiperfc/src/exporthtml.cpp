@@ -34,7 +34,7 @@ ExportHtml::ExportHtml(QString templatefile, QString savefile,int width, int hei
     // connect(addButton, &QPushButton::clicked, this, &ExportHtml::onAddTag);
 
     setLayout(layout);
-    loadhtml(m_templatefile);
+    loadhtml(m_templatefile);// load template file
 }
 
 ExportHtml::~ExportHtml()
@@ -149,10 +149,21 @@ void ExportHtml::setData(TPMgr *tpmgr, TPPlot *tpplot, QString pcs)
     }
 }
 
-void ExportHtml::editTitleTag()
+void ExportHtml::setTestTime(QString time)
+{
+    m_testtime = time;
+}
+
+void ExportHtml::editTitleTag(QString title)
 {
     // JavaScript to modify the content of the <h1> tag with id "title"
-    QString js = "document.getElementById('title').innerHTML = 'Hello, Qt WebEngine!';";
+    QString js = "document.getElementById('title').innerHTML = '"+title+"';";
+    webView->page()->runJavaScript(js);
+}
+
+void ExportHtml::updateTitle(QString title)
+{
+    QString js = "document.title='"+title+"'";
     webView->page()->runJavaScript(js);
 }
 
@@ -184,11 +195,18 @@ void ExportHtml::onLoadFinished(bool isOk)
 
 void ExportHtml::procressData()
 {
+    // title
+    updateTitle(m_testtime);
+    editTitleTag(m_testtime);
+    // TODO: DUT info
+
     QStringList ips;
     QList<QString> ls;
-    QList<TP *> tps= m_tpmgr->getChilds();
+    // iperf test pairs
+    QList<TP *> tps= m_tpmgr->getChilds(false);
     foreach (TP *tp, tps) {
         ls.clear();
+
         QString s = tp->getServer();
         if (!ips.contains(s)) {
             ips.append(s);
@@ -206,29 +224,57 @@ void ExportHtml::procressData()
         AddDivRow("Config", ls);
     }
 
-    //chart
+    //throughput chart
     QPixmap chat = m_tpplot->toPixmap(m_width, m_heigth);
     QString sImg = imageToBase64(chat.toImage());
     AddDivPng("tpchart", sImg);
+
     //host info
+    // QJsonParseError *error= new QJsonParseError();
     // QJsonDocument doc = QJsonDocument();
     // qDebug() << "pcs:" << m_pcs;
     // for(QJsonArray::const_iterator it=m_pcs.constBegin(); it!=m_pcs.constEnd(); ++it){
     qDebug() << "procressData:" << m_pcs;
-    for(int i = 0; i < m_pcs.size(); ++i) {
-        qDebug() << "m_pcs[i]: " <<    m_pcs[i].isString();//.isArray();//.isObject();// String??
-        // QJsonObject jObj = m_pcs[i].toObject();
-        qDebug() << "jObj:" << m_pcs[i];
-        // qDebug() << "CPU: " <<  jObj.value("CPU").toString();
-        // qDebug() << "OS: " << jObj.value("OS").toString();
-        // qDebug() << "OSVer: " << jObj.value("OSVer").toString();
+    foreach (const QJsonValue &value, m_pcs) {
+        if (value.isObject()) {
+            QJsonObject jObj = value.toObject();
+            qDebug() << "jObj.isEmpty:" << jObj.isEmpty();
+            // qDebug() << "CPU: " <<  jObj.value("CPU").toString();
+            // qDebug() << "MB_Model: " <<  jObj.value("MB_Model").toString();
+
+            // qDebug() << "OS: " << jObj.value("OS").toString();
+            // qDebug() << "OSVer: " << jObj.value("OSVer").toString();
+            qDebug() << "NET: " << jObj.value("Net").toString();
+        }else{
+            qDebug() << "TODO QJsonArray value: " << value;
+        }
+
+    }
+    // for(int i = 0; i < m_pcs.size(); ++i) {
+    //     qDebug() << "m_pcs[i]: " <<    m_pcs[i].isString();//.isArray();//.isObject();// String??
+    //     // QJsonObject jObj = m_pcs[i].toObject();
+    //     qDebug() << "jObj:" << m_pcs[i];
+    //     doc.fromJson(m_pcs[i].toString().toUtf8(), error);
+    //     if (error->error == QJsonParseError::NoError) {
+    //         QJsonObject jObj = doc.object();
+
+    //         qDebug() << "CPU: " <<  jObj.value("CPU").toString();
+    //         qDebug() << "MB_Model: " <<  jObj.value("MB_Model").toString();
+
+    //         qDebug() << "OS: " << jObj.value("OS").toString();
+    //         qDebug() << "OSVer: " << jObj.value("OSVer").toString();
+    //     }else{
+    //         qDebug() << "ExportHtml::procressData: Wrong format of m_pcs[i]: " << m_pcs[i].toString().toUtf8() << " ERROR:" << error->errorString() ;
+    //         break;
+    //     }
+
         // QJsonObject jNet = jObj.value("Net").toObject();
         // QString strNet = QJsonDocument(jNet).toJson(QJsonDocument::Compact);
         // qDebug() << "strNet: " << strNet;
         // jNet.
         //doc.setObject(jObj);
         //qDebug() << "PCS:" << doc.toJson(QJsonDocument::Compact);
-    }
+    // }
     //raw data
     save(m_savefile);
 }

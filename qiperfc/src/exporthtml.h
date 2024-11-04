@@ -25,9 +25,11 @@ public:
     void save(QString filename);
     QString imageToBase64(const QImage &image, const char *format = "PNG");
     void setData(TPMgr *tpmgr, TPPlot *tpplot, QString pcs);
+    void setTestTime(QString time);
 
 public slots:
-    void editTitleTag();
+    void editTitleTag(QString title);
+    void updateTitle(QString title);
     void onAddTag();
     void onLoadFinished(bool isOk);
     void procressData();
@@ -40,6 +42,7 @@ private:
     QString m_savefile;
     int m_width;
     int m_heigth;
+    QString m_testtime;
     QWebEngineView *webView;
     // bool m_ok;
     TPMgr *m_tpmgr;

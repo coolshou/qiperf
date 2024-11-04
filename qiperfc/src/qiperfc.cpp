@@ -1046,6 +1046,7 @@ void QIperfC::onExport()
         // qDebug() << "pcs:" << pcs;
         ExportHtml *eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth);
         eh->setData(m_tpmgr, m_tpplot, m_endpointmgr->getPCsInfo(pcs));
+        eh->setTestTime(m_TestStartTime.toString(DATETIME_NOW_FORMAT));
         // QThread::sleep(1);//TODO: any better way to wait page loaded??
         // eh->setData(m_tpmgr, m_tpplot);
 

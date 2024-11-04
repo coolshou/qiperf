@@ -268,11 +268,16 @@ int TPMgr::rootChildCount()
     return rootItem->childCount();
 }
 
-QList<TP *> TPMgr::getChilds()
+QList<TP *> TPMgr::getChilds(bool showAll)
 {
 //    QList<TP *> tps;
     m_tps.clear();
     for(int i = 0; i<rootItem->childCount();i++){
+        if (!showAll){
+            if (!rootItem->child(i)->getEnabled()){
+                continue;
+            }
+        }
         m_tps.append(rootItem->child(i));
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
