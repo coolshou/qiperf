@@ -192,6 +192,7 @@
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
     <addaction name="actionDelete"/>
+    <addaction name="actionCopyText"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -523,6 +524,11 @@
    </property>
    <property name="text">
     <string>Debug log</string>
+   </property>
+  </action>
+  <action name="actionCopyText">
+   <property name="text">
+    <string>Copy Text</string>
    </property>
   </action>
  </widget>

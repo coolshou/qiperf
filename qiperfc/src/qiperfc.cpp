@@ -17,6 +17,7 @@
 #include <QTreeView>
 #include <QToolTip>
 #include <QAction>
+#include <QCursor>
 
 #include "endpointact.h"
 #include "tp.h"
@@ -53,6 +54,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_frm_option = new dlgOption(m_settings);
     connect(m_frm_option, &dlgOption::widthChanged, this, &QIperfC::onWidthChanged);
     connect(m_frm_option, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);
+    connect(m_frm_option, &dlgOption::showGroup, this, &QIperfC::onShowGroup);
     initStatusbar();
     loadSettings();
     //UI actions
@@ -690,6 +692,27 @@ void QIperfC::onCopy()
     }
 }
 
+void QIperfC::onCopyText()
+{
+    if (ui->tv_throughput->hasFocus()){
+        QModelIndexList mls = ui->tv_throughput->selectionModel()->selectedRows();
+        if (mls.length()>0){
+            QModelIndex idx = mls[0]; // first model index
+            QPoint globalPos = QCursor::pos();
+            QPoint widgetPos = ui->tv_throughput->mapFromGlobal(globalPos);
+            int col = ui->tv_throughput->columnAt(widgetPos.x());
+
+            TP *tp;
+            tp = m_tpmgr->getItem(idx);
+            m_clipboard->setText(tp->data(col).toString());
+        }
+
+    }else {
+        qDebug() << "onCopyText: tv_throughput not hasFocus";
+    }
+
+}
+
 void QIperfC::onPaste()
 {
     if (ui->tv_throughput->hasFocus()){
@@ -953,6 +976,8 @@ void QIperfC::saveSettings()
     m_settings->setValue("WaitServerReady", m_WaitServerReady);
     m_settings->setValue("TPExportWidth", m_TPExportWidth);
     m_settings->setValue("TPExportHeigth", m_TPExportHeigth);
+    m_settings->setValue("TPGroup", m_TPGroup);
+
     m_settings->endGroup();
     m_settings->sync();
 }
@@ -1059,9 +1084,16 @@ void QIperfC::onHeigthChanged(int heigth)
     m_TPExportHeigth = heigth;
 }
 
+void QIperfC::onShowGroup(bool bShow)
+{
+    qDebug() << "TODO: onShowGroup:" << bShow;
+    //treeview show/hide (add remove) group
+    //plotchart  show/hide group
+}
+
 void QIperfC::initMenus()
 {
-    m_tpmenu = new QMenu();
+    m_tpmenu = new QMenu(); // config throughput pair right click menu
     m_aEnable = new QAction("Enable select item");
     connect(m_aEnable, &QAction::triggered, this, &QIperfC::onEnableItem);
     m_aDisable = new QAction("Disable select item");
@@ -1070,6 +1102,8 @@ void QIperfC::initMenus()
     m_tpmenu->addAction(ui->actionCopy);
     m_tpmenu->addAction(ui->actionPaste);
     m_tpmenu->addAction(ui->actionDelete);
+    m_tpmenu->addSeparator();
+    m_tpmenu->addAction(ui->actionCopyText);
     m_tpmenu->addSeparator();
     m_tpmenu->addAction(m_aEnable);
     m_tpmenu->addAction(m_aDisable);
@@ -1265,6 +1299,8 @@ void QIperfC::initActions()
 
     // edit
     connect(ui->actionCopy, &QAction::triggered, this, &QIperfC::onCopy);
+    // copy column text
+    connect(ui->actionCopyText, &QAction::triggered, this, &QIperfC::onCopyText);
     connect(ui->actionPaste, &QAction::triggered, this, &QIperfC::onPaste);
 
     connect(ui->actionAddIperf, &QAction::triggered, this, &QIperfC::onAddIperf);

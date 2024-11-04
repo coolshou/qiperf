@@ -81,6 +81,7 @@ public slots:
     void onShowLog();
     void onConfig();
     void onCopy();
+    void onCopyText();
     void onPaste();
     void onDelete();
     void onAbout();
@@ -145,6 +146,8 @@ private slots:
     void onExport();
     void onWidthChanged(int width);
     void onHeigthChanged(int heigth);
+    void onShowGroup(bool bShow);
+
 private:
     Ui::MainWindow *ui;
     CustomHeaderView *header;
@@ -186,6 +189,7 @@ private:
     int m_WaitServerReady;
     int m_TPExportWidth;
     int m_TPExportHeigth;
+    bool m_TPGroup; // show throughput group
     QString m_datapath;
 
     QMenu *m_tpmenu; //right menu for m_tpmgr
