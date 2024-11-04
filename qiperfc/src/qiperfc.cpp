@@ -1047,29 +1047,9 @@ void QIperfC::onExport()
         ExportHtml *eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth);
         eh->setData(m_tpmgr, m_tpplot, m_endpointmgr->getPCsInfo(pcs));
         eh->setTestTime(m_TestStartTime.toString(DATETIME_NOW_FORMAT));
-        // QThread::sleep(1);//TODO: any better way to wait page loaded??
-        // eh->setData(m_tpmgr, m_tpplot);
+        // eh->procressData();
+        eh->exporthtml();
 
-        // eh->save(fileName);
-
-        // //prepare throughput config data
-        // if (m_tpmgr->rootChildCount()>0) {
-        //     QByteArray b = m_tpmgr->savedata();
-        //     //        qDebug() << "env: " << env;
-        //     QString starttime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
-        //     QString tmp = m_logpath + QDir::separator() + starttime;
-        //     QDir d(tmp);
-        //     QStringList filelist;
-        //     foreach(auto s, d.entryList(QDir::Files)){
-        //         filelist.append(tmp+ QDir::separator()+s);
-        //     }
-        //     m_qipconfig->setTPCfg(b, env, starttime, filelist);
-        //     if (!m_qipconfig->exportToFile(fileName, m_tpplot)){
-        //         qDebug() << "Export to " << fileName << " Fail!";
-        //     }
-        // }else{
-        //     qDebug() << "NO throughput config to save";
-        // }
     }else {
         qDebug() << "NO throughput record to Export : TestStartTime: " << m_TestStartTime.toString(DATETIME_NOW_FORMAT);
     }

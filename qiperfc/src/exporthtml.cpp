@@ -30,11 +30,9 @@ ExportHtml::ExportHtml(QString templatefile, QString savefile,int width, int hei
     // QPushButton *addButton = new QPushButton("add Tag", this);
     layout->addWidget(webView);
     // layout->addWidget(addButton);
-
     // connect(addButton, &QPushButton::clicked, this, &ExportHtml::onAddTag);
-
     setLayout(layout);
-    loadhtml(m_templatefile);// load template file
+    // loadhtml(m_templatefile);// load template file
 }
 
 ExportHtml::~ExportHtml()
@@ -99,6 +97,7 @@ display: block;}';").arg(pId, sImg));
 
 void ExportHtml::AddDivHostInfo(QString pId)
 {
+    Q_UNUSED(pId)
     // add host Info list
 }
 
@@ -152,6 +151,11 @@ void ExportHtml::setData(TPMgr *tpmgr, TPPlot *tpplot, QString pcs)
 void ExportHtml::setTestTime(QString time)
 {
     m_testtime = time;
+}
+
+void ExportHtml::exporthtml()
+{
+    loadhtml(m_templatefile);// load template file
 }
 
 void ExportHtml::editTitleTag(QString title)
@@ -235,7 +239,8 @@ void ExportHtml::procressData()
     // qDebug() << "pcs:" << m_pcs;
     // for(QJsonArray::const_iterator it=m_pcs.constBegin(); it!=m_pcs.constEnd(); ++it){
     qDebug() << "procressData:" << m_pcs;
-    foreach (const QJsonValue &value, m_pcs) {
+    // foreach (const QJsonValue &value, m_pcs) {
+    for (const QJsonValue &value: m_pcs) {
         if (value.isObject()) {
             QJsonObject jObj = value.toObject();
             qDebug() << "jObj.isEmpty:" << jObj.isEmpty();

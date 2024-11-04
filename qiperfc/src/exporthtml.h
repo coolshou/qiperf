@@ -26,6 +26,7 @@ public:
     QString imageToBase64(const QImage &image, const char *format = "PNG");
     void setData(TPMgr *tpmgr, TPPlot *tpplot, QString pcs);
     void setTestTime(QString time);
+    void exporthtml();
 
 public slots:
     void editTitleTag(QString title);
