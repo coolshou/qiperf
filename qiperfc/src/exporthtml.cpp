@@ -240,7 +240,7 @@ void ExportHtml::procressData()
     // for(QJsonArray::const_iterator it=m_pcs.constBegin(); it!=m_pcs.constEnd(); ++it){
     qDebug() << "procressData:" << m_pcs;
     // foreach (const QJsonValue &value, m_pcs) {
-    for (const QJsonValue &value: m_pcs) {
+    for (const QJsonValue &value: qAsConst(m_pcs)) {
         if (value.isObject()) {
             QJsonObject jObj = value.toObject();
             qDebug() << "jObj.isEmpty:" << jObj.isEmpty();
