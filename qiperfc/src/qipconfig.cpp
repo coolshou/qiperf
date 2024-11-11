@@ -1,4 +1,4 @@
-#include "QIPConfig.h"
+#include "qipconfig.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>

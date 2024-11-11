@@ -56,7 +56,6 @@ SOURCES += \
     ../src/icmpwrapper.cpp \
     lib/axistag.cpp \
     lib/qcustomplot.cpp \
-    src/QIPConfig.cpp \
     src/codeeditor.cpp \
     src/customheaderview.cpp \
     src/dlgiperf.cpp \
@@ -74,6 +73,7 @@ SOURCES += \
     src/pingitem.cpp \
     src/pingmgr.cpp \
     src/pingplot.cpp \
+    src/qipconfig.cpp \
     src/qiperfc.cpp \
     src/tp.cpp \
     src/tpfoldingdelegate.cpp \
@@ -101,7 +101,6 @@ HEADERS += \
     ../src/myfunc.h \
     lib/axistag.h \
     lib/qcustomplot.h \
-    src/QIPConfig.h \
     src/codeeditor.h \
     src/customheaderview.h \
     src/dlgiperf.h \
@@ -118,6 +117,7 @@ HEADERS += \
     src/pingitem.h \
     src/pingmgr.h \
     src/pingplot.h \
+    src/qipconfig.h \
     src/qiperfc.h \
     src/tp.h \
     src/tpfoldingdelegate.h \

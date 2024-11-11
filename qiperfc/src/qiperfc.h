@@ -22,7 +22,7 @@
 #include "tpmgr.h"
 #include "tpdirdelegate.h"
 #include "tpfoldingdelegate.h"
-#include "QIPConfig.h"
+#include "qipconfig.h"
 #include "tpplot.h"
 #include "formqiperfds.h"
 #include "dlgtest.h"
