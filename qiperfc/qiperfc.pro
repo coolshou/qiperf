@@ -140,6 +140,9 @@ FORMS += \
     src/formqiperfds.ui \
     src/qiperfc.ui
 
+UI_DIR= \
+    src
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
