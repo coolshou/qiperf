@@ -12,6 +12,7 @@
 #include <QSettings>
 #include <QClipboard>
 #include <QMenu>
+#include <QDialog>
 
 #include "comm.h"
 //#include "pipeclient.h"
@@ -205,5 +206,6 @@ private:
     DlgPing *dp;
 #endif
     PingMgr *m_pingmgr;
+    QDialog *m_debugdlg;
 };
 #endif // QIPERFC_H

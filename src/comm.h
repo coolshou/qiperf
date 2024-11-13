@@ -92,4 +92,7 @@ enum class BUFFER_SIZES {
 #define TEST_WS 1
 #define TEST_ICMP 0
 
+//DEBUG
+#define DEBUG_EXPORT_HTML 0
+
 #endif // COMM_H

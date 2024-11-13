@@ -21,8 +21,8 @@ public:
     ~ExportHtml();
     void loadhtml(QString filename);
     void AddDivRow(QString pId, QList<QString> values);
+    void AddRawData(QString pId, QString name, QString data);
     void AddDivPng(QString pId, QString sImg);
-    void AddDivHostInfo(QString pId);
     void save(QString filename);
     QString imageToBase64(const QImage &image, const char *format = "PNG");
     void setData(TPMgr *tpmgr, TPPlot *tpplot, QString pcs);
@@ -36,6 +36,10 @@ public slots:
     void onAddTag();
     void onLoadFinished(bool isOk);
     void procressData();
+
+protected:
+    // Reimplement the keyPressEvent to listen for F12 key
+    void keyPressEvent(QKeyEvent *event) override;
 
 signals:
     void ready();
@@ -54,6 +58,7 @@ private:
     QStringList m_iperf_raw_filenames; // iperf raw log filenames
     IperfWrapper *m_iperfwrapper;
     QString dirToDiv(QString dir);
+    QWebEngineView *devTools;  // Separate view for developer tools
 };
 
 #endif // EXPORTHTML_H

@@ -19,6 +19,8 @@
 #include <QAction>
 #include <QCursor>
 
+#include <QVBoxLayout>
+
 #include "endpointact.h"
 #include "tp.h"
 #include "versions.h"
@@ -110,11 +112,19 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(this, &QIperfC::closeAll, m_frm_qiperfds, &FormQIperfds::close);
 //    connect(this, &QIperfC::closeAll, m_frm_option, &dlgOption::close);// model mode, no need
     connect(this, &QIperfC::closeAll, m_dlgtest, &DlgTest::close);
+#if (DEBUG_EXPORT_HTML==1)
+    m_debugdlg = new QDialog(this);
+    m_debugdlg->setModal(false);
+    m_debugdlg->resize(1280,1024);
+#endif
 }
 
 QIperfC::~QIperfC()
 {
 //    qDebug() << "~QIperfC";
+#if (DEBUG_EXPORT_HTML==1)
+    delete m_debugdlg;
+#endif
     delete ui;
 }
 
@@ -1044,7 +1054,25 @@ void QIperfC::onExport()
         }
         QStringList pcs = m_tpmgr->getPCs();
         // qDebug() << "pcs:" << pcs;
+#if (DEBUG_EXPORT_HTML==1)
+        ExportHtml *eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth, m_debugdlg);
+#else
         ExportHtml *eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth);
+#endif
+
+        //debug ========================
+#if (DEBUG_EXPORT_HTML==1)
+        // Create the dialog
+        m_debugdlg->setWindowTitle("Export to HTML");
+        // Create a layout and add the widget to it
+        QVBoxLayout *layout = new QVBoxLayout;
+        layout->addWidget(eh);
+        // Set the layout on the QDialog
+        m_debugdlg->setLayout(layout);
+        // Show the dialog
+        m_debugdlg->show();
+        //end debug ========================
+#endif
         QString pcsinfo = m_qipconfig->getPCsInfo();
         if (pcsinfo.isEmpty()){
             pcsinfo = m_endpointmgr->getPCsInfo(pcs);

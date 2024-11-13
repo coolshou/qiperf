@@ -13,6 +13,8 @@
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QJsonObject>
+#include <QRandomGenerator>
+#include <QWebEngineSettings>
 
 ExportHtml::ExportHtml(QString templatefile, QString savefile,int width, int heigth,
                        QWidget *parent)
@@ -34,6 +36,13 @@ ExportHtml::ExportHtml(QString templatefile, QString savefile,int width, int hei
     // connect(addButton, &QPushButton::clicked, this, &ExportHtml::onAddTag);
     setLayout(layout);
     // loadhtml(m_templatefile);// load template file
+
+    // Enable developer tools
+    // Initialize developer tools window
+    // devTools = new QWebEngineView(this);
+    // layout->addWidget(devTools);
+    // devTools->setWindowTitle("Developer Tools");
+    // devTools->resize(1280,1024);
 }
 
 ExportHtml::~ExportHtml()
@@ -73,8 +82,50 @@ void ExportHtml::AddDivRow(QString pId, QList<QString> values)
         idx++;
     }
     js.append(QString("pTag.appendChild(trTag);"));
-    // qDebug() << "JS: " << js;
+    if (pId.contains("RawData")){
+        qDebug() << "AddDivRow RawData JS: " << js;
+    }
     webView->page()->runJavaScript(js);
+}
+
+void ExportHtml::AddRawData(QString pId, QString name, QString data)
+{
+    QString js = "";
+    QString idname = "Raw_"+ QString::number(QRandomGenerator::global()->bounded(65535));
+
+    js.append(QString("var pTag = document.getElementById('%1');").arg(pId));
+    js.append(QString("var trTag = document.createElement('div');"));
+    js.append(QString("trTag.classList.add('table-tr');"));
+    //name
+    js.append(QString("var tdTag_1 = document.createElement('div');"));
+    js.append(QString("tdTag_1.classList.add('table-tdraw');"));
+    js.append(QString("tdTag_1.innerHTML = '%1';").arg(name));
+    js.append(QString("trTag.appendChild(tdTag_1);"));
+    //data
+    js.append(QString("var tdTag_2 = document.createElement('div');"));
+    js.append(QString("tdTag_2.classList.add('table-tdraw');"));
+    js.append(QString("var tdTag_data = document.createElement('pre');"));
+    js.append(QString("tdTag_data.setAttribute('id', '%1');").arg(idname));
+
+    js.append(QString("tdTag_2.appendChild(tdTag_data);"));
+    js.append(QString("trTag.appendChild(tdTag_2);"));
+
+    js.append(QString("pTag.appendChild(trTag);"));
+#if (DEBUG_EXPORT_HTML==1)
+    if (pId.contains("RawData")){
+        qDebug() << "AddRawData RawData JS: " << js;
+    }
+#endif
+    webView->page()->runJavaScript(js);
+
+    //data
+    // Encode content in Base64
+    QByteArray base64Content = data.toUtf8().toBase64();
+
+    js = QString("var decodedContent = atob('%1');").arg(QString::fromLatin1(base64Content));
+    js.append(QString("document.getElementById('%1').innerHTML = decodedContent;").arg(idname));
+    webView->page()->runJavaScript(js);
+
 }
 
 void ExportHtml::AddDivPng(QString pId, QString sImg)
@@ -96,12 +147,6 @@ display: block;}';").arg(pId, sImg));
     webView->page()->runJavaScript(js);
 }
 
-void ExportHtml::AddDivHostInfo(QString pId)
-{
-    Q_UNUSED(pId)
-    // add host Info list
-}
-
 void ExportHtml::save(QString filename)
 {
     //try javascript
@@ -112,10 +157,10 @@ void ExportHtml::save(QString filename)
             return;
         }
         QTextStream stream(&file);
-        stream << v.toString();
+        stream << "<!DOCTYPE html>\n"<< v.toString();
         file.close();
     });
-
+    //following not good on save file!!
     // webView->page()->save(filename, QWebEngineDownloadItem::CompleteHtmlSaveFormat); // BAD: have extra comment in <head> "<!-- saved from url ... -->", saved file size become large!!
     // webView->page()->save(filename, QWebEngineDownloadItem::MimeHtmlSaveFormat); // BAD wrong format
     // webView->page()->save(filename, QWebEngineDownloadItem::SingleHtmlSaveFormat); //BAD, did not show record
@@ -253,14 +298,6 @@ void ExportHtml::procressData()
             doc = QJsonDocument::fromJson(pcinfo.toUtf8(), &error);
             if (error.error == QJsonParseError::NoError){
                 QJsonObject jObj = doc.object();
-                // qDebug() << "TODO HostName: " << jObj.value("HostName");
-                // qDebug() << "TODO CPU: " << jObj.value("CPU");
-                // qDebug() << "TODO MB_Model: " << jObj.value("MB_Model");
-                // qDebug() << "TODO MB_Vendor: " << jObj.value("MB_Vendor");
-                // qDebug() << "TODO MEM: " << jObj.value("MEM");
-                // qDebug() << "TODO OS: " << jObj.value("OS");
-                // qDebug() << "TODO OSVer: " << jObj.value("OSVer");
-
                 QJsonObject jObjNet = jObj.value("Net").toObject();
                 QJsonObject data;
                 // qDebug() << "net interfaces: " << jObjNet.keys();
@@ -290,8 +327,11 @@ void ExportHtml::procressData()
                                 hostls.append(data.value("driverVersion").toString());
                                 break;
                             }
+                            QCoreApplication::processEvents(QEventLoop::AllEvents);
                         }
+                        QCoreApplication::processEvents(QEventLoop::AllEvents);
                     }
+                    QCoreApplication::processEvents(QEventLoop::AllEvents);
                 }
             }else {
                 qDebug() << " ERROR: " << error.errorString();
@@ -304,13 +344,41 @@ void ExportHtml::procressData()
         }
     }
 
-    //raw data
+    //iperf log raw data
     if(m_iperf_raw_filenames.length()>0){
-        foreach (auto filename, m_iperf_raw_filenames){
-            qDebug() << "TODO process raw log filename : " << filename;
+        for ( const auto& filename : qAsConst(m_iperf_raw_filenames)){
+            QFileInfo fileInfo(filename);
+            QString filenameonly(fileInfo.fileName());
+            QString rawdata;
+            QFile datafile(filename);
+            if (!datafile.open(QIODevice::ReadOnly)) {
+                rawdata = "Can not open file "+ filename;
+            }else{
+                rawdata = datafile.readAll();
+                datafile.close();
+                // qDebug() << "filename:" << filenameonly <<" rawdata:" << rawdata;
+            }
+            AddRawData("RawData",filenameonly, rawdata);
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }
     save(m_savefile);
+}
+
+void ExportHtml::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_F12) {
+        // Toggle the developer tools window
+        // if (!devTools->isVisible()) {
+        //     webView->page()->setDevToolsPage(devTools->page());  // Link dev tools to main page
+        //     // devTools->show();
+        //     devTools->showMaximized();
+        // } else {
+        //     devTools->close();
+        // }
+    } else {
+        QWidget::keyPressEvent(event);  // Default behavior for other keys
+    }
 }
 
 QString ExportHtml::dirToDiv(QString dir)
