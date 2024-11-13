@@ -201,6 +201,11 @@ QString QIPConfig::getPCsInfo()
     return m_data->env;
 }
 
+QStringList QIPConfig::getIperfRawFilenames()
+{
+    return m_data->datafilenames;
+}
+
 void QIPConfig::onProgress(int currentlineno)
 {
     emit progress(currentlineno);
@@ -312,6 +317,7 @@ bool QIPConfig::filesFromStore(QByteArray &inputData, const QString &outputFolde
             continue;
         }
         outputFile.write(fileContent);
+        m_data->datafilenames.append(outputFile.fileName());
         outputFile.close();
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }

@@ -5,6 +5,7 @@
 #include <QWebEngineView>
 #include <QString>
 #include <QJsonArray>
+#include <QStringList>
 
 #include "tpmgr.h"
 #include "tp.h"
@@ -25,6 +26,7 @@ public:
     void save(QString filename);
     QString imageToBase64(const QImage &image, const char *format = "PNG");
     void setData(TPMgr *tpmgr, TPPlot *tpplot, QString pcs);
+    void setRawFilenames(QStringList filenames);
     void setTestTime(QString time);
     void exporthtml();
 
@@ -49,6 +51,7 @@ private:
     TPMgr *m_tpmgr;
     TPPlot *m_tpplot;
     QJsonArray m_pcs;
+    QStringList m_iperf_raw_filenames; // iperf raw log filenames
     IperfWrapper *m_iperfwrapper;
     QString dirToDiv(QString dir);
 };

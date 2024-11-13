@@ -1051,6 +1051,8 @@ void QIperfC::onExport()
         }
         eh->setData(m_tpmgr, m_tpplot, pcsinfo);
         eh->setTestTime(m_TestStartTime.toString(DATETIME_NOW_FORMAT));
+        eh->setRawFilenames(m_qipconfig->getIperfRawFilenames());
+
         // eh->procressData();
         eh->exporthtml();
 
