@@ -3,7 +3,8 @@ Section: network
 Priority: optional
 Maintainer: coolshou <coolshou2060@gmail.com>
 Build-Depends: debhelper-compat (= 13), qtbase5-dev | qt6-base-dev, make,
-    qt5-qmake | qmake6, libsystemd-dev, libqt5websockets5-dev | libqt6websockets6-dev, liboping-dev,
+    qt5-qmake | qmake6, libsystemd-dev,
+    libqt5websockets5-dev | libqt6websockets6-dev| libqt6network6, liboping-dev,
     qtwebengine5-dev | qt6-webengine-dev
 Standards-Version: 4.6.0
 Homepage: https://github.com/coolshou/qiperf.git
