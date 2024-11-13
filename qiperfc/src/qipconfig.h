@@ -33,6 +33,7 @@ public:
     bool importIperf3Log(QString filename);
     bool exportToFile(QString filename, TPPlot *tpplot, int tpwidth=0, int tpheigth=0);
     bool detectSystemProxy(QString &hostname, quint16 &port);
+    QString getPCsInfo();
 
 public slots:
     void onProgress(int currentlineno);

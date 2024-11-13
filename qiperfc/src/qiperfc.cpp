@@ -1045,7 +1045,11 @@ void QIperfC::onExport()
         QStringList pcs = m_tpmgr->getPCs();
         // qDebug() << "pcs:" << pcs;
         ExportHtml *eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth);
-        eh->setData(m_tpmgr, m_tpplot, m_endpointmgr->getPCsInfo(pcs));
+        QString pcsinfo = m_qipconfig->getPCsInfo();
+        if (pcsinfo.isEmpty()){
+            pcsinfo = m_endpointmgr->getPCsInfo(pcs);
+        }
+        eh->setData(m_tpmgr, m_tpplot, pcsinfo);
         eh->setTestTime(m_TestStartTime.toString(DATETIME_NOW_FORMAT));
         // eh->procressData();
         eh->exporthtml();

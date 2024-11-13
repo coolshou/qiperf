@@ -196,6 +196,11 @@ bool QIPConfig::detectSystemProxy(QString &hostname, quint16 &port)
     }
 }
 
+QString QIPConfig::getPCsInfo()
+{
+    return m_data->env;
+}
+
 void QIPConfig::onProgress(int currentlineno)
 {
     emit progress(currentlineno);

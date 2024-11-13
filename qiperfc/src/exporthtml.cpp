@@ -144,7 +144,7 @@ void ExportHtml::setData(TPMgr *tpmgr, TPPlot *tpplot, QString pcs)
     if (error.error == QJsonParseError::NoError){
         m_pcs = doc.array();
     }else{
-        qDebug() << "ExportHtml::setData Wrong format: " << error.errorString();
+        qDebug() << "ExportHtml::setData Wrong format of pcs info: " << error.errorString();
     }
 }
 
@@ -234,53 +234,84 @@ void ExportHtml::procressData()
     AddDivPng("tpchart", sImg);
 
     //host info
-    // QJsonParseError *error= new QJsonParseError();
-    // QJsonDocument doc = QJsonDocument();
+    QList<QString> hostls;
+    QJsonParseError error;//= new QJsonParseError();
+    QJsonDocument doc;
+    // QJsonDocument doc = QJsonDocument.fromJson(m_pcs, &error);
+    // if (error.error == QJsonParseError::NoError){
+
+    // }
     // qDebug() << "pcs:" << m_pcs;
     // for(QJsonArray::const_iterator it=m_pcs.constBegin(); it!=m_pcs.constEnd(); ++it){
-    qDebug() << "procressData:" << m_pcs;
-    // foreach (const QJsonValue &value, m_pcs) {
+    // qDebug() << "procressData:" << m_pcs;
     for (const QJsonValue &value: qAsConst(m_pcs)) {
-        if (value.isObject()) {
-            QJsonObject jObj = value.toObject();
-            qDebug() << "jObj.isEmpty:" << jObj.isEmpty();
-            // qDebug() << "CPU: " <<  jObj.value("CPU").toString();
-            // qDebug() << "MB_Model: " <<  jObj.value("MB_Model").toString();
+        hostls.clear();
+        if (value.isString()) {
+            QString pcinfo = value.toString();
+            qDebug() << "pcinfo:" << pcinfo;
+            doc = QJsonDocument::fromJson(pcinfo.toUtf8(), &error);
+            if (error.error == QJsonParseError::NoError){
+                QJsonObject jObj = doc.object();
+                // qDebug() << "TODO HostName: " << jObj.value("HostName");
+                // qDebug() << "TODO CPU: " << jObj.value("CPU");
+                // qDebug() << "TODO MB_Model: " << jObj.value("MB_Model");
+                // qDebug() << "TODO MB_Vendor: " << jObj.value("MB_Vendor");
+                // qDebug() << "TODO MEM: " << jObj.value("MEM");
+                // qDebug() << "TODO OS: " << jObj.value("OS");
+                // qDebug() << "TODO OSVer: " << jObj.value("OSVer");
 
-            // qDebug() << "OS: " << jObj.value("OS").toString();
-            // qDebug() << "OSVer: " << jObj.value("OSVer").toString();
-            qDebug() << "NET: " << jObj.value("Net").toString();
+                QJsonObject jObjNet = jObj.value("Net").toObject();
+                QJsonObject data;
+                // qDebug() << "TODO net interfaces: " << jObjNet.keys();
+                foreach(const QString& key, jObjNet.keys()) {
+                    data = jObjNet.value(key).toObject();
+                    // qDebug() << "TODO NET address: " << data.value("address");
+                    QJsonArray addrs = data.value("address").toArray();
+                    for (QJsonArray::const_iterator it=addrs.constBegin(); it!=addrs.constEnd(); ++it) {
+                        QJsonArray jAddr= it->toArray();
+                        // qDebug() << "TODO jAddr: " << jAddr;
+                        for (int i=0;i< jAddr.count();i++){
+                            QJsonValue v = jAddr.at(i);
+                            if (ls.contains(v.toString())){
+                                // qDebug() << "TODO addr: " << v.toString();
+                                hostls.append(v.toString());
+                                QString hostname = jObj.value("HostName").toString();
+                                if (jObj.value("MB_Model").toString().length()>0) {
+                                    hostname = hostname + "<br>" + jObj.value("MB_Model").toString();
+                                }
+                                hostls.append(hostname);
+                                hostls.append(jObj.value("OS").toString());
+                                hostls.append(jObj.value("OSVer").toString());
+                                QString ifname = key;
+                                if (data.value("driverName").toString().length()>0){
+                                    ifname = ifname + "("+data.value("driverName").toString()+")";
+                                }
+                                hostls.append(ifname);
+                                hostls.append(data.value("driverVersion").toString());
+                                break;
+                            }
+                        }
+                    }
+                    // qDebug() << "TODO NET : " <<  key;
+                    // qDebug() << "TODO NET MAC: " << data.value("HW");
+                    // qDebug() << "TODO NET driverName: " << data.value("driverName");
+                    // qDebug() << "TODO NET driverVersion: " << data.value("driverVersion");
+                }
+            }else {
+                qDebug() << " ERROR: " << error.errorString();
+            }
         }else{
             qDebug() << "TODO QJsonArray value: " << value;
         }
+        if (hostls.count()>0){
+            qDebug() << "TODO hostls: " << hostls;
+            AddDivRow("HostInfo", hostls);
+        }
 
     }
-    // for(int i = 0; i < m_pcs.size(); ++i) {
-    //     qDebug() << "m_pcs[i]: " <<    m_pcs[i].isString();//.isArray();//.isObject();// String??
-    //     // QJsonObject jObj = m_pcs[i].toObject();
-    //     qDebug() << "jObj:" << m_pcs[i];
-    //     doc.fromJson(m_pcs[i].toString().toUtf8(), error);
-    //     if (error->error == QJsonParseError::NoError) {
-    //         QJsonObject jObj = doc.object();
 
-    //         qDebug() << "CPU: " <<  jObj.value("CPU").toString();
-    //         qDebug() << "MB_Model: " <<  jObj.value("MB_Model").toString();
-
-    //         qDebug() << "OS: " << jObj.value("OS").toString();
-    //         qDebug() << "OSVer: " << jObj.value("OSVer").toString();
-    //     }else{
-    //         qDebug() << "ExportHtml::procressData: Wrong format of m_pcs[i]: " << m_pcs[i].toString().toUtf8() << " ERROR:" << error->errorString() ;
-    //         break;
-    //     }
-
-        // QJsonObject jNet = jObj.value("Net").toObject();
-        // QString strNet = QJsonDocument(jNet).toJson(QJsonDocument::Compact);
-        // qDebug() << "strNet: " << strNet;
-        // jNet.
-        //doc.setObject(jObj);
-        //qDebug() << "PCS:" << doc.toJson(QJsonDocument::Compact);
-    // }
     //raw data
+
     save(m_savefile);
 }
 
