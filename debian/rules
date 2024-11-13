@@ -21,7 +21,7 @@ VERSION_QIPERFC := $(shell sed -n -e "s/^#define QIPERFC_VERSION //p" src/versio
 VERSION_QIPERFTRAY := $(shell sed -n -e "s/^#define QIPERFTRAY_VERSION //p" src/versions.h)
 
 # sudo qtchooser -install qt6 /usr/lib/qt6/bin/qmake
-export QT_SELECT=qt6
+#export QT_SELECT=qt6
 
 %:
 	dh $@
@@ -36,3 +36,7 @@ override_dh_builddeb:
 	dh_gencontrol -- -pqiperfc -v$(VERSION_QIPERFC) -cdebian/qiperfc.control -DPackage=qiperfc
 	dh_builddeb -pqiperfc --filename=qiperfc_$(VERSION_QIPERFC)_$(DEB_BUILD_ARCH).deb
 
+override_dh_shlibdeps:
+	dh_shlibdeps
+	# for ubuntu 24.10 QT6
+	sed -i "s/libqt6network6t64/libqt6network6 | libqt6network6t64/g" debian/qiperfd.substvars
