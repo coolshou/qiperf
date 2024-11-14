@@ -24,6 +24,11 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     //  /c:/user/<xxx>/appdata/local/temp/qiperf/
     ui->setupUi(this);
     loadcfg();
+
+    //DENUG use
+    ui->menuTest->menuAction()->setVisible(false);
+
+    // ui->menuTest->menuAction()hide();
     //qiperfd log path, this will get wrong path if qiperfd is run under administrator => c:\windows\temp
 //    QString qiperfd =  QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 //    m_qiperfdlog = qiperfd + QDir::separator() + QIPERF_NAME + QDir::separator() + QIPERFD_NAME + ".log";
