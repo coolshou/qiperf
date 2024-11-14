@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -54,7 +57,6 @@
       <property name="font">
        <font>
         <pointsize>18</pointsize>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
@@ -75,7 +77,7 @@
      <x>0</x>
      <y>0</y>
      <width>528</width>
-     <height>29</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHelp">
@@ -91,8 +93,15 @@
     <addaction name="actionRestart"/>
     <addaction name="actionShowLog"/>
    </widget>
+   <widget class="QMenu" name="menuTest">
+    <property name="title">
+     <string>Test</string>
+    </property>
+    <addaction name="actionNotice"/>
+   </widget>
    <addaction name="menuService"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuTest"/>
   </widget>
   <action name="actionAbout">
    <property name="text">
@@ -117,6 +126,11 @@
   <action name="actionShowLog">
    <property name="text">
     <string>Show Log</string>
+   </property>
+  </action>
+  <action name="actionNotice">
+   <property name="text">
+    <string>notice</string>
    </property>
   </action>
  </widget>

@@ -181,6 +181,9 @@ void QIperfTray::initActions()
     connect(ui->actionRestart, SIGNAL(triggered()), this, SLOT(onRestart()));
     connect(ui->actionShowLog, SIGNAL(triggered()), this, SLOT(onShowLog()));
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
+
+    connect(ui->actionNotice, SIGNAL(triggered()), this, SLOT(onNotice()));
+
 }
 
 void QIperfTray::onTrayIconActivated()
@@ -240,6 +243,15 @@ void QIperfTray::onAbout()
                        " v"+QString(VERSION)+"\n"
                        "Auther: Jimmy Yeh\n"
                        "URL: https://github.com/coolshou/qiperf");
+}
+
+void QIperfTray::onNotice()
+{
+    if (m_tray->supportsMessages()){
+        m_tray->showMessage("test", "notice of balloon messages");
+    }else {
+        qDebug() << "System Not support balloon messages!!";
+    }
 }
 void QIperfTray::closeEvent(QCloseEvent *event)
 {

@@ -34,6 +34,11 @@ MyTray::MyTray(QObject *parent):QObject(parent)
 
 }
 
+bool MyTray::supportsMessages()
+{
+    return trayicon->supportsMessages();
+}
+
 void MyTray::hideIconTray()
 {
     trayicon->hide();
@@ -42,6 +47,12 @@ void MyTray::showIconTray()
 {
     trayicon->show();
 }
+
+void MyTray::showMessage(const QString &title, const QString &message, QSystemTrayIcon::MessageIcon icon, int millisecondsTimeoutHint)
+{
+    trayicon->showMessage(title, message, icon, millisecondsTimeoutHint);
+}
+
 void MyTray::iconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     switch(reason){

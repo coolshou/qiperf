@@ -9,6 +9,7 @@ class MyTray : public QObject
     Q_OBJECT
 public:
     explicit MyTray(QObject *parent = nullptr);
+    bool supportsMessages();
 
 signals:
     void sigIconActivated();
@@ -18,6 +19,9 @@ signals:
 public slots:
     void hideIconTray();
     void showIconTray();
+    void showMessage(const QString &title, const QString &message,
+                     QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::Information,
+                     int millisecondsTimeoutHint = 10000);
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);

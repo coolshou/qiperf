@@ -41,6 +41,7 @@ public slots:
     void onRestart();
     void onShowLog();
     void onAbout();
+    void onNotice();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
