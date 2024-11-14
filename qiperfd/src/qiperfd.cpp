@@ -159,6 +159,8 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     qDebug() << "FileWatcher: " << QDir::toNativeSeparators(qiperfdlog);
     m_filewatcher = new FileWatcher(qiperfdlog);
     connect(m_filewatcher, &FileWatcher::onNewLine, this, &QIperfd::onNewLine);
+
+    informMessage(INFO_QIPERFD_STARTED, true);
 }
 
 QIperfd::~QIperfd()
@@ -166,6 +168,7 @@ QIperfd::~QIperfd()
     qDebug() << "~QIperfd" << Qt::endl;
 //    QString info = m_myinfo->disableInfo();
 //    m_udpsrv->setSendMsg(info);
+    informMessage(INFO_QIPERFD_STOPED, true);
     savecfg();
 }
 
@@ -501,10 +504,17 @@ void QIperfd::restartQIperfd()
     // stop: net stop "SERVICE-NAME"
     // start: net start "SERVICE-NAME"
     // restart: net stop [service name] && net start [service name]
-
-
 #endif
 
+}
+
+void QIperfd::informMessage(QString data, bool bShowAtLocal)
+{
+    //data : json format of string or simple string info with "："
+    if (bShowAtLocal){
+        m_pserver->sendMessage(data);
+    }
+    m_wsserver->sendTextResult(data);
 }
 
 void QIperfd::setManagerInterface(QString ifname)
@@ -541,7 +551,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
         QString backmsg = jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str();
 //        qDebug() << "send status (" << idx << "): " << backmsg  << Qt::endl;
-        m_pserver->send_MessageBack(idx, backmsg);
+        informMessage(backmsg, true);
     }
     else if (QString::compare(msg, CMD_IFNAMES, Qt::CaseInsensitive) == 0)
     {
@@ -556,7 +566,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
         QString backmsg = jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str();
 //        qDebug() << "send ifnames: (" << idx << "): " << backmsg  << Qt::endl;
-        m_pserver->send_MessageBack(idx, backmsg);
+        informMessage(backmsg, true);
     }
     else if (QString::compare(msg, CMD_QIPERFD_RESTART, Qt::CaseInsensitive) == 0)
     {
@@ -566,7 +576,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
     else if (QString::compare(msg, CMD_GET_LOGFILENAME, Qt::CaseInsensitive) == 0)
     {
         QString backmsg = QString(CMD_GET_LOGFILENAME)+"："+ qiperfdlog;
-        m_pserver->send_MessageBack(idx, backmsg);
+        informMessage(backmsg, true);
     }
     else
     {
@@ -690,10 +700,9 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport, 
 void QIperfd::onThroughput(int idx, QString sInterval, QString data)
 {
 //    if (bReportTPData){
-        m_wsserver->sendTextResult(QString(CMD_IPERF_TP_DATA)+":"+
-                               QString::number(idx)+":"+
-                               sInterval+":"+
-                               data);
+    QString s = QString(CMD_IPERF_TP_DATA)+":"+ QString::number(idx)+":"+
+                sInterval+":"+ data;
+    m_wsserver->sendTextResult(s);
 //    }
 }
 

@@ -31,6 +31,8 @@ public:
     void restartQiperfd();
     void statusQiperfd();
     void getQiperfdLogFile();
+    void showNotice(QString title, QString msg);
+    void showError(QString title, QString msg);
 
 public slots:
     void onTrayIconActivated();

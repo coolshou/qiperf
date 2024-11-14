@@ -116,8 +116,26 @@ void QIperfTray::getQiperfdLogFile()
     pclient->send_MessageToServer(CMD_GET_LOGFILENAME);
 }
 
-void QIperfTray::onNewMessage(const QString msg)
+void QIperfTray::showNotice(QString title, QString msg)
 {
+    if (m_tray->supportsMessages()){
+        m_tray->showMessage(title, msg);
+    }else {
+        qDebug() << "System Not support balloon messages!!";
+    }
+}
+
+void QIperfTray::showError(QString title, QString msg)
+{
+    if (m_tray->supportsMessages()){
+        m_tray->showMessage(title, msg, QSystemTrayIcon::Warning);
+    }else {
+        qDebug() << "System Not support balloon messages!!";
+    }
+}
+
+void QIperfTray::onNewMessage(const QString msg)
+{   // handle qiperfd message
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError){
@@ -163,6 +181,12 @@ void QIperfTray::onNewMessage(const QString msg)
                 qDebug() << "onNewMessage: Unknown format :" << msg;
             }
         }else {
+            if (msg == INFO_QIPERFD_STOPED){
+                showNotice("Info", "qiperfd stoped!!");
+            }
+            if (msg == INFO_QIPERFD_STARTED){
+                showNotice("Info", "qiperfd started!!");
+            }
             qDebug() << "onNewMessage: ERROR format of msg: ' " << msg << " '";
         }
     }

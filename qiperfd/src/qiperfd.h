@@ -63,6 +63,8 @@ public:
     void restartQIperfd();
 
 public slots:
+    void informMessage(QString data, bool bShowAtLocal=false);
+
     void setManagerInterface(QString ifname);
     void onPipeMessage(int idx, const QString msg);
     void readStdOut(int idx, QString text);

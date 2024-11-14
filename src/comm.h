@@ -29,13 +29,19 @@
 #define CMD_FAIL   "FAIL"
 #define CMD_ARGS   "ARGS"   // send args: eq: -k: kill qiperfd
 #define CMD_STATUS "STATUS"
-#define CMD_QIPERFD_START "QIPERFD_START"
-#define CMD_QIPERFD_STOP  "QIPERFD_STOP"
-#define CMD_QIPERFD_RESTART "QIPERFD_RESTART"
+
+#define CMD_QIPERFD_START "QIPERFD_START" // ASK qiperfd start
+#define INFO_QIPERFD_STARTED "QIPERFD_STARTED"  // inform qiperfd started
+#define CMD_QIPERFD_STOP  "QIPERFD_STOP" // ASK qiperfd stop
+#define INFO_QIPERFD_STOPED "QIPERFD_STOPED" // inform qiperfd stoped
+
+#define CMD_QIPERFD_RESTART "QIPERFD_RESTART" // ASK qiperfd restart
 #define CMD_IFNAMES "IFNAMES"  //Get all interfaces
 #define CMD_SET_IFNAME "SET_IFNAME"  //Get all interfaces
 #define CMD_RUNNING "RUNNING"  //get any iperf running status
 #define CMD_GET_LOGFILENAME "GET_LOGFILENAME"  // get qiperfd log file path
+#define CMD_ERROR "ERROR"  // show error message by qiperftray's balloon message
+#define CMD_INFO "INFO"  // show info message by qiperftray's balloon message
 
 //iperf control
 #define CMD_IPERF_START  "IPERF_START" // start iperf
