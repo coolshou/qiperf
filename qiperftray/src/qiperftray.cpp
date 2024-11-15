@@ -6,6 +6,8 @@
 #include "version.h"
 #include <QMessageBox>
 #include <QStandardPaths>
+#include <QComboBox>
+#include <QJsonArray>
 #include <QDir>
 
 #include <QDebug>
@@ -27,6 +29,7 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
 
     //DENUG use
     ui->menuTest->menuAction()->setVisible(false);
+    QObject::connect(ui->cb_mgr_ifnames, SIGNAL(currentIndexChanged(int)), this,SLOT(onIfnameChange(int)));
 
     // ui->menuTest->menuAction()hide();
     //qiperfd log path, this will get wrong path if qiperfd is run under administrator => c:\windows\temp
@@ -40,7 +43,7 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
 
     setWindowFlags(Qt::WindowTitleHint|Qt::Dialog);
 #if defined (Q_OS_LINUX)
-    setFixedSize(500,300);
+    setFixedSize(800,300);//TODO: should we fix the window size?
 #endif
     ui->te_error->setVisible(false);
     m_tray = tray;
@@ -146,10 +149,38 @@ void QIperfTray::onNewMessage(const QString msg)
         if (QString::compare(act, CMD_IFNAMES, Qt::CaseInsensitive)==0){
             QVariantMap ifnameMap = result[CMD_IFNAMES].toMap();
             QStringList ifnames = ifnameMap["ifnames"].toStringList();
+            // qDebug() << "onNewMessage:CMD_IFNAMES: " << result["netobj"];
+
+            QJsonDocument net = QJsonDocument::fromJson(result["netobj"].toString().toUtf8());
+            QJsonObject netobj = net.object();//.toJsonObject();
+            qDebug() << "onNewMessage:netobj: " << netobj;
+
+            QString ifname;
             ui->cb_mgr_ifnames->clear();
             ui->cb_mgr_ifnames->addItems(ifnames);
-            QString ifname =  result["ifname"].toString();
-//            qDebug() << "current ifname:" << ifname << Qt::endl;
+            //set first ip address
+            QJsonObject data;
+            QJsonArray addrsarray;
+            QJsonArray addrarr;
+            for (int i =0; i< ui->cb_mgr_ifnames->count(); i++ ){
+                ifname = ui->cb_mgr_ifnames->itemText(i);
+                data = netobj.value(ifname).toObject();
+                addrsarray = data.value("address").toArray();
+                // qDebug() << "addrsarray:" << addrsarray;
+                if (addrsarray.count()>0){
+                    if (addrsarray.at(0).isArray()){
+                        addrarr = addrsarray.at(0).toArray();// TODO: multi address handle
+                        // qDebug() << "addrarr:" << addrarr;
+                        if (addrarr.count()>0){
+                            ui->cb_mgr_ifnames->setItemData(i, addrarr[0].toString());
+                        }
+                    }
+                }
+
+            }
+
+            //change combobox to result["ifname"]
+            ifname =  result["ifname"].toString();
             int curidx = ui->cb_mgr_ifnames->currentIndex();
             int fidx =ui->cb_mgr_ifnames->findText(ifname);
             if (curidx != fidx){
@@ -198,6 +229,7 @@ void QIperfTray::onError(QString msg)
 //        qDebug() << "onError: " << msg;
         ui->te_error->setText(msg);
         ui->te_error->setVisible(true);
+        showError("ERROR", msg);
     } else {
         ui->te_error->setVisible(false);
     }
@@ -213,6 +245,12 @@ void QIperfTray::initActions()
 
     connect(ui->actionNotice, SIGNAL(triggered()), this, SLOT(onNotice()));
 
+}
+
+void QIperfTray::onIfnameChange(int index)
+{
+    QString address = ui->cb_mgr_ifnames->itemData(index).toString();
+    ui->lb_address->setText(address);
 }
 
 void QIperfTray::onTrayIconActivated()

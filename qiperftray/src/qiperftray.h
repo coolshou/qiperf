@@ -52,6 +52,7 @@ private slots:
     void onNewMessage(const QString msg);
     void onError(QString msg);
     void initActions();
+    void onIfnameChange(int index);
 
 private:
     QSettings cfg;

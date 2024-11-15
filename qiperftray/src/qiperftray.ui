@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>528</width>
-    <height>544</height>
+    <width>660</width>
+    <height>447</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,7 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QWidget" name="widget" native="true">
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,0">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0,0,0">
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
@@ -34,6 +34,19 @@
        </item>
        <item>
         <widget class="QComboBox" name="cb_mgr_ifnames"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="lb_address">
+         <property name="minimumSize">
+          <size>
+           <width>200</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QPushButton" name="pb_setMgrIfname">
@@ -76,7 +89,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>528</width>
+     <width>660</width>
      <height>23</height>
     </rect>
    </property>

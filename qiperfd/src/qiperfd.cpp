@@ -215,7 +215,7 @@ void QIperfd::savecfg()
     cfg->setValue("port", mgr_port);
     cfg->endGroup();
     cfg->sync();
-    qInfo() <<qApp->applicationPid() << ",savecfg:" << cfg->status() << Qt::endl;
+    // qInfo() <<qApp->applicationPid() << ",savecfg:" << cfg->status() << Qt::endl;
 
 }
 
@@ -558,11 +558,13 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         // get all interfaces names
         QJsonObject netObjs = m_myinfo->collectNetInfo();
         QVariantMap status;
-        QVariantMap ifname;
-        ifname.insert("ifnames", netObjs.keys());
+        QVariantMap ifnames;
+        ifnames.insert("ifnames", netObjs.keys());
+        qDebug() << "CMD_IFNAMES:" << netObjs;
         status.insert("CMD", CMD_IFNAMES);
-        status.insert(CMD_IFNAMES, ifname);
+        status.insert(CMD_IFNAMES, ifnames);
         status.insert("ifname", mgr_ifname); // current manager ifname
+        status.insert("netobj", QString(QJsonDocument(netObjs).toJson()));
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
         QString backmsg = jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str();
 //        qDebug() << "send ifnames: (" << idx << "): " << backmsg  << Qt::endl;
