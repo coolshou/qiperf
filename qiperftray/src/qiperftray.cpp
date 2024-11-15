@@ -35,8 +35,8 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     //qiperfd log path, this will get wrong path if qiperfd is run under administrator => c:\windows\temp
 //    QString qiperfd =  QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 //    m_qiperfdlog = qiperfd + QDir::separator() + QIPERF_NAME + QDir::separator() + QIPERFD_NAME + ".log";
-    m_dlgshowlog = new DlgShowLog();
-
+    m_dlgshowqiperfdlog = new DlgShowLog(this);
+    m_dlgshowlog = new DlgShowLog(this);
 //    qDebug() << "m_qiperfdlog: " << m_qiperfdlog;
 
     //TODO: get install path!! or exec path?
@@ -66,6 +66,12 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
 
 QIperfTray::~QIperfTray()
 {
+    if (m_dlgshowqiperfdlog){
+        m_dlgshowqiperfdlog->close();
+    }
+    if (m_dlgshowlog){
+        m_dlgshowlog->close();
+    }
     delete ui;
 }
 
@@ -85,28 +91,14 @@ void QIperfTray::savecfg()
     cfg.sync();
 }
 
+void QIperfTray::setLogFile(QString filename)
+{
+    m_dlgshowlog->setLogFile(filename);
+}
+
 void QIperfTray::statusmsg(QString msg)
 {
     ui->statusBar->showMessage(msg);
-}
-
-void QIperfTray::startQiperfd()
-{
-    //TODO: start Qiperfd service
-    // nssm.exe start "qiperfd"
-    //sudo systemctl start qiperfd.service
-}
-
-void QIperfTray::stopQiperfd()
-{
-    //TODO: stop Qiperfd service
-    // nssm.exe stop "qiperfd"
-    //sudo systemctl stop qiperfd.service
-}
-
-void QIperfTray::restartQiperfd()
-{
-    //restart Qiperfd service
 }
 
 void QIperfTray::statusQiperfd()
@@ -153,7 +145,7 @@ void QIperfTray::onNewMessage(const QString msg)
 
             QJsonDocument net = QJsonDocument::fromJson(result["netobj"].toString().toUtf8());
             QJsonObject netobj = net.object();//.toJsonObject();
-            qDebug() << "onNewMessage:netobj: " << netobj;
+            // qDebug() << "onNewMessage:netobj: " << netobj;
 
             QString ifname;
             ui->cb_mgr_ifnames->clear();
@@ -202,11 +194,11 @@ void QIperfTray::onNewMessage(const QString msg)
             QStringList ds = msg.split("：");
             if (ds.length()==2){
                 if (ds.value(0)==QIPERFDLOG){
-                    m_dlgshowlog->appendNewLine(ds.value(1));
+                    m_dlgshowqiperfdlog->appendNewLine(ds.value(1));
                 }else if (ds.value(0)==CMD_GET_LOGFILENAME){
                     m_qiperfdlog = ds.value(1);
                     qDebug() << "m_qiperfdlog: " << m_qiperfdlog;
-                    m_dlgshowlog->setLogFile(m_qiperfdlog);
+                    m_dlgshowqiperfdlog->setLogFile(m_qiperfdlog);
                 }
             }else {
                 qDebug() << "onNewMessage: Unknown format :" << msg;
@@ -239,9 +231,10 @@ void QIperfTray::initActions()
 {
     // connect(ui->actionStart, SIGNAL(triggered()), this, SLOT(onStart()));
     // connect(ui->actionStop, SIGNAL(triggered()), this, SLOT(onStop()));
-    connect(ui->actionRestart, SIGNAL(triggered()), this, SLOT(onRestart()));
-    connect(ui->actionShowLog, SIGNAL(triggered()), this, SLOT(onShowLog()));
+    connect(ui->actionRestart, SIGNAL(triggered()), this, SLOT(restartQiperfd()));
+    connect(ui->actionShowQIperfdLog, SIGNAL(triggered()), this, SLOT(onShowQiperfdLog()));
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onAbout()));
+    connect(ui->actionShowLog, SIGNAL(triggered()), this, SLOT(onShowLog()));
 
     connect(ui->actionNotice, SIGNAL(triggered()), this, SLOT(onNotice()));
 
@@ -265,6 +258,12 @@ void QIperfTray::onTrayIconActivated()
 void QIperfTray::onSetMgrIfname()
 {    //Set Mgr_Ifname
     QString ifname = ui->cb_mgr_ifnames->currentText();
+    int idx = ui->cb_mgr_ifnames->currentIndex();
+    QString address = ui->cb_mgr_ifnames->itemData(idx).toString();
+    if (address.isEmpty()){
+        showError("Error", "Please setup manager interface \""+ifname+"\"with IP address");
+        return;
+    }
     QJsonObject jobj;
     jobj.insert("Action", CMD_SET_IFNAME);
     jobj.insert(CMD_SET_IFNAME, ifname);
@@ -280,27 +279,32 @@ void QIperfTray::onGetMgrIfname()
     pclient->send_MessageToServer(CMD_IFNAMES);
 }
 
-void QIperfTray::onStart()
+void QIperfTray::startQiperfd()
 {
     //tell qiperfd start
     pclient->send_MessageToServer(CMD_QIPERFD_START);
 }
 
-void QIperfTray::onStop()
+void QIperfTray::stopQiperfd()
 {
     //tell qiperfd stop
     pclient->send_MessageToServer(CMD_QIPERFD_STOP);
 }
 
-void QIperfTray::onRestart()
+void QIperfTray::restartQiperfd()
 {
     //tell qiperfd stop
     pclient->send_MessageToServer(CMD_QIPERFD_RESTART);
 }
 
-void QIperfTray::onShowLog()
+void QIperfTray::onShowQiperfdLog()
 {
     // show a dialog to show qiperfd log file continious
+    m_dlgshowqiperfdlog->show();
+}
+
+void QIperfTray::onShowLog()
+{
     m_dlgshowlog->show();
 }
 

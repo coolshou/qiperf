@@ -25,10 +25,8 @@ public:
     ~QIperfTray() override;
     void loadcfg();
     void savecfg();
+    void setLogFile(QString filename);
     void statusmsg(QString msg);
-    void startQiperfd();
-    void stopQiperfd();
-    void restartQiperfd();
     void statusQiperfd();
     void getQiperfdLogFile();
     void showNotice(QString title, QString msg);
@@ -38,9 +36,10 @@ public slots:
     void onTrayIconActivated();
     void onSetMgrIfname();
     void onGetMgrIfname();
-    void onStart();
-    void onStop();
-    void onRestart();
+    void startQiperfd();
+    void stopQiperfd();
+    void restartQiperfd();
+    void onShowQiperfdLog();
     void onShowLog();
     void onAbout();
     void onNotice();
@@ -61,6 +60,7 @@ private:
     MyTray *m_tray;
     PipeClient *pclient;
     QTimer *statuser; //timer to check daemon
+    DlgShowLog *m_dlgshowqiperfdlog;
     DlgShowLog *m_dlgshowlog;
     QString m_qiperfdlog;
 };

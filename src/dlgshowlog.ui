@@ -3,7 +3,7 @@
  <class>DlgShowLog</class>
  <widget class="QDialog" name="DlgShowLog">
   <property name="windowModality">
-   <enum>Qt::WindowModal</enum>
+   <enum>Qt::NonModal</enum>
   </property>
   <property name="geometry">
    <rect>
@@ -68,6 +68,22 @@
     </widget>
    </item>
    <item>
+    <widget class="QWidget" name="w_find" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QCheckBox" name="cb_CaseSensitive">
+        <property name="text">
+         <string>Case Sensitive</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="le_find"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QWidget" name="widget_2" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="leftMargin">
@@ -107,12 +123,18 @@
         <property name="text">
          <string>Clear</string>
         </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="pbClose">
         <property name="text">
          <string>Close</string>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
         </property>
        </widget>
       </item>

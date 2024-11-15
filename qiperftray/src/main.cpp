@@ -70,6 +70,7 @@ int main(int argc, char *argv[])
 
     MyTray * mytray = new MyTray();
     QIperfTray w(mytray);
+    w.setLogFile(logfile);
     //w.setWindowFlags( Qt::WindowTitleHint |  Qt::WindowMinimizeButtonHint | Qt::WindowSystemMenuHint);
 
 
