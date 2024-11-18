@@ -25,6 +25,7 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     //Windows:
     //  /c:/user/<xxx>/appdata/local/temp/qiperf/
     ui->setupUi(this);
+    initStatusbar();
     loadcfg();
 
     //DENUG use
@@ -98,7 +99,8 @@ void QIperfTray::setLogFile(QString filename)
 
 void QIperfTray::statusmsg(QString msg)
 {
-    ui->statusBar->showMessage(msg);
+    // ui->statusBar->showMessage(msg);
+    m_status->setText(msg);
 }
 
 void QIperfTray::statusQiperfd()
@@ -180,24 +182,26 @@ void QIperfTray::onNewMessage(const QString msg)
             }
         }else if (QString::compare(act, CMD_STATUS, Qt::CaseInsensitive)==0){
             QVariantMap status = result[CMD_STATUS].toMap();
-            QString works = status["iperfworkers"].toString();
+            QString ver = result[QIPERFD_NAME].toString();
+            // QString works = status["iperfworkers"].toString();
 //            qDebug() << "CMD_STATUS:" << status << Qt::endl;
-            statusmsg("iperf: " + works);
-
+            // statusmsg("iperf: " + works);
+            emit updateIperfcount(status["iperfworkers"].toInt());
+            emit updateQIperfd(ver);
         }else {
 //            qDebug() << "onNewMessage:" << msg << Qt::endl;
             ui->te_msg->setText(msg.toUtf8());
         }
     }else {
         if (msg.contains("：")) {
-            qInfo() << "onNewMessage:" << msg;
+            // qInfo() << "onNewMessage:" << msg;
             QStringList ds = msg.split("：");
             if (ds.length()==2){
                 if (ds.value(0)==QIPERFDLOG){
                     m_dlgshowqiperfdlog->appendNewLine(ds.value(1));
                 }else if (ds.value(0)==CMD_GET_LOGFILENAME){
                     m_qiperfdlog = ds.value(1);
-                    qDebug() << "m_qiperfdlog: " << m_qiperfdlog;
+                    // qDebug() << "m_qiperfdlog: " << m_qiperfdlog;
                     m_dlgshowqiperfdlog->setLogFile(m_qiperfdlog);
                 }
             }else {
@@ -244,6 +248,35 @@ void QIperfTray::onIfnameChange(int index)
 {
     QString address = ui->cb_mgr_ifnames->itemData(index).toString();
     ui->lb_address->setText(address);
+}
+
+void QIperfTray::initStatusbar()
+{
+    m_iperfcount = new QLabel();
+    m_iperfcount->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
+    ui->statusBar->addWidget(m_iperfcount);
+    connect(this , &QIperfTray::updateIperfcount, this,  &QIperfTray::onUpdateIperfcount);
+
+    m_qiperfd = new QLabel();
+    m_qiperfd->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
+    ui->statusBar->addWidget(m_qiperfd);
+    connect(this , &QIperfTray::updateQIperfd, this,  &QIperfTray::onUpdateQIperfd);
+
+
+    m_status= new QLabel();
+    // m_status->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
+    m_status->setFrameStyle(static_cast<int>(QFrame::NoFrame) | static_cast<int>(QFrame::Sunken));
+    ui->statusBar->addPermanentWidget(m_status,1);
+}
+
+void QIperfTray::onUpdateIperfcount(int count)
+{
+    m_iperfcount->setText("Iperf:"+QString::number(count));
+}
+
+void QIperfTray::onUpdateQIperfd(QString msg)
+{
+    m_qiperfd->setText("qiperfd:"+msg);
 }
 
 void QIperfTray::onTrayIconActivated()

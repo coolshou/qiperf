@@ -7,6 +7,7 @@
 #include <QRect>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLabel>
 
 #include "src/mytray.h"
 #include "pipeclient.h"
@@ -31,6 +32,9 @@ public:
     void getQiperfdLogFile();
     void showNotice(QString title, QString msg);
     void showError(QString title, QString msg);
+signals:
+    void updateIperfcount(int count);
+    void updateQIperfd(QString msg);
 
 public slots:
     void onTrayIconActivated();
@@ -52,6 +56,9 @@ private slots:
     void onError(QString msg);
     void initActions();
     void onIfnameChange(int index);
+    void initStatusbar();
+    void onUpdateIperfcount(int count);
+    void onUpdateQIperfd(QString msg);
 
 private:
     QSettings cfg;
@@ -63,5 +70,8 @@ private:
     DlgShowLog *m_dlgshowqiperfdlog;
     DlgShowLog *m_dlgshowlog;
     QString m_qiperfdlog;
+    QLabel *m_iperfcount;
+    QLabel *m_qiperfd;
+    QLabel *m_status;
 };
 #endif // QIPERFTRAY_H
