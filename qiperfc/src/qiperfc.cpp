@@ -104,7 +104,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 #if (TEST_ICMP==1)
     dp = new DlgPing(this);
 #endif
-    m_dlgshowlog=new DlgShowLog(logpath+QIPERFC_NAME+".log");
+    m_dlgshowlog=new DlgShowLog(logpath+QIPERFC_NAME+".log", this);
     connect(this, &QIperfC::closeAll, m_dlgshowlog, &DlgShowLog::close);
 //    connect(this, &QIperfC::closeAll, dp, &DlgPing::close); // model mode, no need
     connect(this, &QIperfC::closeAll, m_dlgrecord, &DlgRecord::close);
@@ -748,7 +748,8 @@ void QIperfC::onAbout()
 
 void QIperfC::onShowDebugLog()
 {
-    m_dlgshowlog->open();
+    m_dlgshowlog->show();
+    // m_dlgshowlog->open();
     m_dlgshowlog->raise();
     m_dlgshowlog->activateWindow();
 }
@@ -1080,7 +1081,7 @@ void QIperfC::onExport()
         eh->setData(m_tpmgr, m_tpplot, pcsinfo);
         eh->setTestTime(m_TestStartTime.toString(DATETIME_NOW_FORMAT));
         eh->setRawFilenames(m_qipconfig->getIperfRawFilenames());
-
+        // TODO: DUT info. model, firmware ver, HW ver...
         // eh->procressData();
         eh->exporthtml();
 
