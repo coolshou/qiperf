@@ -54,6 +54,9 @@
 #include <QPainter>
 #include <QTextBlock>
 #include <QStyle>
+#include <QTextCursor>
+#include <QIcon>
+
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
 #include <QScreen>
 #else
@@ -64,7 +67,9 @@
 
 //![constructor]
 
-CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
+CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent),
+    m_search(nullptr),searchBar(nullptr), searchLabel(nullptr),
+    searchPrev(nullptr),searchNext(nullptr)
 {
     setWindowIcon(QIcon(":logfile"));
     setReadOnly(true);
@@ -94,6 +99,7 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 //    setWindowFlags( Qt::Window | Qt::CustomizeWindowHint
 //                               | Qt::WindowTitleHint
 //                               | Qt::WindowCloseButtonHint );
+
 }
 
 //![constructor]
@@ -156,6 +162,101 @@ void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
         updateLineNumberAreaWidth(0);
 }
 
+void CodeEditor::showSearchBar()
+{
+    if (!m_search) {
+        m_search = new QWidget(this);
+        m_search->setStyleSheet("background-color:#ebedf0;");
+        m_hlsearch = new QHBoxLayout(this);
+        m_hlsearch->layout()->setMargin(1);
+        m_search->setLayout(m_hlsearch);
+        // Create a QLabel for the search label
+        searchLabel = new QLabel("Search:", this);
+        searchLabel->setStyleSheet("font-weight: bold;");
+        m_hlsearch->addWidget(searchLabel);
+        // Create a QLineEdit for searching
+        searchBar = new QLineEdit(this);
+        searchBar->setPlaceholderText("Search...");
+        connect(searchBar, &QLineEdit::returnPressed, this, &CodeEditor::performSearch);
+        m_hlsearch->addWidget(searchBar, 1);
+
+        searchPrev = new QPushButton(QIcon(":/prev"), "", this);
+        connect(searchPrev, &QPushButton::clicked, this, &CodeEditor::pervSearch);
+        m_hlsearch->addWidget(searchPrev);
+
+        searchNext = new QPushButton(QIcon(":/next"), "",this);
+        connect(searchNext, &QPushButton::clicked, this, &CodeEditor::nextSearch);
+        m_hlsearch->addWidget(searchNext);
+
+        // Position and style the search bar and label
+        m_search->setGeometry(30, 5, this->width() - 90, 25);
+        //searchLabel->setGeometry(10, 5, 50, 25);
+        //searchBar->setGeometry(70, 5, this->width() - 80, 25);
+        m_search->show();
+        // searchLabel->show();
+        // searchBar->show();
+        searchBar->setFocus();
+    }else{
+        m_search->show();
+        searchBar->setFocus();
+    }
+}
+
+void CodeEditor::hideSearchBar()
+{
+    if (!m_search) return;
+    if (m_search->isVisible()){
+        m_search->hide();
+    }
+}
+
+void CodeEditor::pervSearch()
+{
+    if (!searchBar) return;
+    const QString searchText = searchBar->text();
+    if (!searchText.isEmpty()) {
+        // Use QPlainTextEdit's find method to search
+        if (!find(searchText, QTextDocument::FindBackward)) {
+            searchBar->setStyleSheet("border: 1px solid red;");  // Highlight the search bar in red if not found
+        } else {
+            searchBar->setStyleSheet("");  // Clear the red border on success
+        }
+    }
+}
+
+void CodeEditor::nextSearch()
+{
+    if (!searchBar) return;
+    const QString searchText = searchBar->text();
+    if (!searchText.isEmpty()) {
+        // Use QPlainTextEdit's find method to search
+        if (!find(searchText)) {
+            searchBar->setStyleSheet("border: 1px solid red;");  // Highlight the search bar in red if not found
+        } else {
+            searchBar->setStyleSheet("");  // Clear the red border on success
+        }
+    }
+}
+
+void CodeEditor::performSearch()
+{
+    if (!searchBar) return;
+
+    const QString searchText = searchBar->text();
+    if (!searchText.isEmpty()) {
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::Start);  // Start from the beginning of the document
+        setTextCursor(cursor);
+
+        // Use QPlainTextEdit's find method to search
+        if (!find(searchText)) {
+            searchBar->setStyleSheet("border: 1px solid red;");  // Highlight the search bar in red if not found
+        } else {
+            searchBar->setStyleSheet("");  // Clear the red border on success
+        }
+    }
+}
+
 //![slotUpdateRequest]
 
 //![resizeEvent]
@@ -166,6 +267,19 @@ void CodeEditor::resizeEvent(QResizeEvent *e)
 
     QRect cr = contentsRect();
     lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+}
+
+void CodeEditor::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_F && event->modifiers() == Qt::ControlModifier){
+        // ctrl+F
+        showSearchBar();
+    }else if (event->key() == Qt::Key_Escape){
+        //
+        hideSearchBar();
+    }else{
+        QPlainTextEdit::keyPressEvent(event);
+    }
 }
 
 //![resizeEvent]

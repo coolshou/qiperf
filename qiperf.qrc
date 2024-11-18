@@ -38,5 +38,7 @@
         <file alias="debugging">images/debugging.png</file>
         <file alias="import">images/import.png</file>
         <file alias="restart">images/restart.png</file>
+        <file alias="prev">images/arrow-prev.png</file>
+        <file alias="next">images/arrow-next.png</file>
     </qresource>
 </RCC>

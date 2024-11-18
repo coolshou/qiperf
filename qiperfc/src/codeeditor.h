@@ -52,6 +52,11 @@
 #define CODEEDITOR_H
 
 #include <QPlainTextEdit>
+#include <QWidget>
+#include <QLineEdit>
+#include <QLabel>
+#include <QPushButton>
+#include <QHBoxLayout>
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -80,15 +85,28 @@ signals:
 protected:
     void closeEvent(QCloseEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
+    void keyPressEvent(QKeyEvent * event) override;
 
 private slots:
     void updateLineNumberAreaWidth(int newBlockCount);
     void highlightCurrentLine();
     void updateLineNumberArea(const QRect &rect, int dy);
+    void showSearchBar();
+    void hideSearchBar();
+    void performSearch();
+    void pervSearch();
+    void nextSearch();
 
 private:
     QWidget *lineNumberArea;
     QString m_filename;
+    QWidget *m_search;
+    QHBoxLayout *m_hlsearch;
+    QLineEdit *searchBar;
+    QLabel *searchLabel;
+    QPushButton *searchPrev;
+    QPushButton *searchNext;
+
 };
 
 //![codeeditordefinition]
