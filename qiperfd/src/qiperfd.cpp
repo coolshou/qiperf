@@ -165,20 +165,11 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 
 QIperfd::~QIperfd()
 {
-    qDebug() << "~QIperfd" << Qt::endl;
-//    QString info = m_myinfo->disableInfo();
-//    m_udpsrv->setSendMsg(info);
     informMessage(INFO_QIPERFD_STOPED, true);
     savecfg();
 }
 
-//void QIperfd::closeEvent(QCloseEvent *event)
-//{
-//    Q_UNUSED(event)
-//    //TODO: close app check
-//    qDebug() << "closeEvent" <<  Qt::endl;
-//    savecfg();
-//}
+
 void QIperfd::onLog(QString text)
 {
     qInfo() << qApp->applicationPid() <<"," << text;
@@ -186,7 +177,6 @@ void QIperfd::onLog(QString text)
 
 void QIperfd::loadcfg(QString apppath)
 {
-    // onLog(",loadcfg: (apppath:" + apppath + ")");
     cfg->beginGroup("main");
     cfg->setValue("Path", apppath);
     cfg->endGroup();
@@ -208,23 +198,16 @@ void QIperfd::loadcfg(QString apppath)
 
 void QIperfd::savecfg()
 {
-    //    qDebug()<< "savecfg" << Qt::endl;
-
     cfg->beginGroup("manager");
     cfg->setValue("ifname", mgr_ifname);
     cfg->setValue("port", mgr_port);
     cfg->endGroup();
     cfg->sync();
-    // qInfo() <<qApp->applicationPid() << ",savecfg:" << cfg->status() << Qt::endl;
-
 }
 
-//QList<QString> QIperfd::listInterfaces()
 QStringList QIperfd::listInterfaces()
 {
-    //QList<QString> nslist;
     QStringList nslist;
-
     QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
     foreach (QNetworkInterface iface, list) // 遍歷每一個網路介面
     {
