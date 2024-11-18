@@ -68,7 +68,6 @@ void PipeClient::socket_disconnected()
 
 void PipeClient::socket_readReady()
 {
-    //qDebug() << "socket_readReady";
     QDataStream in(m_socket);
     in.setVersion(QDataStream::Qt_5_15);
     if (m_socket->bytesAvailable() < static_cast<int>(sizeof(quint16))) {
@@ -76,7 +75,7 @@ void PipeClient::socket_readReady()
     }
     QString message;
     in >> message;
-    qInfo() << "Client got Msg : " << message;
+    // qInfo() << "Client got Msg : " << message;
     emit newMessage(message);
     send_MessageToServer("OK");
 }
@@ -89,6 +88,6 @@ void PipeClient::socket_error(QLocalSocket::LocalSocketError err)
         emit sigError(t);
     } else {
         qDebug() << "socket_error:" << err << Qt::endl;
-        emit sigError(QString::number(err));
+        emit sigError("socket_error("+ QString::number(err)+"):"+ m_socket->errorString());
     }
 }
