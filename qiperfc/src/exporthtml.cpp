@@ -289,7 +289,7 @@ void ExportHtml::procressData()
     QList<QString> hostls;
     QJsonParseError error;//= new QJsonParseError();
     QJsonDocument doc;
-    // qDebug() << "procressData:" << m_pcs;
+    qDebug() << "procressData:" << m_pcs;
     for (const QJsonValue &value: qAsConst(m_pcs)) {
         hostls.clear();
         if (value.isString()) {
@@ -300,13 +300,14 @@ void ExportHtml::procressData()
                 QJsonObject jObj = doc.object();
                 QJsonObject jObjNet = jObj.value("Net").toObject();
                 QJsonObject data;
-                // qDebug() << "net interfaces: " << jObjNet.keys();
+                qDebug() << "net interfaces: " << jObjNet.keys();
                 foreach(const QString& key, jObjNet.keys()) {
                     data = jObjNet.value(key).toObject();
                     // qDebug() << "TODO NET address: " << data.value("address");
                     QJsonArray addrs = data.value("address").toArray();
                     for (QJsonArray::const_iterator it=addrs.constBegin(); it!=addrs.constEnd(); ++it) {
                         QJsonArray jAddr= it->toArray();
+                        qDebug() << "QJsonArray: " << jAddr;
                         for (int i=0;i< jAddr.count();i++){
                             QJsonValue v = jAddr.at(i);
                             if (ls.contains(v.toString())){
@@ -321,7 +322,7 @@ void ExportHtml::procressData()
                                 hostls.append(jObj.value("OSVer").toString());
                                 QString ifname = key;
                                 if (data.value("driverName").toString().length()>0){
-                                    ifname = ifname + "("+data.value("driverName").toString()+")";
+                                    ifname = ifname + "<br>("+data.value("driverName").toString()+")";
                                 }
                                 hostls.append(ifname);
                                 hostls.append(data.value("driverVersion").toString());
@@ -330,8 +331,14 @@ void ExportHtml::procressData()
                             QCoreApplication::processEvents(QEventLoop::AllEvents);
                         }
                         QCoreApplication::processEvents(QEventLoop::AllEvents);
+                        if (hostls.count()>0){
+                            break;
+                        }
                     }
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
+                    if (hostls.count()>0){
+                        break;
+                    }
                 }
             }else {
                 qDebug() << " ERROR: " << error.errorString();
@@ -340,6 +347,7 @@ void ExportHtml::procressData()
             qDebug() << "TODO QJsonArray value: " << value;
         }
         if (hostls.count()>0){
+            // qDebug() << "hostls.count: " << hostls.count();
             AddDivRow("HostInfo", hostls);
         }
     }
