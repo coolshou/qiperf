@@ -17,7 +17,9 @@
 static QTextStream output_ts;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    qDebug() << "myMessageOutput: " << msg << Qt::endl;
+    QDateTime t = QDateTime::currentDateTime();
+    output_ts << "[" + t.toString("yyyy-MM-dd hh:mm:ss.zzz") + "] ";
+
     const char *file = context.file ? context.file : "";
     //    const char *function = context.function ? context.function : "";
     switch (type) {
