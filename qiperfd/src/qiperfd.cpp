@@ -529,6 +529,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         workers.insert("iperfworkers", QString::number(m_iperfworkers.count()));
         status.insert("CMD", CMD_STATUS);
         status.insert(CMD_STATUS, workers);
+        status.insert(QIPERFD_NAME, QIPERFD_VERSION);
         // TODO: any iperf running
         status.insert(CMD_RUNNING, QString::number(m_iperfworkers.count()));
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
