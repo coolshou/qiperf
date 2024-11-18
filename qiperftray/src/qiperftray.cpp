@@ -41,7 +41,7 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
 
     //TODO: get install path!! or exec path?
 
-    setWindowFlags(Qt::WindowTitleHint|Qt::Dialog);
+    // setWindowFlags(Qt::WindowTitleHint|Qt::Dialog);
 #if defined (Q_OS_LINUX)
     setFixedSize(800,300);//TODO: should we fix the window size?
 #endif
