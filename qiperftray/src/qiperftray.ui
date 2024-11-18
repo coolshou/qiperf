@@ -119,6 +119,10 @@
    <addaction name="menuTest"/>
   </widget>
   <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/about</normaloff>:/about</iconset>
+   </property>
    <property name="text">
     <string>About</string>
    </property>
@@ -134,11 +138,19 @@
    </property>
   </action>
   <action name="actionRestart">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/restart</normaloff>:/restart</iconset>
+   </property>
    <property name="text">
     <string>Restart</string>
    </property>
   </action>
   <action name="actionShowQIperfdLog">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/logfile</normaloff>:/logfile</iconset>
+   </property>
    <property name="text">
     <string>Show Log</string>
    </property>
@@ -155,6 +167,10 @@
    </property>
   </action>
   <action name="actionShowLog">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/logfile</normaloff>:/logfile</iconset>
+   </property>
    <property name="text">
     <string>ShowLog</string>
    </property>
