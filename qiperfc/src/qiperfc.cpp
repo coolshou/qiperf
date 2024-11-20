@@ -1313,7 +1313,7 @@ void QIperfC::initActions()
     ui->actionSave->setEnabled(false);
     connect(ui->actionIperf3Log, &QAction::triggered, this, &QIperfC::onImportIperf3Log);
     connect(ui->actionExport, &QAction::triggered, this, &QIperfC::onExport);
-
+    connect(ui->actionQuit, &QAction::triggered, this, &QIperfC::onQuit);
     // edit
     connect(ui->actionCopy, &QAction::triggered, this, &QIperfC::onCopy);
     // copy column text
