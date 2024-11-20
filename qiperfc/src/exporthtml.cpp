@@ -276,7 +276,11 @@ void ExportHtml::procressData()
         ls.append(c);
         ls.append(tp->getThroughput());// TODO: Min/Max throughput?
         ls.append(tp->getLostRate());
-        ls.append(m_iperfwrapper->toIperf3args(tp->getClientArgsMap()));
+        //Parameter: Delay time, iperf args
+        QString para = "(Delay: "+ QString::number(tp->getDelaytime())+" sec)";
+        para.append("<br>");
+        para.append(m_iperfwrapper->toIperf3args(tp->getClientArgsMap()));
+        ls.append(para);
         AddDivRow("Config", ls);
     }
 
