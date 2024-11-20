@@ -75,7 +75,7 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
         }
     }
 //    m_interval = interval;
-    qDebug() << "[" << getBindKey() << "] reg m_bidirtag:" << m_bidirtag << " interval:" << m_interval;
+    qDebug() << "init[" << getBindKey() << "] reg m_bidirtag:" << m_bidirtag << " interval:" << m_interval;
     m_selfdestructionTime = (10+m_interval+m_delaystart) * 1000; //10 sec + report interval
     m_selfdestruction = new QTimer(this);
     m_selfdestruction->setInterval(m_selfdestructionTime);
@@ -113,7 +113,7 @@ void IperfWorker::work()
             QDateTime waitEndTime = QDateTime::currentDateTime();
             int iWait = waitStartTime.secsTo(waitEndTime);
             while (iWait < m_delaystart){
-                qDebug() << "wait " << QString::number(m_delaystart-iWait) << " to start iperf";
+                // qDebug() << "wait " << QString::number(m_delaystart-iWait) << " to start iperf";
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
                 QThread::msleep(100);
                 waitEndTime = QDateTime::currentDateTime();

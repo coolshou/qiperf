@@ -307,7 +307,7 @@ void ExportHtml::procressData()
                     QJsonArray addrs = data.value("address").toArray();
                     for (QJsonArray::const_iterator it=addrs.constBegin(); it!=addrs.constEnd(); ++it) {
                         QJsonArray jAddr= it->toArray();
-                        qDebug() << "QJsonArray: " << jAddr;
+                        // qDebug() << "QJsonArray: " << jAddr;
                         for (int i=0;i< jAddr.count();i++){
                             QJsonValue v = jAddr.at(i);
                             if (ls.contains(v.toString())){
