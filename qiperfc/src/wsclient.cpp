@@ -63,8 +63,8 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject 
 {
     m_webSocket = new QWebSocket();
     m_webSocket->setProxy(QNetworkProxy::NoProxy); // avoid to use proxy
-    QNetworkProxy qnp = m_webSocket->proxy();
-    qDebug() << "proxy hostName: " << qnp.hostName() << " capabilities(): " << qnp.capabilities();
+    // QNetworkProxy qnp = m_webSocket->proxy();
+    // qDebug() << "proxy hostName: " << qnp.hostName() << " capabilities(): " << qnp.capabilities();
 
     connect(m_webSocket, &QWebSocket::connected, this, &WSClient::onConnected);
     connect(m_webSocket, &QWebSocket::disconnected, this, &WSClient::onDisconnected);
@@ -157,56 +157,66 @@ void WSClient::onStateChanged(QAbstractSocket::SocketState state)
 //! [onTextMessageReceived]
 void WSClient::onTextMessageReceived(QString message)
 {
-    int cut2;
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    int cut = message.indexOf(':', 0);
-    QString act = message.left(cut); //action : CMD_IPERF_STARTED/CMD_IPERF_STOPED...
-    message = message.right(message.length()-cut-1);
-    cut2 = message.indexOf(':', 0);
-    QString m_idx = message.left(cut2); // refrow
-    message = message.right(message.length()-cut2-1);
+    QString from = pClient->peerAddress().toString();
+    // pClient->localAddress().toString();
 
-    if (act.startsWith(CMD_IPERF_STARTED)){
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError) {
+        qDebug() << from << " :onTextMessageReceived json: " << message;
+    }else{
+        int cut2;
+
+        int cut = message.indexOf(':', 0);
+        QString act = message.left(cut); //action : CMD_IPERF_STARTED/CMD_IPERF_STOPED...
+        message = message.right(message.length()-cut-1);
         cut2 = message.indexOf(':', 0);
-        QString smode = message.left(cut2); // S: server/ C: client mode
-        message = message.right(message.length()-cut2-1); // key
-        emit iperfStarted(smode, message);
-    } else if (act.startsWith(CMD_IPERF_STOPED)){
-        cut2 = message.indexOf(':', 0);  //
-        QString err_no = message.left(cut2); // error code
+        QString m_idx = message.left(cut2); // refrow
         message = message.right(message.length()-cut2-1);
-        cut2 = message.indexOf(':', 0);  //
-        QString error = message.left(cut2); // error status
-        QString bindkey = message.right(message.length()-cut2-1); // bindkey
 
-//        qDebug()<< "CMD_IPERF_STOPED:" << err_no << " bindkey:" << bindkey << " error:" << error;
-        emit iperfStoped(m_idx, err_no, error, bindkey);
-    } else if (act.startsWith(CMD_IPERF_ERRORED)){
-        cut2 = message.indexOf(':', 0);  //
-        QString err_no = message.left(cut2); // error code
-        message = message.right(message.length()-cut2-1);
-        cut2 = message.lastIndexOf(':');  //
-        QString error = message.left(cut2); // key
-        QString bindkey = message.right(message.length()-cut2-1); // error message
-//        qDebug()<< "CMD_IPERF_ERRORED:" << err_no << " bindkey:" << bindkey << " message:" << error;
-        emit iperfStoped(m_idx, err_no, error, bindkey);
+        if (act.startsWith(CMD_IPERF_STARTED)){
+            cut2 = message.indexOf(':', 0);
+            QString smode = message.left(cut2); // S: server/ C: client mode
+            message = message.right(message.length()-cut2-1); // key
+            emit iperfStarted(smode, message);
+        } else if (act.startsWith(CMD_IPERF_STOPED)){
+            cut2 = message.indexOf(':', 0);  //
+            QString err_no = message.left(cut2); // error code
+            message = message.right(message.length()-cut2-1);
+            cut2 = message.indexOf(':', 0);  //
+            QString error = message.left(cut2); // error status
+            QString bindkey = message.right(message.length()-cut2-1); // bindkey
 
-    } else if (act.startsWith(CMD_IPERF_TP_DATA)){
-        QJsonParseError error;
-        int cut3 = message.indexOf(':', 0);
-        QString sInterval = message.left(cut3);
-        message = message.right(message.length()-cut3-1);
+            //        qDebug()<< "CMD_IPERF_STOPED:" << err_no << " bindkey:" << bindkey << " error:" << error;
+            emit iperfStoped(m_idx, err_no, error, bindkey);
+        } else if (act.startsWith(CMD_IPERF_ERRORED)){
+            cut2 = message.indexOf(':', 0);  //
+            QString err_no = message.left(cut2); // error code
+            message = message.right(message.length()-cut2-1);
+            cut2 = message.lastIndexOf(':');  //
+            QString error = message.left(cut2); // key
+            QString bindkey = message.right(message.length()-cut2-1); // error message
+            //        qDebug()<< "CMD_IPERF_ERRORED:" << err_no << " bindkey:" << bindkey << " message:" << error;
+            emit iperfStoped(m_idx, err_no, error, bindkey);
 
-        QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8(), &error);
-        if (error.error == QJsonParseError::NoError){
-            emit iperfTPdata(m_idx, sInterval, message);
-        }else{
-            qDebug() << "onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + message.toUtf8();
+        } else if (act.startsWith(CMD_IPERF_TP_DATA)){
+            // QJsonParseError error;
+            int cut3 = message.indexOf(':', 0);
+            QString sInterval = message.left(cut3);
+            message = message.right(message.length()-cut3-1);
+
+            doc = QJsonDocument::fromJson(message.toUtf8(), &error);
+            if (error.error == QJsonParseError::NoError){
+                emit iperfTPdata(m_idx, sInterval, message);
+            }else{
+                qDebug() << "onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + message.toUtf8();
+            }
+            //        emit iperfStarted();
+        } else {
+            qDebug() << "Message received: act:" << act <<" refrow:" << m_idx <<
+                " :"<< message << ": "<< from;
         }
-//        emit iperfStarted();
-    } else {
-        qDebug() << "Message received: act:" << act <<" refrow:" << m_idx <<
-                    " :"<< message << ": "<< pClient->peerAddress();
     }
 }
 //! [onTextMessageReceived]
@@ -261,10 +271,12 @@ void WSClient::onSslErrors(const QList<QSslError> &errors)
 
 void WSClient::onError(QAbstractSocket::SocketError error)
 {
-    // QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    // if (pClient){
-    qDebug() << "WSClient::onError:" << error ;//<< " peerAddress:" << pClient->peerAddress().toString();
+    if (error != QAbstractSocket::RemoteHostClosedError){
+        qDebug() << "[" <<m_webSocket->peerAddress().toString() << "]WSClient::onError:" << error ;
+    }else{
+        // TODO : handle RemoteHostClosedError
+
+    }
     //TODO: handle websocket not connect issue
-    // }
 }
 
