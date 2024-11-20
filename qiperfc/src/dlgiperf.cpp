@@ -243,7 +243,21 @@ bool DlgIperf::isRequireConfigMet()
         ui->cb_client_bind_ip->setFocus();
         return false;
     }
-
+    //tmp disable IPv6 address
+    if (addr_target.protocol()==QAbstractSocket::IPv6Protocol){
+        QMessageBox::warning(this, tr("WARNING!!"),
+                             tr("Please specify IPv4 address for iperf server!!"),
+                             QMessageBox::Ok);
+        ui->cb_target_ip->setFocus();
+        return false;
+    }
+    if (addr_client.protocol()==QAbstractSocket::IPv6Protocol){
+        QMessageBox::warning(this, tr("WARNING!!"),
+                             tr("Please specify IPv4 address for iperf client!!"),
+                             QMessageBox::Ok);
+        ui->cb_client_bind_ip->setFocus();
+        return false;
+    }
     if (ui->cb_mserver_ip->currentText() == ui->cb_mclient_ip->currentText()){
         QMessageBox::warning(this, tr("WARNING!!"),
                              tr("Forbid setting same address of Manager Server and Manager Client!!"),
