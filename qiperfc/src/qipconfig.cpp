@@ -153,20 +153,6 @@ bool QIPConfig::importIperf3Log(QString filename)
     return true;
 }
 
-// bool QIPConfig::exportToFile(QString filename, TPPlot *tpplot, int tpwidth, int tpheigth)
-// {
-//     //TODO: how to constructure html file!!
-
-//     //TODO: following is just a test to save plot to png file!!
-//     QString img = filename.replace(".html", ".png");
-//     qDebug() << "save throughput plot to png: " << img;
-//     QPixmap tp = tpplot->toPixmap(tpwidth, tpheigth); //TODO: into html file
-//     if (!tp.save(img)){
-//         // if (!tpplot->savePng(img)){
-//         qDebug() << "throughput plot save to " << img << " Fail!";
-//     }
-// }
-
 bool QIPConfig::detectSystemProxy(QString &hostname, quint16 &port)
 {
     QNetworkProxyQuery npq(QUrl("http://www.google.com"));
@@ -361,7 +347,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 //iperf server record file
                                 IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                            idx, true, parallel,
-                                                                           bidir, "Tx", serverfile);
+                                                                           bidir, "Tx", serverfile, delaytime);
                                 m_fileworkers.append(ifw);
                                 // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
@@ -376,7 +362,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 //iperf client record file
                                 IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                            idx, false, parallel,
-                                                                           bidir, "Rx", clientfile);
+                                                                           bidir, "Rx", clientfile, delaytime);
                                 m_fileworkers.append(ifwc);
                                 // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
@@ -391,7 +377,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                         if (d.exists(serverfile)){
                             IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                        idx, true, parallel,
-                                                                       bidir, "Tx", serverfile);
+                                                                       bidir, "Tx", serverfile, delaytime);
                             m_fileworkers.append(ifw);
                             // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
@@ -404,7 +390,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                         if (d.exists(clientfile)){
                             IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                        idx, false, parallel,
-                                                                       bidir, "Rx", clientfile);
+                                                                       bidir, "Rx", clientfile, delaytime);
                             m_fileworkers.append(ifwc);
                             // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);

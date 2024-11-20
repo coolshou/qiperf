@@ -77,7 +77,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_qipconfig, &QIPConfig::updateTPAvg, m_tpmgr, &TPMgr::addTPdata); // this only set last avg, which may cause min/max value wrong!!
     connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpplot, &TPPlot::onUpdateTPDatas);
     connect(m_qipconfig, &QIPConfig::progress, this, &QIperfC::onProgress);
-    connect(m_qipconfig, &QIPConfig::updateStartDateTime, m_tpplot, &TPPlot::setStartTime);
+    // connect(m_qipconfig, &QIPConfig::updateStartDateTime, m_tpplot, &TPPlot::setStartTime);
     QString proxyhost="";
     quint16 proxyport=0;
     if (m_qipconfig->detectSystemProxy(proxyhost, proxyport)){
@@ -1027,7 +1027,7 @@ void QIperfC::doClear()
     }
     m_tpplot->clear();
     m_TestStartTime = QDateTime();
-    m_tpplot->setStartTime(m_TestStartTime);
+    // m_tpplot->setStartTime(m_TestStartTime);
     m_qipconfig->clear();
     emit updateStatus("");
     emit updateStarttime("");

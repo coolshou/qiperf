@@ -23,7 +23,7 @@ public:
     explicit IperfFileWorker(QString version, QString protocal,
                              int idx, bool servermode, int parallel,
                              bool bidir, QString bidirtag , QString filename,
-                             QObject *parent = nullptr);
+                             int delay=0, QObject *parent = nullptr);
     void start();
 public slots:
     void onProgress(QString filename, int currentlineno);
@@ -51,6 +51,7 @@ private:
     bool m_bidir;
     QString m_bidirtag;
     QString m_filename;
+    int m_delay;
     TPData *tpdata;
     QMap<QString, TPData*> m_datas;
 };

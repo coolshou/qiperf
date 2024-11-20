@@ -10,10 +10,11 @@
 IperfFileWorker::IperfFileWorker(QString version, QString protocal,
                                  int idx, bool servermode, int parallel,
                                  bool bidir, QString bidirtag , QString filename,
-                                 QObject *parent)
+                                 int delay, QObject *parent)
     : QObject{parent}, m_version(version), m_protocal(protocal),
-      m_idx(idx), m_servermode(servermode), m_parallel(parallel),
-      m_bidir(bidir), m_bidirtag(bidirtag), m_filename(filename)
+    m_idx(idx), m_servermode(servermode), m_parallel(parallel),
+    m_bidir(bidir), m_bidirtag(bidirtag), m_filename(filename),
+    m_delay(delay)
 {
     m_thread = new QThread();
     m_iperfwrapper= new IperfWrapper();
@@ -84,14 +85,15 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
                     emit updateTPAvg(QString::number(midx), sInterval, jObj.value("idx").toString(), QString::number(tpvalue),
                                      unit, dir, QString::number(pkt_lost), QString::number(pkt_total));
                 } else {
-                    tpdata = new TPData();
                     if ((m_datas.keys().length() > 0) && (m_datas.keys().contains(idx))){
                         tpdata = m_datas.value(idx);
                     }else {
-                        m_datas.insert(idx, tpdata);
+                        tpdata = new TPData();
                     }
-                    tpdata->timeDatas.append(fInterval);
-
+                    m_datas.insert(idx, tpdata);
+                    tpdata->timeDatas.append(fInterval+m_delay);
+                    // qDebug()<< "m_delay:" << QString::number(m_delay);
+                    //tpdata->timeDatas.append(fInterval);
                     tpdata->valueDatas.append(tpvalue);
                     tpdata->packetLost.append(pkt_lost);
                     tpdata->packetTotal.append(pkt_total);
@@ -108,8 +110,10 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
 
 void IperfFileWorker::onWorkFinished()
 {
-   foreach(QString idx, m_datas.keys()){
+    qDebug() << "onWorkFinished: m_filename: " << m_filename;
+    foreach(QString idx, m_datas.keys()){
        emit updateTPDatas(idx, m_datas.value(idx)->timeDatas, m_datas.value(idx)->valueDatas,
                           m_datas.value(idx)->packetLost, m_datas.value(idx)->packetTotal, m_datas.value(idx)->lostrate);
-   }
+       QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
 }

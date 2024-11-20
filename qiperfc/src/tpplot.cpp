@@ -19,17 +19,15 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
     // qDebug() << "onUpdateTPDatas:" << refrow << " times:" << timedatas << " values: " << valuedatas;
     QCPGraph *graph = getGraph(refrow);
 
-    double minT = *std::min_element(timedatas.begin(), timedatas.end());
-    double maxT = *std::max_element(timedatas.begin(), timedatas.end());
+    double minT = *std::min_element(timedatas.begin(), timedatas.end());// x: min time
+    double maxT = *std::max_element(timedatas.begin(), timedatas.end());// x: max time
     xAxis->setRange(minT-30, maxT+30);
 
-    double minV = *std::min_element(valuedatas.begin(), valuedatas.end());
-    double maxV = *std::max_element(valuedatas.begin(), valuedatas.end());
+    double minV = *std::min_element(valuedatas.begin(), valuedatas.end()); // y: min value
+    double maxV = *std::max_element(valuedatas.begin(), valuedatas.end()); // y: max value
     yAxis->setRange(minV*0.9, maxV*1.1);
 
     graph->setData(timedatas, valuedatas);
-    //TODO: lostrate
-
     // Calculate the sum
     int sum = std::accumulate(packettotals.begin(), packettotals.end(), 0);
     if (sum>0){
@@ -39,6 +37,7 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
         // qDebug() << "timedatas: " << timedatas.length() << " rates:" << lostrates.length();
         // qDebug() << "timedatas: " << timedatas;
         // qDebug() << "lostrate: " << lostrates;
+        //lostrate
         g_lostrate->setData(timedatas, lostrates);
     }
     this->replot();
