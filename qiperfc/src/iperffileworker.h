@@ -26,7 +26,7 @@ public:
                              QObject *parent = nullptr);
     void start();
 public slots:
-    void onProgress(int currentlineno);
+    void onProgress(QString filename, int currentlineno);
 
 signals:
     void onThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
@@ -35,7 +35,7 @@ signals:
     void updateTPAvg(QString midx, QString sInterval, QString idx,
                      QString value, QString unit, QString dir,
                      QString pkt_lost, QString pkt_total);
-    void progress(int currentlineno);
+    void progress(QString filename, int currentlineno);
 private slots:
     void onThroughputData(int midx, QString sInterval,  QString data);
     void onWorkFinished();
@@ -51,6 +51,7 @@ private:
     bool m_bidir;
     QString m_bidirtag;
     QString m_filename;
+    TPData *tpdata;
     QMap<QString, TPData*> m_datas;
 };
 

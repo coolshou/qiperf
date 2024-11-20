@@ -38,9 +38,9 @@ void IperfFileWorker::start()
     }
 }
 
-void IperfFileWorker::onProgress(int currentlineno)
+void IperfFileWorker::onProgress(QString filename, int currentlineno)
 {
-    emit progress(currentlineno);
+    emit progress(filename, currentlineno);
 }
 
 void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data)
@@ -84,7 +84,7 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
                     emit updateTPAvg(QString::number(midx), sInterval, jObj.value("idx").toString(), QString::number(tpvalue),
                                      unit, dir, QString::number(pkt_lost), QString::number(pkt_total));
                 } else {
-                    TPData *tpdata = new TPData();
+                    tpdata = new TPData();
                     if ((m_datas.keys().length() > 0) && (m_datas.keys().contains(idx))){
                         tpdata = m_datas.value(idx);
                     }else {

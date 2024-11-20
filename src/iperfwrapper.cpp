@@ -279,7 +279,7 @@ void IperfWrapper::work()
             {
                 QString line = in.readLine();
                 lineNumber++;
-                emit progress(lineNumber);
+                emit progress(m_filename, lineNumber);
                 if (m_version=="3"){
                     if (line!=""){
                         parserIperf3(line);
@@ -294,7 +294,7 @@ void IperfWrapper::work()
             }
             file.close();
 //            qDebug() << "finish file parser: " << m_filename;
-            emit progress(-1);
+            emit progress(m_filename, -1);
         }else{
             qDebug() << "open file " << m_filename << " Fail!!";
         }

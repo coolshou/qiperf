@@ -1027,6 +1027,7 @@ void QIperfC::doClear()
     }
     m_tpplot->clear();
     m_TestStartTime = QDateTime();
+    m_tpplot->setStartTime(m_TestStartTime);
     m_qipconfig->clear();
     emit updateStatus("");
     emit updateStarttime("");
@@ -1244,10 +1245,10 @@ void QIperfC::onUpdateTPCfg(QByteArray tpcfg)
     m_tpmgr->loaddata(tpcfg);
 }
 
-void QIperfC::onProgress(int currentlineno)
+void QIperfC::onProgress(QString filename, int currentlineno)
 {
     if (currentlineno>0){
-        onUpdateStatus("Procress line "+ QString::number(currentlineno));
+        onUpdateStatus("Procress "+filename+" line "+ QString::number(currentlineno));
     }else{
         onUpdateStatus("");
     }

@@ -137,7 +137,7 @@ private slots:
     void onPlotContextMenuRequest(QPoint pos);
     void onUpdateDataPath(QString datapath);
     void onUpdateTPCfg(QByteArray tpcfg);
-    void onProgress(int currentlineno);
+    void onProgress(QString filename, int currentlineno);
     int getStatusServers();
     int getStatusClients();
     void onEnableItem(bool checked);
