@@ -408,7 +408,7 @@ QModelIndex TPMgr::getRootItemIdx()
 void TPMgr::setItem(const QModelIndex &index, TP *item)
 {
     if (index.isValid()) {
-        qDebug() << "setItem:" << index << " item:" << item;
+        qDebug() << "TODO: setItem:" << index << " item:" << item;
 //        rootItem->appendChild();
         // TODO: setItem
     }
