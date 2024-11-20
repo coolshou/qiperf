@@ -31,13 +31,13 @@ public:
     void setTPCfg(QByteArray tpcfg, QString env="", QString testdate="", QStringList datafilenames={});
     void clear();
     bool importIperf3Log(QString filename);
-    bool exportToFile(QString filename, TPPlot *tpplot, int tpwidth=0, int tpheigth=0);
+    // bool exportToFile(QString filename, TPPlot *tpplot, int tpwidth=0, int tpheigth=0);
     bool detectSystemProxy(QString &hostname, quint16 &port);
     QString getPCsInfo();
     QStringList getIperfRawFilenames();
 
 public slots:
-    void onProgress(int currentlineno);
+    void onProgress(QString filename, int currentlineno);
     void onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                        QString value, QString unit, QString dir,
                        QString pkt_lost, QString pkt_total);
@@ -51,7 +51,7 @@ signals:
     void updateTPAvg(QString midx, QString sInterval, QString idx,
                      QString value, QString unit, QString dir,
                      QString pkt_lost, QString pkt_total);
-    void progress(int currentlineno);
+    void progress(QString filename, int currentlineno);
 
 private slots:
     void onThroughputData(int idx, QString sInterval,  QString data);
@@ -66,7 +66,7 @@ private:
     QByteArray filesToStore(QStringList &inputFiles) const;
     bool filesFromStore(QByteArray &inputData, const QString &outputFolder) const;
     bool parserTPCfgLogFiles(QString logpath);
-
+    void init();
     // QByteArray storefiles(const QStringList &inputFiles) const;
     // Configuration data
     QString m_tmppath;

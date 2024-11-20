@@ -23,18 +23,11 @@ const qint32 QIPConfig::VERSION = 2;
 QIPConfig::QIPConfig(QString tmppath, QObject *parent):
     QObject(parent), m_tmppath(tmppath)
 {
-    //init value
-    m_data= new QIPConfigData();
-    m_version = 2;
-    m_data->tpcfg = "";
-    m_data->env = "";
-    m_data->testdate = "";
+    init();
 }
 
 bool QIPConfig::loadFromFile(const QString &filePath) {
-    qDeleteAll(m_fileworkers);
-    m_fileworkers.clear();
-
+    init();
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "Can not read file: " << QDir::toNativeSeparators(filePath);
@@ -160,19 +153,19 @@ bool QIPConfig::importIperf3Log(QString filename)
     return true;
 }
 
-bool QIPConfig::exportToFile(QString filename, TPPlot *tpplot, int tpwidth, int tpheigth)
-{
-    //TODO: how to constructure html file!!
+// bool QIPConfig::exportToFile(QString filename, TPPlot *tpplot, int tpwidth, int tpheigth)
+// {
+//     //TODO: how to constructure html file!!
 
-    //TODO: following is just a test to save plot to png file!!
-    QString img = filename.replace(".html", ".png");
-    qDebug() << "save throughput plot to png: " << img;
-    QPixmap tp = tpplot->toPixmap(tpwidth, tpheigth); //TODO: into html file
-    if (!tp.save(img)){
-        // if (!tpplot->savePng(img)){
-        qDebug() << "throughput plot save to " << img << " Fail!";
-    }
-}
+//     //TODO: following is just a test to save plot to png file!!
+//     QString img = filename.replace(".html", ".png");
+//     qDebug() << "save throughput plot to png: " << img;
+//     QPixmap tp = tpplot->toPixmap(tpwidth, tpheigth); //TODO: into html file
+//     if (!tp.save(img)){
+//         // if (!tpplot->savePng(img)){
+//         qDebug() << "throughput plot save to " << img << " Fail!";
+//     }
+// }
 
 bool QIPConfig::detectSystemProxy(QString &hostname, quint16 &port)
 {
@@ -206,9 +199,9 @@ QStringList QIPConfig::getIperfRawFilenames()
     return m_data->datafilenames;
 }
 
-void QIPConfig::onProgress(int currentlineno)
+void QIPConfig::onProgress(QString filename, int currentlineno)
 {
-    emit progress(currentlineno);
+    emit progress(filename, currentlineno);
 }
 
 void QIPConfig::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
@@ -337,16 +330,15 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
             QJsonObject jClient;
             QJsonObject jServer;
             QJsonArray arr = doc.array();
-//            qDebug() << "QIPConfig::parserTPCfgLogFiles: " << arr;
+            qDebug() << "QIPConfig::parserTPCfgLogFiles:(" << QString::number(arr.count()) << "): " << arr;
             int idx=0;
-//            foreach(auto jObj, arr){
             for(QJsonArray::const_iterator it=arr.constBegin(); it!=arr.constEnd(); ++it){
                 //TODO: other type of "Action"
                 QJsonObject jObj = it->toObject();
 //                qDebug() << "QIPConfig QJsonObject: " << jObj;
                 if (jObj.value("Action").toString() == "IPERF_ADD" &&
                         jObj.value("enabled").toBool(true)){
-                        //client
+                    //client
                     jClient = jObj.value("client").toObject();
                     QString clientip = jClient.value("bind").toString();
                     bool bidir = jClient.value("bidir").toBool();
@@ -359,8 +351,10 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                     jServer = jObj.value("server").toObject();
                     QString serverip = jServer.value("bind").toString();
                     int serverport = jServer.value("port").toInt();
+                    int delaytime = jServer.value("delaytime").toInt();
                     QString serverfile = logpath + QDir::separator() + serverip + "_" +QString::number(serverport)+ ".log";
                     QString clientfile = logpath + QDir::separator() + clientip + "-" + serverip + "_" +QString::number(clientport)+ ".log";
+                    qDebug() << "delaytime: " << QString::number(delaytime) << "  serverfile:" << serverfile;
                     if (!bidir){
                         if (!reverse){
                             if (d.exists(serverfile)){
@@ -369,7 +363,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                                                            idx, true, parallel,
                                                                            bidir, "Tx", serverfile);
                                 m_fileworkers.append(ifw);
-                                connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
+                                // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
                                 connect(ifw, &IperfFileWorker::updateTPAvg, this, &QIPConfig::onUpdateTPAvg);
                                 connect(ifw, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
@@ -384,7 +378,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                                                            idx, false, parallel,
                                                                            bidir, "Rx", clientfile);
                                 m_fileworkers.append(ifwc);
-                                connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
+                                // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
                                 connect(ifwc, &IperfFileWorker::updateTPAvg, this, &QIPConfig::onUpdateTPAvg);
                                 connect(ifwc, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
@@ -399,7 +393,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                                                        idx, true, parallel,
                                                                        bidir, "Tx", serverfile);
                             m_fileworkers.append(ifw);
-                            connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
+                            // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
                             connect(ifw, &IperfFileWorker::updateTPAvg, this, &QIPConfig::onUpdateTPAvg);
                             connect(ifw, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
@@ -412,7 +406,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                                                        idx, false, parallel,
                                                                        bidir, "Rx", clientfile);
                             m_fileworkers.append(ifwc);
-                            connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
+                            // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
                             connect(ifwc, &IperfFileWorker::updateTPAvg, this, &QIPConfig::onUpdateTPAvg);
                             connect(ifwc, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
@@ -433,4 +427,15 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
     }
     qDebug() << "No data of m_data->tpcfg";
     return false;
+}
+
+void QIPConfig::init()
+{
+    //init value
+    m_data= new QIPConfigData();
+    m_version = 2;
+    m_magic = QByteArray();
+    m_loadversion = 0;
+    qDeleteAll(m_fileworkers);
+    m_fileworkers.clear();
 }
