@@ -26,10 +26,20 @@ IperfFileWorker::IperfFileWorker(QString version, QString protocal,
     connect(m_thread, &QThread::started, m_iperfwrapper, &IperfWrapper::work);
     m_iperfwrapper->moveToThread(m_thread);
     connect(m_iperfwrapper, &IperfWrapper::workFinished, this, &IperfFileWorker::onWorkFinished);
-    connect(m_iperfwrapper, &IperfWrapper::workFinished, m_thread, &QThread::quit);
-    connect(m_iperfwrapper, &IperfWrapper::workFinished, m_iperfwrapper, &IperfWrapper::deleteLater);
+    // connect(m_iperfwrapper, &IperfWrapper::workFinished, m_thread, &QThread::quit);
+    // connect(m_iperfwrapper, &IperfWrapper::workFinished, m_iperfwrapper, &IperfWrapper::deleteLater);
     connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
 
+}
+
+IperfFileWorker::~IperfFileWorker()
+{
+    if (m_thread){
+        delete m_thread;
+    }
+    if(m_iperfwrapper){
+        delete m_iperfwrapper;
+    }
 }
 
 void IperfFileWorker::start()
@@ -89,8 +99,9 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
                         tpdata = m_datas.value(idx);
                     }else {
                         tpdata = new TPData();
+                        m_datas.insert(idx, tpdata);
                     }
-                    m_datas.insert(idx, tpdata);
+
                     tpdata->timeDatas.append(fInterval+m_delay);
                     // qDebug()<< "m_delay:" << QString::number(m_delay);
                     //tpdata->timeDatas.append(fInterval);
@@ -111,9 +122,16 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
 void IperfFileWorker::onWorkFinished()
 {
     qDebug() << "onWorkFinished: m_filename: " << m_filename;
-    foreach(QString idx, m_datas.keys()){
-       emit updateTPDatas(idx, m_datas.value(idx)->timeDatas, m_datas.value(idx)->valueDatas,
+    // QList<QString> keys =  m_datas.keys();
+    QMap<QString, TPData*>::const_iterator iterator = m_datas.constBegin();
+//    foreach(QString idx, m_datas.keys()){
+    // foreach(QString idx, keys){
+    while (iterator != m_datas.constEnd()) {
+        QString idx = iterator.key();
+        qDebug() << "onWorkFinished: idx:" << idx << " timeDatas:" << m_datas.value(idx)->timeDatas;
+        emit updateTPDatas(idx, m_datas.value(idx)->timeDatas, m_datas.value(idx)->valueDatas,
                           m_datas.value(idx)->packetLost, m_datas.value(idx)->packetTotal, m_datas.value(idx)->lostrate);
-       QCoreApplication::processEvents(QEventLoop::AllEvents);
+        ++iterator;
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }

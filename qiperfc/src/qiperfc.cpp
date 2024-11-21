@@ -99,7 +99,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 //    connect(pclient, SIGNAL(newMessage(QString)), this, SLOT(onNewMessage(QString)));
 //    pclient->SetAppHandle(qApp);
 
-    m_dlgrecord = new DlgRecord(this);
+    m_dlgrecord = new DlgRecord();
     m_fileserver = new FileServer(QIPERF_FILEPORT);
 #if (TEST_ICMP==1)
     dp = new DlgPing(this);

@@ -24,6 +24,7 @@ public:
                              int idx, bool servermode, int parallel,
                              bool bidir, QString bidirtag , QString filename,
                              int delay=0, QObject *parent = nullptr);
+    ~IperfFileWorker();
     void start();
 public slots:
     void onProgress(QString filename, int currentlineno);

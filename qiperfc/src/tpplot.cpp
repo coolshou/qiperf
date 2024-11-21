@@ -26,7 +26,7 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
     double minV = *std::min_element(valuedatas.begin(), valuedatas.end()); // y: min value
     double maxV = *std::max_element(valuedatas.begin(), valuedatas.end()); // y: max value
     yAxis->setRange(minV*0.9, maxV*1.1);
-
+    qDebug() << "refrow:" << refrow << " timedatas: " << timedatas;
     graph->setData(timedatas, valuedatas);
     // Calculate the sum
     int sum = std::accumulate(packettotals.begin(), packettotals.end(), 0);

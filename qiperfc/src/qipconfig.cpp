@@ -27,6 +27,7 @@ QIPConfig::QIPConfig(QString tmppath, QObject *parent):
 }
 
 bool QIPConfig::loadFromFile(const QString &filePath) {
+    qDebug() << "loadFromFile";
     init();
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -37,6 +38,8 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
     QDataStream in_lff(&file);
     in_lff >> m_magic;
     in_lff >> m_loadversion;
+    qDebug() << "loadFromFile:m_magic: " << QString(m_magic);//.toStdString());
+
     if (m_magic.startsWith(MAGIC_VALUE)){
         QByteArray compressedtpcfg;
         in_lff >> compressedtpcfg;
@@ -47,6 +50,7 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
             return false;
         }
         if (deserialize(data)){
+            qDebug() << "loadFromFile:deserialize";
             if (m_loadversion>=2){
                 QByteArray compressedfiles;
                 //tmp path
@@ -54,8 +58,10 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
                     QString outpath = m_tmppath + QDir::separator() + m_data->testdate;
                     emit updateDataPath(outpath);
                     in_lff >> compressedfiles;
+                    qDebug() << "loadFromFile:compressedfiles";
                     rc = filesFromStore(compressedfiles, outpath);
                     if (rc){
+                        qDebug() << "loadFromFile:parserTPCfgLogFiles";
                         rc = parserTPCfgLogFiles(outpath);
                     }
                 }else{
@@ -403,7 +409,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                     }
                 }
                 idx = idx +1;
-                QCoreApplication::processEvents(QEventLoop::AllEvents);
+                // QCoreApplication::processEvents(QEventLoop::AllEvents);
             }
             return true;
         }else{
@@ -422,6 +428,7 @@ void QIPConfig::init()
     m_version = 2;
     m_magic = QByteArray();
     m_loadversion = 0;
-    qDeleteAll(m_fileworkers);
     m_fileworkers.clear();
+    qDeleteAll(m_fileworkers);
+
 }
