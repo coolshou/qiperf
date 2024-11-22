@@ -82,7 +82,16 @@ SOURCES += \
     src/tpplot.cpp \
     src/udpreceiver.cpp \
     src/wsclient.cpp \
-    src/tooltipeventfilter.cpp
+    src/tooltipeventfilter.cpp \
+    views/terminal/highlighter.cpp \
+    views/terminal/qvterminal/qvtchar.cpp \
+    views/terminal/qvterminal/qvtcharformat.cpp \
+    views/terminal/qvterminal/qvterminal.cpp \
+    views/terminal/qvterminal/qvtlayout.cpp \
+    views/terminal/qvterminal/qvtline.cpp \
+    views/terminal/terminalview.cpp \
+    views/terminal/termview.cpp \
+    views/viewmanager.cpp
 
     # ../qiperfd/src/wsserver.cpp \
 
@@ -126,7 +135,17 @@ HEADERS += \
     src/tpplot.h \
     src/udpreceiver.h \
     src/wsclient.h \
-    src/tooltipeventfilter.h
+    src/tooltipeventfilter.h \
+    views/abstractview.h \
+    views/terminal/highlighter.h \
+    views/terminal/qvterminal/qvtchar.h \
+    views/terminal/qvterminal/qvtcharformat.h \
+    views/terminal/qvterminal/qvterminal.h \
+    views/terminal/qvterminal/qvtlayout.h \
+    views/terminal/qvterminal/qvtline.h \
+    views/terminal/terminalview.h \
+    views/terminal/termview.h \
+    views/viewmanager.h
 
     # ../qiperfd/src/wsserver.h \
 
