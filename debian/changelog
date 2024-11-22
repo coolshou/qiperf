@@ -1,8 +1,13 @@
-qiperf (0.6.11310.04-1) unstable; urgency=medium
+qiperf (0.6.11311.21-1) unstable; urgency=medium
 
+  * Add show Hostname column in qiperfd list
   * Add export test result to html file
+  * Add show manager interface's first ip address on qiperftray
+  * Add search text input to search string in DlgShowLog and iperf raw log viewer
+  * Fix when qiperfd did not get manager interface's IP, show error message on qiperftray
+  * Add qiperfc right menu "copy text" of the (comment or other) column
 
- -- coolshou <coolshou2060@gmail.com>  Wed, 18 Sep 2024 16:21:36 +0800
+ -- coolshou <coolshou2060@gmail.com>  Wed, 20 Nov 2024 10:00:00 +0800
 
 qiperf (0.5.11309.18-1) unstable; urgency=medium
 
