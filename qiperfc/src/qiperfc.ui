@@ -42,11 +42,11 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tab_console">
+      <widget class="QWidget" name="tab_throughput">
        <attribute name="title">
         <string>Throughput</string>
        </attribute>
-       <layout class="QVBoxLayout" name="vl_console">
+       <layout class="QVBoxLayout" name="vl_throughput">
         <property name="spacing">
          <number>2</number>
         </property>
