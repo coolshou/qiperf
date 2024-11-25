@@ -1,4 +1,4 @@
-qiperf (0.6.11311.21-1) unstable; urgency=medium
+qiperf (0.6.11311.25-1) unstable; urgency=medium
 
   * Add show Hostname column in qiperfd list
   * Add export test result to html file
