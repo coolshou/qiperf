@@ -17,6 +17,7 @@ public:
 
     QString collectInfo();
     QJsonObject collectNetInfo();
+    QJsonArray collectSerial();
     QString disableInfo();
     QString updateInfo();
 //    QHostAddress getIPfromIfname(QString ifname);

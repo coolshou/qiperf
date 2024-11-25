@@ -6,6 +6,7 @@
 #include <QNetworkInterface>
 #include <QDir>
 #include <QFile>
+#include <QSerialPortInfo>
 
 #if defined(Q_OS_LINUX)
 #include <unistd.h> //readlink
@@ -103,10 +104,12 @@ QString MyInfo::collectInfo()
     mainObject.insert("Manager", m_ifname);
     mainObject.insert("update", update);
     mainObject.insert("qiperfd", QString(QIPERFD_VERSION));
+    //serial
+    mainObject.insert("serial", collectSerial());
 
     QJsonObject netObject=collectNetInfo();
-
     mainObject.insert("Net", netObject);
+
     QJsonDocument jsonDoc;
     jsonDoc.setObject(mainObject);
     //conver to QString
@@ -151,6 +154,19 @@ QJsonObject MyInfo::collectNetInfo()
         }
     }
     return netObjects;
+}
+
+QJsonArray MyInfo::collectSerial()
+{
+    QStringList serials;
+    QList<QSerialPortInfo> qs = QSerialPortInfo::availablePorts();
+    foreach(auto q, qs){
+        serials.append(q.portName());
+    }
+    qDebug() << "collectSerial:" << serials;
+
+    QJsonArray arr= QJsonArray::fromStringList(serials);
+    return arr;
 }
 
 QString MyInfo::disableInfo()

@@ -118,10 +118,19 @@
     </property>
     <addaction name="actionTest"/>
    </widget>
+   <widget class="QMenu" name="menuMonitor">
+    <property name="title">
+     <string>Monitor</string>
+    </property>
+    <addaction name="actionAddSerial"/>
+    <addaction name="actionAddPing_2"/>
+    <addaction name="actionWlanSTA"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuRun"/>
    <addaction name="menuOption"/>
+   <addaction name="menuMonitor"/>
    <addaction name="menuHelp"/>
    <addaction name="menuTest"/>
   </widget>
@@ -430,6 +439,24 @@
   <action name="actionCopyText">
    <property name="text">
     <string>Copy Text</string>
+   </property>
+  </action>
+  <action name="actionAddSerial">
+   <property name="text">
+    <string>Serial</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Serial Monitor</string>
+   </property>
+  </action>
+  <action name="actionAddPing_2">
+   <property name="text">
+    <string>Ping</string>
+   </property>
+  </action>
+  <action name="actionWlanSTA">
+   <property name="text">
+    <string>WLAN STA</string>
    </property>
   </action>
  </widget>
