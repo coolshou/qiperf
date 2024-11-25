@@ -181,10 +181,12 @@ QString ExportHtml::imageToBase64(const QImage &image, const char *format)
     return base64String;
 }
 
-void ExportHtml::setData(TPMgr *tpmgr, TPPlot *tpplot, QString pcs)
+void ExportHtml::setData(QList<TP *> tps,  QPixmap chat, QString pcs)
 {
-    m_tpmgr = tpmgr;
-    m_tpplot =  tpplot;
+    // m_tpmgr = tpmgr;
+    m_tps = tps;
+    // m_tpplot =  tpplot;
+    m_chat = chat;
     QJsonParseError error;
     QJsonDocument doc=QJsonDocument::fromJson(pcs.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError){
@@ -259,8 +261,8 @@ void ExportHtml::procressData()
     QStringList ips;
     QList<QString> ls;// store managed ip in list
     // iperf test pairs
-    QList<TP *> tps= m_tpmgr->getChilds(false);
-    foreach (TP *tp, tps) {
+    // QList<TP *> tps= m_tpmgr->getChilds(false);
+    foreach (TP *tp, m_tps) {
         ls.clear();
 
         QString s = tp->getServer();
@@ -285,8 +287,8 @@ void ExportHtml::procressData()
     }
 
     //throughput chart
-    QPixmap chat = m_tpplot->toPixmap(m_width, m_heigth);
-    QString sImg = imageToBase64(chat.toImage());
+    // QPixmap chat = m_tpplot->toPixmap(m_width, m_heigth);
+    QString sImg = imageToBase64(m_chat.toImage());
     AddDivPng("tpchart", sImg);
 
     //host info

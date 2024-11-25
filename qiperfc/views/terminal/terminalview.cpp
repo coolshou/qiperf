@@ -34,7 +34,8 @@ void TerminalView::loadSettings(QSettings *config)
 
 void TerminalView::sendData(const QString &string)
 {
-    QTextCodec *code = QTextCodec::codecForName("GB-2312");
+    // QTextCodec *code = QTextCodec::codecForName("GB-2312");
+    QTextCodec *code = QTextCodec::codecForName("UTF-8");
     QByteArray array = code->fromUnicode(string);
     qDebug() << "send: " << array;
     emit transmitData(array);

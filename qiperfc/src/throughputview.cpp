@@ -1,0 +1,417 @@
+#include "throughputview.h"
+#include "ui_throughputview.h"
+
+#include <QMessageBox>
+#include <QModelIndexList>
+
+#include "tooltipeventfilter.h"
+
+
+// ThroughputView::ThroughputView(QIperfC *main, QWidget *parent) : AbstractView(parent)
+ThroughputView::ThroughputView(QWidget *parent) : AbstractView(parent)
+    , ui(new Ui::ThroughputView)//, m_main(main)
+{
+    ui->setupUi(this);
+    initThroughputChart();
+    m_clipboard = QApplication::clipboard();
+
+    dlgiperf = new DlgIperf(m_tpmgr, this);
+}
+
+ThroughputView::~ThroughputView()
+{
+    delete ui;
+}
+
+int ThroughputView::rootChildCount()
+{
+    return m_tpmgr->rootChildCount();
+}
+
+QByteArray ThroughputView::savedata()
+{
+    return m_tpmgr->savedata();
+}
+
+QStringList ThroughputView::getPCs()
+{
+    return m_tpmgr->getPCs();
+}
+
+void ThroughputView::reset()
+{
+    m_tpmgr->reset();
+}
+
+QList<TP *> ThroughputView::getChilds(bool showAll)
+{
+    Q_UNUSED(showAll)
+    return m_tpmgr->getChilds();
+}
+
+bool ThroughputView::addEndpoint(QString mgr, QString mdata)
+{
+    if (dlgiperf){
+        if (dlgiperf->add(mgr, mdata)){
+            dlgiperf->updateUI();
+            return true;
+        }
+    }
+    return false;
+}
+
+void ThroughputView::doClear()
+{
+    if (m_tpmgr->rootChildCount()>0) {
+        m_tpmgr->clear();
+        ui->tv_throughput->collapseAll();
+    }
+    m_tpplot->clear();
+
+}
+
+QPixmap ThroughputView::toPixmap(int width, int height, double scale)
+{
+    return m_tpplot->toPixmap(width, height, scale);
+}
+
+void ThroughputView::addComment(QString midx, QString comment)
+{
+    m_tpmgr->addComment(midx, comment);
+}
+
+void ThroughputView::onCopy()
+{
+    if (ui->tv_throughput->hasFocus()){
+        QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
+        //        qDebug() << "onCopy:" << idxs;
+        TP *tp;
+        QString s="";
+        foreach(auto idx, idxs){
+            tp = m_tpmgr->getItem(idx);
+            s = s + "\n" + tp->getJsonData();
+        }
+        m_clipboard->setText(s);
+    }else {
+        qDebug() << "tv_throughput no hasFocus";
+    }
+
+}
+
+void ThroughputView::onPaste()
+{
+    if (ui->tv_throughput->hasFocus()){
+        QString clip = m_clipboard->text();
+        m_tpmgr->onPaste(clip);
+    }else {
+        qDebug() << "tv_throughput no hasFocus";
+    }
+}
+
+void ThroughputView::onDelete()
+{
+    QModelIndex cur = ui->tv_throughput->selectionModel()->currentIndex();
+    TP *tp = m_tpmgr->getItem(cur);
+    foreach(TP *p, tp->getChilds()){
+        m_tpplot->del(p->getID());
+    }
+    m_tpmgr->removeRow(cur.row());
+}
+
+void ThroughputView::onCopyText()
+{
+    if (ui->tv_throughput->hasFocus()){
+        QModelIndexList mls = ui->tv_throughput->selectionModel()->selectedRows();
+        if (mls.length()>0){
+            QModelIndex idx = mls[0]; // first model index
+            QPoint globalPos = QCursor::pos();
+            QPoint widgetPos = ui->tv_throughput->mapFromGlobal(globalPos);
+            int col = ui->tv_throughput->columnAt(widgetPos.x());
+
+            TP *tp;
+            tp = m_tpmgr->getItem(idx);
+            m_clipboard->setText(tp->data(col).toString());
+        }
+    }else {
+        qDebug() << "onCopyText: tv_throughput not hasFocus";
+    }
+}
+
+void ThroughputView::onAddIperf()
+{
+    // on_pair_add
+    dlgiperf->updateUI();
+    dlgiperf->setExcIdx(QModelIndex());//new
+    int rc = dlgiperf->exec();// show dlgiperf
+    if (rc == QDialog::Accepted){
+        QString rs= dlgiperf->getJsonCfg();
+        //        qDebug()<< "on_pairAdd: \n" << rs;
+        m_tpmgr->add(rs);
+        emit updateActionsSave(true);
+    }
+}
+
+void ThroughputView::onPairEdit()
+{
+    // TODO: edit
+    QModelIndex idx = ui->tv_throughput->selectionModel()->currentIndex();
+    //    qDebug() << "on_pairEdit: " << cur;
+    onItemDClicked(idx);
+
+}
+
+void ThroughputView::onPairDelete()
+{
+
+}
+
+void ThroughputView::onPairSwap()
+{
+    QModelIndexList mls= ui->tv_throughput->selectionModel()->selectedRows();
+    foreach (QModelIndex midx, mls) {
+        m_tpmgr->swapDirection(midx);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+}
+
+void ThroughputView::onPairSwapIP()
+{
+    QModelIndexList mls= ui->tv_throughput->selectionModel()->selectedRows();
+    foreach (QModelIndex midx, mls) {
+        m_tpmgr->swapIPDirection(midx);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+}
+
+void ThroughputView::setStartTime(QDateTime startTime)
+{
+    m_tpplot->setStartTime(startTime);
+}
+
+void ThroughputView::onAddTPdata(QString midx, QString sInterval, QString idx, QString value, QString unit, QString dir, QString pkt_lost, QString pkt_total)
+{
+    m_tpmgr->addTPdata(midx, sInterval, idx, value, unit, dir, pkt_lost, pkt_total);
+}
+
+void ThroughputView::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas, QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates)
+{
+    m_tpplot->onUpdateTPDatas(refrow, timedatas, valuedatas, packetlosts, packettotals, lostrates);
+}
+
+void ThroughputView::onIperfTPdata(QString refrow, QString sInterval, QString datas)
+{
+    m_tpmgr->onIperfTPdata(refrow, sInterval, datas);
+}
+
+void ThroughputView::onUpdateTPCfg(QByteArray tpcfg)
+{
+    m_tpmgr->loaddata(tpcfg);
+}
+
+void ThroughputView::initMenus()
+{
+    m_tpmenu = new QMenu(); // config throughput pair right click menu
+    m_aEnable = new QAction("Enable select item");
+    connect(m_aEnable, &QAction::triggered, this, &ThroughputView::onEnableItem);
+    m_aDisable = new QAction("Disable select item");
+    connect(m_aDisable, &QAction::triggered, this, &ThroughputView::onDisableItem);
+    //    aDisable->setEnabled(false);
+    // m_tpmenu->addAction(m_main->ui->actionCopy);
+    // m_tpmenu->addAction(m_main->ui->actionPaste);
+    // m_tpmenu->addAction(m_main->ui->actionDelete);
+    m_tpmenu->addSeparator();
+    // m_tpmenu->addAction(m_main->ui->actionCopyText);
+    m_tpmenu->addSeparator();
+    m_tpmenu->addAction(m_aEnable);
+    m_tpmenu->addAction(m_aDisable);
+
+}
+
+void ThroughputView::onPlotContextMenuRequest(QPoint pos)
+{
+    QMenu *menu = new QMenu(this);
+    menu->setAttribute(Qt::WA_DeleteOnClose);
+    //    if (ui->customPlot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
+    //    {
+    //        menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignLeft));
+    //        menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignHCenter));
+    //        menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignRight));
+    //        menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom | Qt::AlignRight));
+    //        menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom | Qt::AlignLeft));
+    //    }
+    //    else  // general context menu on graphs requested
+    {
+        //        menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
+        //        if (ui->customPlot->selectedGraphs().size() > 0)
+        //            menu->addAction("Remove selected graph", this, SLOT(removeSelectedGraph()));
+        //        if (ui->customPlot->graphCount() > 0)
+        //            menu->addAction("Remove all graphs", this, SLOT(removeAllGraphs()));
+        menu->addAction("About", this, &ThroughputView::aboutQCustomPlot);
+    }
+
+    menu->popup(m_tpplot->mapToGlobal(pos));
+}
+
+void ThroughputView::onTPUTContextMenu(QPoint pos)
+{
+    // if select multi items
+    QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
+    if (idxs.length()>1){
+        m_aEnable->setEnabled(true);
+        m_aDisable->setEnabled(true);
+    } else {
+        //TODO: check select item status enable/disable menu item
+        QModelIndex midx = ui->tv_throughput->indexAt(pos);
+        TP *tp = m_tpmgr->getItem(midx);
+        if (tp->getEnabled()){
+            m_aEnable->setEnabled(false);
+            m_aDisable->setEnabled(true);
+        }else{
+            m_aEnable->setEnabled(true);
+            m_aDisable->setEnabled(false);
+        }
+    }
+    m_tpmenu->popup(ui->tv_throughput->mapToGlobal(pos));
+}
+
+void ThroughputView::onTPDataUpdate(const QModelIndex &parent, int first, int last)
+{
+    Q_UNUSED(parent)
+    Q_UNUSED(first)
+    Q_UNUSED(last)
+    //TODO: when throughput is running, add new TP item?
+    bool bStart;
+    if (m_tpmgr->rowCount()>0) {
+        bStart=false;
+        emit updateActions(!bStart, bStart, !bStart);
+    } else {
+        emit updateActions(false, false, false);
+    }
+}
+
+void ThroughputView::aboutQCustomPlot()
+{
+    QMessageBox::about(this, "About QCustomPlot", "QCustomPlot\n"
+                                                  "Ver: "+ QString(QCUSTOMPLOT_VERSION_STR) + "\n"
+                                                                                           "URL: https://www.qcustomplot.com/index.php/introduction");
+
+}
+
+void ThroughputView::onEnableItem(bool checked)
+{
+    Q_UNUSED(checked)
+    //     ui->tv_throughput->SelectItems;
+    QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedIndexes();
+    if (idxs.length()>0){
+        TP *tp;
+        QString s="";
+        foreach(auto idx, idxs){
+            tp = m_tpmgr->getItem(idx);
+            tp->setEnabled();
+        }
+    }
+}
+
+void ThroughputView::onDisableItem(bool checked)
+{
+    Q_UNUSED(checked)
+    QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
+    if (idxs.length()>0){
+        TP *tp;
+        QString s="";
+
+        foreach(auto idx, idxs){
+            tp = m_tpmgr->getItem(idx);
+            tp->setDisabled();
+        }
+    }
+}
+
+void ThroughputView::onItemDClicked(QModelIndex idx)
+{
+    TP *tp = m_tpmgr->getItem(idx);
+    if (tp->getDataType() == TPMgrData::config) {
+        // only iperf pair config can be edit
+        dlgiperf->loadJsonCfg(tp->saveData());
+        dlgiperf->setExcIdx(idx);
+        int rc = dlgiperf->exec();// show dlgiperf
+        if (rc == QDialog::Accepted){
+            QString rs= dlgiperf->getJsonCfg();
+            tp->loadData(rs);
+            m_tpmgr->setItem(idx, tp);
+        }
+    }
+}
+
+void ThroughputView::onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    Q_UNUSED(deselected)
+
+    bool bAct=false;
+    if (selected.length()>0){
+        bAct = true;
+    }
+    emit updateActionsEdit(bAct , bAct , bAct, bAct);
+}
+
+void ThroughputView::initThroughputChart()
+{
+    // throughput chart
+    m_tpplot=new TPPlot(ui->widget_console);
+    m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &ThroughputView::onPlotContextMenuRequest);
+    ui->hl_console->addWidget(m_tpplot);
+
+    m_tpmgr = new TPMgr(this);
+    connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
+    connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
+    connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
+
+    ui->tv_throughput->setModel(m_tpmgr);
+    /* TODO: set specify column font size,
+    // current not inherent other setting
+    header = new CustomHeaderView(Qt::Horizontal, ui->tv_throughput);
+    int s = header->getFontSize();
+    header->setColumnSize(int(TP::mintp), s/2);
+    header->setColumnSize(int(TP::maxtp), s/2);
+    ui->tv_throughput->setHeader(header);
+    // set specify column font size
+//    QHeaderView *header = ui->tv_throughput->header();
+//    QFont font = header->font();
+//    qDebug() << "font size: " << font.pointSize();
+//    font.setPointSize(28); // Set the desired font size
+//    header->setStyleSheet(QString("QHeaderView::section:nth-child(%1) { font-size: %2pt; }").arg(1).arg(font.pointSize()));
+    // end set font size
+
+    */
+    ui->tv_throughput->setColumnWidth(TP::cols::id, 100);
+    ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
+    ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
+    ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
+    ui->tv_throughput->setColumnWidth(TP::cols::lostrate, 110);
+
+    TooltipEventFilter* filter = new TooltipEventFilter(ui->tv_throughput);
+    connect(filter, &TooltipEventFilter::doCopy, this, &ThroughputView::onCopy);
+    connect(filter, &TooltipEventFilter::doPaste, this, &ThroughputView::onPaste);
+    connect(filter, &TooltipEventFilter::doDelete, this, &ThroughputView::onDelete);
+    ui->tv_throughput->viewport()->installEventFilter(filter);
+    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
+    //    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
+    //    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
+    ui->tv_throughput->expandAll();// will show folding icon when have child item??
+    ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu
+    connect(ui->tv_throughput, &QTreeView::customContextMenuRequested, this, &ThroughputView::onTPUTContextMenu);
+    connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &ThroughputView::onItemDClicked); //edit item on double click
+
+    //TODO: slow update text/image?
+    tpdirdelegate = new TPDirDelegate(ui->tv_throughput);
+    //    tpdirdelegate = new TPDirDelegate(this);
+    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdirdelegate);
+    // TODO: why debug build do not show folding icon!!
+    //    tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
+    //    ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
+
+    QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
+    connect(ism, &QItemSelectionModel::selectionChanged, this, &ThroughputView::onTPselectionChanged);
+    //    ui->tv_throughput->header()->setVisible(true);
+}

@@ -18,7 +18,7 @@ QVTerminal::QVTerminal(QWidget *parent)
     _cursorPos.setY(0);
     //_cursorTimer.start(500);
     _cvisible = true;
-    connect(&_cursorTimer, &QTimer::timeout, this, &QVTerminal::toggleCursor);
+    // connect(&_cursorTimer, &QTimer::timeout, this, &QVTerminal::toggleCursor);
 
     _echo = false;
     _crlf = false;
@@ -131,6 +131,9 @@ void QVTerminal::appendData(const QByteArray &data)
             _curentFormat = _format;
             _state = QVTerminal::Text;
             break;
+        default:
+            qDebug() << "TODO: _state:" << _state;
+            // break;
         }
         it++;
     }
@@ -182,7 +185,7 @@ void QVTerminal::moveCursor(int xpos, int ypos)
 void QVTerminal::paste()
 {
     QByteArray data;
-    data.append(QApplication::clipboard()->text());
+    data.append(QApplication::clipboard()->text().toUtf8());
     writeData(data);
 }
 
@@ -340,7 +343,7 @@ void QVTerminal::keyPressEvent(QKeyEvent *event)
         data.append(event->text().toUtf8());
         QAbstractScrollArea::keyPressEvent(event);
     }
-    transmitData(data);
+    emit transmitData(data);
 }
 
 void QVTerminal::paintEvent(QPaintEvent */* paintEvent */)
@@ -396,7 +399,7 @@ void QVTerminal::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::MidButton) {
         if( QApplication::clipboard()->supportsSelection()) {
             QByteArray data;
-            data.append(QApplication::clipboard()->text(QClipboard::Selection));
+            data.append(QApplication::clipboard()->text(QClipboard::Selection).toUtf8());
             writeData(data);
         }
     }

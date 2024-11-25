@@ -12,7 +12,7 @@ class QVTerminal : public QAbstractScrollArea
     Q_OBJECT
 public:
     explicit QVTerminal(QWidget *parent = nullptr);
-    ~QVTerminal();
+    ~QVTerminal() override;
 
     void setIODevice(QIODevice *device);
 

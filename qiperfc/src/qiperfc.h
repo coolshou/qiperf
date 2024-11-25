@@ -16,27 +16,29 @@
 
 #include "comm.h"
 //#include "pipeclient.h"
-#include "dlgiperf.h"
+// #include "dlgiperf.h"
 #include "udpreceiver.h"
 //#include "tpchart.h"
 #include "endpointmgr.h"
-#include "tpmgr.h"
-#include "tpdirdelegate.h"
+// #include "tpmgr.h"
+// #include "tpdirdelegate.h"
 #include "tpfoldingdelegate.h"
 #include "qipconfig.h"
-#include "tpplot.h"
+// #include "tpplot.h"
 #include "formqiperfds.h"
 #include "dlgtest.h"
 #include "dlgoption.h"
 #include "dlgrecord.h"
-#include "tooltipeventfilter.h"
+
 #include "customheaderview.h"
 #include "fileserver.h"
-#include "dlgping.h"
+// #include "dlgping.h"
 #include "pingmgr.h"
 #include "pingplot.h"
 #include "dlgshowlog.h"
 #include "exporthtml.h"
+#include "../views/viewmanager.h"
+#include "throughputview.h"
 
 #if (TEST_ICMP==1)
 #include "../src/icmpping.h"
@@ -71,23 +73,15 @@ public slots:
     void onSave();
     void onImportIperf3Log();
     bool on_Clear();
-    void onAddIperf();
-    void onPairEdit();
-    void onPairDelete();
-    void onPairSwap();
-    void onPairSwapIP();
+
     void onStart();
     void onStop();
     bool onClear();
     void onShowLog();
     void onConfig();
-    void onCopy();
-    void onCopyText();
-    void onPaste();
-    void onDelete();
     void onAbout();
     void onShowDebugLog();
-    void aboutQCustomPlot();
+
     void onErrorStop(int err, QString msg);
     void on_notice(QString send_addr, QString msg);
     void onQuit();
@@ -109,8 +103,8 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 private:
     void updateRunStatus(bool bStart);
-    void initThroughputChart();
-    void initPingChart();
+
+    // void initPingChart();
     void resetError();
     void saveSettings();
     void loadSettings();
@@ -118,30 +112,29 @@ private:
 
 
 private slots:
-    void initMenus();
+
     void initActions();
     void initToolbar();
     void initStatusbar();
     void onUpdateStarttime(QString stime);
     void onUpdateStatus(QString msg);
+    void onUpdateActions(bool bStart, bool bStop, bool bClear);
+    void onUpdateActionsSave(bool bSave);
+    void onUpdateActionsEdit(bool bDel, bool bEdit, bool bSwap, bool bSwapIP);
     void on_updateQIperfdNum(int n);
-    void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-    void onTPDataUpdate(const QModelIndex &parent, int first, int last);
-    void onItemDClicked(QModelIndex idx);
+
     void onRPC_result(const QVariant& result);
     void onRPC_error(int code, const QString& message);
     void onIperfStarted(QString smode, QString ipport);
     void onIperfStoped(QString refrow, QString err_no, QString err, QString ipport);
     void onDisconnected(QString targetip);
-    void onTPUTContextMenu(QPoint pos);
-    void onPlotContextMenuRequest(QPoint pos);
+
+
     void onUpdateDataPath(QString datapath);
-    void onUpdateTPCfg(QByteArray tpcfg);
+
     void onProgress(QString filename, int currentlineno);
     int getStatusServers();
     int getStatusClients();
-    void onEnableItem(bool checked);
-    void onDisableItem(bool checked);
     void onAddPing();
     void onError(QString msg);
     void onExport();
@@ -152,17 +145,18 @@ private slots:
 private:
     Ui::MainWindow *ui;
     CustomHeaderView *header;
+    QString settingfilepath;
     QString m_logpath;
     QClipboard *m_clipboard;
     FormQIperfds *m_frm_qiperfds;
     dlgOption *m_frm_option;
     DlgTest *m_dlgtest;
     DlgRecord *m_dlgrecord; //TODO: store final test result
-    TPPlot *m_tpplot;
+
     PingPlot *m_pingplot;
     QSettings *m_settings;
     bool m_testping;
-    DlgIperf * dlgiperf;  // dialog of iperf config
+
 //    PipeClient *pclient;
 #if (TEST_WS==1)
     QMap<QString, WSClient *> m_wss; // websocket client list for manager iperf server
@@ -176,8 +170,7 @@ private:
     QLabel *m_start_label;
     QLabel *m_status_label;
     QLabel *m_label_qiperfd;
-    TPMgr *m_tpmgr;
-    TPDirDelegate *tpdirdelegate;
+
     TPFoldingDelegate *tpfoldingdelegate;
 
     QDateTime m_TestStartTime;
@@ -193,9 +186,6 @@ private:
     bool m_TPGroup; // show throughput group
     QString m_datapath;
 
-    QMenu *m_tpmenu; //right menu for m_tpmgr
-    QAction *m_aEnable; //
-    QAction *m_aDisable;
     FileServer *m_fileserver;
     QString m_oldsavepath=nullptr;
 
@@ -207,5 +197,8 @@ private:
 #endif
     PingMgr *m_pingmgr;
     QDialog *m_debugdlg;
+    ExportHtml *eh;
+    ThroughputView *m_throughputview;
+    ViewManager *m_views;
 };
 #endif // QIPERFC_H

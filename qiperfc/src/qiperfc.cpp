@@ -32,7 +32,7 @@
 QIperfC::QIperfC(QString logpath, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    QString settingfilepath =  QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    settingfilepath =  QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     // /home/jimmy/.local/share/alphanetworks/qiperfconsole
     QDir d{settingfilepath};
     if (!d.exists()){
@@ -52,6 +52,12 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
         qDebug() << "create path: " << m_logpath;
         logdir.mkpath(".");
     }
+    m_throughputview = new ThroughputView();
+    connect(m_throughputview, &ThroughputView::updateActions, this, &QIperfC::onUpdateActions);
+    connect(m_throughputview, &ThroughputView::updateActionsSave, this, &QIperfC::onUpdateActionsSave);
+    connect(m_throughputview, &ThroughputView::updateActionsEdit, this, &QIperfC::onUpdateActionsEdit);
+
+    m_views = new ViewManager(&settingfilepath, m_throughputview, this);
     m_dlgtest = new DlgTest();
     m_frm_option = new dlgOption(m_settings);
     connect(m_frm_option, &dlgOption::widthChanged, this, &QIperfC::onWidthChanged);
@@ -61,21 +67,20 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     loadSettings();
     //UI actions
     initActions();
-    initMenus();
     initToolbar();
-    initThroughputChart();
-    initPingChart();
+
+    // initPingChart();
     connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
 
     iTimeout = 10*1000;//10sec
     //
     m_qipconfig = new QIPConfig(logdir.absolutePath());
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
-    connect(m_qipconfig, &QIPConfig::updateTPCfg, this, &QIperfC::onUpdateTPCfg);
+    connect(m_qipconfig, &QIPConfig::updateTPCfg, m_throughputview, &ThroughputView::onUpdateTPCfg);
     connect(m_qipconfig, &QIPConfig::updateStartDateTime, this, &QIperfC::setStartTime);
     // connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpmgr, &TPMgr::onUpdateTPDatas);
-    connect(m_qipconfig, &QIPConfig::updateTPAvg, m_tpmgr, &TPMgr::addTPdata); // this only set last avg, which may cause min/max value wrong!!
-    connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpplot, &TPPlot::onUpdateTPDatas);
+    connect(m_qipconfig, &QIPConfig::updateTPAvg, m_throughputview, &ThroughputView::onAddTPdata); // this only set last avg, which may cause min/max value wrong!!
+    connect(m_qipconfig, &QIPConfig::updateTPDatas, m_throughputview, &ThroughputView::onUpdateTPDatas);
     connect(m_qipconfig, &QIPConfig::progress, this, &QIperfC::onProgress);
     // connect(m_qipconfig, &QIPConfig::updateStartDateTime, m_tpplot, &TPPlot::setStartTime);
     QString proxyhost="";
@@ -86,8 +91,6 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_endpointmgr = new EndPointMgr(this);
     m_frm_qiperfds = new FormQIperfds();
     m_frm_qiperfds->setModel(m_endpointmgr);
-
-    dlgiperf = new DlgIperf(m_tpmgr, this);
 
     //
     m_receiver = new UdpReceiver(QIPERFD_BPORT,this);
@@ -131,7 +134,7 @@ QIperfC::~QIperfC()
 bool QIperfC::load(QString filename)
 {    //load test config file
 
-    if (m_tpmgr->rootChildCount()>0) {
+    if (m_throughputview->rootChildCount()>0) {
         QMessageBox msgBox;
         msgBox.setText("Clear data before load config");
         msgBox.setInformativeText("Do you want to save your changes?");
@@ -167,9 +170,9 @@ bool QIperfC::load(QString filename)
 bool QIperfC::save(QString filename)
 {
     //prepare throughput config data
-    if (m_tpmgr->rootChildCount()>0) {
-        QByteArray b = m_tpmgr->savedata();
-        QStringList pcs = m_tpmgr->getPCs();
+    if (m_throughputview->rootChildCount()>0) {
+        QByteArray b = m_throughputview->savedata();
+        QStringList pcs = m_throughputview->getPCs();
         QString env= m_endpointmgr->getPCsInfo(pcs);
 //        qDebug() << "env: " << env;
         QString starttime="";
@@ -207,9 +210,9 @@ void QIperfC::onNew()
 {
     ui->actionSave->setEnabled(false);
     on_Clear();
-    if (m_tpmgr->rootChildCount()>0) {
+    if (m_throughputview->rootChildCount()>0) {
         //this will clear all item include root!!
-        m_tpmgr->reset();
+        m_throughputview->reset();
     }/*else{
         qDebug() << "onNew rootChildCount No child";
     }*/
@@ -284,20 +287,6 @@ bool QIperfC::on_Clear()
     return onClear();
 }
 
-void QIperfC::onAddIperf()
-{
-    // on_pair_add
-    dlgiperf->updateUI();
-    dlgiperf->setExcIdx(QModelIndex());//new
-    int rc = dlgiperf->exec();// show dlgiperf
-    if (rc == QDialog::Accepted){
-        QString rs= dlgiperf->getJsonCfg();
-//        qDebug()<< "on_pairAdd: \n" << rs;
-        m_tpmgr->add(rs);
-        ui->actionSave->setEnabled(true);
-    }
-
-}
 void QIperfC::onAddPing()
 {
     QString strJson;
@@ -316,42 +305,6 @@ void QIperfC::onError(QString msg)
     QMessageBox::warning(this, "ERROR", msg);
 }
 
-void QIperfC::onPairEdit()
-{
-    // TODO: edit
-    QModelIndex idx = ui->tv_throughput->selectionModel()->currentIndex();
-//    qDebug() << "on_pairEdit: " << cur;
-    onItemDClicked(idx);
-}
-
-void QIperfC::onPairDelete()
-{
-    QModelIndex cur = ui->tv_throughput->selectionModel()->currentIndex();
-    TP *tp = m_tpmgr->getItem(cur);
-    foreach(TP *p, tp->getChilds()){
-        m_tpplot->del(p->getID());
-    }
-    m_tpmgr->removeRow(cur.row());
-}
-
-void QIperfC::onPairSwap()
-{
-    QModelIndexList mls= ui->tv_throughput->selectionModel()->selectedRows();
-    foreach (QModelIndex midx, mls) {
-        m_tpmgr->swapDirection(midx);
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
-    }
-}
-
-void QIperfC::onPairSwapIP()
-{
-    QModelIndexList mls= ui->tv_throughput->selectionModel()->selectedRows();
-    foreach (QModelIndex midx, mls) {
-        m_tpmgr->swapIPDirection(midx);
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
-    }
-}
-
 void QIperfC::onStart()
 {
     if (!onClear()){
@@ -366,7 +319,7 @@ void QIperfC::onStart()
     m_status_client.clear();
 
     m_TestStartTime = QDateTime::currentDateTime();
-    m_tpplot->setStartTime(m_TestStartTime);
+    m_throughputview->setStartTime(m_TestStartTime);
     QString startTime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
     m_datapath = m_logpath + QDir::separator() + startTime;
     QDir d(m_datapath);
@@ -377,11 +330,11 @@ void QIperfC::onStart()
     m_fileserver->setRootPath(m_datapath);
 
     emit updateStarttime(startTime);
-    if (m_tpmgr->rootChildCount()>0) {
+    if (m_throughputview->rootChildCount()>0) {
         updateRunStatus(true);
         //start test
         // list of throughput test pair
-        QList<TP *> tps = m_tpmgr->getChilds();
+        QList<TP *> tps = m_throughputview->getChilds();
         QString s; // websocket url
         QString cmd;
         qint64 rs=0;
@@ -413,7 +366,7 @@ void QIperfC::onStart()
                     connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                     connect(m_wss[serverIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
                     connect(m_wss[serverIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
-                    connect(m_wss[serverIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
+                    connect(m_wss[serverIP], &WSClient::iperfTPdata, m_throughputview, &ThroughputView::onIperfTPdata);
                 }else{
                     m_wss[serverIP]->setDatapath(m_datapath);
                 }
@@ -466,7 +419,7 @@ void QIperfC::onStart()
                     connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                     connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
                     connect(m_wsc[clientIP], &WSClient::disconnected, this, &QIperfC::onDisconnected);
-                    connect(m_wsc[clientIP], &WSClient::iperfTPdata, m_tpmgr, &TPMgr::onIperfTPdata);
+                    connect(m_wsc[clientIP], &WSClient::iperfTPdata, m_throughputview, &ThroughputView::onIperfTPdata);
                 }else{
                     m_wsc[clientIP]->setDatapath(m_datapath);
                 }
@@ -538,7 +491,7 @@ void QIperfC::onStart()
         //TODO: wait server start up and ready
         QDateTime oldDT = QDateTime::currentDateTime();
         QDateTime newDT;
-        int iwaittime;
+        qint64 iwaittime;
         int chk=0;
         bool bServerReady=false;
         while (!bServerReady && (bUserStop==false)){ //TODO: timeout!!!
@@ -597,7 +550,7 @@ void QIperfC::onStart()
         }
         QDateTime waitStartTime = QDateTime::currentDateTime();
         QDateTime waitEndTime = QDateTime::currentDateTime();
-        int iWait = waitStartTime.secsTo(waitEndTime);
+        qint64 iWait = waitStartTime.secsTo(waitEndTime);
         while ((iWait < maxtestduration) && (bUserStop==false)){
             if ((getStatusServers()>m_status_server.keys().length()) ||
                 (getStatusClients()>m_status_client.keys().length())) {
@@ -685,59 +638,6 @@ void QIperfC::onConfig()
     }
 }
 
-void QIperfC::onCopy()
-{
-    if (ui->tv_throughput->hasFocus()){
-        QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
-//        qDebug() << "onCopy:" << idxs;
-        TP *tp;
-        QString s="";
-        foreach(auto idx, idxs){
-            tp = m_tpmgr->getItem(idx);
-            s = s + "\n" + tp->getJsonData();
-        }
-        m_clipboard->setText(s);
-    }else {
-        qDebug() << "tv_throughput no hasFocus";
-    }
-}
-
-void QIperfC::onCopyText()
-{
-    if (ui->tv_throughput->hasFocus()){
-        QModelIndexList mls = ui->tv_throughput->selectionModel()->selectedRows();
-        if (mls.length()>0){
-            QModelIndex idx = mls[0]; // first model index
-            QPoint globalPos = QCursor::pos();
-            QPoint widgetPos = ui->tv_throughput->mapFromGlobal(globalPos);
-            int col = ui->tv_throughput->columnAt(widgetPos.x());
-
-            TP *tp;
-            tp = m_tpmgr->getItem(idx);
-            m_clipboard->setText(tp->data(col).toString());
-        }
-
-    }else {
-        qDebug() << "onCopyText: tv_throughput not hasFocus";
-    }
-
-}
-
-void QIperfC::onPaste()
-{
-    if (ui->tv_throughput->hasFocus()){
-        QString clip = m_clipboard->text();
-        m_tpmgr->onPaste(clip);
-    }else {
-        qDebug() << "tv_throughput no hasFocus";
-    }
-}
-
-void QIperfC::onDelete()
-{
-    onPairDelete();
-}
-
 void QIperfC::onAbout()
 {
     QMessageBox::about(this, "About", QString(QIPERFC_NAME)+
@@ -752,13 +652,6 @@ void QIperfC::onShowDebugLog()
     // m_dlgshowlog->open();
     m_dlgshowlog->raise();
     m_dlgshowlog->activateWindow();
-}
-
-void QIperfC::aboutQCustomPlot()
-{
-    QMessageBox::about(this, "About QCustomPlot", "QCustomPlot\n"
-                       "Ver: "+ QString(QCUSTOMPLOT_VERSION_STR) + "\n"
-                       "URL: https://www.qcustomplot.com/index.php/introduction");
 }
 
 void QIperfC::onErrorStop(int err, QString msg)
@@ -786,14 +679,7 @@ void QIperfC::on_notice(QString send_addr, QString msg)
             case EndPointAct::Add:
 //                qDebug() << "QIperfC::on_notice:" << send_addr << "\nmsg:" << msg;
                 if (m_endpointmgr->add(send_addr, msg)){
-                    if (dlgiperf){
-//                        qInfo() << "on_notice:EndPointAct:Add: " << send_addr << " msg: " << msg;
-//                        if (dlgiperf->add(send_addr)){
-                        if (dlgiperf->add(send_addr, msg)){
-                            dlgiperf->updateUI();
-                        }
-                        // TODO: ping dialog
-                    }
+                    m_throughputview->addEndpoint(send_addr, msg);
                     emit updateEndpointNum(m_endpointmgr->getTotalEndpoints());
                 }
                 break;
@@ -806,6 +692,8 @@ void QIperfC::on_notice(QString send_addr, QString msg)
             case EndPointAct::Disable:
                 qDebug() << "TODO qiperfd Disable: from(" << send_addr << ") " << msg << Qt::endl;
                 break;
+            default:
+                qDebug() << "TODO on_notice default action: from(" << send_addr << ") " << msg << Qt::endl;
         }
     } else {
         qDebug() << "TODO on_notice invalid message: from(" << send_addr << ") " << msg;
@@ -860,7 +748,7 @@ void QIperfC::onTest()
 void QIperfC::closeEvent(QCloseEvent *event)
 {
     //TODO: check config edit.
-    Q_UNUSED(event);
+    Q_UNUSED(event)
 
     saveSettings();
     emit closeAll();
@@ -895,79 +783,18 @@ void QIperfC::updateRunStatus(bool bStart)
     ui->actionClear->setEnabled(!bStart);
 }
 
-void QIperfC::initThroughputChart()
-{
-    // throughput chart
-    m_tpplot=new TPPlot(ui->widget_console);
-    m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &QIperfC::onPlotContextMenuRequest);
-    ui->hl_console->addWidget(m_tpplot);
 
-    m_tpmgr = new TPMgr(this);
-    connect(m_tpmgr, &TPMgr::rowsInserted, this, &QIperfC::onTPDataUpdate);
-    connect(m_tpmgr, &TPMgr::rowsRemoved, this, &QIperfC::onTPDataUpdate);
-    connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
-
-    ui->tv_throughput->setModel(m_tpmgr);
-    /* TODO: set specify column font size,
-    // current not inherent other setting
-    header = new CustomHeaderView(Qt::Horizontal, ui->tv_throughput);
-    int s = header->getFontSize();
-    header->setColumnSize(int(TP::mintp), s/2);
-    header->setColumnSize(int(TP::maxtp), s/2);
-    ui->tv_throughput->setHeader(header);
-    // set specify column font size
-//    QHeaderView *header = ui->tv_throughput->header();
-//    QFont font = header->font();
-//    qDebug() << "font size: " << font.pointSize();
-//    font.setPointSize(28); // Set the desired font size
-//    header->setStyleSheet(QString("QHeaderView::section:nth-child(%1) { font-size: %2pt; }").arg(1).arg(font.pointSize()));
-    // end set font size
-
-    */
-    ui->tv_throughput->setColumnWidth(TP::cols::id, 100);
-    ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
-    ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
-    ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
-    ui->tv_throughput->setColumnWidth(TP::cols::lostrate, 110);
-
-    TooltipEventFilter* filter = new TooltipEventFilter(ui->tv_throughput);
-    connect(filter, &TooltipEventFilter::doCopy, this, &QIperfC::onCopy);
-    connect(filter, &TooltipEventFilter::doPaste, this, &QIperfC::onPaste);
-    connect(filter, &TooltipEventFilter::doDelete, this, &QIperfC::onDelete);
-    ui->tv_throughput->viewport()->installEventFilter(filter);
-    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
-//    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
-//    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
-    ui->tv_throughput->expandAll();// will show folding icon when have child item??
-    ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu
-    connect(ui->tv_throughput, &QTreeView::customContextMenuRequested, this, &QIperfC::onTPUTContextMenu);
-    connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &QIperfC::onItemDClicked); //edit item on double click
-
-    //TODO: slow update text/image?
-    tpdirdelegate = new TPDirDelegate(ui->tv_throughput);
-//    tpdirdelegate = new TPDirDelegate(this);
-    ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdirdelegate);
-    // TODO: why debug build do not show folding icon!!
-//    tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
-//    ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
-
-    QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
-    connect(ism, &QItemSelectionModel::selectionChanged, this, &QIperfC::onTPselectionChanged);
-//    ui->tv_throughput->header()->setVisible(true);
-}
-
-void QIperfC::initPingChart()
-{
-    if (!m_testping){
-//        ui->tab_ping->setVisible(false);
-        ui->tabwidget->setTabVisible(1, false);
-    }
-    m_pingmgr = new PingMgr();
-    // ping chart
-    m_pingplot = new PingPlot(ui->widget_ping);
-    ui->hl_ping->addWidget(m_pingplot);
-}
+// void QIperfC::initPingChart()
+// {
+//     if (!m_testping){
+// //        ui->tab_ping->setVisible(false);
+//         ui->tabwidget->setTabVisible(1, false);
+//     }
+//     m_pingmgr = new PingMgr();
+//     // ping chart
+//     m_pingplot = new PingPlot(ui->widget_ping);
+//     ui->hl_ping->addWidget(m_pingplot);
+// }
 
 void QIperfC::resetError()
 {
@@ -1021,11 +848,7 @@ void QIperfC::loadSettings()
 void QIperfC::doClear()
 {
     //clear all test date, config setting remain unchanged
-    if (m_tpmgr->rootChildCount()>0) {
-        m_tpmgr->clear();
-        ui->tv_throughput->collapseAll();
-    }
-    m_tpplot->clear();
+    m_throughputview->doClear();
     m_TestStartTime = QDateTime();
     // m_tpplot->setStartTime(m_TestStartTime);
     m_qipconfig->clear();
@@ -1054,12 +877,12 @@ void QIperfC::onExport()
         if (ext.compare(HTML_EXT)!=0){
             fileName = fi.path() +QDir::separator()+ fi.baseName() + "."+ HTML_EXT;
         }
-        QStringList pcs = m_tpmgr->getPCs();
+        QStringList pcs = m_throughputview->getPCs();
         // qDebug() << "pcs:" << pcs;
 #if (DEBUG_EXPORT_HTML==1)
-        ExportHtml *eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth, m_debugdlg);
+        eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth, m_debugdlg);
 #else
-        ExportHtml *eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth);
+        eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth);
 #endif
 
         //debug ========================
@@ -1079,7 +902,7 @@ void QIperfC::onExport()
         if (pcsinfo.isEmpty()){
             pcsinfo = m_endpointmgr->getPCsInfo(pcs);
         }
-        eh->setData(m_tpmgr, m_tpplot, pcsinfo);
+        eh->setData(m_throughputview->getChilds(false), m_throughputview->toPixmap(m_TPExportWidth, m_TPExportHeigth), pcsinfo);
         eh->setTestTime(m_TestStartTime.toString(DATETIME_NOW_FORMAT));
         eh->setRawFilenames(m_qipconfig->getIperfRawFilenames());
         // TODO: DUT info. model, firmware ver, HW ver...
@@ -1108,25 +931,6 @@ void QIperfC::onShowGroup(bool bShow)
     //plotchart  show/hide group
 }
 
-void QIperfC::initMenus()
-{
-    m_tpmenu = new QMenu(); // config throughput pair right click menu
-    m_aEnable = new QAction("Enable select item");
-    connect(m_aEnable, &QAction::triggered, this, &QIperfC::onEnableItem);
-    m_aDisable = new QAction("Disable select item");
-    connect(m_aDisable, &QAction::triggered, this, &QIperfC::onDisableItem);
-//    aDisable->setEnabled(false);
-    m_tpmenu->addAction(ui->actionCopy);
-    m_tpmenu->addAction(ui->actionPaste);
-    m_tpmenu->addAction(ui->actionDelete);
-    m_tpmenu->addSeparator();
-    m_tpmenu->addAction(ui->actionCopyText);
-    m_tpmenu->addSeparator();
-    m_tpmenu->addAction(m_aEnable);
-    m_tpmenu->addAction(m_aDisable);
-
-}
-
 void QIperfC::onRPC_result(const QVariant &result)
 {
     qDebug() << "onRPC_result: " << result << Qt::endl;
@@ -1152,7 +956,7 @@ void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err, QString
     qDebug() << "onIperfStoped:" << refrow << " : " << ipport <<
         " err_no:" << err_no << " err:" << err;
     if (err_no.toInt()>0){
-        m_tpmgr->addComment(refrow, "["+ ipport +"]Error:" +err);
+        m_throughputview->addComment(refrow, "["+ ipport +"]Error:" +err);
         if (m_status_server.contains(ipport)){
             m_status_server[ipport]=TPStatus::stoped;
         }
@@ -1185,64 +989,11 @@ void QIperfC::onDisconnected(QString targetip)
     }
 }
 
-void QIperfC::onTPUTContextMenu(QPoint pos)
-{
-    // if select multi items
-    QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
-    if (idxs.length()>1){
-        m_aEnable->setEnabled(true);
-        m_aDisable->setEnabled(true);
-    } else {
-        //TODO: check select item status enable/disable menu item
-        QModelIndex midx = ui->tv_throughput->indexAt(pos);
-        TP *tp = m_tpmgr->getItem(midx);
-        if (tp->getEnabled()){
-            m_aEnable->setEnabled(false);
-            m_aDisable->setEnabled(true);
-        }else{
-            m_aEnable->setEnabled(true);
-            m_aDisable->setEnabled(false);
-        }
-    }
-    m_tpmenu->popup(ui->tv_throughput->mapToGlobal(pos));
-}
-
-void QIperfC::onPlotContextMenuRequest(QPoint pos)
-{
-    QMenu *menu = new QMenu(this);
-    menu->setAttribute(Qt::WA_DeleteOnClose);
-//    if (ui->customPlot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
-//    {
-//        menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignLeft));
-//        menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignHCenter));
-//        menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignRight));
-//        menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom | Qt::AlignRight));
-//        menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom | Qt::AlignLeft));
-//    }
-//    else  // general context menu on graphs requested
-    {
-//        menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
-//        if (ui->customPlot->selectedGraphs().size() > 0)
-//            menu->addAction("Remove selected graph", this, SLOT(removeSelectedGraph()));
-//        if (ui->customPlot->graphCount() > 0)
-//            menu->addAction("Remove all graphs", this, SLOT(removeAllGraphs()));
-        menu->addAction("About", this, &QIperfC::aboutQCustomPlot);
-    }
-
-    menu->popup(m_tpplot->mapToGlobal(pos));
-
-}
-
 void QIperfC::onUpdateDataPath(QString datapath)
 {
     m_datapath = datapath;
     m_dlgrecord->setRootPath(datapath);
     ui->actionShowLog->setEnabled(true);
-}
-
-void QIperfC::onUpdateTPCfg(QByteArray tpcfg)
-{
-    m_tpmgr->loaddata(tpcfg);
 }
 
 void QIperfC::onProgress(QString filename, int currentlineno)
@@ -1272,37 +1023,6 @@ int QIperfC::getStatusClients()
     return sum;
 }
 
-void QIperfC::onEnableItem(bool checked)
-{
-    Q_UNUSED(checked)
-//     ui->tv_throughput->SelectItems;
-    QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedIndexes();
-    if (idxs.length()>0){
-        TP *tp;
-        QString s="";
-        foreach(auto idx, idxs){
-            tp = m_tpmgr->getItem(idx);
-            tp->setEnabled();
-        }
-    }
-
-}
-
-void QIperfC::onDisableItem(bool checked)
-{
-    Q_UNUSED(checked)
-    QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
-    if (idxs.length()>0){
-        TP *tp;
-        QString s="";
-
-        foreach(auto idx, idxs){
-            tp = m_tpmgr->getItem(idx);
-            tp->setDisabled();
-        }
-    }
-}
-
 void QIperfC::initActions()
 {
     // init actions
@@ -1315,21 +1035,21 @@ void QIperfC::initActions()
     connect(ui->actionExport, &QAction::triggered, this, &QIperfC::onExport);
     connect(ui->actionQuit, &QAction::triggered, this, &QIperfC::onQuit);
     // edit
-    connect(ui->actionCopy, &QAction::triggered, this, &QIperfC::onCopy);
+    // connect(ui->actionCopy, &QAction::triggered, this, &QIperfC::onCopy);
     // copy column text
-    connect(ui->actionCopyText, &QAction::triggered, this, &QIperfC::onCopyText);
-    connect(ui->actionPaste, &QAction::triggered, this, &QIperfC::onPaste);
+    connect(ui->actionCopyText, &QAction::triggered, m_throughputview, &ThroughputView::onCopyText);
+    // connect(ui->actionPaste, &QAction::triggered, this, &QIperfC::onPaste);
 
-    connect(ui->actionAddIperf, &QAction::triggered, this, &QIperfC::onAddIperf);
+    connect(ui->actionAddIperf, &QAction::triggered, m_throughputview, &ThroughputView::onAddIperf);
     if (!m_testping){
         ui->actionAddPing->setVisible(false);
     }
     connect(ui->actionAddPing, &QAction::triggered, this, &QIperfC::onAddPing);
 
-    connect(ui->actionEdit, &QAction::triggered, this, &QIperfC::onPairEdit);
-    connect(ui->actionDelete, &QAction::triggered, this, &QIperfC::onPairDelete);
-    connect(ui->actionSwap, &QAction::triggered, this, &QIperfC::onPairSwap);
-    connect(ui->actionSwapIP, &QAction::triggered, this, &QIperfC::onPairSwapIP);
+    connect(ui->actionEdit, &QAction::triggered, m_throughputview, &ThroughputView::onPairEdit);
+    connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onPairDelete);
+    connect(ui->actionSwap, &QAction::triggered, m_throughputview, &ThroughputView::onPairSwap);
+    connect(ui->actionSwapIP, &QAction::triggered, m_throughputview, &ThroughputView::onPairSwapIP);
 
     // run
     connect(ui->actionStart, &QAction::triggered, this, &QIperfC::onStart);
@@ -1394,57 +1114,27 @@ void QIperfC::onUpdateStatus(QString msg)
     m_status_label->setText(msg);
 }
 
+void QIperfC::onUpdateActions(bool bStart, bool bStop, bool bClear)
+{
+    ui->actionStart->setEnabled(bStart);
+    ui->actionStop->setEnabled(bStop);
+    ui->actionClear->setEnabled(bClear);
+}
+
+void QIperfC::onUpdateActionsSave(bool bSave)
+{
+    ui->actionSave->setEnabled(bSave);
+}
+
+void QIperfC::onUpdateActionsEdit(bool bDel, bool bEdit, bool bSwap, bool bSwapIP)
+{
+    ui->actionDelete->setEnabled(bDel);
+    ui->actionEdit->setEnabled(bEdit);
+    ui->actionSwap->setEnabled(bSwap);
+    ui->actionSwapIP->setEnabled(bSwapIP);
+}
+
 void QIperfC::on_updateQIperfdNum(int n)
 {
     m_label_qiperfd->setText(QString(QIPERFD_NAME)+ ":" + QString::number(n));
-}
-
-void QIperfC::onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
-{
-    Q_UNUSED(deselected)
-
-    bool bAct=false;
-    if (selected.length()>0){
-        bAct = true;
-    }
-    ui->actionDelete->setEnabled(bAct);
-    ui->actionEdit->setEnabled(bAct);
-    ui->actionSwap->setEnabled(bAct);
-    ui->actionSwapIP->setEnabled(bAct);
-}
-
-void QIperfC::onTPDataUpdate(const QModelIndex &parent, int first, int last)
-{
-    Q_UNUSED(parent)
-    Q_UNUSED(first)
-    Q_UNUSED(last)
-    //TODO: when throughput is running, add new TP item?
-    bool bStart;
-    if (m_tpmgr->rowCount()>0) {
-        bStart=false;
-        ui->actionStart->setEnabled(!bStart);
-        ui->actionStop->setEnabled(bStart);
-        ui->actionClear->setEnabled(!bStart);
-    } else {
-        ui->actionStart->setEnabled(false);
-        ui->actionStop->setEnabled(false);
-//        ui->actionClear->setEnabled(false);
-    }
-    //    updateRunStatus(bStart);
-}
-
-void QIperfC::onItemDClicked(QModelIndex idx)
-{
-    TP *tp = m_tpmgr->getItem(idx);
-    if (tp->getDataType() == TPMgrData::config) {
-        // only iperf pair config can be edit
-        dlgiperf->loadJsonCfg(tp->saveData());
-        dlgiperf->setExcIdx(idx);
-        int rc = dlgiperf->exec();// show dlgiperf
-        if (rc == QDialog::Accepted){
-            QString rs= dlgiperf->getJsonCfg();
-            tp->loadData(rs);
-            m_tpmgr->setItem(idx, tp);
-        }
-    }
 }

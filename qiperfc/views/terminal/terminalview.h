@@ -10,15 +10,15 @@ class TerminalView : public AbstractView
     Q_OBJECT
 
 public:
-    TerminalView(QWidget *parent = nullptr);
-    ~TerminalView();
+    explicit TerminalView(QWidget *parent = nullptr);
+    ~TerminalView() override;
 
-    QString title() { return tr("Terminal"); }
-    QString iid() { return "terminal"; }
-    void loadSettings(QSettings *config);
-    void receiveData(const QByteArray &array);
-    void setEnabled(bool enabled);
-    void clear();
+    QString title() override { return tr("Terminal"); }
+    QString iid() override { return "terminal"; }
+    void loadSettings(QSettings *config) override;
+    void receiveData(const QByteArray &array) override;
+    void setEnabled(bool enabled) override;
+    void clear() override;
 
 private slots:
     void sendData(const QString &string);

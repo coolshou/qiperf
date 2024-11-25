@@ -2,6 +2,7 @@
 #define VIEWMANAGER_H
 
 #include <QObject>
+#include "../src/throughputview.h"
 
 class AbstractView;
 class QAction;
@@ -12,8 +13,8 @@ class ViewManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit ViewManager(QString *docPath, QMainWindow *window);
-    ~ViewManager();
+    explicit ViewManager(QString *docPath, ThroughputView *tpview, QMainWindow *window);
+    ~ViewManager() override;
 
     void loadConfig(QSettings *config);
     void saveConfig(QSettings *config);
@@ -23,6 +24,12 @@ public:
     void setEnabled(bool enabled);
     void clear(void);
     void setFileAction(QAction *openAction, QAction *saveAction);
+public slots:
+    // void onAddTPdata(QString midx, QString sInterval, QString idx,
+    //                QString value, QString unit, QString dir=nullptr,
+    //                QString pkt_lost="", QString pkt_total="");
+    // void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
+    //                      QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates);
 
 signals:
     void transmitData(const QByteArray &);
@@ -42,8 +49,11 @@ private:
         int postion;
     };
     QVector<AbstractView *> *m_views;
-    QMainWindow *m_window;
     QString *m_docPath;
+    ThroughputView *m_throughputview;
+    QMainWindow *m_window;
+
+
 };
 
 #endif // VIEWMEDIATOR_H

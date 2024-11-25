@@ -75,6 +75,7 @@ SOURCES += \
     src/pingplot.cpp \
     src/qipconfig.cpp \
     src/qiperfc.cpp \
+    src/throughputview.cpp \
     src/tp.cpp \
     src/tpfoldingdelegate.cpp \
     src/tpmgr.cpp \
@@ -128,6 +129,7 @@ HEADERS += \
     src/pingplot.h \
     src/qipconfig.h \
     src/qiperfc.h \
+    src/throughputview.h \
     src/tp.h \
     src/tpfoldingdelegate.h \
     src/tpmgr.h \
@@ -157,7 +159,8 @@ FORMS += \
     src/dlgrecord.ui \
     src/dlgtest.ui \
     src/formqiperfds.ui \
-    src/qiperfc.ui
+    src/qiperfc.ui \
+    src/throughputview.ui
 
 UI_DIR= \
     src

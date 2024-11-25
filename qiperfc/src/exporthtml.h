@@ -25,7 +25,7 @@ public:
     void AddDivPng(QString pId, QString sImg);
     void save(QString filename);
     QString imageToBase64(const QImage &image, const char *format = "PNG");
-    void setData(TPMgr *tpmgr, TPPlot *tpplot, QString pcs);
+    void setData(QList<TP *> tps,  QPixmap chat, QString pcs);
     void setRawFilenames(QStringList filenames);
     void setTestTime(QString time);
     void exporthtml();
@@ -52,13 +52,15 @@ private:
     QString m_testtime;
     QWebEngineView *webView;
     // bool m_ok;
-    TPMgr *m_tpmgr;
-    TPPlot *m_tpplot;
+    // TPMgr *m_tpmgr;
+    // TPPlot *m_tpplot;
     QJsonArray m_pcs;
     QStringList m_iperf_raw_filenames; // iperf raw log filenames
     IperfWrapper *m_iperfwrapper;
     QString dirToDiv(QString dir);
     QWebEngineView *devTools;  // Separate view for developer tools
+    QList<TP *> m_tps;
+    QPixmap m_chat;
 };
 
 #endif // EXPORTHTML_H
