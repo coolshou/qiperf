@@ -123,7 +123,7 @@
      <string>Monitor</string>
     </property>
     <addaction name="actionAddSerial"/>
-    <addaction name="actionAddPing_2"/>
+    <addaction name="actionAddPing"/>
     <addaction name="actionWlanSTA"/>
    </widget>
    <addaction name="menuFile"/>
@@ -416,15 +416,7 @@
      <normaloff>:/iperf3</normaloff>:/iperf3</iconset>
    </property>
    <property name="text">
-    <string>Iperf3 log</string>
-   </property>
-  </action>
-  <action name="actionAddPing">
-   <property name="text">
-    <string>Add Ping</string>
-   </property>
-   <property name="toolTip">
-    <string>Add Ping</string>
+    <string>Iperf3 log(TODO)</string>
    </property>
   </action>
   <action name="actionShowDebugLog">
@@ -437,26 +429,38 @@
    </property>
   </action>
   <action name="actionCopyText">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/copytext</normaloff>:/copytext</iconset>
+   </property>
    <property name="text">
     <string>Copy Text</string>
    </property>
   </action>
   <action name="actionAddSerial">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/serial</normaloff>:/serial</iconset>
+   </property>
    <property name="text">
-    <string>Serial</string>
+    <string>Serial(TODO)</string>
    </property>
    <property name="toolTip">
     <string>Add Serial Monitor</string>
    </property>
   </action>
-  <action name="actionAddPing_2">
+  <action name="actionAddPing">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/ping</normaloff>:/ping</iconset>
+   </property>
    <property name="text">
-    <string>Ping</string>
+    <string>Ping(TODO)</string>
    </property>
   </action>
   <action name="actionWlanSTA">
    <property name="text">
-    <string>WLAN STA</string>
+    <string>WLAN STA(TODO)</string>
    </property>
   </action>
  </widget>

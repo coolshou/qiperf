@@ -40,5 +40,8 @@
         <file alias="restart">images/restart.png</file>
         <file alias="prev">images/arrow-prev.png</file>
         <file alias="next">images/arrow-next.png</file>
+        <file alias="copytext">images/copytext.png</file>
+        <file alias="ping">images/ping.png</file>
+        <file alias="serial">images/serial.png</file>
     </qresource>
 </RCC>
