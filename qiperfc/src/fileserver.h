@@ -34,6 +34,8 @@ private slots:
     void onClientDisconnected();
 
 signals:
+    void error(QString msg);
+
 private:
     QTcpServer *fileserver;
     QString m_rootpath;

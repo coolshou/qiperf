@@ -13,8 +13,12 @@ FileServer::FileServer(quint16 port, QObject *parent)
 {
 //    filesocket = new QTcpSocket(this);
     fileserver = new QTcpServer(this);
-    fileserver->listen(QHostAddress::AnyIPv4, port);
-    qDebug() << "FileServer listen on: " << port;
+    if (!fileserver->listen(QHostAddress::AnyIPv4, port)){
+        QString err = "FileServer:FileServer listen on port: " + QString::number(port) + " Fail!!";
+        emit error(err);
+    }else{
+        qInfo() << "FileServer listen on: " << port;
+    }
     connect(fileserver, &QTcpServer::newConnection, this, &FileServer::acceptFileConnection);
     // connect(fileserver, &QTcpServer:, this, SLOT(acceptFileConnection()));
     bytesReceived = 0;
