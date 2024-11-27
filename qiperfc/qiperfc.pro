@@ -2,6 +2,8 @@ QT += core gui
 QT += network websockets
 QT += printsupport # require by qcustomplot
 QT += webenginewidgets
+QT += serialport
+
 #CONFIG += release
 CONFIG += debug
 
@@ -54,6 +56,8 @@ SOURCES += \
     ../src/iperfwrapper.cpp \
     ../src/icmpping.cpp \
     ../src/icmpwrapper.cpp \
+    ../src/port/portsetbox.cpp \
+    ../src/port/serialport.cpp \
     lib/axistag.cpp \
     lib/qcustomplot.cpp \
     src/codeeditor.cpp \
@@ -103,6 +107,9 @@ HEADERS += \
     ../src/comm.h \
     ../src/endpoint.h \
     ../src/endpointtype.h \
+    ../src/port/abstractport.h \
+    ../src/port/portsetbox.h \
+    ../src/port/serialport.h \
     ../src/versions.h \
     ../src/endpointact.h \
     ../src/iperfwrapper.h \
@@ -153,6 +160,8 @@ HEADERS += \
 
 FORMS += \
     ../src/dlgshowlog.ui \
+    ../src/port/portsetbox.ui \
+    ../src/port/serialport.ui \
     src/dlgiperf.ui \
     src/dlgoption.ui \
     src/dlgping.ui \
