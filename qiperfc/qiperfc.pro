@@ -66,6 +66,7 @@ SOURCES += \
     src/dlgoption.cpp \
     src/dlgping.cpp \
     src/dlgrecord.cpp \
+    src/dlgserial.cpp \
     src/dlgtest.cpp \
     src/endpointmgr.cpp \
     src/exporthtml.cpp \
@@ -125,6 +126,7 @@ HEADERS += \
     src/dlgoption.h \
     src/dlgping.h \
     src/dlgrecord.h \
+    src/dlgserial.h \
     src/dlgtest.h \
     src/endpointmgr.h \
     src/exporthtml.h \
@@ -168,6 +170,7 @@ FORMS += \
     src/dlgoption.ui \
     src/dlgping.ui \
     src/dlgrecord.ui \
+    src/dlgserial.ui \
     src/dlgtest.ui \
     src/formqiperfds.ui \
     src/qiperfc.ui \
