@@ -15,30 +15,24 @@
 #include <QDialog>
 
 #include "comm.h"
-//#include "pipeclient.h"
-// #include "dlgiperf.h"
 #include "udpreceiver.h"
-//#include "tpchart.h"
 #include "endpointmgr.h"
-// #include "tpmgr.h"
-// #include "tpdirdelegate.h"
-#include "tpfoldingdelegate.h"
 #include "qipconfig.h"
-// #include "tpplot.h"
 #include "formqiperfds.h"
 #include "dlgtest.h"
 #include "dlgoption.h"
 #include "dlgrecord.h"
+#include "dlgserial.h"
 
-#include "customheaderview.h"
+// #include "customheaderview.h"
 #include "fileserver.h"
-// #include "dlgping.h"
 #include "pingmgr.h"
 #include "pingplot.h"
 #include "dlgshowlog.h"
 #include "exporthtml.h"
 #include "../views/viewmanager.h"
 #include "throughputview.h"
+#include "serialview.h"
 
 #if (TEST_ICMP==1)
 #include "../src/icmpping.h"
@@ -83,7 +77,7 @@ public slots:
     void onShowDebugLog();
 
     void onErrorStop(int err, QString msg);
-    void on_notice(QString send_addr, QString msg);
+    void onNotice(QString send_addr, QString msg);
     void onQuit();
     void notificationReceived(const QString key, const QVariant value);
     void setStartTime(QDateTime startTime);
@@ -135,8 +129,11 @@ private slots:
     void onProgress(QString filename, int currentlineno);
     int getStatusServers();
     int getStatusClients();
+    void onAddSerial();
     void onAddPing();
+    void onWlanSTA();
     void onError(QString msg);
+    void onFileServerError(QString msg);
     void onExport();
     void onWidthChanged(int width);
     void onHeigthChanged(int heigth);
@@ -144,7 +141,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    CustomHeaderView *header;
+    // CustomHeaderView *header;
     QString settingfilepath;
     QString m_logpath;
     QClipboard *m_clipboard;
@@ -152,7 +149,7 @@ private:
     dlgOption *m_frm_option;
     DlgTest *m_dlgtest;
     DlgRecord *m_dlgrecord; //TODO: store final test result
-
+    DlgSerial *m_dlgserial; // serial select dialog
     PingPlot *m_pingplot;
     QSettings *m_settings;
     bool m_testping;
@@ -170,8 +167,6 @@ private:
     QLabel *m_start_label;
     QLabel *m_status_label;
     QLabel *m_label_qiperfd;
-
-    TPFoldingDelegate *tpfoldingdelegate;
 
     QDateTime m_TestStartTime;
     int bErrorStop;

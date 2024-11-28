@@ -7,6 +7,7 @@
 #include <QModelIndex>
 #include <QVariant>
 #include <QJsonArray>
+#include <QColor>
 
 #include "../src/endpoint.h"
 
@@ -42,12 +43,17 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     QModelIndex indexFromItem(EndPoint *item);
 
+
     bool add(QString id, QString data); //add endpoint
+    bool addEndpoint(QString id, QString data);
+    bool delEndpoint(QString id);
+    bool update(QString id, QString data); //update endpoint
     void disable(QString id); //disable endpoint
     bool isExist(QString id);
     int getTotalEndpoints();
     QString getPCsInfo(QStringList pcs);
     QJsonArray getPCsInfos(QStringList pcs);
+    QMap<QString, QStringList>  getSerials();
 
 private:
     EndPoint* getEndPoint(QString id);
@@ -57,8 +63,8 @@ private:
 //    void setupModelData(const QStringList &lines, EndPoint *parent);
     QStringList _headers;
     EndPoint *rootItem;
-
     QList<EndPoint*> m_endpoints; //QList of endpoints
+    QColor m_disabledTextColor;
 };
 
 #endif // ENDPOINTMGR_H

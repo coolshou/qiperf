@@ -47,7 +47,7 @@ private:
     Ui::DlgIperf *ui;
     TPMgr *m_tpmgr;
     QStringList mgrls; //manager ip address list
-    QMap<QString, QStringList> m_ips; // manager ip, all support ip in the manager server
+    QMap<QString, QStringList> m_ips; // key: manager ip, value: all support ip in the manager server
     bool b_ipv6;
     QModelIndex m_excIdx;
 };

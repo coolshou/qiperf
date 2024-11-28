@@ -24,6 +24,8 @@ public:
     void setEnabled(bool enabled);
     void clear(void);
     void setFileAction(QAction *openAction, QAction *saveAction);
+    void addView(AbstractView *view);
+
 public slots:
     // void onAddTPdata(QString midx, QString sInterval, QString idx,
     //                QString value, QString unit, QString dir=nullptr,
@@ -48,6 +50,7 @@ private:
         AbstractView *view;
         int postion;
     };
+    QDockWidget *m_align = nullptr;
     QVector<AbstractView *> *m_views;
     QString *m_docPath;
     ThroughputView *m_throughputview;

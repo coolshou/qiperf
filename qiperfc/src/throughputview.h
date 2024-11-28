@@ -16,6 +16,7 @@
 #include "dlgiperf.h"
 // #include "qiperfc.h"
 #include "tpdirdelegate.h"
+#include "tpfoldingdelegate.h"
 
 #include "../views/abstractview.h"
 
@@ -89,6 +90,7 @@ private:
     QAction *m_aDisable;
     DlgIperf * dlgiperf;  // dialog of iperf config
     TPDirDelegate *tpdirdelegate;
+    // TPFoldingDelegate *tpfoldingdelegate;
     void initThroughputChart();
 };
 

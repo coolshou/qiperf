@@ -23,32 +23,22 @@ ViewManager::ViewManager(QString *docPath, ThroughputView *tpview, QMainWindow *
 
     // create views
     //m_views->append(new TextTRView());
-
-
-    m_views->append(m_throughputview);
-    m_views->append(new TerminalView()); //TODO: add manuy TerminalView...
+    // m_views->append(m_throughputview);
+    // m_views->append(new TerminalView()); //TODO: add manuy TerminalView...
     //m_views->append(new OscilloscopeView());
     //m_views->append(new FileTransmitView());
-
     // m_views->append(loadExtensions("extensions"));
+
     delete window->takeCentralWidget();
     window->setDockNestingEnabled(true);
-    int index = 0;
-    QDockWidget *align = nullptr;
-    for (AbstractView *view : qAsConst(*m_views)) {
-        QDockWidget *dock = new QDockWidget(view->title(), window);
-        dock->setObjectName(view->iid());
-        // dock->setFeatures(QDockWidget::AllDockWidgetFeatures);//deprecate
-        dock->setWidget(view);
-        if (index++) {
-            window->tabifyDockWidget(align, dock);
-        } else {
-            window->addDockWidget(Qt::LeftDockWidgetArea, dock);
-            align = dock;
-        }
-        connect(view, &AbstractView::transmitData, this, &ViewManager::transmitData);
-        connect(view, &AbstractView::sendMessage, this, &ViewManager::dispatchMessage);
-    }
+
+    // int index = 0;
+    // QDockWidget *align = nullptr;
+    // for (AbstractView *view : qAsConst(*m_views)) {
+    //     addView(view, align, index);
+    //     index++;
+    // }
+    addView(m_throughputview);
 }
 
 ViewManager::~ViewManager()
@@ -125,6 +115,27 @@ void ViewManager::setFileAction(QAction *openAction, QAction *saveAction)
 {
     connect(openAction, SIGNAL(triggered()), this, SLOT(openFile()));
     connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFile()));
+}
+
+void ViewManager::addView(AbstractView *view)
+{
+    int idx = m_views->count();
+
+    QDockWidget *dock = new QDockWidget(view->title(), m_window);
+    dock->setObjectName(view->iid());
+    // dock->setFeatures(QDockWidget::AllDockWidgetFeatures);//deprecate
+    dock->setWidget(view);
+    if (idx) {
+        // QDockWidget *align = m_views->at(idx);
+        m_window->tabifyDockWidget(m_align, dock);
+    } else {
+        m_window->addDockWidget(Qt::LeftDockWidgetArea, dock);
+        m_align = dock;
+    }
+    connect(view, &AbstractView::transmitData, this, &ViewManager::transmitData);
+    connect(view, &AbstractView::sendMessage, this, &ViewManager::dispatchMessage);
+
+    m_views->append(view);
 }
 
 AbstractView* ViewManager::findActiveView()

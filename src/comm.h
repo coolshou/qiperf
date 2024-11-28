@@ -22,6 +22,7 @@
 #define QIPERFD_WSPORT 47016  //websocket port
 #define QIPERFD_WSNAME "WS Server"
 #define QIPERF_FILEPORT 47017 //FileServer Port
+#define QIPERF_SERIALPORT 47020 // basic port use for serial data transfer
 #define RPC_PORT 57025
 
 
@@ -57,6 +58,8 @@
 #define CMD_IPERF_TP_DATA  "IPERF_TP_DATA"  // report iperf throughput data
 #define CMD_IPERF_TP_FILE  "IPERF_TP_FILE"  // iperf throughput data filename with full path
 #define CMD_IPERF_GET_TP_FILE  "IPERF_GET_TP_FILE"  // get iperf throughput data file
+// serial
+#define CMD_SERIAL_ADD    "SERIAL_ADD"   // add SERIAL setting for rs232
 
 // ping
 #define CMD_PING        "PING"

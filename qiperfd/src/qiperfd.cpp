@@ -166,6 +166,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 QIperfd::~QIperfd()
 {
     informMessage(INFO_QIPERFD_STOPED, true);
+
     savecfg();
 }
 
@@ -432,7 +433,7 @@ void QIperfd::startAll()
     }
 }
 void QIperfd::stop(int idx)
-{
+{   //stop runing iperf
     if (isRunning(idx)){
         m_iperfworkers.value(idx)->setStop();
         //    iperfwork->setStop();
@@ -472,23 +473,8 @@ bool QIperfd::isRunning(int idx)
 
 void QIperfd::restartQIperfd()
 {
-#if defined(Q_OS_LINUX)
-    #if !defined(Q_OS_ANDROID)
-        // cmd = "systemctl restart qiperfd";
-        const QStringList arguments ={"restart", "qiperfd"};
-        qApp->quit();
-        QProcess::startDetached("systemctl", arguments);
-    #else
-    qDebug() << "TODO: restart android qiperfd service"
-    #endif
-#else
-    //windows,PS: Stop-Service -Name "SERVICE-NAME"
-    // get all service status: sc queryex state=all type=service
-    // stop: net stop "SERVICE-NAME"
-    // start: net start "SERVICE-NAME"
-    // restart: net stop [service name] && net start [service name]
-#endif
-
+    m_udpsrv->setSendMsg(m_myinfo->disableInfo()); // broadcast
+    QTimer::singleShot(1500, this, SLOT(doRestartQIperfd()));
 }
 
 void QIperfd::informMessage(QString data, bool bShowAtLocal)
@@ -506,6 +492,7 @@ void QIperfd::setManagerInterface(QString ifname)
 //    qDebug() << "setManagerInterface:" << mgr_ifname << Qt::endl;
     savecfg();
     emit setMgrIfname(ifname);
+    m_udpsrv->setSendMsg(m_myinfo->updateInfo()); // broadcast
 }
 
 void QIperfd::onPipeMessage(int idx, const QString msg)
@@ -702,6 +689,27 @@ void QIperfd::onQuit()
 void QIperfd::onNewLine(QString line)
 {
     m_pserver->sendMessage(QIPERFDLOG+QString("：")+line);
+}
+
+void QIperfd::doRestartQIperfd()
+{
+    qDebug() << "doRestartQIperfd";
+#if defined(Q_OS_LINUX)
+#if !defined(Q_OS_ANDROID)
+    // cmd = "systemctl restart qiperfd";
+    const QStringList arguments ={"restart", "qiperfd"};
+    qApp->quit();
+    QProcess::startDetached("systemctl", arguments);
+#else
+    qDebug() << "TODO: restart android qiperfd service"
+#endif
+#else
+    //windows,PS: Stop-Service -Name "SERVICE-NAME"
+    // get all service status: sc queryex state=all type=service
+    // stop: net stop "SERVICE-NAME"
+    // start: net start "SERVICE-NAME"
+    // restart: net stop [service name] && net start [service name]
+#endif
 }
 
 void QIperfd::onWSactMessage(QString msg)

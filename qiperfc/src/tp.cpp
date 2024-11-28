@@ -580,6 +580,12 @@ void TP::setEnabled()
     updateJson("enabled", m_enabled);
 }
 
+void TP::setEnabled(bool enable)
+{
+    m_enabled = enable;
+    updateJson("enabled", m_enabled);
+}
+
 void TP::setDisabled()
 {
     m_enabled = false;

@@ -6,12 +6,18 @@
 #include <QCoreApplication>
 #include <QEventLoop>
 #include <QFlags>
+#include <QPalette>
+#include <QWidget>
 
 #include "comm.h"
 
 EndPointMgr::EndPointMgr(QObject *parent)
     : QAbstractItemModel(parent)
 {
+    QWidget widget;
+    QPalette palette = widget.palette();
+    m_disabledTextColor = palette.color(QPalette::Disabled, QPalette::Text);
+
     this->rootItem = new EndPoint(("Root"), ("Root"));
 }
 
@@ -37,10 +43,16 @@ QVariant EndPointMgr::data(const QModelIndex &index, int role) const
     if (role != Qt::DisplayRole) {
         return QVariant();
     }
+
 //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
     EndPoint *item = static_cast<EndPoint*>(index.internalPointer());
+    if (role == Qt::ForegroundRole){
+        // when item is disabled, grayout text
+        if (! item->getEnabled()) {
+            return m_disabledTextColor;
+        }
+    }
     if (index.row()==0 && index.column()==0){
-
 //        qDebug() << "EndPointMgr::data: " << index  << " flasg: " << flags(index) << " value:" << item->data(index.column());
     }
 
@@ -169,47 +181,67 @@ QModelIndex EndPointMgr::indexFromItem(EndPoint *item){
 
 bool EndPointMgr::add(QString id, QString data)
 {
-//    QDateTime t=QDateTime::currentDateTime();
-//    QString timestemp= t.toString("yyyy.dd.MM.hh:mm:ss.zzz");
-
-    //check id exist
-    if (isExist(id)){
+    if (isExist(id)){    //check id exist
         QJsonParseError error;
         QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
-            QJsonObject jsonObject = doc.object();
-    //        bool update = jsonObject["update"].toBool();
-            //TODO: update information of endpoint
+            // QJsonObject jsonObject = doc.object();
             EndPoint* ep = getEndPoint(id);
-    //        if (update){
-    //            qDebug() << "TODO update EndPointMgr::add: Exist(" << id << ") " << Qt::endl;
-                //TODO: do data update!
-                ep->loadData(data);
-                ep->updateTimeStemp();
-                //TODO: update UI value from endpoint
-                //QModelIndex midx = indexFromItem(ep);
-                //qDebug() << "update midx: " << midx << " ep:" << ep;
-    //            m_endpoints[id]
-    //        }
+            ep->loadData(data);
+            ep->updateTimeStemp();
         }else{
             qDebug() << "wrong format (" << error.errorString() << "\n" << data;
         }
         return false;
     } else {
         //new endpoint
-//        qDebug() << "EndPointMgr::add: (" << id << ") " << data;
-        EndPoint* ep = new EndPoint(id, data, rootItem);
-//        ep->setFlags(Qt::NoItemFlags);
-        int ibegin = rootItem->childCount();
-        int iend = rootItem->childCount()+1;
-        QModelIndex midx = indexFromItem(rootItem);
-        beginInsertRows(midx, ibegin, iend);
-        rootItem->appendChild(ep);
-        endInsertRows();
-        ep->updateTimeStemp();
-        m_endpoints.append(ep);
-        return true;
+        return addEndpoint(id, data);
     }
+}
+
+bool EndPointMgr::addEndpoint(QString id, QString data)
+{
+    EndPoint* ep = new EndPoint(id, data, rootItem);
+    int ibegin = rootItem->childCount();
+    int iend = rootItem->childCount()+1;
+    QModelIndex midx = indexFromItem(rootItem);
+    beginInsertRows(midx, ibegin, iend);
+    rootItem->appendChild(ep);
+    endInsertRows();
+    ep->updateTimeStemp();
+    m_endpoints.append(ep);
+    return true;
+}
+
+bool EndPointMgr::delEndpoint(QString id)
+{
+    EndPoint* ep = getEndPoint(id);
+    rootItem->delChild(ep);
+    if (m_endpoints.contains(ep)){
+        m_endpoints.removeAt(m_endpoints.indexOf(ep));
+    }
+    return true;
+}
+
+bool EndPointMgr::update(QString id, QString data)
+{
+    Q_UNUSED(id)
+    QJsonParseError error;
+    QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError) {
+        QJsonObject jsonObject = doc.object();
+        QString oldid = jsonObject["old_manager_ip"].toString();
+        QString newid =jsonObject["new_manager_ip"].toString();
+        //remove old EndPoint
+        if (isExist(oldid)){
+            delEndpoint(oldid);
+        }
+        // add new EndPoint
+        return addEndpoint(newid, data);
+    }else{
+        qDebug() << "wrong format (" << error.errorString() << "\n" << data;
+    }
+    return false;
 }
 
 void EndPointMgr::disable(QString id)
@@ -217,7 +249,7 @@ void EndPointMgr::disable(QString id)
     if (isExist(id)){
         EndPoint* ep = getEndPoint(id);
         qDebug() << "disable: " << ep->getID() << Qt::endl;
-
+        ep->setEnabled(false);
     }
 }
 
@@ -281,6 +313,18 @@ QJsonArray EndPointMgr::getPCsInfos(QStringList pcs)
     // qDebug() << "targetds:" << targetds;
     QJsonArray arr= QJsonArray::fromStringList(targetds);
     return arr;
+}
+
+QMap<QString, QStringList> EndPointMgr::getSerials()
+{
+    QMap<QString, QStringList>  ds;
+    //get each manager ip's serial
+    foreach(EndPoint *ep, m_endpoints){
+        ds.insert(ep->getID(), ep->getSerials());
+
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    return ds;
 }
 
 EndPoint* EndPointMgr::getEndPoint(QString id)

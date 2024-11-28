@@ -43,10 +43,15 @@ QString MyInfo::collectInfo()
 {
     //collect Info for use , in json format string
     /*
- { "ACT":,
+ { "ACT":1,
    "Type":,
     "HostName": "Test",
    "OS":"", ""OSVer",
+"MB_Vendor":,
+"MB_Model":,
+"MB_Serial":,
+"CPU":,
+"MEM":,
    "Manager": "ifname1",
    "Net": {
        "ifname1": {
@@ -57,6 +62,7 @@ QString MyInfo::collectInfo()
             "Addrs":[["ip", "Mask", "BCast"],["ip2", "Mask2", "BCast2"]]
    },
    "qiperfd":"0.2.11306.21"
+   "serial":""
    "update":0
  }
 */
@@ -110,6 +116,7 @@ QString MyInfo::collectInfo()
     QJsonObject netObject=collectNetInfo();
     mainObject.insert("Net", netObject);
 
+    m_mainObject = mainObject;
     QJsonDocument jsonDoc;
     jsonDoc.setObject(mainObject);
     //conver to QString
@@ -171,7 +178,7 @@ QJsonArray MyInfo::collectSerial()
 
 QString MyInfo::disableInfo()
 {
-    QJsonObject mainObject;
+    QJsonObject mainObject = m_mainObject;
     mainObject.insert("ACT", EndPointAct::Disable);
     QJsonDocument jsonDoc;
     jsonDoc.setObject(mainObject);
@@ -181,9 +188,16 @@ QString MyInfo::disableInfo()
 
 QString MyInfo::updateInfo()
 {
-    QJsonObject mainObject;
+    if (QString::compare(m_old_manager_ip, m_new_manager_ip, Qt::CaseInsensitive)==0) {
+        qDebug() << "m_old_manager_ip = m_new_manager_ip (" << m_new_manager_ip << ")" ;
+        return "";
+    }
+
+    QJsonObject mainObject = m_mainObject;
     mainObject.insert("ACT", EndPointAct::Update);
-    //TODO: other update info
+    //from manager IP to new IP
+    mainObject.insert("old_manager_ip", m_old_manager_ip);
+    mainObject.insert("new_manager_ip", m_new_manager_ip);
     QJsonDocument jsonDoc;
     jsonDoc.setObject(mainObject);
     QString strJson(jsonDoc.toJson(QJsonDocument::Compact));
@@ -246,7 +260,7 @@ int MyInfo::getEndpointType()
             rc = static_cast<int>(EndPointType::Linux);
         }
         break;
-    case 6:
+    case 6: // Unknown
         rc = static_cast<int>(EndPointType::Unknown);
         break;
     default:// Linux
@@ -899,6 +913,18 @@ QString MyInfo::getTotalMemory() {
 #endif
 void MyInfo::setIfname(QString mgr_ifname)
 {
+    QList<QHostAddress> old_addrs, new_addrs;
+
+    //org manager ip
+    old_addrs = getIPfromIfname(m_ifname);
+    if (old_addrs.length()>0){
+        m_old_manager_ip = old_addrs[0].toString();
+    }
+    //new manager ip
     m_ifname = mgr_ifname;
+    new_addrs = getIPfromIfname(m_ifname);
+    if (new_addrs.length()>0){
+        m_new_manager_ip = new_addrs[0].toString();
+    }
     update = 1;
 }

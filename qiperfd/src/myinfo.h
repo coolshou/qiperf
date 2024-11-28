@@ -22,6 +22,7 @@ public:
     QString updateInfo();
 //    QHostAddress getIPfromIfname(QString ifname);
     QList<QHostAddress> getIPfromIfname(QString ifname);
+
     int getEndpointType();
     void getCpuMemInfo(QString &cpuModel, QString &totalMemory);
     void getMotherboardInfo(QString &vendor, QString &model, QString &serial);
@@ -60,8 +61,9 @@ private:
 #if defined(Q_OS_WIN32)
     QMap<QString, QStringList> drivers;
 #endif
-
-
+    QString m_old_manager_ip;
+    QString m_new_manager_ip;
+    QJsonObject m_mainObject;
 };
 
 #endif // MYINFO_H

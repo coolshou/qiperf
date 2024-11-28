@@ -95,6 +95,7 @@ signals:
 
 private slots:
     void onNewConnection();
+    void onClosed();
     void processTextMessage(QString message);
     void processBinaryMessage(QByteArray message);
     void socketDisconnected();

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>424</width>
+    <height>201</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <iconset resource="../../qiperf.qrc">
     <normaloff>:/serial</normaloff>:/serial</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1,0">
    <property name="leftMargin">
     <number>2</number>
    </property>
@@ -165,26 +165,11 @@
          <bool>true</bool>
         </property>
         <property name="currentText">
-         <string notr="true">1200</string>
+         <string notr="true">9600</string>
         </property>
         <property name="maxVisibleItems">
          <number>20</number>
         </property>
-        <item>
-         <property name="text">
-          <string notr="true">1200</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string notr="true">2400</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string notr="true">4800</string>
-         </property>
-        </item>
         <item>
          <property name="text">
           <string notr="true">9600</string>
@@ -192,17 +177,7 @@
         </item>
         <item>
          <property name="text">
-          <string notr="true">14400</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
           <string notr="true">19200</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string notr="true">28800</string>
          </property>
         </item>
         <item>
@@ -220,20 +195,23 @@
           <string notr="true">115200</string>
          </property>
         </item>
-        <item>
-         <property name="text">
-          <string notr="true">230400</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string notr="true">460800</string>
-         </property>
-        </item>
        </widget>
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

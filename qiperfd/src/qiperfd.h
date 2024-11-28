@@ -75,6 +75,7 @@ public slots:
     void onThroughput(int idx, QString sInterval, QString data); // idx, refrow, throughput data
     void onQuit();
     void onNewLine(QString line);
+    void doRestartQIperfd();
 
 signals:
     void setMgrIfname(QString ifname);

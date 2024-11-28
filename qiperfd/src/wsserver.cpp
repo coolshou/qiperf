@@ -202,6 +202,17 @@ void WSServer::onNewConnection()
 
 }
 //! [onNewConnection]
+//!
+void WSServer::onClosed()
+{
+    qDebug() << "WSServer::onClosed";
+    disconnect(m_pWebSocketServer,&QWebSocketServer::newConnection, 0 ,0);
+    disconnect(m_pWebSocketServer,&QWebSocketServer::closed, 0, 0);
+    disconnect(m_pWebSocketServer,&QWebSocketServer::sslErrors, 0 ,0);
+    disconnect(m_pWebSocketServer,&QWebSocketServer::serverError, 0 ,0);
+
+}
+
 
 //! [processTextMessage]
 void WSServer::processTextMessage(QString message)
@@ -328,16 +339,14 @@ void WSServer::sendNextChunk(QString target)
 
 void WSServer::updateListen()
 {
-    if (m_pWebSocketServer->isListening()){
+    // if (m_pWebSocketServer->isListening()){
         m_pWebSocketServer->close();
-        disconnect(m_pWebSocketServer,&QWebSocketServer::newConnection, 0 ,0);
-        disconnect(m_pWebSocketServer,&QWebSocketServer::sslErrors, 0 ,0);
-        disconnect(m_pWebSocketServer,&QWebSocketServer::serverError, 0 ,0);
-    }
+    // }
     if (m_pWebSocketServer->listen(m_addr, m_port))
     {
         qInfo() << "WS Server listening on port" << m_port << " URL:" << m_pWebSocketServer->serverUrl();
         connect(m_pWebSocketServer, &QWebSocketServer::newConnection, this, &WSServer::onNewConnection);
+        connect(m_pWebSocketServer, &QWebSocketServer::closed, this, &WSServer::onClosed);
         connect(m_pWebSocketServer, &QWebSocketServer::sslErrors, this, &WSServer::onSslErrors);
         connect(m_pWebSocketServer, &QWebSocketServer::serverError, this, &WSServer::onServerError);
     }

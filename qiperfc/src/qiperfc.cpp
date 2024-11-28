@@ -21,6 +21,7 @@
 
 #include <QVBoxLayout>
 
+
 #include "endpointact.h"
 #include "tp.h"
 #include "versions.h"
@@ -59,6 +60,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 
     m_views = new ViewManager(&settingfilepath, m_throughputview, this);
     m_dlgtest = new DlgTest();
+    m_dlgserial = new DlgSerial();
     m_frm_option = new dlgOption(m_settings);
     connect(m_frm_option, &dlgOption::widthChanged, this, &QIperfC::onWidthChanged);
     connect(m_frm_option, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);
@@ -93,8 +95,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_frm_qiperfds->setModel(m_endpointmgr);
 
     //
-    m_receiver = new UdpReceiver(QIPERFD_BPORT,this);
-    connect(m_receiver, &UdpReceiver::notice, this, &QIperfC::on_notice);
+    m_receiver = new UdpReceiver(QIPERFD_BPORT, this);
+    connect(m_receiver, &UdpReceiver::notice, this, &QIperfC::onNotice);
     connect(m_receiver, &UdpReceiver::error, this, &QIperfC::onError);
 
     // control local qiperfd?
@@ -104,6 +106,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 
     m_dlgrecord = new DlgRecord();
     m_fileserver = new FileServer(QIPERF_FILEPORT);
+    connect(m_fileserver, &FileServer::error, this, &QIperfC::onFileServerError);
+
 #if (TEST_ICMP==1)
     dp = new DlgPing(this);
 #endif
@@ -114,7 +118,11 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 //    connect(this, &QIperfC::closeAll, dlgiperf, &DlgIperf::close);// model mode, no need
     connect(this, &QIperfC::closeAll, m_frm_qiperfds, &FormQIperfds::close);
 //    connect(this, &QIperfC::closeAll, m_frm_option, &dlgOption::close);// model mode, no need
+    connect(this, &QIperfC::closeAll, m_dlgserial, &DlgSerial::close);
+
     connect(this, &QIperfC::closeAll, m_dlgtest, &DlgTest::close);
+
+
 #if (DEBUG_EXPORT_HTML==1)
     m_debugdlg = new QDialog(this);
     m_debugdlg->setModal(false);
@@ -300,7 +308,17 @@ void QIperfC::onAddPing()
 #endif
 }
 
+void QIperfC::onWlanSTA()
+{
+    // TODO: add wlan sta monitor
+}
+
 void QIperfC::onError(QString msg)
+{
+    QMessageBox::warning(this, "ERROR", msg);
+}
+
+void QIperfC::onFileServerError(QString msg)
 {
     QMessageBox::warning(this, "ERROR", msg);
 }
@@ -665,7 +683,7 @@ void QIperfC::onErrorStop(int err, QString msg)
 //    onStop();
 }
 
-void QIperfC::on_notice(QString send_addr, QString msg)
+void QIperfC::onNotice(QString send_addr, QString msg)
 {
     //receive qiperfd notices
     QJsonParseError error;
@@ -677,7 +695,7 @@ void QIperfC::on_notice(QString send_addr, QString msg)
         int act = obj["ACT"].toInt();
         switch (act){
             case EndPointAct::Add:
-//                qDebug() << "QIperfC::on_notice:" << send_addr << "\nmsg:" << msg;
+                // qDebug() << "qiperfd add:" << send_addr << "\nmsg:" << msg;
                 if (m_endpointmgr->add(send_addr, msg)){
                     m_throughputview->addEndpoint(send_addr, msg);
                     emit updateEndpointNum(m_endpointmgr->getTotalEndpoints());
@@ -685,6 +703,7 @@ void QIperfC::on_notice(QString send_addr, QString msg)
                 break;
             case EndPointAct::Update:
                 qDebug() << "TODO qiperfd Update: from(" << send_addr << ") " << msg << Qt::endl;
+
                 break;
             case EndPointAct::Del:
                 qDebug() << "TODO qiperfd Del: from(" << send_addr << ") " << msg << Qt::endl;
@@ -834,14 +853,20 @@ void QIperfC::loadSettings()
     m_oldsavepath = m_settings->value("oldsavepath",
                                       QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
     m_settings->endGroup();
+
     m_settings->beginGroup("Iperf");
     m_WaitServerReady =m_settings->value("WaitServerReady", 10).toInt();
     m_TPExportWidth =m_settings->value("TPExportWidth", 1280).toInt();
     m_TPExportHeigth =m_settings->value("TPExportHeigth", 180).toInt();
 //    m_frm_option->setWaitServerReady();
     m_settings->endGroup();
+
     m_settings->beginGroup("test");
     m_testping = m_settings->value("testping", false).toBool();
+    m_settings->endGroup();
+
+    m_settings->beginGroup("Terminal");
+//TODO
     m_settings->endGroup();
 }
 
@@ -1008,7 +1033,7 @@ void QIperfC::onProgress(QString filename, int currentlineno)
 int QIperfC::getStatusServers()
 {
     int sum = 0;
-    for (auto value : m_status_server) {
+    for (auto value : qAsConst(m_status_server)) {
         sum += value;
     }
     return sum;
@@ -1017,10 +1042,29 @@ int QIperfC::getStatusServers()
 int QIperfC::getStatusClients()
 {
     int sum = 0;
-    for (auto value : m_status_client) {
+    for (auto value : qAsConst(m_status_client)) {
         sum += value;
     }
     return sum;
+}
+
+void QIperfC::onAddSerial()
+{
+    // SerialPort *ser = new SerialPort();
+    m_dlgserial->setSerialData(m_endpointmgr->getSerials());
+
+    //TODO: setup manager ip -> ports mapping data
+    // m_dlgserial->
+    if (m_dlgserial->exec()== QDialog::Accepted){
+        //TODO: ask remote create serialport and connect to websockport?
+        //
+        //TODO: local use websock connect to remote websock server
+        //
+        // local serialport or remote serialport
+
+        SerialView *serialview = new SerialView();
+        m_views->addView(serialview);
+    }
 }
 
 void QIperfC::initActions()
@@ -1041,29 +1085,29 @@ void QIperfC::initActions()
     // connect(ui->actionPaste, &QAction::triggered, this, &QIperfC::onPaste);
 
     connect(ui->actionAddIperf, &QAction::triggered, m_throughputview, &ThroughputView::onAddIperf);
-    if (!m_testping){
-        ui->actionAddPing->setVisible(false);
-    }
-    connect(ui->actionAddPing, &QAction::triggered, this, &QIperfC::onAddPing);
 
     connect(ui->actionEdit, &QAction::triggered, m_throughputview, &ThroughputView::onPairEdit);
     connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onPairDelete);
     connect(ui->actionSwap, &QAction::triggered, m_throughputview, &ThroughputView::onPairSwap);
     connect(ui->actionSwapIP, &QAction::triggered, m_throughputview, &ThroughputView::onPairSwapIP);
-
     // run
     connect(ui->actionStart, &QAction::triggered, this, &QIperfC::onStart);
     connect(ui->actionStop, &QAction::triggered, this, &QIperfC::onStop);
     connect(ui->actionClear, &QAction::triggered, this, &QIperfC::onClear);
     connect(ui->actionShowLog, &QAction::triggered, this, &QIperfC::onShowLog);
-
+    // monitor
+    // connect(ui->actionAddPing, &QAction::triggered, this, &QIperfC::onAddPing);
+    connect(ui->actionAddSerial, &QAction::triggered, this, &QIperfC::onAddSerial);
+    if (!m_testping){
+        ui->actionAddPing->setVisible(false);
+    }
+    connect(ui->actionAddPing, &QAction::triggered, this, &QIperfC::onAddPing);
+    connect(ui->actionWlanSTA, &QAction::triggered, this, &QIperfC::onWlanSTA);
     //option
     connect(ui->actionConfig, &QAction::triggered, this, &QIperfC::onConfig);
-
     //help
     connect(ui->actionAbout, &QAction::triggered, this, &QIperfC::onAbout);
     connect(ui->actionShowDebugLog, &QAction::triggered, this, &QIperfC::onShowDebugLog);
-
     //test
     connect(ui->actionTest, &QAction::triggered, this, &QIperfC::onTest);
 

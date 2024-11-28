@@ -21,6 +21,13 @@ void EndPoint::appendChild(EndPoint *item)
     m_childItems.append(item);
 }
 
+void EndPoint::delChild(EndPoint *item)
+{
+    int midx = m_childItems.indexOf(item);
+    qDebug() << "(TODO delChild) midx:" << QString::number(midx);
+
+}
+
 EndPoint *EndPoint::child(int row)
 {
     if (row < 0 || row >= m_childItems.size())
@@ -77,7 +84,7 @@ void EndPoint::loadData(QString data)
         m_type = static_cast<EndPointType::Type>(jsonRoot.value("Type").toInt());
         EndPointType *ept = new EndPointType();
         QString sType = ept->getTypeString(m_type);
-        m_Manager = jsonRoot.value("Manager").toString();
+        m_Manager = jsonRoot.value("Manager").toString(); // manager interface
         m_HostName = jsonRoot.value("HostName").toString();
 
     //    bool update = jsonRoot.value("update").toBool();
@@ -92,7 +99,11 @@ void EndPoint::loadData(QString data)
         m_itemDatas.insert(EndPointMgr::cols::osver, OS_version);
         m_itemDatas.insert(EndPointMgr::cols::status, "");
         m_itemDatas.insert(EndPointMgr::cols::version, qiperfd_ver);
-        //    parents.last()->appendChild(new EndPoint(m_id, data, parents.last()));
+        if (jsonRoot.value("serial").isArray()){
+            m_serials = jsonRoot.value("serial").toArray();
+        }
+        updateTimeStemp();
+
         //TODO: get address of each interface....
         if (!jsonRoot.value("Net").isNull()){
             oNet = jsonRoot.value("Net").toObject();
@@ -112,9 +123,29 @@ void EndPoint::updateTimeStemp()
 {
     QDateTime t=QDateTime::currentDateTime();
     m_lastnoticetime = t.toString("yyyy.dd.MM.hh:mm:ss.zzz");
+    m_itemDatas[EndPointMgr::cols::status] = m_lastnoticetime;
 }
 
 QString EndPoint::getLastNoticeTime()
 {
     return m_lastnoticetime;
+}
+
+void EndPoint::setEnabled(bool enable)
+{
+    m_enabled = enable;
+}
+
+bool EndPoint::getEnabled()
+{
+    return m_enabled;
+}
+
+QStringList EndPoint::getSerials()
+{
+    QStringList stringList;
+    for (const QJsonValue &value : m_serials) {
+        stringList.append(value.toString());
+    }
+    return stringList;
 }

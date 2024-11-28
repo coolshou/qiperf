@@ -50,7 +50,7 @@ QList<TP *> ThroughputView::getChilds(bool showAll)
 }
 
 bool ThroughputView::addEndpoint(QString mgr, QString mdata)
-{
+{   //update dlgiperf's manager data
     if (dlgiperf){
         if (dlgiperf->add(mgr, mdata)){
             dlgiperf->updateUI();
@@ -307,7 +307,8 @@ void ThroughputView::onEnableItem(bool checked)
         QString s="";
         foreach(auto idx, idxs){
             tp = m_tpmgr->getItem(idx);
-            tp->setEnabled();
+            // tp->setEnabled();
+            tp->setEnabled(true);
         }
     }
 }
@@ -322,7 +323,8 @@ void ThroughputView::onDisableItem(bool checked)
 
         foreach(auto idx, idxs){
             tp = m_tpmgr->getItem(idx);
-            tp->setDisabled();
+            // tp->setDisabled();
+            tp->setEnabled(false);
         }
     }
 }

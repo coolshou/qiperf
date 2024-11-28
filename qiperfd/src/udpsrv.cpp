@@ -87,7 +87,9 @@ void UdpSrv::update_addr()
 }
 
 void UdpSrv::setSendMsg(QString msg)
-{
-    //qInfo() << "setSendMsg:" << msg;
-    m_sendMsg = msg;
+{   //NOTICE: this did not send immedially!!
+    if (msg.length()>0){
+        qInfo() << "setSendMsg:" << msg;
+        m_sendMsg = msg;
+    }
 }

@@ -91,6 +91,7 @@ public:
     void setLostRate(QString pkt_lost, QString pkt_total);
     QString getLostRate();
     void setEnabled();
+    void setEnabled(bool enable);
     void setDisabled();
     bool getEnabled();
 

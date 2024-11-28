@@ -6,6 +6,7 @@
 #include <QList>
 #include "endpointtype.h"
 #include <QJsonObject>
+#include <QJsonArray>
 
 //endpoint store each qiperfd's info
 //class EndPoint : public QObject
@@ -19,7 +20,7 @@ public:
     ~EndPoint() ;//override;
 
     void appendChild(EndPoint *child);
-
+    void delChild(EndPoint *child);
     EndPoint *child(int row);
     int childCount() const;
     int columnCount() const;
@@ -34,6 +35,9 @@ public:
     QString getJsonData();
     void updateTimeStemp();
     QString getLastNoticeTime();
+    void setEnabled(bool enable);
+    bool getEnabled();
+    QStringList getSerials();
 signals:
 
 private:
@@ -52,6 +56,8 @@ private:
     // (TODO)mobile interfaces
     QString m_lastnoticetime; // last get notice time string, eq: 2023.17.06.12:22:07.905
     QJsonObject oNet;
+    bool m_enabled; // enable/disable item
+    QJsonArray m_serials;
 };
 
 #endif // ENDPOINT_H

@@ -7,6 +7,7 @@ SerialView::SerialView(QWidget *parent) : AbstractView(parent)
     ui->setupUi(this);
     m_serialport = new SerialPort();
     m_termialview = new TerminalView(parent);
+    ui->vLayout->addWidget(m_termialview);
 
     connect(m_termialview, &TerminalView::transmitData, this, &SerialView::writePortData);
     // connect(m_termialview, &TerminalView::sendMessage, this, &ViewManager::dispatchMessage);
