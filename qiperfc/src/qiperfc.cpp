@@ -1080,9 +1080,11 @@ void QIperfC::initActions()
     connect(ui->actionQuit, &QAction::triggered, this, &QIperfC::onQuit);
     // edit
     // connect(ui->actionCopy, &QAction::triggered, this, &QIperfC::onCopy);
+    connect(ui->actionCopy, &QAction::triggered, m_throughputview, &ThroughputView::onCopy);
     // copy column text
     connect(ui->actionCopyText, &QAction::triggered, m_throughputview, &ThroughputView::onCopyText);
     // connect(ui->actionPaste, &QAction::triggered, this, &QIperfC::onPaste);
+    connect(ui->actionPaste, &QAction::triggered, m_throughputview, &ThroughputView::onPaste);
 
     connect(ui->actionAddIperf, &QAction::triggered, m_throughputview, &ThroughputView::onAddIperf);
 

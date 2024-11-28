@@ -16,6 +16,7 @@ ThroughputView::ThroughputView(QWidget *parent) : AbstractView(parent)
     m_clipboard = QApplication::clipboard();
 
     dlgiperf = new DlgIperf(m_tpmgr, this);
+    initMenus();
 }
 
 ThroughputView::~ThroughputView()
