@@ -123,6 +123,12 @@ win32 {
     RC_CODEPAGE=0x04b0 #unicode：指定應該被包含進一個.rc檔案中的字碼頁，僅適用於Windows
     RC_LANG=0x0409 #en_US：指定應該被包含進一個.rc檔案中的語言，僅適用於Windows
 
+    CONFIG(debug, debug|release) {
+        DESTDIR = Debug
+    } else {
+        DESTDIR = Release
+    }
+
     DISTFILES += $$PWD/../images/qiperf.icon
 
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/../$${TARGET}_$${QT_ARCH}))
