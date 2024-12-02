@@ -295,39 +295,8 @@ bool QIperfC::on_Clear()
     return onClear();
 }
 
-void QIperfC::onAddPing()
+void QIperfC::initStart()
 {
-    QString strJson;
-#if (TEST_ICMP==1)
-    if (dp->exec()== QDialog::Accepted){
-        strJson = dp->getJsonstr();
-        qDebug() << "strJson:" << strJson;
-        //TODO: add to ping treeview/chart
-        ui->actionSave->setEnabled(true);
-    }
-#endif
-}
-
-void QIperfC::onWlanSTA()
-{
-    // TODO: add wlan sta monitor
-}
-
-void QIperfC::onError(QString msg)
-{
-    QMessageBox::warning(this, "ERROR", msg);
-}
-
-void QIperfC::onFileServerError(QString msg)
-{
-    QMessageBox::warning(this, "ERROR", msg);
-}
-
-void QIperfC::onStart()
-{
-    if (!onClear()){
-        return;
-    }
     bUserStop = false;
     ui->actionShowLog->setEnabled(true);
     ui->actionSave->setEnabled(true);
@@ -336,6 +305,13 @@ void QIperfC::onStart()
     m_status_server.clear();
     m_status_client.clear();
 
+}
+void QIperfC::onStart()
+{
+    if (!onClear()){
+        return;
+    }
+    initStart();
     m_TestStartTime = QDateTime::currentDateTime();
     m_throughputview->setStartTime(m_TestStartTime);
     QString startTime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
@@ -379,7 +355,7 @@ void QIperfC::onStart()
                 if (!m_wss.contains(serverIP)) {
                     //TODO: can not work with interface with DHCP under Windows??
                     s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
-                    // qDebug() << "server websocket url: " << s;
+                    qInfo() << "server websocket:" << serverIP << " url: " << s << " m_datapath:" << m_datapath;
                     m_wss[serverIP]=new WSClient(serverIP, QUrl(s), m_datapath);
                     connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
                     connect(m_wss[serverIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
@@ -421,7 +397,7 @@ void QIperfC::onStart()
                 }
                 //tell server add iperf server
                 cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
-    //            qInfo() << "server cmd:"<< serverIP << " CMD_IPERF_ADD:" << tp->getServer() << ":" << tp->getPort() ;
+                qInfo() << "server cmd: "<< cmd ;
                 rs = m_wss[serverIP]->sendText(cmd);
                 if (rs<=0){
                     emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
@@ -472,7 +448,7 @@ void QIperfC::onStart()
                 }
                 //tell client add iperf client
                 cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
-    //            qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
+                //            qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
                 rs = m_wsc[clientIP]->sendText(cmd);
                 if (rs<=0){
                     emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
@@ -505,7 +481,7 @@ void QIperfC::onStart()
             return;
         }
         //###############################
-         QThread::sleep(3);
+        QThread::sleep(3);
         //TODO: wait server start up and ready
         QDateTime oldDT = QDateTime::currentDateTime();
         QDateTime newDT;
@@ -531,7 +507,7 @@ void QIperfC::onStart()
                               QString::number(m_status_server.keys().length())+
                               ":"+ QString::number(iwaittime));
 
-//            if (oldDT.secsTo(newDT)>m_WaitServerReady){
+            //            if (oldDT.secsTo(newDT)>m_WaitServerReady){
             if (iwaittime<0){
                 // timeout
                 break;
@@ -573,7 +549,7 @@ void QIperfC::onStart()
             if ((getStatusServers()>m_status_server.keys().length()) ||
                 (getStatusClients()>m_status_client.keys().length())) {
                 qDebug() << "Some problem happen!! abort!! server:" << m_status_server <<
-                            " client:" << m_status_client;
+                    " client:" << m_status_client;
                 break;
             }else if(getStatusServers()==0 && getStatusClients()==0) {
                 //qDebug() << "All test end, stop early";
@@ -629,6 +605,34 @@ bool QIperfC::onClear(){
     }
     doClear();
     return true;
+}
+
+void QIperfC::onAddPing()
+{
+    QString strJson;
+#if (TEST_ICMP==1)
+    if (dp->exec()== QDialog::Accepted){
+        strJson = dp->getJsonstr();
+        qDebug() << "strJson:" << strJson;
+        //TODO: add to ping treeview/chart
+        ui->actionSave->setEnabled(true);
+    }
+#endif
+}
+
+void QIperfC::onWlanSTA()
+{
+    // TODO: add wlan sta monitor
+}
+
+void QIperfC::onError(QString msg)
+{
+    QMessageBox::warning(this, "ERROR", msg);
+}
+
+void QIperfC::onFileServerError(QString msg)
+{
+    QMessageBox::warning(this, "ERROR", msg);
 }
 
 void QIperfC::onShowLog()
@@ -1085,11 +1089,11 @@ void QIperfC::initActions()
     connect(ui->actionCopyText, &QAction::triggered, m_throughputview, &ThroughputView::onCopyText);
     // connect(ui->actionPaste, &QAction::triggered, this, &QIperfC::onPaste);
     connect(ui->actionPaste, &QAction::triggered, m_throughputview, &ThroughputView::onPaste);
+    // connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onDelete);
+    // connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onPairDelete);
 
     connect(ui->actionAddIperf, &QAction::triggered, m_throughputview, &ThroughputView::onAddIperf);
-
     connect(ui->actionEdit, &QAction::triggered, m_throughputview, &ThroughputView::onPairEdit);
-    connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onPairDelete);
     connect(ui->actionSwap, &QAction::triggered, m_throughputview, &ThroughputView::onPairSwap);
     connect(ui->actionSwapIP, &QAction::triggered, m_throughputview, &ThroughputView::onPairSwapIP);
     // run
@@ -1119,7 +1123,7 @@ void QIperfC::initToolbar()
 {
     QMenu *menuAdd = new QMenu(this);
     menuAdd->addAction(ui->actionAddIperf);
-    menuAdd->addAction(ui->actionAddPing);
+    // menuAdd->addAction(ui->actionAddPing);
 
     ui->actionAdd->setMenu(menuAdd);
 

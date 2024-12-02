@@ -67,7 +67,7 @@ public slots:
     void onSave();
     void onImportIperf3Log();
     bool on_Clear();
-
+    void initStart();
     void onStart();
     void onStop();
     bool onClear();
