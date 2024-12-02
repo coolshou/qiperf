@@ -1,6 +1,8 @@
 #ifndef IPERFWRAPPER_H
 #define IPERFWRAPPER_H
-
+/*
+ * this class will be run in QThread
+*/
 #include <QObject>
 #include <QMap>
 #include <QJsonArray>
