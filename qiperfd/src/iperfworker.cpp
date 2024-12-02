@@ -11,7 +11,7 @@
 #include <QDir>
 #include <QDateTime>
 
-//#include <QOverload>
+// #include <QOverload>
 
 #include <QDebug>
 #include "../src/comm.h"
@@ -128,7 +128,7 @@ void IperfWorker::work()
             while (!m_stop){
                 //procress iperf output
                 QThread::msleep(500);
-                QCoreApplication::processEvents(QEventLoop::AllEvents);
+                QCoreApplication::processEvents(QEventLoop::AllEvents); // must have
             }
         }else{
             emit log(m_idx, "iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "));
@@ -259,7 +259,7 @@ void IperfWorker::readyReadStdOut()
             if (line.length()>0){
                 parserStdOut(line);
             }
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
 
     }

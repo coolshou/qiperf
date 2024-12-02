@@ -1,6 +1,8 @@
 #ifndef IPERFWORKER_H
 #define IPERFWORKER_H
-
+/*
+ * this class wii run in QThread
+*/
 #include <QObject>
 #include <QProcess>
 #include <QString>
