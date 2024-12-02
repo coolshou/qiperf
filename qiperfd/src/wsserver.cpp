@@ -173,7 +173,8 @@ void WSServer::addFileToSend(QString filename, QString target)
         delete file;
 //        continue;
     }
-    qDebug() << "send file: " << file << " TO: " << m_currentClient;
+    qDebug() << "send file: " << filename << " TO: " << m_currentClient;
+    // qDebug() << "send file TO: " << m_currentClient;
     m_files.enqueue(file);
     m_sendtype=WSServer::sendtype::file;
     sendNextChunk(m_currentClient);
@@ -339,9 +340,9 @@ void WSServer::sendNextChunk(QString target)
 
 void WSServer::updateListen()
 {
-    // if (m_pWebSocketServer->isListening()){
+    if (m_pWebSocketServer->isListening()){
         m_pWebSocketServer->close();
-    // }
+    }
     if (m_pWebSocketServer->listen(m_addr, m_port))
     {
         qInfo() << "WS Server listening on port" << m_port << " URL:" << m_pWebSocketServer->serverUrl();
