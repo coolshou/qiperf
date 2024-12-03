@@ -23,7 +23,7 @@ TPMgr::TPMgr(QObject *parent)
     m_updater = new QTimer();
     // m_updater->setInterval(1000); //1 sec
     connect(m_updater, &QTimer::timeout, this, &TPMgr::onUpdater);
-    m_updater->start(1000); // 1 sec, TODO: why slow to show up the throughput/lost rate in cfg row??
+    startUpdater();
 }
 TPMgr::~TPMgr()
 {
@@ -259,8 +259,13 @@ QModelIndex TPMgr::indexFromItem(TP *item){
 
 void TPMgr::del(QModelIndex idx)
 {
-    rootItem->removeChildren(idx.row(), 0);
+    stopUpdater();
+    int row = idx.row()-1;
+    beginRemoveRows(getRootItemIdx(), row,  row);
+    rootItem->removeChildren(row, 1);
+    endRemoveColumns();
     qDebug() << "TPMgr::del : childCount:" << rootItem->childCount() << " del:" << idx;
+    startUpdater();
 }
 
 int TPMgr::rootChildCount()
@@ -592,12 +597,28 @@ void TPMgr::onPaste(QString data)
             jsonRoot.insert("client", o_client);
             jsonRoot.insert("server", o_server);
             doc.setObject(jsonRoot);
+
+
             QString strJson(doc.toJson(QJsonDocument::Compact));
-//            qDebug() << "strJson:\n" << strJson;
+//          qDebug() << "strJson:\n" << strJson;
             this->add(strJson);
        }else{
            qDebug() << "Wrong format of clipboard data: " << data;
        }
+    }
+}
+
+void TPMgr::startUpdater()
+{
+    if (!m_updater->isActive()){
+        m_updater->start(1000); // 1 sec, TODO: why slow to show up the throughput/lost rate in cfg row??
+    }
+}
+
+void TPMgr::stopUpdater()
+{
+    if (m_updater->isActive()){
+        m_updater->stop();
     }
 }
 
@@ -687,7 +708,7 @@ void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
 }
 
 void TPMgr::onUpdater()
-{
+{   //update total throughput/lost rate for each iperf test pair (-P >=1) result
     double g_tpvalue=-1.0;
     int g_lostvalue=-1;
     int g_totalvalue=-1;
@@ -707,7 +728,7 @@ void TPMgr::onUpdater()
         g_tpvalue = g_tpvalue + tpvalue;
         g_lostvalue = g_lostvalue + lostvalue;
         g_totalvalue = g_totalvalue + totalvalue;
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     rootItem->setThroughput(QString::number(g_tpvalue));
     rootItem->setLostRate(QString::number(g_lostvalue), QString::number(g_totalvalue));

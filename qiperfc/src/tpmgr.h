@@ -85,6 +85,8 @@ public:
     bool isBindkeyExist(QString managerIP, QString bindkey, QModelIndex exc_idx);
     int getMaxPort(QString m_ip, QString targetIP); // get all tp config's port number and return Max value in same manage ip & target ip
     void onPaste(QString data);
+    void startUpdater();
+    void stopUpdater();
 
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);

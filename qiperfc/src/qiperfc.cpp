@@ -1089,7 +1089,7 @@ void QIperfC::initActions()
     connect(ui->actionCopyText, &QAction::triggered, m_throughputview, &ThroughputView::onCopyText);
     // connect(ui->actionPaste, &QAction::triggered, this, &QIperfC::onPaste);
     connect(ui->actionPaste, &QAction::triggered, m_throughputview, &ThroughputView::onPaste);
-    // connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onDelete);
+    connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onDelete);
     // connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onPairDelete);
 
     connect(ui->actionAddIperf, &QAction::triggered, m_throughputview, &ThroughputView::onAddIperf);

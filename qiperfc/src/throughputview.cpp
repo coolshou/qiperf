@@ -111,12 +111,13 @@ void ThroughputView::onPaste()
 
 void ThroughputView::onDelete()
 {
-    QModelIndex cur = ui->tv_throughput->selectionModel()->currentIndex();
-    TP *tp = m_tpmgr->getItem(cur);
+    QModelIndex curIdx = ui->tv_throughput->selectionModel()->currentIndex();
+    TP *tp = m_tpmgr->getItem(curIdx);
+
     foreach(TP *p, tp->getChilds()){
         m_tpplot->del(p->getID());
     }
-    m_tpmgr->removeRow(cur.row());
+    m_tpmgr->del(curIdx);
 }
 
 void ThroughputView::onCopyText()
