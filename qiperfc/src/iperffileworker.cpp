@@ -21,6 +21,7 @@ IperfFileWorker::IperfFileWorker(QString version, QString protocal,
     m_iperfwrapper->setSetting(idx, servermode, QString::number(parallel), bidir, bidirtag);
     m_iperfwrapper->setFile(filename);
     m_iperfwrapper->setIperf(version, protocal);
+    m_iperfwrapper->setDelaytime(delay);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfFileWorker::onThroughputData);
     connect(m_iperfwrapper, &IperfWrapper::progress, this, &IperfFileWorker::onProgress);
     connect(m_thread, &QThread::started, m_iperfwrapper, &IperfWrapper::work);
@@ -102,7 +103,8 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
                         m_datas.insert(idx, tpdata);
                     }
 
-                    tpdata->timeDatas.append(fInterval+m_delay);
+                    // tpdata->timeDatas.append(fInterval+m_delay);
+                    tpdata->timeDatas.append(fInterval);
                     // qDebug()<< "m_delay:" << QString::number(m_delay);
                     //tpdata->timeDatas.append(fInterval);
                     tpdata->valueDatas.append(tpvalue);
@@ -121,14 +123,11 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
 
 void IperfFileWorker::onWorkFinished()
 {
-    qDebug() << "onWorkFinished: m_filename: " << m_filename;
-    // QList<QString> keys =  m_datas.keys();
+    // qDebug() << "onWorkFinished: m_filename: " << m_filename;
     QMap<QString, TPData*>::const_iterator iterator = m_datas.constBegin();
-//    foreach(QString idx, m_datas.keys()){
-    // foreach(QString idx, keys){
     while (iterator != m_datas.constEnd()) {
         QString idx = iterator.key();
-        qDebug() << "onWorkFinished: idx:" << idx << " timeDatas:" << m_datas.value(idx)->timeDatas;
+        // qDebug() << "onWorkFinished: idx:" << idx << " timeDatas:" << m_datas.value(idx)->timeDatas;
         emit updateTPDatas(idx, m_datas.value(idx)->timeDatas, m_datas.value(idx)->valueDatas,
                           m_datas.value(idx)->packetLost, m_datas.value(idx)->packetTotal, m_datas.value(idx)->lostrate);
         ++iterator;
