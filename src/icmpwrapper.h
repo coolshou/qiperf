@@ -1,6 +1,9 @@
 #ifndef ICMPWRAPPER_H
 #define ICMPWRAPPER_H
 
+/*
+ * this clacc will run in QThread
+*/
 #include <QObject>
 #include <QMap>
 #include <QThread>

@@ -1,7 +1,7 @@
 #include "icmpwrapper.h"
 
-#include <QCoreApplication>
-#include <QEventLoop>
+// #include <QCoreApplication>
+// #include <QEventLoop>
 #include <QAbstractSocket>
 
 #include "myfunc.h"
@@ -189,7 +189,7 @@ void IcmpWrapper::work()
 //        emit icmpResponse(QString("ICMP packet sent to %1").arg(m_target));
 
         for (;;) {
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
             // Listen for a response
             struct sockaddr_in reply_addr;
             socklen_t addr_len = sizeof(reply_addr);
@@ -361,7 +361,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
         if (sockfd >= 0) {
             break;
         }
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     if ((int)sockfd < 0) {
         psockerror("socket");
@@ -464,7 +464,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
                 break;
             }
         }
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
 
         struct icmp request;
 
@@ -538,7 +538,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
         start_time = utime();
 
         for (;;) {
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
             char msg_buf[MESSAGE_BUFFER_SIZE];
             char packet_info_buf[MESSAGE_BUFFER_SIZE];
             struct in6_addr msg_addr = {0};
