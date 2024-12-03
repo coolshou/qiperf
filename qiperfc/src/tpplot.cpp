@@ -21,22 +21,41 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
 
     double minT = *std::min_element(timedatas.begin(), timedatas.end());// x: min time
     double maxT = *std::max_element(timedatas.begin(), timedatas.end());// x: max time
-    xAxis->setRange(minT-30, maxT+30);
+    //when have several serial chart, set correct min/max
+    qDebug() << "minRange: " << QString::number(xAxis->range().lower)
+             << "maxRange: " << QString::number(xAxis->range().upper)
+             << "minT: " << QString::number(minT)
+             << "maxT: " << QString::number(maxT);
+    if (xAxis->range().lower < minT){
+        minT = xAxis->range().lower;
+    }
+    if (xAxis->range().upper > maxT){
+        maxT = xAxis->range().upper;
+    }
+    minT = minT - (0.1*minT);
+    maxT = maxT + (0.1*maxT);
+    // xAxis->setRange(minT-30, maxT+30);
+    xAxis->setRange(minT, maxT);
 
     double minV = *std::min_element(valuedatas.begin(), valuedatas.end()); // y: min value
     double maxV = *std::max_element(valuedatas.begin(), valuedatas.end()); // y: max value
-    yAxis->setRange(minV*0.9, maxV*1.1);
+    if (yAxis->range().lower < minV){
+        minV = yAxis->range().lower;
+    }
+    if (yAxis->range().upper > maxV){
+        maxV = yAxis->range().upper;
+    }
+    minV = minV - (0.1*minV);
+    maxV = maxV + (0.1*maxV);
+    // yAxis->setRange(minV*0.9, maxV*1.1);
+    yAxis->setRange(minV, maxV);
     qDebug() << "refrow:" << refrow << " timedatas: " << timedatas;
     graph->setData(timedatas, valuedatas);
     // Calculate the sum
     int sum = std::accumulate(packettotals.begin(), packettotals.end(), 0);
     if (sum>0){
         // int lost = std::accumulate(packetlosts.begin(), packetlosts.end(), 0);
-        // qDebug() << "sum lost: " << QString::number(lost) << " total: " << QString::number(sum);
         QCPBars *g_lostrate = getLostRateGraph(refrow);
-        // qDebug() << "timedatas: " << timedatas.length() << " rates:" << lostrates.length();
-        // qDebug() << "timedatas: " << timedatas;
-        // qDebug() << "lostrate: " << lostrates;
         //lostrate
         g_lostrate->setData(timedatas, lostrates);
     }
