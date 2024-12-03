@@ -164,7 +164,7 @@ void WSClient::onTextMessageReceived(QString message)
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError) {
-        qDebug() << from << " :onTextMessageReceived json: " << message;
+        // qDebug() << "(TODO)from: " << from << " :json: " << message;
     }else{
         int cut2;
 
