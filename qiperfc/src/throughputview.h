@@ -44,6 +44,7 @@ public:
     void doClear();
     QPixmap toPixmap(int width=0, int height=0, double scale=1.0);
     void addComment(QString midx, QString comment);
+    QDateTime getStartTime();
 
 public slots:
     void onCopy();
@@ -90,6 +91,7 @@ private:
     QAction *m_aDisable;
     DlgIperf * dlgiperf;  // dialog of iperf config
     TPDirDelegate *tpdirdelegate;
+    QDateTime m_starttime;
     // TPFoldingDelegate *tpfoldingdelegate;
     void initThroughputChart();
 };

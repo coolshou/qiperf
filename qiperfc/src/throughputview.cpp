@@ -5,6 +5,7 @@
 #include <QModelIndexList>
 
 #include "tooltipeventfilter.h"
+#include "comm.h"
 
 
 // ThroughputView::ThroughputView(QIperfC *main, QWidget *parent) : AbstractView(parent)
@@ -81,6 +82,11 @@ void ThroughputView::addComment(QString midx, QString comment)
     m_tpmgr->addComment(midx, comment);
 }
 
+QDateTime ThroughputView::getStartTime()
+{
+    return m_starttime;
+}
+
 void ThroughputView::onCopy()
 {
     if (ui->tv_throughput->hasFocus()){
@@ -118,6 +124,10 @@ void ThroughputView::onDelete()
         m_tpplot->del(p->getID());
     }
     m_tpmgr->del(curIdx);
+    //TODO: remove releative iperf3 log file
+    QString client = tp->getBindKey(false); //client
+    QString server = tp->getBindKey(); //server
+    qDebug() << getStartTime() << " client:" << client << " server:" << server;
 }
 
 void ThroughputView::onCopyText()
@@ -155,19 +165,16 @@ void ThroughputView::onAddIperf()
 
 void ThroughputView::onPairEdit()
 {
-    // TODO: edit
     QModelIndex idx = ui->tv_throughput->selectionModel()->currentIndex();
-    //    qDebug() << "on_pairEdit: " << cur;
     onItemDClicked(idx);
-
 }
 
 void ThroughputView::onPairDelete()
 {
+    //TODO: do not use this, use onDelete()
     QModelIndex idx = ui->tv_throughput->selectionModel()->currentIndex();
     qDebug() << "TODO: onPairDelete:" << idx;
     m_tpmgr->del(idx);
-
 }
 
 void ThroughputView::onPairSwap()
@@ -190,6 +197,7 @@ void ThroughputView::onPairSwapIP()
 
 void ThroughputView::setStartTime(QDateTime startTime)
 {
+    m_starttime = startTime;
     m_tpplot->setStartTime(startTime);
 }
 

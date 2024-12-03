@@ -80,6 +80,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
     connect(m_qipconfig, &QIPConfig::updateTPCfg, m_throughputview, &ThroughputView::onUpdateTPCfg);
     connect(m_qipconfig, &QIPConfig::updateStartDateTime, this, &QIperfC::setStartTime);
+    connect(m_qipconfig, &QIPConfig::updateStartDateTime, m_throughputview, &ThroughputView::setStartTime);
     // connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpmgr, &TPMgr::onUpdateTPDatas);
     connect(m_qipconfig, &QIPConfig::updateTPAvg, m_throughputview, &ThroughputView::onAddTPdata); // this only set last avg, which may cause min/max value wrong!!
     connect(m_qipconfig, &QIPConfig::updateTPDatas, m_throughputview, &ThroughputView::onUpdateTPDatas);
