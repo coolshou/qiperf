@@ -69,6 +69,7 @@ signals:
     void updateActions(bool bStart, bool bStop, bool bClear);
     void updateActionsSave(bool bStart);
     void updateActionsEdit(bool bDel, bool bEdit, bool bSwap, bool bSwapIP);
+    void deleteFiles(QStringList files);
 
 private slots:
     void initMenus();

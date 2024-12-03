@@ -202,6 +202,23 @@ void QIPConfig::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                      pkt_lost, pkt_total);
 }
 
+void QIPConfig::onDeleteFiles(QStringList filenames)
+{
+    foreach(QString filename , filenames){
+        filename = m_tmppath + QDir::separator() + filename;
+        if (m_data->datafilenames.contains(filename)){
+            m_data->datafilenames.removeAt(m_data->datafilenames.indexOf(filename));
+            //actually remove file
+            QFile file(filename);
+            if (file.exists()){
+                qDebug() << "actually delete file:" << filename;
+                file.remove();
+            }
+        }
+    }
+
+}
+
 void QIPConfig::onThroughputData(int idx, QString sInterval, QString data)
 {
 //    qDebug() << "QIPConfig::onThroughputData: " << idx << " sInterval: " << sInterval << " data: " << data;

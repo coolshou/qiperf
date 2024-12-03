@@ -17,7 +17,7 @@ public:
     QString tpcfg;
     QString env; // store environment setting. eq: PC1 info/PC2 info ...
     QString testdate; // store test datetime of folder which include all record data file
-    QStringList datafilenames; // all recored data file name
+    QStringList datafilenames; // all recored data log file name (full path)
 };
 
 class QIPConfig : public QObject {
@@ -40,6 +40,8 @@ public slots:
     void onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                        QString value, QString unit, QString dir,
                        QString pkt_lost, QString pkt_total);
+    void onDeleteFiles(QStringList filenames);
+
 signals:
     void updateDataPath(QString datapath);
     void updateTPCfg(QByteArray tpcfg);

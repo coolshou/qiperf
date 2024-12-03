@@ -124,10 +124,16 @@ void ThroughputView::onDelete()
         m_tpplot->del(p->getID());
     }
     m_tpmgr->del(curIdx);
-    //TODO: remove releative iperf3 log file
+    // remove releative iperf3 log file
     QString client = tp->getBindKey(false); //client
     QString server = tp->getBindKey(); //server
-    qDebug() << getStartTime() << " client:" << client << " server:" << server;
+    QString d = getStartTime().toString(DATETIME_NOW_FORMAT);
+    // qDebug() << d << " client:" << client << " server:" << server;
+
+    QStringList fs;
+    fs.append(d+QDir::separator()+client+".log");
+    fs.append(d+QDir::separator()+server+".log");
+    emit deleteFiles(fs);
 }
 
 void ThroughputView::onCopyText()
