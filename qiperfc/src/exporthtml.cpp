@@ -295,18 +295,18 @@ void ExportHtml::procressData()
     QList<QString> hostls;
     QJsonParseError error;//= new QJsonParseError();
     QJsonDocument doc;
-    qDebug() << "procressData:" << m_pcs;
+    // qDebug() << "procressData:" << m_pcs;
     for (const QJsonValue &value: qAsConst(m_pcs)) {
         hostls.clear();
         if (value.isString()) {
             QString pcinfo = value.toString();
-            qDebug() << "pcinfo:" << pcinfo;
+            // qDebug() << "pcinfo:" << pcinfo;
             doc = QJsonDocument::fromJson(pcinfo.toUtf8(), &error);
             if (error.error == QJsonParseError::NoError){
                 QJsonObject jObj = doc.object();
                 QJsonObject jObjNet = jObj.value("Net").toObject();
                 QJsonObject data;
-                qDebug() << "net interfaces: " << jObjNet.keys();
+                // qDebug() << "net interfaces: " << jObjNet.keys();
                 foreach(const QString& key, jObjNet.keys()) {
                     data = jObjNet.value(key).toObject();
                     // qDebug() << "TODO NET address: " << data.value("address");
