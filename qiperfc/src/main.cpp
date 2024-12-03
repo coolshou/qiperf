@@ -29,7 +29,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
         output_ts << QString("DEBUG: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
         break;
     case QtInfoMsg:
-        output_ts << QString("INFO: %1 ").arg(msg) << Qt::endl;
+        output_ts << QString("INFO: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
         break;
     case QtWarningMsg:
         output_ts << QString("WARN: %1 (%2:%3)").arg(msg, file).arg(context.line) << Qt::endl;
