@@ -163,6 +163,9 @@ void ThroughputView::onPairEdit()
 
 void ThroughputView::onPairDelete()
 {
+    QModelIndex idx = ui->tv_throughput->selectionModel()->currentIndex();
+    qDebug() << "TODO: onPairDelete:" << idx;
+    m_tpmgr->del(idx);
 
 }
 
@@ -301,14 +304,11 @@ void ThroughputView::aboutQCustomPlot()
 void ThroughputView::onEnableItem(bool checked)
 {
     Q_UNUSED(checked)
-    //     ui->tv_throughput->SelectItems;
     QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedIndexes();
     if (idxs.length()>0){
         TP *tp;
-        QString s="";
         foreach(auto idx, idxs){
             tp = m_tpmgr->getItem(idx);
-            // tp->setEnabled();
             tp->setEnabled(true);
         }
     }
@@ -320,11 +320,8 @@ void ThroughputView::onDisableItem(bool checked)
     QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
     if (idxs.length()>0){
         TP *tp;
-        QString s="";
-
         foreach(auto idx, idxs){
             tp = m_tpmgr->getItem(idx);
-            // tp->setDisabled();
             tp->setEnabled(false);
         }
     }

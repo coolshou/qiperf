@@ -27,7 +27,7 @@ QIPConfig::QIPConfig(QString tmppath, QObject *parent):
 }
 
 bool QIPConfig::loadFromFile(const QString &filePath) {
-    qDebug() << "loadFromFile";
+    qInfo() << "loadFromFile" << filePath;
     init();
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -38,7 +38,7 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
     QDataStream in_lff(&file);
     in_lff >> m_magic;
     in_lff >> m_loadversion;
-    qDebug() << "loadFromFile:m_magic: " << QString(m_magic);//.toStdString());
+    // qDebug() << "loadFromFile:m_magic: " << QString(m_magic);//.toStdString());
 
     if (m_magic.startsWith(MAGIC_VALUE)){
         QByteArray compressedtpcfg;
@@ -50,7 +50,7 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
             return false;
         }
         if (deserialize(data)){
-            qDebug() << "loadFromFile:deserialize";
+            // qDebug() << "loadFromFile:deserialize";
             if (m_loadversion>=2){
                 QByteArray compressedfiles;
                 //tmp path
@@ -58,10 +58,10 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
                     QString outpath = m_tmppath + QDir::separator() + m_data->testdate;
                     emit updateDataPath(outpath);
                     in_lff >> compressedfiles;
-                    qDebug() << "loadFromFile:compressedfiles";
+                    // qDebug() << "loadFromFile:compressedfiles";
                     rc = filesFromStore(compressedfiles, outpath);
                     if (rc){
-                        qDebug() << "loadFromFile:parserTPCfgLogFiles";
+                        // qDebug() << "loadFromFile:parserTPCfgLogFiles";
                         rc = parserTPCfgLogFiles(outpath);
                     }
                 }else{
@@ -322,7 +322,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
             QJsonObject jClient;
             QJsonObject jServer;
             QJsonArray arr = doc.array();
-            qDebug() << "QIPConfig::parserTPCfgLogFiles:(" << QString::number(arr.count()) << "): " << arr;
+            // qDebug() << "QIPConfig::parserTPCfgLogFiles:(" << QString::number(arr.count()) << "): " << arr;
             int idx=0;
             for(QJsonArray::const_iterator it=arr.constBegin(); it!=arr.constEnd(); ++it){
                 //TODO: other type of "Action"
@@ -346,10 +346,13 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                     int delaytime = jServer.value("delaytime").toInt();
                     QString serverfile = logpath + QDir::separator() + serverip + "_" +QString::number(serverport)+ ".log";
                     QString clientfile = logpath + QDir::separator() + clientip + "-" + serverip + "_" +QString::number(clientport)+ ".log";
-                    qDebug() << "delaytime: " << QString::number(delaytime) << "  serverfile:" << serverfile;
+                    qDebug() << "delaytime: " << QString::number(delaytime);
+
+
                     if (!bidir){
                         if (!reverse){
                             if (d.exists(serverfile)){
+                                qDebug() << " serverfile:" << serverfile;
                                 //iperf server record file
                                 IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                            idx, true, parallel,
@@ -365,6 +368,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             }
                         }else{
                             if (d.exists(clientfile)){
+                                qDebug() << " clientfile:" << clientfile;
                                 //iperf client record file
                                 IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                            idx, false, parallel,
@@ -381,6 +385,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                         }
                     }else{
                         if (d.exists(serverfile)){
+                            qDebug() << "bidir serverfile:" << serverfile;
                             IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                        idx, true, parallel,
                                                                        bidir, "Tx", serverfile, delaytime);
@@ -394,6 +399,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             qDebug() << "bidir: not exist serverfile:" << serverfile;
                         }
                         if (d.exists(clientfile)){
+                            qDebug() << "bidir clientfile:" << clientfile;
                             IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                        idx, false, parallel,
                                                                        bidir, "Rx", clientfile, delaytime);
