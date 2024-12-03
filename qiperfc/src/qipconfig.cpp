@@ -50,7 +50,6 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
             return false;
         }
         if (deserialize(data)){
-            // qDebug() << "loadFromFile:deserialize";
             if (m_loadversion>=2){
                 QByteArray compressedfiles;
                 //tmp path
@@ -58,10 +57,8 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
                     QString outpath = m_tmppath + QDir::separator() + m_data->testdate;
                     emit updateDataPath(outpath);
                     in_lff >> compressedfiles;
-                    // qDebug() << "loadFromFile:compressedfiles";
                     rc = filesFromStore(compressedfiles, outpath);
                     if (rc){
-                        // qDebug() << "loadFromFile:parserTPCfgLogFiles";
                         rc = parserTPCfgLogFiles(outpath);
                     }
                 }else{
@@ -311,23 +308,22 @@ bool QIPConfig::filesFromStore(QByteArray &inputData, const QString &outputFolde
 
 bool QIPConfig::parserTPCfgLogFiles(QString logpath)
 {
-//    qDebug() << "parserTPCfgLogFiles m_fileworkers:" << m_fileworkers.length();
     //use m_data->tpcfg to parser all log file to setup throughput plot chart
     QDir d;
     if (m_data->tpcfg.size()>0){
-//        qDebug() << "parserTPCfgLogFiles tpcfg: " << m_data->tpcfg;
         QJsonParseError error;
         QJsonDocument doc=QJsonDocument::fromJson(m_data->tpcfg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
             QJsonObject jClient;
             QJsonObject jServer;
             QJsonArray arr = doc.array();
-            // qDebug() << "QIPConfig::parserTPCfgLogFiles:(" << QString::number(arr.count()) << "): " << arr;
+            qDebug() << "tpcfg size: " << QString::number(arr.size());
             int idx=0;
-            for(QJsonArray::const_iterator it=arr.constBegin(); it!=arr.constEnd(); ++it){
-                //TODO: other type of "Action"
-                QJsonObject jObj = it->toObject();
-//                qDebug() << "QIPConfig QJsonObject: " << jObj;
+            // for(QJsonArray::const_iterator it=arr.constBegin(); it!=arr.constEnd(); ++it){
+            //     QJsonObject jObj = it->toObject();
+            foreach (const QJsonValue val, arr) {
+                //FIXME: why this will enter multiple times!!??
+                QJsonObject jObj = val.toObject();
                 if (jObj.value("Action").toString() == "IPERF_ADD" &&
                         jObj.value("enabled").toBool(true)){
                     //client
@@ -432,7 +428,10 @@ void QIPConfig::init()
     m_version = 2;
     m_magic = QByteArray();
     m_loadversion = 0;
-    m_fileworkers.clear();
-    qDeleteAll(m_fileworkers);
+    if (m_fileworkers.length()>0){
+        qDebug() << "clear m_fileworkers:" << m_fileworkers;
+        m_fileworkers.clear();
+        // qDeleteAll(m_fileworkers); // this may cause app crash!!
+    }
 
 }
