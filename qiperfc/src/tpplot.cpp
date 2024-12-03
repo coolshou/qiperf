@@ -123,7 +123,7 @@ void TPPlot::del(QString idx)
 //                qDebug() << "removePlottable QCPBars fail: " << idx;
         }
     }else{
-       qDebug() << "QCPBars not exist:" << idx;
+       // qDebug() << "m_lostgraphs not exist:" << idx;
     }
     if (m_graphs.contains(idx)){
 //        QCPGraph *g= m_graphs.value(idx);
@@ -133,7 +133,7 @@ void TPPlot::del(QString idx)
 //            qDebug() << "removeGraph fail: " << idx;
         }
     }else{
-        qDebug() << "QCPGraph not exist:" << idx;
+        qDebug() << "m_graphs not exist:" << idx;
     }
 
     replot();
