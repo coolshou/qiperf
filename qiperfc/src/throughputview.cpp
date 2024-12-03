@@ -263,7 +263,6 @@ void ThroughputView::onPlotContextMenuRequest(QPoint pos)
     //    }
     //    else  // general context menu on graphs requested
     {
-        //        menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
         //        if (ui->customPlot->selectedGraphs().size() > 0)
         //            menu->addAction("Remove selected graph", this, SLOT(removeSelectedGraph()));
         //        if (ui->customPlot->graphCount() > 0)

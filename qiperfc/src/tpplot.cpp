@@ -22,10 +22,10 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
     double minT = *std::min_element(timedatas.begin(), timedatas.end());// x: min time
     double maxT = *std::max_element(timedatas.begin(), timedatas.end());// x: max time
     //when have several serial chart, set correct min/max
-    qDebug() << "minRange: " << QString::number(xAxis->range().lower)
-             << "maxRange: " << QString::number(xAxis->range().upper)
-             << "minT: " << QString::number(minT)
-             << "maxT: " << QString::number(maxT);
+    // qDebug() << "minRange: " << QString::number(xAxis->range().lower)
+    //          << "maxRange: " << QString::number(xAxis->range().upper)
+    //          << "minT: " << QString::number(minT)
+    //          << "maxT: " << QString::number(maxT);
     if (xAxis->range().lower < minT){
         minT = xAxis->range().lower;
     }

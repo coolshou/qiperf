@@ -26,19 +26,13 @@ public slots:
                          QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates);
 
 private slots:
-//    void realtimeDataSlot(QPrivateSignal sig);
     void selectionChanged();
 private:
     void initCustomPlot();
-//    void addRandomGraph();
     QPen newColorPen(int r, int g, int b, int width);
     QDateTime m_starttime;
-//    QTimer dataTimer;
     QMap<QString, QCPGraph *> m_graphs; // throughput graphs
     QMap<QString, QCPBars *> m_lostgraphs; // lost rate graphs
-//    QScrollArea *legendScrollArea;
-//    QWidget *legendContainer;
-//    QVBoxLayout *legendLayout;
     int m_yAxisMaxDefault=10; // 10 Mbps
     int m_xAxisMaxDefault=30; // 30sec
 };
