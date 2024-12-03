@@ -9,8 +9,11 @@
 
 
 // ThroughputView::ThroughputView(QIperfC *main, QWidget *parent) : AbstractView(parent)
-ThroughputView::ThroughputView(QWidget *parent) : AbstractView(parent)
-    , ui(new Ui::ThroughputView)//, m_main(main)
+ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
+                               QAction *aCopyText, QWidget *parent) : AbstractView(parent)
+    , ui(new Ui::ThroughputView), m_actionCopy(aCopy),m_actionPaste(aPaste),
+    m_actionDelete(aDelete),m_actionCopyText(aCopyText)
+//, m_main(main)
 {
     ui->setupUi(this);
     initThroughputChart();
@@ -119,17 +122,16 @@ void ThroughputView::onDelete()
 {
     QModelIndex curIdx = ui->tv_throughput->selectionModel()->currentIndex();
     TP *tp = m_tpmgr->getItem(curIdx);
+    // remove releative iperf3 log file
+    QString client = tp->getBindKey(false); //client
+    QString server = tp->getBindKey(); //server
+    QString d = getStartTime().toString(DATETIME_NOW_FORMAT);
 
     foreach(TP *p, tp->getChilds()){
         m_tpplot->del(p->getID());
     }
     m_tpmgr->del(curIdx);
-    // remove releative iperf3 log file
-    QString client = tp->getBindKey(false); //client
-    QString server = tp->getBindKey(); //server
-    QString d = getStartTime().toString(DATETIME_NOW_FORMAT);
-    // qDebug() << d << " client:" << client << " server:" << server;
-
+    // signal remove files
     QStringList fs;
     fs.append(d+QDir::separator()+client+".log");
     fs.append(d+QDir::separator()+server+".log");
@@ -229,17 +231,18 @@ void ThroughputView::onUpdateTPCfg(QByteArray tpcfg)
 
 void ThroughputView::initMenus()
 {
-    m_tpmenu = new QMenu(); // config throughput pair right click menu
     m_aEnable = new QAction("Enable select item");
     connect(m_aEnable, &QAction::triggered, this, &ThroughputView::onEnableItem);
     m_aDisable = new QAction("Disable select item");
     connect(m_aDisable, &QAction::triggered, this, &ThroughputView::onDisableItem);
-    //    aDisable->setEnabled(false);
-    // m_tpmenu->addAction(m_main->ui->actionCopy);
-    // m_tpmenu->addAction(m_main->ui->actionPaste);
-    // m_tpmenu->addAction(m_main->ui->actionDelete);
+    m_aDisable->setEnabled(false);
+
+    m_tpmenu = new QMenu(); // config throughput pair right click menu
+    m_tpmenu->addAction(m_actionCopy);
+    m_tpmenu->addAction(m_actionPaste);
+    m_tpmenu->addAction(m_actionDelete);
     m_tpmenu->addSeparator();
-    // m_tpmenu->addAction(m_main->ui->actionCopyText);
+    m_tpmenu->addAction(m_actionCopyText);
     m_tpmenu->addSeparator();
     m_tpmenu->addAction(m_aEnable);
     m_tpmenu->addAction(m_aDisable);

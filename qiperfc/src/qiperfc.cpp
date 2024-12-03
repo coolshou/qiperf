@@ -53,7 +53,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
         qDebug() << "create path: " << m_logpath;
         logdir.mkpath(".");
     }
-    m_throughputview = new ThroughputView();
+    m_throughputview = new ThroughputView(ui->actionCopy, ui->actionPaste,
+                                          ui->actionDelete, ui->actionCopyText);
     connect(m_throughputview, &ThroughputView::updateActions, this, &QIperfC::onUpdateActions);
     connect(m_throughputview, &ThroughputView::updateActionsSave, this, &QIperfC::onUpdateActionsSave);
     connect(m_throughputview, &ThroughputView::updateActionsEdit, this, &QIperfC::onUpdateActionsEdit);

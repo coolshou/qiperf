@@ -30,7 +30,10 @@ class ThroughputView : public AbstractView
 
 public:
     // explicit ThroughputView(QIperfC *main, QWidget *parent = nullptr);
-    explicit ThroughputView(QWidget *parent = nullptr);
+    //explicit ThroughputView(QWidget *parent = nullptr);
+    explicit ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
+                            QAction *aCopyText,
+                            QWidget *parent = nullptr);
     ~ThroughputView() override;
 
     QString title() override { return tr("Throughput"); }
@@ -90,6 +93,10 @@ private:
     QMenu *m_tpmenu; //right menu for m_tpmgr
     QAction *m_aEnable; //
     QAction *m_aDisable;
+    QAction *m_actionCopy;
+    QAction *m_actionPaste;
+    QAction *m_actionDelete;
+    QAction *m_actionCopyText;
     DlgIperf * dlgiperf;  // dialog of iperf config
     TPDirDelegate *tpdirdelegate;
     QDateTime m_starttime;
