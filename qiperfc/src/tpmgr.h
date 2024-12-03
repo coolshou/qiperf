@@ -30,7 +30,8 @@ public:
     enum DataType{
         root=0,  // root item
         config=1,  // config item
-        TP=2     // throughput data item
+        TP=2,     // throughput data item
+        group=3  // group of all config item
     };
     Q_ENUM(DataType)
 };

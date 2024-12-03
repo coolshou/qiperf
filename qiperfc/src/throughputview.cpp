@@ -291,7 +291,14 @@ void ThroughputView::onTPUTContextMenu(QPoint pos)
             m_aEnable->setEnabled(true);
             m_aDisable->setEnabled(false);
         }
+        if ((tp->getDataType()!=TPMgrData::config) &&
+            (tp->getDataType()!=TPMgrData::TP)){
+            //don't show menu on not supported item
+            return;
+        }
     }
+    //show right menu
+
     m_tpmenu->popup(ui->tv_throughput->mapToGlobal(pos));
 }
 
