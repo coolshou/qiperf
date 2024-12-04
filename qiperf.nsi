@@ -757,9 +757,9 @@ Function check_vc_redist
 
     ;not installed, so run the installer
 !ifdef WIN64
-    ExecWait '$INSTDIR\vc_redist.x64.exe' /q /norestart
+    ExecWait '$INSTDIR\vc_redist.x64.exe /q /norestart'
 !else
-    ExecWait '$INSTDIR\vc_redist.x86.exe' /q /norestart
+    ExecWait '$INSTDIR\vc_redist.x86.exe /q /norestart'
 !endif
 
     installed:
