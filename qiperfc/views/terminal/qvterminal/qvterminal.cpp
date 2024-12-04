@@ -396,7 +396,7 @@ void QVTerminal::resizeEvent(QResizeEvent */* event */)
 
 void QVTerminal::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::MidButton) {
+    if (event->button() == Qt::MiddleButton) {
         if( QApplication::clipboard()->supportsSelection()) {
             QByteArray data;
             data.append(QApplication::clipboard()->text(QClipboard::Selection).toUtf8());
