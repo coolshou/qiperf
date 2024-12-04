@@ -437,6 +437,7 @@ quint64 MyInfo::getSysBufferSize()
     }
 #else
     qDebug() << "getSysBufferSize: Not support platform: " << QSysInfo::productType();
+    return 0;
 #endif
 }
 
