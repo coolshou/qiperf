@@ -277,7 +277,7 @@ Section "qiperf console" SECTION_Console
     File "Qt6WebChannel${DEBUGSTR}.dll"
     File "Qt6WebEngineCore${DEBUGSTR}.dll"
     File "Qt6WebEngineWidgets${DEBUGSTR}.dll"
-    File "QtWebEngineProcessd.exe"
+    File "QtWebEngineProcess${DEBUGSTR}.exe"
     SetOutPath "$INSTDIR\platforminputcontexts"
     File "platforminputcontexts\qtvirtualkeyboardplugin${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\position"
