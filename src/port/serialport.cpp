@@ -8,6 +8,8 @@
 #include <QSettings>
 #include <QLineEdit>
 #include <QAbstractItemView>
+#include <QRegExpValidator>
+
 #include <QDebug>
 
 SerialPort::SerialPort(QWidget *parent) :
@@ -177,7 +179,7 @@ void SerialPort::scanPort()
     QVector<QSerialPortInfo> vec;
 
 
-    
+
     //查找可用的串口
     foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
         // 检测端口列表变更
