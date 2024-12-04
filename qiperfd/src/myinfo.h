@@ -7,6 +7,7 @@
 
 #if defined(Q_OS_WIN32)
 #include "wbemcli.h"
+#include "winreg.h"
 #endif
 
 class MyInfo : public QObject
