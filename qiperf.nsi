@@ -486,7 +486,7 @@ Section Uninstall
     Delete "$INSTDIR\platforminputcontexts\qtvirtualkeyboardplugin{DEBUGSTR}.dll"
     Delete "$INSTDIR\position\qtposition_nmea{DEBUGSTR}.dll"
     Delete "$INSTDIR\position\qtposition_positionpoll{DEBUGSTR}.dll"
-    Delete "$INSTDIR\position\qtposition_winrt{DEBUGSTR}.dll
+    Delete "$INSTDIR\position\qtposition_winrt{DEBUGSTR}.dll"
     Delete "$INSTDIR\qmltooling\qmldbg_debugger{DEBUGSTR}.dll"
     Delete "$INSTDIR\qmltooling\qmldbg_inspector{DEBUGSTR}.dll"
     Delete "$INSTDIR\qmltooling\qmldbg_local{DEBUGSTR}.dll"
