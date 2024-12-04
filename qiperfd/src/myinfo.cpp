@@ -453,7 +453,9 @@ void MyInfo::setSysBufferSize(quint64 buff)
     writeSysFile(READ_BUFFER_SIZE_PATH, QString::number(buff/2));
     writeSysFile(WRITE_BUFFER_SIZE_PATH, QString::number(buff/2));
 #else
-    qDebug() << "setSysBufferSize: Not support platform: " << QSysInfo::productType();
+    Q_UNUSED(buff)
+    qDebug() << "TODO setSysBufferSize: Not support platform: " << QSysInfo::productType();
+
 #endif
 }
 void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory) {
@@ -819,7 +821,9 @@ QString MyInfo::getCPUModel() {
     QString cpuModel;
     while (pEnumerator) {
         HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pClsObj, &uReturn);
-        if (0 == uReturn) break;
+        if (0 == uReturn) {
+            break;
+        }
 
         cpuModel = getWMIProperty(pClsObj, SysAllocString(L"Name"));
         pClsObj->Release();
