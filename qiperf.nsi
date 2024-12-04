@@ -48,8 +48,8 @@ SetCompressor LZMA
 !include "x64.nsh"
 ; Modern interface settings
 !include "MUI.nsh"
-!include "nsProcess.nsh"
-!include "FileAssociation.nsh"
+!include "nsis\nsProcess.nsh"
+!include "nsis\FileAssociation.nsh"
 !include "WordFunc.nsh"
 !insertmacro VersionCompare
 
@@ -173,7 +173,7 @@ Section "qiperf daemon" SECTION_Daemon
     File "windows\x86\cygwin1.dll"
     File "windows\x86\cygz.dll"
     File "windows\x86\iperf2.exe"
-    File "windows\x86\iperf21.exe"
+    File "windows\x86\iperf2.1.exe"
     File "windows\x86\iperf3.exe"
     SetOutPath "$INSTDIR\windows\x86_64\"
     File "windows\x86_64\cygcrypto-1.1.dll"
@@ -601,7 +601,7 @@ Section Uninstall
     Delete "$INSTDIR\windows\x86\cygwin1.dll"
     Delete "$INSTDIR\windows\x86\cygz.dll"
     Delete "$INSTDIR\windows\x86\iperf2.exe"
-    Delete "$INSTDIR\windows\x86\iperf21.exe"
+    Delete "$INSTDIR\windows\x86\iperf2.1.exe"
     Delete "$INSTDIR\windows\x86\iperf3.exe"
     Delete "$INSTDIR\windows\x86_64\cygcrypto-1.1.dll"
     Delete "$INSTDIR\windows\x86_64\cygwin1.dll"
