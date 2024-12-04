@@ -19,9 +19,9 @@
 !define QT6
 !define DEBUG
 !ifdef DEBUG
-  DEBUGSTR "d"
+ !define DEBUGSTR "d"
 !else
-  DEBUGSTR ""
+ !define DEBUGSTR ""
 !endif
 
 VIProductVersion ${APPFileVersion}
