@@ -309,7 +309,11 @@ Section "qiperf console" SECTION_Console
     File "resources\qtwebengine_resources.pak"
     File "resources\qtwebengine_resources_100p.pak"
     File "resources\qtwebengine_resources_200p.pak"
+!ifdef DEBUG
     File "resources\v8_context_snapshot.debug.bin"
+!else
+    File "resources\v8_context_snapshot.bin"
+!endif
     SetOutPath "$INSTDIR\translations\qtwebengine_locales"
     File "translations\qtwebengine_locales\am.pak"
     File "translations\qtwebengine_locales\ar.pak"
@@ -515,7 +519,11 @@ Section Uninstall
     Delete "$INSTDIR\resources\qtwebengine_resources.pak"
     Delete "$INSTDIR\resources\qtwebengine_resources_100p.pak"
     Delete "$INSTDIR\resources\qtwebengine_resources_200p.pak"
+!ifdef DEBUG
     Delete "$INSTDIR\resources\v8_context_snapshot.debug.bin"
+!else
+    Delete "$INSTDIR\resources\v8_context_snapshot.bin"
+!endif
     Delete "$INSTDIR\styles\qmodernwindowsstyle{DEBUGSTR}.dll"
     Delete "$INSTDIR\translations\qtwebengine_locales\am.pak"
     Delete "$INSTDIR\translations\qtwebengine_locales\ar.pak"
