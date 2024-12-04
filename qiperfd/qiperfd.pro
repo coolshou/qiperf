@@ -20,11 +20,12 @@ unix:!android {
     LIBS += $$system(pkg-config --libs libsystemd)
 }
 win32:{
-    LIBS     += -lws2_32
-    LIBS     += -liphlpapi
-    LIBS     += -lwbemuuid
-    LIBS     += -lsetupapi
-    LIBS     += -lole32 -loleaut32
+    LIBS += -lws2_32
+    LIBS += -liphlpapi
+    LIBS += -lwbemuuid
+    LIBS += -lsetupapi
+    LIBS += -lole32 -loleaut32
+    LIBS += -ladvapi32
     # -lcomsuppw //mingw not support
 }
 # You can make your code fail to compile if it uses deprecated APIs.
