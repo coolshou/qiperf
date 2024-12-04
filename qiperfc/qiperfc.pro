@@ -232,11 +232,6 @@ win32 {
         DESTDIR = Release
     }
 
-    QMAKE_EXTRA_TARGETS += customvcpath
-    customvcpath.target = setvcpath
-    customvcpath.commands = set PATH=C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Bin;$(PATH)
-    PRE_TARGETDEPS += setvcpath
-
     DISTFILES += $$PWD/../images/qiperf.icon
 
     #DIST_DIRECTORY =  $$shell_quote($$shell_path($${ROOT_DIRECTORY}/../$${TARGET}_$${QT_ARCH}-$${VERSION}))
