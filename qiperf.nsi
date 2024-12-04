@@ -258,7 +258,7 @@ Section "qiperf console" SECTION_Console
     File "${QIPERFC_NAME}"
 !ifdef QT6
     File "Qt6Core5Compat${DEBUGSTR}.dll"
-    File "Qt6OpenGL${DEBUGSTR}.dll""
+    File "Qt6OpenGL${DEBUGSTR}.dll"
     File "Qt6Positioning${DEBUGSTR}.dll"
     File "Qt6PrintSupport${DEBUGSTR}.dll"
     File "Qt6Qml${DEBUGSTR}.dll"
