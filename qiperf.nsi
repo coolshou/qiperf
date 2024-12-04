@@ -1,5 +1,7 @@
 ; Script generated with the Venis Install Wizard
 
+!addplugindir "nsis\"
+
 ; Define your application name
 !define APPNAME "qiperf"
 !define APPVERSION 0.6
