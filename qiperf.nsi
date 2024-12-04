@@ -102,7 +102,11 @@ Section "qiperf daemon" SECTION_Daemon
     !cd "qiperfd_x86"
 !endif
 !ifdef VCBUILD
+!ifdef WIN64
     File "vc_redist.x64.exe"
+!else
+    File "vc_redist.x86.exe"
+!endif
     ;File "concrt140${DEBUGSTR}.dll"
     ;File "msvcp140_1${DEBUGSTR}.dll"
     ;File "msvcp140_2${DEBUGSTR}.dll"
@@ -242,6 +246,7 @@ Section "qiperf daemon" SECTION_Daemon
     # set QIPERFTRAY_NAME run on system boot
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "${QIPERFTRAY_NAME}" '"$INSTDIR\${QIPERFTRAY_NAME}"'
 
+    Call check_vc_redist
     Call install_qiperfd
 SectionEnd
 
@@ -434,7 +439,11 @@ Section Uninstall
 
     ; Clean up qiperf daemon
 !ifdef VCBUILD
+!ifdef WIN64
     Delete "$INSTDIR\vc_redist.x64.exe"
+!else
+    Delete "$INSTDIR\vc_redist.x86.exe"
+!endif
     ;Delete "$INSTDIR\concrt140${DEBUGSTR}.dll"
     ;Delete "$INSTDIR\msvcp140_1${DEBUGSTR}.dll"
     ;Delete "$INSTDIR\msvcp140_2${DEBUGSTR}.dll"
@@ -727,6 +736,27 @@ Function install_qiperfd
     # install qiperfd  service & start it
     Exec '"$INSTDIR\nssm.exe" install "qiperfd" "$INSTDIR\${QIPERFD_NAME}"'
     Exec '"$INSTDIR\nssm.exe" start "qiperfd"'
+FunctionEnd
+
+Function check_vc_redist
+    ${If} ${RunningX64}
+            ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" "Installed"
+            StrCmp $1 1 installed
+    ${Else}
+            ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Installed"
+            StrCmp $1 1 installed
+    ${EndIf}
+
+    ;not installed, so run the installer
+!ifdef WIN64
+    ExecWait '$INSTDIR\vc_redist.x64.exe' /q /norestart
+!else
+    ExecWait '$INSTDIR\vc_redist.x86.exe' /q /norestart
+!endif
+
+    installed:
+    ;we are done
+
 FunctionEnd
 
 Function un.install_qiperfd
