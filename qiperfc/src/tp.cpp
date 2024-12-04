@@ -107,8 +107,7 @@ bool TP::removeChildren(int position, int count)
     if (position < 0 || position + count > m_childItems.size()){
         return false;
     }
-    m_childItems.erase(m_childItems.begin()+position, m_childItems.begin()+count);
-
+    m_childItems.erase(m_childItems.begin()+position, m_childItems.begin()+position+count);
     return true;
 }
 

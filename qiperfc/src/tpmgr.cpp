@@ -260,11 +260,10 @@ QModelIndex TPMgr::indexFromItem(TP *item){
 void TPMgr::del(QModelIndex idx)
 {
     stopUpdater();
-    int row = idx.row()-1;
-    beginRemoveRows(getRootItemIdx(), row,  row);
-    rootItem->removeChildren(row, 1);
-    endRemoveColumns();
-    qDebug() << "TPMgr::del : childCount:" << rootItem->childCount() << " del:" << idx;
+    int row = idx.row();
+    if (!removeRows(row, 1 , getRootItemIdx())){
+        qDebug() << "del fail("<< QString::number(row) << "): " << idx;
+    }
     startUpdater();
 }
 
@@ -294,7 +293,7 @@ bool TPMgr::removeRows(int row, int count, const QModelIndex &parent)
 {
     TP *parentItem = getItem(parent);
     bool success = true;
-
+    qDebug() << "parentItem:" << parentItem << " type:" << parentItem->getDataType() ;
     beginRemoveRows(parent, row, row + count - 1);
     success = parentItem->removeChildren(row, count);
     endRemoveRows();
@@ -395,6 +394,7 @@ TP *TPMgr::getItem(const QModelIndex &index) const
             qDebug() << "getItem: no item??";
         }
     }
+    qDebug() << "getItem rootItem:" << rootItem;
     return rootItem;
 }
 
@@ -406,7 +406,7 @@ TP *TPMgr::getRootItem() const
 QModelIndex TPMgr::getRootItemIdx()
 {
     QModelIndex idx = indexFromItem(rootItem);
-    qDebug() << "idx:" << idx << " rootItem:" << rootItem;
+    // qInfo() << "idx:" << idx << " rootItem:" << rootItem;
     return idx;
 }
 
