@@ -234,10 +234,11 @@ win32 {
 
     DISTFILES += $$PWD/../images/qiperf.icon
 
-    #DIST_DIRECTORY =  $$shell_quote($$shell_path($${ROOT_DIRECTORY}/../$${TARGET}_$${QT_ARCH}-$${VERSION}))
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/../$${TARGET}_$${QT_ARCH}))
 
     DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
+    iperfdata.commands = \
+        $$sprintf($$QMAKE_MKDIR_CMD, $$DIST_DIRECTORY) $$escape_expand(\\n\\t)
 CONFIG(release, debug|release) {
     release: iperfbin.commands = \
         $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Release/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
@@ -255,6 +256,7 @@ CONFIG(release, debug|release) {
 
     first.depends = $(first) iperfbin template deploy
     export(first.depends)
+    export(iperfdata.commands)
     export(iperfbin.commands)
     export(template.commands)
     QMAKE_EXTRA_TARGETS += first iperfbin template deploy

@@ -62,8 +62,6 @@ VERSION = $$extract_version(26)
 message(QIPERFTRAY_VERSION: $$VERSION)
 
 win32 {
-    #VER = $$system(findstr /c:"\"define QIPERFD_VERSION\"" $$PWD/../src/versions.h)
-    #VERSION = 0.2.11306.03  # major.minor.patch.build
     # windows resources
     RC_ICONS=$$PWD/../images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
@@ -83,14 +81,15 @@ win32 {
 
     DISTFILES += $$PWD/../images/qiperf.icon
 
-    #DIST_DIRECTORY =  $$shell_quote($$shell_path($${ROOT_DIRECTORY}/../$${TARGET}_$${QT_ARCH}-$${VERSION}))
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/../$${TARGET}_$${QT_ARCH}))
 
     DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
+    iperfdata.commands = \
+        $$sprintf($$QMAKE_MKDIR_CMD, $$DIST_DIRECTORY) $$escape_expand(\\n\\t)
 CONFIG(release, debug|release) {
     release: iperfbin.commands = \
         $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Release/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
-}else {
+} else {
     debug: iperfbin.commands = \
         $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Debug/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
 }
@@ -99,6 +98,7 @@ CONFIG(release, debug|release) {
 
     first.depends = $(first) iperfbin deploy
     export(first.depends)
+    export(iperfdata.commands)
     export(iperfbin.commands)
     QMAKE_EXTRA_TARGETS += first iperfbin deploy
 

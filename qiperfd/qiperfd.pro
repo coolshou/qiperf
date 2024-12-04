@@ -111,8 +111,6 @@ VERSION = $$extract_version(14)
 message(QIPERFD_VERSION: $$VERSION)
 
 win32 {
-    #VER = $$system(findstr /c:"\"define QIPERFD_VERSION\"" $$PWD/../src/versions.h)
-    #VERSION = 0.2.11306.27 # major.minor.patch.build
 # windows resources
     RC_ICONS=$$PWD/../images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
