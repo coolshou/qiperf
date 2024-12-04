@@ -334,7 +334,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
             QJsonObject jClient;
             QJsonObject jServer;
             QJsonArray arr = doc.array();
-            qDebug() << "tpcfg size: " << QString::number(arr.size());
+            // qDebug() << "tpcfg size: " << QString::number(arr.size());
             int idx=0;
             // for(QJsonArray::const_iterator it=arr.constBegin(); it!=arr.constEnd(); ++it){
             //     QJsonObject jObj = it->toObject();
