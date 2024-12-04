@@ -466,7 +466,7 @@ Section Uninstall
     Delete "$INSTDIR\generic\qtuiotouchplugin${DEBUGSTR}.dll"
     Delete "$INSTDIR\styles\qmodernwindowsstyle{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Core5Compat{DEBUGSTR}.dll"
-    Delete "$INSTDIR\Qt6OpenGL{DEBUGSTR}.dll""
+    Delete "$INSTDIR\Qt6OpenGL{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Positioning{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6PrintSupport{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Qml{DEBUGSTR}.dll"
