@@ -232,6 +232,11 @@ win32 {
         DESTDIR = Release
     }
 
+    QMAKE_EXTRA_TARGETS += customvcpath
+    customvcpath.target = setvcpath
+    customvcpath.commands = set PATH=C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Bin;$(PATH)
+    PRE_TARGETDEPS += setvcpath
+
     DISTFILES += $$PWD/../images/qiperf.icon
 
     #DIST_DIRECTORY =  $$shell_quote($$shell_path($${ROOT_DIRECTORY}/../$${TARGET}_$${QT_ARCH}-$${VERSION}))
@@ -240,10 +245,10 @@ win32 {
     DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
 CONFIG(release, debug|release) {
     release: iperfbin.commands = \
-        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Release/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
+        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Release/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
 } else {
     debug: iperfbin.commands = \
-        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Debug/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
+        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Debug/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
 }
     deploy.commands = \
         windeployqt $$shell_quote($$shell_path($$DIST_FILE))

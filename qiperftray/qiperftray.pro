@@ -88,10 +88,10 @@ win32 {
     DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
 CONFIG(release, debug|release) {
     release: iperfbin.commands = \
-        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Release/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
+        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Release/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
 }else {
     debug: iperfbin.commands = \
-    $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/../Debug/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
+        $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Debug/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
 }
     deploy.commands = \
         windeployqt $$shell_quote($$shell_path($$DIST_FILE))
