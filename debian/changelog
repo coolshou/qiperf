@@ -1,4 +1,4 @@
-qiperf (0.6.11311.25-1) unstable; urgency=medium
+qiperf (0.6.11312.04-1) unstable; urgency=medium
 
   * Add show Hostname column in qiperfd list
   * Add export test result to html file
@@ -6,8 +6,9 @@ qiperf (0.6.11311.25-1) unstable; urgency=medium
   * Add search text input to search string in DlgShowLog and iperf raw log viewer
   * Fix when qiperfd did not get manager interface's IP, show error message on qiperftray
   * Add qiperfc right menu "copy text" of the (comment or other) column
+  * Windows version change to vs2019 build (QWebEngineWidgets not exist in mingw64 build)
 
- -- coolshou <coolshou2060@gmail.com>  Wed, 20 Nov 2024 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Dec, 04 Nov 2024 10:00:00 +0800
 
 qiperf (0.5.11309.18-1) unstable; urgency=medium
 
