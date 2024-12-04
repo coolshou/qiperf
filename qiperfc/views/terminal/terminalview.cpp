@@ -13,7 +13,7 @@ TerminalView::TerminalView(QWidget *parent) : AbstractView(parent)
     m_term = new QVTerminal(this);
     layout->addWidget(m_term);
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-    layout()->setContentsMargins(2,2,2,2);
+    layout->setContentsMargins(2,2,2,2);
 #else
     layout->setMargin(2);
 #endif
