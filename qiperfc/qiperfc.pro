@@ -5,8 +5,8 @@ QT += webenginewidgets
 QT += serialport
 
 
-#CONFIG += release
-CONFIG += debug
+CONFIG += release
+#CONFIG += debug
 
 QT += opengl
 DEFINES += QCUSTOMPLOT_USE_OPENGL # qcustomplot use OPENGL
