@@ -8,7 +8,12 @@
 #include <QSettings>
 #include <QLineEdit>
 #include <QAbstractItemView>
+#include <QtGlobal>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QRegExpValidator>
+#else
+#include <QRegularExpressionValidator>
+#endif
 
 #include <QDebug>
 
@@ -20,7 +25,12 @@ SerialPort::SerialPort(QWidget *parent) :
     serialPort = new QSerialPort(this);
     m_scanTimer = new QTimer(this);
 
+    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    //only under QT 5.15
     QRegExpValidator *pReg = new QRegExpValidator(QRegExp("^\\d{2,7}$"));
+    #else
+    QValidator *pReg = new QRegularExpressionValidator(QRegularExpression("^\\d{2,7}$"));
+    #endif
     ui->baudRateBox->lineEdit()->setValidator(pReg);
     serialPort->setTextModeEnabled(true);
 #if defined(Q_OS_LINUX)
