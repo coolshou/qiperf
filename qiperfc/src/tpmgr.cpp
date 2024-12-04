@@ -222,7 +222,10 @@ int TPMgr::rowCount(const QModelIndex &parent) const
 bool TPMgr::add(QString data)
 {
     //json data
-    int idx = rootItem->childCount();
+    //TODO: get largest idx number!!
+    int idx = getMaxIdx();
+    idx = idx + 1;
+    // int idx = rootItem->childCount();
     beginInsertRows(QModelIndex(), idx, idx);
     TP *tp = new TP(QString::number(idx), data, rootItem);
     tp->setDataType(TPMgrData::config);
@@ -579,6 +582,21 @@ int TPMgr::getMaxPort(QString m_ip, QString targetIP)
     return maxPort;
 }
 
+int TPMgr::getMaxIdx()
+{
+    int maxIdx=0;
+    int idx = 0;
+    foreach(auto tp, rootItem->getChilds()){
+        idx = tp->getID().toInt();
+        if (idx>maxIdx){
+            maxIdx = idx;
+        }
+
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    return maxIdx;
+}
+
 void TPMgr::onPaste(QString data)
 {
     QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8());
@@ -588,6 +606,7 @@ void TPMgr::onPaste(QString data)
        if (jsonRoot.contains("client") &&jsonRoot.contains("server")){
            QJsonObject o_client = jsonRoot["client"].toObject();
            QJsonObject o_server = jsonRoot["server"].toObject();
+           // Get largest iperf port number!!
            int num = this->getMaxPort(o_server["manager"].toString(),
                                          o_client["target"].toString());
             o_client["port"]=num+1;
@@ -691,12 +710,12 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 
 }
 
-void TPMgr::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
-                            QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate)
-{
-    qDebug() << "TODO: TPMgr::onUpdateTPDatas, just show last value";
-    // addTPdata(refrow, sInterval, idx, value, unit, dir, packetlosts, packettotals);
-}
+// void TPMgr::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
+//                             QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate)
+// {
+//     qDebug() << "TODO: TPMgr::onUpdateTPDatas, just show last value";
+//     // addTPdata(refrow, sInterval, idx, value, unit, dir, packetlosts, packettotals);
+// }
 
 void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                           QString value, QString unit, QString dir,

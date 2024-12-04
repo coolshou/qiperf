@@ -85,14 +85,16 @@ public:
     QMap<QString, QStringList> getBindkeys(); // get all Bindkeys (managerIP: IP_Port, IP_Port ...)
     bool isBindkeyExist(QString managerIP, QString bindkey, QModelIndex exc_idx);
     int getMaxPort(QString m_ip, QString targetIP); // get all tp config's port number and return Max value in same manage ip & target ip
+    int getMaxIdx();
+
     void onPaste(QString data);
     void startUpdater();
     void stopUpdater();
 
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
-    void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
-                         QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
+    // void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
+    //                      QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
     void onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                        QString value, QString unit, QString dir,
                        QString pkt_lost, QString pkt_total);
