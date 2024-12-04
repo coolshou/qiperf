@@ -56,6 +56,7 @@
 #include <QStyle>
 #include <QTextCursor>
 #include <QIcon>
+#include <QtGlobal>
 
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
 #include <QScreen>
@@ -168,7 +169,11 @@ void CodeEditor::showSearchBar()
         m_search = new QWidget(this);
         m_search->setStyleSheet("background-color:#ebedf0;");
         m_hlsearch = new QHBoxLayout(this);
+        #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+        m_hlsearch->layout()->setContentsMargins(1,1,1,1);
+        #else
         m_hlsearch->layout()->setMargin(1);
+        #endif
         m_search->setLayout(m_hlsearch);
         // Create a QLabel for the search label
         searchLabel = new QLabel("Search:", this);
