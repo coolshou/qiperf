@@ -82,7 +82,10 @@ void QVTerminal::appendData(const QByteArray &data)
                 break;
             default:
                 if (c.isPrint()) {
-                    text.append(c);
+                    QByteArray byteArray;
+                    byteArray.append(c.toLatin1());
+                    text.append(byteArray);
+                    //text.append(c);
                 }
             }
             break;
