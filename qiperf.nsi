@@ -276,11 +276,11 @@ Section "qiperf console" SECTION_Console
     File "Qt6WebEngineWidgets${DEBUGSTR}.dll"
     File "QtWebEngineProcessd.exe"
     SetOutPath "$INSTDIR\platforminputcontexts"
-    File "platforminputcontexts\qtvirtualkeyboardplugin${DEBUGSTR}.dll
+    File "platforminputcontexts\qtvirtualkeyboardplugin${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\position"
     File "position\qtposition_nmea${DEBUGSTR}.dll"
     File "position\qtposition_positionpoll${DEBUGSTR}.dll"
-    File "position\qtposition_winrt${DEBUGSTR}.dll
+    File "position\qtposition_winrt${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\qml"
     SetOutPath "$INSTDIR\qmltooling"
     File "qmltooling\qmldbg_debugger${DEBUGSTR}.dll"
@@ -481,8 +481,7 @@ Section Uninstall
     Delete "$INSTDIR\Qt6WebEngineCore{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6WebEngineWidgets{DEBUGSTR}.dll"
     Delete "$INSTDIR\QtWebEngineProcessd.exe"
-    Delete "$INSTDIR\platforminputcontexts\qtvirtualkeyboardplugin{DEBUGSTR}.dll
-    SetOutPath "$INSTDIR\position"
+    Delete "$INSTDIR\platforminputcontexts\qtvirtualkeyboardplugin{DEBUGSTR}.dll"
     Delete "$INSTDIR\position\qtposition_nmea{DEBUGSTR}.dll"
     Delete "$INSTDIR\position\qtposition_positionpoll{DEBUGSTR}.dll"
     Delete "$INSTDIR\position\qtposition_winrt{DEBUGSTR}.dll
@@ -632,13 +631,14 @@ Section Uninstall
     RMDir "$INSTDIR\windows\"
 !ifdef QT6
     RMDir "$INSTDIR\networkinformation\"
-    RMDir "$INSTDIR\tls"
+    RMDir "$INSTDIR\tls\"
     RMDir "$INSTDIR\generic\"
-    RMDir "$INSTDIR\platforminputcontexts"
-    RMDir "$INSTDIR\qml"
-    RMDir "$INSTDIR\qmltooling"
-    RMDir "$INSTDIR\resources"
-    RMDir "$INSTDIR\translations\qtwebengine_locales"
+    RMDir "$INSTDIR\platforminputcontexts\"
+    RMDir "$INSTDIR\position\"
+    RMDir "$INSTDIR\qml\"
+    RMDir "$INSTDIR\qmltooling\"
+    RMDir "$INSTDIR\resources\"
+    RMDir "$INSTDIR\translations\qtwebengine_locales\"
 !else
     RMDir "$INSTDIR\bearer\"
 !endif
