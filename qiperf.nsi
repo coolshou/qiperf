@@ -19,7 +19,7 @@
 
 !define VCBUILD 1 ; vs2022
 !define QT6
-!define DEBUG
+;!define DEBUG
 !ifdef DEBUG
  !define DEBUGSTR "d"
 !else
@@ -102,16 +102,17 @@ Section "qiperf daemon" SECTION_Daemon
     !cd "qiperfd_x86"
 !endif
 !ifdef VCBUILD
-    File "concrt140${DEBUGSTR}.dll"
-    File "msvcp140_1${DEBUGSTR}.dll"
-    File "msvcp140_2${DEBUGSTR}.dll"
-    File "msvcp140${DEBUGSTR}.dll"
-    File "msvcp140${DEBUGSTR}_atomic_wait.dll"
-    File "msvcp140${DEBUGSTR}_codecvt_ids.dll"
-    File "vccorlib140${DEBUGSTR}.dll"
-    File "vcruntime140_1${DEBUGSTR}.dll"
-    File "vcruntime140_threads${DEBUGSTR}.dll"
-    File "vcruntime140${DEBUGSTR}.dll"
+    File "vc_redist.x64.exe"
+    ;File "concrt140${DEBUGSTR}.dll"
+    ;File "msvcp140_1${DEBUGSTR}.dll"
+    ;File "msvcp140_2${DEBUGSTR}.dll"
+    ;File "msvcp140${DEBUGSTR}.dll"
+    ;File "msvcp140${DEBUGSTR}_atomic_wait.dll"
+    ;File "msvcp140${DEBUGSTR}_codecvt_ids.dll"
+    ;File "vccorlib140${DEBUGSTR}.dll"
+    ;File "vcruntime140_1${DEBUGSTR}.dll"
+    ;File "vcruntime140_threads${DEBUGSTR}.dll"
+    ;File "vcruntime140${DEBUGSTR}.dll"
 
 !else
     ;;mingw
@@ -433,16 +434,17 @@ Section Uninstall
 
     ; Clean up qiperf daemon
 !ifdef VCBUILD
-    Delete "$INSTDIR\concrt140${DEBUGSTR}.dll"
-    Delete "$INSTDIR\msvcp140_1${DEBUGSTR}.dll"
-    Delete "$INSTDIR\msvcp140_2${DEBUGSTR}.dll"
-    Delete "$INSTDIR\msvcp140${DEBUGSTR}.dll"
-    Delete "$INSTDIR\msvcp140${DEBUGSTR}_atomic_wait.dll"
-    Delete "$INSTDIR\msvcp140${DEBUGSTR}_codecvt_ids.dll"
-    Delete "$INSTDIR\vccorlib140${DEBUGSTR}.dll"
-    Delete "$INSTDIR\vcruntime140_1${DEBUGSTR}.dll"
-    Delete "$INSTDIR\vcruntime140_threads${DEBUGSTR}.dll"
-    Delete "$INSTDIR\vcruntime140${DEBUGSTR}.dll"
+    Delete "$INSTDIR\vc_redist.x64.exe"
+    ;Delete "$INSTDIR\concrt140${DEBUGSTR}.dll"
+    ;Delete "$INSTDIR\msvcp140_1${DEBUGSTR}.dll"
+    ;Delete "$INSTDIR\msvcp140_2${DEBUGSTR}.dll"
+    ;Delete "$INSTDIR\msvcp140${DEBUGSTR}.dll"
+    ;Delete "$INSTDIR\msvcp140${DEBUGSTR}_atomic_wait.dll"
+    ;Delete "$INSTDIR\msvcp140${DEBUGSTR}_codecvt_ids.dll"
+    ;Delete "$INSTDIR\vccorlib140${DEBUGSTR}.dll"
+    ;Delete "$INSTDIR\vcruntime140_1${DEBUGSTR}.dll"
+    ;Delete "$INSTDIR\vcruntime140_threads${DEBUGSTR}.dll"
+    ;Delete "$INSTDIR\vcruntime140${DEBUGSTR}.dll"
     Delete "$INSTDIR\dxil.dll"
 !else
     Delete "$INSTDIR\libgcc_s_seh-1.dll"
