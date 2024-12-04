@@ -3,6 +3,8 @@
 #include <QHBoxLayout>
 #include <QTextCodec>
 #include <QSettings>
+#include <QtGlobal>
+
 #include <QDebug>
 
 TerminalView::TerminalView(QWidget *parent) : AbstractView(parent)
@@ -10,10 +12,14 @@ TerminalView::TerminalView(QWidget *parent) : AbstractView(parent)
     QHBoxLayout *layout = new QHBoxLayout(this);
     m_term = new QVTerminal(this);
     layout->addWidget(m_term);
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    layout()->setContentsMargins(2,2,2,2);
+#else
     layout->setMargin(2);
+#endif
     this->setLayout(layout);
     m_term->format()->font()->setFamily("Consolas");
-    connect(m_term, SIGNAL(transmitData(const QByteArray &)), this, SIGNAL(transmitData(const QByteArray &)));
+    connect(m_term, SIGNAL(transmitData(QByteArray)), this, SIGNAL(transmitData(QByteArray)));
 }
 
 TerminalView::~TerminalView()
