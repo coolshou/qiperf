@@ -171,6 +171,7 @@ bool QIperfC::load(QString filename)
         }
     }
     if (m_qipconfig->loadFromFile(filename)){
+        ui->actionSave->setEnabled(true);
         return true;
     }else{
         qDebug() << "load file " << filename << " Fail!!";
@@ -251,7 +252,6 @@ void QIperfC::onOpen()
     if (load(fileName)){
         m_oldsavepath = fi.path();
     }
-    ui->actionSave->setEnabled(true);
 }
 
 void QIperfC::onSave()
@@ -960,6 +960,7 @@ void QIperfC::onShowGroup(bool bShow)
 {
     qDebug() << "TODO: onShowGroup:" << bShow;
     //treeview show/hide (add remove) group
+    // m_throughputview->setShowGroup(bShow);
     //plotchart  show/hide group
 }
 
