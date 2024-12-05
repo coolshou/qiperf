@@ -1,9 +1,15 @@
 @ECHO OFF
 
-set PATH=D:\Qt\5.15.2\mingw81_64\bin;D:\Qt\Tools\mingw810_64\bin;C:\msys64\usr\bin;C:\msys64\mingw64\bin;%PATH%
-make distclean
+REM vc 2022 Community
+%comspec% /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+
+nmake  distclean
+del /Q /S qiperfc_x86_64\*
+del /Q /S qiperfd_x86_64\*
+del /Q /S qiperftray_x86_64\*
+
 qmake
-make
+nmake
 
 set PATH=C:\Program Files (x86)\NSIS\;%PATH%
 makensis.exe /DWIN64 /V3 qiperf.nsi
