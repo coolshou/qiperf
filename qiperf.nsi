@@ -276,7 +276,6 @@ Section "qiperf console" SECTION_Console
     File "Qt6Quick3DUtils${DEBUGSTR}.dll"
     File "Qt6Quick${DEBUGSTR}.dll"
     File "Qt6QuickWidgets${DEBUGSTR}.dll"
-    File "Qt6SerialPort${DEBUGSTR}.dll"
     File "Qt6Svg${DEBUGSTR}.dll"
     File "Qt6VirtualKeyboard${DEBUGSTR}.dll"
     File "Qt6WebChannel${DEBUGSTR}.dll"
