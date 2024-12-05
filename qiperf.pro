@@ -33,8 +33,10 @@ DEBIAN.files += \
     debian/qiperftray.control \
     debian/qiperftray.install \
     debian/qiperftray.links \
-    TODO \
-    test.sh
+    TODO
+
+#    deploy.sh
+#    build_x64.bat
 
 
 NSIS.files += \
