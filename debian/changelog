@@ -1,3 +1,10 @@
+qiperf (0.6.11312.06-1) unstable; urgency=medium
+
+  * Fix wrong state of menu save when load config from args
+  * Fix Under Windows Iperf.exe did not terminate on test finished
+
+ -- coolshou <coolshou2060@gmail.com>  Thu, 05 Dec 2024 08:27:34 +0800
+
 qiperf (0.6.11312.04-1) unstable; urgency=medium
 
   * Add show Hostname column in qiperfd list
