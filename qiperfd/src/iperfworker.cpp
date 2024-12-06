@@ -157,13 +157,17 @@ void IperfWorker::onSelfDestructor()
 void IperfWorker::setStop()
 {
     m_stop = true;
-    if (m_iperf->waitForFinished(1000)){
+    if (m_iperf->waitForFinished(3000)){
         emit log(m_idx, "iperf killed");
     }else{
         int pid = m_iperf->processId();
         if (pid >0){
             qDebug() << "force terminate iperf id: " << QString::number(pid);
+#if defined(Q_OS_WIN32)
+            m_iperf->kill();
+#else
             m_iperf->terminate();
+#endif
         }else{
             qDebug() <<"NOT Running m_iperf: " << m_iperf->program() << m_iperf->arguments();
         }
