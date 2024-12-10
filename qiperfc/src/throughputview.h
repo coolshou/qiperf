@@ -67,7 +67,7 @@ public slots:
                          QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates);
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
     void onUpdateTPCfg(QByteArray tpcfg);
-
+    void setShowGroup(bool bShow);
 signals:
     void updateActions(bool bStart, bool bStop, bool bClear);
     void updateActionsSave(bool bStart);
@@ -100,6 +100,7 @@ private:
     DlgIperf * dlgiperf;  // dialog of iperf config
     TPDirDelegate *tpdirdelegate;
     QDateTime m_starttime;
+    bool m_showgroup;
     // TPFoldingDelegate *tpfoldingdelegate;
     void initThroughputChart();
 };
