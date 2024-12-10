@@ -128,8 +128,10 @@ void ThroughputView::onDelete()
         QString server = tp->getBindKey(); //server
         QString d = getStartTime().toString(DATETIME_NOW_FORMAT);
 
-        foreach(TP *p, tp->getChilds()){
-            m_tpplot->del(p->getID());
+        if (tp->haveChilds()){
+            foreach(TP *p, tp->getChilds()){
+                m_tpplot->del(p->getID());
+            }
         }
         m_tpmgr->del(curIdx);
         // TODO: should/how we modify remain item's idx??
@@ -224,12 +226,22 @@ void ThroughputView::onUpdateTPDatas(QString refrow, QVector<double> timedatas, 
 
 void ThroughputView::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
+    //update iperf throughput from websocket client
     m_tpmgr->onIperfTPdata(refrow, sInterval, datas);
 }
 
 void ThroughputView::onUpdateTPCfg(QByteArray tpcfg)
 {
     m_tpmgr->loaddata(tpcfg);
+}
+
+void ThroughputView::setShowGroup(bool bShow)
+{
+    //TODO: show group
+    m_showgroup = bShow;
+    // TODO: m_tpmgr
+    m_tpmgr->setShowGroup(m_showgroup);
+    // TODO: m_tpplot
 }
 
 void ThroughputView::initMenus()
