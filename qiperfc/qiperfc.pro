@@ -5,7 +5,8 @@ QT += webenginewidgets
 QT += serialport
 
 
-CONFIG += release
+#following setting will overwrite qtcreater's setting
+#CONFIG += release
 #CONFIG += debug
 
 QT += opengl

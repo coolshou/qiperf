@@ -2,7 +2,8 @@ QT += core gui
 QT += network
 QT += webenginewidgets
 
-CONFIG += release
+#following setting will overwrite qtcreater's setting
+#CONFIG += release
 #CONFIG += debug
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
