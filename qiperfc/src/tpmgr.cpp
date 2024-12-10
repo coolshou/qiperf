@@ -224,7 +224,7 @@ bool TPMgr::add(QString data)
     //json data
     //TODO: get largest idx number!!
     int idx = getMaxIdx();
-    idx = idx + 1;
+    // idx = idx + 1;
     // int idx = rootItem->childCount();
     beginInsertRows(QModelIndex(), idx, idx);
     TP *tp = new TP(QString::number(idx), data, rootItem);
@@ -590,6 +590,8 @@ int TPMgr::getMaxIdx()
         idx = tp->getID().toInt();
         if (idx>maxIdx){
             maxIdx = idx;
+        }else{
+            maxIdx++;
         }
 
         QCoreApplication::processEvents(QEventLoop::AllEvents);
