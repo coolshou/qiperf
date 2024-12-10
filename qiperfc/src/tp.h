@@ -14,6 +14,7 @@ class TP: public QObject
     Q_GADGET
 public:
     explicit TP(QString id, QString data, TP *parentItem = nullptr);
+    ~TP() override;
     enum DirType{
         Tx=0,
         Rx=1,

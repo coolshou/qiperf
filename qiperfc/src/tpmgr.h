@@ -93,12 +93,10 @@ public:
 
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
-    // void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
-    //                      QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
     void onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                        QString value, QString unit, QString dir,
                        QString pkt_lost, QString pkt_total);
-
+    void setShowGroup(bool bShow);
 signals:
     void IperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);// time, idx, throughput value, lost rate
 
@@ -107,11 +105,13 @@ private slots:
 
 private:
     TP *rootItem;
+    TP *groupItem; //hold group item
     QList<TP*> m_tps; //QList of tp, data
     QFileIconProvider iconProvider;
     QMap<QString, double> m_intervals;
     QColor m_disabledTextColor;
     QTimer *m_updater;
+    bool m_showgroup;
 };
 
 #endif // TPMGR_H

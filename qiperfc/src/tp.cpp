@@ -15,13 +15,19 @@ TP::TP(QString id, QString data, TP *parent)
     m_lostpacket = 0;
     m_totalpacket = 0;
     clearThroughput();
-
+    // m_childItems = QList<TP *>();
     m_itemDatas={m_id, "", "", "", // id, server, dir ,client
                  "", "", "", //throughput, min tput, max tput
                  "", ""}; // lost rate, comment
     if (data!="" && data !="Root"){
         loadData(data);
     }
+}
+
+TP::~TP()
+{
+    // qDeleteAll(m_childItems);
+    m_childItems.clear();
 }
 
 void TP::appendChild(TP *item)
@@ -56,7 +62,6 @@ TP *TP::child(int row)
 QList<TP *> TP::getChilds()
 {
     return m_childItems;
-
 }
 
 int TP::childCount() const
