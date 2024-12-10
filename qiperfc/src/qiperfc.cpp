@@ -42,10 +42,12 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
         }
     }
     QString settingfilename = settingfilepath + QDir::separator() + QIPERFC_NAME + ".ini";
+    qDebug() << "settingfilename:" << settingfilename;
     m_TestStartTime = QDateTime();
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     m_clipboard = QApplication::clipboard();
     ui->setupUi(this);
+    loadSettings();
 
     m_logpath = logpath + "data";
     QDir logdir(m_logpath);
@@ -67,7 +69,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_frm_option, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);
     connect(m_frm_option, &dlgOption::showGroup, this, &QIperfC::onShowGroup);
     initStatusbar();
-    loadSettings();
+
     //UI actions
     initActions();
     initToolbar();
@@ -842,7 +844,6 @@ void QIperfC::saveSettings()
     m_settings->setValue("TPExportWidth", m_TPExportWidth);
     m_settings->setValue("TPExportHeigth", m_TPExportHeigth);
     m_settings->setValue("TPGroup", m_TPGroup);
-
     m_settings->endGroup();
     m_settings->sync();
 }
@@ -866,6 +867,7 @@ void QIperfC::loadSettings()
     m_WaitServerReady =m_settings->value("WaitServerReady", 10).toInt();
     m_TPExportWidth =m_settings->value("TPExportWidth", 1280).toInt();
     m_TPExportHeigth =m_settings->value("TPExportHeigth", 180).toInt();
+    m_TPGroup =m_settings->value("TPGroup", false).toBool();
 //    m_frm_option->setWaitServerReady();
     m_settings->endGroup();
 
@@ -959,10 +961,8 @@ void QIperfC::onHeigthChanged(int heigth)
 
 void QIperfC::onShowGroup(bool bShow)
 {
-    qDebug() << "TODO: onShowGroup:" << bShow;
-    //treeview show/hide (add remove) group
-    // m_throughputview->setShowGroup(bShow);
-    //plotchart  show/hide group
+    m_TPGroup = bShow;
+    m_throughputview->setShowGroup(bShow);
 }
 
 void QIperfC::onRPC_result(const QVariant &result)
