@@ -353,6 +353,7 @@ void QIperfC::onStart()
                     maxtestduration = maxtestduration + idelaytime;
                 }
                 refrow = tp->row();
+                qDebug() << "==> refrow: " << QString::number(refrow) ;
                 QString serverIP = tp->getMgrServer();
                 //TODO: detect manager server is pingable
                 if (!m_wss.contains(serverIP)) {
