@@ -4,7 +4,9 @@ QT += serialport
 
 CONFIG += c++17 console
 CONFIG -= app_bundle
-CONFIG += release
+
+#following setting will overwrite qtcreater's setting
+#CONFIG += release
 #CONFIG += debug
 
 #include(../jcon-cpp.pri)
