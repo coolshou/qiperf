@@ -745,23 +745,43 @@ Function install_qiperfd
     Exec '"$INSTDIR\nssm.exe" start "qiperfd"'
 FunctionEnd
 
+Function install_vc_redist
+    ;not installed, so run the installer
+    !ifdef WIN64
+    ExecWait '$INSTDIR\vc_redist.x64.exe /q /norestart'
+    !else
+    ExecWait '$INSTDIR\vc_redist.x86.exe /q /norestart'
+    !endif
+FunctionEnd
+
 Function check_vc_redist
     ${If} ${RunningX64}
             ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" "Installed"
-            StrCmp $1 1 installed
+            StrCmp $1 1 installed install_vc_redist
     ${Else}
             ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Installed"
-            StrCmp $1 1 installed
+            StrCmp $1 1 installed install_vc_redist
     ${EndIf}
 
-    ;not installed, so run the installer
-!ifdef WIN64
-    ExecWait '$INSTDIR\vc_redist.x64.exe /q /norestart'
-!else
-    ExecWait '$INSTDIR\vc_redist.x86.exe /q /norestart'
-!endif
-
     installed:
+    ; Visual Studio 2017 version 15.6 introduced msvcp140_1
+    ; Visual Studio 2019 ? introduced msvcp140_2
+    ; 14.24 OKs
+
+    ;check vc_redist version <14.20 is not good
+    ${If} ${RunningX64}
+            ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" "Minor"
+            ;StrCmp $1 24 version_ok
+    ${Else}
+            ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Minor"
+            ;StrCmp $1 24 version_ok
+    ${EndIf}
+    ${VersionCompare} $1 "24" $var
+    ${If} $var >= 2
+        call install_vc_redist
+    ${EndIf}
+
+    version_ok:
     ;we are done
 
 FunctionEnd
