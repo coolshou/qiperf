@@ -80,11 +80,11 @@ int dlgOption::getWaitServerReady()
     return ui->sb_WaitServerReady->value();
 }
 
-void dlgOption::setTPsize(int width, int heigth)
-{
-    // ui->sb_width_tp->setValue(width);
-    // ui->sb_heigth_tp->setValue(heigth);
-}
+// void dlgOption::setTPsize(int width, int heigth)
+// {
+//     // ui->sb_width_tp->setValue(width);
+//     // ui->sb_heigth_tp->setValue(heigth);
+// }
 
 void dlgOption::changeEvent(QEvent *e)
 {
