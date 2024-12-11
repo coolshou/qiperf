@@ -35,9 +35,9 @@ DEBIAN.files += \
     debian/qiperftray.links \
     TODO
 
-#    deploy.sh
-#    build_x64.bat
-
+MISC.files += \
+   deploy.sh \
+   build_x64.bat
 
 NSIS.files += \
     qiperf.nsi
