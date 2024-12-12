@@ -182,17 +182,18 @@ QModelIndex EndPointMgr::indexFromItem(EndPoint *item){
 bool EndPointMgr::add(QString id, QString data)
 {
     if (isExist(id)){    //check id exist
-        QJsonParseError error;
-        QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8(), &error);
-        if (error.error == QJsonParseError::NoError) {
+        // QJsonParseError error;
+        // QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8(), &error);
+        // if (error.error == QJsonParseError::NoError) {
             // QJsonObject jsonObject = doc.object();
             EndPoint* ep = getEndPoint(id);
             ep->loadData(data);
             ep->updateTimeStemp();
-        }else{
-            qDebug() << "wrong format (" << error.errorString() << "\n" << data;
-        }
-        return false;
+        // }else{
+        //     qDebug() << "wrong format (" << error.errorString() << "\n" << data;
+        // }
+        // return false;
+            return true;
     } else {
         //new endpoint
         return addEndpoint(id, data);
@@ -203,7 +204,8 @@ bool EndPointMgr::addEndpoint(QString id, QString data)
 {
     EndPoint* ep = new EndPoint(id, data, rootItem);
     int ibegin = rootItem->childCount();
-    int iend = rootItem->childCount()+1;
+    // int iend = rootItem->childCount()+1;
+    int iend = rootItem->childCount();
     QModelIndex midx = indexFromItem(rootItem);
     beginInsertRows(midx, ibegin, iend);
     rootItem->appendChild(ep);
