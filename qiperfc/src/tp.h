@@ -34,19 +34,20 @@ public:
         comment=8
     };
     Q_ENUM(cols)
+    //basic
     void appendChild(TP *child);
-    void clear();
-    int findChild(TP *child);
-
     TP *child(int row);
-    QList<TP*> getChilds();
     int childCount() const;
-    bool haveChilds();
     int columnCount() const;
     QVariant data(int column) const;
-    int setData(int column, QVariant var);
     int row() const;
     TP *parentItem();
+    //end basic
+    void clear();
+    int findChild(TP *child);
+    QList<TP*> getChilds();
+    bool haveChilds();
+    int setData(int column, QVariant var);
     bool removeChildren(int position, int count);
     //explicit EndPoint(QString id, QString data, QObject *parent = nullptr);
 

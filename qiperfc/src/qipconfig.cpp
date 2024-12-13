@@ -363,7 +363,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                     if (!bidir){
                         if (!reverse){
                             if (d.exists(serverfile)){
-                                qDebug() << "delaytime: " << QString::number(delaytime) << " serverfile:" << serverfile;
+                                qInfo() << "delaytime: " << QString::number(delaytime) << " serverfile:" << serverfile;
                                 //iperf server record file
                                 IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                            idx, true, parallel,
@@ -379,7 +379,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             }
                         }else{
                             if (d.exists(clientfile)){
-                                qDebug() << "delaytime: " << QString::number(delaytime) << " clientfile:" << clientfile;
+                                qInfo() << "delaytime: " << QString::number(delaytime) << " clientfile:" << clientfile;
                                 //iperf client record file
                                 IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                            idx, false, parallel,
@@ -396,7 +396,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                         }
                     }else{
                         if (d.exists(serverfile)){
-                            qDebug()<< "delaytime: " << QString::number(delaytime) << "bidir serverfile:" << serverfile;
+                            qInfo()<< "delaytime: " << QString::number(delaytime) << "bidir serverfile:" << serverfile;
                             IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                        idx, true, parallel,
                                                                        bidir, "Tx", serverfile, delaytime);
@@ -410,7 +410,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             qDebug() << "bidir: not exist serverfile:" << serverfile;
                         }
                         if (d.exists(clientfile)){
-                            qDebug()<< "delaytime: " << QString::number(delaytime) << "bidir clientfile:" << clientfile;
+                            qInfo()<< "delaytime: " << QString::number(delaytime) << "bidir clientfile:" << clientfile;
                             IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                        idx, false, parallel,
                                                                        bidir, "Rx", clientfile, delaytime);

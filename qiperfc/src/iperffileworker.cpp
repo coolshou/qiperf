@@ -115,7 +115,7 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
             }
         }
         else {
-            qDebug() << "TPMgr::onIperfTPdata wrong format:(" << error.errorString() << "\n" << data;
+            qDebug() << "IperfFileWorker::onThroughputData wrong format:(" << error.errorString() << "\n" << data;
             return;
         }
     }

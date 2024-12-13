@@ -42,7 +42,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
         }
     }
     QString settingfilename = settingfilepath + QDir::separator() + QIPERFC_NAME + ".ini";
-    qDebug() << "settingfilename:" << settingfilename;
+    qInfo() << "settingfilename:" << settingfilename;
     m_TestStartTime = QDateTime();
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     m_clipboard = QApplication::clipboard();
@@ -56,7 +56,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
         logdir.mkpath(".");
     }
     m_throughputview = new ThroughputView(ui->actionCopy, ui->actionPaste,
-                                          ui->actionDelete, ui->actionCopyText);
+                                          ui->actionDelete, ui->actionCopyText,
+                                          m_TPGroup);
     connect(m_throughputview, &ThroughputView::updateActions, this, &QIperfC::onUpdateActions);
     connect(m_throughputview, &ThroughputView::updateActionsSave, this, &QIperfC::onUpdateActionsSave);
     connect(m_throughputview, &ThroughputView::updateActionsEdit, this, &QIperfC::onUpdateActionsEdit);
@@ -868,6 +869,7 @@ void QIperfC::loadSettings()
     m_TPExportWidth =m_settings->value("TPExportWidth", 1280).toInt();
     m_TPExportHeigth =m_settings->value("TPExportHeigth", 180).toInt();
     m_TPGroup =m_settings->value("TPGroup", false).toBool();
+    qDebug() << "m_TPGroup:" << m_TPGroup;
 //    m_frm_option->setWaitServerReady();
     m_settings->endGroup();
 

@@ -41,20 +41,23 @@ class TPMgr : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit TPMgr(QObject *parent = nullptr);
+    explicit TPMgr(bool showgroup=false, QObject *parent = nullptr);
     ~TPMgr() override;
-    ////basic read only data model
-    QModelIndex index(int row, int column, const QModelIndex &parent) const override;
-    QModelIndex parent(const QModelIndex &idx) const override;
-    int rowCount(const QModelIndex &parent=QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent) const override;
-    QVariant data(const QModelIndex &idx, int role) const override;
+    // //basic read only data model
     // // editable data model
+    QVariant data(const QModelIndex &idx, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role= Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &idx) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+
     // setData() const override; // require emit dataChanged()
     // flags() const override;  //return ItemIsEditable
 //    Qt::ItemFlags flags(const QModelIndex &idx) const override;
     // // header display mathod
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+
     //setHeaderData() const override;  // require emit headerDataChanged()
     //
 //    bool removeRow(int row, const QModelIndex &parent = QModelIndex()) override;
@@ -90,6 +93,7 @@ public:
     void onPaste(QString data);
     void startUpdater();
     void stopUpdater();
+    void setTestData();
 
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);

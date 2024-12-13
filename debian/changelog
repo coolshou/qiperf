@@ -1,3 +1,10 @@
+qiperf (0.7.11312.11-1) unstable; urgency=medium
+
+  * Fix qiperfd list have empty item at end of list cause sorting column display extra empty rows.
+  * Move to QT6 build
+
+ -- coolshou <coolshou2060@gmail.com>  Wed, 11 Dec 2024 10:00:00 +0800
+
 qiperf (0.6.11312.10-1) unstable; urgency=medium
 
   * Fix wrong state of menu save when load config from args

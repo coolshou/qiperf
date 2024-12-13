@@ -9,14 +9,15 @@
 
 #include "tp.h"
 
-TPMgr::TPMgr(QObject *parent)
-    : QAbstractItemModel(parent)
+TPMgr::TPMgr(bool showgroup, QObject *parent)
+    : QAbstractItemModel(parent), m_showgroup(showgroup)
 {
 //    item = invisibleRootItem();
+    qDebug() << "TPMgr m_showgroup:" << m_showgroup;
     reset();
     // rootItem = new TP(("Root"), ("Root"), nullptr);
     // rootItem->setDataType(TPMgrData::root);
-    m_showgroup = false;
+    // m_showgroup = false;
     // groupItem = nullptr;
     // groupItem = new TP(("Total"), ("Total"), rootItem);
     // groupItem->setDataType(TPMgrData::group);
@@ -30,110 +31,83 @@ TPMgr::TPMgr(QObject *parent)
     // m_updater->setInterval(1000); //1 sec
     connect(m_updater, &QTimer::timeout, this, &TPMgr::onUpdater);
     startUpdater();
+
+    setTestData();
 }
 TPMgr::~TPMgr()
 {
     // qDeleteAll(m_tps);
     m_tps.clear();
 }
-QVariant TPMgr::data(const QModelIndex &idx, int role) const
+QVariant TPMgr::data(const QModelIndex &index, int role) const
 {
-    if (!idx.isValid()){
-        qDebug() << "data index.isValid: " << idx ;
+    if (!index.isValid()){
+        qDebug() << "data index.isValid: " << index ;
         return QVariant();
     }
+    //show a custom icon
+    // if (role == Qt::DecorationRole){
+    //     //folding icon
+    //     if (index.column()==0){
+    //         // qDebug() << "TPMgr::data: DecorationRole" << index.parent();
+    //         return QVariant(QIcon(":/folding/close"));
+    //     }
+    // }
+
     if (role == Qt::TextAlignmentRole){
-        if ((idx.column() == TP::cols::throughput)||
-            (idx.column() == TP::cols::mintp)||
-            (idx.column() == TP::cols::maxtp)||
-            (idx.column() == TP::cols::lostrate)){
+        if ((index.column() == TP::cols::throughput)||
+            (index.column() == TP::cols::mintp)||
+            (index.column() == TP::cols::maxtp)||
+            (index.column() == TP::cols::lostrate)){
             // align text data to center
             return Qt::AlignCenter;
         }
     }
-    TP *item = getItem(idx);
+
+    TP *item = static_cast<TP*>(index.internalPointer());
+    // TP *tpitem = getItem(index);
     if (role == Qt::ForegroundRole){
         // when item is disabled, grayout text
         if (! item->getEnabled()) {
             return m_disabledTextColor;
         }
     }
-
-   // if ((role == Qt::DecorationRole) && (idx.column()==TP::cols::id)) {
-   //     //show a custom icon!!
-   //     qDebug() << "show DecorationRole folder";
-   //     return iconProvider.icon(QFileIconProvider::Folder);
-   // }
+/*
+    if (tpitem->getDataType()==TPMgrData::group){
+        qDebug() << "data: group:" << tpitem;
+        return QVariant(tpitem->data(index.column()));
+    }
+*/
     if (role != Qt::DisplayRole) {
         //this will show text data!!
-        //        qDebug() << "data not DisplayRole:" << index << Qt::endl;
+        // qDebug() << "data not DisplayRole:" << idx ;
         return QVariant();
     }
-//    if (role == Qt::DisplayRole || role == Qt::EditRole) {
-//        TP* item = getItem(index);
-//        return item->data(role);
-//    }
-//    return QVariant();
-    //    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
 
-
-//    TP *item = static_cast<TP*>(index.internalPointer());
     if (item->getDataType()==TPMgrData::config){
-        if (idx.column()== TP::cols::dir) {
-            if (!item->getEnabled()){
-                return QVariant("disable"+item->data(idx.column()).toString());
-            }
-        }
-        if ((idx.column() == TP::cols::throughput)||
-            (idx.column() == TP::cols::mintp) ||
-            (idx.column() == TP::cols::maxtp) ){
-            if (item->data(idx.column()).toDouble()<0){
+        // if (index.column()== TP::cols::dir) {
+        //     if (!item->getEnabled()){
+        //         return QVariant("disable"+item->data(index.column()).toString());
+        //     }
+        // }
+        if ((index.column() == TP::cols::throughput)||
+            (index.column() == TP::cols::mintp) ||
+            (index.column() == TP::cols::maxtp) ){
+            if (item->data(index.column()).toDouble()<0){
                 //do not show -1 value
                 return QVariant();
             }
         }
-        //     (idx.column() == TP::cols::lostrate)){
-        //     // TODO: this will keeps calc! not good
-        //     //special case of throughput data (sum of all iperf  --parallel value)
-        //     double tpvalue=0.0;
-        //     double tpMinvalue=0.0;
-        //     double tpMaxvalue=0.0;
-        //     double tpLostrate=0.0;
-        //     QList<TP *> tps=item->getChilds();
-        //     foreach(TP *tp, tps){
-        //         qDebug() << "TP: " << tp->getTxRxThroughput();
-        //         tpvalue = tpvalue + tp->getTxRxThroughput().toDouble();
-        //         tpMinvalue = tpMinvalue + tp->getMinThroughput().toDouble();
-        //         tpMaxvalue = tpMaxvalue + tp->getMaxThroughput().toDouble();
-        //         tpLostrate = tpLostrate + tp->getLostRate().toDouble();
-        //         QCoreApplication::processEvents(QEventLoop::AllEvents);
-        //     }
-        //     if (idx.column()== TP::cols::throughput) {
-
-        //         return QVariant(tpvalue);
-        //     }
-        //     if (idx.column()== TP::cols::mintp) {
-        //         return QVariant(tpMinvalue);
-        //     }
-        //     if (idx.column()== TP::cols::maxtp) {
-        //         return QVariant(tpMaxvalue);
-        //     }
-        //     if (idx.column()== TP::cols::lostrate) {
-        //         return QVariant(tpLostrate);
-        //     }
-        // }
     }
-//    if (idx.column()== TP::cols::lostrate) {
-//        QModelIndex id = index(idx.row(), TP::cols::id, idx.parent());
-//        TP *item = getItem(id);
-//        qDebug() << item << " "<< item->row() << " getLostRate:" << item->getLostRate();
-//        //TODO: special case of loserate date
-//        return QVariant(item->getLostRate());
-//    }
-
-    return item->data(idx.column());
+    return item->data(index.column());
 }
 
+Qt::ItemFlags TPMgr::flags(const QModelIndex &index) const {
+    if (!index.isValid())
+        return Qt::NoItemFlags;
+
+    return QAbstractItemModel::flags(index);
+}
 QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
                                  int role) const
 {
@@ -235,8 +209,9 @@ int TPMgr::rowCount(const QModelIndex &parent) const
 }
 
 bool TPMgr::add(QString data)
-{
-    //json data
+{   //add iperf config item
+
+    //data: json format data
     //Get largest idx number!!
     int idx = getMaxIdx();
     // idx = idx + 1;
@@ -248,6 +223,7 @@ bool TPMgr::add(QString data)
     }else{
         pitm = rootItem;
     }
+    qDebug() <<"idx:" << idx << " add pitm: " << pitm << " data:" << data;
     TP *tp = new TP(QString::number(idx), data, pitm);
     tp->setDataType(TPMgrData::config);
     pitm->appendChild(tp);
@@ -395,7 +371,7 @@ bool TPMgr::loaddata(QByteArray data)
             QJsonDocument doc(obj);
             QString strJson(doc.toJson(QJsonDocument::Compact));
             add(strJson);
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
         return true;
     }else{
@@ -406,14 +382,28 @@ bool TPMgr::loaddata(QByteArray data)
 
 void TPMgr::reset(){
     //reset all data to none
-    beginResetModel();
+    // beginResetModel();
     m_tps.clear();
-    rootItem = new TP(("Root"), ("Root"));
+    rootItem = new TP(("Root"), ("Root")); //
     rootItem->setDataType(TPMgrData::root);
-    groupItem = new TP(("Total"), ("Total"), rootItem);
+    groupItem = new TP("Total", "Total", rootItem);
     groupItem->setDataType(TPMgrData::group);
+    rootItem->appendChild(groupItem);
 
-    endResetModel();
+    // TP *g = new TP("N", "N", rootItem);
+    // rootItem->appendChild(g);
+    // endResetModel();
+    // if(m_showgroup){
+        // QModelIndex idx = getRootItemIdx();
+        // int i = rootItem->childCount();
+        // qDebug() << "idx:" << idx << " count:" << QString::number(i);
+        // beginInsertRows(QModelIndex(), 0 ,0);
+        // beginInsertRows(idx, i, i);
+
+        // endInsertRows();
+    // }
+    qDebug() << "rootItem:" << rootItem << " groupItem:" << groupItem;
+
     m_intervals.clear();
 }
 
@@ -445,6 +435,7 @@ TP *TPMgr::getItem(const QModelIndex &index) const
     if (index.isValid()) {
         TP* item = static_cast<TP*>(index.internalPointer());
         if (item){
+            // qDebug() << "TPMgr::getItem:" << item;
             return item;
         }else{
             qDebug() << "getItem: no item??";
@@ -462,23 +453,24 @@ TP *TPMgr::getItem(const QModelIndex &index) const
 
 TP *TPMgr::getRootItem() const
 {
-    if (m_showgroup){
-        return groupItem;
-    }else{
+    // if (m_showgroup){
+    //     return groupItem;
+    // }else{
         return rootItem;
-    }
+    // }
 }
 
 QModelIndex TPMgr::getRootItemIdx()
 {
     QModelIndex idx;
-    TP *itm;
-    if (m_showgroup){
-        itm = groupItem;
-    }else{
-        itm = rootItem;
-    }
-    idx = indexFromItem(itm);
+    // TP *itm;
+    // if (m_showgroup){
+    //     itm = groupItem;
+    // }else{
+        // itm = rootItem;
+    // }
+    // idx = indexFromItem(itm);
+    idx = indexFromItem(rootItem);
     // qInfo() << "idx:" << idx << " rootItem:" << rootItem;
     return idx;
 }
@@ -544,6 +536,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
     }
     TP *c = getItemByIdx(midx+"_"+idx, tp); //iperf pair config item
     if (c==nullptr){
+        //New
         c = new TP(midx+"_"+idx, "", tp);
         c->setThroughput(dir, value);
         c->setDirection(dir);
@@ -565,6 +558,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
         }
 
     }
+    qDebug() << "TPMgr::addTPdata, tp:" << tp << " child:" << c;
 }
 
 TP *TPMgr::getItemByIdx(QString midx, TP *item)
@@ -709,7 +703,7 @@ void TPMgr::onPaste(QString data)
 void TPMgr::startUpdater()
 {
     if (!m_updater->isActive()){
-        m_updater->start(1000); // 1 sec, TODO: why slow to show up the throughput/lost rate in cfg row??
+        m_updater->start(500); // 1 sec, TODO: why slow to show up the throughput/lost rate in cfg row??
     }
 }
 
@@ -718,6 +712,34 @@ void TPMgr::stopUpdater()
     if (m_updater->isActive()){
         m_updater->stop();
     }
+}
+
+void TPMgr::setTestData()
+{
+    // add test data to show tree
+    // groupItem = new TP("Total", "Total", rootItem);
+    // rootItem->appendChild(groupItem);
+    QList<TP*> cfgs;
+
+    TP *cfg = new TP("cfg1", "cfg1", groupItem);
+    cfg->setDataType(TPMgrData::config);
+    cfgs << cfg;
+    TP *cfg2 = new TP("cfg2", "cfg2", groupItem);
+    cfg2->setDataType(TPMgrData::config);
+    cfgs << cfg2;
+    foreach(TP *c, cfgs){
+        groupItem->appendChild(c);
+        for (int i = 0; i < 3; ++i) {
+            TP *child = new TP(QString::number(i), QString::number(i), c);
+            c->appendChild(child);
+            for (int j = 0; j < 2; ++j) {
+                TP *gchild = new TP(QString::number(j), QString::number(j), child);
+                child->appendChild(gchild);
+
+            }
+        }
+    }
+
 }
 
 void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
@@ -802,10 +824,12 @@ void TPMgr::setShowGroup(bool bShow)
 {
     qDebug() << "TODO: setShowGroup: " << bShow;
     m_showgroup = bShow;
+    //beginMoveRows()
+    //endMoveRows()
     if (m_showgroup){
         qDebug() << "show groupItem";
         // if (!groupItem){
-        rootItem->appendChild(groupItem);
+        // rootItem->appendChild(groupItem);
         // }
 
     }else{
