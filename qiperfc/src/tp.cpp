@@ -21,6 +21,8 @@ TP::TP(QString id, QString data, TP *parent)
                  "", ""}; // lost rate, comment
     if (data!="" && data !="Root" && data !="Total"){
         loadData(data);
+    }else{
+        qDebug() << "create TP:" << id << " data:" << data;
     }
 }
 

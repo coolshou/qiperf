@@ -10,9 +10,10 @@
 
 // ThroughputView::ThroughputView(QIperfC *main, QWidget *parent) : AbstractView(parent)
 ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
-                               QAction *aCopyText, QWidget *parent) : AbstractView(parent)
+                               QAction *aCopyText,  bool showgroup,
+                               QWidget *parent) : AbstractView(parent)
     , ui(new Ui::ThroughputView), m_actionCopy(aCopy),m_actionPaste(aPaste),
-    m_actionDelete(aDelete),m_actionCopyText(aCopyText)
+    m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_showgroup(showgroup)
 //, m_main(main)
 {
     ui->setupUi(this);
@@ -401,7 +402,7 @@ void ThroughputView::initThroughputChart()
     connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &ThroughputView::onPlotContextMenuRequest);
     ui->hl_console->addWidget(m_tpplot);
 
-    m_tpmgr = new TPMgr(this);
+    m_tpmgr = new TPMgr(m_showgroup, this);
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);

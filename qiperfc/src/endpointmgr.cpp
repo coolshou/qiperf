@@ -155,6 +155,7 @@ int EndPointMgr::rowCount(const QModelIndex &parent) const
 }
 
 QModelIndex EndPointMgr::indexFromItem(EndPoint *item){
+    //get item's QModelIndex
     if(item == rootItem || item == nullptr)
         return QModelIndex();
     EndPoint *parent = item->parentItem();

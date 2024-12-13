@@ -32,7 +32,7 @@ public:
     // explicit ThroughputView(QIperfC *main, QWidget *parent = nullptr);
     //explicit ThroughputView(QWidget *parent = nullptr);
     explicit ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
-                            QAction *aCopyText,
+                            QAction *aCopyText, bool showgroup=false,
                             QWidget *parent = nullptr);
     ~ThroughputView() override;
 
