@@ -88,6 +88,7 @@ private slots:
     void onWSactMessage(QString msg); //procress websocket action message
     void onNewClient(QHostAddress addr); //
 private:
+    void checkFirewallStatus();
     QString tmppath;
     QString qiperfdlog;
     QString tmpfilepath;
