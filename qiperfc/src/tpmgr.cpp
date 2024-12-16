@@ -662,6 +662,7 @@ int TPMgr::getMaxIdx()
 {
     int maxIdx=0;
     int idx = 0;
+
     TP *itm;
     if (m_showgroup){
         itm = groupItem;
@@ -677,6 +678,14 @@ int TPMgr::getMaxIdx()
                 maxIdx++;
             }
             QCoreApplication::processEvents(QEventLoop::AllEvents);
+// =======
+//     foreach(auto tp, rootItem->getChilds()){
+//         idx = tp->getID().toInt();
+//         if (idx>maxIdx){
+//             maxIdx = idx;
+//         }else{
+//             maxIdx++;
+// >>>>>>> dev
         }
     }
     return maxIdx;

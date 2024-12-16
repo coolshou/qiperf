@@ -776,12 +776,14 @@ Function check_vc_redist
             ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Minor"
             ;StrCmp $1 24 version_ok
     ${EndIf}
-    ${VersionCompare} $1 "24" $var
-    ${If} $var >= 2
+    IntCmp $1 24 issame install_vc_redist morethan
+    install_vc_redist:
+    ;${If} $var >= 2
         call install_vc_redist
-    ${EndIf}
+    ;${EndIf}
 
-    version_ok:
+    issame:
+    morethan:
     ;we are done
 
 FunctionEnd
