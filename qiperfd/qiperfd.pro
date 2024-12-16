@@ -108,6 +108,13 @@ defineReplace(extract_version) {
     return($$version)
 }
 
+# get git branch & version
+GITBRANCH = $$system(git rev-parse --abbrev-ref HEAD)
+DEFINES += GITBRANCH=\\\"$$GITBRANCH\\\"
+GITVER = $$system(git rev-parse --short=8 HEAD)
+DEFINES += GITVER=\\\"$$GITVER\\\"
+
+
 VERSION = $$extract_version(14)
 #VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFD_VERSION\"" | awk -F\' \'  \'{print $3}\' | awk -F\'\"\'  \'{print $2}\')
 message(QIPERFD_VERSION: $$VERSION)

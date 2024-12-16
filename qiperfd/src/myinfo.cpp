@@ -109,7 +109,7 @@ QString MyInfo::collectInfo()
 
     mainObject.insert("Manager", m_ifname);
     mainObject.insert("update", update);
-    mainObject.insert("qiperfd", QString(QIPERFD_VERSION));
+    mainObject.insert("qiperfd", QString(QIPERFD_VERSION)+" git:" + GITBRANCH+GITVER);
     //serial
     mainObject.insert("serial", collectSerial());
 
