@@ -204,6 +204,11 @@ defineReplace(extract_version) {
     # Return the extracted version
     return($$version)
 }
+# get git branch & version
+GITBRANCH = $$system(git rev-parse --abbrev-ref HEAD)
+DEFINES += GITBRANCH=\\\"$$GITBRANCH\\\"
+GITVER = $$system(git rev-parse --short=8 HEAD)
+DEFINES += GITVER=\\\"$$GITVER\\\"
 
 # Set the VERSION variable
 VERSION = $$extract_version(20)

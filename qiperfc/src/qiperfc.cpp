@@ -670,9 +670,10 @@ void QIperfC::onConfig()
 void QIperfC::onAbout()
 {
     QMessageBox::about(this, "About", QString(QIPERFC_NAME)+
-                       " v"+QString(QIPERFC_VERSION)+"\n"
-                       "Auther: Jimmy Yeh\n"
-                                                     "URL: https://github.com/coolshou/qiperf");
+                       "\n v"+QString(QIPERFC_VERSION)+
+                       "\n git:" + GITBRANCH+GITVER+
+                       "\n Auther: Jimmy Yeh"
+                       "\nURL: https://github.com/coolshou/qiperf");
 }
 
 void QIperfC::onShowDebugLog()
