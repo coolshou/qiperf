@@ -11,7 +11,11 @@
 #include "qiperfd.h"
 #include "../src/comm.h"
 #include "../src/versions.h"
-
+#if defined(Q_OS_WIN32)
+#include <comdef.h>
+#include <Wbemidl.h>
+#pragma comment(lib, "wbemuuid.lib")
+#endif
 #include <QDebug>
 
 QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
@@ -888,7 +892,7 @@ void QIperfd::checkFirewallStatus()
         &pEnumerator);
 
     if (FAILED(hres)) {
-        QMessageBox::critical(this, "Error", "Query for firewall status failed.");
+        // QMessageBox::critical(this, "Error", "Query for firewall status failed.");
         err = "Error: Query for firewall status failed.";
         informMessage(err, true);
         pSvc->Release();
