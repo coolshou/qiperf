@@ -161,6 +161,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     connect(m_filewatcher, &FileWatcher::onNewLine, this, &QIperfd::onNewLine);
 
     informMessage(INFO_QIPERFD_STARTED, true);
+    checkFirewallStatus();
 }
 
 QIperfd::~QIperfd()
@@ -778,4 +779,155 @@ void QIperfd::onNewClient(QHostAddress addr)
     }
     //TODO: multi file client
     m_fileclient = new FileClient(QIPERF_FILEPORT, addr.toString());
+}
+
+void QIperfd::checkFirewallStatus()
+{
+#if defined(Q_OS_WIN32)
+    HRESULT hres;
+    QString err ="";
+    // Initialize COM
+    hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+    if (FAILED(hres)) {
+        // QMessageBox::critical(this, "Error", "Failed to initialize COM library.");
+        err = "Error: Failed to initialize COM library.";
+        informMessage(err, true);
+        return;
+    }
+
+    // Initialize security
+    hres = CoInitializeSecurity(
+        NULL,
+        -1,                          // COM authentication
+        NULL,                        // Authentication services
+        NULL,                        // Reserved
+        RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
+        RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
+        NULL,                        // Authentication info
+        EOAC_NONE,                   // Additional capabilities
+        NULL                         // Reserved
+        );
+
+    if (FAILED(hres)) {
+        // QMessageBox::critical(this, "Error", "Failed to initialize security.");
+        err = "Error: Failed to initialize security.";
+        informMessage(err, true);
+        CoUninitialize();
+        return;
+    }
+
+    // Obtain the initial locator to WMI
+    IWbemLocator *pLoc = NULL;
+
+    hres = CoCreateInstance(
+        CLSID_WbemLocator,
+        0,
+        CLSCTX_INPROC_SERVER,
+        IID_IWbemLocator, (LPVOID *)&pLoc);
+
+    if (FAILED(hres)) {
+        // QMessageBox::critical(this, "Error", "Failed to create IWbemLocator object.");
+        err = "Error: Failed to create IWbemLocator object.";
+        informMessage(err, true);
+        CoUninitialize();
+        return;
+    }
+
+    // Connect to WMI through the IWbemLocator::ConnectServer method
+    IWbemServices *pSvc = NULL;
+
+    hres = pLoc->ConnectServer(
+        _bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
+        NULL,                    // User name. NULL = current user
+        NULL,                    // User password. NULL = current
+        0,                       // Locale. NULL indicates current
+        NULL,                    // Security flags.
+        0,                       // Authority (for example, Kerberos)
+        0,                       // Context object
+        &pSvc                    // pointer to IWbemServices proxy
+        );
+
+    if (FAILED(hres)) {
+        // QMessageBox::critical(this, "Error", "Could not connect to WMI namespace.");
+        err = "Error: Could not connect to WMI namespace. ROOT\\CIMV2";
+        informMessage(err, true);
+        pLoc->Release();
+        CoUninitialize();
+        return;
+    }
+
+    // Set security levels on the proxy
+    hres = CoSetProxyBlanket(
+        pSvc,                        // Indicates the proxy to set
+        RPC_C_AUTHN_WINNT,           // RPC_C_AUTHN_xxx
+        RPC_C_AUTHZ_NONE,            // RPC_C_AUTHZ_xxx
+        NULL,                        // Server principal name
+        RPC_C_AUTHN_LEVEL_CALL,      // RPC_C_AUTHN_LEVEL_xxx
+        RPC_C_IMP_LEVEL_IMPERSONATE, // RPC_C_IMP_LEVEL_xxx
+        NULL,                        // client identity
+        EOAC_NONE                    // proxy capabilities
+        );
+
+    if (FAILED(hres)) {
+        // QMessageBox::critical(this, "Error", "Could not set proxy blanket.");
+        err = "Error: Could not set proxy blanket.";
+        informMessage(err, true);
+        pSvc->Release();
+        pLoc->Release();
+        CoUninitialize();
+        return;
+    }
+
+    // Use the IWbemServices pointer to make requests of WMI
+    IEnumWbemClassObject* pEnumerator = NULL;
+    hres = pSvc->ExecQuery(
+        bstr_t("WQL"),
+        bstr_t("SELECT * FROM Win32_FirewallProduct"),
+        WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+        NULL,
+        &pEnumerator);
+
+    if (FAILED(hres)) {
+        QMessageBox::critical(this, "Error", "Query for firewall status failed.");
+        err = "Error: Query for firewall status failed.";
+        informMessage(err, true);
+        pSvc->Release();
+        pLoc->Release();
+        CoUninitialize();
+        return;
+    }
+
+    // Get the data from the query
+    IWbemClassObject *pclsObj = NULL;
+    ULONG uReturn = 0;
+
+    while (pEnumerator) {
+        HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1,
+                                       &pclsObj, &uReturn);
+
+        if (0 == uReturn) {
+            break;
+        }
+
+        VARIANT vtProp;
+
+        // Get the value of the DisplayName property
+        hr = pclsObj->Get(L"DisplayName", 0, &vtProp, 0, 0);
+        QString firewallProduct = QString::fromWCharArray(vtProp.bstrVal);
+        // QMessageBox::information(this, "Firewall Status", "Firewall Product: " + firewallProduct);
+        err = "Firewall Status: Firewall Product: " + firewallProduct;
+        informMessage(err, true);
+        VariantClear(&vtProp);
+
+        pclsObj->Release();
+    }
+
+    // Cleanup
+    pSvc->Release();
+    pLoc->Release();
+    pEnumerator->Release();
+    CoUninitialize();
+#else
+    qDebug() << "TODO: Firewall detect!!";
+#endif
 }
