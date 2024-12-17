@@ -1,5 +1,6 @@
 qiperf (0.7.11312.16-1) unstable; urgency=medium
 
+  * Fix Ignore load iperf log file TP value on interval < 1 sec (invalid TP value?)
   * Fix qiperfd list have empty item at end of list cause sorting column display extra empty rows.
   * Move to QT6 build
 

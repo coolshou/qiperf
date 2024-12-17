@@ -352,11 +352,13 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                     int parallel = jClient.value("parallel").toInt();
                     QString version = jClient.value("version").toString();
                     int clientport = jClient.value("port").toInt();
+                    uint clientinterval = jClient.value("interval").toInt();
                     //server
                     jServer = jObj.value("server").toObject();
                     QString serverip = jServer.value("bind").toString();
                     int serverport = jServer.value("port").toInt();
                     int delaytime = jServer.value("delaytime").toInt();
+                    uint serverinterval = jServer.value("interval").toInt();
                     QString serverfile = logpath + QDir::separator() + serverip + "_" +QString::number(serverport)+ ".log";
                     QString clientfile = logpath + QDir::separator() + clientip + "-" + serverip + "_" +QString::number(clientport)+ ".log";
 
@@ -367,7 +369,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 //iperf server record file
                                 IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                            idx, true, parallel,
-                                                                           bidir, "Tx", serverfile, delaytime);
+                                                                           bidir, "Tx", serverfile, delaytime, serverinterval);
                                 m_fileworkers.append(ifw);
                                 // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
@@ -383,7 +385,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 //iperf client record file
                                 IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                            idx, false, parallel,
-                                                                           bidir, "Rx", clientfile, delaytime);
+                                                                           bidir, "Rx", clientfile, delaytime, clientinterval);
                                 m_fileworkers.append(ifwc);
                                 // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
@@ -399,7 +401,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             qInfo()<< "delaytime: " << QString::number(delaytime) << "bidir serverfile:" << serverfile;
                             IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                        idx, true, parallel,
-                                                                       bidir, "Tx", serverfile, delaytime);
+                                                                       bidir, "Tx", serverfile, delaytime, serverinterval);
                             m_fileworkers.append(ifw);
                             // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
@@ -413,7 +415,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             qInfo()<< "delaytime: " << QString::number(delaytime) << "bidir clientfile:" << clientfile;
                             IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                        idx, false, parallel,
-                                                                       bidir, "Rx", clientfile, delaytime);
+                                                                       bidir, "Rx", clientfile, delaytime, clientinterval);
                             m_fileworkers.append(ifwc);
                             // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);

@@ -169,6 +169,20 @@ void IperfWrapper::parserIperf3(QString linedata)
             QStringList data = linedata.split(" ", Qt::SkipEmptyParts);
             if (data.length()>=6){
                 QString sInterval  = data[0]; // Interval
+                // check report interval value is correct (smallest value 1 sec)
+                double interval = 0.0;
+                if (sInterval.contains("-")){
+                    QStringList ds = sInterval.split("-");
+                    if (ds.length()==2){
+                        interval = ds[1].toDouble() - ds[0].toDouble();
+                        // qDebug() << "ds[1]:" << ds[1] << " ds[0]:" << ds[0] << "====interval:" << QString::number(interval);
+                    }
+                }
+                if (interval<m_interval){
+                    qDebug() << "interval value:" << QString::number(interval) << " expect:" << QString::number(m_interval);
+                    return;
+                }
+
                 if (!m_tpdatas.contains(sInterval)){
                     QJsonArray lst =QJsonArray();
                     m_tpdatas.insert(sInterval, lst);
@@ -176,6 +190,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                 if (m_tpdatas[sInterval].count()<iparallel){
                     QJsonObject irec = QJsonObject();
                     irec.insert("idx", idx+sTag);  // parallel num
+                    irec.insert("interval", interval);  // interval
                     irec.insert("value", data[4]);  // Bitrate
                     irec.insert("unit", data[5]);  // Bitrate unit
                     if (m_protocal.contains("UDP")){
@@ -264,6 +279,11 @@ void IperfWrapper::setIperf(QString version, QString protocal)
 void IperfWrapper::setDelaytime(int delaytime)
 {
     m_delaytime = delaytime;
+}
+
+void IperfWrapper::setInterval(uint interval)
+{
+    m_interval = interval;
 }
 
 void IperfWrapper::work()
