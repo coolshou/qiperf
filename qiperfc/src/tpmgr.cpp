@@ -32,7 +32,7 @@ TPMgr::TPMgr(bool showgroup, QObject *parent)
     connect(m_updater, &QTimer::timeout, this, &TPMgr::onUpdater);
     startUpdater();
 
-    setTestData();
+    // setTestData();
 }
 TPMgr::~TPMgr()
 {
@@ -750,6 +750,7 @@ void TPMgr::setTestData()
         groupItem->appendChild(c);
         for (int i = 0; i < 3; ++i) {
             TP *child = new TP(QString::number(i), QString::number(i), c);
+            child->setDataType(TPMgrData::TP);
             c->appendChild(child);
             for (int j = 0; j < 2; ++j) {
                 TP *gchild = new TP(QString::number(j), QString::number(j), child);

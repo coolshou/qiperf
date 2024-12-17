@@ -39,4 +39,6 @@ override_dh_builddeb:
 override_dh_shlibdeps:
 	dh_shlibdeps
 	# for ubuntu 24.10 QT6
+	sed -i "s/libqt6network6t64/libqt6network6 | libqt6network6t64/g" debian/qiperfc.substvars
 	sed -i "s/libqt6network6t64/libqt6network6 | libqt6network6t64/g" debian/qiperfd.substvars
+	sed -i "s/libqt6network6t64/libqt6network6 | libqt6network6t64/g" debian/qiperftray.substvars
