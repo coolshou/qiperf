@@ -20,6 +20,7 @@ public:
     void setFile(QString filename);
     void setIperf(QString version, QString protocal);
     void setDelaytime(int delaytime);
+    void setInterval(uint interval);
 
 public slots:
     void work();
@@ -40,6 +41,7 @@ private:
     QString m_version;
     QString m_protocal;
     int m_delaytime;
+    uint m_interval;
 };
 
 #endif // IPERFWRAPPER_H

@@ -10,7 +10,7 @@
 IperfFileWorker::IperfFileWorker(QString version, QString protocal,
                                  int idx, bool servermode, int parallel,
                                  bool bidir, QString bidirtag , QString filename,
-                                 int delay, QObject *parent)
+                                 int delay, uint interval, QObject *parent)
     : QObject{parent}, m_version(version), m_protocal(protocal),
     m_idx(idx), m_servermode(servermode), m_parallel(parallel),
     m_bidir(bidir), m_bidirtag(bidirtag), m_filename(filename),
@@ -22,6 +22,7 @@ IperfFileWorker::IperfFileWorker(QString version, QString protocal,
     m_iperfwrapper->setFile(filename);
     m_iperfwrapper->setIperf(version, protocal);
     m_iperfwrapper->setDelaytime(delay);
+    m_iperfwrapper->setInterval(interval);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfFileWorker::onThroughputData);
     connect(m_iperfwrapper, &IperfWrapper::progress, this, &IperfFileWorker::onProgress);
     connect(m_thread, &QThread::started, m_iperfwrapper, &IperfWrapper::work);

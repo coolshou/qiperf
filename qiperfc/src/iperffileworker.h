@@ -23,7 +23,8 @@ public:
     explicit IperfFileWorker(QString version, QString protocal,
                              int idx, bool servermode, int parallel,
                              bool bidir, QString bidirtag , QString filename,
-                             int delay=0, QObject *parent = nullptr);
+                             int delay=0, uint interval=1,
+                             QObject *parent = nullptr);
     ~IperfFileWorker();
     void start();
 public slots:
