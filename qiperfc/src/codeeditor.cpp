@@ -181,6 +181,7 @@ void CodeEditor::showSearchBar()
         m_hlsearch->addWidget(searchLabel);
         // Create a QLineEdit for searching
         searchBar = new QLineEdit(this);
+        searchBar->setText(this->textCursor().selectedText());
         searchBar->setPlaceholderText("Search...");
         connect(searchBar, &QLineEdit::returnPressed, this, &CodeEditor::performSearch);
         m_hlsearch->addWidget(searchBar, 1);
