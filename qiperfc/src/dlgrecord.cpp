@@ -1,6 +1,8 @@
 #include "dlgrecord.h"
 #include "ui_dlgrecord.h"
 
+#include <QProcess>
+
 #include <QDebug>
 
 DlgRecord::DlgRecord(QWidget *parent) :
@@ -9,6 +11,7 @@ DlgRecord::DlgRecord(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DlgRecord::close);
+    connect(ui->pbBrowser, &QPushButton::clicked, this, &DlgRecord::onBrowser);
 
     m_fileModel = new QFileSystemModel(this);
     m_fileModel->setFilter(QDir::NoDotAndDotDot | QDir::Files);
@@ -95,4 +98,25 @@ void DlgRecord::onRefresh()
 {
     qDebug() << "onRefresh";
     m_fileModel->setRootPath(m_rootpath);
+}
+
+void DlgRecord::onBrowser(bool checked)
+{
+    Q_UNUSED(checked)
+    qDebug() << "open " << m_rootpath << " in file manager";
+    QProcess process;
+#if defined(Q_OS_WIN)
+    QString command = "explorer";
+    QStringList arguments;
+    arguments << QDir::toNativeSeparators(m_rootpath);
+#elif defined(Q_OS_MAC)
+    QString command = "open";
+    QStringList arguments;
+    arguments << m_rootpath;
+#else
+    QString command = "xdg-open";
+    QStringList arguments;
+    arguments << m_rootpath;
+#endif
+    process.startDetached(command, arguments);
 }
