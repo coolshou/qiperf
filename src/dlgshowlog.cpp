@@ -56,6 +56,7 @@ void DlgShowLog::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_F && event->modifiers() == Qt::ControlModifier){
         //ctrl + F
         ui->w_find->setVisible(true);
+        ui->le_find->setText(ui->te_log->textCursor().selectedText());
         ui->le_find->setFocus();
     }else if (event->key() == Qt::Key_Escape){
         ui->w_find->setVisible(false);
