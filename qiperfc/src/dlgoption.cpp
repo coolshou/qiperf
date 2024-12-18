@@ -32,7 +32,6 @@ void dlgOption::loadcfg(QSettings *cfg)
     ui->sb_heigth_tp->setValue(cfg->value("TPExportHeigth", 500).toInt());
     ui->cb_TPGroup->setChecked(cfg->value("TPGroup", false).toBool());
     ui->cb_IgnoreWrongInterval->setChecked(cfg->value("IgnoreWrongInterval", false).toBool());
-    // ui->cb_TPGroup->
     cfg->endGroup();
 
     cfg->beginGroup("agent");

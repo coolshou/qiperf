@@ -51,8 +51,7 @@ void ThroughputView::reset()
 
 QList<TP *> ThroughputView::getChilds(bool showAll)
 {
-    Q_UNUSED(showAll)
-    return m_tpmgr->getChilds();
+    return m_tpmgr->getChilds(showAll);
 }
 
 bool ThroughputView::addEndpoint(QString mgr, QString mdata)
