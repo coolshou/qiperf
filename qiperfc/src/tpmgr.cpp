@@ -15,13 +15,6 @@ TPMgr::TPMgr(bool showgroup, QObject *parent)
 //    item = invisibleRootItem();
     qDebug() << "TPMgr m_showgroup:" << m_showgroup;
     reset();
-    // rootItem = new TP(("Root"), ("Root"), nullptr);
-    // rootItem->setDataType(TPMgrData::root);
-    // m_showgroup = false;
-    // groupItem = nullptr;
-    // groupItem = new TP(("Total"), ("Total"), rootItem);
-    // groupItem->setDataType(TPMgrData::group);
-
     m_intervals.clear();
 
     QWidget widget;
@@ -72,6 +65,7 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             return m_disabledTextColor;
         }
     }
+
 /*
     if (tpitem->getDataType()==TPMgrData::group){
         qDebug() << "data: group:" << tpitem;
@@ -85,11 +79,15 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
     }
 
     if (item->getDataType()==TPMgrData::config){
-        // if (index.column()== TP::cols::dir) {
-        //     if (!item->getEnabled()){
-        //         return QVariant("disable"+item->data(index.column()).toString());
-        //     }
-        // }
+        if (index.column()== TP::cols::dir) {
+            if (!item->getEnabled()){
+                //when item disabled, let image grayout too.
+                return QVariant("disable"+item->data(index.column()).toString());
+             }
+            //else { // the column dir will be empty!!
+            //     return QVariant();
+            // }
+        }
         if ((index.column() == TP::cols::throughput)||
             (index.column() == TP::cols::mintp) ||
             (index.column() == TP::cols::maxtp) ){
@@ -99,6 +97,7 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             }
         }
     }
+
     return item->data(index.column());
 }
 
@@ -384,6 +383,7 @@ bool TPMgr::loaddata(QByteArray data)
 void TPMgr::reset(){
     //reset all data to none
     // beginResetModel();
+    // qDeleteAll(m_tps);
     m_tps.clear();
     rootItem = new TP(("Root"), ("Root")); //
     rootItem->setDataType(TPMgrData::root);
@@ -549,6 +549,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
             }
         }
         tp->appendChild(c); // add iperf pair config item to parent item
+        qDebug() << "TPMgr::addTPdata, parent:" << tp << " child:" << c;
     }else{
         c->setThroughput(dir, value);
         if (!pkt_lost.isEmpty()){
@@ -557,9 +558,9 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
-
+        qDebug() << "TPMgr::addTPdata, update child:" << c << " dir:" << dir << " tp: " << value;
     }
-    qDebug() << "TPMgr::addTPdata, tp:" << tp << " child:" << c;
+
 }
 
 TP *TPMgr::getItemByIdx(QString midx, TP *item)
@@ -678,14 +679,6 @@ int TPMgr::getMaxIdx()
                 maxIdx++;
             }
             QCoreApplication::processEvents(QEventLoop::AllEvents);
-// =======
-//     foreach(auto tp, rootItem->getChilds()){
-//         idx = tp->getID().toInt();
-//         if (idx>maxIdx){
-//             maxIdx = idx;
-//         }else{
-//             maxIdx++;
-// >>>>>>> dev
         }
     }
     return maxIdx;
