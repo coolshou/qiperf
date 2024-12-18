@@ -20,8 +20,8 @@
 const QByteArray QIPConfig::MAGIC_VALUE = ".QIP";
 const qint32 QIPConfig::VERSION = 2;
 
-QIPConfig::QIPConfig(QString tmppath, QObject *parent):
-    QObject(parent), m_tmppath(tmppath)
+QIPConfig::QIPConfig(QString tmppath, bool IgnoreWrongInterval, QObject *parent):
+    QObject(parent), m_tmppath(tmppath), m_IgnoreWrongInterval(IgnoreWrongInterval)
 {
     init();
 }
@@ -202,6 +202,8 @@ void QIPConfig::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                               QString value, QString unit, QString dir,
                               QString pkt_lost, QString pkt_total)
 {
+    qDebug() << "QIPConfig::onUpdateTPAvg " <<  midx << " sInterval:" << sInterval
+             << " idx:" << idx << " value: " << value;
     emit updateTPAvg(midx, sInterval, idx,
                      value, unit, dir,
                      pkt_lost, pkt_total);
@@ -340,6 +342,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
             QJsonObject jServer;
             QJsonArray arr = doc.array();
             // qDebug() << "tpcfg size: " << QString::number(arr.size());
+            qDebug() << "IgnoreWrongInterval:" << m_IgnoreWrongInterval;
             int idx=0;
             // for(QJsonArray::const_iterator it=arr.constBegin(); it!=arr.constEnd(); ++it){
             //     QJsonObject jObj = it->toObject();

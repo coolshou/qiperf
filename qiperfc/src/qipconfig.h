@@ -23,7 +23,7 @@ public:
 class QIPConfig : public QObject {
     Q_OBJECT
 public:
-    QIPConfig(QString tmppath, QObject *parent=nullptr);
+    QIPConfig(QString tmppath, bool IgnoreWrongInterval=false, QObject *parent=nullptr);
     bool loadFromFile(const QString &filePath);
     bool saveToFile(const QString &filePath) const;
     uint32_t getVersion();
