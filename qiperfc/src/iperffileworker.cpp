@@ -10,14 +10,15 @@
 IperfFileWorker::IperfFileWorker(QString version, QString protocal,
                                  int idx, bool servermode, int parallel,
                                  bool bidir, QString bidirtag , QString filename,
-                                 int delay, uint interval, QObject *parent)
+                                 int delay, uint interval,
+                                 bool ignoreWrongInterval, QObject *parent)
     : QObject{parent}, m_version(version), m_protocal(protocal),
     m_idx(idx), m_servermode(servermode), m_parallel(parallel),
     m_bidir(bidir), m_bidirtag(bidirtag), m_filename(filename),
-    m_delay(delay)
+    m_delay(delay), m_ignoreWrongInterval(ignoreWrongInterval)
 {
     m_thread = new QThread();
-    m_iperfwrapper= new IperfWrapper();
+    m_iperfwrapper= new IperfWrapper(m_ignoreWrongInterval);
     m_iperfwrapper->setSetting(idx, servermode, QString::number(parallel), bidir, bidirtag);
     m_iperfwrapper->setFile(filename);
     m_iperfwrapper->setIperf(version, protocal);

@@ -15,6 +15,7 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     connect(ui->sb_width_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onWidthChange);
     connect(ui->sb_heigth_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onHeigthChange);
     connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
+    connect(ui->cb_IgnoreWrongInterval, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onIgnoreWrongIntervalChanged);
 }
 
 dlgOption::~dlgOption()
@@ -30,6 +31,7 @@ void dlgOption::loadcfg(QSettings *cfg)
     ui->sb_width_tp->setValue(cfg->value("TPExportWidth", 1280).toInt());
     ui->sb_heigth_tp->setValue(cfg->value("TPExportHeigth", 500).toInt());
     ui->cb_TPGroup->setChecked(cfg->value("TPGroup", false).toBool());
+    ui->cb_IgnoreWrongInterval->setChecked(cfg->value("IgnoreWrongInterval", false).toBool());
     // ui->cb_TPGroup->
     cfg->endGroup();
 
@@ -52,6 +54,7 @@ void dlgOption::updatecfg()
     m_cfg->setValue("TPExportWidth", ui->sb_width_tp->value());
     m_cfg->setValue("TPExportHeigth", ui->sb_heigth_tp->value());
     m_cfg->setValue("TPGroup", ui->cb_TPGroup->isChecked());
+    m_cfg->setValue("IgnoreWrongInterval", ui->cb_IgnoreWrongInterval->isChecked());
     m_cfg->endGroup();
 
     m_cfg->beginGroup("agent");
@@ -128,6 +131,17 @@ void dlgOption::onStateChanged(int state)
     }else{
         emit showGroup(false);
         m_cfg->setValue("Iperf/TPGroup", false);
+    }
+}
+
+void dlgOption::onIgnoreWrongIntervalChanged(int state)
+{
+    if (state == Qt::Checked){
+        emit IgnoreWrongInterval(true);
+        m_cfg->setValue("Iperf/IgnoreWrongInterval", true);
+    }else{
+        emit IgnoreWrongInterval(false);
+        m_cfg->setValue("Iperf/IgnoreWrongInterval", false);
     }
 }
 
