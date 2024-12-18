@@ -11,8 +11,8 @@
 
 #include <QDebug>
 
-IperfWrapper::IperfWrapper(QObject *parent)
-    : QObject{parent}
+IperfWrapper::IperfWrapper(bool ignorewronginterval, QObject *parent)
+    : QObject{parent}, m_ignorewronginterval(ignorewronginterval)
 {
 
 }
@@ -169,7 +169,6 @@ void IperfWrapper::parserIperf3(QString linedata)
             QStringList data = linedata.split(" ", Qt::SkipEmptyParts);
             if (data.length()>=6){
                 QString sInterval  = data[0]; // Interval
-                // check report interval value is correct (smallest value 1 sec)
                 double interval = 0.0;
                 if (sInterval.contains("-")){
                     QStringList ds = sInterval.split("-");
@@ -178,9 +177,12 @@ void IperfWrapper::parserIperf3(QString linedata)
                         // qDebug() << "ds[1]:" << ds[1] << " ds[0]:" << ds[0] << "====interval:" << QString::number(interval);
                     }
                 }
-                if (interval<m_interval){
-                    qDebug() << "interval value:" << QString::number(interval) << " expect:" << QString::number(m_interval);
-                    return;
+                if (m_ignorewronginterval){
+                    // check report interval value is correct (smallest value 1 sec)
+                    if (qAbs(m_interval-interval)>0.5){
+                        qInfo() << linedata << "\ninterval value:" << QString::number(interval) << " expect:" << QString::number(m_interval);
+                        return;
+                    }
                 }
 
                 if (!m_tpdatas.contains(sInterval)){
