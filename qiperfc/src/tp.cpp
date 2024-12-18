@@ -19,10 +19,12 @@ TP::TP(QString id, QString data, TP *parent)
     m_itemDatas={m_id, "", "", "", // id, server, dir ,client
                  "", "", "", //throughput, min tput, max tput
                  "", ""}; // lost rate, comment
+
+    qDebug() << "create TP:" << id << " data:" << data << " parent:" << parent;
     if (data!="" && data !="Root" && data !="Total"){
         loadData(data);
     }else{
-        qDebug() << "create TP:" << id << " data:" << data;
+//
     }
 }
 
@@ -59,6 +61,7 @@ TP *TP::child(int row)
     if (row < 0 || row >= m_childItems.size())
         return nullptr;
     return m_childItems.at(row);
+    // return m_childItems.value(row);
 }
 
 QList<TP *> TP::getChilds()
@@ -121,7 +124,7 @@ bool TP::removeChildren(int position, int count)
 int TP::row() const
 {
     //TODO: after clear, the may cause problem
-    if (m_parentItem){
+    if (m_parentItem != nullptr){
         if (m_parentItem->haveChilds()){
             return m_parentItem->m_childItems.indexOf(const_cast<TP*>(this));
         }

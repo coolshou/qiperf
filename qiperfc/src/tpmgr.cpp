@@ -279,8 +279,8 @@ int TPMgr::rootChildCount()
 
 QList<TP *> TPMgr::getChilds(bool showAll)
 {
-//    QList<TP *> tps;
-    m_tps.clear();
+   QList<TP *> tps;
+    // m_tps.clear();
     TP *itm;
     if (m_showgroup){
         itm = groupItem;
@@ -293,11 +293,13 @@ QList<TP *> TPMgr::getChilds(bool showAll)
                 continue;
             }
         }
-        m_tps.append(itm->child(i));
+        // m_tps.append(itm->child(i));
+        tps.append(itm->child(i));
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 
-    return m_tps;
+    // return m_tps;
+    return tps;
 }
 
 bool TPMgr::removeRows(int row, int count, const QModelIndex &parent)
@@ -383,7 +385,7 @@ bool TPMgr::loaddata(QByteArray data)
 void TPMgr::reset(){
     //reset all data to none
     // beginResetModel();
-    // qDeleteAll(m_tps);
+    // qDeleteAll(m_tps); // cause app crash?
     m_tps.clear();
     rootItem = new TP(("Root"), ("Root")); //
     rootItem->setDataType(TPMgrData::root);
