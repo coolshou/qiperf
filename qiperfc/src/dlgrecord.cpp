@@ -70,7 +70,7 @@ void DlgRecord::changeEvent(QEvent *e)
 
 void DlgRecord::closeEvent(QCloseEvent *e)
 {
-    close();
+    onClose();
     QDialog::closeEvent(e);
 }
 
