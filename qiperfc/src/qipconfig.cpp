@@ -188,6 +188,11 @@ QStringList QIPConfig::getIperfRawFilenames()
     return m_data->datafilenames;
 }
 
+void QIPConfig::setIgnoreWrongInterval(bool bIgnore)
+{
+    m_IgnoreWrongInterval = bIgnore;
+}
+
 void QIPConfig::onProgress(QString filename, int currentlineno)
 {
     emit progress(filename, currentlineno);
@@ -369,7 +374,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 //iperf server record file
                                 IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                            idx, true, parallel,
-                                                                           bidir, "Tx", serverfile, delaytime, serverinterval);
+                                                                           bidir, "Tx", serverfile, delaytime, serverinterval,
+                                                                           m_IgnoreWrongInterval);
                                 m_fileworkers.append(ifw);
                                 // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
@@ -385,7 +391,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 //iperf client record file
                                 IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                            idx, false, parallel,
-                                                                           bidir, "Rx", clientfile, delaytime, clientinterval);
+                                                                           bidir, "Rx", clientfile, delaytime, clientinterval,
+                                                                            m_IgnoreWrongInterval);
                                 m_fileworkers.append(ifwc);
                                 // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                                 connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
@@ -401,7 +408,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             qInfo()<< "delaytime: " << QString::number(delaytime) << "bidir serverfile:" << serverfile;
                             IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                        idx, true, parallel,
-                                                                       bidir, "Tx", serverfile, delaytime, serverinterval);
+                                                                       bidir, "Tx", serverfile, delaytime, serverinterval,
+                                                                       m_IgnoreWrongInterval);
                             m_fileworkers.append(ifw);
                             // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
@@ -414,8 +422,9 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                         if (d.exists(clientfile)){
                             qInfo()<< "delaytime: " << QString::number(delaytime) << "bidir clientfile:" << clientfile;
                             IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
-                                                                       idx, false, parallel,
-                                                                       bidir, "Rx", clientfile, delaytime, clientinterval);
+                                                                        idx, false, parallel,
+                                                                        bidir, "Rx", clientfile, delaytime, clientinterval,
+                                                                        m_IgnoreWrongInterval);
                             m_fileworkers.append(ifwc);
                             // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
                             connect(ifwc, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);

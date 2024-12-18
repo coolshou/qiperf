@@ -29,6 +29,7 @@ signals:
     void widthChanged(int width);
     void heigthChanged(int heigth);
     void showGroup(bool bShow);
+    void IgnoreWrongInterval(bool ignore);
 
 protected:
     void changeEvent(QEvent *e) override;
@@ -39,6 +40,7 @@ private slots:
     void onWidthChange(int width);
     void onHeigthChange(int heigth);
     void onStateChanged(int state);
+    void onIgnoreWrongIntervalChanged(int state);
 
 private:
     Ui::DlgOption *ui;

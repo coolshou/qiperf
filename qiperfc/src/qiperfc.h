@@ -138,6 +138,7 @@ private slots:
     void onWidthChanged(int width);
     void onHeigthChanged(int heigth);
     void onShowGroup(bool bShow);
+    void onIgnoreWrongInterval(bool bIgnore);
 
 private:
     Ui::MainWindow *ui;
@@ -195,5 +196,6 @@ private:
     ExportHtml *eh;
     ThroughputView *m_throughputview;
     ViewManager *m_views;
+    bool m_IgnoreWrongInterval;
 };
 #endif // QIPERFC_H

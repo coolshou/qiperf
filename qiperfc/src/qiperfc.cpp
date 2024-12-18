@@ -69,6 +69,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_frm_option, &dlgOption::widthChanged, this, &QIperfC::onWidthChanged);
     connect(m_frm_option, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);
     connect(m_frm_option, &dlgOption::showGroup, this, &QIperfC::onShowGroup);
+    connect(m_frm_option, &dlgOption::IgnoreWrongInterval, this, &QIperfC::onIgnoreWrongInterval);
     initStatusbar();
 
     //UI actions
@@ -142,6 +143,9 @@ QIperfC::~QIperfC()
 #if (DEBUG_EXPORT_HTML==1)
     delete m_debugdlg;
 #endif
+    if (m_dlgrecord){
+        delete m_dlgrecord;
+    }
     delete ui;
 }
 
@@ -846,6 +850,7 @@ void QIperfC::saveSettings()
     m_settings->setValue("TPExportWidth", m_TPExportWidth);
     m_settings->setValue("TPExportHeigth", m_TPExportHeigth);
     m_settings->setValue("TPGroup", m_TPGroup);
+    m_settings->setValue("IgnoreWrongInterval", m_IgnoreWrongInterval);
     m_settings->endGroup();
     m_settings->sync();
 }
@@ -869,7 +874,8 @@ void QIperfC::loadSettings()
     m_WaitServerReady =m_settings->value("WaitServerReady", 10).toInt();
     m_TPExportWidth =m_settings->value("TPExportWidth", 1280).toInt();
     m_TPExportHeigth =m_settings->value("TPExportHeigth", 180).toInt();
-    m_TPGroup =m_settings->value("TPGroup", false).toBool();
+    m_TPGroup = m_settings->value("TPGroup", false).toBool();
+    m_IgnoreWrongInterval = m_settings->value("IgnoreWrongInterval", false).toBool();
     qDebug() << "m_TPGroup:" << m_TPGroup;
 //    m_frm_option->setWaitServerReady();
     m_settings->endGroup();
@@ -966,6 +972,13 @@ void QIperfC::onShowGroup(bool bShow)
 {
     m_TPGroup = bShow;
     m_throughputview->setShowGroup(bShow);
+}
+
+void QIperfC::onIgnoreWrongInterval(bool bIgnore)
+{
+    m_IgnoreWrongInterval = bIgnore;
+    m_qipconfig->setIgnoreWrongInterval(m_IgnoreWrongInterval);
+    //TODO: info all qiperfd Ignore Wrong Interval data on report iperf throughput?or just not show the wrong data??
 }
 
 void QIperfC::onRPC_result(const QVariant &result)

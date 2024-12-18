@@ -34,6 +34,7 @@ public:
     bool detectSystemProxy(QString &hostname, quint16 &port);
     QString getPCsInfo();
     QStringList getIperfRawFilenames();
+    void setIgnoreWrongInterval(bool bIgnore);
 
 public slots:
     void onProgress(QString filename, int currentlineno);
@@ -78,7 +79,7 @@ private:
 //    IperfWrapper *m_ciperfwrapper;
 //    IperfWrapper *m_siperfwrapper;
     QList<IperfFileWorker *> m_fileworkers;
-
+    bool m_IgnoreWrongInterval;
 };
 
 

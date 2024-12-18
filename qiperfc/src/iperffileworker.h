@@ -24,6 +24,7 @@ public:
                              int idx, bool servermode, int parallel,
                              bool bidir, QString bidirtag , QString filename,
                              int delay=0, uint interval=1,
+                             bool ignoreWrongInterval = false,
                              QObject *parent = nullptr);
     ~IperfFileWorker();
     void start();
@@ -56,6 +57,7 @@ private:
     int m_delay;
     TPData *tpdata;
     QMap<QString, TPData*> m_datas;
+    bool m_ignoreWrongInterval;
 };
 
 #endif // IPERFFILEWORKER_H
