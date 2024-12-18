@@ -11,7 +11,7 @@ class IperfWrapper : public QObject
 {
     Q_OBJECT
 public:
-    explicit IperfWrapper(QObject *parent = nullptr);
+    explicit IperfWrapper(bool ignorewronginterval = true, QObject *parent = nullptr);
 
     QString toIperf3args(QVariantMap jsondata); // to iperf3 args
     QString toIperf2args(QVariantMap jsondata); // to iperf2 args
@@ -42,6 +42,7 @@ private:
     QString m_protocal;
     int m_delaytime;
     uint m_interval;
+    bool m_ignorewronginterval;
 };
 
 #endif // IPERFWRAPPER_H
