@@ -203,10 +203,9 @@ void QIPConfig::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                               QString pkt_lost, QString pkt_total)
 {
     qDebug() << "QIPConfig::onUpdateTPAvg " <<  midx << " sInterval:" << sInterval
-             << " idx:" << idx << " value: " << value;
-    emit updateTPAvg(midx, sInterval, idx,
-                     value, unit, dir,
-                     pkt_lost, pkt_total);
+             << " idx:" << idx << " value: " << value << " unit:" << unit
+             << " pkt_lost:" << pkt_lost << " pkt_total:" << pkt_total;
+    emit updateTPAvg(midx, sInterval, idx, value, unit, dir, pkt_lost, pkt_total);
 }
 
 void QIPConfig::onDeleteFiles(QStringList filenames)
