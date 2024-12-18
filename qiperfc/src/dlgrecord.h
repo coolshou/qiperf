@@ -30,6 +30,7 @@ protected:
 private slots:
     void onItemDClicked(QModelIndex idx);
     void onRefresh();
+    void onBrowser(bool checked);
 
 private:
     Ui::DlgRecord *ui;
