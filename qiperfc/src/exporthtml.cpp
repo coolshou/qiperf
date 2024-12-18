@@ -261,7 +261,6 @@ void ExportHtml::procressData()
     QStringList ips;
     QList<QString> ls;// store managed ip in list
     // iperf test pairs
-    // QList<TP *> tps= m_tpmgr->getChilds(false);
     foreach (TP *tp, m_tps) {
         ls.clear();
 
