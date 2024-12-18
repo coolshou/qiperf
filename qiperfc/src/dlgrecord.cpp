@@ -10,7 +10,7 @@ DlgRecord::DlgRecord(QWidget *parent) :
     ui(new Ui::DlgRecord)
 {
     ui->setupUi(this);
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DlgRecord::close);
+    connect(ui->pbClose, &QPushButton::clicked, this, &DlgRecord::onClose);
     connect(ui->pbBrowser, &QPushButton::clicked, this, &DlgRecord::onBrowser);
 
     m_fileModel = new QFileSystemModel(this);
@@ -38,7 +38,7 @@ void DlgRecord::setRootPath(QString rootpath)
     setWindowTitle(QDir::toNativeSeparators(rootpath));
 }
 
-void DlgRecord::close()
+void DlgRecord::onClose()
 {
     foreach(auto key, m_logfiles.keys()){
         m_logfiles[key]->hide();
@@ -46,7 +46,7 @@ void DlgRecord::close()
         m_logfiles.remove(key);
         QApplication::processEvents(QEventLoop::AllEvents);
     }
-
+    this->accept();
 }
 
 void DlgRecord::onClosing(QString filename)

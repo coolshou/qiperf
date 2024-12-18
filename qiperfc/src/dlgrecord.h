@@ -20,7 +20,7 @@ public:
     ~DlgRecord();
     void setRootPath(QString rootpath);
 public slots:
-    void close();
+    void onClose();
     void onClosing(QString filename);
 
 protected:
