@@ -86,7 +86,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_qipconfig, &QIPConfig::updateTPCfg, m_throughputview, &ThroughputView::onUpdateTPCfg);
     connect(m_qipconfig, &QIPConfig::updateStartDateTime, this, &QIperfC::setStartTime);
     connect(m_qipconfig, &QIPConfig::updateStartDateTime, m_throughputview, &ThroughputView::setStartTime);
-    // connect(m_qipconfig, &QIPConfig::updateTPDatas, m_tpmgr, &TPMgr::onUpdateTPDatas);
+    // connect(m_qipconfig, &QIPConfig::updateTPDatas, m_throughputview, &ThroughputView::onUpdateTPDatas);
     connect(m_qipconfig, &QIPConfig::updateTPAvg, m_throughputview, &ThroughputView::onAddTPdata); // this only set last avg, which may cause min/max value wrong!!
     connect(m_qipconfig, &QIPConfig::updateTPDatas, m_throughputview, &ThroughputView::onUpdateTPDatas);
     connect(m_qipconfig, &QIPConfig::progress, this, &QIperfC::onProgress);
@@ -876,7 +876,7 @@ void QIperfC::loadSettings()
     m_TPExportHeigth =m_settings->value("TPExportHeigth", 180).toInt();
     m_TPGroup = m_settings->value("TPGroup", false).toBool();
     m_IgnoreWrongInterval = m_settings->value("IgnoreWrongInterval", false).toBool();
-    qDebug() << "m_TPGroup:" << m_TPGroup;
+    qDebug() << "loadSettings m_IgnoreWrongInterval:" << m_IgnoreWrongInterval;
 //    m_frm_option->setWaitServerReady();
     m_settings->endGroup();
 
@@ -977,6 +977,7 @@ void QIperfC::onShowGroup(bool bShow)
 void QIperfC::onIgnoreWrongInterval(bool bIgnore)
 {
     m_IgnoreWrongInterval = bIgnore;
+    qDebug() << "onIgnoreWrongInterval:" << bIgnore;
     m_qipconfig->setIgnoreWrongInterval(m_IgnoreWrongInterval);
     //TODO: info all qiperfd Ignore Wrong Interval data on report iperf throughput?or just not show the wrong data??
 }
