@@ -48,7 +48,8 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
     // }
 
     if (role == Qt::TextAlignmentRole){
-        if ((index.column() == TP::cols::throughput)||
+        if ((index.column() == TP::cols::dir)||
+            (index.column() == TP::cols::throughput)||
             (index.column() == TP::cols::mintp)||
             (index.column() == TP::cols::maxtp)||
             (index.column() == TP::cols::lostrate)){
