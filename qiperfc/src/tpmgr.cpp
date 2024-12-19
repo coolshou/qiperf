@@ -489,11 +489,18 @@ void TPMgr::setItem(const QModelIndex &index, TP *item)
 
 int TPMgr::swapDirection(QModelIndex midx)
 {
+    QString dir = "Tx";
     TP *tp= getItem(midx);
     if (tp->getDirection().contains("Tx")){
-        tp->setDirection("Rx");
+        dir = "Rx";
     }else if (tp->getDirection().contains("Rx")){
-        tp->setDirection("Tx");
+        dir = "Tx";
+    }
+    tp->setDirection(dir);
+    if (tp->haveChilds()){
+        foreach(TP *t, tp->getChilds()){
+            t->setDirection(dir);
+        }
     }
     emit dataChanged(QModelIndex(),QModelIndex());
     return 0;
