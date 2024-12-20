@@ -653,6 +653,9 @@ void QIperfC::onShowLog()
         if (d.exists()){
             m_dlgrecord->setRootPath(m_datapath);
             m_dlgrecord->show();
+            m_dlgrecord->raise();
+            m_dlgrecord->activateWindow();
+
         }else{
             QMessageBox::information(this, "ERROR", "No test record folder: " + m_datapath);
         }
