@@ -184,7 +184,8 @@ bool DlgIperf::add(QString mgr, QString mdata)
                         if (data.contains("address")) {
                             addrs= data.value("address").toArray();
                             if (!addrs.empty()){
-                                foreach(auto addr, addrs){
+                                // foreach(auto addr, addrs){
+                                for (const auto &addr: addrs){
                                     if (addr.isArray()){
                                         ds.append(addr[0].toString());
                                     }
