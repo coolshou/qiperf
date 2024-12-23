@@ -12,4 +12,4 @@ qmake
 nmake
 
 set PATH=C:\Program Files (x86)\NSIS\;%PATH%
-makensis.exe /DWIN64 /V3 qiperf.nsi
+makensis.exe /DWIN64 /V4 qiperf.nsi
