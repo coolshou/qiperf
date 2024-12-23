@@ -91,7 +91,11 @@ QString MyInfo::collectInfo()
     }else{
         mainObject.insert("OS", QSysInfo::prettyProductName());
     }
-    mainObject.insert("OSVer", QSysInfo::kernelVersion());
+    QString osver = QSysInfo::kernelVersion();
+#if defined(Q_OS_WIN32)
+    osver = osver + "." + getWindowsPatchNumber();
+#endif
+    mainObject.insert("OSVer", osver);
     // motherboard info
     QString vendor="";
     QString model="";
@@ -110,6 +114,8 @@ QString MyInfo::collectInfo()
     mainObject.insert("Manager", m_ifname);
     mainObject.insert("update", update);
     mainObject.insert("qiperfd", QString(QIPERFD_VERSION)+" git:" + GITBRANCH+GITVER);
+    //iperf3 version
+
     //serial
     mainObject.insert("serial", collectSerial());
 
@@ -661,6 +667,23 @@ void MyInfo::getNetworkAdapterInfo() {
     if (pAdapterInfo) {
         free(pAdapterInfo);
     }
+}
+QString MyInfo::getWindowsPatchNumber(){
+    HKEY hKey;
+    const wchar_t* subKey = L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion";
+    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, subKey, 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
+        return "Can not open Registry";
+    }
+
+    wchar_t patchNumber[256];
+    DWORD bufferSize = sizeof(patchNumber);
+    if (RegQueryValueExW(hKey, L"UBR", nullptr, nullptr, reinterpret_cast<LPBYTE>(patchNumber), &bufferSize) != ERROR_SUCCESS) {
+        RegCloseKey(hKey);
+        return "Can not read patchNumber (UBR)";
+    }
+
+    RegCloseKey(hKey);
+    return QString::fromWCharArray(patchNumber);
 }
 void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial) {
     HRESULT hres;
