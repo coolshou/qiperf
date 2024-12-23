@@ -4,8 +4,8 @@
 
 ; Define your application name
 !define APPNAME "qiperf"
-!define APPVERSION 0.6
-!define APPFileVersion 0.6.11312.10
+!define APPVERSION 0.7
+!define APPFileVersion 0.7.11312.23
 !define APPDOMAIN "coolshou.idv.tw"
 !define APPURL "https://github.com/coolshou/qiperf"
 #!define WIN64 ; force  64 bit, comment out for 32 bit
@@ -714,7 +714,7 @@ init.uninst:
 init.done:
     # TODO: get old setup mode
 
-    # get preview install mode
+    # get previous install mode
     ClearErrors
     ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode"
     strcpy $OLD_INSTALL_MODE $R0
@@ -739,6 +739,19 @@ Function install_qiperfd
     ; Add an application to the firewall exception list - All Networks - All IP Version - Enabled
     SimpleFC::AddApplication "qiperfd daemon" "$INSTDIR\${QIPERFD_NAME}" 0 2 "" 1
     Pop $0 ; return error(1)/success(0)
+    ; Add iperf3 to firewall
+    !ifdef WIN64
+    SimpleFC::AddApplication "iperf3" "$INSTDIR\x86_64\iperf3.exe" 0 2 "" 1
+    !else
+    SimpleFC::AddApplication "iperf3" "$INSTDIR\x86\iperf3.exe" 0 2 "" 1
+    !endif
+    Pop $0 ; return error(1)/success(0)
+    ; Add iperf2.1 to firewall
+    SimpleFC::AddApplication "iperf2.1" "$INSTDIR\x86\iperf2.1.exe" 0 2 "" 1
+    Pop $0 ; return error(1)/success(0)
+    ; Add iperf2 to firewall
+    SimpleFC::AddApplication "iperf2" "$INSTDIR\x86\iperf2.exe" 0 2 "" 1
+    Pop $0 ; return error(1)/success(0)
 
     # install qiperfd  service & start it
     Exec '"$INSTDIR\nssm.exe" install "qiperfd" "$INSTDIR\${QIPERFD_NAME}"'
@@ -746,7 +759,7 @@ Function install_qiperfd
 FunctionEnd
 
 Function install_vc_redist
-    ;not installed, so run the installer
+    ;not installed, so run the installer in quiet mode
     !ifdef WIN64
     ExecWait '$INSTDIR\vc_redist.x64.exe /q /norestart'
     !else
@@ -833,6 +846,19 @@ Function un.install_qiperfd
     DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Run\${QIPERFTRAY_NAME}"
     ; Remove an application from the firewall exception list
     SimpleFC::RemoveApplication "$INSTDIR\${QIPERFD_NAME}"
+    Pop $0 ; return error(1)/success(0)
+    ; Remove iperf3 from the firewall
+    !ifdef WIN64
+    SimpleFC::RemoveApplication "$INSTDIR\x86_64\iperf3.exe"
+    !else
+    SimpleFC::RemoveApplication "$INSTDIR\x86\iperf3.exe"
+    !endif
+    Pop $0 ; return error(1)/success(0)
+    ; Remove iperf2.1 from the firewall
+    SimpleFC::RemoveApplication "$INSTDIR\x86\iperf2.1.exe"
+    Pop $0 ; return error(1)/success(0)
+    ; Remove iperf2 from the firewall
+    SimpleFC::RemoveApplication "$INSTDIR\x86\iperf2.exe"
     Pop $0 ; return error(1)/success(0)
 
 FunctionEnd
