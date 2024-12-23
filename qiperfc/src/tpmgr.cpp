@@ -30,7 +30,7 @@ TPMgr::TPMgr(bool showgroup, QObject *parent)
 TPMgr::~TPMgr()
 {
     // qDeleteAll(m_tps);
-    m_tps.clear();
+    // m_tps.clear();
 }
 QVariant TPMgr::data(const QModelIndex &index, int role) const
 {
@@ -224,9 +224,9 @@ bool TPMgr::add(QString data)
     }else{
         pitm = rootItem;
     }
-    qDebug() <<"idx:" << idx << " add pitm: " << pitm << " data:" << data;
-    TP *tp = new TP(QString::number(idx), data, pitm);
-    tp->setDataType(TPMgrData::config);
+    qDebug() <<"idx:" << idx << " add pitm: " << pitm ;//<< " data:" << data;
+    TP *tp = new TP(QString::number(idx), data, TPMgrData::config, pitm);
+
     pitm->appendChild(tp);
     endInsertRows();
 
@@ -373,6 +373,7 @@ bool TPMgr::loaddata(QByteArray data)
             QJsonObject obj = value.toObject();
             QJsonDocument doc(obj);
             QString strJson(doc.toJson(QJsonDocument::Compact));
+            qDebug() << "add: " << strJson;
             add(strJson);
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
@@ -387,13 +388,21 @@ void TPMgr::reset(){
     //reset all data to none
     // beginResetModel();
     // qDeleteAll(m_tps); // cause app crash?
-    m_tps.clear();
-    rootItem = new TP(("Root"), ("Root")); //
-    rootItem->setDataType(TPMgrData::root);
-    groupItem = new TP("Total", "Total", rootItem);
-    groupItem->setDataType(TPMgrData::group);
-    rootItem->appendChild(groupItem);
+    // m_tps.clear();
+    rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
+    // rootItem->setDataType(TPMgrData::root);
+    // int idx = getMaxIdx();
+    // qDebug() << "idx:" << QString::number(idx) ;
+    qDebug() << "rootItem:" << rootItem;
+    if(m_showgroup){
+        beginInsertRows(QModelIndex(), 0, 0);
+        groupItem = new TP("Total", "Total", TPMgrData::group, rootItem);
+        // groupItem->setDataType(TPMgrData::group);
+        rootItem->appendChild(groupItem);
+        endInsertRows();
+    }
 
+    // add("Total");
     // TP *g = new TP("N", "N", rootItem);
     // rootItem->appendChild(g);
     // endResetModel();
@@ -406,7 +415,8 @@ void TPMgr::reset(){
 
         // endInsertRows();
     // }
-    qDebug() << "rootItem:" << rootItem << " groupItem:" << groupItem;
+
+    // qDebug() << " groupItem:" << groupItem;
 
     m_intervals.clear();
 }
@@ -548,10 +558,10 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
     TP *c = getItemByIdx(midx+"_"+idx, tp); //iperf pair config item
     if (c==nullptr){
         //New
-        c = new TP(midx+"_"+idx, "", tp);
+        c = new TP(midx+"_"+idx, "", TPMgrData::TP, tp);
         c->setThroughput(dir, value);
         c->setDirection(dir);
-        c->setDataType(TPMgrData::TP);
+        // c->setDataType(TPMgrData::TP);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
                // qDebug() << c << " new pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
@@ -688,7 +698,7 @@ int TPMgr::getMaxIdx()
             }else{
                 maxIdx++;
             }
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }
     return maxIdx;
@@ -743,20 +753,20 @@ void TPMgr::setTestData()
     // rootItem->appendChild(groupItem);
     QList<TP*> cfgs;
 
-    TP *cfg = new TP("cfg1", "cfg1", groupItem);
-    cfg->setDataType(TPMgrData::config);
+    TP *cfg = new TP("cfg1", "cfg1", TPMgrData::config, groupItem);
+    // cfg->setDataType(TPMgrData::config);
     cfgs << cfg;
-    TP *cfg2 = new TP("cfg2", "cfg2", groupItem);
-    cfg2->setDataType(TPMgrData::config);
+    TP *cfg2 = new TP("cfg2", "cfg2", TPMgrData::config, groupItem);
+    // cfg2->setDataType(TPMgrData::config);
     cfgs << cfg2;
     foreach(TP *c, cfgs){
         groupItem->appendChild(c);
         for (int i = 0; i < 3; ++i) {
-            TP *child = new TP(QString::number(i), QString::number(i), c);
-            child->setDataType(TPMgrData::TP);
+            TP *child = new TP(QString::number(i), QString::number(i), TPMgrData::TP,  c);
+            // child->setDataType(TPMgrData::TP);
             c->appendChild(child);
             for (int j = 0; j < 2; ++j) {
-                TP *gchild = new TP(QString::number(j), QString::number(j), child);
+                TP *gchild = new TP(QString::number(j), QString::number(j), TPMgrData::TP, child);
                 child->appendChild(gchild);
 
             }
