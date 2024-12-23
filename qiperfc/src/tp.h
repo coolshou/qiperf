@@ -5,7 +5,7 @@
 #include <QVariant>
 #include <QList>
 #include <QJsonObject>
-
+#include "tpmgrdata.h"
 
 //TP store each throughput config
 //class TP : public QObject
@@ -13,7 +13,7 @@ class TP: public QObject
 {
     Q_GADGET
 public:
-    explicit TP(QString id, QString data, TP *parentItem = nullptr);
+    explicit TP(QString id, QString data, int datatype = TPMgrData::config, TP *parentItem = nullptr);
     ~TP() override;
     enum DirType{
         Tx=0,
@@ -100,8 +100,8 @@ public:
 signals:
 
 private:
-    int m_datatype; // item type, 0: init, 1: for config root item, 2: throughput data
     QString m_id; // reference id
+    int m_datatype; // item type, 0: init, 1: for config root item, 2: throughput data
     QList<TP *> m_childItems;
     QList<QVariant> m_itemDatas;// id, server ip, dir, client ip, throughput, min throughput, max throughput, lost rate, comment
     TP *m_parentItem;

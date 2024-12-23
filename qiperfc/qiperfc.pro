@@ -105,6 +105,7 @@ SOURCES += \
     # ../qiperfd/src/wsserver.cpp \
 
 HEADERS += \
+    ../src/tpmgrdata.h \
     ../src/dlgshowlog.h \
     ../src/filewatcher.h \
     ../src/pipeclient.h \
