@@ -675,16 +675,17 @@ QString MyInfo::getWindowsPatchNumber(){
         return "Can not open Registry";
     }
 
-    wchar_t patchNumber[256];
-    DWORD bufferSize = sizeof(patchNumber);
-    if (RegQueryValueExW(hKey, L"UBR", nullptr, nullptr, reinterpret_cast<LPBYTE>(patchNumber), &bufferSize) != ERROR_SUCCESS) {
+    DWORD patchNumber = 0;
+    DWORD valueSize = sizeof(patchNumber);
+    DWORD type = 0;
+    if (RegQueryValueExW(hKey, L"UBR", nullptr, &type, reinterpret_cast<LPBYTE>(&patchNumber), &valueSize) != ERROR_SUCCESS) {
         RegCloseKey(hKey);
         return "Can not read patchNumber (UBR)";
     }
 
     RegCloseKey(hKey);
     qDebug() << "patchNumber:" << patchNumber;
-    return QString::fromWCharArray(patchNumber);
+    return QString::number(patchNumber);
 }
 void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial) {
     HRESULT hres;
