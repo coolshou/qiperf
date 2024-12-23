@@ -7,6 +7,8 @@
 #include <QPalette>
 #include <QColor>
 
+#include <QDebug>
+
 #include "tp.h"
 
 TPMgr::TPMgr(bool showgroup, QObject *parent)
@@ -196,14 +198,17 @@ int TPMgr::rowCount(const QModelIndex &parent) const
 //    if (parent.column() > 0)
 //        return 0;
 
-    if (!parent.isValid())
-        if(m_showgroup){
-            parentItem = groupItem;
-        }else{
+    if (!parent.isValid()){
+        // if(m_showgroup){
+        //     qDebug() << "TPMgr::rowCount: parent: group" << groupItem;
+        //     parentItem = groupItem;
+        // }else{
+            // qDebug() << "TPMgr::rowCount: parent: root" << rootItem;
             parentItem = rootItem;
-        }
-    else
+        // }
+    }else{
         parentItem = static_cast<TP*>(parent.internalPointer());
+    }
 
     return parentItem->childCount();
 }
@@ -369,7 +374,8 @@ bool TPMgr::loaddata(QByteArray data)
     QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &error);
     if (error.error == QJsonParseError::NoError){
         QJsonArray jsonarr = jsonDoc.array();
-        foreach (const QJsonValue &value, jsonarr) {
+        // foreach (const QJsonValue &value, jsonarr) {
+        for (const auto value: jsonarr){
             QJsonObject obj = value.toObject();
             QJsonDocument doc(obj);
             QString strJson(doc.toJson(QJsonDocument::Compact));
@@ -400,6 +406,7 @@ void TPMgr::reset(){
         // groupItem->setDataType(TPMgrData::group);
         rootItem->appendChild(groupItem);
         endInsertRows();
+        qDebug() << " groupItem:" << groupItem;
     }
 
     // add("Total");
@@ -416,7 +423,7 @@ void TPMgr::reset(){
         // endInsertRows();
     // }
 
-    // qDebug() << " groupItem:" << groupItem;
+
 
     m_intervals.clear();
 }

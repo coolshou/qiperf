@@ -345,7 +345,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
             int idx=0;
             // for(QJsonArray::const_iterator it=arr.constBegin(); it!=arr.constEnd(); ++it){
             //     QJsonObject jObj = it->toObject();
-            foreach (const QJsonValue val, arr) {
+            // foreach (const QJsonValue val, arr) {
+            for (const auto val: arr){
                 //FIXME: why this will enter multiple times!!??
                 QJsonObject jObj = val.toObject();
                 if (jObj.value("Action").toString() == "IPERF_ADD" &&
