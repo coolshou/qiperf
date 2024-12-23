@@ -113,15 +113,27 @@ void IcmpWrapper::work()
 #ifdef _WIN32
     init_winsock_lib();
 #endif
-
+    char errorMessage[256];
     if (ip_version == IP_V4){
         if ((sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
-            emit errorResponse(QString("Socket IPv4 creation failed: %1").arg(strerror(errno)));
+#ifdef _MSC_VER
+            // 使用 strerror_s 獲取錯誤訊息
+            strerror_s(errorMessage, sizeof(errorMessage), errno);
+#else
+            strerror_r(errno, errorMessage, sizeof(errorMessage));
+#endif
+            emit errorResponse(QString("Socket IPv4 creation failed: %1").arg(errorMessage));
             return;
         }
     }else if(ip_version == IP_V6){
         if ((sockfd = socket(AF_INET6, SOCK_RAW, IPPROTO_ICMPV6)) < 0) {
-            emit errorResponse(QString("Socket IPv6 creation failed: %1").arg(strerror(errno)));
+#ifdef _MSC_VER
+            // 使用 strerror_s 獲取錯誤訊息
+            strerror_s(errorMessage, sizeof(errorMessage), errno);
+#else
+            strerror_r(errno, errorMessage, sizeof(errorMessage));
+#endif
+            emit errorResponse(QString("Socket IPv6 creation failed: %1").arg(errorMessage));
             return;
         }
     }else{
@@ -160,7 +172,7 @@ void IcmpWrapper::work()
         dest_addr.sin_addr.s_addr = inet_addr(m_target.toStdString().c_str());
     }else{
         //TODO: IPV6
-//        memset(&dest_addr6, 0, sizeof(dest_addr6));
+       memset(&dest_addr6, 0, sizeof(dest_addr6));
 //        dest_addr6.sin6_family = AF_INET6;
 //        dest_addr6.sin6_addr = inet_addr(m_target.toStdString().c_str());
 
@@ -300,7 +312,7 @@ void IcmpWrapper::onResponseTime(uint16_t seq, double responseTime, const char *
 int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
 {
     //BUGS: this will cause APP crash on finished!!
-    int error;
+    int error=0;
     struct addrinfo *addrinfo_list = NULL;
     struct addrinfo *addrinfo;
     std::string str=shostname.toStdString();
