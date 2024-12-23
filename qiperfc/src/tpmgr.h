@@ -3,13 +3,16 @@
 
 #include <QObject>
 #include <QAbstractItemModel>
-//#include <QStandardItemModel>
 #include <QList>
+#include <QModelIndex>
+#include <QStringList>
 #include <QJsonObject>
 #include <QMap>
 #include <QFileIconProvider>
+#include <QColor>
 #include <QTimer>
 #include "tp.h"
+#include "tpmgrdata.h"
 
 class TPStatus: public QObject
 {
@@ -23,18 +26,6 @@ public:
     Q_ENUM(Status)
 };
 
-class TPMgrData: public QObject
-{
-    Q_GADGET
-public:
-    enum DataType{
-        root=0,  // root item
-        config=1,  // config item
-        TP=2,     // throughput data item
-        group=3  // group of all config item
-    };
-    Q_ENUM(DataType)
-};
 
 //class to manager all Throughput data
 class TPMgr : public QAbstractItemModel
@@ -110,7 +101,7 @@ private slots:
 private:
     TP *rootItem;
     TP *groupItem; //hold group item
-    QList<TP*> m_tps; //QList of tp, data
+    // QList<TP*> m_tps; //QList of tp, data
     QFileIconProvider iconProvider;
     QMap<QString, double> m_intervals;
     QColor m_disabledTextColor;

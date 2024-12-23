@@ -3,15 +3,15 @@
 #include <QJsonParseError>
 #include <QPixmap>
 #include <QVariant>
+#include <QList>
 
-TP::TP(QString id, QString data, TP *parent)
-    :m_id(id), m_parentItem(parent)
+TP::TP(QString id, QString data,int datatype, TP *parent)
+    :m_id(id), m_datatype(datatype), m_parentItem(parent)
 {
-    m_id=id;
+    // m_id=id;
     m_jsondata = "";
-//    setEnabled();
     m_enabled = true;
-    m_datatype = 0;
+    // m_datatype = 0;
     m_lostpacket = 0;
     m_totalpacket = 0;
     clearThroughput();
@@ -71,12 +71,12 @@ QList<TP *> TP::getChilds()
 
 int TP::childCount() const
 {
-    return m_childItems.count();
+    return m_childItems.size();
 }
 
 bool TP::haveChilds()
 {
-    if (m_childItems.count()>0){
+    if (m_childItems.size()>0){
         return true;
     }else{
         return false;
@@ -86,7 +86,7 @@ bool TP::haveChilds()
 
 int TP::columnCount() const
 {
-    return m_itemDatas.count();
+    return m_itemDatas.size();
 }
 
 QVariant TP::data(int column) const
@@ -94,8 +94,8 @@ QVariant TP::data(int column) const
     if (column < 0 || column >= m_itemDatas.size()){
         return QVariant();
     }
-    return m_itemDatas.at(column);
-
+//    return m_itemDatas.at(column);
+    return m_itemDatas.value(column);
 }
 
 int TP::setData(int column, QVariant var)
@@ -117,7 +117,11 @@ bool TP::removeChildren(int position, int count)
     if (position < 0 || position + count > m_childItems.size()){
         return false;
     }
-    m_childItems.erase(m_childItems.begin()+position, m_childItems.begin()+position+count);
+    QList<TP *>::ConstIterator begin = m_childItems.begin()+position;
+    // QList::const_iterator begin = m_childItems.begin()+position;
+    QList<TP *>::ConstIterator end = m_childItems.begin()+position+count;
+    // QList::const_iterator end = m_childItems.begin()+position+count;
+    m_childItems.erase(begin, end);
     return true;
 }
 
@@ -558,7 +562,7 @@ void TP::setLostRate(QString pkt_lost, QString pkt_total)
     }
     if (m_totalpacket>0){
         double lr = static_cast<double>(m_lostpacket)/m_totalpacket;
-
+        //TODO: lost rate % not show in scientific notation eq: 5.83509e-05 (3/5141307)
         QString s= QString::number(lr*100)+
                 " ("+QString::number(m_lostpacket)+"/"+QString::number(m_totalpacket)+")";
         //TODO: only show rate, move lost/total to tooltip?
