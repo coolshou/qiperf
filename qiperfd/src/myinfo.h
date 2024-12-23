@@ -40,6 +40,7 @@ public:
     QString getDriverVersion(const QString &hardwareID);
     QString getAdapterName(const QString &description);
     void getNetworkAdapterInfo();
+    QString getWindowsPatchNumber();
 #endif
 
 public slots:
