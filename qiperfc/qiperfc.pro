@@ -105,7 +105,6 @@ SOURCES += \
     # ../qiperfd/src/wsserver.cpp \
 
 HEADERS += \
-    ../src/tpmgrdata.h \
     ../src/dlgshowlog.h \
     ../src/filewatcher.h \
     ../src/pipeclient.h \
@@ -147,6 +146,7 @@ HEADERS += \
     src/tp.h \
     src/tpfoldingdelegate.h \
     src/tpmgr.h \
+    src/tpmgrdata.h \
     src/tpdirdelegate.h \
     src/tpplot.h \
     src/udpreceiver.h \
