@@ -18,12 +18,15 @@
 #include <time.h>
 
 //#include <getopt.h>
+#include <cstring> // WIN VC: strerror_s / Linux: strerror_r
 
 #ifdef _WIN32
 #ifdef _WIN32_WINNT
     #undef _WIN32_WINNT
 #endif
     #define _WIN32_WINNT 0x0601 /* for inet_XtoY functions on MinGW */
+
+
 
 #include <process.h>  /* _getpid() */
 #include <winsock2.h>
