@@ -345,7 +345,7 @@ void QIperfTray::onAbout()
 {
     QMessageBox::about(this, "About", QString(QIPERFTRAY_NAME)+
                        "\n v"+QString(VERSION)+
-                       "\n git:" + GITBRANCH+GITVER+
+                       "\n git:" + GITBRANCH+"-"+GITVER+
                        "\nAuther: Jimmy Yeh"+
                        "\nURL: https://github.com/coolshou/qiperf");
 }
