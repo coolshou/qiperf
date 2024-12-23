@@ -120,7 +120,9 @@ void IcmpWrapper::work()
             // 使用 strerror_s 獲取錯誤訊息
             strerror_s(errorMessage, sizeof(errorMessage), errno);
 #else
-            strerror_r(errno, errorMessage, sizeof(errorMessage));
+            if (strerror_r(errno, errorMessage, sizeof(errorMessage))!=0){
+                qDebug() << "Can not get error message of socket:" << errno;
+            }
 #endif
             emit errorResponse(QString("Socket IPv4 creation failed: %1").arg(errorMessage));
             return;
@@ -131,7 +133,9 @@ void IcmpWrapper::work()
             // 使用 strerror_s 獲取錯誤訊息
             strerror_s(errorMessage, sizeof(errorMessage), errno);
 #else
-            strerror_r(errno, errorMessage, sizeof(errorMessage));
+            if(strerror_r(errno, errorMessage, sizeof(errorMessage))!=0){
+                qDebug() << "Can not get error message of socket6:" << errno;
+            }
 #endif
             emit errorResponse(QString("Socket IPv6 creation failed: %1").arg(errorMessage));
             return;
