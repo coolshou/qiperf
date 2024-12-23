@@ -113,7 +113,7 @@ QString MyInfo::collectInfo()
 
     mainObject.insert("Manager", m_ifname);
     mainObject.insert("update", update);
-    mainObject.insert("qiperfd", QString(QIPERFD_VERSION)+" git:" + GITBRANCH+GITVER);
+    mainObject.insert("qiperfd", QString(QIPERFD_VERSION)+" git:" + GITBRANCH+"-"+GITVER);
     //iperf3 version
 
     //serial
@@ -683,6 +683,7 @@ QString MyInfo::getWindowsPatchNumber(){
     }
 
     RegCloseKey(hKey);
+    qDebug() << "patchNumber:" << patchNumber;
     return QString::fromWCharArray(patchNumber);
 }
 void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial) {
