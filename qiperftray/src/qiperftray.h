@@ -61,7 +61,7 @@ private slots:
     void onUpdateQIperfd(QString msg);
 
 private:
-    QSettings cfg;
+    QSettings *cfg;
     QRect m_geometry;
     Ui::MainWindow *ui;
     MyTray *m_tray;
