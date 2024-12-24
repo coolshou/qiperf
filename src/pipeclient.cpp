@@ -44,7 +44,7 @@ void PipeClient::send_MessageToServer(QString message)
     if (!m_message.isEmpty()){
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_5_15);
+        out.setVersion(QDataStream::Qt_5_11);
         out << m_message;
         out.device()->seek(0);
         m_socket->write(block);
@@ -69,7 +69,7 @@ void PipeClient::socket_disconnected()
 void PipeClient::socket_readReady()
 {
     QDataStream in(m_socket);
-    in.setVersion(QDataStream::Qt_5_15);
+    in.setVersion(QDataStream::Qt_5_11);
     if (m_socket->bytesAvailable() < static_cast<int>(sizeof(quint16))) {
         return;
     }
