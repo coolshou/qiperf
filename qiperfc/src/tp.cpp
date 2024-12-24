@@ -8,6 +8,7 @@
 TP::TP(QString id, QString data,int datatype, TP *parent)
     :m_id(id), m_datatype(datatype), m_parentItem(parent)
 {
+    m_childItems = QList<TP *>();
     // m_id=id;
     m_jsondata = "";
     m_enabled = true;
@@ -15,7 +16,7 @@ TP::TP(QString id, QString data,int datatype, TP *parent)
     m_lostpacket = 0;
     m_totalpacket = 0;
     clearThroughput();
-    // m_childItems = QList<TP *>();
+
     m_itemDatas={m_id, "", "", "", // id, server, dir ,client
                  "", "", "", //throughput, min tput, max tput
                  "", ""}; // lost rate, comment
@@ -71,12 +72,16 @@ QList<TP *> TP::getChilds()
 
 int TP::childCount() const
 {
-    return m_childItems.size();
+    // if (m_childItems){
+        return m_childItems.count();
+    // }else{
+    //     return 0;
+    // }
 }
 
 bool TP::haveChilds()
 {
-    if (m_childItems.size()>0){
+    if (m_childItems.count()>0){
         return true;
     }else{
         return false;
@@ -86,7 +91,8 @@ bool TP::haveChilds()
 
 int TP::columnCount() const
 {
-    return m_itemDatas.size();
+    // return m_itemDatas.size();
+    return m_itemDatas.count();
 }
 
 QVariant TP::data(int column) const
@@ -481,7 +487,7 @@ void TP::setThroughput(QString dir, QString value)
 void TP::updateTimeStemp()
 {
     QDateTime t=QDateTime::currentDateTime();
-    m_lastnoticetime = t.toString("yyyy.dd.MM.hh:mm:ss.zzz");
+    m_lastnoticetime = t.toString("yyyy.MM.dd.hh:mm:ss.zzz");
 }
 
 QString TP::getLastNoticeTime()
