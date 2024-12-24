@@ -16,28 +16,38 @@ qiperftray.depends = qiperfd
 
 
 DEBIAN.files += \
-    debian/source/format \
     debian/changelog \
-    debian/control \
-    debian/copyright \
-    debian/rules \
-    debian/README.Debian \
-    debian/README.source \
-    debian/qiperfc.control \
-    debian/qiperfc.install \
-    debian/qiperfc.links \
-    debian/qiperfd.control \
-    debian/qiperfd.install \
-    debian/qiperfd.postinst \
-    debian/qiperfd.preinst \
-    debian/qiperftray.control \
-    debian/qiperftray.install \
-    debian/qiperftray.links \
+
+QIPERFCDEBIAN.files += \
+    qiperfc/debian/control \
+    qiperfc/debian/copyright \
+    qiperfc/debian/rules \
+    qiperfc/debian/README.Debian \
+    qiperfc/debian/README.source \
+    qiperfc/debian/qiperfc.links
+
+QIPERFDDEBIAN.files += \
+    qiperfd/debian/README.Debian \
+    qiperfd/debian/control \
+    qiperfd/debian/copyright \
+    qiperfd/debian/rules \
+    qiperfd/debian/README.source \
+    qiperfd/debian/qiperfd.postinst \
+    qiperfd/debian/qiperfd.preinst
+
+QIPERFTRAYDEBIAN.files += \
+    qiperftray/debian/control \
+    qiperftray/debian/copyright \
+    qiperftray/debian/rules \
+    qiperftray/debian/README.Debian \
+    qiperftray/debian/README.source \
+    qiperftray/debian/qiperftray.links \
     TODO
 
 MISC.files += \
    deploy.sh \
-   build_x64.bat
+   build_x64.bat\
+   build_x64.sh
 
 NSIS.files += \
     qiperf.nsi

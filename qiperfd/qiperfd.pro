@@ -53,7 +53,7 @@ SOURCES += \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
+else: unix:!android: target.path = /opt/qiperf/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
@@ -206,7 +206,7 @@ unix:!android {
         linux/$$B_ARCH/iperf2 \
         linux/$$B_ARCH/iperf2.1 \
         linux/$$B_ARCH/iperf3
-    IPERF_FILES.path += /opt/$${TARGET}/bin/linux/
+    IPERF_FILES.path += /opt/qiperf/bin/linux/
     INSTALLS += IPERF_FILES
 
     if (contains($$B_ARCH,"")) {

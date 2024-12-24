@@ -3,7 +3,7 @@
 # build deb package
 DOBUILD=0
 
-VERSION=0.6.11312.10
+VERSION=0.7.11312.23-1
 #VERSION=0.6.11312.04
 declare -a DESTFILES=()
 DESTFILES+=(qiperfd_${VERSION}_amd64.deb)
@@ -16,13 +16,14 @@ WDESTFILES+=(qiperf-setup-${VERSION}.exe)
 UPDATE_LINUX=1
 declare -a IPS=()
 #IPS+=("192.168.70.11")
-IPS+=("192.168.70.13")
+#IPS+=("192.168.70.13")
+#IPS+=("192.168.70.12")
 IPS+=("192.168.70.23")
 IPS+=("192.168.70.24")
-IPS+=("192.168.70.135")
-IPS+=("192.168.70.31")
+#IPS+=("192.168.70.135")
+#IPS+=("192.168.70.31")
 #IPS+=("192.168.70.154")
-IPS+=("192.168.70.162")
+#IPS+=("192.168.70.162")
 #IPS+=("192.168.70.147") # not test user
 
 #windows remote
@@ -66,8 +67,8 @@ if [ "x$?" == "x0" ]; then
         do
             for DESTFILE in "${DESTFILES[@]}"
             do
-                echo "===== scp ../${DESTFILE} test@${IP}:/home/test/${DESTFILE}"
-                scp ../${DESTFILE} test@${IP}:/home/test/${DESTFILE}
+                echo "===== scp ${DESTFILE} test@${IP}:/home/test/${DESTFILE}"
+                scp ${DESTFILE} test@${IP}:/home/test/${DESTFILE}
                 echo "===== ssh test@${IP} sudo dpkg -i /home/test/${DESTFILE}"
                 ssh test@${IP} sudo dpkg -i /home/test/${DESTFILE}
             done
@@ -80,8 +81,8 @@ if [ "x$?" == "x0" ]; then
         do
             for DESTFILE in "${DESTFILES[@]}"
             do
-                echo "===== scp -P $PORT ../${DESTFILE}  test@${DOREMOTEIP}:/home/test/${DESTFILE}"
-                scp -P $PORT ../${DESTFILE} test@${DOREMOTEIP}:/home/test/${DESTFILE}
+                echo "===== scp -P $PORT ${DESTFILE}  test@${DOREMOTEIP}:/home/test/${DESTFILE}"
+                scp -P $PORT ${DESTFILE} test@${DOREMOTEIP}:/home/test/${DESTFILE}
                 echo "===== ssh -p $PORT test@${DOREMOTEIP} sudo dpkg -i /home/test/${DESTFILE}"
                 ssh -p $PORT test@${DOREMOTEIP} sudo dpkg -i /home/test/${DESTFILE}
             done
@@ -91,8 +92,8 @@ if [ "x$?" == "x0" ]; then
     do
         for WINSETUP in "${WDESTFILES[@]}"
         do
-            echo "===== scp ../${WINSETUP} test@${IP}:D:\\${WINSETUP}"
-            scp ../${WINSETUP} test@${IP}:D:\\${WINSETUP}
+            echo "===== scp ${WINSETUP} test@${IP}:D:\\${WINSETUP}"
+            scp ${WINSETUP} test@${IP}:D:\\${WINSETUP}
             echo "===== ssh test@${IP} D:\\${WINSETUP} /S"
             ssh test@${IP} D:\\${WINSETUP} /S
         done
@@ -102,8 +103,8 @@ if [ "x$?" == "x0" ]; then
         do
             for WINSETUP in "${WDESTFILES[@]}"
             do
-                echo "===== scp -P ${PORT} ../${WINSETUP} test@${RVRIP}:D:\\${WINSETUP}"
-                scp -P ${PORT} ../${WINSETUP} test@${RVRIP}:D:\\${WINSETUP}
+                echo "===== scp -P ${PORT} ${WINSETUP} test@${RVRIP}:D:\\${WINSETUP}"
+                scp -P ${PORT} ${WINSETUP} test@${RVRIP}:D:\\${WINSETUP}
                 echo "===== ssh -P ${PORT} test@${RVRIP} D:\\${WINSETUP} /S"
                 ssh -P ${PORT} test@${RVRIP} D:\\${WINSETUP} /S
             done

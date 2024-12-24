@@ -185,7 +185,7 @@ UI_DIR= \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
+else: unix:!android: target.path = /opt/qiperf/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
@@ -277,7 +277,7 @@ unix:!android {
         "/usr/share/mime/packages/"
 
     ICONS.files += \
-        ../images/qiperf.png
+        ../images/qiperfc.png
     ICONS.path += \
         "/usr/share/icons/"
 
@@ -287,11 +287,11 @@ unix:!android {
         "/usr/share/applications/"
 
     IMAGES.files += \
-        ../images/qiperf.png
+        ../images/qiperfc.png
     IMAGES.path += \
         "/usr/share/pixmaps/"
 
-    template.path += /opt/$${TARGET}/template/
+    template.path += /opt/qiperf/template/
 
     INSTALLS += MIME ICONS DESKTOP IMAGES template
 }
