@@ -87,8 +87,14 @@ protected:
 private slots:
     void onWSactMessage(QString msg); //procress websocket action message
     void onNewClient(QHostAddress addr); //
+    void onIperfStdout();
 private:
     void checkFirewallStatus();
+    void initIperf(QString apppath);
+    void getIperfVer(QString cmd, int ver);
+    QString getIperf2ver();
+    QString getIperf21ver();
+    void getIperfVersion();
     QString tmppath;
     QString qiperfdlog;
     QString tmpfilepath;
@@ -102,8 +108,11 @@ private:
     PipeServer *m_pserver;
     //TODO: iperf1
     QString m_iperfexe2; //iperf2
+    QString m_iperfexe2ver; //iperf2 version
     QString m_iperfexe21; //iperf2.1
+    QString m_iperfexe21ver; //iperf2.1 version
     QString m_iperfexe3; //iperf3
+    QString m_iperfexe3ver; //iperf3 version
     QMap<int, IperfWorker*> m_iperfworkers;
     QMap<int, QThread*> m_threads; // iperfworker's thread
 //    QList<IperfWorker*> m_iperfworkers;
