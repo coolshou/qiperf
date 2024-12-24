@@ -9,7 +9,10 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QMessageLogContext>
+#include <QDateTime>
+
 #include <qlogging.h>
+
 
 #include <stdio.h>
 
