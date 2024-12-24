@@ -76,7 +76,6 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject 
     connect(m_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &WSClient::onError);
     connect(m_webSocket, &QWebSocket::textMessageReceived, this, &WSClient::onTextMessageReceived);
     connect(m_webSocket, &QWebSocket::binaryMessageReceived, this, &WSClient::onBinaryMessageReceived);
-//    qDebug() << "WSClient open websocket:" << url << Qt::endl;
     // m_serverip = serverip;
     // m_url = url;
 //    m_datapath = datapath + QDir::separator();

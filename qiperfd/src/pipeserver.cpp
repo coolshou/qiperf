@@ -137,11 +137,8 @@ void PipeServer::on_disconnected()
 
 void PipeServer::send_MessageBack(int idx, QString message)
 {
-//    qDebug() << "send_MessageBack count: " << idx << Qt::endl;
     //TODO why following will cause APP crash
     if (!m_locals->isEmpty()){
-
-        //qDebug() << m_locals.count() << Qt::endl;
         if (m_locals->count()> idx){
             QLocalSocket *socket = m_locals->at(idx);
             QByteArray block;
@@ -157,6 +154,6 @@ void PipeServer::send_MessageBack(int idx, QString message)
             socket->flush();
         }
     } else{
-        qInfo() << "send_MessageBack: idx " << idx << " out of range: " << m_locals->count() << Qt::endl;
+        qInfo() << "send_MessageBack: idx " << idx << " out of range: " << m_locals->count();
     }
 }

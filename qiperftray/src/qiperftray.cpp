@@ -184,12 +184,10 @@ void QIperfTray::onNewMessage(const QString msg)
             QVariantMap status = result[CMD_STATUS].toMap();
             QString ver = result[QIPERFD_NAME].toString();
             // QString works = status["iperfworkers"].toString();
-//            qDebug() << "CMD_STATUS:" << status << Qt::endl;
             // statusmsg("iperf: " + works);
             emit updateIperfcount(status["iperfworkers"].toInt());
             emit updateQIperfd(ver);
         }else {
-//            qDebug() << "onNewMessage:" << msg << Qt::endl;
             ui->te_msg->setText(msg.toUtf8());
         }
     }else {
@@ -303,7 +301,6 @@ void QIperfTray::onSetMgrIfname()
     QJsonDocument doc;
     doc.setObject(jobj);
     QString strjson(doc.toJson(QJsonDocument::Compact));
-//    qDebug()<< "onSetMgrIfname:" << strjson << Qt::endl;
     pclient->send_MessageToServer(strjson);
 }
 

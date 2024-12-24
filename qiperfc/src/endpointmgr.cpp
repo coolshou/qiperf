@@ -36,7 +36,7 @@ int EndPointMgr::columnCount(const QModelIndex &parent) const
 QVariant EndPointMgr::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid()){
-        qDebug() << "data index.isValid:" << index << Qt::endl;
+        qDebug() << "data index.isValid:" << index;
         return QVariant();
     }
 
@@ -44,7 +44,7 @@ QVariant EndPointMgr::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-//    qDebug() << "data:" << index << " ,role:" << QString::number(role) << Qt::endl;
+//    qDebug() << "data:" << index << " ,role:" << QString::number(role) ;
     EndPoint *item = static_cast<EndPoint*>(index.internalPointer());
     if (role == Qt::ForegroundRole){
         // when item is disabled, grayout text
@@ -251,7 +251,7 @@ void EndPointMgr::disable(QString id)
 {
     if (isExist(id)){
         EndPoint* ep = getEndPoint(id);
-        qDebug() << "disable: " << ep->getID() << Qt::endl;
+        qDebug() << "disable: " << ep->getID();
         ep->setEnabled(false);
     }
 }

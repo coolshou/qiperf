@@ -66,7 +66,7 @@ void TPDirDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                     painter->drawPixmap(rect, pixmap);
                     // painter->drawPixmap(option.rect, pixmap);
                 }else{
-                    //                qDebug() << "No image: " << imagePath << ::Qt::endl;
+                    //                qDebug() << "No image: " << imagePath
                 }
             } else {
                 qDebug() << "data.not Valid: " << data;
