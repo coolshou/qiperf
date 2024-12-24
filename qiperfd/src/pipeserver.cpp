@@ -65,7 +65,7 @@ void PipeServer::sendARGS(QStringList args)
             msg = msg + " " + args.join(" ");
             QByteArray block;
             QDataStream out(&block, QIODevice::WriteOnly);
-            out.setVersion(QDataStream::Qt_5_15);
+            out.setVersion(QDataStream::Qt_5_11);
             out << msg;
             out.device()->seek(0);
             qint64 rs = ls.write(block);
@@ -143,7 +143,7 @@ void PipeServer::send_MessageBack(int idx, QString message)
             QLocalSocket *socket = m_locals->at(idx);
             QByteArray block;
             QDataStream out(&block, QIODevice::WriteOnly);
-            out.setVersion(QDataStream::Qt_5_15);
+            out.setVersion(QDataStream::Qt_5_11);
             out << message;
             out.device()->seek(0);
             qint64 rs = socket->write(block);
