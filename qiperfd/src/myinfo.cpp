@@ -113,7 +113,8 @@ QString MyInfo::collectInfo()
 
     mainObject.insert("Manager", m_ifname);
     mainObject.insert("update", update);
-    mainObject.insert("qiperfd", QString(QIPERFD_VERSION)+" git:" + GITBRANCH+"-"+GITVER);
+    mainObject.insert("qiperfd", QString(QIPERFD_VERSION));
+    mainObject.insert("gitver", QString(GITBRANCH)+"-"+QString(GITVER));
     //iperf3 version
 
     //serial
@@ -128,7 +129,6 @@ QString MyInfo::collectInfo()
     //conver to QString
 //    QString strJson(jsonDoc.toJson(QJsonDocument::Indented));
     QString strJson(jsonDoc.toJson(QJsonDocument::Compact));
-//    qDebug().noquote() << "JSON:" << strJson << Qt::endl;
     update = 0;
     return strJson;
 }
