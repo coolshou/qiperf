@@ -30,7 +30,7 @@ void UdpReceiver::dataReceived()
         qint64 rc=0;
         rc=m_socket->readDatagram(datagram.data(), datagram.size(), &send_addr, &send_port);
         if (rc == -1){
-            qDebug() << "UdpReceiver::dataReceived error!!" << Qt::endl;
+            qDebug() << "UdpReceiver::dataReceived error!!";
         } else{
             QString s_addr="";
             bool conversionOK = false;
@@ -40,7 +40,7 @@ void UdpReceiver::dataReceived()
                 s_addr = ip4Address.toString();
             }else{
                 s_addr = send_addr.toString();
-                qDebug() << s_addr << " convert to ipv4 fail" << Qt::endl;
+                qDebug() << s_addr << " convert to ipv4 fail";
             }
             QString msg = datagram.data();
 //            qInfo() <<"UdpReceiver::dataReceived:" << msg;

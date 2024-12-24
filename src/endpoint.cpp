@@ -74,7 +74,6 @@ void EndPoint::loadData(QString data)
 {
     m_jsondata = data;
 //    QList<EndPoint *> parents;
-//    qDebug() << "loadData:" << m_parentItem << Qt::endl;
     //TODO: parser data
     QJsonParseError error;
     QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8(), &error);
@@ -107,7 +106,6 @@ void EndPoint::loadData(QString data)
         //TODO: get address of each interface....
         if (!jsonRoot.value("Net").isNull()){
             oNet = jsonRoot.value("Net").toObject();
-    //        qDebug() << "TODO: oNet:" << oNet << Qt::endl;
         }
     }/*else{
         qDebug() << "EndPoint::loadData wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;

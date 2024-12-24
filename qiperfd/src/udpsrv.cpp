@@ -62,7 +62,6 @@ void UdpSrv::onTimeout()
         }
         // don't clear, let it keeps sending
 //        m_sendMsg ="";
-//        qDebug() <<"("<< QString::number(m_sendMsg.length()) <<")" "clear m_sendMsg:" << m_sendMsg << "." << Qt::endl;
     } else {
         qInfo() <<"("<< QString::number(m_sendMsg.length()) <<")" "wait new m_sendMsg";
     }
@@ -76,7 +75,6 @@ void UdpSrv::update_addr()
 //        socket->unbind();
         m_addr = addrs[0]; // ip address
         m_baddr = addrs[1]; // broadcast address
-//        qDebug() << "m_baddr:" << m_baddr.toString() << Qt::endl;
         if (!(socket->ConnectedState == QAbstractSocket::UnconnectedState)) {
             onLog("update_addr: m_addr:" + m_addr.toString());
             socket->bind(m_addr, QUdpSocket::ShareAddress); // now interface

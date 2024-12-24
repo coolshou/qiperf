@@ -45,7 +45,6 @@ MyService::MyService(QIperfd *qiperfd, QObject *parent)
 
 QString MyService::getOS()
 {
-    qDebug() << "getOS \n" << Qt::endl;
     return QSysInfo::productType();
 }
 

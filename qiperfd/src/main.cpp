@@ -48,6 +48,7 @@ int isNotRoot()
 static QTextStream output_ts;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    QString endl = "\n";
     QDateTime t = QDateTime::currentDateTime();
     output_ts << "[" + t.toString("yyyy-MM-dd hh:mm:ss.zzz") + "] ";
 
@@ -56,19 +57,19 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     //    const char *function = context.function ? context.function : "";
     switch (type) {
     case QtDebugMsg:
-        output_ts << QString("DEBUG: %1 (%2:%3)").arg(msg, file, line) << Qt::endl;
+        output_ts << QString("DEBUG: %1 (%2:%3)").arg(msg, file, line) << endl;
         break;
     case QtInfoMsg:
-        output_ts << QString("INFO: %1 (%2:%3)").arg(msg, file, line) << Qt::endl;
+        output_ts << QString("INFO: %1 (%2:%3)").arg(msg, file, line) << endl;
         break;
     case QtWarningMsg:
-        output_ts << QString("WARN: %1 (%2:%3)").arg(msg, file, line) << Qt::endl;
+        output_ts << QString("WARN: %1 (%2:%3)").arg(msg, file, line) << endl;
         break;
     case QtCriticalMsg:
-        output_ts << QString("CRITICAL: %1 (%2:%3)").arg(msg, file, line) << Qt::endl;
+        output_ts << QString("CRITICAL: %1 (%2:%3)").arg(msg, file, line) << endl;
         break;
     case QtFatalMsg:
-        output_ts << QString("FATAL: %1 (%2:%3)").arg(msg, file, line) << Qt::endl;
+        output_ts << QString("FATAL: %1 (%2:%3)").arg(msg, file, line) << endl;
         break;
     default:
         // qDebug() << msg << " (" << context.line << ")";

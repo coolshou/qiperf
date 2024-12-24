@@ -721,17 +721,17 @@ void QIperfC::onNotice(QString send_addr, QString msg)
                 }
                 break;
             case EndPointAct::Update:
-                qDebug() << "TODO qiperfd Update: from(" << send_addr << ") " << msg << Qt::endl;
+                qDebug() << "TODO qiperfd Update: from(" << send_addr << ") " << msg;
 
                 break;
             case EndPointAct::Del:
-                qDebug() << "TODO qiperfd Del: from(" << send_addr << ") " << msg << Qt::endl;
+                qDebug() << "TODO qiperfd Del: from(" << send_addr << ") " << msg;
                 break;
             case EndPointAct::Disable:
-                qDebug() << "TODO qiperfd Disable: from(" << send_addr << ") " << msg << Qt::endl;
+                qDebug() << "TODO qiperfd Disable: from(" << send_addr << ") " << msg;
                 break;
             default:
-                qDebug() << "TODO on_notice default action: from(" << send_addr << ") " << msg << Qt::endl;
+                qDebug() << "TODO on_notice default action: from(" << send_addr << ") " << msg;
         }
     } else {
         qDebug() << "TODO on_notice invalid message: from(" << send_addr << ") " << msg;
@@ -740,7 +740,7 @@ void QIperfC::onNotice(QString send_addr, QString msg)
 
 void QIperfC::onQuit()
 {
-    qInfo() << "onQuit" << Qt::endl;
+    qInfo() << "onQuit";
     // TODO: do any thing before quit!
     qApp->quit();
 }
@@ -749,7 +749,7 @@ void QIperfC::notificationReceived(const QString key, const QVariant value)
 {
     qDebug() << "RPC Received notification:"
                      << "Key:" << key
-                     << "Value:" << value << Qt::endl;
+                     << "Value:" << value;
 }
 
 void QIperfC::setStartTime(QDateTime startTime)
@@ -987,12 +987,12 @@ void QIperfC::onIgnoreWrongInterval(bool bIgnore)
 
 void QIperfC::onRPC_result(const QVariant &result)
 {
-    qDebug() << "onRPC_result: " << result << Qt::endl;
+    qDebug() << "onRPC_result: " << result;
 }
 
 void QIperfC::onRPC_error(int code, const QString &message)
 {
-    qDebug() << "onRPC_error: (" << code << ")" << message << Qt::endl;
+    qDebug() << "onRPC_error: (" << code << ")" << message;
 }
 
 void QIperfC::onIperfStarted(QString smode, QString ipport)

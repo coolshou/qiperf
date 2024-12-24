@@ -263,12 +263,12 @@ void WSServer::socketDisconnected()
 
 void WSServer::onSslErrors(const QList<QSslError> &errors)
 {
-    qDebug() << "Ssl errors occurred" << errors << Qt::endl;
+    qDebug() << "Ssl errors occurred" << errors;
 }
 
 void WSServer::onServerError(QWebSocketProtocol::CloseCode closeCode)
 {
-    qDebug() << "Server Error occurred:" << closeCode << Qt::endl;
+    qDebug() << "Server Error occurred:" << closeCode;
 }
 
 void WSServer::onBytesWritten(qint64 bytes)
