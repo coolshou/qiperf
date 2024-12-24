@@ -50,9 +50,13 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     }
     QString apppath = qApp->applicationDirPath(); // app run time path:/home/coolshou/sdb/download/work/qiperf/Debug
     loadcfg(apppath);
-    //    qDebug() << "start UdpSrv" << Qt::endl;
     //
-    m_iperfwrapper = new IperfWrapper(this);
+    initIperf(apppath);
+    getIperfVer(m_iperfexe2, static_cast<int>(IPERF_VER::V2));
+    getIperfVer(m_iperfexe21, static_cast<int>(IPERF_VER::V21));
+    getIperfVer(m_iperfexe3, static_cast<int>(IPERF_VER::V3));
+
+    m_iperfwrapper = new IperfWrapper();
 //    m_myinfo = new MyInfo(getManagerInterface());
     m_myinfo = new MyInfo(mgr_ifname);
     connect(this, &QIperfd::setMgrIfname, m_myinfo, &MyInfo::setIfname);
@@ -77,86 +81,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     // pipserver : interact with systemtray GUI (qiperftray)
     m_pserver=pserver;
 
-    // iperf control interface, accept add/del iperf setting from remote
-    QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-#if defined(Q_OS_ANDROID) || defined(Q_OS_WIN32)
-    QString arch = QSysInfo::buildCpuArchitecture();
-#endif
-#if defined(Q_OS_LINUX)
-    // linux/android path
-#if !defined(Q_OS_ANDROID)
-    QString tmp_path = QString(QDir::separator()) + "qiperf";
-    QDir dir(tmp + tmp_path);
-    if (!dir.exists())
-    {
-        dir.mkdir(tmp + tmp_path);
-    }
-#else
-    QString tmp_path = "";
-#endif
-    //TODO: check we have newer version of iperf, remove old !!
-    m_iperfexe2 = tmp + tmp_path + QDir::separator() + "iperf2";
-    if (QFileInfo::exists(m_iperfexe2))
-    {
-        QFile::remove(m_iperfexe2);
-    }
-    m_iperfexe21 = tmp + tmp_path + QDir::separator() + "iperf2.1";
-    if (QFileInfo::exists(m_iperfexe21))
-    {
-        QFile::remove(m_iperfexe21);
-    }
-    m_iperfexe3 = tmp + tmp_path + QDir::separator() + "iperf3";
-    if (QFileInfo::exists(m_iperfexe3))
-    {
-        QFile::remove(m_iperfexe3);
-    }
-// iperf2
-#if defined(Q_OS_ANDROID)
-    QFile i2File(":/android/" + arch + "/iperf");
-#else
-    QFile i2File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf2");
-    if (i2File.exists()) {
-        // make file execuable
-        if (i2File.copy(m_iperfexe2)){
-            QFile iperf2File(m_iperfexe2);
-            iperf2File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
-                                  QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
-                                  QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
-        }else{
-            qDebug() << "copy file " << " to " << m_iperfexe2 << " fail";
-        }
-    }else{
-        qDebug() << i2File.fileName() << " NOT EXIST!!";
-    }
-#endif
-// iperf3
-#if defined(Q_OS_ANDROID)
-    QFile i3File(":/android/" + arch + "/iperf3");
-#else
-    QFile i3File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf3");
-    if(i3File.exists()){
-        if (i3File.copy(m_iperfexe3)){
-            QFile iperf3File(m_iperfexe3);
-            iperf3File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
-                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
-                                      QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
-        }else{
-            qDebug() << "copy file " << " to " << m_iperfexe3 << " fail";
-        }
-    }else{
-        qDebug() << i3File.fileName() << " NOT EXIST!!";
-    }
-#endif
 
-#elif defined(Q_OS_WIN32)
-    // windows, iperf files
-
-    m_iperfexe2 = apppath + QDir::separator() + "windows" +QDir::separator() + "x86"+QDir::separator() + "iperf2.exe";
-    m_iperfexe21 = apppath + QDir::separator() + "windows"+ QDir::separator() + "x86"+QDir::separator() + "iperf2.1.exe";
-    m_iperfexe3 = apppath + QDir::separator() + "windows" +QDir::separator() + arch + QDir::separator() + "iperf3.exe";
-#else
-    qDebug() << " Not Support platform!!" << Qt::endl;
-#endif
 
     // system service manager
     qiperfdlog = tmppath+QIPERFD_NAME+".log";
@@ -275,7 +200,6 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
         if (name.compare(iface.humanReadableName()) == 0)
         {
             ifname = iface.name();
-//            qDebug() << "getIfNameByHumanReadableName:" << ifname << " from: " <<name << Qt::endl;
             break;
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
@@ -327,7 +251,7 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
     }else if (ver==static_cast<int>(IPERF_VER::V2)){
         cmd = m_iperfexe2;
     }else{
-        qDebug() << "Not support Iperf version:" << ver << Qt::endl;
+        qDebug() << "Not support Iperf version:" << ver;
         return -1;
     }
     uint port = jsondata["port"].toUInt();
@@ -375,7 +299,7 @@ void QIperfd::del(int idx)
 
 int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bindHost)
 {
-    qDebug() << "addIperfServer:" << bindHost << ":" << port << Qt::endl;
+    qDebug() << "addIperfServer:" << bindHost << ":" << port ;
 
     QString cmd;
     // add a iperf server
@@ -384,7 +308,7 @@ int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bind
     }else if (version==static_cast<int>(IPERF_VER::V2)){
         cmd = m_iperfexe2;
     }else{
-        qDebug() << "Not support Iperf version:" << version << Qt::endl;
+        qDebug() << "Not support Iperf version:" << version ;
         return -1;
     }
     QString args="-s";
@@ -397,7 +321,7 @@ int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bind
 
 int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs)
 {
-    qDebug() << "addIperfClient:" << Host << ":" << port << Qt::endl;
+    qDebug() << "addIperfClient:" << Host << ":" << port ;
     QString cmd;
     // add a iperf server
     if (version==static_cast<int>(IPERF_VER::V3)){
@@ -405,7 +329,7 @@ int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host
     }else if (version==static_cast<int>(IPERF_VER::V2)){
         cmd = m_iperfexe2;
     }else{
-        qDebug() << "Not support Iperf version:" << version << Qt::endl;
+        qDebug() << "Not support Iperf version:" << version ;
         return -1;
     }
     QString args = iperfargs;
@@ -494,7 +418,6 @@ void QIperfd::informMessage(QString data, bool bShowAtLocal)
 void QIperfd::setManagerInterface(QString ifname)
 {
     mgr_ifname = ifname;
-//    qDebug() << "setManagerInterface:" << mgr_ifname << Qt::endl;
     savecfg();
     emit setMgrIfname(ifname);
     m_udpsrv->setSendMsg(m_myinfo->updateInfo()); // broadcast
@@ -515,7 +438,6 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
     if (QString::compare(msg, CMD_STATUS, Qt::CaseInsensitive) == 0)
     {
         // get current all iperf status
-        //        qDebug() << "TODO: send current status back to GUI" << Qt::endl;
         QVariantMap status;
         QVariantMap workers;
         workers.insert("iperfworkers", QString::number(m_iperfworkers.count()));
@@ -526,7 +448,6 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         status.insert(CMD_RUNNING, QString::number(m_iperfworkers.count()));
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
         QString backmsg = jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str();
-//        qDebug() << "send status (" << idx << "): " << backmsg  << Qt::endl;
         informMessage(backmsg, true);
     }
     else if (QString::compare(msg, CMD_IFNAMES, Qt::CaseInsensitive) == 0)
@@ -543,7 +464,6 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         status.insert("netobj", QString(QJsonDocument(netObjs).toJson()));
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
         QString backmsg = jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str();
-//        qDebug() << "send ifnames: (" << idx << "): " << backmsg  << Qt::endl;
         informMessage(backmsg, true);
     }
     else if (QString::compare(msg, CMD_QIPERFD_RESTART, Qt::CaseInsensitive) == 0)
@@ -638,7 +558,6 @@ void QIperfd::onErrored(int m_idx, int refrow, QString text, QString ipport)
 
 void QIperfd::onIperfLog(int idx, QString text)
 {
-//    qDebug() << "TODO: onIperfLog(" << QString::number(idx) << "):" << text << Qt::endl;
     onLog("(" + QString::number(idx) + ")" + text + "");
 }
 
@@ -783,6 +702,11 @@ void QIperfd::onNewClient(QHostAddress addr)
     }
     //TODO: multi file client
     m_fileclient = new FileClient(QIPERF_FILEPORT, addr.toString());
+}
+
+void QIperfd::onIperfStdout()
+{
+
 }
 
 void QIperfd::checkFirewallStatus()
@@ -932,6 +856,124 @@ void QIperfd::checkFirewallStatus()
     pEnumerator->Release();
     CoUninitialize();
 #else
-    qDebug() << "TODO: Firewall detect!!";
+    qDebug() << "TODO: checkFirewallStatus(Firewall detect)!!";
 #endif
+}
+
+void QIperfd::initIperf(QString apppath)
+{
+    // iperf control interface, accept add/del iperf setting from remote
+    QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+#if defined(Q_OS_ANDROID) || defined(Q_OS_WIN32)
+    QString arch = QSysInfo::buildCpuArchitecture();
+#endif
+#if defined(Q_OS_LINUX)
+    // linux/android path
+#if !defined(Q_OS_ANDROID)
+    QString tmp_path = QString(QDir::separator()) + "qiperf";
+    QDir dir(tmp + tmp_path);
+    if (!dir.exists())
+    {
+        dir.mkdir(tmp + tmp_path);
+    }
+#else
+    QString tmp_path = "";
+#endif
+    //TODO: check we have newer version of iperf, remove old !!
+    m_iperfexe2 = tmp + tmp_path + QDir::separator() + "iperf2";
+    if (QFileInfo::exists(m_iperfexe2))
+    {
+        QFile::remove(m_iperfexe2);
+    }
+    m_iperfexe21 = tmp + tmp_path + QDir::separator() + "iperf2.1";
+    if (QFileInfo::exists(m_iperfexe21))
+    {
+        QFile::remove(m_iperfexe21);
+    }
+    m_iperfexe3 = tmp + tmp_path + QDir::separator() + "iperf3";
+    if (QFileInfo::exists(m_iperfexe3))
+    {
+        QFile::remove(m_iperfexe3);
+    }
+// iperf2
+#if defined(Q_OS_ANDROID)
+    QFile i2File(":/android/" + arch + "/iperf");
+#else
+    QFile i2File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf2");
+    if (i2File.exists()) {
+        // make file execuable
+        if (i2File.copy(m_iperfexe2)){
+            QFile iperf2File(m_iperfexe2);
+            iperf2File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
+                                      QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
+        }else{
+            qDebug() << "copy file " << " to " << m_iperfexe2 << " fail";
+        }
+    }else{
+        qDebug() << i2File.fileName() << " NOT EXIST!!";
+    }
+#endif
+// iperf3
+#if defined(Q_OS_ANDROID)
+    QFile i3File(":/android/" + arch + "/iperf3");
+#else
+    QFile i3File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf3");
+    if(i3File.exists()){
+        if (i3File.copy(m_iperfexe3)){
+            QFile iperf3File(m_iperfexe3);
+            iperf3File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
+                                      QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
+        }else{
+            qDebug() << "copy file " << " to " << m_iperfexe3 << " fail";
+        }
+    }else{
+        qDebug() << i3File.fileName() << " NOT EXIST!!";
+    }
+#endif
+
+#elif defined(Q_OS_WIN32)
+    // windows, iperf files
+
+    m_iperfexe2 = apppath + QDir::separator() + "windows" +QDir::separator() + "x86"+QDir::separator() + "iperf2.exe";
+    m_iperfexe21 = apppath + QDir::separator() + "windows"+ QDir::separator() + "x86"+QDir::separator() + "iperf2.1.exe";
+    m_iperfexe3 = apppath + QDir::separator() + "windows" +QDir::separator() + arch + QDir::separator() + "iperf3.exe";
+#else
+    qDebug() << " Not Support platform!!";
+#endif
+}
+
+void QIperfd::getIperfVer(QString cmd, int ver)
+{
+
+    QProcess process;
+    // connect(process, &QProcess::readyReadStandardOutput, this, &QIperfd::onIperfStdout);
+    QStringList args;
+    args.append("-v");
+    // process.startDetached(m_iperfexe3, args);
+    process.start(cmd, args);
+    // startCommand(m_iperfexe3); //Qt6.0
+    process.waitForFinished(10);
+    QString out = process.readAllStandardOutput();
+    QStringList ds = out.split("\n");
+    foreach (QString line, ds) {
+        if (line.startsWith("iperf")){
+            qDebug() << "line: " << line;
+            QStringList tmps =line.split(" ");
+            if (tmps.length()>=2){
+                if (ver == static_cast<int>(IPERF_VER::V2)){
+                    m_iperfexe2ver = tmps[2];
+                }
+                if (ver == static_cast<int>(IPERF_VER::V21)){
+                    m_iperfexe21ver = tmps[2];
+                }
+                if (ver == static_cast<int>(IPERF_VER::V3)){
+                    m_iperfexe3ver = tmps[1];
+                }
+                break;
+            }
+        }
+    }
+    qDebug() << "iperf3 ver:" << m_iperfexe3ver;
 }
