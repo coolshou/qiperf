@@ -25,20 +25,13 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
       m_bindaddr(bindaddr), m_target(target), m_bidir(bidir), m_reverse(reverse),
       m_interval(interval), m_delaystart(delaystart), m_parent(parent)
 {
-//    m_delaystart =delaystart; //TODO: m_delaystart
     m_logfile = nullptr;
     m_logtextstream = nullptr;
     m_iperflogpath = "";
-//    m_idx = idx; // thread index
-    m_iperfwrapper = new IperfWrapper(this);
+    m_iperfwrapper = new IperfWrapper();
     m_iperfwrapper->setDelaytime(delaystart);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfWorker::onThroughputData);
 //    this->deleteLater(); //this will cause stdout not flush??
-//    m_parent = parent;
-//    m_version = version;
-//    m_bidir = bidir;
-//    m_reverse = reverse;
-//    emit log(QString("arg:"+arg));
 //    m_cmd = cmd; //iperf exec fullpath
     m_arguments = arg.split(" ");
     if (m_arguments.contains("-s")){
