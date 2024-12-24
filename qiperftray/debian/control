@@ -1,0 +1,19 @@
+Source: qiperf
+Section: network
+Priority: optional
+Maintainer: coolshou <coolshou2060@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+    qt5-qmake | qmake6, qtbase5-dev | qt6-base-dev,
+    libqt5websockets5-dev | libqt6websockets6-dev | qt6-websockets-dev,
+Standards-Version: 4.6.0
+Homepage: https://github.com/coolshou/qiperf.git
+#Vcs-Browser: https://salsa.debian.org/debian/qiperf
+#Vcs-Git: https://github.com/coolshou/qiperf.git
+Rules-Requires-Root: no
+
+Package: qiperftray
+Architecture: any
+Multi-Arch: allowed
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: qt base systray to monitor qiperfd
+ qt base systray to monitor qiperfd

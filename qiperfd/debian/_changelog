@@ -1,0 +1,73 @@
+qiperf (0.7.11312.23-1) unstable; urgency=medium
+
+  * add open log folder with system's file manager
+  * Fix Ignore load iperf log file TP value on interval < 1 sec (invalid TP value?)
+  * Fix qiperfd list have empty item at end of list cause sorting column display extra empty rows.
+  * Fix not show text on throughput Direction Column
+  * Linux Move to QT6 base
+
+ -- coolshou <coolshou2060@gmail.com>  Wed, 11 Dec 2024 10:00:00 +0800
+
+qiperf (0.6.11312.10-1) unstable; urgency=medium
+
+  * Fix wrong state of menu save when load config from args
+  * Fix Under Windows Iperf.exe did not terminate on test finished
+  * Fix wrong idx introduce on 0.6.11312.04
+
+ -- coolshou <coolshou2060@gmail.com>  Thu, 10 Dec 2024 10:00:00 +0800
+
+qiperf (0.6.11312.04-1) unstable; urgency=medium
+
+  * Add show Hostname column in qiperfd list
+  * Add export test result to html file
+  * Add show manager interface's first ip address on qiperftray
+  * Add search text input to search string in DlgShowLog and iperf raw log viewer
+  * Fix when qiperfd did not get manager interface's IP, show error message on qiperftray
+  * Add qiperfc right menu "copy text" of the (comment or other) column
+  * Windows version change to vs2022 build (because QWebEngineWidgets not exist in mingw64 build)
+  * Fix load config the throughput chart on wrong x axis
+
+ -- coolshou <coolshou2060@gmail.com>  Wed, 04 Dec 2024 10:00:00 +0800
+
+qiperf (0.5.11309.18-1) unstable; urgency=medium
+
+  * Add delay start time for iperf test
+  * Add enable/disable specify iperf test pair
+  * Fix second time run test no throughput value on UI
+  * Fix second time run test save raw log file to wrong folder
+  * Fix clear record did not fully clear record data
+  * Fix delete pair will clear all test pairs
+  * Fix open multi times many cause throughput plot wrong
+  * Fix open saved qip file (with iperf raw data) cause app crash under Windows
+  * Add detectSystemProxy() and force not use system proxy on control qiperfd
+  * Add select throughput chart's legend item, also hilight the line. vice versa.
+
+ -- coolshou <coolshou2060@gmail.com>  Wed, 18 Sep 2024 10:00:00 +0800
+
+qiperf (0.4.11308.06-1) unstable; urgency=medium
+
+  * fix: limit iperf3 parallel pair number to 20 (--bidir 10) to avoid throughput problem under windows
+  * default: iperf3 send/receive socket buffer sizes to 256K (-w 256K)
+  * update show Min/Max throughput
+  * fix: collapse folding on clear throughput date
+  * fix: many GUI bug fix
+  * add show UDP packet lost rate
+
+ -- coolshou <jimmy_yeh@alphanetworks.com>  Tue, 6 Aug 2024 17:40:07 +0800
+
+qiperf (0.3.11307.23-1) unstable; urgency=medium
+
+  * add user stop()
+  * add net interface driver name/version info
+  * add store iperf record files on test finish, use Run -> Show Log to show all record files
+  * add self-destruction timer in 10 sec when iperf server did not connected by iperf client
+  * add save/load .QIP with iperf record/env info
+  * many bug fix/flow adjust
+
+ -- coolshou <jimmy_yeh@alphanetworks.com>  Tue, 23 Jul 2024 10:17:17 +0800
+
+qiperf (0.2.11306.28-1) unstable; urgency=medium
+
+  * Initial release
+
+ -- coolshou <jimmy_yeh@alphanetworks.com>  Thu, 01 Nov 2023 00:00:00 +0800

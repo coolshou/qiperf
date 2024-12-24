@@ -1,6 +1,0 @@
-debian/tmp/usr/share/pixmaps/qiperfd.png  /usr/share/pixmaps/
-debian/tmp/lib/systemd/system/qiperfd.service /usr/lib/systemd/system/
-debian/tmp/opt/qiperfd/bin/qiperfd /opt/qiperf/bin/
-debian/tmp/opt/qiperfd/bin/linux/iperf2 /opt/qiperf/bin/linux
-debian/tmp/opt/qiperfd/bin/linux/iperf2.1 /opt/qiperf/bin/linux
-debian/tmp/opt/qiperfd/bin/linux/iperf3 /opt/qiperf/bin/linux
