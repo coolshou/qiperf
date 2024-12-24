@@ -187,7 +187,7 @@ unix:!android {
         #RESOURCES += \
         #    linux-arm64.qrc
     }
-    contains(QT_ARCH, armv7) {
+    contains(QT_ARCH, armv7||arm) {
         B_ARCH="armhf"
         #RESOURCES += \
         #    linux-armhf.qrc
