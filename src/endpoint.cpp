@@ -122,7 +122,7 @@ QString EndPoint::getJsonData()
 void EndPoint::updateTimeStemp()
 {
     QDateTime t=QDateTime::currentDateTime();
-    m_lastnoticetime = t.toString("yyyy.dd.MM.hh:mm:ss.zzz");
+    m_lastnoticetime = t.toString("yyyy.MM.dd.hh:mm:ss.zzz");
     m_itemDatas[EndPointMgr::cols::status] = m_lastnoticetime;
 }
 
