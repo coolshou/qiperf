@@ -15,7 +15,7 @@ QIperfTray::QIperfTray(MyTray *tray, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    QSettings cfg= QSettings(QSettings::IniFormat, QSettings::UserScope,
+    cfg = new QSettings(QSettings::IniFormat, QSettings::UserScope,
                               QIPERF_ORG, QIPERFTRAY_NAME);
     //SystemScope: /etc/xdg/xdg-lxqt/alphanetworks/qiperftray.conf
     //  sudo =>      /etc/xdg/alphanetworks/qiperftray.conf
@@ -77,18 +77,18 @@ QIperfTray::~QIperfTray()
 
 void QIperfTray::loadcfg()
 {
-    cfg.beginGroup("main");
-    m_geometry = cfg.value("geometry", QRect(0,0,200,200)).toRect();
-    cfg.endGroup();
+    cfg->beginGroup("main");
+    m_geometry = cfg->value("geometry", QRect(0,0,200,200)).toRect();
+    cfg->endGroup();
     setGeometry(m_geometry);
 }
 
 void QIperfTray::savecfg()
 {
-    cfg.beginGroup("main");
-    cfg.setValue("geometry", this->geometry());
-    cfg.endGroup();
-    cfg.sync();
+    cfg->beginGroup("main");
+    cfg->setValue("geometry", this->geometry());
+    cfg->endGroup();
+    cfg->sync();
 }
 
 void QIperfTray::setLogFile(QString filename)
