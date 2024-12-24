@@ -1,5 +1,4 @@
 #include "qiperftray.h"
-#include "qiperftray.h"
 #include "ui_qiperftray.h"
 
 #include "comm.h"
