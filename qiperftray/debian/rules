@@ -27,7 +27,7 @@ export DEB_BUILD_OPTIONS+=nocheck
 #VERSION_QIPERFTRAY := $(shell sed -n -e "s/^#define QIPERFTRAY_VERSION //p" src/versions.h)
 
 # sudo qtchooser -install qt6 /usr/lib/qt6/bin/qmake
-export QT_SELECT=qt6
+#export QT_SELECT=qt6
 
 %:
 	dh $@
