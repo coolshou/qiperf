@@ -1,6 +1,6 @@
 QT += core gui
 QT += network
-QT += webenginewidgets
+
 
 #following setting will overwrite qtcreater's setting
 #CONFIG += release
