@@ -1,0 +1,34 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+#export DH_VERBOSE = 1
+
+DEB_BUILD_OPTIONS=noddebs
+
+#include /usr/share/cdbs/1/rules/debhelper.mk
+# see FEATURE AREAS in dpkg-buildflags(1)
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# see ENVIRONMENT in dpkg-buildflags(1)
+# package maintainers to append CFLAGS
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+# package maintainers to append LDFLAGS
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+DPKG_EXPORT_BUILDFLAGS := 1
+include /usr/share/dpkg/architecture.mk
+
+# for cross build
+export DEB_BUILD_OPTIONS+=nocheck
+
+#VERSION_QIPERF := $(shell sed -n -e "s/^#define QIPERF_VERSION //p" src/versions.h)
+#VERSION_QIPERFD := $(shell sed -n -e "s/^#define QIPERFD_VERSION //p" src/versions.h)
+#VERSION_QIPERFC := $(shell sed -n -e "s/^#define QIPERFC_VERSION //p" src/versions.h)
+#VERSION_QIPERFTRAY := $(shell sed -n -e "s/^#define QIPERFTRAY_VERSION //p" src/versions.h)
+
+# sudo qtchooser -install qt6 /usr/lib/qt6/bin/qmake
+export QT_SELECT=qt6
+
+%:
+	dh $@
+
