@@ -115,8 +115,10 @@ QString MyInfo::collectInfo()
     mainObject.insert("update", update);
     mainObject.insert("qiperfd", QString(QIPERFD_VERSION));
     mainObject.insert("buildver", QString(GITBRANCH)+"-"+QString(GITVER));
-    //iperf3 version
-
+    //iperf version
+    mainObject.insert("iperf2ver", m_iperf2ver);
+    mainObject.insert("iperf21ver", m_iperf21ver);
+    mainObject.insert("iperf3ver", m_iperf3ver);
     //serial
     mainObject.insert("serial", collectSerial());
 
@@ -174,7 +176,13 @@ QJsonArray MyInfo::collectSerial()
     QStringList serials;
     QList<QSerialPortInfo> qs = QSerialPortInfo::availablePorts();
     foreach(auto q, qs){
-        serials.append(q.portName());
+        if (q.hasProductIdentifier() && q.hasVendorIdentifier()){
+            qDebug() << q.portName() << " productIdentifier:" << q.productIdentifier()
+                     << " vendorIdentifier:" << q.vendorIdentifier()
+                     << " serialNumber:" << q.serialNumber()
+                     << " description: " << q.manufacturer();
+            serials.append(q.portName());
+        }
     }
     qDebug() << "collectSerial:" << serials;
 
@@ -320,6 +328,13 @@ void MyInfo::getTTL()
 #else
     qDebug() << "getTTL: Not support platform: " << QSysInfo::productType();
 #endif
+}
+
+void MyInfo::setIperfVer(QString v2, QString v21, QString v3)
+{
+    m_iperf2ver = v2;
+    m_iperf21ver = v21;
+    m_iperf3ver = v3;
 }
 
 QString MyInfo::readSysFile(const QString &path) {

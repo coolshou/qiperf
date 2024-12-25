@@ -31,6 +31,7 @@ public:
     quint64 getSysBufferSize();
     void setSysBufferSize(quint64 buff);
     void getTTL();
+    void setIperfVer(QString v2,QString v21,QString v3);
 
 #if defined(Q_OS_LINUX)
 
@@ -66,6 +67,9 @@ private:
     QString m_old_manager_ip;
     QString m_new_manager_ip;
     QJsonObject m_mainObject;
+    QString m_iperf2ver;
+    QString m_iperf21ver;
+    QString m_iperf3ver;
 };
 
 #endif // MYINFO_H
