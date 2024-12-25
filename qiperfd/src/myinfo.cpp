@@ -114,7 +114,7 @@ QString MyInfo::collectInfo()
     mainObject.insert("Manager", m_ifname);
     mainObject.insert("update", update);
     mainObject.insert("qiperfd", QString(QIPERFD_VERSION));
-    mainObject.insert("gitver", QString(GITBRANCH)+"-"+QString(GITVER));
+    mainObject.insert("buildver", QString(GITBRANCH)+"-"+QString(GITVER));
     //iperf3 version
 
     //serial
