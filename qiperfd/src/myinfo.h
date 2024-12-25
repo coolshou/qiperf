@@ -25,13 +25,14 @@ public:
     QList<QHostAddress> getIPfromIfname(QString ifname);
 
     int getEndpointType();
+    void setIperfVer(QString v2,QString v21,QString v3);
     void getCpuMemInfo(QString &cpuModel, QString &totalMemory);
     void getMotherboardInfo(QString &vendor, QString &model, QString &serial);
     QString getDriverVersion(const QString &interfaceName, QString &drivername);
     quint64 getSysBufferSize();
     void setSysBufferSize(quint64 buff);
     void getTTL();
-    void setIperfVer(QString v2,QString v21,QString v3);
+
 
 #if defined(Q_OS_LINUX)
 
