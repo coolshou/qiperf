@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     //log file
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 
-    QString logfilePath = tmp + QDir::separator() + QIPERF_NAME + QDir::separator();
+    QString logfilePath = tmp + QDir::separator() + QIPERFC_NAME + QDir::separator();
     QDir dir(logfilePath);
     if (!dir.exists())
         dir.mkpath(".");
