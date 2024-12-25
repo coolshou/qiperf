@@ -47,7 +47,7 @@ QIPERFTRAYDEBIAN.files += \
 MISC.files += \
    deploy.sh \
    build_x64.bat\
-   build_x64.sh
+   build_deb.sh
 
 NSIS.files += \
     qiperf.nsi
