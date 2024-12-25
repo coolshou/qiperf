@@ -1,4 +1,4 @@
-qiperf (0.7.11312.24-1) unstable; urgency=medium
+qiperf (0.7.11312.25-1) unstable; urgency=medium
 
   * add open log folder with system's file manager
   * Fix Ignore load iperf log file TP value on interval < 1 sec (invalid TP value?)
