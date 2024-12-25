@@ -3,7 +3,7 @@
 # build deb package
 DOBUILD=0
 
-VERSION=0.7.11312.23-1
+VERSION=0.7.11312.25-1
 #VERSION=0.6.11312.04
 declare -a DESTFILES=()
 DESTFILES+=(qiperfd_${VERSION}_amd64.deb)
@@ -58,7 +58,7 @@ PORTS+=(55911) # LAN
 
 if [ "x$DOBUILD" == "x1" ]; then
     # build
-    dpkg-buildpackage -b --no-sign -nc
+    build_deb.sh
 fi
 
 if [ "x$?" == "x0" ]; then
@@ -88,6 +88,7 @@ if [ "x$?" == "x0" ]; then
             done
         done
     fi
+    # window system
     for IP in "${WIPS[@]}"
     do
         for WINSETUP in "${WDESTFILES[@]}"
@@ -111,20 +112,3 @@ if [ "x$?" == "x0" ]; then
         done
     fi
 fi
-
-# clean up
-rm ../*.buildinfo
-rm ../*.changes
-
-# windows build
-#if [ $DOREMOTE -eq 1 ]; then
-#WINSETUP=qiperf-setup-0.2.11306.28.exe
-#
-#   echo "scp ../${WINSETUP} test@192.168.70.11:D:\\${WINSETUP}"
-#    scp ../${WINSETUP} test@192.168.70.11:D:\\${WINSETUP}
-#    scp ../${WINSETUP} test@192.168.70.188:D:\\${WINSETUP}
-#
-    #ssh test@192.168.70.11 D:\\${WINSETUP} /S
-#    ssh test@192.168.70.188 D:\\${WINSETUP} /S
-#
-#fi
