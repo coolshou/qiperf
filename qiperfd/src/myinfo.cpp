@@ -289,6 +289,13 @@ int MyInfo::getEndpointType()
     //    }
 }
 
+void MyInfo::setIperfVer(QString v2, QString v21, QString v3)
+{
+    m_iperf2ver = v2;
+    m_iperf21ver = v21;
+    m_iperf3ver = v3;
+}
+
 #if defined(Q_OS_LINUX)
 QString MyInfo::getDriverVersion(const QString &interfaceName, QString &drivername)
 {
@@ -330,12 +337,7 @@ void MyInfo::getTTL()
 #endif
 }
 
-void MyInfo::setIperfVer(QString v2, QString v21, QString v3)
-{
-    m_iperf2ver = v2;
-    m_iperf21ver = v21;
-    m_iperf3ver = v3;
-}
+
 
 QString MyInfo::readSysFile(const QString &path) {
     QFile file(path);
