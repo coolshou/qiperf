@@ -50,6 +50,7 @@ private:
     QString OS_version; // store OS version
     QString OS_name; // store OS name
     QString qiperfd_ver; // store qiperfd version
+    QString build_ver; // git ver
     QString m_Manager; // manager interface
     QString m_HostName;
     // net (eth/wifi) inerfaces:

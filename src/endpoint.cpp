@@ -90,6 +90,7 @@ void EndPoint::loadData(QString data)
         OS_name = jsonRoot.value("OS").toString();
         OS_version = jsonRoot.value("OSVer").toString();
         qiperfd_ver = jsonRoot.value("qiperfd").toString();
+        build_ver = jsonRoot.value("buildver").toString();
         m_itemDatas.insert(EndPointMgr::cols::name,  m_id);
         m_itemDatas.insert(EndPointMgr::cols::ifname, m_Manager);
         m_itemDatas.insert(EndPointMgr::cols::hostname, m_HostName);
@@ -98,6 +99,7 @@ void EndPoint::loadData(QString data)
         m_itemDatas.insert(EndPointMgr::cols::osver, OS_version);
         m_itemDatas.insert(EndPointMgr::cols::status, "");
         m_itemDatas.insert(EndPointMgr::cols::version, qiperfd_ver);
+        m_itemDatas.insert(EndPointMgr::cols::buildver, build_ver);
         if (jsonRoot.value("serial").isArray()){
             m_serials = jsonRoot.value("serial").toArray();
         }

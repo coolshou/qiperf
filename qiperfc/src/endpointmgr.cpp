@@ -100,6 +100,8 @@ QVariant EndPointMgr::headerData(int section, Qt::Orientation orientation,
                 return QString("Last seen");
             case EndPointMgr::version:
                 return QString("Version");
+            case EndPointMgr::buildver:
+                return QString("Build ver");
             default:
                 return QVariant();
         }

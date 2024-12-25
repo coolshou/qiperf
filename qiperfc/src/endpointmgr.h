@@ -25,7 +25,8 @@ public:
         os=4,
         osver=5,
         status=6,
-        version=7
+        version=7,
+        buildver=8
     };
     Q_ENUM(cols)
 
