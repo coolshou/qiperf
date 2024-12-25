@@ -59,6 +59,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     m_iperfwrapper = new IperfWrapper();
 //    m_myinfo = new MyInfo(getManagerInterface());
     m_myinfo = new MyInfo(mgr_ifname);
+    m_myinfo->setIperfVer(m_iperfexe2ver, m_iperfexe21ver, m_iperfexe3ver);
     connect(this, &QIperfd::setMgrIfname, m_myinfo, &MyInfo::setIfname);
     QString info = m_myinfo->collectInfo();
     quint64 buffsize = m_myinfo->getSysBufferSize();
@@ -914,6 +915,25 @@ void QIperfd::initIperf(QString apppath)
         qDebug() << i2File.fileName() << " NOT EXIST!!";
     }
 #endif
+// iperf2.1
+#if defined(Q_OS_ANDROID)
+    QFile i21File(":/android/" + arch + "/iperf");
+#else
+    QFile i21File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf2.1");
+    if (i21File.exists()) {
+        // make file execuable
+        if (i21File.copy(m_iperfexe21)){
+            QFile iperf21File(m_iperfexe21);
+            iperf21File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
+                                      QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
+        }else{
+            qDebug() << "copy file " << " to " << m_iperfexe21 << " fail";
+        }
+    }else{
+        qDebug() << i21File.fileName() << " NOT EXIST!!";
+    }
+#endif
 // iperf3
 #if defined(Q_OS_ANDROID)
     QFile i3File(":/android/" + arch + "/iperf3");
@@ -952,14 +972,22 @@ void QIperfd::getIperfVer(QString cmd, int ver)
     QStringList args;
     args.append("-v");
     // process.startDetached(m_iperfexe3, args);
+#if QT_VERSION < 0x060000  // < 6.0
     process.start(cmd, args);
-    // startCommand(m_iperfexe3); //Qt6.0
-    process.waitForFinished(10);
-    QString out = process.readAllStandardOutput();
+#else
+    QString c = cmd + " -v";
+    process.startCommand(c); //Qt6.0
+#endif
+    process.waitForFinished(5000); //wait 5 sec
+    QString out;
+    if (ver == static_cast<int>(IPERF_VER::V2)){
+        out = process.readAllStandardError();
+    }else{
+        out = process.readAllStandardOutput();
+    }
     QStringList ds = out.split("\n");
     foreach (QString line, ds) {
         if (line.startsWith("iperf")){
-            qDebug() << "line: " << line;
             QStringList tmps =line.split(" ");
             if (tmps.length()>=2){
                 if (ver == static_cast<int>(IPERF_VER::V2)){
@@ -975,5 +1003,5 @@ void QIperfd::getIperfVer(QString cmd, int ver)
             }
         }
     }
-    qDebug() << "iperf3 ver:" << m_iperfexe3ver;
+
 }
