@@ -701,7 +701,6 @@ QString MyInfo::getWindowsPatchNumber(){
     }
 
     RegCloseKey(hKey);
-    qDebug() << "patchNumber:" << patchNumber;
     return QString::number(patchNumber);
 }
 void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial) {
