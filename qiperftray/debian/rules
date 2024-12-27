@@ -32,3 +32,9 @@ export DEB_BUILD_OPTIONS+=nocheck
 %:
 	dh $@
 
+override_dh_shlibdeps:
+	dh_shlibdeps
+	# for ubuntu 24.10 QT6
+	sed -i "s/libqt6network6t64/libqt6network6 | libqt6network6t64/g" debian/qiperftray.substvars
+	sed -i "s/libqt6gui6t64/libqt6gui6 | libqt6gui6t64/g" debian/qiperftray.substvars
+	sed -i "s/libqt6widgets6t64/libqt6widgets6 | libqt6widgets6t64/g" debian/qiperftray.substvars

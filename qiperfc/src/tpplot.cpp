@@ -52,6 +52,7 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
     qDebug() << "refrow:" << refrow << " timedatas: " << timedatas;
     graph->setData(timedatas, valuedatas);
     // Calculate the sum
+    Q_UNUSED(packetlosts)
     int sum = std::accumulate(packettotals.begin(), packettotals.end(), 0);
     if (sum>0){
         // int lost = std::accumulate(packetlosts.begin(), packetlosts.end(), 0);
