@@ -172,7 +172,6 @@ void TP::loadData(QString data)
         if (o_client.value("reverse").toBool()){
             direction= TPDIRRx;
         }
-        qDebug() << "direction: " << direction;
         // server
         QJsonObject o_server = jsonRoot.value("server").toObject();
         QString server = o_client.value("target").toString();
