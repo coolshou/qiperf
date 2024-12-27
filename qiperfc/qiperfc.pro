@@ -120,6 +120,7 @@ HEADERS += \
     ../src/icmpping.h \
     ../src/icmpwrapper.h \
     ../src/myfunc.h \
+    ../src/tpmgrdata.h \
     lib/axistag.h \
     lib/qcustomplot.h \
     src/codeeditor.h \
@@ -146,7 +147,6 @@ HEADERS += \
     src/tp.h \
     src/tpfoldingdelegate.h \
     src/tpmgr.h \
-    src/tpmgrdata.h \
     src/tpdirdelegate.h \
     src/tpplot.h \
     src/udpreceiver.h \

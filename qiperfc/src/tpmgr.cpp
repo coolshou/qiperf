@@ -10,6 +10,7 @@
 #include <QDebug>
 
 #include "tp.h"
+#include "../src/tpmgrdata.h"
 
 TPMgr::TPMgr(bool showgroup, QObject *parent)
     : QAbstractItemModel(parent), m_showgroup(showgroup)
@@ -85,6 +86,7 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
         if (index.column()== TP::cols::dir) {
             if (!item->getEnabled()){
                 //when item disabled, let image grayout too.
+                qDebug() << "disable:" << item;
                 return QVariant("disable"+item->data(index.column()).toString());
              }
             //else { // the column dir will be empty!!
@@ -507,12 +509,12 @@ void TPMgr::setItem(const QModelIndex &index, TP *item)
 
 int TPMgr::swapDirection(QModelIndex midx)
 {
-    QString dir = "Tx";
+    QString dir = TPDIRTx;
     TP *tp= getItem(midx);
-    if (tp->getDirection().contains("Tx")){
-        dir = "Rx";
-    }else if (tp->getDirection().contains("Rx")){
-        dir = "Tx";
+    if (tp->getDirection().contains(TPDIRTx)){
+        dir = TPDIRRx;
+    }else if (tp->getDirection().contains(TPDIRRx)){
+        dir = TPDIRTx;
     }
     tp->setDirection(dir);
     if (tp->haveChilds()){

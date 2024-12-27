@@ -64,6 +64,7 @@ HEADERS += \
     ../src/versions.h \
     ../src/iperfwrapper.h \
     ../src/filewatcher.h \
+    ../src/tpmgrdata.h \
     src/fileclient.h \
     src/iperfworker.h \
     src/myinfo.h \

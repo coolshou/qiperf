@@ -12,7 +12,7 @@
 #include <QColor>
 #include <QTimer>
 #include "tp.h"
-#include "tpmgrdata.h"
+#include "../src/tpmgrdata.h"
 
 class TPStatus: public QObject
 {

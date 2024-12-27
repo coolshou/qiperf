@@ -11,6 +11,7 @@
 #include <QDir>
 #include <QDateTime>
 
+#include "../src/tpmgrdata.h"
 // #include <QOverload>
 
 #include <QDebug>
@@ -49,19 +50,19 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
     if (m_servermode){
         if (m_reverse){
             if (m_bidir){
-                setBidirTag("Rx");
+                setBidirTag(TPDIRRx);
             }else{
                 setBidirTag("");
             }
         }else{
-            setBidirTag("Tx");
+            setBidirTag(TPDIRTx);
         }
     }else{
         if (m_reverse||m_bidir){
-            setBidirTag("Rx");
+            setBidirTag(TPDIRRx);
         }else{
             if (m_bidir){
-                setBidirTag("Tx");
+                setBidirTag(TPDIRTx);
             }else{
                 setBidirTag("");
             }
