@@ -3,6 +3,10 @@
 
 #include <QObject>
 
+#define TPDIRTx "Tx"
+#define TPDIRRx "Rx"
+#define TPDIRTR "TR"
+
 class TPMgrData: public QObject
 {
     Q_GADGET

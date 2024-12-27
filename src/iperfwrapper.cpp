@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QFile>
 #include <QThread>
+#include "../src/tpmgrdata.h"
 
 #include <QDebug>
 
@@ -147,11 +148,11 @@ void IperfWrapper::parserIperf3(QString linedata)
                 iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
                 sDir = linedata.mid(1,iS-1).trimmed();// server:[TX-S][RX-S], client:[TX-C][RX-C]
                 linedata = linedata.right(linedata.length()-iS-1);
-                if (sDir.contains("RX")){
+                if (sDir.contains(TPDIRRx)){
                     if (m_servermode){
-                        sDir = "Tx";
+                        sDir = TPDIRTx;
                     }else{
-                        sDir = "Rx";
+                        sDir = TPDIRRx;
                     }
                     linedata = linedata.trimmed();
     //                    qDebug() << "bidir msg:" << msg;

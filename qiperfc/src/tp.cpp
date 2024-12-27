@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QList>
 
+
 TP::TP(QString id, QString data,int datatype, TP *parent)
     :m_id(id), m_datatype(datatype), m_parentItem(parent)
 {
@@ -100,8 +101,8 @@ QVariant TP::data(int column) const
     if (column < 0 || column >= m_itemDatas.size()){
         return QVariant();
     }
-//    return m_itemDatas.at(column);
-    return m_itemDatas.value(column);
+    return m_itemDatas.at(column);
+//    return m_itemDatas.value(column);
 }
 
 int TP::setData(int column, QVariant var)
@@ -164,13 +165,14 @@ void TP::loadData(QString data)
         m_omit = o_client.value("omit").toInt();
         m_delaytime = o_client.value("delaytime").toInt();
     //    QString m_mclient = o_client["manager"].toString();
-        QString direction = QVariant::fromValue(DirType::Tx).toString();
+        QString direction = TPDIRTx;
         if (o_client.value("bidir").toBool()){
-            direction=QVariant::fromValue(DirType::TR).toString();
+            direction = TPDIRTR;
         }
         if (o_client.value("reverse").toBool()){
-            direction=QVariant::fromValue(DirType::Rx).toString();
+            direction= TPDIRRx;
         }
+        qDebug() << "direction: " << direction;
         // server
         QJsonObject o_server = jsonRoot.value("server").toObject();
         QString server = o_client.value("target").toString();
@@ -298,7 +300,7 @@ QVariantMap TP::getClientArgsMap()
 
 QString TP::getDirection()
 {
-    return m_itemDatas[int(TP::dir)].toString();
+    return m_itemDatas[int(TP::cols::dir)].toString();
 }
 
 QString TP::getMgrServer()
@@ -414,14 +416,14 @@ int TP::setDirection(QString direction)
 {
     setData(TP::cols::dir, direction);
     if (!m_jsondata.isEmpty()){
-        if (direction.contains("Tx")){
-            setDirection(TP::Tx);
-        }else if (direction.contains("Rx")){
-            setDirection(TP::Rx);
-        }else if (direction.contains("TR")){
-            setDirection(TP::TR);
+        if (direction.contains(TPDIRTx)){
+            setDirection(TP::DirType::Tx);
+        }else if (direction.contains(TPDIRRx)){
+            setDirection(TP::DirType::Rx);
+        }else if (direction.contains(TPDIRTR)){
+            setDirection(TP::DirType::TR);
         }else {
-            setDirection(TP::RT);
+            setDirection(TP::DirType::RT);
         }
     }
     return 0;
@@ -462,7 +464,7 @@ void TP::setThroughput(QString value)
 
 void TP::setThroughput(QString dir, QString value)
 {
-    if (dir.contains("Tx")){
+    if (dir.contains(TPDIRTx)){
         m_Tx = value.toDouble();
         // qDebug() << "setThroughput:m_Tx: " << m_Tx;
         if (m_minTx==0 || (m_minTx> value.toDouble())){

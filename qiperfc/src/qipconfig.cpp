@@ -14,6 +14,8 @@
 #include <QNetworkProxyFactory>
 #include <QUrl>
 
+#include "../src/tpmgrdata.h"
+
 #include <QDebug>
 
 
@@ -377,7 +379,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 //iperf server record file
                                 IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                            idx, true, parallel,
-                                                                           bidir, "Tx", serverfile, delaytime, serverinterval,
+                                                                           bidir, TPDIRTx, serverfile, delaytime, serverinterval,
                                                                            m_IgnoreWrongInterval);
                                 m_fileworkers.append(ifw);
                                 // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
@@ -394,7 +396,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 //iperf client record file
                                 IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                            idx, false, parallel,
-                                                                           bidir, "Rx", clientfile, delaytime, clientinterval,
+                                                                           bidir, TPDIRRx, clientfile, delaytime, clientinterval,
                                                                             m_IgnoreWrongInterval);
                                 m_fileworkers.append(ifwc);
                                 // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
@@ -411,7 +413,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             qInfo()<< "delaytime: " << QString::number(delaytime) << "bidir serverfile:" << serverfile;
                             IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                        idx, true, parallel,
-                                                                       bidir, "Tx", serverfile, delaytime, serverinterval,
+                                                                       bidir, TPDIRTx, serverfile, delaytime, serverinterval,
                                                                        m_IgnoreWrongInterval);
                             m_fileworkers.append(ifw);
                             // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
@@ -426,7 +428,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             qInfo()<< "delaytime: " << QString::number(delaytime) << "bidir clientfile:" << clientfile;
                             IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                         idx, false, parallel,
-                                                                        bidir, "Rx", clientfile, delaytime, clientinterval,
+                                                                        bidir, TPDIRRx, clientfile, delaytime, clientinterval,
                                                                         m_IgnoreWrongInterval);
                             m_fileworkers.append(ifwc);
                             // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);

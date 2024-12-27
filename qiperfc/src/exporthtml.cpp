@@ -16,6 +16,8 @@
 #include <QRandomGenerator>
 #include <QWebEngineSettings>
 
+#include "../src/tpmgrdata.h"
+
 ExportHtml::ExportHtml(QString templatefile, QString savefile,int width, int heigth,
                        QWidget *parent)
     : QWidget{parent}, m_templatefile(templatefile), m_savefile(savefile),
@@ -396,11 +398,11 @@ void ExportHtml::keyPressEvent(QKeyEvent *event)
 
 QString ExportHtml::dirToDiv(QString dir)
 {
-    if (dir.contains("Tx")){
+    if (dir.contains(TPDIRTx)){
         return "<div class=\"dirTx\"></div>";
-    } else if (dir.contains("Rx")){
+    } else if (dir.contains(TPDIRRx)){
         return "<div class=\"dirRx\"></div>";
-    } else if (dir.contains("TR")){
+    } else if (dir.contains(TPDIRTR)){
         return "<div class=\"dirTR\"></div>";
     } else {
         return "<div class=\"dirRT\"></div>";

@@ -1,27 +1,29 @@
 #ifndef TP_H
 #define TP_H
 
-#include <QObject>
+// #include <QObject>
 #include <QVariant>
 #include <QList>
 #include <QJsonObject>
-#include "tpmgrdata.h"
+
+#include "../src/tpmgrdata.h"
 
 //TP store each throughput config
-//class TP : public QObject
-class TP: public QObject
+// class TP : public QObject
+class TP
 {
-    Q_GADGET
+    // Q_GADGET
 public:
     explicit TP(QString id, QString data, int datatype = TPMgrData::config, TP *parentItem = nullptr);
-    ~TP() override;
+    // ~TP() override;
+    ~TP();
     enum DirType{
         Tx=0,
         Rx=1,
         TR=2,
         RT=3
     };
-    Q_ENUM(DirType)
+    // Q_ENUM(DirType)
     enum cols{
         id=0,
         server=1,
@@ -33,7 +35,7 @@ public:
         lostrate=7,
         comment=8
     };
-    Q_ENUM(cols)
+    // Q_ENUM(cols)
     //basic
     void appendChild(TP *child);
     TP *child(int row);
@@ -96,8 +98,6 @@ public:
     void setEnabled(bool enable);
     void setDisabled();
     bool getEnabled();
-
-signals:
 
 private:
     QString m_id; // reference id
