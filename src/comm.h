@@ -64,7 +64,7 @@
 // ping
 #define CMD_PING        "PING"
 
-
+#define MYTIMESTEMP "yyyy-MM-dd hh:mm:ss.zzz"
 #define DATETIME_NOW_FORMAT "yyyy-MM-dd_hhmmss.zzz"
 
 enum class IPERF_VER {
