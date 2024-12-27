@@ -35,6 +35,7 @@ void TPDirDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         QVariant data = index.data(); // Retrieve data associated with the index
         if (data.isValid()) {
             QString imagePath = ":/"+data.toString();// Assumes you store the image path in Qt::UserRole
+            // qDebug() << "imagePath:" << imagePath;
             QImage image(imagePath);
             if (!image.isNull()) {
                 QPixmap pixmap = QPixmap::fromImage(image);

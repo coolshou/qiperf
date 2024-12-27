@@ -434,17 +434,17 @@ void ThroughputView::initThroughputChart()
     connect(filter, &TooltipEventFilter::doPaste, this, &ThroughputView::onPaste);
     connect(filter, &TooltipEventFilter::doDelete, this, &ThroughputView::onDelete);
     ui->tv_throughput->viewport()->installEventFilter(filter);
-    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
+    // ui->tv_throughput->setRootIsDecorated(true); //show folding icon
     //    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
     //    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
-    ui->tv_throughput->expandAll();// will show folding icon when have child item??
+    // ui->tv_throughput->expandAll();// will show folding icon when have child item??
     ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu
     connect(ui->tv_throughput, &QTreeView::customContextMenuRequested, this, &ThroughputView::onTPUTContextMenu);
     connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &ThroughputView::onItemDClicked); //edit item on double click
 
-    //TODO: slow update text/image?
+    //TODO: slow update text
     tpdirdelegate = new TPDirDelegate(ui->tv_throughput);
-    //    tpdirdelegate = new TPDirDelegate(this);
+    // tpdirdelegate = new TPDirDelegate(this); // this will not show dir picture
     ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdirdelegate);
     // TODO: why debug build do not show folding icon!!
     //    tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
