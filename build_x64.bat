@@ -12,4 +12,5 @@ qmake
 nmake
 
 set PATH=C:\Program Files (x86)\NSIS\;%PATH%
+REM # TODO, update version
 makensis.exe /DWIN64 /V4 qiperf.nsi
