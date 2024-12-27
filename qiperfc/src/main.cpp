@@ -50,6 +50,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
         fflush(stdout);
         break;
     }
+    output_ts.flush(); //empty all data from its write buffer into the device
 }
 int main(int argc, char *argv[])
 {
