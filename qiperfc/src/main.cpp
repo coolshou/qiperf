@@ -21,24 +21,33 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 {
     QString endl = "\n";
     QDateTime t = QDateTime::currentDateTime();
-    output_ts << "[" + t.toString("yyyy-MM-dd hh:mm:ss.zzz") + "] ";
+    output_ts << "[" + t.toString(MYTIMESTEMP) + "] ";
     const char *file = context.file ? context.file : "";
     //    const char *function = context.function ? context.function : "";
+    QString line ="";
+    if (file){
+        line = QString("(%1:%2)").arg(file, QString::number(context.line));
+    }
     switch (type) {
     case QtDebugMsg:
-        output_ts << QString("DEBUG: %1 (%2:%3)").arg(msg, file).arg(context.line) << endl;
+        output_ts << QString("DEBUG: %1 %2").arg(msg, line) << endl;
         break;
     case QtInfoMsg:
-        output_ts << QString("INFO: %1 (%2:%3)").arg(msg, file).arg(context.line) << endl;
+        output_ts << QString("INFO: %1 %2").arg(msg, line) << endl;
         break;
     case QtWarningMsg:
-        output_ts << QString("WARN: %1 (%2:%3)").arg(msg, file).arg(context.line) << endl;
+        output_ts << QString("WARN: %1 %2").arg(msg, line) << endl;
         break;
     case QtCriticalMsg:
-        output_ts << QString("CRITICAL: %1 (%2:%3)").arg(msg, file).arg(context.line) << endl;
+        output_ts << QString("CRITICAL: %1 %2").arg(msg, line) << endl;
         break;
     case QtFatalMsg:
-        output_ts << QString("FATAL: %1 (%2:%3)").arg(msg, file).arg(context.line) << endl;
+        output_ts << QString("FATAL: %1 %2").arg(msg, line) << endl;
+        break;
+    default:
+        QString m = msg + " "+ line;
+        printf("%s\n", m.toStdString().c_str());
+        fflush(stdout);
         break;
     }
 }
@@ -59,7 +68,7 @@ int main(int argc, char *argv[])
         QFileInfo finfo(logfile);
         QDateTime oldtime =  finfo.fileTime(QFileDevice::FileModificationTime);
         qDebug() << "logfile ModificationTime: "  << oldtime;
-        QString baklogfile =  logfilePath + QIPERFC_NAME + "_" + oldtime.toString("yyyy-MM-dd_hhmmss.zzz")+ ".log";
+        QString baklogfile =  logfilePath + QIPERFC_NAME + "_" + oldtime.toString(DATETIME_NOW_FORMAT)+ ".log";
         QFile::rename(logfile, baklogfile);
     }
 
