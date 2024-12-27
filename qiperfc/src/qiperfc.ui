@@ -328,12 +328,15 @@
    </property>
   </action>
   <action name="actionNew">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="../../qiperf.qrc">
      <normaloff>:/new</normaloff>:/new</iconset>
    </property>
    <property name="text">
-    <string>New</string>
+    <string>New(TODO)</string>
    </property>
   </action>
   <action name="actionExport">
