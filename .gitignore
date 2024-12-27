@@ -23,3 +23,5 @@
 /Makefile
 /.qtc_clangd/*
 /build/*
+/qiperfd/debian/qiperfd/*
+/qiperftray/debian/qiperftray/*
