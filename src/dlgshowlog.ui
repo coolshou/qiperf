@@ -80,6 +80,28 @@
       <item>
        <widget class="QLineEdit" name="le_find"/>
       </item>
+      <item>
+       <widget class="QPushButton" name="pbPrev">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../qiperf.qrc">
+          <normaloff>:/prev</normaloff>:/prev</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbNext">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../qiperf.qrc">
+          <normaloff>:/next</normaloff>:/next</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
