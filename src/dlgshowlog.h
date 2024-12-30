@@ -30,6 +30,9 @@ protected:
 
 private slots:
     void onClear(bool checked);
+    void onPrev(bool checked);
+    void onNext(bool checked);
+
 private:
     Ui::DlgShowLog *ui;
     FileWatcher *m_filewatcher;

@@ -2,6 +2,7 @@
 #include "ui_dlgshowlog.h"
 #include <QDir>
 #include <QMessageBox>
+#include <QTextDocument>
 
 #include <QDebug>
 
@@ -71,6 +72,43 @@ void DlgShowLog::onClear(bool checked)
     ui->te_log->clear();
 }
 
+void DlgShowLog::onPrev(bool checked)
+{
+    Q_UNUSED(checked)
+    const QString searchText = ui->le_find->text();
+    if (!searchText.isEmpty()) {
+        QTextDocument::FindFlags options = QTextDocument::FindBackward;
+        if (ui->cb_CaseSensitive->isChecked()){
+            options = options | QTextDocument::FindCaseSensitively;
+        }
+        // Use QPlainTextEdit's find method to search
+        if (!ui->te_log->find(searchText, options)) {
+            ui->le_find->setStyleSheet("border: 1px solid red;");  // Highlight the search bar in red if not found
+        } else {
+            ui->le_find->setStyleSheet("");  // Clear the red border on success
+        }
+    }
+
+}
+
+void DlgShowLog::onNext(bool checked)
+{
+    Q_UNUSED(checked)
+    const QString searchText = ui->le_find->text();
+    if (!searchText.isEmpty()) {
+        QTextDocument::FindFlags options;
+        if (ui->cb_CaseSensitive->isChecked()){
+            options = QTextDocument::FindCaseSensitively;
+        }
+        // Use QPlainTextEdit's find method to search
+        if (!ui->te_log->find(searchText, options)) {
+            ui->le_find->setStyleSheet("border: 1px solid red;");  // Highlight the search bar in red if not found
+        } else {
+            ui->le_find->setStyleSheet("");  // Clear the red border on success
+        }
+    }
+}
+
 void DlgShowLog::init()
 {
     ui->setupUi(this);
@@ -79,6 +117,8 @@ void DlgShowLog::init()
     connect(ui->pbClear, &QPushButton::clicked, this, &DlgShowLog::onClear);
     connect(ui->pbClose, &QPushButton::clicked, this, &DlgShowLog::close);
     connect(ui->le_find, &QLineEdit::returnPressed, this, &DlgShowLog::doFind);
+    connect(ui->pbPrev, &QPushButton::clicked, this, &DlgShowLog::onPrev);
+    connect(ui->pbNext, &QPushButton::clicked, this, &DlgShowLog::onNext);
 }
 
 void DlgShowLog::appendNewLine(QString line)
