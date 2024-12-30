@@ -114,9 +114,16 @@
     </property>
     <addaction name="actionNotice"/>
    </widget>
+   <widget class="QMenu" name="menucmd">
+    <property name="title">
+     <string>cmd</string>
+    </property>
+    <addaction name="actionIperfVersion"/>
+   </widget>
    <addaction name="menuService"/>
    <addaction name="menuHelp"/>
    <addaction name="menuTest"/>
+   <addaction name="menucmd"/>
   </widget>
   <action name="actionAbout">
    <property name="icon">
@@ -173,6 +180,11 @@
    </property>
    <property name="text">
     <string>ShowLog</string>
+   </property>
+  </action>
+  <action name="actionIperfVersion">
+   <property name="text">
+    <string>Iperf version</string>
    </property>
   </action>
  </widget>

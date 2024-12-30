@@ -296,6 +296,15 @@ void MyInfo::setIperfVer(QString v2, QString v21, QString v3)
     m_iperf3ver = v3;
 }
 
+QJsonObject MyInfo::getIperfVer()
+{
+    QJsonObject json;
+    json.insert("iperf2ver", m_iperf2ver);
+    json.insert("iperf21ver", m_iperf21ver);
+    json.insert("iperf3ver", m_iperf3ver);
+    return json;
+}
+
 #if defined(Q_OS_LINUX)
 QString MyInfo::getDriverVersion(const QString &interfaceName, QString &drivername)
 {

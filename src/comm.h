@@ -43,6 +43,7 @@
 #define CMD_GET_LOGFILENAME "GET_LOGFILENAME"  // get qiperfd log file path
 #define CMD_ERROR "ERROR"  // show error message by qiperftray's balloon message
 #define CMD_INFO "INFO"  // show info message by qiperftray's balloon message
+#define CMD_IPERFVER "IPERFVER" // get iperf version
 
 //iperf control
 #define CMD_IPERF_START  "IPERF_START" // start iperf

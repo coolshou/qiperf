@@ -477,6 +477,11 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         QString backmsg = QString(CMD_GET_LOGFILENAME)+"："+ qiperfdlog;
         informMessage(backmsg, true);
     }
+    else if (QString::compare(msg, CMD_IPERFVER, Qt::CaseInsensitive) == 0)
+    {   //get iperf version
+        QJsonObject jobj = m_myinfo->getIperfVer();
+        informMessage(QString(CMD_IPERFVER)+"："+QString(QJsonDocument(jobj).toJson()), true);
+    }
     else
     {
         qDebug() << "handle json: " << msg ;

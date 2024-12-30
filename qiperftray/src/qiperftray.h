@@ -47,6 +47,7 @@ public slots:
     void onShowLog();
     void onAbout();
     void onNotice();
+    void onIperfVersion();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
