@@ -200,6 +200,10 @@ void QIperfTray::onNewMessage(const QString msg)
                     m_qiperfdlog = ds.value(1);
                     // qDebug() << "m_qiperfdlog: " << m_qiperfdlog;
                     m_dlgshowqiperfdlog->setLogFile(m_qiperfdlog);
+                }else if (ds.value(0)==CMD_IPERFVER) {
+                    ui->te_msg->append(ds.value(1));
+                }else {
+                    qDebug() << "TODO: handle data: " << msg;
                 }
             }else {
                 qDebug() << "onNewMessage: Unknown format :" << msg;
@@ -238,7 +242,7 @@ void QIperfTray::initActions()
     connect(ui->actionShowLog, SIGNAL(triggered()), this, SLOT(onShowLog()));
 
     connect(ui->actionNotice, SIGNAL(triggered()), this, SLOT(onNotice()));
-
+    connect(ui->actionIperfVersion, SIGNAL(triggered()), this, SLOT(onIperfVersion()));
 }
 
 void QIperfTray::onIfnameChange(int index)
@@ -353,6 +357,12 @@ void QIperfTray::onNotice()
     }else {
         qDebug() << "System Not support balloon messages!!";
     }
+}
+
+void QIperfTray::onIperfVersion()
+{
+    //get iperf version
+    pclient->send_MessageToServer(CMD_IPERFVER);
 }
 void QIperfTray::closeEvent(QCloseEvent *event)
 {

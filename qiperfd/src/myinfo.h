@@ -26,6 +26,7 @@ public:
 
     int getEndpointType();
     void setIperfVer(QString v2,QString v21,QString v3);
+    QJsonObject getIperfVer();
     void getCpuMemInfo(QString &cpuModel, QString &totalMemory);
     void getMotherboardInfo(QString &vendor, QString &model, QString &serial);
     QString getDriverVersion(const QString &interfaceName, QString &drivername);
