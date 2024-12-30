@@ -274,7 +274,7 @@ void QIperfC::onSave()
     QFileInfo fi(fileName);
     QString ext = fi.suffix();
     if (ext.compare(QIPERF_EXT)!=0){
-        fileName = fi.path() + fi.baseName() + "."+ QIPERF_EXT;
+        fileName = fi.path()+ "/" + fi.baseName() + "."+ QIPERF_EXT;
     }
 //    qInfo() << "save file: " << fileName ;
     if (save(fileName)){
