@@ -109,6 +109,7 @@ QString DlgIperf::getJsonCfg()
     clientObj.insert("fmtreport", ui->cb_fmtreport->currentText());
     clientObj.insert("reverse", ui->chk_reverse->isChecked());
     clientObj.insert("bidir", ui->chk_bidir->isChecked());
+    clientObj.insert("zerocopy", ui->cb_zerocopy->isChecked());
 
     clientObj.insert("delaytime", ui->sb_delaytime->value());
     mainObj.insert("client", clientObj);
@@ -154,6 +155,7 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
         ui->sb_mss->setValue(clientObj["mss"].toInt());
         ui->cb_fmtreport->setCurrentText(clientObj["fmtreport"].toString());
         ui->chk_reverse->setChecked(clientObj["reverse"].toBool());
+        ui->cb_zerocopy->setChecked(clientObj["zerocopy"].toBool());
     }else{
         qDebug() << "Wrong format of loadJsonCfg:(" << error.errorString() << ")\n" << jsoncfg;
     }
