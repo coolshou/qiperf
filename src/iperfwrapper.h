@@ -11,7 +11,7 @@ class IperfWrapper : public QObject
 {
     Q_OBJECT
 public:
-    explicit IperfWrapper(bool ignorewronginterval = true, QObject *parent = nullptr);
+    explicit IperfWrapper(bool ignorewronginterval = false, QObject *parent = nullptr);
 
     QString toIperf3args(QVariantMap jsondata); // to iperf3 args
     QString toIperf2args(QVariantMap jsondata); // to iperf2 args

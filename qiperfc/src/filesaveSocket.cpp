@@ -49,7 +49,7 @@ void FileSaveSocket::onReadyRead()
 
             m_localFile->write(buffer);
             if (bytesReceived == m_fileSize) {
-                qDebug() << "FileSaveSocket::onReadyRead File finish received:" << m_localFile->fileName();
+                // qDebug() << "FileSaveSocket::onReadyRead File finish received:" << m_localFile->fileName();
                 m_localFile->close();
                 delete m_localFile;
                 m_localFile = nullptr;

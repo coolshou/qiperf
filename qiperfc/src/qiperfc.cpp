@@ -580,6 +580,7 @@ void QIperfC::onStart()
 
 void QIperfC::onStop(){
     QString cmd="";
+    // Stop reg iperf client
     foreach (auto key, m_wsc.keys()){
         if (m_wsc[key]){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
@@ -588,6 +589,7 @@ void QIperfC::onStop(){
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
+    // Stop reg iperf server
     foreach (auto key, m_wss.keys()){
         if (m_wss[key]){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
@@ -603,6 +605,8 @@ void QIperfC::onStop(){
     updateRunStatus(false);
     QString endtime = getNowString();
     QDateTime enddatetime = QDateTime::fromString(endtime,DATETIME_NOW_FORMAT);
+    //TODO: error end message?
+    qDebug() << "m_status_server:" << m_status_server << " m_status_client:" << m_status_client;
     emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(m_TestStartTime.secsTo(enddatetime))+" sec)");
 }
 
@@ -1007,7 +1011,7 @@ void QIperfC::onIperfStarted(QString smode, QString ipport)
 
 void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err, QString ipport)
 {
-    qDebug() << "onIperfStoped:" << refrow << " : " << ipport <<
+    qDebug() << "onIperfStoped:" << refrow << " bind key: " << ipport <<
         " err_no:" << err_no << " err:" << err;
     if (err_no.toInt()>0){
         m_throughputview->addComment(refrow, "["+ ipport +"]Error:" +err);
