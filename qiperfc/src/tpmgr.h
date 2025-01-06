@@ -19,10 +19,13 @@ class TPStatus: public QObject
     Q_GADGET
 public:
     enum Status{
-        init=-1,  // init
-        started=0,  // started
-        stoped=1     // stoped
+        init=0,  // init
+        started=1,  // started
+        stoped=2     // stoped
     };
+    // init=-1,  // init
+    //     started=0,  // started
+    //     stoped=1     // stoped
     Q_ENUM(Status)
 };
 
@@ -66,7 +69,10 @@ public:
     void reset();
     void clear();
     TP *getItem(const QModelIndex& index) const;
-    TP *getRootItem() const;
+    TP *getRootItem();
+    TP *newGroupItem();
+    TP *getGroupItem();
+
     QModelIndex getRootItemIdx();
     void setItem(const QModelIndex& index, TP *item);
     int swapDirection(QModelIndex midx);
@@ -85,6 +91,8 @@ public:
     void startUpdater();
     void stopUpdater();
     void setTestData();
+
+
 
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);

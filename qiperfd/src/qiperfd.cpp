@@ -286,12 +286,12 @@ void QIperfd::del(int idx)
     //
     if (m_threads.contains(idx))
     {
-        qDebug() << "QIperfd::del m_threads:" << idx;
+        // qDebug() << "QIperfd::del m_threads:" << idx;
         m_threads.remove(idx);
     }
     if (m_iperfworkers.contains(idx))
     {
-        qDebug() << "remove m_iperfworkers:" << idx;
+        // qDebug() << "remove m_iperfworkers:" << idx;
         m_iperfworkers.remove(idx);
     }
 

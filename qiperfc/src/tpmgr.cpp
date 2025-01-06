@@ -85,7 +85,7 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
         if (index.column()== TP::cols::dir) {
             if (!item->getEnabled()){
                 //when item disabled, let image grayout too.
-                qDebug() << "disable:" << item;
+                // qDebug() << "disable:" << item;
                 return QVariant("disable"+item->data(index.column()).toString());
              }
             //else { // the column dir will be empty!!
@@ -402,12 +402,7 @@ void TPMgr::reset(){
     // qDebug() << "idx:" << QString::number(idx) ;
     qDebug() << "rootItem:" << rootItem;
     if(m_showgroup){
-        beginInsertRows(QModelIndex(), 0, 0);
-        groupItem = new TP("Total", "Total", TPMgrData::group, rootItem);
-        // groupItem->setDataType(TPMgrData::group);
-        rootItem->appendChild(groupItem);
-        endInsertRows();
-        qDebug() << " groupItem:" << groupItem;
+        newGroupItem();
     }
 
     // add("Total");
@@ -473,13 +468,22 @@ TP *TPMgr::getItem(const QModelIndex &index) const
     return itm;
 }
 
-TP *TPMgr::getRootItem() const
+TP *TPMgr::getRootItem()
 {
-    // if (m_showgroup){
-    //     return groupItem;
-    // }else{
+    if (m_showgroup){
+        return getGroupItem();
+    }else{
         return rootItem;
-    // }
+    }
+}
+
+TP *TPMgr::getGroupItem()
+{
+    if (groupItem){
+        return groupItem;
+    }else {
+        return newGroupItem();
+    }
 }
 
 QModelIndex TPMgr::getRootItemIdx()
@@ -761,26 +765,38 @@ void TPMgr::setTestData()
     // rootItem->appendChild(groupItem);
     QList<TP*> cfgs;
 
-    TP *cfg = new TP("cfg1", "cfg1", TPMgrData::config, groupItem);
-    // cfg->setDataType(TPMgrData::config);
+    TP *cfg = new TP("cfg1", "", TPMgrData::config, groupItem);
+    groupItem->appendChild(cfg);
+    qDebug() << "cfg:" << cfg;
     cfgs << cfg;
-    TP *cfg2 = new TP("cfg2", "cfg2", TPMgrData::config, groupItem);
-    // cfg2->setDataType(TPMgrData::config);
+    TP *cfg2 = new TP("cfg2", "", TPMgrData::config, groupItem);
+    groupItem->appendChild(cfg2);
+    qDebug() << "cfg2:" << cfg2;
     cfgs << cfg2;
     foreach(TP *c, cfgs){
-        groupItem->appendChild(c);
+        qDebug() << "c:" << c;
         for (int i = 0; i < 3; ++i) {
-            TP *child = new TP(QString::number(i), QString::number(i), TPMgrData::TP,  c);
-            // child->setDataType(TPMgrData::TP);
+            TP *child = new TP("f:"+QString::number(i), QString::number(i), TPMgrData::TP,  c);
             c->appendChild(child);
             for (int j = 0; j < 2; ++j) {
-                TP *gchild = new TP(QString::number(j), QString::number(j), TPMgrData::TP, child);
+                TP *gchild = new TP("s:"+QString::number(j), QString::number(j), TPMgrData::TP, child);
                 child->appendChild(gchild);
 
             }
         }
     }
 
+}
+
+TP *TPMgr::newGroupItem()
+{
+    // beginInsertRows(QModelIndex(), 0, 2);
+    groupItem = new TP("Total", "Total", TPMgrData::group, rootItem);
+    // groupItem->setDataType(TPMgrData::group);
+    rootItem->appendChild(groupItem);
+    // endInsertRows();
+    qDebug() << " groupItem:" << groupItem;
+    return groupItem;
 }
 
 void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
@@ -868,13 +884,17 @@ void TPMgr::setShowGroup(bool bShow)
     //beginMoveRows()
     //endMoveRows()
     if (m_showgroup){
-        qDebug() << "show groupItem";
+        qDebug() << "ShowGroup: rootItem->childCount():" << rootItem->childCount();
+        // TODO: move exist test item to groupItem
+        qDebug() << "groupItem:" << groupItem;
         // if (!groupItem){
         // rootItem->appendChild(groupItem);
         // }
 
     }else{
-        qDebug() << "hide groupItem and move all subitem to rootItem";
+        qDebug() << "TODO: HideGroup: groupItem and move all subitem to rootItem";
+
+
     }
 }
 

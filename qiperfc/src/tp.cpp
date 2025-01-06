@@ -23,7 +23,8 @@ TP::TP(QString id, QString data,int datatype, TP *parent)
                  "", ""}; // lost rate, comment
 
     qDebug() << "create TP:" << id << " data:" << data << " parent:" << parent;
-    if (data!="" && data !="Root" && data !="Total"){
+    // if (data!="" && data !="Root" && data !="Total"){
+    if (data!="" && m_datatype == TPMgrData::config){
         loadData(data);
     }else{
 //
@@ -188,7 +189,7 @@ void TP::loadData(QString data)
         m_itemDatas.replace(int(TP::cols::lostrate), "");
         m_itemDatas.replace(int(TP::cols::comment), "");
     }else{
-        qDebug() << "TP::loadData wrong format (" << error.errorString() << "\n" << data;
+        qDebug() << "TP::loadData wrong format (" << error.errorString() << "\n data:" << data;
     }
     m_jsondata = data;
 }

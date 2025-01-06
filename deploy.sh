@@ -3,7 +3,7 @@
 # build deb package
 DOBUILD=0
 
-VERSION=0.7.11312.27-1
+VERSION=0.7.11401.06-1
 #VERSION=0.6.11312.04
 declare -a DESTFILES=()
 DESTFILES+=(qiperfd_${VERSION}_amd64.deb)
