@@ -25,3 +25,6 @@
 /build/*
 /qiperfd/debian/qiperfd/*
 /qiperftray/debian/qiperftray/*
+/qiperfc/debian/.debhelper/*
+/qiperfd/debian/.debhelper/*
+/qiperftray/debian/.debhelper/*
