@@ -11,6 +11,6 @@ for package in qiperfc qiperfd qiperftray; do
     fi
     cd $package
     #debuild -b -uc -us
-    dpkg-buildpackage -b --no-sign
+    dpkg-buildpackage -b --no-sign -uc
     cd ..
 done

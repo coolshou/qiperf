@@ -1,4 +1,4 @@
-qiperf (0.7.11312.27-1) unstable; urgency=medium
+qiperf (0.7.11401.06-1) unstable; urgency=medium
 
   * add open log folder with system's file manager
   * Fix Ignore load iperf log file TP value on interval < 1 sec (invalid TP value?)
@@ -8,7 +8,7 @@ qiperf (0.7.11312.27-1) unstable; urgency=medium
   * Update iperf3 to 3.18
   * update qiperfd for raspiberry Pi 4. Raspbian 10 (buster)
 
- -- coolshou <coolshou2060@gmail.com>  Fri, 27 Dec 2024 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Mon, 06 Jan 2025 10:00:00 +0800
 
 qiperf (0.6.11312.10-1) unstable; urgency=medium
 
