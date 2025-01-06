@@ -102,7 +102,7 @@ void FileServer::sendFile(QString filename)
 
     totalBytes = m_localFile->size();
     QDataStream sendout(&outBlock, QIODevice::WriteOnly);
-    sendout.setVersion(QDataStream::Qt_5_15);
+    sendout.setVersion(QDataStream::Qt_5_11);
     QString currentFileName = filename.right(filename.size() - filename.lastIndexOf('/') - 1);
     qDebug() << "sendFile: " << filename;
 
