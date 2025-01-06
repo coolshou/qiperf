@@ -242,7 +242,7 @@ void QIPConfig::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVect
 QByteArray QIPConfig::serialize() const {
     QByteArray data;
     QDataStream out(&data, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_15); // Set the stream version
+    out.setVersion(QDataStream::Qt_5_11); // Set the stream version
 
     out << m_data->tpcfg;
     if (m_version>=2){
@@ -255,7 +255,7 @@ QByteArray QIPConfig::serialize() const {
 
 bool QIPConfig::deserialize(const QByteArray &data) {
     QDataStream in_de(data);
-    in_de.setVersion(QDataStream::Qt_5_15); // Set the stream version
+    in_de.setVersion(QDataStream::Qt_5_11); // Set the stream version
 
     in_de >> m_data->tpcfg;
     emit updateTPCfg(m_data->tpcfg.toUtf8());
