@@ -22,9 +22,14 @@ DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
     m_tpmgr = tpmgr;
     b_ipv6 = false;
     connect(ui->cb_version, &QComboBox::currentTextChanged, this, &DlgIperf::ChangeVersion);
+#if QT_VERSION < 0x060700  // < 6.7
+    //stateChanged (until 6.9)
     connect(ui->chk_bidir, &QCheckBox::stateChanged, this, &DlgIperf::onChkBidirStatech);
     connect(ui->chk_reverse, &QCheckBox::stateChanged, this, &DlgIperf::onChkReverseStatech);
-
+#else
+    connect(ui->chk_bidir, &QCheckBox::checkStateChanged, this, &DlgIperf::onChkBidirStatech);
+    connect(ui->chk_reverse, &QCheckBox::checkStateChanged, this, &DlgIperf::onChkReverseStatech);
+#endif
 //    connect(ui, &QDialog::accepted, this, &QDialog::onAccepted);
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DlgIperf::onAccepted);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -355,7 +360,7 @@ void DlgIperf::onAccepted()
         return;
     }
 }
-
+#if QT_VERSION < 0x060700  // < 6.7
 void DlgIperf::onChkBidirStatech(int state)
 {
     if (state==Qt::Checked){
@@ -369,6 +374,21 @@ void DlgIperf::onChkReverseStatech(int state)
         ui->chk_bidir->setCheckState(Qt::Unchecked);
     }
 }
+#else
+void DlgIperf::onChkBidirStatech(Qt::CheckState state)
+{
+    if (state==Qt::Checked){
+        ui->chk_reverse->setCheckState(Qt::Unchecked);
+    }
+}
+
+void DlgIperf::onChkReverseStatech(Qt::CheckState state)
+{
+    if (state==Qt::Checked){
+        ui->chk_bidir->setCheckState(Qt::Unchecked);
+    }
+}
+#endif
 
 void DlgIperf::onSelectMServer(QString text)
 {

@@ -32,8 +32,13 @@ public:
 public slots:
     void ChangeVersion(const QString ver);
     void onAccepted();
+#if QT_VERSION < 0x060700  // < 6.7
     void onChkBidirStatech(int state);
     void onChkReverseStatech(int state);
+#else
+    void onChkBidirStatech(Qt::CheckState state);
+    void onChkReverseStatech(Qt::CheckState state);
+#endif
     void onSelectMServer(QString text);
     void onSelectMClient(QString text);
 
