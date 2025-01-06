@@ -24,7 +24,6 @@ TPMgr::TPMgr(bool showgroup, QObject *parent)
     QPalette palette = widget.palette();
     m_disabledTextColor = palette.color(QPalette::Disabled, QPalette::Text);
     m_updater = new QTimer();
-    // m_updater->setInterval(1000); //1 sec
     connect(m_updater, &QTimer::timeout, this, &TPMgr::onUpdater);
     startUpdater();
 
@@ -810,7 +809,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             sum_lost = sum_lost + pkt_lost.toDouble();
             sum_total = sum_total + pkt_total.toDouble();
             if (fInterval >= m_intervals.value(idx, 0.0)){
-    //            qDebug() << "sInterval:" << sInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
+               qDebug() << "addTPdata fInterval:" << fInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
                 addTPdata(refrow, sInterval, idx, value,
                     jObj.value("unit").toString(), dir, pkt_lost, pkt_total);
                 m_intervals[idx] = fInterval;
