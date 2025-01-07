@@ -80,7 +80,7 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject 
     // m_url = url;
 //    m_datapath = datapath + QDir::separator();
     setDatapath(datapath);
-    qDebug() << "m_webSocket->open(m_url): " << m_url;
+    // qDebug() << "m_webSocket->open(m_url): " << m_url;
     m_webSocket->open(m_url);
 }
 //! [constructor]
