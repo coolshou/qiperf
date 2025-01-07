@@ -542,7 +542,7 @@ void QIperfC::onStart()
             return;
         }
         //Start client
-        for (auto key: m_wsc.keys()){
+        for (auto key: qAsConst(m_wsc.keys())){
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             rs = m_wsc[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
             if (rs<=0){
