@@ -41,7 +41,7 @@ public slots:
 #endif
     void onSelectMServer(QString text);
     void onSelectMClient(QString text);
-
+    void onMSSvalueChanged(int value);
 
 protected:
     void changeEvent(QEvent *e) override;
@@ -55,6 +55,7 @@ private:
     QMap<QString, QStringList> m_ips; // key: manager ip, value: all support ip in the manager server
     bool b_ipv6;
     QModelIndex m_excIdx;
+    int old_mss; // store old mss value
 };
 
 #endif // DLGIPERF_H
