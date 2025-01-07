@@ -530,6 +530,9 @@
            <property name="alignment">
             <set>Qt::AlignCenter</set>
            </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
            <property name="maximum">
             <number>9216</number>
            </property>

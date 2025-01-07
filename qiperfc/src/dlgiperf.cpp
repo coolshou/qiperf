@@ -14,12 +14,15 @@
 #include <QCoreApplication>
 #include <QEventLoop>
 
+#include "../src/showcustomtooltip.h"
+
 DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DlgIperf)
 {
     ui->setupUi(this);
     m_tpmgr = tpmgr;
+    old_mss = 0;
     b_ipv6 = false;
     connect(ui->cb_version, &QComboBox::currentTextChanged, this, &DlgIperf::ChangeVersion);
 #if QT_VERSION < 0x060700  // < 6.7
@@ -39,6 +42,7 @@ DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
     connect(ui->cb_mserver_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMServer);
     connect(ui->cb_mclient_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMClient);
 
+    connect(ui->sb_mss, &QSpinBox::valueChanged, this, &DlgIperf::onMSSvalueChanged);
     // TODD: temp disable item of UDP/SCTP
 //    auto * model = qobject_cast<QStandardItemModel*>(ui->cb_protocal->model());
 //    auto * itemUTP = model->item(1);
@@ -419,5 +423,24 @@ void DlgIperf::onSelectMClient(QString text)
                 }
             }
         }
+    }
+}
+
+void DlgIperf::onMSSvalueChanged(int value)
+{
+    if ((value<88)&&(value>0)){
+        // TODO: the tooltip only show < 1 sec ? why?
+        showCustomToolTip(ui->sb_mss, ui->sb_mss->toolTip());
+        // qDebug() << "old_mss:" << QString::number(old_mss) << " new:" << QString::number(value);
+        if (value> old_mss){
+            ui->sb_mss->setValue(88);
+            old_mss = 88;
+        } else {
+            ui->sb_mss->setValue(0);
+            old_mss = 0;
+        }
+    }else{
+        //store value as old_mss
+        old_mss = value;
     }
 }
