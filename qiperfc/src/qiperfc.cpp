@@ -360,7 +360,7 @@ void QIperfC::onStart()
                     maxtestduration = maxtestduration + idelaytime;
                 }
                 refrow = tp->row();
-                qDebug() << "==> refrow: " << QString::number(refrow) ;
+                qDebug() << tp << " ==> refrow: " << QString::number(refrow) ;
                 QString serverIP = tp->getMgrServer();
                 //TODO: detect manager server is pingable
                 if (!m_wss.contains(serverIP)) {
@@ -467,7 +467,7 @@ void QIperfC::onStart()
                 }
                 m_status_client[tp->getBindKey(false)]=TPStatus::init;// init client of BindKey status 0
             } else {
-                qDebug() << "Ignore disabled TP test pair: " << tp;
+                qInfo() << "Ignore disabled TP test pair: " << tp;
             }
 
         }
@@ -526,6 +526,7 @@ void QIperfC::onStart()
         }
         if(bUserStop){
             qDebug() << "User Stop on wait ServerReady!!";
+            emit updateStatus("User Stop on wait ServerReady!!");
             return;
         }
         if (!bServerReady){
@@ -541,7 +542,7 @@ void QIperfC::onStart()
             return;
         }
         //Start client
-        for (auto key: m_wsc.keys()){
+        for (auto key: qAsConst(m_wsc.keys())){
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             rs = m_wsc[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
             if (rs<=0){
@@ -883,7 +884,6 @@ void QIperfC::loadSettings()
     m_TPExportHeigth =m_settings->value("TPExportHeigth", 180).toInt();
     m_TPGroup = m_settings->value("TPGroup", false).toBool();
     m_IgnoreWrongInterval = m_settings->value("IgnoreWrongInterval", false).toBool();
-    qDebug() << "loadSettings m_IgnoreWrongInterval:" << m_IgnoreWrongInterval;
 //    m_frm_option->setWaitServerReady();
     m_settings->endGroup();
 
