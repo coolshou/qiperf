@@ -5,6 +5,8 @@
 #include <QTreeView>
 #include <QApplication>
 
+#include "tp.h"
+
 #include <QDebug>
 
 TPFoldingDelegate::TPFoldingDelegate(QObject *parent)
@@ -35,8 +37,8 @@ void TPFoldingDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
         }
 
         QRect rect = opt.rect;
-        int width = style->pixelMetric(QStyle::PM_IndicatorWidth, &branchOption, opt.widget);
-        int height = style->pixelMetric(QStyle::PM_IndicatorHeight, &branchOption, opt.widget);
+        int width = style->pixelMetric(QStyle::PM_IndicatorWidth, &branchOption, opt.widget)/2;
+        int height = style->pixelMetric(QStyle::PM_IndicatorHeight, &branchOption, opt.widget)/2;
 //        int x = rect.x() + opt.rect.width() / 2 - width / 2;
         int y = rect.y() + opt.rect.height() / 2 - height / 2;
         int x = rect.x() - width * 0.9; // 2;
@@ -44,6 +46,12 @@ void TPFoldingDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 
         // Set custom icon
         QIcon customIcon = (branchOption.state & QStyle::State_Open) ? QIcon(":/folding/open") : QIcon(":/folding/close");
-        customIcon.paint(painter, QRect(x, y, width, height), Qt::AlignCenter, QIcon::Normal, QIcon::Off);
+        // index.model()->itemData();
+        int mode = QIcon::Normal;
+        TP *item = static_cast<TP*>(index.internalPointer());
+        if (!item->getEnabled()){
+            mode = QIcon::Disabled;
+        }
+        customIcon.paint(painter, QRect(x, y, width, height), Qt::AlignCenter, QIcon::Mode(mode), QIcon::Off);
     }
 }
