@@ -152,16 +152,15 @@ void IperfWrapper::parserIperf3(QString linedata)
                 iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
                 sDir = linedata.mid(1,iS-1).trimmed();// server:[TX-S][RX-S], client:[TX-C][RX-C]
                 linedata = linedata.right(linedata.length()-iS-1);
-                if (sDir.contains(TPDIRRx)){
+                if (sDir.contains(TPDIRRx, Qt::CaseSensitivity::CaseInsensitive)){
                     if (m_servermode){
-                        sDir = TPDIRTx;
-                    }else{
                         sDir = TPDIRRx;
+                    }else{
+                        sDir = TPDIRTx;
                     }
                     linedata = linedata.trimmed();
-    //                    qDebug() << "bidir msg:" << msg;
                 }else {
-    //                qInfo() << "ignore Tx part data";
+                    // qInfo() << "ignore m_bidir part data: " << sDir;
                     return;
                 }
             }else{

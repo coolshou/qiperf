@@ -125,7 +125,7 @@ void WSClient::setDatapath(QString datapath)
 //! [onConnected]
 void WSClient::onConnected()
 {
-    qInfo() << "WebSocket connected: " << m_url;
+    // qInfo() << "WebSocket connected: " << m_url;
 }
 //! [onConnected]
 //!

@@ -19,7 +19,7 @@ TP::TP(QString id, QString data,int datatype, TP *parent)
     clearThroughput();
 
     m_itemDatas={m_id, "", "", "", // id, server, dir ,client
-                 "", "", "", //throughput, min tput, max tput
+                 "", "", "", //throughput, min throughput, max throughput
                  "", ""}; // lost rate, comment
 
     qDebug() << "create TP:" << id << " data:" << data << " parent:" << parent;
@@ -27,7 +27,9 @@ TP::TP(QString id, QString data,int datatype, TP *parent)
     if (data!="" && m_datatype == TPMgrData::config){
         loadData(data);
     }else{
-//
+        if (data!=""){
+            m_itemDatas[1] = data;
+        }
     }
 }
 
@@ -166,12 +168,12 @@ void TP::loadData(QString data)
         m_omit = o_client.value("omit").toInt();
         m_delaytime = o_client.value("delaytime").toInt();
     //    QString m_mclient = o_client["manager"].toString();
-        QString direction = TPDIRTx;
+        QString direction = TPDIRRx;
         if (o_client.value("bidir").toBool()){
             direction = TPDIRTR;
         }
         if (o_client.value("reverse").toBool()){
-            direction= TPDIRRx;
+            direction= TPDIRTx;
         }
         // server
         QJsonObject o_server = jsonRoot.value("server").toObject();
@@ -375,10 +377,10 @@ int TP::setDirection(DirType direction)
         QJsonObject o_client = jsonRoot["client"].toObject();
         if (direction == DirType::Tx){
             o_client["bidir"]=false;
-            o_client["reverse"]=false;
+            o_client["reverse"]=true;
         }else if (direction == DirType::Rx){
             o_client["bidir"]=false;
-            o_client["reverse"]=true;
+            o_client["reverse"]=false;
         }else if (direction == DirType::TR){
             o_client["bidir"]=true;
             o_client["reverse"]=false;
@@ -390,10 +392,10 @@ int TP::setDirection(DirType direction)
         QJsonObject o_server = jsonRoot["server"].toObject();
         if (direction == DirType::Tx){
             o_server["bidir"]=false;
-            o_server["reverse"]=false;
+            o_server["reverse"]=true;
         }else if (direction == DirType::Rx){
             o_server["bidir"]=false;
-            o_server["reverse"]=true;
+            o_server["reverse"]=false;
         }else if (direction == DirType::TR){
             o_server["bidir"]=true;
             o_server["reverse"]=false;

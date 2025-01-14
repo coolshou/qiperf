@@ -31,7 +31,15 @@ void TPDirDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                 opt.rect
                 );
             opt.icon.paint(painter, iconRect, Qt::AlignLeft);
+
+            // int mode = QIcon::Normal;
+            // TP *item = static_cast<TP*>(index.internalPointer());
+            // if (!item->getEnabled()){
+            //     mode = QIcon::Disabled;
+            // }
+            // opt.icon.paint(painter, iconRect, Qt::AlignLeft, QIcon::Mode(mode));
         }
+
         QVariant data = index.data(); // Retrieve data associated with the index
         if (data.isValid()) {
             QString imagePath = ":/"+data.toString();// Assumes you store the image path in Qt::UserRole
@@ -45,34 +53,6 @@ void TPDirDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
             }
         }
         painter->restore();
-
-        if (0){
-            // const QModelIndex itm;// = index;
-            // // QModelIndex itm = index;
-            // // QMap<int, QVariant> rolesData;
-            // // rolesData[Qt::DisplayRole] = "";
-            // // itm.model()->setItemData(itm, rolesData);
-            // // qDebug() << "option:" << option.rect << " text:" << option.text;
-            // qDebug() << " text:" << index.data(Qt::DisplayRole) ;//<< " new:" << itm.data(Qt::DisplayRole);
-            // QStyledItemDelegate::paint(painter, option, itm); //this will draw all include text string
-            // Assuming you want to display images in column::dir
-            QVariant data = index.data(); // Retrieve data associated with the index
-            if (data.isValid()) {
-                QString imagePath = ":/"+data.toString();// Assumes you store the image path in Qt::UserRole
-                QImage image(imagePath);
-                if (!image.isNull()) {
-                    QPixmap pixmap = QPixmap::fromImage(image);
-                    QRect rect = option.rect;
-                    rect.setWidth(option.rect.width()/2);
-                    painter->drawPixmap(rect, pixmap);
-                    // painter->drawPixmap(option.rect, pixmap);
-                }else{
-                    //                qDebug() << "No image: " << imagePath
-                }
-            } else {
-                qDebug() << "data.not Valid: " << data;
-            }
-        }
     }
     else {
         QStyledItemDelegate::paint(painter, option, index); //this is original paint, it will draw all include text

@@ -73,8 +73,10 @@ void TPPlot::selectionChanged()
         QCPGraph *graph = this->graph(i);
         QCPPlottableLegendItem *item = this->legend->itemWithPlottable(graph);
         if ((item->selected() or graph->selected())){
+
             item->setSelected(true);
             graph->setSelection(QCPDataSelection(graph->data()->dataRange()));
+            qDebug() << "selectionChanged: graph->name(): " << graph->name();
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }

@@ -401,12 +401,15 @@ void ThroughputView::initThroughputChart()
     connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &ThroughputView::onPlotContextMenuRequest);
     ui->hl_console->addWidget(m_tpplot);
 
-    m_tpmgr = new TPMgr(m_showgroup, this);
+    // m_tpmgr = new TPMgr(m_showgroup, this);
+    m_tpmgr = new TPMgr(m_showgroup, ui->tv_throughput);
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
 
     ui->tv_throughput->setModel(m_tpmgr);
+    // ui->tv_throughput->setHeaderHidden(true);// not show header column
+    // ui->tv_throughput->expandAll();// will show folding icon when have child item??
     /* TODO: set specify column font size,
     // current not inherent other setting
     header = new CustomHeaderView(Qt::Horizontal, ui->tv_throughput);
@@ -434,10 +437,10 @@ void ThroughputView::initThroughputChart()
     connect(filter, &TooltipEventFilter::doPaste, this, &ThroughputView::onPaste);
     connect(filter, &TooltipEventFilter::doDelete, this, &ThroughputView::onDelete);
     ui->tv_throughput->viewport()->installEventFilter(filter);
-    // ui->tv_throughput->setRootIsDecorated(true); //show folding icon
-    //    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
+    ui->tv_throughput->setRootIsDecorated(true); //show folding icon
+    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
     //    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
-    // ui->tv_throughput->expandAll();// will show folding icon when have child item??
+
     ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu
     connect(ui->tv_throughput, &QTreeView::customContextMenuRequested, this, &ThroughputView::onTPUTContextMenu);
     connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &ThroughputView::onItemDClicked); //edit item on double click
@@ -447,10 +450,10 @@ void ThroughputView::initThroughputChart()
     // tpdirdelegate = new TPDirDelegate(this); // this will not show dir picture
     ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdirdelegate);
     // TODO: why debug build do not show folding icon!!
-    //    tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
-    //    ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
+    tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
+    ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
 
     QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
     connect(ism, &QItemSelectionModel::selectionChanged, this, &ThroughputView::onTPselectionChanged);
-    //    ui->tv_throughput->header()->setVisible(true);
+
 }

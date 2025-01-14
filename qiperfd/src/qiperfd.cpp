@@ -21,7 +21,7 @@
 QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     : QObject{parent}, m_fileclient(nullptr)
 {
-    bReportTPData = false;
+    // bReportTPData = false;
     onLog(QString(QIPERFD_NAME) + ":" + QIPERFD_VERSION);
     tmppath = QStandardPaths::writableLocation(QStandardPaths::TempLocation)+
             QDir::separator()+QIPERF_NAME+QDir::separator();
@@ -590,10 +590,10 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport, 
     m_wsserver->sendTextResult(msg);
     if (!filename.isEmpty()){
         if(QFileInfo::exists(filename)){
-            qDebug() << "enqueueFile: " << filename;
+            // qDebug() << "enqueueFile: " << filename;
             m_fileclient->enqueueFile(filename);
         }else{
-            qDebug() << "file to send not Exist: " << filename;
+            onLog("file to send not Exist: " + filename);
         }
     }
     del(idx);
@@ -671,13 +671,13 @@ void QIperfd::onWSactMessage(QString msg)
         QString tag = d[1];
         QString bindkey = d[2];
         m_directions[starttime][bindkey] = tag; // tag for bidir
-        bReportTPData = true;
+        // bReportTPData = true;
         qInfo() << "SET to Report throughput data: " << msg;
     }else if (act.startsWith(CMD_IPERF_UNREG)){
         QStringList d = msg.split(":");
         QString starttime = d[0];
         QString bindkey = d[1];
-        bReportTPData = false;
+        // bReportTPData = false;
         m_directions[starttime][bindkey].clear();
         qInfo() << "SET to NOT Report throughput data: " << msg;
     }else if (act.startsWith(CMD_IPERF_CLEAR)){
@@ -716,8 +716,13 @@ void QIperfd::onIperfStdout()
 
 }
 
-void QIperfd::checkFirewallStatus()
+int QIperfd::checkFirewallStatus()
 {
+/*return:
+-1: error happen
+ 0: No firewall
+ 1: firewall is active
+*/
 #if defined(Q_OS_WIN32)
     HRESULT hres;
     QString err ="";
@@ -727,7 +732,7 @@ void QIperfd::checkFirewallStatus()
         // QMessageBox::critical(this, "Error", "Failed to initialize COM library.");
         err = "Error: Failed to initialize COM library.";
         informMessage(err, true);
-        return;
+        return -1;
     }
 
     // Initialize security
@@ -748,7 +753,7 @@ void QIperfd::checkFirewallStatus()
         err = "Error: Failed to initialize security.";
         informMessage(err, true);
         CoUninitialize();
-        return;
+        return -1;
     }
 
     // Obtain the initial locator to WMI
@@ -765,7 +770,7 @@ void QIperfd::checkFirewallStatus()
         err = "Error: Failed to create IWbemLocator object.";
         informMessage(err, true);
         CoUninitialize();
-        return;
+        return -1;
     }
 
     // Connect to WMI through the IWbemLocator::ConnectServer method
@@ -788,7 +793,7 @@ void QIperfd::checkFirewallStatus()
         informMessage(err, true);
         pLoc->Release();
         CoUninitialize();
-        return;
+        return -1;
     }
 
     // Set security levels on the proxy
@@ -810,7 +815,7 @@ void QIperfd::checkFirewallStatus()
         pSvc->Release();
         pLoc->Release();
         CoUninitialize();
-        return;
+        return -1;
     }
 
     // Use the IWbemServices pointer to make requests of WMI
@@ -829,7 +834,7 @@ void QIperfd::checkFirewallStatus()
         pSvc->Release();
         pLoc->Release();
         CoUninitialize();
-        return;
+        return -1;
     }
 
     // Get the data from the query
@@ -862,8 +867,36 @@ void QIperfd::checkFirewallStatus()
     pLoc->Release();
     pEnumerator->Release();
     CoUninitialize();
+    return uReturn;
 #else
-    qDebug() << "TODO: checkFirewallStatus(Firewall detect)!!";
+    QProcess process;
+    QString command = "ps";
+    QStringList arguments;
+    arguments << "aux" << "| grep -E 'firewalld|ufw|iptables|nft'";
+
+    // Start the process
+#if QT_VERSION < 0x060000  // < 6.0
+    process.start(command, arguments);
+#else
+    command = command + arguments.join(" ");
+    process.startCommand(command);
+#endif
+    process.waitForFinished();
+
+    // Read the output
+    QByteArray output = process.readAllStandardOutput();
+    QByteArray errorOutput = process.readAllStandardError();
+
+    if (!output.isEmpty()) {
+        qDebug() << "Firewall processes found:\n" << output;
+        return 1;
+    } else if (!errorOutput.isEmpty()) {
+        qDebug() << "Error:\n" << errorOutput;
+        return -1;
+    } else {
+        qDebug() << "No firewall processes found.";
+        return 0;
+    }
 #endif
 }
 
