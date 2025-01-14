@@ -25,9 +25,11 @@ export DEB_BUILD_OPTIONS+=nocheck
 #VERSION_QIPERFD := $(shell sed -n -e "s/^#define QIPERFD_VERSION //p" src/versions.h)
 #VERSION_QIPERFC := $(shell sed -n -e "s/^#define QIPERFC_VERSION //p" src/versions.h)
 #VERSION_QIPERFTRAY := $(shell sed -n -e "s/^#define QIPERFTRAY_VERSION //p" src/versions.h)
+DISTRO_NAME=$(shell grep '^VERSION_CODENAME' /etc/os-release | cut -d= -f2)
+DEB_VERSION=$(shell grep -m1 -oP '(?<=\().*?(?=\))' debian/changelog)${DISTRO_NAME}
 
 # sudo qtchooser -install qt6 /usr/lib/qt6/bin/qmake
-#export QT_SELECT=qt6
+export QT_SELECT=qt6
 
 %:
 	dh $@
@@ -38,3 +40,10 @@ override_dh_shlibdeps:
 	sed -i "s/libqt6network6t64/libqt6network6 | libqt6network6t64/g" debian/qiperftray.substvars
 	sed -i "s/libqt6gui6t64/libqt6gui6 | libqt6gui6t64/g" debian/qiperftray.substvars
 	sed -i "s/libqt6widgets6t64/libqt6widgets6 | libqt6widgets6t64/g" debian/qiperftray.substvars
+
+#override_dh_auto_build:
+#	echo "Building package for ${DEB_VERSION}" > build-info.txt
+#	dh_auto_build
+
+override_dh_gencontrol:
+	dh_gencontrol -- -v$(DEB_VERSION)
