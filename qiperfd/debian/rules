@@ -29,7 +29,7 @@ DISTRO_NAME=$(shell grep '^VERSION_CODENAME' /etc/os-release | cut -d= -f2)
 DEB_VERSION=$(shell grep -m1 -oP '(?<=\().*?(?=\))' debian/changelog)${DISTRO_NAME}
 
 # sudo qtchooser -install qt6 /usr/lib/qt6/bin/qmake
-#export QT_SELECT=qt6
+export QT_SELECT=qt6
 
 %:
 	dh $@
