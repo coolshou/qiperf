@@ -288,6 +288,18 @@ void ThroughputView::onPlotContextMenuRequest(QPoint pos)
     menu->popup(m_tpplot->mapToGlobal(pos));
 }
 
+void ThroughputView::onSelectedTPitem(QString idx)
+{
+    //set TP item selected
+    QModelIndex indexToSelect =  m_tpmgr->setSelectItem(idx);
+    // Get the selection model
+    QItemSelectionModel *selectionModel = ui->tv_throughput->selectionModel();
+    selectionModel->select(indexToSelect, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+
+    // Optionally, make the selection visible
+    ui->tv_throughput->scrollTo(indexToSelect);
+}
+
 void ThroughputView::onTPUTContextMenu(QPoint pos)
 {
     // if select multi items
@@ -399,6 +411,7 @@ void ThroughputView::initThroughputChart()
     m_tpplot=new TPPlot(ui->widget_console);
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &ThroughputView::onPlotContextMenuRequest);
+    connect(m_tpplot, &TPPlot::selectedTPitem, this, &ThroughputView::onSelectedTPitem);
     ui->hl_console->addWidget(m_tpplot);
 
     // m_tpmgr = new TPMgr(m_showgroup, this);
