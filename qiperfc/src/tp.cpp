@@ -10,10 +10,8 @@ TP::TP(QString id, QString data,int datatype, TP *parent)
     :m_id(id), m_datatype(datatype), m_parentItem(parent)
 {
     m_childItems = QList<TP *>();
-    // m_id=id;
     m_jsondata = "";
     m_enabled = true;
-    // m_datatype = 0;
     m_lostpacket = 0;
     m_totalpacket = 0;
     clearThroughput();
@@ -22,7 +20,7 @@ TP::TP(QString id, QString data,int datatype, TP *parent)
                  "", "", "", //throughput, min throughput, max throughput
                  "", ""}; // lost rate, comment
 
-    qDebug() << "create TP:" << id << " data:" << data << " parent:" << parent;
+    // qInfo() << "create TP:" << id << " data:" << data << " parent:" << parent;
     // if (data!="" && data !="Root" && data !="Total"){
     if (data!="" && m_datatype == TPMgrData::config){
         loadData(data);

@@ -231,14 +231,18 @@ TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
     }else{
         pitm = getRootItem();
     }
+    QModelIndex midx = indexFromItem(pitm);
     //data: json format data
     //Get largest idx number!!
     int idx = getMaxIdx();
-    qDebug() << "add idx:" << QString::number(idx);
-    qDebug() << "add data: " << data;
-    beginInsertRows(QModelIndex(), idx, idx); //must have to show model data in view!!
+    // qDebug() << "add idx:" << QString::number(idx);
+    // qDebug() << "add data: " << data;
+
+    // beginInsertRows(QModelIndex(), idx, idx+1); //must have to show model data in view!!
+    beginInsertRows(midx, idx, idx+1); //must have to show model data in view!!
+
     TP *tp = new TP(QString::number(idx), data, datatype, pitm);
-    qDebug() <<"idx:" << idx << " tp:" << tp << " add pitm: " << pitm ;//<< " data:" << data;
+    qDebug() <<"midx:" << midx << " idx:" << idx << " tp:" << tp << " add pitm: " << pitm ;//<< " data:" << data;
     pitm->appendChild(tp);
     endInsertRows();
 
@@ -286,15 +290,10 @@ int TPMgr::rootChildCount()
 
 QList<TP *> TPMgr::getChilds(bool showAll)
 {
-   QList<TP *> tps;
+    QList<TP *> tps;
     // m_tps.clear();
     TP *itm = getRootItem();
-    // if (m_showgroup){
-    //     itm = groupItem;
-    // }else{
-    //     itm = rootItem;
-    // }
-    qDebug() << "root child:" << itm->childCount() << " cuilds: " << itm->getChilds()  ;
+    // qDebug() << "root child:" << itm->childCount() << " cuilds: " << itm->getChilds()  ;
 
     for(int i = 0; i<itm->childCount();i++){
         TP *chitm = itm->child(i);
@@ -304,21 +303,18 @@ QList<TP *> TPMgr::getChilds(bool showAll)
             }
         }
         // m_tps.append(itm->child(i));
-        qDebug() << QString::number(i) << " add: " << chitm;
         tps.append(chitm);
         if (chitm->haveChilds()){
-            qDebug() <<  "chitm->getChilds: " << chitm->getChilds();
             for(int j = 0; j<chitm->childCount();j++){
                 // QCoreApplication::processEvents(QEventLoop::AllEvents);
                 TP *ccitm = chitm->child(j);
                 tps.append(ccitm);
-                qDebug() << "add subitm: " << ccitm;
             }
         }
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 
-    qDebug() << "getChilds tps:" << tps;
+    // qDebug() << "getChilds tps:" << tps;
     return tps;
 }
 
@@ -488,15 +484,8 @@ TP *TPMgr::getGroupItem()
 QModelIndex TPMgr::getRootItemIdx()
 {
     QModelIndex idx;
-    // TP *itm;
-    // if (m_showgroup){
-    //     itm = groupItem;
-    // }else{
-        // itm = rootItem;
-    // }
-    // idx = indexFromItem(itm);
-    idx = indexFromItem(rootItem);
-    // qInfo() << "idx:" << idx << " rootItem:" << rootItem;
+    idx = indexFromItem(getRootItem());
+    qInfo() << "getRootItemIdx:" << idx;
     return idx;
 }
 
@@ -559,11 +548,10 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
 {
     //add throughput item
     Q_UNUSED(sInterval)
-    Q_UNUSED(unit)
-    qInfo() <<  "addTPdata: midx: " << midx;
+    Q_UNUSED(unit) // TODO: check unit
+
     TP *tp = getItemByIdx(midx); //parent item
     if (tp==nullptr){
-        // qDebug() << "addTPdata: no parent iperf pair?? (midx=" << midx << ")" << idx;
         return;
     }
     TP *c = getItemByIdx(midx+"_"+idx, tp); //iperf pair config item
@@ -572,26 +560,21 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
         c = new TP(midx+"_"+idx, "", TPMgrData::TP, tp);
         c->setThroughput(dir, value);
         c->setDirection(dir);
-        // c->setDataType(TPMgrData::TP);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
-               // qDebug() << c << " new pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
         tp->appendChild(c); // add iperf pair config item to parent item
-        qInfo() << "TPMgr::addTPdata, parent:" << tp << " child:" << c << " TP value:" << value;
     }else{
+        //update throughput value
         c->setThroughput(dir, value);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
-               // qInfo() << c << " row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
-        qInfo() << "TPMgr::addTPdata: "<< c << " update TP value: " << value;
     }
-
 }
 
 TP *TPMgr::getItemByIdx(QString midx, TP *item)
@@ -600,7 +583,6 @@ TP *TPMgr::getItemByIdx(QString midx, TP *item)
     if (item==nullptr){
         lst = getChilds();
     }else{
-//        qDebug() << "getItemByIdx:" << midx << " item:" << item;
         if (item->haveChilds()){
             if (item->childCount()>0){
                 lst = item->getChilds();
@@ -608,16 +590,13 @@ TP *TPMgr::getItemByIdx(QString midx, TP *item)
                 return nullptr;
             }
         }else{
-//            qDebug() << "item: " << item << " DO NOT have child";
             return nullptr;
         }
     }
     if(lst.count()>0){
         foreach (auto tp, lst){
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
-            // qDebug() << "TP:" << tp << " idx:" << tp->getID();
             if (tp->getID() == midx){
-                qDebug() << "found item of " << midx << " tp:" << tp;
                 return tp;
             }
         }
@@ -675,11 +654,6 @@ int TPMgr::getMaxPort(QString m_ip, QString targetIP)
     int maxPort=0;
     int port;
     TP *itm = getRootItem();
-    // if (m_showgroup){
-    //     itm = groupItem;
-    // }else{
-    //     itm = rootItem;
-    // }
     if(itm->haveChilds()){
         foreach(auto tp, itm->getChilds()){
             if(m_ip == tp->getMgrServer() && (targetIP == tp->getServer())){
@@ -793,13 +767,16 @@ void TPMgr::setTestData()
 
 TP *TPMgr::newGroupItem()
 {
-    // beginInsertRows(QModelIndex(), 0, 2);
-    groupItem = add("Total", TPMgrData::group, rootItem);
-    // groupItem = new TP("0", "Total", TPMgrData::group, rootItem);
-    // groupItem->setDataType(TPMgrData::group);
-    // rootItem->appendChild(groupItem);
-    // endInsertRows();
+    QModelIndex midx = indexFromItem(rootItem);
+    qDebug() << "newGroupItem root midx: " << midx;
+    // beginInsertRows(midx, 0, 1);
+    beginInsertRows(QModelIndex(), 0, 1);
+    // groupItem = add("Total", TPMgrData::group, rootItem);
+    groupItem = new TP("0", "Total", TPMgrData::group, rootItem);
+    rootItem->appendChild(groupItem);
+    endInsertRows();
     qDebug() << " groupItem:" << groupItem;
+    qDebug() << "newGroupItem groupItem idx: " << indexFromItem(groupItem);
     return groupItem;
 }
 

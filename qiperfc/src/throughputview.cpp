@@ -440,9 +440,9 @@ void ThroughputView::initThroughputChart()
 
     */
     ui->tv_throughput->setColumnWidth(TP::cols::id, 100);
-    ui->tv_throughput->setColumnWidth(TP::cols::server, 180);
+    ui->tv_throughput->setColumnWidth(TP::cols::server, 150);
     ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
-    ui->tv_throughput->setColumnWidth(TP::cols::client, 180);
+    ui->tv_throughput->setColumnWidth(TP::cols::client, 150);
     ui->tv_throughput->setColumnWidth(TP::cols::lostrate, 110);
 
     TooltipEventFilter* filter = new TooltipEventFilter(ui->tv_throughput);
