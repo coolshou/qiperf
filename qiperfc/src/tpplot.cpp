@@ -76,7 +76,7 @@ void TPPlot::selectionChanged()
 
             item->setSelected(true);
             graph->setSelection(QCPDataSelection(graph->data()->dataRange()));
-            qDebug() << "selectionChanged: graph->name(): " << graph->name();
+            emit selectedTPitem(graph->name());
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }

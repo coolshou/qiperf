@@ -24,6 +24,8 @@ public slots:
     void setStartTime(QDateTime startTime);
     void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
                          QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates);
+signals:
+    void selectedTPitem(QString idx);
 
 private slots:
     void selectionChanged();
