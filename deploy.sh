@@ -2,12 +2,12 @@
 
 # build deb package
 DOBUILD=0
-
-VERSION=0.7.11401.06-1
+CODENAME=`grep '^VERSION_CODENAME' /etc/os-release | cut -d= -f2`
+VERSION=0.7.11401.15-1
 #VERSION=0.6.11312.04
 declare -a DESTFILES=()
-DESTFILES+=(qiperfd_${VERSION}_amd64.deb)
-DESTFILES+=(qiperftray_${VERSION}_amd64.deb)
+DESTFILES+=(qiperfd_${VERSION}${CODENAME}_amd64.deb)
+DESTFILES+=(qiperftray_${VERSION}${CODENAME}_amd64.deb)
 
 declare -a WDESTFILES=()
 WDESTFILES+=(qiperf-setup-${VERSION}.exe)
