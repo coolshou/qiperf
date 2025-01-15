@@ -118,7 +118,7 @@ qint64 WSServer::sendTextMessage(QString msg, QString target)
         ts = m_clients.keys();
     }
     qint64 rc=0;
-    for(auto &t: std::as_const(ts)) {
+    for(auto &t: as_const(ts)) {
         if (m_clients.contains(t)) {
 //            onLog("TODO: send:" + msg + " back to " + t);
             m_sendtype=WSServer::sendtype::text;
@@ -143,7 +143,7 @@ qint64 WSServer::sendBinaryMessage(QByteArray &data, QString target)
         ts = m_clients.keys();
     }
     qint64 rc=0;
-    for(auto &t: std::as_const(ts)) {
+    for(auto &t: as_const(ts)) {
         if (m_clients.contains(t)) {
             rc = m_clients.value(t)->sendBinaryMessage(data);
             if (rc<=0){

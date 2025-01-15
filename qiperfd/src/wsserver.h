@@ -67,6 +67,14 @@
 QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 
+#include <iostream>
+
+// Custom as_const function
+template <typename T>
+constexpr const T& as_const(T& t) noexcept {
+    return t;
+}
+
 class WSServer : public QObject
 {
     Q_OBJECT
