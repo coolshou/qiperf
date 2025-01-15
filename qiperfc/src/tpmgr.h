@@ -58,7 +58,7 @@ public:
     bool removeRows(int row, int count, const QModelIndex &parent) override;
 
     // ======
-    bool add(QString data);
+    TP * add(QString data, TPMgrData::DataType datatype=TPMgrData::config, TP *parent=nullptr);
     QModelIndex indexFromItem(TP *item);
     void del(QModelIndex idx);
     int rootChildCount();
@@ -91,8 +91,7 @@ public:
     void startUpdater();
     void stopUpdater();
     void setTestData();
-
-
+    QModelIndex setSelectItem(QString idx);
 
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
@@ -100,6 +99,7 @@ public slots:
                        QString value, QString unit, QString dir,
                        QString pkt_lost, QString pkt_total);
     void setShowGroup(bool bShow);
+
 signals:
     void IperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);// time, idx, throughput value, lost rate
 
