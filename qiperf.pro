@@ -10,10 +10,7 @@ SUBDIRS += \
 qiperftray.subdir = qiperftray
 qiperfd.subdir = qiperfd
 qiperfc.subdir = qiperfc
-
-#qiperfc.depends = qiperfd
 qiperftray.depends = qiperfd
-
 
 DEBIAN.files += \
     debian/changelog \
@@ -41,13 +38,13 @@ QIPERFTRAYDEBIAN.files += \
     qiperftray/debian/rules \
     qiperftray/debian/README.Debian \
     qiperftray/debian/README.source \
-    qiperftray/debian/qiperftray.links \
-    TODO
+    qiperftray/debian/qiperftray.links
 
 MISC.files += \
-   deploy.sh \
-   build_x64.bat\
-   build_deb.sh
+    deploy.sh \
+    build_x64.bat \
+    build_deb.sh \
+    TODO
 
 NSIS.files += \
     qiperf.nsi
