@@ -1,14 +1,15 @@
-qiperf (0.7.11401.06-1) unstable; urgency=medium
+qiperf (0.7.11401.15-1) unstable; urgency=medium
 
   * add open log folder with system's file manager
   * Fix Ignore load iperf log file TP value on interval < 1 sec (invalid TP value?)
   * Fix qiperfd list have empty item at end of list cause sorting column display extra empty rows.
   * Fix not show text on throughput Direction Column
+  * Update GUI iperf Max Buffer Length(-l) to 999
   * Linux Move to QT6 base
   * Update iperf3 to 3.18
   * update qiperfd for raspiberry Pi 4. Raspbian 10 (buster)
 
- -- coolshou <coolshou2060@gmail.com>  Mon, 06 Jan 2025 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Wed, 15 Jan 2025 10:00:00 +0800
 
 qiperf (0.6.11312.10-1) unstable; urgency=medium
 
