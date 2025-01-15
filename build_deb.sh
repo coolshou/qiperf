@@ -1,11 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 
+BUILDPACKAGES="qiperfd qiperftray"
+# Get the machine hardware name
+machine_arch=$(uname -m)
+if [ "$machine_arch" = "x86_64" ]; then
 export QT_SELECT=qt6
-#export QT_SELECT=qt5
+BUILDPACKAGES+=" qiperfc"
+else
+export QT_SELECT=qt5
+fi
 
-rm *.buildinfo *.changes *.deb
+rm -f *.buildinfo *.changes *.deb
 
-for package in qiperfc qiperfd qiperftray; do
+for package in ${BUILDPACKAGES[@]} ; do
     if [ ! -e $package/debian/changelog ]; then
         ln -s debian/changelog $package/debian/
     fi
