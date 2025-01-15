@@ -76,6 +76,7 @@ signals:
 private slots:
     void initMenus();
     void onPlotContextMenuRequest(QPoint pos);
+    void onSelectedTPitem(QString idx);
     void onTPUTContextMenu(QPoint pos);
     void onTPDataUpdate(const QModelIndex &parent, int first, int last);
     void aboutQCustomPlot();
