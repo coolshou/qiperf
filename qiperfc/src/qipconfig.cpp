@@ -379,7 +379,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 //iperf server record file
                                 IperfFileWorker *ifw = new IperfFileWorker(version, protocal,
                                                                            idx, true, parallel,
-                                                                           bidir, TPDIRTx, serverfile, delaytime, serverinterval,
+                                                                           bidir, TPDIRRx, serverfile, delaytime, serverinterval,
                                                                            m_IgnoreWrongInterval);
                                 m_fileworkers.append(ifw);
                                 // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
@@ -396,7 +396,7 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 //iperf client record file
                                 IperfFileWorker *ifwc = new IperfFileWorker(version, protocal,
                                                                            idx, false, parallel,
-                                                                           bidir, TPDIRRx, clientfile, delaytime, clientinterval,
+                                                                           bidir, TPDIRTx, clientfile, delaytime, clientinterval,
                                                                             m_IgnoreWrongInterval);
                                 m_fileworkers.append(ifwc);
                                 // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
