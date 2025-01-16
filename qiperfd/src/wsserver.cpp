@@ -343,7 +343,8 @@ void WSServer::updateListen()
     if (m_pWebSocketServer->isListening()){
         m_pWebSocketServer->close();
     }
-    if (m_pWebSocketServer->listen(m_addr, m_port))
+    // if (m_pWebSocketServer->listen(m_addr, m_port))
+    if (m_pWebSocketServer->listen(QHostAddress::Any, m_port))
     {
         qInfo() << "WS Server listening on port" << m_port << " URL:" << m_pWebSocketServer->serverUrl();
         connect(m_pWebSocketServer, &QWebSocketServer::newConnection, this, &WSServer::onNewConnection);
