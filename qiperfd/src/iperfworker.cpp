@@ -318,7 +318,7 @@ void IperfWorker::parserStdOut(QString msg)
 void IperfWorker::onThroughputData(int idx, QString sInterval, QString data)
 {
     if(m_bidirtag.isEmpty()){
-        qInfo() << "No m_bidirtag, not reprort ThroughputData: ("<<sInterval<<")" << data;
+        // qInfo() << "No m_bidirtag, not reprort ThroughputData: ("<<sInterval<<")" << data;
     }else{
         emit onThroughput(idx, sInterval, data);
     }
