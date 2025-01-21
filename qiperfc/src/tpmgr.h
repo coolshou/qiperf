@@ -93,8 +93,6 @@ public:
     void setTestData();
     QModelIndex setSelectItem(QString idx);
 
-
-
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
     void onUpdateTPAvg(QString midx, QString sInterval, QString idx,

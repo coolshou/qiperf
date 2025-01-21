@@ -598,6 +598,7 @@ TP *TPMgr::getItemByIdx(QString midx, TP *item)
         foreach (auto tp, lst){
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
             if (tp->getID() == midx){
+                qDebug() << "found item of " << midx << " tp:" << tp;
                 return tp;
             }
         }
