@@ -69,7 +69,6 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
         if (index.column()== TP::cols::dir) {
             if (!item->getEnabled()){
                 //when item disabled, let image grayout too.
-                // qDebug() << "disable:" << item;
                 return QVariant("disable"+item->data(index.column()).toString());
              }
             //else { // the column dir will be empty!!
