@@ -19,9 +19,9 @@ class TPStatus: public QObject
     Q_GADGET
 public:
     enum Status{
-        init=-1,  // init
-        started=0,  // started
-        stoped=1     // stoped
+        init=0,  // init
+        started=1,  // started
+        stoped=2     // stoped
     };
     // init=-1,  // init
     //     started=0,  // started
@@ -92,6 +92,8 @@ public:
     void stopUpdater();
     void setTestData();
     QModelIndex setSelectItem(QString idx);
+
+
 
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
