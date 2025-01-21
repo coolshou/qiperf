@@ -366,11 +366,12 @@ void QIperfTray::onIperfVersion()
 }
 void QIperfTray::closeEvent(QCloseEvent *event)
 {
-    Q_UNUSED(event)
-    //TODO: close app check
-//    event.
+    if (m_tray->isVisible()) {
+        // close to system tray
+        hide();
+        event->ignore();
+    }
     savecfg();
-
 }
 
 void QIperfTray::onTimeout()
