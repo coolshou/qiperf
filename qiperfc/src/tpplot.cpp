@@ -49,7 +49,7 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
     maxV = maxV + (0.1*maxV);
     // yAxis->setRange(minV*0.9, maxV*1.1);
     yAxis->setRange(minV, maxV);
-    qDebug() << "refrow:" << refrow << " timedatas: " << timedatas;
+    // qDebug() << "refrow:" << refrow << " timedatas: " << timedatas;
     graph->setData(timedatas, valuedatas);
     // Calculate the sum
     Q_UNUSED(packetlosts)

@@ -200,7 +200,7 @@ void ExportHtml::setData(QList<TP *> tps,  QPixmap chat, QString pcs)
 
 void ExportHtml::setRawFilenames(QStringList filenames)
 {
-    qDebug() << "setRawFilenames:" << filenames;
+    // qDebug() << "setRawFilenames:" << filenames;
     m_iperf_raw_filenames = filenames;
 }
 
@@ -297,7 +297,7 @@ void ExportHtml::procressData()
     QJsonParseError error;//= new QJsonParseError();
     QJsonDocument doc;
     // qDebug() << "procressData:" << m_pcs;
-    for (const QJsonValue &value: qAsConst(m_pcs)) {
+    for (const QJsonValue &value: std::as_const(m_pcs)) {
         hostls.clear();
         if (value.isString()) {
             QString pcinfo = value.toString();
@@ -361,7 +361,7 @@ void ExportHtml::procressData()
 
     //iperf log raw data
     if(m_iperf_raw_filenames.length()>0){
-        for ( const auto& filename : qAsConst(m_iperf_raw_filenames)){
+        for ( const auto& filename : std::as_const(m_iperf_raw_filenames)){
             QFileInfo fileInfo(filename);
             QString filenameonly(fileInfo.fileName());
             QString rawdata;
