@@ -39,6 +39,11 @@ bool MyTray::supportsMessages()
     return trayicon->supportsMessages();
 }
 
+bool MyTray::isVisible() const
+{
+    return trayicon->isVisible();
+}
+
 void MyTray::hideIconTray()
 {
     trayicon->hide();

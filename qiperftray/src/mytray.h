@@ -10,6 +10,7 @@ class MyTray : public QObject
 public:
     explicit MyTray(QObject *parent = nullptr);
     bool supportsMessages();
+    bool isVisible() const;
 
 signals:
     void sigIconActivated();
