@@ -24,7 +24,7 @@ void TPDirDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 //                qDebug() << "No image: " << imagePath << ::Qt::endl;
             }
         } else {
-            qDebug() << "data.isValid: " << data << ::Qt::endl;
+            qDebug() << "data.not Valid: " << data;
         }
     }
     else {
