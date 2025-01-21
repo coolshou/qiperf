@@ -58,7 +58,6 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             return m_disabledTextColor;
         }
     }
-
 /*
     if (tpitem->getDataType()==TPMgrData::group){
         qDebug() << "data: group:" << tpitem;
@@ -418,7 +417,6 @@ void TPMgr::reset(){
     } else{
         groupItem = nullptr;
     }
-
     m_intervals.clear();
 }
 
