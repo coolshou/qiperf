@@ -1042,5 +1042,4 @@ void QIperfd::getIperfVer(QString cmd, int ver)
             }
         }
     }
-
 }
