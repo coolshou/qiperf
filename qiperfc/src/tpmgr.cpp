@@ -237,12 +237,6 @@ TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
     // idx = idx + 1;
     // int idx = rootItem->childCount();
     beginInsertRows(QModelIndex(), idx, idx);
-    TP *pitm = getRootItem();
-    // if (m_showgroup){
-    //     pitm = groupItem;
-    // }else{
-    //     pitm = rootItem;
-    // }
     TP *tp = new TP(QString::number(idx), data, TPMgrData::config, pitm);
     qDebug() <<"idx:" << idx << " tp:" << tp << " add pitm: " << pitm ;//<< " data:" << data;
     pitm->appendChild(tp);
