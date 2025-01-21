@@ -13,8 +13,14 @@ TPMgr::TPMgr(QObject *parent)
     : QAbstractItemModel(parent)
 {
 //    item = invisibleRootItem();
-    rootItem = new TP(("Root"), ("Root"), nullptr);
-    rootItem->setDataType(TPMgrData::root);
+    reset();
+    // rootItem = new TP(("Root"), ("Root"), nullptr);
+    // rootItem->setDataType(TPMgrData::root);
+    m_showgroup = false;
+    // groupItem = nullptr;
+    // groupItem = new TP(("Total"), ("Total"), rootItem);
+    // groupItem->setDataType(TPMgrData::group);
+
     m_intervals.clear();
 
     QWidget widget;
@@ -27,7 +33,8 @@ TPMgr::TPMgr(QObject *parent)
 }
 TPMgr::~TPMgr()
 {
-    //    delete rootItem;
+    // qDeleteAll(m_tps);
+    m_tps.clear();
 }
 QVariant TPMgr::data(const QModelIndex &idx, int role) const
 {
@@ -181,7 +188,11 @@ QModelIndex TPMgr::index(int row, int column, const QModelIndex &parent) const
     TP *parentItem;
 
     if (!parent.isValid())
-        parentItem = rootItem;
+        if(m_showgroup){
+            parentItem = groupItem;
+        }else{
+            parentItem = rootItem;
+        }
     else
         parentItem = static_cast<TP*>(parent.internalPointer());
 
@@ -212,7 +223,11 @@ int TPMgr::rowCount(const QModelIndex &parent) const
 //        return 0;
 
     if (!parent.isValid())
-        parentItem = rootItem;
+        if(m_showgroup){
+            parentItem = groupItem;
+        }else{
+            parentItem = rootItem;
+        }
     else
         parentItem = static_cast<TP*>(parent.internalPointer());
 
@@ -222,15 +237,22 @@ int TPMgr::rowCount(const QModelIndex &parent) const
 bool TPMgr::add(QString data)
 {
     //json data
-    //TODO: get largest idx number!!
+    //Get largest idx number!!
     int idx = getMaxIdx();
     // idx = idx + 1;
     // int idx = rootItem->childCount();
     beginInsertRows(QModelIndex(), idx, idx);
-    TP *tp = new TP(QString::number(idx), data, rootItem);
+    TP *pitm;
+    if (m_showgroup){
+        pitm = groupItem;
+    }else{
+        pitm = rootItem;
+    }
+    TP *tp = new TP(QString::number(idx), data, pitm);
     tp->setDataType(TPMgrData::config);
-    rootItem->appendChild(tp);
+    pitm->appendChild(tp);
     endInsertRows();
+
 //    qDebug() << "TPMgr::add: " << tp->getEnabled();
 
     return true;
@@ -247,7 +269,7 @@ QModelIndex TPMgr::indexFromItem(TP *item){
         parent = parent->parentItem();
     }
     QModelIndex ix;
-    parent = rootItem;
+    // parent = rootItem;
     /*for(auto ch: parents){
         ix = index(ch->row(), 0, ix);
     }*/
@@ -272,20 +294,30 @@ void TPMgr::del(QModelIndex idx)
 
 int TPMgr::rootChildCount()
 {
-    return rootItem->childCount();
+    if(m_showgroup){
+        return groupItem->childCount();
+    }else{
+        return rootItem->childCount();
+    }
 }
 
 QList<TP *> TPMgr::getChilds(bool showAll)
 {
 //    QList<TP *> tps;
     m_tps.clear();
-    for(int i = 0; i<rootItem->childCount();i++){
+    TP *itm;
+    if (m_showgroup){
+        itm = groupItem;
+    }else{
+        itm = rootItem;
+    }
+    for(int i = 0; i<itm->childCount();i++){
         if (!showAll){
-            if (!rootItem->child(i)->getEnabled()){
+            if (!itm->child(i)->getEnabled()){
                 continue;
             }
         }
-        m_tps.append(rootItem->child(i));
+        m_tps.append(itm->child(i));
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 
@@ -309,8 +341,14 @@ QByteArray TPMgr::savedata()
     QJsonArray jsonarr;
     //save all data in json string
     if(rootChildCount() > 0){
-        for (int row = 0; row < rootItem->childCount(); ++row){
-            TP *tp = rootItem->child(row);
+        TP *itm;
+        if (m_showgroup){
+            itm = groupItem;
+        }else{
+            itm = rootItem;
+        }
+        for (int row = 0; row < itm->childCount(); ++row){
+            TP *tp = itm->child(row);
             QJsonDocument jsonDoc= QJsonDocument::fromJson(tp->saveData().toUtf8());
             QJsonObject jsonObj = jsonDoc.object();
             jsonarr.append(jsonObj);
@@ -328,8 +366,14 @@ QStringList TPMgr::getPCs()
     QStringList ds;
     //get all config's PC info
     if(this->rootChildCount() > 0){
-        for (int row = 0; row < rootItem->childCount(); ++row){
-            TP *tp = rootItem->child(row);
+        TP *itm;
+        if (m_showgroup){
+            itm = groupItem;
+        }else{
+            itm = rootItem;
+        }
+        for (int row = 0; row < itm->childCount(); ++row){
+            TP *tp = itm->child(row);
 //            qDebug() << "MgrServer: " << tp->getMgrServer();
 //            qDebug() << "MgrClient: " << tp->getMgrClient();
             ds.append(tp->getMgrServer()+";"+tp->getMgrClient());
@@ -365,6 +409,10 @@ void TPMgr::reset(){
     beginResetModel();
     m_tps.clear();
     rootItem = new TP(("Root"), ("Root"));
+    rootItem->setDataType(TPMgrData::root);
+    groupItem = new TP(("Total"), ("Total"), rootItem);
+    groupItem->setDataType(TPMgrData::group);
+
     endResetModel();
     m_intervals.clear();
 }
@@ -372,15 +420,20 @@ void TPMgr::reset(){
 void TPMgr::clear(){
     // clean test record
     // TODO: when there is child the folding icon will not remove after clear!!
-    if (rootItem->haveChilds()){
-        foreach(auto tp, rootItem->getChilds()){
+    TP *itm;
+    if (m_showgroup){
+        itm = groupItem;
+    }else{
+        itm = rootItem;
+    }
+    if (itm->haveChilds()){
+        foreach(auto tp, itm->getChilds()){
             if (tp->haveChilds()){
                 tp->removeChildren(0, tp->childCount());
             }
             tp->clearThroughput();
             tp->resetData();
             QCoreApplication::processEvents(QEventLoop::AllEvents);
-
         }
         emit dataChanged(QModelIndex(),QModelIndex());
     }
@@ -397,18 +450,35 @@ TP *TPMgr::getItem(const QModelIndex &index) const
             qDebug() << "getItem: no item??";
         }
     }
-    qDebug() << "getItem rootItem:" << rootItem;
-    return rootItem;
+    TP *itm;
+    if (m_showgroup){
+        itm = groupItem;
+    }else{
+        itm = rootItem;
+    }
+    qDebug() << "getItem rootItem:" << itm;
+    return itm;
 }
 
 TP *TPMgr::getRootItem() const
 {
-    return rootItem;
+    if (m_showgroup){
+        return groupItem;
+    }else{
+        return rootItem;
+    }
 }
 
 QModelIndex TPMgr::getRootItemIdx()
 {
-    QModelIndex idx = indexFromItem(rootItem);
+    QModelIndex idx;
+    TP *itm;
+    if (m_showgroup){
+        itm = groupItem;
+    }else{
+        itm = rootItem;
+    }
+    idx = indexFromItem(itm);
     // qInfo() << "idx:" << idx << " rootItem:" << rootItem;
     return idx;
 }
@@ -534,12 +604,15 @@ QMap<QString, QStringList> TPMgr::getBindkeys()
     QString mip;
     foreach (auto tp, this->getChilds()){
         mip = tp->getMgrServer();
-        foreach(auto ch, tp->getChilds()){
-            mip.append(ch->getServer()+"_"+QString::number(ch->getPort()));
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+        if(tp->haveChilds()){
+            foreach(auto ch, tp->getChilds()){
+                mip.append(ch->getServer()+"_"+QString::number(ch->getPort()));
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
+            }
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
+    //TODO: what is this??
     return ds;
 }
 
@@ -570,14 +643,22 @@ int TPMgr::getMaxPort(QString m_ip, QString targetIP)
 {
     int maxPort=0;
     int port;
-    foreach(auto tp, rootItem->getChilds()){
-        if(m_ip == tp->getMgrServer() && (targetIP == tp->getServer())){
-            port = tp->getPort();
-            if (port>maxPort){
-                maxPort = port;
+    TP *itm;
+    if (m_showgroup){
+        itm = groupItem;
+    }else{
+        itm = rootItem;
+    }
+    if(itm->haveChilds()){
+        foreach(auto tp, itm->getChilds()){
+            if(m_ip == tp->getMgrServer() && (targetIP == tp->getServer())){
+                port = tp->getPort();
+                if (port>maxPort){
+                    maxPort = port;
+                }
             }
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     return maxPort;
 }
@@ -593,8 +674,6 @@ int TPMgr::getMaxIdx()
         }else{
             maxIdx++;
         }
-
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     return maxIdx;
 }
@@ -618,8 +697,6 @@ void TPMgr::onPaste(QString data)
             jsonRoot.insert("client", o_client);
             jsonRoot.insert("server", o_server);
             doc.setObject(jsonRoot);
-
-
             QString strJson(doc.toJson(QJsonDocument::Compact));
 //          qDebug() << "strJson:\n" << strJson;
             this->add(strJson);
@@ -712,13 +789,6 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 
 }
 
-// void TPMgr::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
-//                             QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate)
-// {
-//     qDebug() << "TODO: TPMgr::onUpdateTPDatas, just show last value";
-//     // addTPdata(refrow, sInterval, idx, value, unit, dir, packetlosts, packettotals);
-// }
-
 void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                           QString value, QString unit, QString dir,
                           QString pkt_lost, QString pkt_total)
@@ -728,29 +798,51 @@ void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
     addTPdata(midx, sInterval, idx, value, unit, dir, pkt_lost, pkt_total);
 }
 
+void TPMgr::setShowGroup(bool bShow)
+{
+    qDebug() << "TODO: setShowGroup: " << bShow;
+    m_showgroup = bShow;
+    if (m_showgroup){
+        qDebug() << "show groupItem";
+        // if (!groupItem){
+        rootItem->appendChild(groupItem);
+        // }
+
+    }else{
+        qDebug() << "hide groupItem and move all subitem to rootItem";
+    }
+}
+
 void TPMgr::onUpdater()
 {   //update total throughput/lost rate for each iperf test pair (-P >=1) result
     double g_tpvalue=-1.0;
     int g_lostvalue=-1;
     int g_totalvalue=-1;
-
-    for (auto &cfg : rootItem->getChilds() ) {
-        double tpvalue=-1.0;
-        int lostvalue=-1;
-        int totalvalue=-1;
-        for (auto &tp: cfg->getChilds()){
-            tpvalue = tpvalue + tp->getThroughput().toDouble();
-            lostvalue = lostvalue + tp->getLostPackets();
-            totalvalue = totalvalue + tp->getTotalPackets();
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
-        }
-        cfg->setThroughput(QString::number(tpvalue));
-        cfg->setLostRate(QString::number(lostvalue), QString::number(totalvalue));
-        g_tpvalue = g_tpvalue + tpvalue;
-        g_lostvalue = g_lostvalue + lostvalue;
-        g_totalvalue = g_totalvalue + totalvalue;
-        // QCoreApplication::processEvents(QEventLoop::AllEvents);
+    TP *itm;
+    if (m_showgroup){
+        itm = groupItem;
+    }else{
+        itm = rootItem;
     }
-    rootItem->setThroughput(QString::number(g_tpvalue));
-    rootItem->setLostRate(QString::number(g_lostvalue), QString::number(g_totalvalue));
+    if (itm->haveChilds()){
+        for (auto &cfg : itm->getChilds() ) {
+            double tpvalue=-1.0;
+            int lostvalue=-1;
+            int totalvalue=-1;
+            for (auto &tp: cfg->getChilds()){
+                tpvalue = tpvalue + tp->getThroughput().toDouble();
+                lostvalue = lostvalue + tp->getLostPackets();
+                totalvalue = totalvalue + tp->getTotalPackets();
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
+            }
+            cfg->setThroughput(QString::number(tpvalue));
+            cfg->setLostRate(QString::number(lostvalue), QString::number(totalvalue));
+            g_tpvalue = g_tpvalue + tpvalue;
+            g_lostvalue = g_lostvalue + lostvalue;
+            g_totalvalue = g_totalvalue + totalvalue;
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
+        }
+        itm->setThroughput(QString::number(g_tpvalue));
+        itm->setLostRate(QString::number(g_lostvalue), QString::number(g_totalvalue));
+    }
 }
