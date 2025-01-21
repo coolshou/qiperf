@@ -82,7 +82,7 @@ int TP::childCount() const
 
 bool TP::haveChilds()
 {
-    if (m_childItems.size()>0){
+    if (m_childItems.count()>0){
         return true;
     }else{
         return false;
