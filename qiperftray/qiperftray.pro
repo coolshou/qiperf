@@ -1,7 +1,6 @@
 QT += core gui
 QT += network
 
-
 #following setting will overwrite qtcreater's setting
 #CONFIG += release
 #CONFIG += debug
