@@ -14,7 +14,6 @@
 #include "tpplot.h"
 #include "tpmgr.h"
 #include "dlgiperf.h"
-// #include "qiperfc.h"
 #include "tpdirdelegate.h"
 #include "tpfoldingdelegate.h"
 
@@ -99,9 +98,10 @@ private:
     QAction *m_actionCopyText;
     DlgIperf * dlgiperf;  // dialog of iperf config
     TPDirDelegate *tpdirdelegate;
+    TPFoldingDelegate *tpfoldingdelegate;
     QDateTime m_starttime;
     bool m_showgroup;
-    // TPFoldingDelegate *tpfoldingdelegate;
+
     void initThroughputChart();
 };
 

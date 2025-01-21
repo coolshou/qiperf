@@ -16,7 +16,6 @@ TPMgr::TPMgr(bool showgroup, QObject *parent)
     : QAbstractItemModel(parent), m_showgroup(showgroup)
 {
 //    item = invisibleRootItem();
-    qDebug() << "TPMgr m_showgroup:" << m_showgroup;
     reset();
     m_intervals.clear();
 
@@ -40,14 +39,6 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
         qDebug() << "data index.isValid: " << index ;
         return QVariant();
     }
-    //show a custom icon
-    // if (role == Qt::DecorationRole){
-    //     //folding icon
-    //     if (index.column()==0){
-    //         // qDebug() << "TPMgr::data: DecorationRole" << index.parent();
-    //         return QVariant(QIcon(":/folding/close"));
-    //     }
-    // }
 
     if (role == Qt::TextAlignmentRole){
         if ((index.column() == TP::cols::dir)||
@@ -61,7 +52,6 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
     }
 
     TP *item = static_cast<TP*>(index.internalPointer());
-    // TP *tpitem = getItem(index);
     if (role == Qt::ForegroundRole){
         // when item is disabled, grayout text
         if (! item->getEnabled()) {
@@ -75,17 +65,11 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
         return QVariant(tpitem->data(index.column()));
     }
 */
-    if (role != Qt::DisplayRole) {
-        //this will show text data!!
-        // qDebug() << "data not DisplayRole:" << idx ;
-        return QVariant();
-    }
 
     if (item->getDataType()==TPMgrData::config){
         if (index.column()== TP::cols::dir) {
             if (!item->getEnabled()){
                 //when item disabled, let image grayout too.
-                // qDebug() << "disable:" << item;
                 return QVariant("disable"+item->data(index.column()).toString());
              }
             //else { // the column dir will be empty!!
@@ -102,6 +86,11 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
         }
     }
 
+    if (role != Qt::DisplayRole) {
+        //this will show text data!!
+        // qDebug() << "data not DisplayRole:" << idx ;
+        return QVariant();
+    }
     return item->data(index.column());
 }
 
@@ -118,6 +107,7 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
 //        return QVariant();
     if (role == Qt::TextAlignmentRole){
         if (section != TP::cols::comment){
+            // all columns except "comment"
             return Qt::AlignCenter;
         }
     }
@@ -195,23 +185,42 @@ QModelIndex TPMgr::parent(const QModelIndex &idx) const
 
 int TPMgr::rowCount(const QModelIndex &parent) const
 {
+    // return correct child row count
     TP *parentItem;
-//    if (parent.column() > 0)
-//        return 0;
+    if (parent.column() > 0)
+        return 0;
 
-    if (!parent.isValid()){
-        // if(m_showgroup){
-        //     qDebug() << "TPMgr::rowCount: parent: group" << groupItem;
-        //     parentItem = groupItem;
-        // }else{
-            // qDebug() << "TPMgr::rowCount: parent: root" << rootItem;
-            parentItem = rootItem;
-        // }
-    }else{
-        parentItem = static_cast<TP*>(parent.internalPointer());
+    if (!parent.isValid()) {
+        // Root level: Number of parents
+        return rootItem->childCount();//.size();
     }
+    //TODO: groupItem?
 
+    parentItem = static_cast<TP *>(parent.internalPointer());
+
+    // qDebug() << "parent:" << parentItem;
+    // qDebug() << "    childCount:" << parentItem->childCount();
     return parentItem->childCount();
+
+//     int rowCount=0;
+//     TP *parentItem;
+// //    if (parent.column() > 0)
+// //        return 0;
+
+//     if (!parent.isValid()){
+//         // if(m_showgroup){
+//         //     qDebug() << "TPMgr::rowCount: parent: group" << groupItem;
+//         //     parentItem = groupItem;
+//         // }else{
+//             // qDebug() << "TPMgr::rowCount: parent: root" << rootItem;
+//             parentItem = rootItem;
+//         // }
+//     }else{
+//         parentItem = static_cast<TP*>(parent.internalPointer());
+//     }
+//     rowCount = parentItem->childCount();
+//     qDebug() << "parentItem:" << parentItem << " rowCount:" << QString::number(rowCount);
+//     return rowCount;
 }
 
 bool TPMgr::add(QString data)
@@ -223,14 +232,14 @@ bool TPMgr::add(QString data)
     // idx = idx + 1;
     // int idx = rootItem->childCount();
     beginInsertRows(QModelIndex(), idx, idx);
-    TP *pitm;
-    if (m_showgroup){
-        pitm = groupItem;
-    }else{
-        pitm = rootItem;
-    }
-    qDebug() <<"idx:" << idx << " add pitm: " << pitm ;//<< " data:" << data;
+    TP *pitm = getRootItem();
+    // if (m_showgroup){
+    //     pitm = groupItem;
+    // }else{
+    //     pitm = rootItem;
+    // }
     TP *tp = new TP(QString::number(idx), data, TPMgrData::config, pitm);
+    qDebug() <<"idx:" << idx << " tp:" << tp << " add pitm: " << pitm ;//<< " data:" << data;
 
     pitm->appendChild(tp);
     endInsertRows();
@@ -287,12 +296,12 @@ QList<TP *> TPMgr::getChilds(bool showAll)
 {
    QList<TP *> tps;
     // m_tps.clear();
-    TP *itm;
-    if (m_showgroup){
-        itm = groupItem;
-    }else{
-        itm = rootItem;
-    }
+    TP *itm = getRootItem();
+    // if (m_showgroup){
+    //     itm = groupItem;
+    // }else{
+    //     itm = rootItem;
+    // }
     for(int i = 0; i<itm->childCount();i++){
         if (!showAll){
             if (!itm->child(i)->getEnabled()){
@@ -325,12 +334,12 @@ QByteArray TPMgr::savedata()
     QJsonArray jsonarr;
     //save all data in json string
     if(rootChildCount() > 0){
-        TP *itm;
-        if (m_showgroup){
-            itm = groupItem;
-        }else{
-            itm = rootItem;
-        }
+        TP *itm = getRootItem();
+        // if (m_showgroup){
+        //     itm = groupItem;
+        // }else{
+        //     itm = rootItem;
+        // }
         for (int row = 0; row < itm->childCount(); ++row){
             TP *tp = itm->child(row);
             QJsonDocument jsonDoc= QJsonDocument::fromJson(tp->saveData().toUtf8());
@@ -350,12 +359,12 @@ QStringList TPMgr::getPCs()
     QStringList ds;
     //get all config's PC info
     if(this->rootChildCount() > 0){
-        TP *itm;
-        if (m_showgroup){
-            itm = groupItem;
-        }else{
-            itm = rootItem;
-        }
+        TP *itm = getRootItem();
+        // if (m_showgroup){
+        //     itm = groupItem;
+        // }else{
+        //     itm = rootItem;
+        // }
         for (int row = 0; row < itm->childCount(); ++row){
             TP *tp = itm->child(row);
 //            qDebug() << "MgrServer: " << tp->getMgrServer();
@@ -379,7 +388,7 @@ bool TPMgr::loaddata(QByteArray data)
             QJsonObject obj = value.toObject();
             QJsonDocument doc(obj);
             QString strJson(doc.toJson(QJsonDocument::Compact));
-            qDebug() << "add: " << strJson;
+            // qDebug() << "add: " << strJson;
             add(strJson);
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
@@ -402,6 +411,8 @@ void TPMgr::reset(){
     qDebug() << "rootItem:" << rootItem;
     if(m_showgroup){
         newGroupItem();
+    } else{
+        groupItem = nullptr;
     }
 
     // add("Total");
@@ -426,12 +437,12 @@ void TPMgr::reset(){
 void TPMgr::clear(){
     // clean test record
     // TODO: when there is child the folding icon will not remove after clear!!
-    TP *itm;
-    if (m_showgroup){
-        itm = groupItem;
-    }else{
-        itm = rootItem;
-    }
+    TP *itm = getRootItem();
+    // if (m_showgroup){
+    //     itm = groupItem;
+    // }else{
+    //     itm = rootItem;
+    // }
     if (itm->haveChilds()){
         foreach(auto tp, itm->getChilds()){
             if (tp->haveChilds()){
@@ -457,7 +468,7 @@ TP *TPMgr::getItem(const QModelIndex &index) const
             qDebug() << "getItem: no item??";
         }
     }
-    TP *itm;
+    TP *itm;// = getRootItem();
     if (m_showgroup){
         itm = groupItem;
     }else{
@@ -511,7 +522,7 @@ void TPMgr::setItem(const QModelIndex &index, TP *item)
 
 int TPMgr::swapDirection(QModelIndex midx)
 {
-    QString dir = TPDIRTx;
+    QString dir = TPDIRRx;
     TP *tp= getItem(midx);
     if (tp->getDirection().contains(TPDIRTx)){
         dir = TPDIRRx;
@@ -580,16 +591,16 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
             }
         }
         tp->appendChild(c); // add iperf pair config item to parent item
-        qDebug() << "TPMgr::addTPdata, parent:" << tp << " child:" << c;
+        qInfo() << "TPMgr::addTPdata, parent:" << tp << " child:" << c << " TP value:" << value;
     }else{
         c->setThroughput(dir, value);
         if (!pkt_lost.isEmpty()){
             if (!pkt_total.isEmpty()){
-               // qDebug() << c << " row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+               // qInfo() << c << " row:" << c->row() << " columnCount:" << c->columnCount() << " pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
                 c->setLostRate(pkt_lost, pkt_total);
             }
         }
-        qDebug() << "TPMgr::addTPdata, update child:" << c << " dir:" << dir << " tp: " << value;
+        qInfo() << "TPMgr::addTPdata: "<< c << " update TP value: " << value;
     }
 
 }
@@ -670,12 +681,12 @@ int TPMgr::getMaxPort(QString m_ip, QString targetIP)
 {
     int maxPort=0;
     int port;
-    TP *itm;
-    if (m_showgroup){
-        itm = groupItem;
-    }else{
-        itm = rootItem;
-    }
+    TP *itm = getRootItem();
+    // if (m_showgroup){
+    //     itm = groupItem;
+    // }else{
+    //     itm = rootItem;
+    // }
     if(itm->haveChilds()){
         foreach(auto tp, itm->getChilds()){
             if(m_ip == tp->getMgrServer() && (targetIP == tp->getServer())){
@@ -780,7 +791,7 @@ void TPMgr::setTestData()
 TP *TPMgr::newGroupItem()
 {
     // beginInsertRows(QModelIndex(), 0, 2);
-    groupItem = new TP("Total", "Total", TPMgrData::group, rootItem);
+    groupItem = new TP("0", "Total", TPMgrData::group, rootItem);
     // groupItem->setDataType(TPMgrData::group);
     rootItem->appendChild(groupItem);
     // endInsertRows();
@@ -825,7 +836,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             sum_lost = sum_lost + pkt_lost.toDouble();
             sum_total = sum_total + pkt_total.toDouble();
             if (fInterval >= m_intervals.value(idx, 0.0)){
-               qDebug() << "addTPdata fInterval:" << fInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
+               // qDebug() << "addTPdata fInterval:" << fInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
                 addTPdata(refrow, sInterval, idx, value,
                     jObj.value("unit").toString(), dir, pkt_lost, pkt_total);
                 m_intervals[idx] = fInterval;
@@ -873,6 +884,9 @@ void TPMgr::setShowGroup(bool bShow)
     //beginMoveRows()
     //endMoveRows()
     if (m_showgroup){
+        if (groupItem==nullptr){
+            newGroupItem();
+        }
         qDebug() << "ShowGroup: rootItem->childCount():" << rootItem->childCount();
         // TODO: move exist test item to groupItem
         qDebug() << "groupItem:" << groupItem;

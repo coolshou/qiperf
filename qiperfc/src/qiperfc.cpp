@@ -459,7 +459,7 @@ void QIperfC::onStart()
                 }
                 //tell client add iperf client
                 cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
-                //            qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
+                // qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
                 rs = m_wsc[clientIP]->sendText(cmd);
                 if (rs<=0){
                     emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
@@ -467,7 +467,7 @@ void QIperfC::onStart()
                 }
                 m_status_client[tp->getBindKey(false)]=TPStatus::init;// init client of BindKey status 0
             } else {
-                qInfo() << "Ignore disabled TP test pair: " << tp;
+                // qInfo() << "Ignore disabled TP test pair: " << tp;
             }
 
         }
@@ -509,7 +509,7 @@ void QIperfC::onStart()
                     chk++;
                 }
             }
-            if (chk>=m_status_server.keys().length()){
+            if (chk>=m_status_server.keys().count()){
                 bServerReady=true;
             }
             newDT = QDateTime::currentDateTime();
@@ -542,7 +542,7 @@ void QIperfC::onStart()
             return;
         }
         //Start client
-        for (auto key: qAsConst(m_wsc.keys())){
+        for (auto key: m_wsc.keys()){
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             rs = m_wsc[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
             if (rs<=0){
@@ -585,16 +585,16 @@ void QIperfC::onStop(){
     foreach (auto key, m_wsc.keys()){
         if (m_wsc[key]){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
-            qDebug() << m_wsc[key] << " m_wsc send cmd: " << cmd;
+            qInfo() << m_wsc[key] << " m_wsc send cmd: " << cmd;
             m_wsc[key]->sendText(cmd);
         }
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     // Stop reg iperf server
     foreach (auto key, m_wss.keys()){
         if (m_wss[key]){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
-            qDebug() << m_wss[key] <<  "m_wss send cmd: " << cmd;
+            qInfo() << m_wss[key] <<  "m_wss send cmd: " << cmd;
             m_wss[key]->sendText(cmd);
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
@@ -607,7 +607,7 @@ void QIperfC::onStop(){
     QString endtime = getNowString();
     QDateTime enddatetime = QDateTime::fromString(endtime,DATETIME_NOW_FORMAT);
     //TODO: error end message?
-    qDebug() << "m_status_server:" << m_status_server << " m_status_client:" << m_status_client;
+    qInfo() << "m_status_server:" << m_status_server << " m_status_client:" << m_status_client;
     emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(m_TestStartTime.secsTo(enddatetime))+" sec)");
 }
 
@@ -1001,7 +1001,7 @@ void QIperfC::onRPC_error(int code, const QString &message)
 
 void QIperfC::onIperfStarted(QString smode, QString ipport)
 {
-    qDebug() << "onIperfStarted:" << smode << " : " << ipport;
+    qInfo() << "onIperfStarted:" << smode << " : " << ipport;
     if (smode.contains("S", Qt::CaseSensitive)){
         m_status_server[ipport]=TPStatus::started;
     }else{
@@ -1066,7 +1066,7 @@ void QIperfC::onProgress(QString filename, int currentlineno)
 int QIperfC::getStatusServers()
 {
     int sum = 0;
-    for (auto value : qAsConst(m_status_server)) {
+    for (auto value : std::as_const(m_status_server)) {
         sum += value;
     }
     return sum;
@@ -1075,7 +1075,7 @@ int QIperfC::getStatusServers()
 int QIperfC::getStatusClients()
 {
     int sum = 0;
-    for (auto value : qAsConst(m_status_client)) {
+    for (auto value : std::as_const(m_status_client)) {
         sum += value;
     }
     return sum;

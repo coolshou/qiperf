@@ -48,24 +48,20 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
         m_arguments.append("--forceflush");
     }
     if (m_servermode){
-        if (m_reverse){
-            if (m_bidir){
-                setBidirTag(TPDIRRx);
-            }else{
-                setBidirTag("");
-            }
+        if (m_bidir){
+            setBidirTag(TPDIRRx);
+        }else if(m_reverse){
+            setBidirTag(TPDIRNO);
         }else{
-            setBidirTag(TPDIRTx);
+            setBidirTag(TPDIRRx);
         }
     }else{
-        if (m_reverse||m_bidir){
-            setBidirTag(TPDIRRx);
+        if (m_bidir){
+            setBidirTag(TPDIRTx);
+        }else if (m_reverse){
+            setBidirTag(TPDIRTx);
         }else{
-            if (m_bidir){
-                setBidirTag(TPDIRTx);
-            }else{
-                setBidirTag("");
-            }
+            setBidirTag(TPDIRNO);
         }
     }
 //    m_interval = interval;
@@ -100,8 +96,8 @@ void IperfWorker::work()
         connect(m_iperf, &QProcess::started, this, &IperfWorker::onStarted);
         connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
 
-        qDebug() << "m_delaystart: " << QString::number(m_delaystart);
         if (m_delaystart>0){
+            qInfo() << "m_delaystart: " << QString::number(m_delaystart);
             emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
             QDateTime waitStartTime = QDateTime::currentDateTime();
             QDateTime waitEndTime = QDateTime::currentDateTime();
@@ -163,7 +159,7 @@ void IperfWorker::setStop()
             m_iperf->terminate();
 #endif
         }else{
-            qDebug() <<"NOT Running m_iperf: " << m_iperf->program() << m_iperf->arguments();
+            // qDebug() <<"NOT Running m_iperf: " << m_iperf->program() << m_iperf->arguments();
         }
     }
 //    emit finished(m_refrow, 0, 2, getBindKey());
@@ -257,7 +253,7 @@ void IperfWorker::readyReadStdOut()
             if (line.length()>0){
                 parserStdOut(line);
             }
-            // QCoreApplication::processEvents(QEventLoop::AllEvents);
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
 
     }
@@ -322,7 +318,7 @@ void IperfWorker::parserStdOut(QString msg)
 void IperfWorker::onThroughputData(int idx, QString sInterval, QString data)
 {
     if(m_bidirtag.isEmpty()){
-//        qDebug() << "No m_bidirtag, not reprot ThroughputData: ("<<sInterval<<")" << data;
+        qInfo() << "No m_bidirtag, not reprort ThroughputData: ("<<sInterval<<")" << data;
     }else{
         emit onThroughput(idx, sInterval, data);
     }

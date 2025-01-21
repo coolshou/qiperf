@@ -89,7 +89,7 @@ private slots:
     void onNewClient(QHostAddress addr); //
     void onIperfStdout();
 private:
-    void checkFirewallStatus();
+    int checkFirewallStatus();
     void initIperf(QString apppath);
     void getIperfVer(QString cmd, int ver);
     QString getIperf2ver();
