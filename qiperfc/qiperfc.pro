@@ -147,7 +147,6 @@ HEADERS += \
     src/tp.h \
     src/tpfoldingdelegate.h \
     src/tpmgr.h \
-    src/tpmgrdata.h \
     src/tpdirdelegate.h \
     src/tpplot.h \
     src/udpreceiver.h \
