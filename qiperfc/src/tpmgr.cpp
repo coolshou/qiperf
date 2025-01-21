@@ -223,9 +223,14 @@ int TPMgr::rowCount(const QModelIndex &parent) const
 //     return rowCount;
 }
 
-bool TPMgr::add(QString data)
+TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
 {   //add iperf config item
-
+    TP *pitm = nullptr;
+    if (parent){
+        pitm = parent;
+    }else{
+        pitm = getRootItem();
+    }
     //data: json format data
     //Get largest idx number!!
     int idx = getMaxIdx();
@@ -240,13 +245,11 @@ bool TPMgr::add(QString data)
     // }
     TP *tp = new TP(QString::number(idx), data, TPMgrData::config, pitm);
     qDebug() <<"idx:" << idx << " tp:" << tp << " add pitm: " << pitm ;//<< " data:" << data;
-
     pitm->appendChild(tp);
     endInsertRows();
 
-//    qDebug() << "TPMgr::add: " << tp->getEnabled();
-
-    return true;
+    return tp;
+    // return true;
 }
 QModelIndex TPMgr::indexFromItem(TP *item){
     if(item == rootItem || item == nullptr)
@@ -260,16 +263,11 @@ QModelIndex TPMgr::indexFromItem(TP *item){
         parent = parent->parentItem();
     }
     QModelIndex ix;
-    // parent = rootItem;
-    /*for(auto ch: parents){
-        ix = index(ch->row(), 0, ix);
-    }*/
-
     for(int i=0; i < parents.count(); i++){
         ix = index(parents[i]->row(), 0, ix);
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
-    ix = index(ix.row(), 0, ix);
+    ix = index(item->row(), 0, ix);
     return ix;
 }
 
@@ -302,18 +300,31 @@ QList<TP *> TPMgr::getChilds(bool showAll)
     // }else{
     //     itm = rootItem;
     // }
+    qDebug() << "root child:" << itm->childCount() << " cuilds: " << itm->getChilds()  ;
+
     for(int i = 0; i<itm->childCount();i++){
+        TP *chitm = itm->child(i);
         if (!showAll){
-            if (!itm->child(i)->getEnabled()){
+            if (!chitm->getEnabled()){
                 continue;
             }
         }
         // m_tps.append(itm->child(i));
-        tps.append(itm->child(i));
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        qDebug() << QString::number(i) << " add: " << chitm;
+        tps.append(chitm);
+        if (chitm->haveChilds()){
+            qDebug() <<  "chitm->getChilds: " << chitm->getChilds();
+            for(int j = 0; j<chitm->childCount();j++){
+                // QCoreApplication::processEvents(QEventLoop::AllEvents);
+                TP *ccitm = chitm->child(j);
+                tps.append(ccitm);
+                qDebug() << "add subitm: " << ccitm;
+            }
+        }
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 
-    // return m_tps;
+    qDebug() << "getChilds tps:" << tps;
     return tps;
 }
 
@@ -414,22 +425,6 @@ void TPMgr::reset(){
     } else{
         groupItem = nullptr;
     }
-
-    // add("Total");
-    // TP *g = new TP("N", "N", rootItem);
-    // rootItem->appendChild(g);
-    // endResetModel();
-    // if(m_showgroup){
-        // QModelIndex idx = getRootItemIdx();
-        // int i = rootItem->childCount();
-        // qDebug() << "idx:" << idx << " count:" << QString::number(i);
-        // beginInsertRows(QModelIndex(), 0 ,0);
-        // beginInsertRows(idx, i, i);
-
-        // endInsertRows();
-    // }
-
-
 
     m_intervals.clear();
 }
@@ -571,7 +566,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
     //add throughput item
     Q_UNUSED(sInterval)
     Q_UNUSED(unit)
-
+    qInfo() <<  "addTPdata: midx: " << midx;
     TP *tp = getItemByIdx(midx); //parent item
     if (tp==nullptr){
         // qDebug() << "addTPdata: no parent iperf pair?? (midx=" << midx << ")" << idx;
@@ -625,11 +620,15 @@ TP *TPMgr::getItemByIdx(QString midx, TP *item)
     }
     if(lst.count()>0){
         foreach (auto tp, lst){
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // qDebug() << "TP:" << tp << " idx:" << tp->getID();
             if (tp->getID() == midx){
+                qDebug() << "found item of " << midx << " tp:" << tp;
                 return tp;
             }
         }
+    }else{
+        qDebug() << "TPMgr::getItemByIdx: No TP list";
     }
     return nullptr;
 }
@@ -726,7 +725,7 @@ void TPMgr::onPaste(QString data)
            QJsonObject o_client = jsonRoot["client"].toObject();
            QJsonObject o_server = jsonRoot["server"].toObject();
            // Get largest iperf port number!!
-           int num = this->getMaxPort(o_server["manager"].toString(),
+           int num = getMaxPort(o_server["manager"].toString(),
                                          o_client["target"].toString());
             o_client["port"]=num+1;
             o_server["port"]=num+1;
@@ -737,7 +736,7 @@ void TPMgr::onPaste(QString data)
             doc.setObject(jsonRoot);
             QString strJson(doc.toJson(QJsonDocument::Compact));
 //          qDebug() << "strJson:\n" << strJson;
-            this->add(strJson);
+            add(strJson);
        }else{
            qDebug() << "Wrong format of clipboard data: " << data;
        }
@@ -791,9 +790,10 @@ void TPMgr::setTestData()
 TP *TPMgr::newGroupItem()
 {
     // beginInsertRows(QModelIndex(), 0, 2);
-    groupItem = new TP("0", "Total", TPMgrData::group, rootItem);
+    groupItem = add("Total", TPMgrData::group, rootItem);
+    // groupItem = new TP("0", "Total", TPMgrData::group, rootItem);
     // groupItem->setDataType(TPMgrData::group);
-    rootItem->appendChild(groupItem);
+    // rootItem->appendChild(groupItem);
     // endInsertRows();
     qDebug() << " groupItem:" << groupItem;
     return groupItem;
@@ -898,6 +898,18 @@ void TPMgr::setShowGroup(bool bShow)
         qDebug() << "TODO: HideGroup: groupItem and move all subitem to rootItem";
 
 
+    }
+}
+
+QModelIndex TPMgr::setSelectItem(QString idx)
+{
+    TP *tp = getItemByIdx(idx);
+    if (tp){
+        QModelIndex midx = indexFromItem(tp);
+        return midx;
+    }else{
+        qDebug() << "DID not get " << idx << " TP item";
+        return QModelIndex();
     }
 }
 
