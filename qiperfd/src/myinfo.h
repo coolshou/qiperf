@@ -34,7 +34,6 @@ public:
     void setSysBufferSize(quint64 buff);
     void getTTL();
 
-
 #if defined(Q_OS_LINUX)
 
 #endif

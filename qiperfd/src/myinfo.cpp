@@ -346,8 +346,6 @@ void MyInfo::getTTL()
 #endif
 }
 
-
-
 QString MyInfo::readSysFile(const QString &path) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
