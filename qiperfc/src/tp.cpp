@@ -19,7 +19,6 @@ TP::TP(QString id, QString data,int datatype, TP *parent)
     m_itemDatas={m_id, "", "", "", // id, server, dir ,client
                  "", "", "", //throughput, min throughput, max throughput
                  "", ""}; // lost rate, comment
-
     // qInfo() << "create TP:" << id << " data:" << data << " parent:" << parent;
     // if (data!="" && data !="Root" && data !="Total"){
     if (data!="" && m_datatype == TPMgrData::config){
