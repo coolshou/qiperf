@@ -41,6 +41,10 @@ void dlgOption::loadcfg(QSettings *cfg)
     }
     ui->sb_port->setValue(cfg->value("managerport", 45454).toInt());
     cfg->endGroup();
+
+    cfg->beginGroup("notice");
+    ui->cb_showManagerIPWarning->setChecked(cfg->value("showManagerIPWarning", true).toBool());
+    cfg->endGroup();
 }
 
 void dlgOption::updatecfg()
@@ -66,6 +70,11 @@ void dlgOption::updatecfg()
     }
     m_cfg->setValue("managerport", port);
     m_cfg->endGroup();
+
+    m_cfg->beginGroup("notice");
+    m_cfg->setValue("showManagerIPWarning", ui->cb_showManagerIPWarning->isChecked());
+    m_cfg->endGroup();
+
     m_cfg->sync();
 }
 
@@ -80,6 +89,11 @@ void dlgOption::setWaitServerReady(int val)
 int dlgOption::getWaitServerReady()
 {
     return ui->sb_WaitServerReady->value();
+}
+
+bool dlgOption::getShowManagerIPWarning()
+{
+    return ui->cb_showManagerIPWarning->isChecked();
 }
 
 // void dlgOption::setTPsize(int width, int heigth)

@@ -22,6 +22,7 @@ public:
     void updatecfg();
     void setWaitServerReady(int val);
     int getWaitServerReady();
+    bool getShowManagerIPWarning();
     // void setTPsize(int width, int heigth);
 
 signals:
