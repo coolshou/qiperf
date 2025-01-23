@@ -7,6 +7,7 @@
 #include <QEvent>
 #include <QMap>
 #include <QString>
+#include <QtGlobal>
 
 #include "tpmgr.h"
 
@@ -32,7 +33,7 @@ public:
 public slots:
     void ChangeVersion(const QString ver);
     void onAccepted();
-#if QT_VERSION < 0x060700  // < 6.7
+#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
     void onChkBidirStatech(int state);
     void onChkReverseStatech(int state);
 #else
