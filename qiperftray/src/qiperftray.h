@@ -68,7 +68,7 @@ private:
     MyTray *m_tray;
     PipeClient *pclient;
     QTimer *statuser; //timer to check daemon
-    DlgShowLog *m_dlgshowqiperfdlog;
+    DlgShowLog *m_dlgshowqiperfdlog; // qiperfd log
     DlgShowLog *m_dlgshowlog;
     QString m_qiperfdlog;
     QLabel *m_iperfcount;
