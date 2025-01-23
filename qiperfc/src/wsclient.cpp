@@ -73,7 +73,11 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject 
     connect(m_webSocket, &QWebSocket::stateChanged, this, &WSClient::onStateChanged);
     connect(m_webSocket, QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
             this, &WSClient::onSslErrors);
+#if QT_VERSION < QT_VERSION_CHECK(6,5,0)  // < 6.5
     connect(m_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &WSClient::onError);
+#else
+    connect(m_webSocket, &QWebSocket::errorOccurred, this, &WSClient::onError);
+#endif
     connect(m_webSocket, &QWebSocket::textMessageReceived, this, &WSClient::onTextMessageReceived);
     connect(m_webSocket, &QWebSocket::binaryMessageReceived, this, &WSClient::onBinaryMessageReceived);
     // m_serverip = serverip;

@@ -602,12 +602,9 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport, 
 
 void QIperfd::onThroughput(int idx, QString sInterval, QString data)
 {
-//    if (bReportTPData){
     QString s = QString(CMD_IPERF_TP_DATA)+":"+ QString::number(idx)+":"+
                 sInterval+":"+ data;
-qDebug() << "send Throughput result back: "<< QString::number(idx) << " (" <<  sInterval << ") data:" <<  data;
     m_wsserver->sendTextResult(s);
-//    }
 }
 
 void QIperfd::onQuit()

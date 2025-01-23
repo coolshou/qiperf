@@ -25,7 +25,7 @@ DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
     old_mss = 0;
     b_ipv6 = false;
     connect(ui->cb_version, &QComboBox::currentTextChanged, this, &DlgIperf::ChangeVersion);
-#if QT_VERSION < 0x060700  // < 6.7
+#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
     //stateChanged (until 6.9)
     connect(ui->chk_bidir, &QCheckBox::stateChanged, this, &DlgIperf::onChkBidirStatech);
     connect(ui->chk_reverse, &QCheckBox::stateChanged, this, &DlgIperf::onChkReverseStatech);
@@ -366,7 +366,7 @@ void DlgIperf::onAccepted()
         return;
     }
 }
-#if QT_VERSION < 0x060700  // < 6.7
+#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
 void DlgIperf::onChkBidirStatech(int state)
 {
     if (state==Qt::Checked){
