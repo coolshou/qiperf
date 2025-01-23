@@ -451,7 +451,7 @@ void ThroughputView::initThroughputChart()
     connect(filter, &TooltipEventFilter::doDelete, this, &ThroughputView::onDelete);
     ui->tv_throughput->viewport()->installEventFilter(filter);
     ui->tv_throughput->setRootIsDecorated(true); //show folding icon
-    ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx());
+    // ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx()); // this will cause total group disappear!!
     //    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
 
     ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu
@@ -462,9 +462,9 @@ void ThroughputView::initThroughputChart()
     tpdirdelegate = new TPDirDelegate(ui->tv_throughput);
     // tpdirdelegate = new TPDirDelegate(this); // this will not show dir picture
     ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdirdelegate);
-    // TODO: why debug build do not show folding icon!!
-    tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
-    ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
+
+    //tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
+    //ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
 
     QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
     connect(ism, &QItemSelectionModel::selectionChanged, this, &ThroughputView::onTPselectionChanged);

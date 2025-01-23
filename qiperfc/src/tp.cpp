@@ -25,7 +25,8 @@ TP::TP(QString id, QString data,int datatype, TP *parent)
         loadData(data);
     }else{
         if (data!=""){
-            m_itemDatas[1] = data;
+            // m_itemDatas[1] = data;
+            m_itemDatas[0] = data;
         }
     }
 }
