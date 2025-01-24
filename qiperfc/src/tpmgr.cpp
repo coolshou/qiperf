@@ -35,8 +35,6 @@ TPMgr::~TPMgr()
 {
     delete rootItem;
     delete groupItem;
-    // qDeleteAll(m_tps);
-    // m_tps.clear();
 }
 QVariant TPMgr::data(const QModelIndex &index, int role) const
 {
@@ -62,12 +60,6 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             return m_disabledTextColor;
         }
     }
-/*
-    if (tpitem->getDataType()==TPMgrData::group){
-        qDebug() << "data: group:" << tpitem;
-        return QVariant(tpitem->data(index.column()));
-    }
-*/
     if (item->getDataType()==TPMgrData::group){
         if ((index.column() == TP::cols::throughput)||
             (index.column() == TP::cols::mintp) ||
@@ -241,20 +233,13 @@ TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
         qInfo() << "add getRootItem " << pitm;
     }
     QModelIndex midx = indexFromItem(pitm);
-    //data: json format data
-    // qInfo() << "add data: " << data;
-    //Get largest idx number!!
     int idx = getMaxIdx();
-    // idx = idx + 1;
-    // int idx = rootItem->childCount();
     beginInsertRows(midx, idx, idx);
     TP *tp = new TP(QString::number(idx), data, datatype, pitm);
     qDebug() <<"idx:" << idx << " tp:" << tp << " add pitm: " << pitm ;//<< " data:" << data;
     pitm->appendChild(tp);
     endInsertRows();
-
     return tp;
-    // return true;
 }
 QModelIndex TPMgr::indexFromItem(TP *item){
     if(item == rootItem || item == nullptr)
@@ -288,11 +273,7 @@ void TPMgr::del(QModelIndex idx)
 
 int TPMgr::rootChildCount()
 {
-    // if(m_showgroup){
-    //     return groupItem->childCount();
-    // }else{
-        return rootItem->childCount();
-    // }
+    return rootItem->childCount();
 }
 
 QList<TP *> TPMgr::getChilds(bool showAll)
@@ -343,11 +324,6 @@ QByteArray TPMgr::savedata()
     //save all data in json string
     if(rootChildCount() > 0){
         TP *itm = getRootItem();
-        // if (m_showgroup){
-        //     itm = groupItem;
-        // }else{
-        //     itm = rootItem;
-        // }
         for (int row = 0; row < itm->childCount(); ++row){
             TP *tp = itm->child(row);
             QJsonDocument jsonDoc= QJsonDocument::fromJson(tp->saveData().toUtf8());
@@ -368,15 +344,8 @@ QStringList TPMgr::getPCs()
     //get all config's PC info
     if(this->rootChildCount() > 0){
         TP *itm = getRootItem();
-        // if (m_showgroup){
-        //     itm = groupItem;
-        // }else{
-        //     itm = rootItem;
-        // }
         for (int row = 0; row < itm->childCount(); ++row){
             TP *tp = itm->child(row);
-//            qDebug() << "MgrServer: " << tp->getMgrServer();
-//            qDebug() << "MgrClient: " << tp->getMgrClient();
             ds.append(tp->getMgrServer()+";"+tp->getMgrClient());
         }
     }else {
@@ -425,6 +394,7 @@ void TPMgr::clear(){
         foreach(auto tp, itm->getChilds()){
             if (tp->haveChilds()){
                 tp->removeChildren(0, tp->childCount());
+                m_treeview->collapse(indexFromItem(tp));
             }
             tp->clearThroughput();
             tp->resetData();
@@ -550,6 +520,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
     TP *c = getItemByIdx(midx+"_"+idx, tp); //iperf pair config item
     if (c==nullptr){
         //New
+        beginInsertRows(indexFromItem(tp), 0, 0);
         c = new TP(midx+"_"+idx, "", TPMgrData::TP, tp);
         c->setThroughput(dir, value);
         c->setDirection(dir);
@@ -559,6 +530,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
             }
         }
         tp->appendChild(c); // add iperf pair config item to parent item
+        endInsertRows();
     }else{
         //update throughput value
         c->setThroughput(dir, value);
