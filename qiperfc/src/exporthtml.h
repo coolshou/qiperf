@@ -52,7 +52,6 @@ private:
     QString m_testtime;
     QWebEngineView *webView;
     // bool m_ok;
-    // TPMgr *m_tpmgr;
     // TPPlot *m_tpplot;
     QJsonArray m_pcs;
     QStringList m_iperf_raw_filenames; // iperf raw log filenames

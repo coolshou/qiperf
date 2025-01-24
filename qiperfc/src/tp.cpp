@@ -64,7 +64,6 @@ TP *TP::child(int row)
     if (row < 0 || row >= m_childItems.size())
         return nullptr;
     return m_childItems.at(row);
-    // return m_childItems.value(row);
 }
 
 QList<TP *> TP::getChilds()
@@ -74,11 +73,7 @@ QList<TP *> TP::getChilds()
 
 int TP::childCount() const
 {
-    // if (m_childItems){
-        return m_childItems.count();
-    // }else{
-    //     return 0;
-    // }
+    return m_childItems.count();
 }
 
 bool TP::haveChilds()
@@ -88,12 +83,10 @@ bool TP::haveChilds()
     }else{
         return false;
     }
-
 }
 
 int TP::columnCount() const
 {
-    // return m_itemDatas.size();
     return m_itemDatas.count();
 }
 
@@ -103,7 +96,6 @@ QVariant TP::data(int column) const
         return QVariant();
     }
     return m_itemDatas.at(column);
-//    return m_itemDatas.value(column);
 }
 
 int TP::setData(int column, QVariant var)
@@ -126,9 +118,7 @@ bool TP::removeChildren(int position, int count)
         return false;
     }
     QList<TP *>::ConstIterator begin = m_childItems.begin()+position;
-    // QList::const_iterator begin = m_childItems.begin()+position;
     QList<TP *>::ConstIterator end = m_childItems.begin()+position+count;
-    // QList::const_iterator end = m_childItems.begin()+position+count;
     m_childItems.erase(begin, end);
     return true;
 }
@@ -224,7 +214,7 @@ void TP::setServer(QString addr)
 }
 
 QString TP::getServerArgs()
-{
+{   // get iperf server command arguments
     QJsonParseError error;
     QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError){
@@ -264,7 +254,7 @@ void TP::setClient(QString addr)
 }
 
 QString TP::getClientArgs()
-{
+{   // get iperf client command arguments
     QJsonParseError error;
     QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError){
@@ -451,10 +441,12 @@ void TP::setComment(QString comment)
 
 void TP::setThroughput(QString value)
 {
+    //min value
     if ((m_itemDatas[int(TP::mintp)].toDouble()<=0 && (value.toDouble()>0))||
             (value.toFloat() < m_itemDatas[int(TP::mintp)].toDouble())){
         m_itemDatas[int(TP::mintp)] = value;
     }
+    //max value
     if (m_itemDatas[int(TP::maxtp)]==""||
             (value.toFloat() > m_itemDatas[int(TP::maxtp)].toDouble())){
         m_itemDatas[int(TP::maxtp)] = value;
