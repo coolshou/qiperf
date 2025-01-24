@@ -12,9 +12,11 @@
 #include "tp.h"
 #include "../src/tpmgrdata.h"
 
-TPMgr::TPMgr(bool showgroup, QObject *parent)
-    : QAbstractItemModel(parent), m_showgroup(showgroup)
+TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QObject *parent)
+    : QAbstractItemModel(parent), m_showgroup(showgroup), m_treeview(treeview)
 {
+    connect(this, &QAbstractItemModel::rowsInserted, this, &TPMgr::onRowsInserted);
+
     rootItem=nullptr;
 //    item = invisibleRootItem();
     reset();
@@ -867,6 +869,13 @@ void TPMgr::setShowGroup(bool bShow)
         qDebug() << "TODO: HideGroup: groupItem and move all subitem to rootItem";
 
 
+    }
+}
+
+void TPMgr::onRowsInserted(const QModelIndex &parent, int first, int last)
+{   //when inserted, expand all
+    for (; first <= last; ++first) {
+        m_treeview->expand(this->index(first, 0, parent));
     }
 }
 

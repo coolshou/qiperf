@@ -69,7 +69,7 @@ void ThroughputView::doClear()
 {
     if (m_tpmgr->rootChildCount()>0) {
         m_tpmgr->clear();
-        ui->tv_throughput->collapseAll();
+        // ui->tv_throughput->collapseAll(); //this cause when start running, group item will collapse
     }
     m_tpplot->clear();
 
@@ -426,12 +426,13 @@ void ThroughputView::initThroughputChart()
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
-    connect(m_tpmgr, &QAbstractItemModel::rowsInserted,
-            [&](const QModelIndex &parent, int first, int last) {
-                for (; first <= last; ++first) {
-            ui->tv_throughput->expand(m_tpmgr->index(first, 0, parent));
-                }
-            });
+    //
+    // connect(m_tpmgr, &QAbstractItemModel::rowsInserted,
+    //         [&](const QModelIndex &parent, int first, int last) {
+    //             for (; first <= last; ++first) {
+    //         ui->tv_throughput->expand(m_tpmgr->index(first, 0, parent));
+    //             }
+    //         });
     ui->tv_throughput->setModel(m_tpmgr);
     // ui->tv_throughput->setHeaderHidden(true);// not show header column
     // ui->tv_throughput->expandAll();// will show folding icon when have child item??
@@ -463,7 +464,7 @@ void ThroughputView::initThroughputChart()
     connect(filter, &TooltipEventFilter::doDelete, this, &ThroughputView::onDelete);
     ui->tv_throughput->viewport()->installEventFilter(filter);
     ui->tv_throughput->setRootIsDecorated(true); //show folding icon
-    // ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx()); // this will cause total group disappear!!
+    // ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx()); // Cause total/group item disappear!!
     //    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
 
     ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu

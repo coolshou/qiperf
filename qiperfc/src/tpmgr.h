@@ -11,6 +11,8 @@
 #include <QFileIconProvider>
 #include <QColor>
 #include <QTimer>
+#include <QTreeView>
+
 #include "tp.h"
 #include "../src/tpmgrdata.h"
 
@@ -35,7 +37,7 @@ class TPMgr : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit TPMgr(bool showgroup=false, QObject *parent = nullptr);
+    explicit TPMgr(bool showgroup=false, QTreeView *treeview=nullptr,  QObject *parent=nullptr);
     ~TPMgr() override;
     // //basic read only data model
     // // editable data model
@@ -99,6 +101,7 @@ public slots:
                        QString value, QString unit, QString dir,
                        QString pkt_lost, QString pkt_total);
     void setShowGroup(bool bShow);
+    void onRowsInserted(const QModelIndex &parent, int first, int last);
 
 signals:
     void IperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);// time, idx, throughput value, lost rate
@@ -107,6 +110,8 @@ private slots:
     void onUpdater();
 
 private:
+    bool m_showgroup;
+    QTreeView *m_treeview; //relative treeview
     TP *rootItem;
     TP *groupItem; //hold group item
     // QList<TP*> m_tps; //QList of tp, data
@@ -114,7 +119,6 @@ private:
     QMap<QString, double> m_intervals;
     QColor m_disabledTextColor;
     QTimer *m_updater;
-    bool m_showgroup;
 };
 
 #endif // TPMGR_H
