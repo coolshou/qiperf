@@ -15,10 +15,11 @@
 TPMgr::TPMgr(bool showgroup, QObject *parent)
     : QAbstractItemModel(parent), m_showgroup(showgroup)
 {
+    rootItem=nullptr;
 //    item = invisibleRootItem();
     reset();
     m_intervals.clear();
-
+    groupItem = nullptr;
     QWidget widget;
     QPalette palette = widget.palette();
     m_disabledTextColor = palette.color(QPalette::Disabled, QPalette::Text);
@@ -30,13 +31,14 @@ TPMgr::TPMgr(bool showgroup, QObject *parent)
 }
 TPMgr::~TPMgr()
 {
+    delete rootItem;
+    delete groupItem;
     // qDeleteAll(m_tps);
     // m_tps.clear();
 }
 QVariant TPMgr::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid()){
-        qDebug() << "data index.isValid: " << index ;
         return QVariant();
     }
 
@@ -64,7 +66,16 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
         return QVariant(tpitem->data(index.column()));
     }
 */
-
+    if (item->getDataType()==TPMgrData::group){
+        if ((index.column() == TP::cols::throughput)||
+            (index.column() == TP::cols::mintp) ||
+            (index.column() == TP::cols::maxtp) ){
+            if (item->data(index.column()).toDouble()<0){
+                //do not show -1 value
+                return QVariant();
+            }
+        }
+    }
     if (item->getDataType()==TPMgrData::config){
         if (index.column()== TP::cols::dir) {
             if (!item->getEnabled()){
@@ -154,11 +165,7 @@ QModelIndex TPMgr::index(int row, int column, const QModelIndex &parent) const
     TP *parentItem;
 
     if (!parent.isValid())
-        if(m_showgroup){
-            parentItem = groupItem;
-        }else{
-            parentItem = rootItem;
-        }
+        parentItem = rootItem;
     else
         parentItem = static_cast<TP*>(parent.internalPointer());
 
@@ -229,15 +236,17 @@ TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
         pitm = parent;
     }else{
         pitm = getRootItem();
+        qInfo() << "add getRootItem " << pitm;
     }
     QModelIndex midx = indexFromItem(pitm);
     //data: json format data
+    // qInfo() << "add data: " << data;
     //Get largest idx number!!
     int idx = getMaxIdx();
     // idx = idx + 1;
     // int idx = rootItem->childCount();
-    beginInsertRows(QModelIndex(), idx, idx);
-    TP *tp = new TP(QString::number(idx), data, TPMgrData::config, pitm);
+    beginInsertRows(midx, idx, idx);
+    TP *tp = new TP(QString::number(idx), data, datatype, pitm);
     qDebug() <<"idx:" << idx << " tp:" << tp << " add pitm: " << pitm ;//<< " data:" << data;
     pitm->appendChild(tp);
     endInsertRows();
@@ -277,11 +286,11 @@ void TPMgr::del(QModelIndex idx)
 
 int TPMgr::rootChildCount()
 {
-    if(m_showgroup){
-        return groupItem->childCount();
-    }else{
+    // if(m_showgroup){
+    //     return groupItem->childCount();
+    // }else{
         return rootItem->childCount();
-    }
+    // }
 }
 
 QList<TP *> TPMgr::getChilds(bool showAll)
@@ -398,19 +407,11 @@ bool TPMgr::loaddata(QByteArray data)
 
 void TPMgr::reset(){
     //reset all data to none
-    // beginResetModel();
-    // qDeleteAll(m_tps); // cause app crash?
-    // m_tps.clear();
-    rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
-    // rootItem->setDataType(TPMgrData::root);
-    // int idx = getMaxIdx();
-    // qDebug() << "idx:" << QString::number(idx) ;
-    qDebug() << "rootItem:" << rootItem;
-    if(m_showgroup){
-        newGroupItem();
-    } else{
-        groupItem = nullptr;
+    if (rootItem){
+        delete rootItem;
     }
+    rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
+    qDebug() << "rootItem:" << rootItem;
     m_intervals.clear();
 }
 
@@ -418,11 +419,6 @@ void TPMgr::clear(){
     // clean test record
     // TODO: when there is child the folding icon will not remove after clear!!
     TP *itm = getRootItem();
-    // if (m_showgroup){
-    //     itm = groupItem;
-    // }else{
-    //     itm = rootItem;
-    // }
     if (itm->haveChilds()){
         foreach(auto tp, itm->getChilds()){
             if (tp->haveChilds()){
@@ -448,14 +444,14 @@ TP *TPMgr::getItem(const QModelIndex &index) const
             qDebug() << "getItem: no item??";
         }
     }
-    TP *itm;// = getRootItem();
-    if (m_showgroup){
-        itm = groupItem;
-    }else{
-        itm = rootItem;
-    }
-    qDebug() << "getItem rootItem:" << itm;
-    return itm;
+    // TP *itm;// = getRootItem();
+    // if (m_showgroup){
+    //     itm = groupItem;
+    // }else{
+    //     itm = rootItem;
+    // }
+    // qDebug() << "getItem rootItem:" << itm;
+    // return itm;
 }
 
 TP *TPMgr::getRootItem()
@@ -665,9 +661,10 @@ int TPMgr::getMaxPort(QString m_ip, QString targetIP)
 
 int TPMgr::getMaxIdx()
 {
+    TP *itm = getRootItem();
     int maxIdx=0;
     int idx = 0;
-    foreach(auto tp, rootItem->getChilds()){
+    foreach(auto tp, itm->getChilds()){
         idx = tp->getID().toInt();
         if (idx>maxIdx){
             maxIdx = idx;
@@ -724,44 +721,50 @@ void TPMgr::setTestData()
 {
     // add test data to show tree
     // groupItem = new TP("Total", "Total", rootItem);
+    TP *parentItm = getRootItem();
     // rootItem->appendChild(groupItem);
     QList<TP*> cfgs;
 
-    TP *cfg = new TP("cfg1", "", TPMgrData::config, groupItem);
-    groupItem->appendChild(cfg);
-    qDebug() << "cfg:" << cfg;
-    cfgs << cfg;
-    TP *cfg2 = new TP("cfg2", "", TPMgrData::config, groupItem);
-    groupItem->appendChild(cfg2);
-    qDebug() << "cfg2:" << cfg2;
-    cfgs << cfg2;
-    foreach(TP *c, cfgs){
-        qDebug() << "c:" << c;
-        for (int i = 0; i < 3; ++i) {
-            TP *child = new TP("f:"+QString::number(i), QString::number(i), TPMgrData::TP,  c);
-            c->appendChild(child);
-            for (int j = 0; j < 2; ++j) {
-                TP *gchild = new TP("s:"+QString::number(j), QString::number(j), TPMgrData::TP, child);
-                child->appendChild(gchild);
+    QString cfg1="{\"Action\":\"IPERF_ADD\",\"client\":{\"bidir\":false,\"bind\":\"172.17.0.1\",\"bitrate\":0,\"buffer\":0,\"delaytime\":0,\"dscp\":-1,\"duration\":30,\"fmtreport\":\"m\",\"interval\":1,\"ipv6\":false,\"manager\":\"192.168.70.147\",\"mss\":0,\"omit\":2,\"parallel\":1,\"port\":5201,\"protocal\":\"TCP\",\"reverse\":false,\"target\":\"169.254.11.54\",\"tos\":-1,\"unit_bitrate\":\"K\",\"unit_buffer\":\"K\",\"unit_windowsize\":\"K\",\"version\":\"3\",\"windowsize\":256,\"zerocopy\":false},\"enabled\":true,\"server\":{\"bidir\":false,\"bind\":\"169.254.11.54\",\"delaytime\":0,\"fmtreport\":\"m\",\"interval\":1,\"manager\":\"192.168.70.11\",\"parallel\":1,\"port\":5201,\"protocal\":\"TCP\",\"reverse\":false,\"version\":\"3\"}}";
+    QString cfg2="{\"Action\":\"IPERF_ADD\",\"client\":{\"bidir\":false,\"bind\":\"192.168.0.22\",\"bitrate\":0,\"buffer\":0,\"delaytime\":0,\"dscp\":-1,\"duration\":30,\"fmtreport\":\"m\",\"interval\":1,\"ipv6\":false,\"manager\":\"192.168.70.147\",\"mss\":0,\"omit\":2,\"parallel\":1,\"port\":5201,\"protocal\":\"TCP\",\"reverse\":false,\"target\":\"192.168.0.100\",\"tos\":-1,\"unit_bitrate\":\"K\",\"unit_buffer\":\"K\",\"unit_windowsize\":\"K\",\"version\":\"3\",\"windowsize\":256,\"zerocopy\":false},\"enabled\":true,\"server\":{\"bidir\":false,\"bind\":\"169.254.11.54\",\"delaytime\":0,\"fmtreport\":\"m\",\"interval\":1,\"manager\":\"192.168.70.11\",\"parallel\":1,\"port\":5201,\"protocal\":\"TCP\",\"reverse\":false,\"version\":\"3\"}}";
 
-            }
-        }
-    }
+    TP *tpcfg = add(cfg1, TPMgrData::config, parentItm);
+    cfgs << tpcfg;
+    TP *tpcfg2 = add(cfg2, TPMgrData::config, parentItm);
+    cfgs << tpcfg2;
+    // TP *cfg = new TP("cfg1", "", TPMgrData::config, groupItem);
+    // groupItem->appendChild(cfg);
+    // qDebug() << "cfg:" << cfg;
+    // cfgs << cfg;
+    // TP *cfg2 = new TP("cfg2", "", TPMgrData::config, groupItem);
+    // groupItem->appendChild(cfg2);
+    // qDebug() << "cfg2:" << cfg2;
+    // cfgs << cfg2;
+    // foreach(TP *c, cfgs){
+    //     qDebug() << "c:" << c;
+    //     for (int i = 0; i < 3; ++i) {
+    //         TP *child = new TP("f:"+QString::number(i), QString::number(i), TPMgrData::TP,  c);
+    //         c->appendChild(child);
+    //         for (int j = 0; j < 2; ++j) {
+    //             TP *gchild = new TP("s:"+QString::number(j), QString::number(j), TPMgrData::TP, child);
+    //             child->appendChild(gchild);
+
+    //         }
+    //     }
+    // }
 
 }
 
 TP *TPMgr::newGroupItem()
 {
     QModelIndex midx = indexFromItem(rootItem);
-    qDebug() << "newGroupItem root midx: " << midx;
-    // beginInsertRows(midx, 0, 1);
-    beginInsertRows(QModelIndex(), 0, 1);
-    // groupItem = add("Total", TPMgrData::group, rootItem);
+    qDebug() << " root idx: " << midx;
+    beginInsertRows(midx, 0, 0);
     groupItem = new TP("0", "Total", TPMgrData::group, rootItem);
     rootItem->appendChild(groupItem);
+    qDebug() << "newGroupItem: groupItem:" << groupItem << " root:" << rootItem;
+    qDebug() << "newGroupItem: groupItem idx: " << indexFromItem(groupItem);
     endInsertRows();
-    qDebug() << " groupItem:" << groupItem;
-    qDebug() << "newGroupItem groupItem idx: " << indexFromItem(groupItem);
     return groupItem;
 }
 
@@ -850,12 +853,12 @@ void TPMgr::setShowGroup(bool bShow)
     //beginMoveRows()
     //endMoveRows()
     if (m_showgroup){
-        if (groupItem==nullptr){
-            newGroupItem();
-        }
+        // if (groupItem==nullptr){
+        //     TP *groupItem = newGroupItem();
+        // }
         qDebug() << "ShowGroup: rootItem->childCount():" << rootItem->childCount();
         // TODO: move exist test item to groupItem
-        qDebug() << "groupItem:" << groupItem;
+        // qDebug() << "groupItem:" << groupItem;
         // if (!groupItem){
         // rootItem->appendChild(groupItem);
         // }
@@ -885,11 +888,11 @@ void TPMgr::onUpdater()
     int g_lostvalue=-1;
     int g_totalvalue=-1;
     TP *itm;
-    if (m_showgroup){
-        itm = groupItem;
-    }else{
+    // if (m_showgroup){
+    //     itm = groupItem;
+    // }else{
         itm = rootItem;
-    }
+    // }
     if (itm->haveChilds()){
         for (auto &cfg : itm->getChilds() ) {
             double tpvalue=-1.0;
