@@ -249,7 +249,7 @@ void QIperfC::onOpen()
     }
     QString fileName = QFileDialog::getOpenFileName(this,
              tr("Open QIperf file"), path , tr(QIPERF_EXT_FILTER));
-    if (fileName){
+    if (!fileName.isEmpty()){
         QFileInfo fi(fileName);
         QString ext = fi.suffix();
         if (ext.compare(QIPERF_EXT)!=0){
