@@ -67,6 +67,7 @@ public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
     void onUpdateTPCfg(QByteArray tpcfg);
     void setShowGroup(bool bShow);
+    void setXRangeUpper(double upper);
 signals:
     void updateActions(bool bStart, bool bStop, bool bClear);
     void updateActionsSave(bool bStart);

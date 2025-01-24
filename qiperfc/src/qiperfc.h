@@ -91,6 +91,7 @@ signals:
     void testStarted(); // signal when test started
     void testStoped(int err); // signal when test stoped, 0: no error
     void closeAll(); // send signal to close all dialog
+    void setEndTime(double value);
 
 protected:
     void closeEvent(QCloseEvent *event)override;
@@ -154,7 +155,7 @@ private:
     PingPlot *m_pingplot;
     QSettings *m_settings;
     bool m_testping;
-
+    int iExtraWait = 5;
 //    PipeClient *pclient;
 #if (TEST_WS==1)
     QMap<QString, WSClient *> m_wss; // websocket client list for manager iperf server

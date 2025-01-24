@@ -61,6 +61,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_throughputview, &ThroughputView::updateActions, this, &QIperfC::onUpdateActions);
     connect(m_throughputview, &ThroughputView::updateActionsSave, this, &QIperfC::onUpdateActionsSave);
     connect(m_throughputview, &ThroughputView::updateActionsEdit, this, &QIperfC::onUpdateActionsEdit);
+    connect(this, &QIperfC::setEndTime, m_throughputview, &ThroughputView::setXRangeUpper);
 
     m_views = new ViewManager(&settingfilepath, m_throughputview, this);
     m_dlgtest = new DlgTest();
@@ -341,6 +342,7 @@ void QIperfC::onStart()
         QList<TP *> tps = m_throughputview->getChilds();
         QString s; // websocket url
         QString cmd;
+        QString err;
         qint64 rs=0;
         int maxtestduration=0; // max wait test time
         int iwait=0;
@@ -353,7 +355,7 @@ void QIperfC::onStart()
                 //RPC to control all server endpoint (iperf server)
                 iwait = tp->getWaitTime();
                 if (iwait> maxtestduration){
-                    maxtestduration = iwait+5;
+                    maxtestduration = iwait+iExtraWait;
                 }
                 idelaytime = tp->getDelaytime();
                 if (idelaytime>0) {
@@ -386,8 +388,9 @@ void QIperfC::onStart()
                         }
                     }else{
                         bErrorStop = 1;
-                        tp->setComment("ERROR: "+serverIP+" not connected");
-                        emit errorStop(2, "ERROR: "+serverIP+" not connected");
+                        err = "ERROR: websocket "+serverIP+" not connected";
+                        tp->setComment(err);
+                        emit errorStop(2, err);
                         break;
                     }
                     itimeout--;
@@ -395,11 +398,11 @@ void QIperfC::onStart()
                                       " ("+ QString::number(itimeout) +")");
                 }
                 if (itimeout<=0){
-                    emit errorStop(1,"ERROR: Wait connect to " +s+ " timeout");
+                    emit errorStop(1,"ERROR: Wait connect to websocket " +s+ " timeout");
                     break;
                 }
                 if(bErrorStop>0){
-                    qDebug() << "Some error happen!!";
+                    emit errorStop(3, "Unknown error happen!!("+QString::number(bErrorStop)+")");
                     return;
                 }
                 if(bUserStop){
@@ -438,8 +441,9 @@ void QIperfC::onStart()
                         }
                     }else{
                         bErrorStop = 1;
-                        tp->setComment("ERROR: "+clientIP+" not connected");
-                        emit errorStop(2, "ERROR: "+clientIP+" not connected");
+                        err = "ERROR: websocket "+clientIP+" not connected";
+                        tp->setComment(err);
+                        emit errorStop(2, err);
                         break;
                     }
                     itimeout--;
@@ -450,7 +454,7 @@ void QIperfC::onStart()
                     break;
                 }
                 if(bErrorStop>0){
-                    qDebug() << "Some error happen!!";
+                    emit errorStop(3, "Unknown error happen!!("+QString::number(bErrorStop)+")");
                     return;
                 }
                 if(bUserStop){
@@ -475,7 +479,7 @@ void QIperfC::onStart()
         // TODO: list of ping test
 
         if(bErrorStop>0){
-            qDebug() << "Some error happen!!";
+            emit errorStop(4, "Unknown error happen!!("+QString::number(bErrorStop)+")");
             return;
         }
         //Start server
@@ -525,8 +529,8 @@ void QIperfC::onStart()
             }
         }
         if(bUserStop){
-            qDebug() << "User Stop on wait ServerReady!!";
-            emit updateStatus("User Stop on wait ServerReady!!");
+            err = "User Stop on wait ServerReady!!";
+            emit updateStatus(err);
             return;
         }
         if (!bServerReady){
@@ -574,6 +578,7 @@ void QIperfC::onStart()
             iWait = waitStartTime.secsTo(waitEndTime);
         }
         onStop();
+        emit setEndTime(maxtestduration-iExtraWait);
     } else {
         QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");
     }
@@ -821,6 +826,10 @@ bool QIperfC::eventFilter(QObject *obj, QEvent *event)
 }
 void QIperfC::updateRunStatus(bool bStart)
 {
+    //set button status
+    ui->actionAddIperf->setEnabled(!bStart);
+    onUpdateActionsEdit(!bStart, !bStart, !bStart, !bStart);
+
     ui->actionStart->setEnabled(!bStart);
     ui->actionStop->setEnabled(bStart);
     ui->actionClear->setEnabled(!bStart);

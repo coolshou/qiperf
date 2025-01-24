@@ -244,6 +244,13 @@ void ThroughputView::setShowGroup(bool bShow)
     // TODO: m_tpplot
 }
 
+void ThroughputView::setXRangeUpper(double upper)
+{
+    if (m_tpplot){
+        m_tpplot->setXRangeUpper(upper);
+    }
+}
+
 void ThroughputView::initMenus()
 {
     m_aEnable = new QAction("Enable select item");
@@ -419,7 +426,12 @@ void ThroughputView::initThroughputChart()
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
-
+    connect(m_tpmgr, &QAbstractItemModel::rowsInserted,
+            [&](const QModelIndex &parent, int first, int last) {
+                for (; first <= last; ++first) {
+            ui->tv_throughput->expand(m_tpmgr->index(first, 0, parent));
+                }
+            });
     ui->tv_throughput->setModel(m_tpmgr);
     // ui->tv_throughput->setHeaderHidden(true);// not show header column
     // ui->tv_throughput->expandAll();// will show folding icon when have child item??

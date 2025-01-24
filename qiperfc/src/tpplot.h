@@ -18,6 +18,7 @@ public:
     QCPGraph *getGraph(QString idx); // get QCPGraph by index
     QCPBars *getLostRateGraph(QString idx);
     void clear();
+    void setXRangeUpper(double upper);
 
 public slots:
     void onIperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);  //

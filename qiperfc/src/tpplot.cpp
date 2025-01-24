@@ -104,7 +104,8 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
         yAxis->setRange(0, aval);
     }
     if (xdata >= xAxis->range().upper){
-        xAxis->setRange(0, xdata+30);
+        qDebug() << "xdata:" << xdata;
+        xAxis->setRange(0, xdata+10); // do not add 30 sec
     }
     // add x/y data to graphic
     graph->addData(xdata, ydata);
@@ -210,6 +211,13 @@ void TPPlot::clear()
 
     setStartTime(QDateTime());
 
+    replot();
+}
+
+void TPPlot::setXRangeUpper(double upper)
+{
+    // qDebug() << "setXRangeUpper:" << QString::number(upper);
+    xAxis->setRangeUpper(upper);
     replot();
 }
 
