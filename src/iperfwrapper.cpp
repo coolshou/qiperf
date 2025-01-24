@@ -189,7 +189,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                     if (!linedata.contains("receiver")){
                         // check report interval value is correct (smallest value 1 sec)
                         if (qAbs(m_interval-interval)>0.5){
-                            qInfo() << linedata << "\n interval value:" << QString::number(interval) << " expect:" << QString::number(m_interval);
+                            qInfo() << linedata << "=>>>> ignorewronginterval value:" << QString::number(interval) << " expect:" << QString::number(m_interval);
                             return;
                         }
                     }

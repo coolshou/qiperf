@@ -82,7 +82,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 
     iTimeout = 10*1000;//10sec
     //
-    m_qipconfig = new QIPConfig(logdir.absolutePath());
+    m_qipconfig = new QIPConfig(logdir.absolutePath(), m_IgnoreWrongInterval);
     connect(m_qipconfig, &QIPConfig::updateDataPath, this, &QIperfC::onUpdateDataPath);
     connect(m_qipconfig, &QIPConfig::updateTPCfg, m_throughputview, &ThroughputView::onUpdateTPCfg);
     connect(m_qipconfig, &QIPConfig::updateStartDateTime, this, &QIperfC::setStartTime);
