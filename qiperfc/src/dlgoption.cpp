@@ -16,6 +16,8 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     connect(ui->sb_heigth_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onHeigthChange);
     connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
     connect(ui->cb_IgnoreWrongInterval, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onIgnoreWrongIntervalChanged);
+
+    ui->tabWidget->setCurrentIndex(0);
 }
 
 dlgOption::~dlgOption()
