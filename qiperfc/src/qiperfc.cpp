@@ -249,16 +249,18 @@ void QIperfC::onOpen()
     }
     QString fileName = QFileDialog::getOpenFileName(this,
              tr("Open QIperf file"), path , tr(QIPERF_EXT_FILTER));
-    QFileInfo fi(fileName);
-    QString ext = fi.suffix();
-    if (ext.compare(QIPERF_EXT)!=0){
-        qDebug() << "Not support file format: " << fileName;
-        return;
-    }
-    doClear();
-    onNew();
-    if (load(fileName)){
-        m_oldsavepath = fi.path();
+    if (fileName){
+        QFileInfo fi(fileName);
+        QString ext = fi.suffix();
+        if (ext.compare(QIPERF_EXT)!=0){
+            qDebug() << "Not support file ext format: " << ext << " Expect:" << QIPERF_EXT;
+            return;
+        }
+        doClear();
+        onNew();
+        if (load(fileName)){
+            m_oldsavepath = fi.path();
+        }
     }
 }
 
