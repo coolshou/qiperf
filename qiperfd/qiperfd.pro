@@ -35,6 +35,7 @@ win32:{
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../lib/ntp/ntpserver.cpp \
     ../src/endpointtype.cpp \
     ../src/icmpping.cpp \
     ../src/icmpwrapper.cpp \
@@ -57,6 +58,7 @@ else: unix:!android: target.path = /opt/qiperf/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    ../lib/ntp/ntpserver.h \
     ../src/endpointtype.h \
     ../src/icmpping.h \
     ../src/comm.h \

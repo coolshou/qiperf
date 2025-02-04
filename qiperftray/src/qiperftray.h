@@ -35,6 +35,7 @@ public:
 signals:
     void updateIperfcount(int count);
     void updateQIperfd(QString msg);
+    void updateNtpServer(bool checked);
 
 public slots:
     void onTrayIconActivated();
@@ -48,6 +49,7 @@ public slots:
     void onAbout();
     void onNotice();
     void onIperfVersion();
+    void onNtpServer();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -60,6 +62,7 @@ private slots:
     void initStatusbar();
     void onUpdateIperfcount(int count);
     void onUpdateQIperfd(QString msg);
+    void onUpdateNtpServer(bool checked);
 
 private:
     QSettings *cfg;

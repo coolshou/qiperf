@@ -29,6 +29,8 @@
 #include "wsserver.h"
 #endif
 
+#include "../lib/ntp/ntpserver.h"
+
 class QIperfd : public QObject
 {
     Q_OBJECT
@@ -90,6 +92,8 @@ private slots:
     void onIperfStdout();
 private:
     int checkFirewallStatus();
+    void setNtpServer(QString mode);
+    void startNtpServer();
     void initIperf(QString apppath);
     void getIperfVer(QString cmd, int ver);
     QString getIperf2ver();
@@ -127,6 +131,8 @@ private:
     FileClient *m_fileclient;
     FileWatcher *m_filewatcher;
     IcmpPing *m_icmpping;
+    bool bNtpserver; // enable NTP server
+    NtpServer *m_ntpserver;
 };
 
 #endif // QIPERFD_H

@@ -19,8 +19,9 @@
 #include <QDebug>
 
 QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
-    : QObject{parent}, m_fileclient(nullptr)
+    : QObject{parent}, m_pserver(pserver), m_fileclient(nullptr)
 {
+    // pserver : interact with systemtray GUI (qiperftray)
     // bReportTPData = false;
     onLog(QString(QIPERFD_NAME) + ":" + QIPERFD_VERSION);
     tmppath = QStandardPaths::writableLocation(QStandardPaths::TempLocation)+
@@ -79,10 +80,8 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     connect(this, &QIperfd::iperfStarted, m_wsserver, &WSServer::sendTextResult);
     connect(this, &QIperfd::setMgrIfname, m_wsserver, &WSServer::setIfname);
 #endif
-    // pipserver : interact with systemtray GUI (qiperftray)
-    m_pserver=pserver;
 
-
+    startNtpServer();
 
     // system service manager
     qiperfdlog = tmppath+QIPERFD_NAME+".log";
@@ -97,7 +96,6 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 QIperfd::~QIperfd()
 {
     informMessage(INFO_QIPERFD_STOPED, true);
-
     savecfg();
 }
 
@@ -125,6 +123,9 @@ void QIperfd::loadcfg(QString apppath)
     mgr_ifname = cfg->value("ifname", default_ifname).toString();
     mgr_port = cfg->value("port", QIPERFD_PORT).toInt();
     onLog("mgr_ifname: " + mgr_ifname + ", mgr_port: " + QString::number(mgr_port));
+
+    bNtpserver = cfg->value("EnableNtpServer", false).toBool();
+
     cfg->endGroup();
 }
 
@@ -133,6 +134,7 @@ void QIperfd::savecfg()
     cfg->beginGroup("manager");
     cfg->setValue("ifname", mgr_ifname);
     cfg->setValue("port", mgr_port);
+    cfg->setValue("EnableNtpServer", bNtpserver);
     cfg->endGroup();
     cfg->sync();
 }
@@ -447,6 +449,8 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         status.insert(QIPERFD_NAME, QIPERFD_VERSION);
         // TODO: any iperf running
         status.insert(CMD_RUNNING, QString::number(m_iperfworkers.count()));
+        // NTP server
+        status.insert(CMD_NTP_START, bNtpserver);
         QJsonDocument jsonDocument = QJsonDocument::fromVariant(status);
         QString backmsg = jsonDocument.toJson(QJsonDocument::Compact).toStdString().c_str();
         informMessage(backmsg, true);
@@ -481,6 +485,13 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
     {   //get iperf version
         QJsonObject jobj = m_myinfo->getIperfVer();
         informMessage(QString(CMD_IPERFVER)+"："+QString(QJsonDocument(jobj).toJson()), true);
+    }
+    else if (msg.startsWith(CMD_NTP_START, Qt::CaseInsensitive))
+    {
+        int cut = msg.indexOf(':');
+        QString ntpmode = msg.right(msg.length()-cut-1);
+        qDebug() << "CMD_NTP_START:ntpmode:" << ntpmode;
+        setNtpServer(ntpmode);
     }
     else
     {
@@ -895,6 +906,38 @@ int QIperfd::checkFirewallStatus()
         return 0;
     }
 #endif
+}
+
+void QIperfd::setNtpServer(QString mode)
+{
+    if (mode.startsWith("0")){
+        // disable
+        bNtpserver = false;
+    }else{
+        // enable
+        bNtpserver = true;
+    }
+    savecfg();
+    startNtpServer();
+}
+
+void QIperfd::startNtpServer()
+{
+    if (bNtpserver){
+        if (m_ntpserver){
+            qInfo() << "stop old Ntp Server";
+            m_ntpserver->disconnect();
+            delete(m_ntpserver);
+        }
+        qInfo() << "start Ntp Server";
+        m_ntpserver = new NtpServer(this);
+    }else{
+        if (m_ntpserver){
+            qInfo() << "stop Ntp Server";
+            m_ntpserver->disconnect();
+            delete(m_ntpserver);
+        }
+    }
 }
 
 void QIperfd::initIperf(QString apppath)

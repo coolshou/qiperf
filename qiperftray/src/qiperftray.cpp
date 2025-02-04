@@ -182,10 +182,12 @@ void QIperfTray::onNewMessage(const QString msg)
         }else if (QString::compare(act, CMD_STATUS, Qt::CaseInsensitive)==0){
             QVariantMap status = result[CMD_STATUS].toMap();
             QString ver = result[QIPERFD_NAME].toString();
+            bool bNtpServer = result[CMD_NTP_START].toBool();
             // QString works = status["iperfworkers"].toString();
             // statusmsg("iperf: " + works);
             emit updateIperfcount(status["iperfworkers"].toInt());
             emit updateQIperfd(ver);
+            emit updateNtpServer(bNtpServer);
         }else {
             ui->te_msg->setText(msg.toUtf8());
         }
@@ -243,6 +245,8 @@ void QIperfTray::initActions()
 
     connect(ui->actionNotice, SIGNAL(triggered()), this, SLOT(onNotice()));
     connect(ui->actionIperfVersion, SIGNAL(triggered()), this, SLOT(onIperfVersion()));
+
+    connect(ui->actionNtpServer, SIGNAL(triggered()), this, SLOT(onNtpServer()));
 }
 
 void QIperfTray::onIfnameChange(int index)
@@ -262,7 +266,7 @@ void QIperfTray::initStatusbar()
     m_qiperfd->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
     ui->statusBar->addWidget(m_qiperfd);
     connect(this , &QIperfTray::updateQIperfd, this,  &QIperfTray::onUpdateQIperfd);
-
+    connect(this , &QIperfTray::updateNtpServer, this, &QIperfTray::onUpdateNtpServer);
 
     m_status= new QLabel();
     // m_status->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
@@ -278,6 +282,11 @@ void QIperfTray::onUpdateIperfcount(int count)
 void QIperfTray::onUpdateQIperfd(QString msg)
 {
     m_qiperfd->setText("qiperfd:"+msg);
+}
+
+void QIperfTray::onUpdateNtpServer(bool checked)
+{
+    ui->actionNtpServer->setChecked(checked);
 }
 
 void QIperfTray::onTrayIconActivated()
@@ -364,6 +373,20 @@ void QIperfTray::onIperfVersion()
     //get iperf version
     pclient->send_MessageToServer(CMD_IPERFVER);
 }
+
+void QIperfTray::onNtpServer()
+{
+    //set NTP server
+    QString msg=QString(CMD_NTP_START);
+    if (ui->actionNtpServer->isChecked()){
+        msg.append(":1");
+    }else{
+        msg.append(":0");
+    }
+    qDebug() << "onNtpServer: " << msg;
+    pclient->send_MessageToServer(msg);
+}
+
 void QIperfTray::closeEvent(QCloseEvent *event)
 {
     if (m_tray->isVisible()) {
