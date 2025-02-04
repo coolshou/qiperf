@@ -177,10 +177,12 @@ QJsonArray MyInfo::collectSerial()
     QList<QSerialPortInfo> qs = QSerialPortInfo::availablePorts();
     foreach(auto q, qs){
         if (q.hasProductIdentifier() && q.hasVendorIdentifier()){
-            qDebug() << q.portName() << " productIdentifier:" << q.productIdentifier()
-                     << " vendorIdentifier:" << q.vendorIdentifier()
-                     << " serialNumber:" << q.serialNumber()
-                     << " description: " << q.manufacturer();
+            qDebug() << q.portName()
+                     << " ProductId: 0x" << QString::number(q.productIdentifier(), 16).toUpper()
+                     << " VendorId: 0x" << QString::number(q.vendorIdentifier(), 16).toUpper()
+                     << " SN:" << q.serialNumber()
+                     << " description: " << q.description()
+                     << " manufacturer: " << q.manufacturer();
             serials.append(q.portName());
         }
     }
