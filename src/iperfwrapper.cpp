@@ -82,6 +82,10 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
         if (bitrate>0){
             QString unit_bitrate = jsondata["unit_bitrate"].toString();
             args = args + " -b " +QString::number(bitrate)+ unit_bitrate;
+        }else{
+            if (protocal.contains("UDP")){
+                args = args + " -b 0 ";
+            }
         }
         uint buffer = jsondata["buffer"].toUInt();
         if (buffer>0){
