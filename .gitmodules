@@ -7,3 +7,6 @@
 [submodule "qiperfd/lib/QUSB"]
 	path = qiperfd/lib/QUSB
 	url = https://github.com/coolshou/QUSB.git
+[submodule "lib/qntp"]
+	path = lib/qntp
+	url = https://github.com/coolshou/qntp.git
