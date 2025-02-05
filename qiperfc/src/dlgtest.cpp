@@ -52,7 +52,6 @@ void DlgTest::on_pb_add_server_clicked()
     iperfObj.insert("port", 5201);
     QJsonArray cmd_args;
     cmd_args.push_back("-s");
-//    cmd_args.push_back("--forceflush");
 
     iperfObj.insert("cmd_args", cmd_args);
     mainObj.insert("Action", CMD_IPERF_ADD);

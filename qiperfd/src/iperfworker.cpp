@@ -38,14 +38,14 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
     if (m_arguments.contains("-s")){
         m_servermode=true;
         if (m_version==3){
-            m_arguments.append("--one-off"); //handle one client connection then exit
+            // m_arguments.append("--one-off"); //handle one client connection then exit//move to iperfwrapper
         }
     }
 //    m_port = port;
 //    m_bindaddr = bindaddr;
 //    m_target = target;
     if (m_version>=static_cast<int>(IPERF_VER::V3)){
-        m_arguments.append("--forceflush");
+        // m_arguments.append("--forceflush");//move to iperfwrapper
     }
     if (m_servermode){
         if (m_bidir){

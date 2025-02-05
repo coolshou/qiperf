@@ -104,11 +104,14 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
         if ((tos>=0)&&(tos<=255)){
             args = args + " --tos " +QString::number(tos);
         }
+    }else {
+        args = args +" --one-off ";
     }
     QString fmtreport = jsondata["fmtreport"].toString();
     if (!fmtreport.isEmpty()){
         args = args + " -f " + fmtreport;
     }
+    args = args + " --forceflush ";
     return args;
 }
 
