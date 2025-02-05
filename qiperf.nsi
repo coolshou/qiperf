@@ -4,8 +4,8 @@
 
 ; Define your application name
 !define APPNAME "qiperf"
-!define APPVERSION 0.7
-!define APPFileVersion 0.7.11401.21
+!define APPVERSION 0.8
+!define APPFileVersion 0.8.11402.05
 !define APPDOMAIN "coolshou.idv.tw"
 !define APPURL "https://github.com/coolshou/qiperf"
 #!define WIN64 ; force  64 bit, comment out for 32 bit
@@ -187,6 +187,7 @@ Section "qiperf daemon" SECTION_Daemon
     File "windows\x86_64\cygwin1.dll"
     File "windows\x86_64\cygz.dll"
     File "windows\x86_64\iperf3.exe"
+    File "windows\x86_64\iperf2.2.exe"
     SetOutPath "$INSTDIR\"
     !cd ..
 !ifdef WIN64
@@ -623,6 +624,7 @@ Section Uninstall
     Delete "$INSTDIR\windows\x86_64\cygcrypto-1.1.dll"
     Delete "$INSTDIR\windows\x86_64\cygwin1.dll"
     Delete "$INSTDIR\windows\x86_64\cygz.dll"
+    Delete "$INSTDIR\windows\x86_64\iperf2.2.exe"
     Delete "$INSTDIR\windows\x86_64\iperf3.exe"
 
     Delete "$INSTDIR\D3Dcompiler_47.dll"

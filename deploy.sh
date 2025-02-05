@@ -3,15 +3,17 @@
 # build deb package
 DOBUILD=0
 CODENAME=`grep '^VERSION_CODENAME' /etc/os-release | cut -d= -f2`
-#VERSION=0.8.11401.15-1
-VERSION=0.7.11401.21-1
+WINVERSION=0.8.11402.05
+#WINVERSION=0.7.11401.21
+VERSION=${WINVERSION}-1
+
 #VERSION=0.6.11312.04
 declare -a DESTFILES=()
 DESTFILES+=(qiperfd_${VERSION}${CODENAME}_amd64.deb)
 DESTFILES+=(qiperftray_${VERSION}${CODENAME}_amd64.deb)
 
 declare -a WDESTFILES=()
-WDESTFILES+=(qiperf-setup-${VERSION}.exe)
+WDESTFILES+=(qiperf-setup-${WINVERSION}.exe)
 
 # ================================================
 UPDATE_LINUX=1
@@ -43,14 +45,25 @@ RVRPORT+=(60010)
 
 # Room6 - TR398 PCs
 DOREMOTE=0
+DOREMOTEWIN=1 #; remote is windows
 DOREMOTEIP="172.31.117.120"
+
+if [ $DOREMOTEWIN -eq 1 ]; then
+  TARGET=test@${DOREMOTEIP}:/D:/
+  DESTFILES=${WDESTFILES}
+  INSTCMD=/D:/${WDESTFILES} -s
+else
+  TARGET=test@${DOREMOTEIP}:/home/test/
+  INSTCMD=sudo dpkg -i /home/test/${DESTFILE}
+fi
+
 declare -a PORTS=()
 #PORTS+=(55901)
 #PORTS+=(55902)
 #PORTS+=(55903)
 PORTS+=(55904)
 PORTS+=(55905)
-#PORTS+=(55906)
+PORTS+=(55906)
 #PORTS+=(55908)
 PORTS+=(55911) # LAN
 #PORTS+=(55912) # LAN2
@@ -82,10 +95,10 @@ if [ "x$?" == "x0" ]; then
         do
             for DESTFILE in "${DESTFILES[@]}"
             do
-                echo "===== scp -P $PORT ${DESTFILE}  test@${DOREMOTEIP}:/home/test/${DESTFILE}"
-                scp -P $PORT ${DESTFILE} test@${DOREMOTEIP}:/home/test/${DESTFILE}
-                echo "===== ssh -p $PORT test@${DOREMOTEIP} sudo dpkg -i /home/test/${DESTFILE}"
-                ssh -p $PORT test@${DOREMOTEIP} sudo dpkg -i /home/test/${DESTFILE}
+                echo "===== scp -P $PORT ${DESTFILE}  ${TARGET}${DESTFILE}"
+                scp -P $PORT ${DESTFILE} ${TARGET}${DESTFILE}
+                echo "===== ssh -p $PORT test@${DOREMOTEIP} ${INSTCMD}"
+                ssh -p $PORT test@${DOREMOTEIP} ${INSTCMD}
             done
         done
     fi
