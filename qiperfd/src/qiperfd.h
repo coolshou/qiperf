@@ -30,6 +30,7 @@
 #endif
 
 #include "../lib/ntp/ntpserver.h"
+#include "../lib/ntp/ntpsync.h"
 
 class QIperfd : public QObject
 {
@@ -89,7 +90,7 @@ protected:
 private slots:
     void onWSactMessage(QString msg); //procress websocket action message
     void onNewClient(QHostAddress addr); //
-    void onIperfStdout();
+
 private:
     int checkFirewallStatus();
     void setNtpServer(QString mode);
@@ -133,6 +134,7 @@ private:
     IcmpPing *m_icmpping;
     bool bNtpserver; // enable NTP server
     NtpServer *m_ntpserver;
+    NtpSync *m_ntpsync;
 };
 
 #endif // QIPERFD_H

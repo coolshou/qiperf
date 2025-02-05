@@ -14,6 +14,7 @@ include(../qiperf.pri)
 unix {
 include(../QCtrlSignals/qctrlsignals.pri)
 #include(../sigwatch.pri)
+include(../lib/qntp/qntp.pri)
 }
 unix:!android {
     #LIBS += -lsystemd
@@ -36,6 +37,7 @@ win32:{
 
 SOURCES += \
     ../lib/ntp/ntpserver.cpp \
+    ../lib/ntp/ntpsync.cpp \
     ../src/endpointtype.cpp \
     ../src/icmpping.cpp \
     ../src/icmpwrapper.cpp \
@@ -59,6 +61,7 @@ else: unix:!android: target.path = /opt/qiperf/bin
 
 HEADERS += \
     ../lib/ntp/ntpserver.h \
+    ../lib/ntp/ntpsync.h \
     ../src/endpointtype.h \
     ../src/icmpping.h \
     ../src/comm.h \

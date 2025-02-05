@@ -60,7 +60,8 @@
 #define CMD_IPERF_TP_FILE  "IPERF_TP_FILE"  // iperf throughput data filename with full path
 #define CMD_IPERF_GET_TP_FILE  "IPERF_GET_TP_FILE"  // get iperf throughput data file
 // NTP server
-#define CMD_NTP_START "NTP_START"  // enable/disable NTP server
+#define CMD_NTP_START "NTP_START"  // enable/disable NTP server NTP_START:1 => enable, NTP_START:0 => disable
+#define CMD_NTP_SYNC "NTP_SYNC" // request do NTP time sync with server NTP_SYNC:ServerIP
 
 // serial
 #define CMD_SERIAL_ADD    "SERIAL_ADD"   // add SERIAL setting for rs232
