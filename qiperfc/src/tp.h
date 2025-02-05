@@ -62,6 +62,7 @@ public:
     QString getServer();
     void setServer(QString addr);
     QString getServerArgs();
+    QVariantMap getServerArgsMap();
     QString getBindKey(bool s=true);
     QString getClient();
     void setClient(QString addr);

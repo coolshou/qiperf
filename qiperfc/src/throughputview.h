@@ -16,6 +16,7 @@
 #include "dlgiperf.h"
 #include "tpdirdelegate.h"
 #include "tpfoldingdelegate.h"
+#include "iperfwrapper.h"
 
 #include "../views/abstractview.h"
 
@@ -83,6 +84,8 @@ private slots:
     void aboutQCustomPlot();
     void onEnableItem(bool checked);
     void onDisableItem(bool checked);
+    void copyClientArgs(bool checked);
+    void copyServerArgs(bool checked);
     void onItemDClicked(QModelIndex idx);
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 private:
@@ -98,11 +101,14 @@ private:
     QAction *m_actionPaste;
     QAction *m_actionDelete;
     QAction *m_actionCopyText;
+    QAction *m_actionClientArgs;
+    QAction *m_actionServerArgs;
     DlgIperf * dlgiperf;  // dialog of iperf config
     TPDirDelegate *tpdirdelegate;
     TPFoldingDelegate *tpfoldingdelegate;
     QDateTime m_starttime;
     bool m_showgroup;
+    IperfWrapper *m_iperfwrapper;
 
     void initThroughputChart();
 };

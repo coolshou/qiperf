@@ -16,11 +16,12 @@ ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete
     m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_showgroup(showgroup)
 //, m_main(main)
 {
+    m_iperfwrapper = new IperfWrapper();
     ui->setupUi(this);
     initThroughputChart();
     m_clipboard = QApplication::clipboard();
 
-    dlgiperf = new DlgIperf(m_tpmgr, this);
+    dlgiperf = new DlgIperf(m_tpmgr, this); //add/edit iperf config dialog
     initMenus();
 }
 
@@ -259,6 +260,11 @@ void ThroughputView::initMenus()
     connect(m_aDisable, &QAction::triggered, this, &ThroughputView::onDisableItem);
     m_aDisable->setEnabled(false);
 
+    m_actionClientArgs = new QAction("Copy Iperf client cmd");
+    connect(m_actionClientArgs, &QAction::triggered, this, &ThroughputView::copyClientArgs);
+    m_actionServerArgs = new QAction("Copy Iperf server cmd");
+    connect(m_actionServerArgs, &QAction::triggered, this, &ThroughputView::copyServerArgs);
+
     m_tpmenu = new QMenu(); // config throughput pair right click menu
     m_tpmenu->addAction(m_actionCopy);
     m_tpmenu->addAction(m_actionPaste);
@@ -268,6 +274,9 @@ void ThroughputView::initMenus()
     m_tpmenu->addSeparator();
     m_tpmenu->addAction(m_aEnable);
     m_tpmenu->addAction(m_aDisable);
+    m_tpmenu->addSeparator();
+    m_tpmenu->addAction(m_actionClientArgs);
+    m_tpmenu->addAction(m_actionServerArgs);
 
 }
 
@@ -330,9 +339,15 @@ void ThroughputView::onTPUTContextMenu(QPoint pos)
             //don't show menu on not supported item
             return;
         }
+        if (tp->getDataType()!=TPMgrData::config){
+            m_actionClientArgs->setEnabled(false);
+            m_actionServerArgs->setEnabled(false);
+        }else{
+            m_actionClientArgs->setEnabled(true);
+            m_actionServerArgs->setEnabled(true);
+        }
     }
     //show right menu
-
     m_tpmenu->popup(ui->tv_throughput->mapToGlobal(pos));
 }
 
@@ -385,6 +400,30 @@ void ThroughputView::onDisableItem(bool checked)
     }
 }
 
+void ThroughputView::copyClientArgs(bool checked)
+{
+    Q_UNUSED(checked)
+    QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
+    if (idxs.length()>0){
+        TP *tp= m_tpmgr->getItem(idxs[0]);
+        QString args = m_iperfwrapper->toIperf3args(tp->getClientArgsMap());
+        m_clipboard->setText(args);
+    }
+}
+
+void ThroughputView::copyServerArgs(bool checked)
+{
+    Q_UNUSED(checked)
+    QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
+    if (idxs.length()>0){
+        TP *tp= m_tpmgr->getItem(idxs[0]);
+        m_clipboard->setText(tp->getServerArgs());
+        QString args = m_iperfwrapper->toIperf3args(tp->getServerArgsMap());
+        m_clipboard->setText(args);
+
+    }
+}
+
 void ThroughputView::onItemDClicked(QModelIndex idx)
 {
     TP *tp = m_tpmgr->getItem(idx);
@@ -426,16 +465,10 @@ void ThroughputView::initThroughputChart()
     connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
-    //
-    // connect(m_tpmgr, &QAbstractItemModel::rowsInserted,
-    //         [&](const QModelIndex &parent, int first, int last) {
-    //             for (; first <= last; ++first) {
-    //         ui->tv_throughput->expand(m_tpmgr->index(first, 0, parent));
-    //             }
-    //         });
+
     ui->tv_throughput->setModel(m_tpmgr);
     // ui->tv_throughput->setHeaderHidden(true);// not show header column
-    // ui->tv_throughput->expandAll();// will show folding icon when have child item??
+
     /* TODO: set specify column font size,
     // current not inherent other setting
     header = new CustomHeaderView(Qt::Horizontal, ui->tv_throughput);
@@ -443,6 +476,7 @@ void ThroughputView::initThroughputChart()
     header->setColumnSize(int(TP::mintp), s/2);
     header->setColumnSize(int(TP::maxtp), s/2);
     ui->tv_throughput->setHeader(header);
+
     // set specify column font size
 //    QHeaderView *header = ui->tv_throughput->header();
 //    QFont font = header->font();
@@ -469,7 +503,7 @@ void ThroughputView::initThroughputChart()
 
     ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu
     connect(ui->tv_throughput, &QTreeView::customContextMenuRequested, this, &ThroughputView::onTPUTContextMenu);
-    connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &ThroughputView::onItemDClicked); //edit item on double click
+    connect(ui->tv_throughput, &QTreeView::doubleClicked, this, &ThroughputView::onItemDClicked); //edit iperf config item on double click
 
     //TODO: slow update text
     tpdirdelegate = new TPDirDelegate(ui->tv_throughput);

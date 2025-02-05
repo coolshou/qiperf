@@ -222,13 +222,29 @@ QString TP::getServerArgs()
 
         QJsonObject o_server = jsonRoot["server"].toObject();
         o_server["server"]=true;
-
         QJsonDocument doc(o_server);
         QString strJson(doc.toJson(QJsonDocument::Compact));
         return strJson;
     }else{
         qDebug() << "getServerArgs wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
         return "";
+    }
+}
+
+QVariantMap TP::getServerArgsMap()
+{
+    QJsonParseError error;
+    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError){
+        QJsonObject jsonRoot = fulldoc.object();
+
+        QJsonObject jobj = jsonRoot.value("server").toObject();
+        jobj["server"]=true;
+        QJsonDocument doc(jobj);
+        return doc.toVariant().toMap();
+    }else{
+        qDebug() << "getServerArgsMap wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+        return QVariantMap();
     }
 }
 
@@ -283,7 +299,7 @@ QVariantMap TP::getClientArgsMap()
         QJsonDocument doc(o_client);
         return doc.toVariant().toMap();
     }else{
-        qDebug() << "getClientArgs wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+        qDebug() << "getClientArgsMap wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
         return QVariantMap();
     }
 }
