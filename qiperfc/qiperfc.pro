@@ -40,6 +40,12 @@ unix {
 INCLUDEPATH += \
     $$PWD/lib
 
+# for excel
+QXLSX_PARENTPATH=$$PWD/lib/QXlsx/QXlsx         # current QXlsx path is . (. means curret directory)
+QXLSX_HEADERPATH=$$PWD/lib/QXlsx/QXlsx/header/  # current QXlsx header path is ./header/
+QXLSX_SOURCEPATH=$$PWD/lib/QXlsx/QXlsx/source/  # current QXlsx source path is ./source/
+include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
+
 # debug
 #CONFIG += sanitizer
 #CONFIG += sanitize_address
