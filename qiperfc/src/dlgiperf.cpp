@@ -22,6 +22,7 @@ DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
 {
     ui->setupUi(this);
     m_tpmgr = tpmgr;
+    mgrls.append("");
     old_mss = 0;
     b_ipv6 = false;
     connect(ui->cb_version, &QComboBox::currentTextChanged, this, &DlgIperf::ChangeVersion);
@@ -42,7 +43,8 @@ DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
     connect(ui->cb_mserver_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMServer);
     connect(ui->cb_mclient_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMClient);
 
-    connect(ui->sb_mss, &QSpinBox::valueChanged, this, &DlgIperf::onMSSvalueChanged);
+    // connect(ui->sb_mss, &QSpinBox::valueChanged, this, &DlgIperf::onMSSvalueChanged); //TODO: Not good for UI interaction
+
     // TODD: temp disable item of UDP/SCTP
 //    auto * model = qobject_cast<QStandardItemModel*>(ui->cb_protocal->model());
 //    auto * itemUTP = model->item(1);
@@ -69,7 +71,11 @@ QString DlgIperf::getJsonCfg()
         QJsonObject serverObj;
         serverObj.insert("version", ui->cb_version->currentText());
         serverObj.insert("port", ui->sb_port->value());
-        serverObj.insert("manager", ui->cb_mserver_ip->currentText());
+        if (ui->cb_mserver_ip->currentText().isEmpty()){
+            serverObj.insert("manager", ui->cb_target_ip->currentText());
+        }else{
+            serverObj.insert("manager", ui->cb_mserver_ip->currentText());
+        }
         serverObj.insert("protocal", ui->cb_protocal->currentText());
         serverObj.insert("parallel", ui->sb_parallel->value());
         serverObj.insert("reverse", ui->chk_reverse->isChecked());
@@ -89,7 +95,11 @@ QString DlgIperf::getJsonCfg()
     QJsonObject clientObj;
     clientObj.insert("version", ui->cb_version->currentText());
     clientObj.insert("port", ui->sb_port->value());
-    clientObj.insert("manager", ui->cb_mclient_ip->currentText());
+    if (ui->cb_mclient_ip->currentText().isEmpty()){
+        clientObj.insert("manager", ui->cb_client_bind_ip->currentText());
+    }else{
+        clientObj.insert("manager", ui->cb_mclient_ip->currentText());
+    }
     clientObj.insert("ipv6", b_ipv6);
     if (!ui->cb_client_bind_ip->currentText().isEmpty()) {
         //TODO: check IPv4/IPv6format
@@ -270,14 +280,20 @@ bool DlgIperf::isRequireConfigMet()
         ui->cb_client_bind_ip->setFocus();
         return false;
     }
-    if (ui->cb_mserver_ip->currentText() == ui->cb_mclient_ip->currentText()){
-        QMessageBox::warning(this, tr("WARNING!!"),
-                             tr("Forbid setting same address of Manager Server and Manager Client!!"),
-                             QMessageBox::Ok);
-        ui->cb_mclient_ip->setFocus();
-        //TODO: use style to hightlight some item:  *{border: 3px solid red;}
-        return false;
-    }
+    // if (ui->cb_mserver_ip->currentText()==""){
+    //     //TODO: use target ip as manager server ip
+    // }
+    // if (ui->cb_mclient_ip->currentText()==""){
+    //     //TODO: use bind ip as manager client ip
+    // }
+    // if (ui->cb_mserver_ip->currentText() == ui->cb_mclient_ip->currentText()){
+    //     QMessageBox::warning(this, tr("WARNING!!"),
+    //                          tr("Forbid setting same address of Manager Server and Manager Client!!"),
+    //                          QMessageBox::Ok);
+    //     ui->cb_mclient_ip->setFocus();
+    //     //TODO: use style to hightlight some item:  *{border: 3px solid red;}
+    //     return false;
+    // }
     if(ui->cb_version->currentText()=="3"){
         if (ui->chk_bidir->isChecked()){
             if (ui->sb_parallel->value()>10){
