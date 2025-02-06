@@ -10,3 +10,6 @@
 [submodule "lib/qntp"]
 	path = lib/qntp
 	url = https://github.com/coolshou/qntp.git
+[submodule "qiperfc/lib/QXlsx"]
+	path = qiperfc/lib/QXlsx
+	url = https://github.com/coolshou/QXlsx.git
