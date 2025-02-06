@@ -18,10 +18,10 @@ TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QObject *parent)
     connect(this, &QAbstractItemModel::rowsInserted, this, &TPMgr::onRowsInserted);
 
     rootItem=nullptr;
+    groupItem = nullptr;
 //    item = invisibleRootItem();
     reset();
     m_intervals.clear();
-    groupItem = nullptr;
     QWidget widget;
     QPalette palette = widget.palette();
     m_disabledTextColor = palette.color(QPalette::Disabled, QPalette::Text);
@@ -187,40 +187,20 @@ int TPMgr::rowCount(const QModelIndex &parent) const
 {
     // return correct child row count
     TP *parentItem;
-    if (parent.column() > 0)
+    if (parent.column() > 0){
         return 0;
+    }
 
     if (!parent.isValid()) {
         // Root level: Number of parents
         return rootItem->childCount();//.size();
     }
     //TODO: groupItem?
-
     parentItem = static_cast<TP *>(parent.internalPointer());
 
-    // qDebug() << "parent:" << parentItem;
-    // qDebug() << "    childCount:" << parentItem->childCount();
+    // qDebug() << "rowCount parent:" << parentItem << " childCount:" << QString::number(parentItem->childCount());
     return parentItem->childCount();
 
-//     int rowCount=0;
-//     TP *parentItem;
-// //    if (parent.column() > 0)
-// //        return 0;
-
-//     if (!parent.isValid()){
-//         // if(m_showgroup){
-//         //     qDebug() << "TPMgr::rowCount: parent: group" << groupItem;
-//         //     parentItem = groupItem;
-//         // }else{
-//             // qDebug() << "TPMgr::rowCount: parent: root" << rootItem;
-//             parentItem = rootItem;
-//         // }
-//     }else{
-//         parentItem = static_cast<TP*>(parent.internalPointer());
-//     }
-//     rowCount = parentItem->childCount();
-//     qDebug() << "parentItem:" << parentItem << " rowCount:" << QString::number(rowCount);
-//     return rowCount;
 }
 
 TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
@@ -230,13 +210,13 @@ TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
         pitm = parent;
     }else{
         pitm = getRootItem();
-        qInfo() << "add getRootItem " << pitm;
+        qInfo() << "No parent, add:getRootItem " << pitm;
     }
     QModelIndex midx = indexFromItem(pitm);
     int idx = getMaxIdx();
     beginInsertRows(midx, idx, idx);
     TP *tp = new TP(QString::number(idx), data, datatype, pitm);
-    qDebug() <<"idx:" << idx << " tp:" << tp << " add pitm: " << pitm ;//<< " data:" << data;
+    qDebug() <<"Max idx:" << idx << " tp:" << tp << " add:"<< datatype << " pitm: " << pitm ;//<< " data:" << data;
     pitm->appendChild(tp);
     endInsertRows();
     return tp;
@@ -273,6 +253,7 @@ void TPMgr::del(QModelIndex idx)
 
 int TPMgr::rootChildCount()
 {
+
     return rootItem->childCount();
 }
 
@@ -316,6 +297,32 @@ bool TPMgr::removeRows(int row, int count, const QModelIndex &parent)
     endRemoveRows();
 
     return success;
+}
+
+bool TPMgr::moveRow(const QModelIndex &sourceParent, int sourceRow, const QModelIndex &destinationParent, int destinationChild)
+{
+    if (!sourceParent.isValid() || !destinationParent.isValid()){
+        qDebug() << " sourceParent.isValid:" << sourceParent.isValid();
+        qDebug() << " destinationParent.isValid:" << destinationParent.isValid();
+        return false;
+    }
+    TP *sourceParentItem = static_cast<TP*>(sourceParent.internalPointer());
+    TP *destinationParentItem = static_cast<TP*>(destinationParent.internalPointer());
+
+    if (sourceRow < 0 || sourceRow >= sourceParentItem->childCount() ||
+        destinationChild < 0 || destinationChild > destinationParentItem->childCount()){
+        return false;
+    }
+    qDebug() << "sourceParent:" << sourceParent << " sourceRow:" << QString::number(sourceRow);
+    qDebug() << "destinationParent:" << destinationParent << " destinationChild:" << QString::number(destinationChild);
+    beginMoveRows(sourceParent, sourceRow, sourceRow, destinationParent, destinationChild);
+    // data.move(sourceRow, destinationChild);
+    rootItem->removeChild(sourceParentItem);
+    // TP *item = sourceParentItem->child(sourceRow);
+    // sourceParentItem->removeChild(sourceRow);
+    destinationParentItem->insertChild(destinationChild, sourceParentItem);
+    endMoveRows();
+    return true;
 }
 
 QByteArray TPMgr::savedata()
@@ -379,11 +386,28 @@ bool TPMgr::loaddata(QByteArray data)
 void TPMgr::reset(){
     //reset all data to none
     if (rootItem){
+        if (rootItem->childCount()>0){
+            rootItem->removeChildren(0,rootItem->childCount());
+        }
         delete rootItem;
     }
+    if (m_showgroup){
+        if (groupItem){
+            if (groupItem->childCount()>0){
+                groupItem->removeChildren(0,groupItem->childCount());
+            }
+            // delete groupItem;//direct delete cause app crash??
+        }
+    }
     rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
-    qDebug() << "rootItem:" << rootItem;
+    QModelIndex midx = indexFromItem(rootItem);
+    qDebug() << "rootItem:" << rootItem << " midx:" << midx << " valid:" << midx.isValid();
     m_intervals.clear();
+    if (m_showgroup){
+       if (groupItem!=nullptr){
+           rootItem->appendChild(groupItem);
+        }
+    }
 }
 
 void TPMgr::clear(){
@@ -416,14 +440,7 @@ TP *TPMgr::getItem(const QModelIndex &index) const
             qDebug() << "getItem: no item??";
         }
     }
-    // TP *itm;// = getRootItem();
-    // if (m_showgroup){
-    //     itm = groupItem;
-    // }else{
-    //     itm = rootItem;
-    // }
-    // qDebug() << "getItem rootItem:" << itm;
-    // return itm;
+    return nullptr;
 }
 
 TP *TPMgr::getRootItem()
@@ -438,8 +455,10 @@ TP *TPMgr::getRootItem()
 TP *TPMgr::getGroupItem()
 {
     if (groupItem){
+        qDebug() << "getGroupItem:" << groupItem;
         return groupItem;
     }else {
+        qDebug() << "newGroupItem";
         return newGroupItem();
     }
 }
@@ -456,6 +475,7 @@ void TPMgr::setItem(const QModelIndex &index, TP *item)
 {
     if (index.isValid()) {
         qDebug() << "TODO: setItem:" << index << " item:" << item;
+        qDebug() << "Direction:" << item->getDirection();
 //        rootItem->appendChild();
         // TODO: setItem
     }
@@ -730,7 +750,7 @@ void TPMgr::setTestData()
 }
 
 TP *TPMgr::newGroupItem()
-{
+{   // create new Total/Group item under rootItem
     QModelIndex midx = indexFromItem(rootItem);
     qDebug() << " root idx: " << midx;
     beginInsertRows(midx, 0, 0);
@@ -827,10 +847,27 @@ void TPMgr::setShowGroup(bool bShow)
     //beginMoveRows()
     //endMoveRows()
     if (m_showgroup){
-        // if (groupItem==nullptr){
-        //     TP *groupItem = newGroupItem();
+        QList<TP*> childs = rootItem->getChilds();
+        qDebug() << "childs:" << childs << " child count:" << QString::number(childs.count());
+        if (groupItem==nullptr){
+            // groupItem = newGroupItem();
+            newGroupItem();
+        }
+
+        foreach (auto *tp, childs) {
+            qDebug() << "tp:" << tp << " row:" << QString::number(tp->row());
+            moveRow(indexFromItem(tp), tp->row(), indexFromItem(groupItem), groupItem->childCount());
+        }
+        // moveRow(index(0, 0), 0, indexFromItem(groupItem), 0);
+        //moveRow
+        // foreach (auto *tp, childs) {
+        //     rootItem->removeChild(tp); // TODO: correct way to move
+        //     tp->setParent(groupItem);
+        //     groupItem->appendChild(tp);
+
         // }
-        qDebug() << "ShowGroup: rootItem->childCount():" << rootItem->childCount();
+
+        // qDebug() << "groupItem:" << groupItem <<" ShowGroup: rootItem->childCount():" << rootItem->childCount();
         // TODO: move exist test item to groupItem
         // qDebug() << "groupItem:" << groupItem;
         // if (!groupItem){
@@ -839,8 +876,6 @@ void TPMgr::setShowGroup(bool bShow)
 
     }else{
         qDebug() << "TODO: HideGroup: groupItem and move all subitem to rootItem";
-
-
     }
 }
 

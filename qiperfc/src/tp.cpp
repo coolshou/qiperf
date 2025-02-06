@@ -123,6 +123,33 @@ bool TP::removeChildren(int position, int count)
     return true;
 }
 
+TP * TP::removeChild(TP *child)
+{
+    int idx = m_childItems.indexOf(child);
+    if (idx>=0){
+       return m_childItems.takeAt(idx);
+    }
+}
+
+void TP::removeChild(int row)
+{
+    if (row >= 0 && row < m_childItems.size()) {
+        m_childItems.removeAt(row);
+    }
+}
+
+void TP::insertChild(int row, TP *child)
+{
+    if (row >= 0 && row <= m_childItems.size()) {
+        m_childItems.insert(row, child);
+    }
+}
+
+void TP::setParent(TP *parent)
+{
+    m_parentItem = parent;
+}
+
 int TP::row() const
 {
     //TODO: after clear, the may cause problem

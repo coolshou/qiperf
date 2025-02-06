@@ -52,6 +52,10 @@ public:
     int setData(int column, QVariant var);
     bool removeChildren(int position, int count);
     //explicit EndPoint(QString id, QString data, QObject *parent = nullptr);
+    TP * removeChild(TP *child);
+    void removeChild(int row);
+    void insertChild(int row, TP *child);
+    void setParent(TP *parent);
 
     QString getID();
     void loadData(QString data);

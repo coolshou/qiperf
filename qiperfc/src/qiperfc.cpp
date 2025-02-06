@@ -178,6 +178,7 @@ bool QIperfC::load(QString filename)
               break;
         }
     }
+    onNew();
     if (m_qipconfig->loadFromFile(filename)){
         ui->actionSave->setEnabled(true);
         return true;
@@ -256,8 +257,8 @@ void QIperfC::onOpen()
             qDebug() << "Not support file ext format: " << ext << " Expect:" << QIPERF_EXT;
             return;
         }
-        doClear();
-        onNew();
+        // doClear();
+        // onNew();
         if (load(fileName)){
             m_oldsavepath = fi.path();
         }
@@ -413,7 +414,7 @@ void QIperfC::onStart()
                 }
                 //tell server add iperf server
                 cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
-                qInfo() << "server cmd: "<< cmd ;
+                // qInfo() << "server cmd: "<< cmd ;
                 rs = m_wss[serverIP]->sendText(cmd);
                 if (rs<=0){
                     emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());

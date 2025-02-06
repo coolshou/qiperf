@@ -58,7 +58,8 @@ public:
     //
 //    bool removeRow(int row, const QModelIndex &parent = QModelIndex()) override;
     bool removeRows(int row, int count, const QModelIndex &parent) override;
-
+    bool moveRow(const QModelIndex &sourceParent, int sourceRow,
+                 const QModelIndex &destinationParent, int destinationChild) ;
     // ======
     TP * add(QString data, TPMgrData::DataType datatype=TPMgrData::config, TP *parent=nullptr);
     QModelIndex indexFromItem(TP *item);
