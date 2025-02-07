@@ -3,7 +3,7 @@
 # build deb package
 DOBUILD=0
 CODENAME=`grep '^VERSION_CODENAME' /etc/os-release | cut -d= -f2`
-WINVERSION=0.8.11402.05
+WINVERSION=0.8.11402.07
 #WINVERSION=0.7.11401.21
 VERSION=${WINVERSION}-1
 
@@ -45,7 +45,7 @@ RVRPORT+=(60010)
 
 # Room6 - TR398 PCs
 DOREMOTE=0
-DOREMOTEWIN=1 #; remote is windows
+DOREMOTEWIN=0 #; remote is windows
 DOREMOTEIP="172.31.117.120"
 
 if [ $DOREMOTEWIN -eq 1 ]; then

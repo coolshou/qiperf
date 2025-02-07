@@ -1,12 +1,13 @@
-qiperf (0.8.11402.05-1) unstable; urgency=medium
+qiperf (0.8.11402.07-1) unstable; urgency=medium
 
   * Adjust throughput chart time axis max value during testing
   * Add Total throughput value
   * Fix Total throughput value store place
   * adjust iperf Parallel(-P) Max value to 128
+  * Fix iperf UDP mode use -b 0 as default (for Max throughut)
   * qiperfd: Add NTP server & NTP client
 
- -- coolshou <coolshou2060@gmail.com>  Wed, 05 Feb 2025 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Fri, 07 Feb 2025 10:00:00 +0800
 
 qiperf (0.7.11401.21-1) unstable; urgency=medium
 
