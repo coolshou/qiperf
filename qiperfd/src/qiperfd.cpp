@@ -82,7 +82,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 #endif
 
     startNtpServer();
-    m_ntpsync = new NtpSync(this);
+    // m_ntpsync = new NtpSync(this);
     // m_ntpsync->sync("192.168.70.147");
 
     // system service manager
@@ -709,7 +709,7 @@ void QIperfd::onWSactMessage(QString msg)
         qDebug()<< "CMD_NTP_SYNC";
         cut = msg.indexOf(':', 0);
         msg = msg.right(msg.length()-cut-1);
-        m_ntpsync->sync(msg);
+        // m_ntpsync->sync(msg);
     }else {
         qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;
         qDebug() << "\n==========";

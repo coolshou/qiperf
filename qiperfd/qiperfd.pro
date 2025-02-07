@@ -14,7 +14,7 @@ include(../qiperf.pri)
 unix {
 include(../QCtrlSignals/qctrlsignals.pri)
 #include(../sigwatch.pri)
-include(../lib/qntp/qntp.pri)
+#include(../lib/qntp/qntp.pri)
 }
 unix:!android {
     #LIBS += -lsystemd
@@ -37,7 +37,6 @@ win32:{
 
 SOURCES += \
     ../lib/ntp/ntpserver.cpp \
-    ../lib/ntp/ntpsync.cpp \
     ../src/endpointtype.cpp \
     ../src/icmpping.cpp \
     ../src/icmpwrapper.cpp \
@@ -52,7 +51,8 @@ SOURCES += \
     src/qiperfd.cpp \
     src/udpsrv.cpp \
     src/wsserver.cpp
-    #$$PWD/../src/sighandler.cpp
+# ../lib/ntp/ntpsync.cpp \
+#$$PWD/../src/sighandler.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -61,7 +61,6 @@ else: unix:!android: target.path = /opt/qiperf/bin
 
 HEADERS += \
     ../lib/ntp/ntpserver.h \
-    ../lib/ntp/ntpsync.h \
     ../src/endpointtype.h \
     ../src/icmpping.h \
     ../src/comm.h \
@@ -79,7 +78,7 @@ HEADERS += \
     src/udpsrv.h \
     src/version.h \
     src/wsserver.h
-
+    # ../lib/ntp/ntpsync.h \
     #$$PWD/../src/sighandler.h
 
 android {

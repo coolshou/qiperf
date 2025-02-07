@@ -30,7 +30,7 @@
 #endif
 
 #include "../lib/ntp/ntpserver.h"
-#include "../lib/ntp/ntpsync.h"
+// #include "../lib/ntp/ntpsync.h"
 
 class QIperfd : public QObject
 {
@@ -134,7 +134,7 @@ private:
     IcmpPing *m_icmpping;
     bool bNtpserver; // enable NTP server
     NtpServer *m_ntpserver;
-    NtpSync *m_ntpsync;
+    // NtpSync *m_ntpsync;
 };
 
 #endif // QIPERFD_H
