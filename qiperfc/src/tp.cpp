@@ -484,17 +484,24 @@ void TP::setComment(QString comment)
 
 void TP::setThroughput(QString value)
 {
-    //min value
-    if ((m_itemDatas[int(TP::mintp)].toDouble()<=0 && (value.toDouble()>0))||
+    if (value.isEmpty()){
+        qDebug() << "setThroughput isEmpty";
+        m_itemDatas[int(TP::mintp)] = "";
+        m_itemDatas[int(TP::maxtp)] = "";
+        m_itemDatas[int(TP::throughput)] = "";
+    }else{
+        //min value
+        if ((m_itemDatas[int(TP::mintp)].toDouble()<=0 && (value.toDouble()>0))||
             (value.toFloat() < m_itemDatas[int(TP::mintp)].toDouble())){
-        m_itemDatas[int(TP::mintp)] = value;
-    }
-    //max value
-    if (m_itemDatas[int(TP::maxtp)]==""||
+            m_itemDatas[int(TP::mintp)] = value;
+        }
+        //max value
+        if (m_itemDatas[int(TP::maxtp)]==""||
             (value.toFloat() > m_itemDatas[int(TP::maxtp)].toDouble())){
-        m_itemDatas[int(TP::maxtp)] = value;
+            m_itemDatas[int(TP::maxtp)] = value;
+        }
+        m_itemDatas[int(TP::throughput)] = value;
     }
-    m_itemDatas[int(TP::throughput)] = value;
 }
 
 void TP::setThroughput(QString dir, QString value)
@@ -581,6 +588,11 @@ void TP::clearThroughput()
     m_maxTx = 0;
     m_minRx = 0;
     m_maxRx = 0;
+    if (m_itemDatas.length()>0){
+    qDebug() << "throughput:" << m_itemDatas[int(TP::throughput)]
+             << " min throughput:" << m_itemDatas[int(TP::throughput)]
+             << " max throughput:" << m_itemDatas[int(TP::throughput)] ;
+    }
 }
 
 int TP::getLostPackets()

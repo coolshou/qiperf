@@ -66,11 +66,11 @@ public slots:
     void onOpen();
     void onSave();
     void onImportIperf3Log();
-    bool on_Clear();
+    bool on_Clear(bool showNotice=true);
     void initStart();
     void onStart();
     void onStop();
-    bool onClear();
+    bool onClear(bool showNotice=true);
     void onShowLog();
     void onConfig();
     void onAbout();

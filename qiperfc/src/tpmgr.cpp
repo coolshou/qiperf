@@ -60,6 +60,27 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             return m_disabledTextColor;
         }
     }
+    if ((role == Qt::DisplayRole)&&(index.column() == TP::cols::throughput)&&
+        ((item->getDataType()==TPMgrData::group)||
+         (item->getDataType()==TPMgrData::config))){
+        // sum of subitem's value
+        if (item->childCount()>0) {
+            // Sum child values
+            float sum = 0;
+            QString s;
+            for (TP* child : item->getChilds()) {
+                sum += child->getThroughput().toFloat();
+            }
+            // if (item->getDataType()==TPMgrData::config){
+            //     qDebug() <<" config TP:" <<item->getThroughput();
+            // }
+            // if (item->getDataType()==TPMgrData::group){
+            //     qDebug() << "getChilds:" << item->getChilds() << "group sum:" << QString::number(sum);
+            // }
+            item->setThroughput(s.setNum(sum));
+            return sum;
+        }
+    }
     if (item->getDataType()==TPMgrData::group){
         if ((index.column() == TP::cols::throughput)||
             (index.column() == TP::cols::mintp) ||
@@ -301,13 +322,20 @@ bool TPMgr::removeRows(int row, int count, const QModelIndex &parent)
 
 bool TPMgr::moveRow(const QModelIndex &sourceParent, int sourceRow, const QModelIndex &destinationParent, int destinationChild)
 {
-    if (!sourceParent.isValid() || !destinationParent.isValid()){
+    // if (!sourceParent.isValid() || !destinationParent.isValid()){
+    if (!sourceParent.isValid()){
         qDebug() << " sourceParent.isValid:" << sourceParent.isValid();
-        qDebug() << " destinationParent.isValid:" << destinationParent.isValid();
+        // qDebug() << " destinationParent.isValid:" << destinationParent.isValid();
         return false;
     }
+
     TP *sourceParentItem = static_cast<TP*>(sourceParent.internalPointer());
-    TP *destinationParentItem = static_cast<TP*>(destinationParent.internalPointer());
+    TP *destinationParentItem;
+    if (!destinationParent.isValid()){
+        destinationParentItem = rootItem;
+    }else{
+        destinationParentItem = static_cast<TP*>(destinationParent.internalPointer());
+    }
 
     if (sourceRow < 0 || sourceRow >= sourceParentItem->childCount() ||
         destinationChild < 0 || destinationChild > destinationParentItem->childCount()){
@@ -317,7 +345,8 @@ bool TPMgr::moveRow(const QModelIndex &sourceParent, int sourceRow, const QModel
     qDebug() << "destinationParent:" << destinationParent << " destinationChild:" << QString::number(destinationChild);
     beginMoveRows(sourceParent, sourceRow, sourceRow, destinationParent, destinationChild);
     // data.move(sourceRow, destinationChild);
-    rootItem->removeChild(sourceParentItem);
+    sourceParentItem->parentItem()->removeChild(sourceParentItem);
+    // rootItem->removeChild(sourceParentItem);
     // TP *item = sourceParentItem->child(sourceRow);
     // sourceParentItem->removeChild(sourceRow);
     destinationParentItem->insertChild(destinationChild, sourceParentItem);
@@ -413,12 +442,12 @@ void TPMgr::reset(){
 void TPMgr::clear(){
     // clean test record
     // TODO: when there is child the folding icon will not remove after clear!!
-    TP *itm = getRootItem();
+    TP *itm = getRootItem(); // rootitem or groupitem
     if (itm->haveChilds()){
         foreach(auto tp, itm->getChilds()){
             if (tp->haveChilds()){
                 tp->removeChildren(0, tp->childCount());
-                m_treeview->collapse(indexFromItem(tp));
+                // m_treeview->collapse(indexFromItem(tp));
             }
             tp->clearThroughput();
             tp->resetData();
@@ -434,7 +463,6 @@ TP *TPMgr::getItem(const QModelIndex &index) const
     if (index.isValid()) {
         TP* item = static_cast<TP*>(index.internalPointer());
         if (item){
-            // qDebug() << "TPMgr::getItem:" << item;
             return item;
         }else{
             qDebug() << "getItem: no item??";
@@ -455,10 +483,10 @@ TP *TPMgr::getRootItem()
 TP *TPMgr::getGroupItem()
 {
     if (groupItem){
-        qDebug() << "getGroupItem:" << groupItem;
+        // qDebug() << "getGroupItem:" << groupItem;
         return groupItem;
     }else {
-        qDebug() << "newGroupItem";
+        // qDebug() << "newGroupItem";
         return newGroupItem();
     }
 }
@@ -844,38 +872,37 @@ void TPMgr::setShowGroup(bool bShow)
 {
     qDebug() << "TODO: setShowGroup: " << bShow;
     m_showgroup = bShow;
-    //beginMoveRows()
-    //endMoveRows()
+    TP *targetitem;
+    QModelIndex targetparent;
+
+    QList<TP*> childs;
     if (m_showgroup){
-        QList<TP*> childs = rootItem->getChilds();
+        childs = rootItem->getChilds();
         qDebug() << "childs:" << childs << " child count:" << QString::number(childs.count());
         if (groupItem==nullptr){
             // groupItem = newGroupItem();
             newGroupItem();
         }
-
+        targetitem = groupItem;
+        targetparent = indexFromItem(groupItem);
+        // foreach (auto *tp, childs) {
+        //     qDebug() << "tp:" << tp << " row:" << QString::number(tp->row());
+        //     moveRow(indexFromItem(tp), tp->row(), indexFromItem(groupItem), groupItem->childCount());
+        // }
+    }else{
+        if (groupItem){
+            childs = groupItem->getChilds();
+        }
+        targetitem = rootItem;
+        targetparent = indexFromItem(rootItem);
+    }
+    if (childs.length()>0){
         foreach (auto *tp, childs) {
             qDebug() << "tp:" << tp << " row:" << QString::number(tp->row());
-            moveRow(indexFromItem(tp), tp->row(), indexFromItem(groupItem), groupItem->childCount());
+            moveRow(indexFromItem(tp), tp->row(), indexFromItem(targetitem), targetitem->childCount());
         }
-        // moveRow(index(0, 0), 0, indexFromItem(groupItem), 0);
-        //moveRow
-        // foreach (auto *tp, childs) {
-        //     rootItem->removeChild(tp); // TODO: correct way to move
-        //     tp->setParent(groupItem);
-        //     groupItem->appendChild(tp);
-
-        // }
-
-        // qDebug() << "groupItem:" << groupItem <<" ShowGroup: rootItem->childCount():" << rootItem->childCount();
-        // TODO: move exist test item to groupItem
-        // qDebug() << "groupItem:" << groupItem;
-        // if (!groupItem){
-        // rootItem->appendChild(groupItem);
-        // }
-
-    }else{
-        qDebug() << "TODO: HideGroup: groupItem and move all subitem to rootItem";
+    }else {
+        qDebug() << "setShowGroup: No child item to move";
     }
 }
 

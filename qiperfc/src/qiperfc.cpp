@@ -167,7 +167,7 @@ bool QIperfC::load(QString filename)
               break;
           case QMessageBox::Discard:
               // Don't Save was clicked
-              on_Clear();
+              on_Clear(false);
               break;
           case QMessageBox::Cancel:
               // Cancel was clicked
@@ -178,7 +178,7 @@ bool QIperfC::load(QString filename)
               break;
         }
     }
-    onNew();
+    // onNew();
     if (m_qipconfig->loadFromFile(filename)){
         ui->actionSave->setEnabled(true);
         return true;
@@ -303,10 +303,10 @@ void QIperfC::onImportIperf3Log()
     }
 }
 
-bool QIperfC::on_Clear()
+bool QIperfC::on_Clear(bool showNotice)
 {
     // this will clean iperf test pair config
-    return onClear();
+    return onClear(showNotice);
 }
 
 void QIperfC::initStart()
@@ -619,8 +619,8 @@ void QIperfC::onStop(){
     emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(m_TestStartTime.secsTo(enddatetime))+" sec)");
 }
 
-bool QIperfC::onClear(){
-    if (m_TestStartTime.isValid()){
+bool QIperfC::onClear(bool showNotice){
+    if (m_TestStartTime.isValid() && showNotice){
         int ret = QMessageBox::information(this, "NOTICE", "Previous test record will be clear, Continious?", QMessageBox::Ok|QMessageBox::Cancel);
         if (ret == QMessageBox::Cancel){
             // test cancel

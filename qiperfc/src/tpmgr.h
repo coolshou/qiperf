@@ -40,7 +40,6 @@ public:
     explicit TPMgr(bool showgroup=false, QTreeView *treeview=nullptr,  QObject *parent=nullptr);
     ~TPMgr() override;
     // //basic read only data model
-    // // editable data model
     QVariant data(const QModelIndex &idx, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role= Qt::DisplayRole) const override;
@@ -48,14 +47,8 @@ public:
     QModelIndex parent(const QModelIndex &idx) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-
-    // setData() const override; // require emit dataChanged()
-    // flags() const override;  //return ItemIsEditable
-//    Qt::ItemFlags flags(const QModelIndex &idx) const override;
     // // header display mathod
-
     //setHeaderData() const override;  // require emit headerDataChanged()
-    //
 //    bool removeRow(int row, const QModelIndex &parent = QModelIndex()) override;
     bool removeRows(int row, int count, const QModelIndex &parent) override;
     bool moveRow(const QModelIndex &sourceParent, int sourceRow,

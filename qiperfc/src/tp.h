@@ -78,7 +78,7 @@ public:
     QString getMgrClient(); //manager client ip
     void setMgrClient(QString addr);
     void swapServerClient(QString mgrServer, QString server, QString mgrClient, QString client);
-    QString getThroughput(); //
+    QString getThroughput();
     int getWaitTime();
     int getDelaytime();
     int setDirection(DirType direction);
