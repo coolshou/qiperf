@@ -72,6 +72,7 @@ void NtpSync::sync(QString server)
 
 void NtpSync::onReplyReceived(const QHostAddress &address, quint16 port, const NtpReply &reply)
 {
+    qDebug() << "onReplyReceived:" << address.toString() << " port:" << QString::number(port);
     // qDebug() << "Reply received from " << address.toString() << ":" << QString::number(port) << ": {\n"
     //        << "    leapIndicator    = " << QString::number(reply.leapIndicator()) << "\n"
     //        << "    versionNumber    = " << QString::number(reply.versionNumber()) << "\n"

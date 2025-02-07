@@ -44,6 +44,8 @@ void UdpSrv::readyRead()
     QHostAddress sender;
     quint16 senderPort;
     socket->readDatagram(Buffer.data(),Buffer.size(),&sender,&senderPort);
+
+    qDebug() << "UdpSrv::readyRead:" << Buffer;
 }
 
 void UdpSrv::onTimeout()
