@@ -144,8 +144,8 @@ static void psockerror(const char *s)
 #endif /* !_WIN32 */
 
 #ifdef _WIN32
-    #define socket(af, type, protocol) \
-        WSASocketW(af, type, protocol, NULL, 0, 0)
+//    #define socket(af, type, protocol) \
+//        WSASocketW(af, type, protocol, NULL, 0, 0)
     #define close_socket closesocket
     #define getpid _getpid
     #ifndef usleep
