@@ -22,15 +22,15 @@ win32 {
 
 }
 
-unix:!android {
-    DEBIAN_FILES.files += \
-        debian/copyright \
-        debian/changelog \
-        debian/source \
-        debian/source/format \
-        debian/qiperf-docs.docs \
-        debian/rules \
-        debian/control \
-        debian/README.source \
-        debian/README.Debian
-}
+# unix:!android {
+#     DEBIAN_FILES.files += \
+#         debian/copyright \
+#         debian/changelog \
+#         debian/source \
+#         debian/source/format \
+#         debian/qiperf-docs.docs \
+#         debian/rules \
+#         debian/control \
+#         debian/README.source \
+#         debian/README.Debian
+# }

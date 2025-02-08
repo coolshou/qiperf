@@ -23,11 +23,12 @@
 #include <cfgmgr32.h>
 #endif
 
-#include "endpoint.h"
+// #include "endpoint.h"
 #include "endpointtype.h"
 #include "endpointact.h"
-#include "version.h"
-#include "comm.h"
+// #include "version.h"
+#include "../src/versions.h"
+// #include "comm.h"
 
 #include <QDebug>
 
