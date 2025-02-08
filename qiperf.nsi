@@ -693,6 +693,7 @@ Function .onInit
     ${EndIf}
 
 # ;Check earlier installation
+    DetailPrint "Detect old version of qiperf..."
     ClearErrors
     ReadRegStr $0 HKLM "Software\${PRODUCT_REG_KEY}" "DisplayVersion"
     IfErrors init.uninst ; older versions might not have "Version" string set
@@ -761,6 +762,7 @@ Function install_qiperfd
 FunctionEnd
 
 Function install_vc_redist
+    DetailPrint "Install VC runtime for qiperf..."
     ;not installed, so run the installer in quiet mode
     !ifdef WIN64
     ExecWait '$INSTDIR\vc_redist.x64.exe /q /norestart'
@@ -770,6 +772,7 @@ Function install_vc_redist
 FunctionEnd
 
 Function check_vc_redist
+    DetailPrint "Check VC runtime..."
     ${If} ${RunningX64}
             ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" "Installed"
             StrCmp $1 1 installed install_vc_redist
