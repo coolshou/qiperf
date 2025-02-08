@@ -5,6 +5,7 @@
 #include <QAbstractSocket>
 
 #include "myfunc.h"
+#include <time.h>
 
 #include <QDebug>
 
@@ -173,7 +174,13 @@ void IcmpWrapper::work()
     if (ip_version == IP_V4){
         memset(&dest_addr, 0, sizeof(dest_addr));
         dest_addr.sin_family = AF_INET;
-        dest_addr.sin_addr.s_addr = inet_addr(m_target.toStdString().c_str());
+        // dest_addr.sin_addr.s_addr = inet_addr(m_target.toStdString().c_str());
+#ifdef _WIN32
+        const wchar_t* ipAddress = reinterpret_cast<const wchar_t*>(m_target.utf16());
+        InetPton(AF_INET, ipAddress , &dest_addr.sin_addr);
+#else
+        inet_pton(AF_INET, m_target.toStdString().c_str(), &dest_addr.sin_addr);
+#endif
     }else{
         //TODO: IPV6
        memset(&dest_addr6, 0, sizeof(dest_addr6));
@@ -196,7 +203,10 @@ void IcmpWrapper::work()
         error = sendto(sockfd, packet.data(), packet.size(), 0,
                        (struct sockaddr*)&dest_addr, sizeof(dest_addr));
         if (error <= 0) {
-            emit errorResponse(QString("Failed to send packet: %1").arg(strerror(errno)));
+            char errbuffer[256]; // Buffer to hold the error message
+            if (strerror_s(errbuffer, sizeof(errbuffer), errno)== 0){
+                emit errorResponse(QString("Failed to send packet: %1").arg(errbuffer));
+            }
             close_socket(sockfd);
             emit finished(m_idx);
             return;
@@ -225,6 +235,7 @@ void IcmpWrapper::work()
             if (n > 0) {
                 struct iphdr* ip_hdr = (struct iphdr*)buffer;
                 struct icmphdr* icmp_hdr = (struct icmphdr*)(buffer + (ip_hdr->ihl * 4));
+                wchar_t straddr[INET_ADDRSTRLEN];
                 /*
                  * Verify that this is indeed an echo reply packet.
                  */
@@ -232,8 +243,11 @@ void IcmpWrapper::work()
                       && icmp_hdr->type == ICMP_ECHO_REPLY)
                     && !(reply_addr.sin_family == AF_INET6
                          && icmp_hdr->type == ICMP6_ECHO_REPLY)) {
-                    emit errorResponse(QString("Received non-echo reply ICMP packet from %1")
-                                                      .arg(inet_ntoa(reply_addr.sin_addr)));
+                    if (InetNtop(AF_INET, &reply_addr.sin_addr, straddr, INET_ADDRSTRLEN) != NULL) {
+                        emit errorResponse(QString("Received non-echo reply ICMP packet from %1")
+                                               .arg(straddr));
+                                               //.arg(inet_ntoa(reply_addr.sin_addr)));
+                    }
                     continue;
                 }
                 /*
@@ -243,9 +257,11 @@ void IcmpWrapper::work()
                 uint16_t reply_id = icmp_hdr->un.echo.id;
                 int recv_sequence = ntohs(icmp_hdr->un.echo.sequence);
                 if (reply_id != htons(packet_id) || recv_sequence != sequence) {
+                    if (InetNtop(AF_INET, &reply_addr.sin_addr, straddr, INET_ADDRSTRLEN) != NULL) {
                     emit errorResponse(QString("Received reply ICMP packet with wrong sequence from %1, SEQ:%2")
-                                                      .arg(inet_ntoa(reply_addr.sin_addr))
-                                      .arg(recv_sequence));
+                                               .arg(straddr) // .arg(inet_ntoa(reply_addr.sin_addr))
+                                               .arg(recv_sequence));
+                    }
                     continue;
                 }
                 // Calculate the checksum of the received ICMP header
@@ -258,16 +274,20 @@ void IcmpWrapper::work()
 
                 if (received_checksum == calculated_checksum) {
                     int received_ttl = ip_hdr->ttl;
+                    if (InetNtop(AF_INET, &reply_addr.sin_addr, straddr, INET_ADDRSTRLEN) != NULL) {
                     emit errorResponse(QString("Received ICMP reply from %1: SEQ=%2 time=%3 TTL=%4")
-                                      .arg(inet_ntoa(reply_addr.sin_addr))
+                                               .arg(straddr)  //.arg(inet_ntoa(reply_addr.sin_addr))
                                       .arg(recv_sequence)
                                       .arg((double)delay / 1000.0)
                                       .arg(received_ttl));
+                    }
                     emit icmpResponseTime(recv_sequence, (double)delay / 1000.0, " ");
                     break;
                 }else{
+                    if (InetNtop(AF_INET, &reply_addr.sin_addr, straddr, INET_ADDRSTRLEN) != NULL) {
                     emit errorResponse(QString("Received ICMP echo reply from %1 with invalid checksum")
-                                                          .arg(inet_ntoa(reply_addr.sin_addr)));
+                                                          .arg(straddr));//.arg(inet_ntoa(reply_addr.sin_addr)));
+                    }
                 }
             }else{
                 /* No data available yet, try to receive again. */
@@ -359,7 +379,10 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
     if (error != 0) {
         if (error == EAI_SYSTEM){
 //            fprintf(stderr, "getaddrinfo: %s\n", strerror(errno));
-            qDebug() << "getaddrinfo: " << strerror(errno);
+            char errbuffer[256]; // Buffer to hold the error message
+            if (strerror_s(errbuffer, sizeof(errbuffer), errno)== 0){
+                qDebug() << "getaddrinfo: " << errbuffer;
+            }
         }else{
 //            fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(error));
             qDebug() << "getaddrinfo: " << gai_strerror(errno);
@@ -557,7 +580,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
             char msg_buf[MESSAGE_BUFFER_SIZE];
             char packet_info_buf[MESSAGE_BUFFER_SIZE];
-            struct in6_addr msg_addr = {0};
+            struct in6_addr msg_addr = {{0}};
 #ifdef _WIN32
             WSABUF msg_buf_struct = {
                 sizeof(msg_buf),
@@ -826,15 +849,18 @@ unsigned short IcmpWrapper::calculateChecksum(void *b, int len) {
 void IcmpWrapper::current_time(const char *timestempformat) {
     Q_UNUSED(timestempformat) // TODO: custom timestemp format
     time_t rawtime;
-    struct tm *timeinfo;
+    struct tm timeinfo;
     char buffer[80];
 
     time(&rawtime);
-    timeinfo = localtime(&rawtime);
-
-    strftime(buffer, sizeof(buffer), "%Y%m%d_%H:%M:%S ", timeinfo);
-    //strftime(buffer, sizeof(buffer), &timestempformat, timeinfo);
-    printf("%s", buffer);
+    // timeinfo = localtime(&rawtime);
+    // Initialize timeinfo to zero
+    memset(&timeinfo, 0, sizeof(struct tm));
+    if (localtime_s(&timeinfo, &rawtime) == 0) {
+        strftime(buffer, sizeof(buffer), "%Y%m%d_%H:%M:%S ", &timeinfo);
+        //strftime(buffer, sizeof(buffer), &timestempformat, timeinfo);
+        printf("%s", buffer);
+    }
 }
 
 
