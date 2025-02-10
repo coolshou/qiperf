@@ -444,13 +444,17 @@ void TPMgr::clear(){
     // TODO: when there is child the folding icon will not remove after clear!!
     TP *itm = getRootItem(); // rootitem or groupitem
     if (itm->haveChilds()){
+        itm->clearThroughput();
+        // itm->resetData();
         foreach(auto tp, itm->getChilds()){
             if (tp->haveChilds()){
+                beginRemoveRows(indexFromItem(tp), 0 , tp->childCount()-1);
                 tp->removeChildren(0, tp->childCount());
                 // m_treeview->collapse(indexFromItem(tp));
+                endRemoveRows();
             }
             tp->clearThroughput();
-            tp->resetData();
+            // tp->resetData();
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
         emit dataChanged(QModelIndex(),QModelIndex());
