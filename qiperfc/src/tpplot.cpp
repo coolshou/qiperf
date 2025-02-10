@@ -104,8 +104,7 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
         yAxis->setRange(0, aval);
     }
     if (xdata >= xAxis->range().upper){
-        qDebug() << "xdata:" << xdata;
-        xAxis->setRange(0, xdata+10); // do not add 30 sec
+        xAxis->setRange(0, xdata+10); // add 10 sec
     }
     // add x/y data to graphic
     graph->addData(xdata, ydata);
