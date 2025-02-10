@@ -28,8 +28,9 @@
 #include "endpointact.h"
 // #include "version.h"
 #include "../src/versions.h"
-// #include "comm.h"
-
+#if defined(Q_OS_LINUX)
+#include "comm.h"
+#endif
 #include <QDebug>
 
 
