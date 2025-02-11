@@ -3,7 +3,7 @@
 # build deb package
 DOBUILD=0
 CODENAME=`grep '^VERSION_CODENAME' /etc/os-release | cut -d= -f2`
-WINVERSION=0.8.11402.07
+WINVERSION=0.8.11402.11
 #WINVERSION=0.7.11401.21
 VERSION=${WINVERSION}-1
 
@@ -16,7 +16,7 @@ declare -a WDESTFILES=()
 WDESTFILES+=(qiperf-setup-${WINVERSION}.exe)
 
 # ================================================
-UPDATE_LINUX=1
+UPDATE_LINUX=0
 declare -a IPS=()
 #IPS+=("192.168.70.11")
 #IPS+=("192.168.70.13")
@@ -44,28 +44,28 @@ RVRPORT+=(60020)
 RVRPORT+=(60010)
 
 # Room6 - TR398 PCs
-DOREMOTE=0
+DOREMOTE=1
 DOREMOTEWIN=0 #; remote is windows
 DOREMOTEIP="172.31.117.120"
 
 if [ $DOREMOTEWIN -eq 1 ]; then
   TARGET=test@${DOREMOTEIP}:/D:/
   DESTFILES=${WDESTFILES}
-  INSTCMD=/D:/${WDESTFILES} -s
+  INSTCMD="/D:/${WDESTFILES} -s"
 else
   TARGET=test@${DOREMOTEIP}:/home/test/
-  INSTCMD=sudo dpkg -i /home/test/${DESTFILE}
+  INSTCMD="sudo dpkg -i /home/test/${DESTFILES}"
 fi
 
 declare -a PORTS=()
-#PORTS+=(55901)
-#PORTS+=(55902)
-#PORTS+=(55903)
+PORTS+=(55901)
+PORTS+=(55902)
+PORTS+=(55903)
 PORTS+=(55904)
 PORTS+=(55905)
-PORTS+=(55906)
-#PORTS+=(55908)
-PORTS+=(55911) # LAN
+#PORTS+=(55906)
+PORTS+=(55908)
+#PORTS+=(55911) # LAN
 #PORTS+=(55912) # LAN2
 #PORTS+=(55920)
 
