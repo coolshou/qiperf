@@ -83,6 +83,9 @@ public slots:
     void setStartTime(QDateTime startTime);
     //test
     void onTest();
+    void onTestStarted();
+    void onTestStoped(int err);
+
 signals:
     void updateEndpointNum(int n);
     void updateStarttime(QString stime);
@@ -92,6 +95,7 @@ signals:
     void testStoped(int err); // signal when test stoped, 0: no error
     void closeAll(); // send signal to close all dialog
     void setEndTime(double value);
+    void updateInterval(int interval);
 
 protected:
     void closeEvent(QCloseEvent *event)override;
@@ -171,6 +175,7 @@ private:
     QLabel *m_label_qiperfd;
 
     QDateTime m_TestStartTime;
+    bool bStartTest;
     int bErrorStop;
     bool bUserStop;
     int iTimeout; // default wait websocket timeout 10

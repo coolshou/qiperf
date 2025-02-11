@@ -127,7 +127,9 @@ TP * TP::removeChild(TP *child)
 {
     int idx = m_childItems.indexOf(child);
     if (idx>=0){
-       return m_childItems.takeAt(idx);
+        return m_childItems.takeAt(idx);
+    }else{
+        return nullptr;
     }
 }
 
@@ -182,6 +184,7 @@ void TP::loadData(QString data)
         m_duration = o_client.value("duration").toInt();
         m_omit = o_client.value("omit").toInt();
         m_delaytime = o_client.value("delaytime").toInt();
+        m_interval = o_client.value("interval").toInt();
     //    QString m_mclient = o_client["manager"].toString();
         QString direction = TPDIRRx;
         if (o_client.value("bidir").toBool()){
@@ -670,6 +673,13 @@ bool TP::getEnabled()
 {
     return m_enabled;
 }
+
+int TP::getInterval()
+{
+    return m_interval;
+}
+
+
 void TP::updateJson(QString key, QVariant value){
     QJsonParseError error;
     QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);

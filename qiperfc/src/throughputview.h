@@ -69,11 +69,13 @@ public slots:
     void onUpdateTPCfg(QByteArray tpcfg);
     void setShowGroup(bool bShow);
     void setXRangeUpper(double upper);
+    void setInterval(int interval);
 signals:
     void updateActions(bool bStart, bool bStop, bool bClear);
     void updateActionsSave(bool bStart);
     void updateActionsEdit(bool bDel, bool bEdit, bool bSwap, bool bSwapIP);
     void deleteFiles(QStringList files);
+    void updateInterval(int interval);
 
 private slots:
     void initMenus();

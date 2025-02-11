@@ -55,6 +55,9 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
         qDebug() << "create path: " << m_logpath;
         logdir.mkpath(".");
     }
+    connect(this, &QIperfC::testStarted, this, &QIperfC::onTestStarted);
+    connect(this, &QIperfC::testStoped, this, &QIperfC::onTestStoped);
+
     m_throughputview = new ThroughputView(ui->actionCopy, ui->actionPaste,
                                           ui->actionDelete, ui->actionCopyText,
                                           m_TPGroup);
@@ -62,6 +65,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_throughputview, &ThroughputView::updateActionsSave, this, &QIperfC::onUpdateActionsSave);
     connect(m_throughputview, &ThroughputView::updateActionsEdit, this, &QIperfC::onUpdateActionsEdit);
     connect(this, &QIperfC::setEndTime, m_throughputview, &ThroughputView::setXRangeUpper);
+    connect(this, &QIperfC::updateInterval, m_throughputview, &ThroughputView::setInterval);
 
     m_views = new ViewManager(&settingfilepath, m_throughputview, this);
     m_dlgtest = new DlgTest();
@@ -76,7 +80,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     //UI actions
     initActions();
     initToolbar();
-
+    updateRunStatus(false);
     // initPingChart();
     connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
 
@@ -92,7 +96,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_qipconfig, &QIPConfig::updateTPDatas, m_throughputview, &ThroughputView::onUpdateTPDatas);
     connect(m_qipconfig, &QIPConfig::progress, this, &QIperfC::onProgress);
     connect(m_throughputview, &ThroughputView::deleteFiles, m_qipconfig, &QIPConfig::onDeleteFiles);
-    // connect(m_qipconfig, &QIPConfig::updateStartDateTime, m_tpplot, &TPPlot::setStartTime);
+
     QString proxyhost="";
     quint16 proxyport=0;
     if (m_qipconfig->detectSystemProxy(proxyhost, proxyport)){
@@ -312,6 +316,7 @@ bool QIperfC::on_Clear(bool showNotice)
 void QIperfC::initStart()
 {
     bUserStop = false;
+    emit testStarted();
     ui->actionShowLog->setEnabled(true);
     ui->actionSave->setEnabled(true);
     resetError();
@@ -348,6 +353,7 @@ void QIperfC::onStart()
         QString err;
         qint64 rs=0;
         int maxtestduration=0; // max wait test time
+        int maxInterval=0; // max Interval time
         int iwait=0;
         int idelaytime=0;
         int itimeout;
@@ -355,6 +361,9 @@ void QIperfC::onStart()
         foreach (TP *tp, tps) {
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             if (tp->getEnabled()){
+                if (tp->getInterval()> maxInterval){
+                    maxInterval = tp->getInterval();
+                }
                 //RPC to control all server endpoint (iperf server)
                 iwait = tp->getWaitTime();
                 if (iwait> maxtestduration){
@@ -480,7 +489,9 @@ void QIperfC::onStart()
         }
         //TODO: record which should report iperf throughput value
         // TODO: list of ping test
-
+        qDebug() << "maxtestduration:" << QString::number(maxtestduration);
+        qDebug() << "maxInterval:" << QString::number(maxInterval);
+        emit updateInterval(maxInterval);
         if(bErrorStop>0){
             emit errorStop(4, "Unknown error happen!!("+QString::number(bErrorStop)+")");
             return;
@@ -611,7 +622,9 @@ void QIperfC::onStop(){
     if (m_fileserver->getSockets()>0){
         m_fileserver->close();
     }
-    updateRunStatus(false);
+    // bStartTest = false;
+    // updateRunStatus(false);
+    emit testStoped(0);
     QString endtime = getNowString();
     QDateTime enddatetime = QDateTime::fromString(endtime,DATETIME_NOW_FORMAT);
     //TODO: error end message?
@@ -713,6 +726,7 @@ void QIperfC::onErrorStop(int err, QString msg)
     emit updateStatus(msg);
     updateRunStatus(false);
 //    onStop();
+    emit testStoped(bErrorStop);
 }
 
 void QIperfC::onNotice(QString send_addr, QString msg)
@@ -772,7 +786,7 @@ void QIperfC::setStartTime(QDateTime startTime)
 }
 
 void QIperfC::onTest()
-{
+{ // test cmd
     QString strJson;
 #if (TEST_ICMP==1)
     if (dp->exec()== QDialog::Accepted){
@@ -793,6 +807,21 @@ void QIperfC::onTest()
         QString cmd = QString(CMD_PING)+":"+QString::number(0)+":"+strJson;
         qDebug() << "onTest cmd:" << cmd;
         ws->sendText(cmd);
+    }
+}
+
+void QIperfC::onTestStarted()
+{
+    updateRunStatus(true);
+}
+
+void QIperfC::onTestStoped(int err)
+{
+    updateRunStatus(false);
+    if (err){
+        qDebug() << "onTestStoped: ERROR" << QString::number(err);
+    }else{
+        qDebug() << "onTestStoped: no error";
     }
 }
 
@@ -832,10 +861,8 @@ void QIperfC::updateRunStatus(bool bStart)
     //set button status
     ui->actionAddIperf->setEnabled(!bStart);
     onUpdateActionsEdit(!bStart, !bStart, !bStart, !bStart);
-
-    ui->actionStart->setEnabled(!bStart);
-    ui->actionStop->setEnabled(bStart);
-    ui->actionClear->setEnabled(!bStart);
+    onUpdateActions(!bStart, bStart, !bStart);
+    bStartTest = bStart;
 }
 
 
@@ -1210,6 +1237,7 @@ void QIperfC::onUpdateActions(bool bStart, bool bStop, bool bClear)
     ui->actionStart->setEnabled(bStart);
     ui->actionStop->setEnabled(bStop);
     ui->actionClear->setEnabled(bClear);
+
 }
 
 void QIperfC::onUpdateActionsSave(bool bSave)

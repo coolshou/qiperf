@@ -25,6 +25,7 @@ public slots:
     void setStartTime(QDateTime startTime);
     void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
                          QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates);
+    void setInterval(int interval);
 signals:
     void selectedTPitem(QString idx);
 
@@ -38,6 +39,7 @@ private:
     QMap<QString, QCPBars *> m_lostgraphs; // lost rate graphs
     int m_yAxisMaxDefault=10; // 10 Mbps
     int m_xAxisMaxDefault=30; // 30sec
+    int m_interval;
 };
 
 #endif // TPPLOT_H

@@ -4,6 +4,7 @@
 
 TPPlot::TPPlot(QWidget *parent):QCustomPlot(parent)
 {
+    m_interval = 1;
     initCustomPlot();
 }
 
@@ -63,6 +64,11 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
     this->replot();
 }
 
+void TPPlot::setInterval(int interval)
+{
+    m_interval = interval;
+}
+
 void TPPlot::selectionChanged()
 {
     /* synchronize the selection of the graphs with the selection state of the respective
@@ -104,7 +110,7 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
         yAxis->setRange(0, aval);
     }
     if (xdata >= xAxis->range().upper){
-        xAxis->setRange(0, xdata+10); // add 10 sec
+        xAxis->setRange(0, xdata + m_interval); // add m_interval sec
     }
     // add x/y data to graphic
     graph->addData(xdata, ydata);

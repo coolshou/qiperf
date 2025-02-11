@@ -103,6 +103,7 @@ public:
     void setEnabled(bool enable);
     void setDisabled();
     bool getEnabled();
+    int getInterval();
 
 private:
     QString m_id; // reference id
@@ -120,6 +121,7 @@ private:
     int m_duration; //test duration in sec
     int m_omit; //test omit time in sec
     int m_delaytime; // delay time
+    int m_interval; // interval
     QString m_tp; // throughput value
     QString m_comment; // comment
 

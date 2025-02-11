@@ -228,7 +228,6 @@ void ThroughputView::onUpdateTPDatas(QString refrow, QVector<double> timedatas, 
 void ThroughputView::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
     //update iperf throughput from websocket client
-    qDebug() << "ThroughputView::onIperfTPdata:" << " refrow:"<< refrow<<" sInterval:"<< sInterval;
     m_tpmgr->onIperfTPdata(refrow, sInterval, datas);
 }
 
@@ -251,6 +250,11 @@ void ThroughputView::setXRangeUpper(double upper)
     if (m_tpplot){
         m_tpplot->setXRangeUpper(upper);
     }
+}
+
+void ThroughputView::setInterval(int interval)
+{
+    emit updateInterval(interval);
 }
 
 void ThroughputView::initMenus()
@@ -354,12 +358,20 @@ void ThroughputView::onTPUTContextMenu(QPoint pos)
 
 void ThroughputView::onTPDataUpdate(const QModelIndex &parent, int first, int last)
 {
-    Q_UNUSED(parent)
-    Q_UNUSED(first)
-    Q_UNUSED(last)
+    qDebug() << "parent:" << parent << " first:" << QString::number(first) << " last:" << QString::number(last);
+    // Q_UNUSED(parent)
+    // Q_UNUSED(first)
+    // Q_UNUSED(last)
     //TODO: when throughput is running, add new TP item?
+    // when new throughput data insert, this will trugger,
     bool bStart;
     if (m_tpmgr->rowCount()>0) {
+        // TP *itm = m_tpmgr->getItem(parent);
+        // if (itm){
+        //     if (itm->getDataType() ==TPMgrData::TP){
+        //         return;
+        //     }
+        // }
         bStart=false;
         emit updateActions(!bStart, bStart, !bStart);
     } else {
@@ -460,12 +472,13 @@ void ThroughputView::initThroughputChart()
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &ThroughputView::onPlotContextMenuRequest);
     connect(m_tpplot, &TPPlot::selectedTPitem, this, &ThroughputView::onSelectedTPitem);
+    connect(this, &ThroughputView::updateInterval, m_tpplot, &TPPlot::setInterval);
     ui->hl_console->addWidget(m_tpplot);
 
     // m_tpmgr = new TPMgr(m_showgroup, this);
     m_tpmgr = new TPMgr(m_showgroup, ui->tv_throughput);
-    connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
-    connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
+    // connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
+    // connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
 
     ui->tv_throughput->setModel(m_tpmgr);
