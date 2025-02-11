@@ -48,8 +48,11 @@ void TPDirDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
             if (!image.isNull()) {
                 QPixmap pixmap = QPixmap::fromImage(image);
                 QRect rect = option.rect;
+                // qDebug() << "TPDirDelegate::paint rect:" << rect << " pixmap:" << pixmap.rect();
+                //TODO: do not expend image to the row high (multi-lines)
                 // rect.setWidth((option.rect.width()/3)*2); // adjust size
                 painter->drawPixmap(rect, pixmap);
+                // painter->drawPixmap((option.rect.bottomRight()-pixmap.rect().bottomRight())/2, pixmap);
             }
         }
         painter->restore();

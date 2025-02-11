@@ -228,6 +228,7 @@ void ThroughputView::onUpdateTPDatas(QString refrow, QVector<double> timedatas, 
 void ThroughputView::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
     //update iperf throughput from websocket client
+    qDebug() << "ThroughputView::onIperfTPdata:" << " refrow:"<< refrow<<" sInterval:"<< sInterval;
     m_tpmgr->onIperfTPdata(refrow, sInterval, datas);
 }
 
@@ -362,6 +363,7 @@ void ThroughputView::onTPDataUpdate(const QModelIndex &parent, int first, int la
         bStart=false;
         emit updateActions(!bStart, bStart, !bStart);
     } else {
+        qDebug() <<"onTPDataUpdate: m_tpmgr->rowCount <=0";
         emit updateActions(false, false, false);
     }
 }
@@ -498,7 +500,7 @@ void ThroughputView::initThroughputChart()
     connect(filter, &TooltipEventFilter::doDelete, this, &ThroughputView::onDelete);
     ui->tv_throughput->viewport()->installEventFilter(filter);
     ui->tv_throughput->setRootIsDecorated(true); //show folding icon
-    // ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx()); // Cause total/group item disappear!!
+    // ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx()); //enable this will cause total/group item disappear!!
     //    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
 
     ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu

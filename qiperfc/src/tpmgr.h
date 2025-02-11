@@ -98,7 +98,7 @@ public slots:
     void onRowsInserted(const QModelIndex &parent, int first, int last);
 
 signals:
-    void IperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);// time, idx, throughput value, lost rate
+    void IperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);//Notice iperf throughput value:  time, idx, throughput value, lost rate
 
 private slots:
     void onUpdater();

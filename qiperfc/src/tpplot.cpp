@@ -111,7 +111,7 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
     //lost rate
     if (lostrate>0){
         QCPBars *g_lostrate = getLostRateGraph(idx);
-        qDebug() << "g_lostrate: " << xdata << " value:" << lostrate;
+        // qDebug() << "g_lostrate: " << xdata << " value:" << lostrate;
         g_lostrate->addData(xdata, lostrate);
     }
     replot();
