@@ -126,10 +126,18 @@
     <addaction name="actionAddPing"/>
     <addaction name="actionWlanSTA"/>
    </widget>
+   <widget class="QMenu" name="menuAutomate">
+    <property name="title">
+     <string>Automate</string>
+    </property>
+    <addaction name="actionSimple"/>
+    <addaction name="actionMacro"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuRun"/>
    <addaction name="menuOption"/>
+   <addaction name="menuAutomate"/>
    <addaction name="menuMonitor"/>
    <addaction name="menuHelp"/>
    <addaction name="menuTest"/>
@@ -464,6 +472,16 @@
   <action name="actionWlanSTA">
    <property name="text">
     <string>WLAN STA(TODO)</string>
+   </property>
+  </action>
+  <action name="actionSimple">
+   <property name="text">
+    <string>Simple(TODO)</string>
+   </property>
+  </action>
+  <action name="actionMacro">
+   <property name="text">
+    <string>Macro(TODO)</string>
    </property>
   </action>
  </widget>
