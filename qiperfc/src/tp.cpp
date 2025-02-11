@@ -589,9 +589,13 @@ void TP::clearThroughput()
     m_minRx = 0;
     m_maxRx = 0;
     if (m_itemDatas.length()>0){
-    qDebug() << "throughput:" << m_itemDatas[int(TP::throughput)]
-             << " min throughput:" << m_itemDatas[int(TP::throughput)]
-             << " max throughput:" << m_itemDatas[int(TP::throughput)] ;
+        m_itemDatas.replace(int(TP::cols::throughput), "");
+        m_itemDatas.replace(int(TP::cols::mintp), "");
+        m_itemDatas.replace(int(TP::cols::maxtp), "");
+        m_itemDatas.replace(int(TP::cols::lostrate), "");
+    // qDebug() << "clearThroughput throughput:" << m_itemDatas[int(TP::throughput)]
+    //          << " min throughput:" << m_itemDatas[int(TP::throughput)]
+    //          << " max throughput:" << m_itemDatas[int(TP::throughput)] ;
     }
 }
 
