@@ -68,17 +68,22 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             // Sum child values
             float sum = 0;
             QString s;
+            int i=0;
             for (TP* child : item->getChilds()) {
-                sum += child->getThroughput().toFloat();
+                if (child->getThroughput().isEmpty()){
+                    i++;
+                }else{
+                    sum += child->getThroughput().toFloat();
+                }
             }
-            // if (item->getDataType()==TPMgrData::config){
-            //     qDebug() <<" config TP:" <<item->getThroughput();
-            // }
-            // if (item->getDataType()==TPMgrData::group){
-            //     qDebug() << "getChilds:" << item->getChilds() << "group sum:" << QString::number(sum);
-            // }
-            item->setThroughput(s.setNum(sum));
-            return sum;
+            if (i==item->getChilds().count()){
+                item->setThroughput("");
+                return QVariant();
+            }else{
+                item->setThroughput(s.setNum(sum));
+                return sum;
+            }
+            // TODO: Lost Rate
         }
     }
     if (item->getDataType()==TPMgrData::group){
@@ -444,7 +449,9 @@ void TPMgr::clear(){
     // TODO: when there is child the folding icon will not remove after clear!!
     TP *itm = getRootItem(); // rootitem or groupitem
     if (itm->haveChilds()){
+        // qDebug() << itm->getID() << " DataType:" << itm->getDataType();
         itm->clearThroughput();
+        // qDebug() << "Throughput:" << itm->getThroughput() << " Max" << itm->getMaxThroughput();
         // itm->resetData();
         foreach(auto tp, itm->getChilds()){
             if (tp->haveChilds()){

@@ -485,7 +485,7 @@ void TP::setComment(QString comment)
 void TP::setThroughput(QString value)
 {
     if (value.isEmpty()){
-        qDebug() << "setThroughput isEmpty";
+        // qDebug() << "setThroughput isEmpty";
         m_itemDatas[int(TP::mintp)] = "";
         m_itemDatas[int(TP::maxtp)] = "";
         m_itemDatas[int(TP::throughput)] = "";
@@ -626,6 +626,8 @@ void TP::setLostRate(QString pkt_lost, QString pkt_total)
                 " ("+QString::number(m_lostpacket)+"/"+QString::number(m_totalpacket)+")";
         //TODO: only show rate, move lost/total to tooltip?
         m_itemDatas[int(TP::lostrate)] = s;
+    }else {
+        m_itemDatas[int(TP::lostrate)] = "";
     }
 }
 
