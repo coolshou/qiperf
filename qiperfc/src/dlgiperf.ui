@@ -837,50 +837,6 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="0" colspan="4">
-          <widget class="QWidget" name="widget_3" native="true">
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <property name="spacing">
-             <number>1</number>
-            </property>
-            <property name="leftMargin">
-             <number>1</number>
-            </property>
-            <property name="topMargin">
-             <number>1</number>
-            </property>
-            <property name="rightMargin">
-             <number>1</number>
-            </property>
-            <property name="bottomMargin">
-             <number>1</number>
-            </property>
-            <item>
-             <widget class="QCheckBox" name="chk_reverse">
-              <property name="toolTip">
-               <string>Server send data to client</string>
-              </property>
-              <property name="text">
-               <string>reverse(-R)</string>
-              </property>
-              <property name="tristate">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="chk_bidir">
-              <property name="text">
-               <string>bidirectional(--bidir)</string>
-              </property>
-              <property name="tristate">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
         </layout>
        </widget>
       </item>
@@ -918,13 +874,14 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>sb_delaytime</tabstop>
   <tabstop>cb_version</tabstop>
   <tabstop>sb_port</tabstop>
   <tabstop>cb_protocal</tabstop>
-  <tabstop>gb_control_server</tabstop>
   <tabstop>cb_mserver_ip</tabstop>
   <tabstop>chk_server_bind_ip</tabstop>
   <tabstop>cb_mclient_ip</tabstop>
+  <tabstop>cb_target_ip</tabstop>
   <tabstop>cb_client_bind_ip</tabstop>
   <tabstop>sb_duration</tabstop>
   <tabstop>sb_omit</tabstop>
@@ -940,6 +897,7 @@
   <tabstop>sb_dscp</tabstop>
   <tabstop>sb_tos</tabstop>
   <tabstop>sb_mss</tabstop>
+  <tabstop>cb_zerocopy</tabstop>
   <tabstop>sb_interval</tabstop>
   <tabstop>cb_fmtreport</tabstop>
   <tabstop>tw_iperf</tabstop>
