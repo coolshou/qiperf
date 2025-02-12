@@ -596,9 +596,7 @@ void TP::clearThroughput()
         m_itemDatas.replace(int(TP::cols::mintp), "");
         m_itemDatas.replace(int(TP::cols::maxtp), "");
         m_itemDatas.replace(int(TP::cols::lostrate), "");
-    // qDebug() << "clearThroughput throughput:" << m_itemDatas[int(TP::throughput)]
-    //          << " min throughput:" << m_itemDatas[int(TP::throughput)]
-    //          << " max throughput:" << m_itemDatas[int(TP::throughput)] ;
+        m_itemDatas.replace(int(TP::cols::comment), "");
     }
 }
 
