@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QEventLoop>
 #include <QProcess>
+#include <QDateTime>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
@@ -645,11 +646,21 @@ void QIperfd::doRestartQIperfd()
     qDebug() << "TODO: restart android qiperfd service"
 #endif
 #else
-    //windows,PS: Stop-Service -Name "SERVICE-NAME"
-    // get all service status: sc queryex state=all type=service
-    // stop: net stop "SERVICE-NAME"
-    // start: net start "SERVICE-NAME"
-    // restart: net stop [service name] && net start [service name]
+    // create a windows Schedule task to restart qiperfd
+    QString program = "schtasks";
+    QStringList arguments;
+    // Get the current time and add one second
+    QDateTime currentTime = QDateTime::currentDateTime().addSecs(1);
+    QString startTime = currentTime.toString("HH:mm:ss");
+
+    arguments << "/Create"
+              << "/SC" << "ONCE"
+              << "/TN" << "stopqiperfd"
+              << "/TR" << "net stop qiperfd && net start qiperfd"
+              << "/ST" << startTime;
+
+    QProcess process;
+    process.startDetached(program, arguments);
 #endif
 }
 
