@@ -155,7 +155,8 @@ void TP::setParent(TP *parent)
 int TP::row() const
 {
     //TODO: after clear, the may cause problem
-    if (m_parentItem != nullptr){
+    // if (m_parentItem != nullptr){
+    if (m_parentItem){
         if (m_parentItem->haveChilds()){
             return m_parentItem->m_childItems.indexOf(const_cast<TP*>(this));
         }
