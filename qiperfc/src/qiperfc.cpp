@@ -262,7 +262,7 @@ void QIperfC::onOpen()
             return;
         }
         // doClear();
-        // onNew();
+        onNew();
         if (load(fileName)){
             m_oldsavepath = fi.path();
         }
