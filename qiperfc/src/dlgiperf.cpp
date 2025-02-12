@@ -294,6 +294,7 @@ bool DlgIperf::isRequireConfigMet()
     //     //TODO: use style to hightlight some item:  *{border: 3px solid red;}
     //     return false;
     // }
+    /*
     if(ui->cb_version->currentText()=="3"){
         if (ui->chk_bidir->isChecked()){
             if (ui->sb_parallel->value()>10){
@@ -306,13 +307,14 @@ bool DlgIperf::isRequireConfigMet()
         }else{
             if (ui->sb_parallel->value()>20){
                 QMessageBox::warning(this, tr("WARNING!!"),
-                                     tr("In bidirectional mode, The parallel number should not over 20 (iperf3 under window may have problem)!!"),  QMessageBox::Ok);
+                                     tr("The parallel number should not over 20 (iperf3 under window may have problem)!!"),  QMessageBox::Ok);
                 ui->sb_parallel->setValue(20);
                 ui->sb_parallel->setFocus();
                 return false;
             }
         }
-    }
+    }*/
+
 
     //check target and client in same protocal type
     if(addr_target.protocol()!=addr_client.protocol()){
