@@ -17,6 +17,7 @@
 #include "tpdirdelegate.h"
 #include "tpfoldingdelegate.h"
 #include "iperfwrapper.h"
+#include "nowrapdelegate.h"
 
 #include "../views/abstractview.h"
 
@@ -108,6 +109,7 @@ private:
     DlgIperf * dlgiperf;  // dialog of iperf config
     TPDirDelegate *tpdirdelegate;
     TPFoldingDelegate *tpfoldingdelegate;
+    NoWrapDelegate *nowrapdelegate;
     QDateTime m_starttime;
     bool m_showgroup;
     IperfWrapper *m_iperfwrapper;

@@ -83,6 +83,7 @@ SOURCES += \
     src/formqiperfds.cpp \
     src/iperffileworker.cpp \
     src/main.cpp \
+    src/nowrapdelegate.cpp \
     src/pingitem.cpp \
     src/pingmgr.cpp \
     src/pingplot.cpp \
@@ -143,6 +144,7 @@ HEADERS += \
     src/fileserver.h \
     src/formqiperfds.h \
     src/iperffileworker.h \
+    src/nowrapdelegate.h \
     src/pingitem.h \
     src/pingmgr.h \
     src/pingplot.h \

@@ -442,14 +442,21 @@ void ThroughputView::onItemDClicked(QModelIndex idx)
 {
     TP *tp = m_tpmgr->getItem(idx);
     if (tp->getDataType() == TPMgrData::config) {
-        // only iperf pair config can be edit
-        dlgiperf->loadJsonCfg(tp->saveData());
-        dlgiperf->setExcIdx(idx);
-        int rc = dlgiperf->exec();// show dlgiperf
-        if (rc == QDialog::Accepted){
-            QString rs= dlgiperf->getJsonCfg();
-            tp->loadData(rs);
-            m_tpmgr->setItem(idx, tp);
+        QPoint globalPos = QCursor::pos();
+        QPoint widgetPos = ui->tv_throughput->mapFromGlobal(globalPos);
+        int col = ui->tv_throughput->columnAt(widgetPos.x());
+        if (col != TP::cols::comment) {
+            // only iperf pair config can be edit
+            dlgiperf->loadJsonCfg(tp->saveData());
+            dlgiperf->setExcIdx(idx);
+            int rc = dlgiperf->exec();// show dlgiperf
+            if (rc == QDialog::Accepted){
+                QString rs= dlgiperf->getJsonCfg();
+                tp->loadData(rs);
+                m_tpmgr->setItem(idx, tp);
+            }
+        }else{
+            qDebug() << "TODO: handle double click on column comment";
         }
     }
 }
@@ -524,6 +531,9 @@ void ThroughputView::initThroughputChart()
     tpdirdelegate = new TPDirDelegate(ui->tv_throughput);
     // tpdirdelegate = new TPDirDelegate(this); // this will not show dir picture
     ui->tv_throughput->setItemDelegateForColumn(TP::cols::dir, tpdirdelegate);
+
+    nowrapdelegate = new NoWrapDelegate(ui->tv_throughput);
+    ui->tv_throughput->setItemDelegateForColumn(TP::cols::comment, nowrapdelegate);
 
     //tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
     //ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
