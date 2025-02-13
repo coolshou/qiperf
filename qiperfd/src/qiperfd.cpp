@@ -8,6 +8,7 @@
 #include <QEventLoop>
 #include <QProcess>
 #include <QDateTime>
+#include <QSysInfo>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
@@ -645,22 +646,38 @@ void QIperfd::doRestartQIperfd()
 #else
     qDebug() << "TODO: restart android qiperfd service"
 #endif
-#else
+#elif defined(Q_OS_WINDOWS)
     // create a windows Schedule task to restart qiperfd
     QString program = "schtasks";
-    QStringList arguments;
+    // QStringList delarguments;
+    // delarguments << "/Delete"
+    //              << "/TN" << "startqiperfd"
+    //              << "/F"
+    // QProcess::startDetached(program, delarguments);
+
     // Get the current time and add one second
     QDateTime currentTime = QDateTime::currentDateTime().addSecs(1);
     QString startTime = currentTime.toString("HH:mm:ss");
 
+    QStringList arguments;
     arguments << "/Create"
               << "/SC" << "ONCE"
-              << "/TN" << "stopqiperfd"
-              << "/TR" << "net stop qiperfd && net start qiperfd"
-              << "/ST" << startTime;
-
+              << "/TN" << "startqiperfd"
+              << "/TR" << "net start qiperfd"
+              << "/ST" << startTime
+              << "/F";
     QProcess process;
+    process.setProcessChannelMode(QProcess::MergedChannels);
     process.startDetached(program, arguments);
+    if (!process.waitForStarted(5000)){
+        qDebug() << "start schtasks '" << program << " " << arguments.join(" ") << "' Fail or timeout\n"
+                 <<(" << process.readAll()<< ")";
+    }else{
+        qApp->quit();
+    }
+#else
+
+    qDebug() << "do Restart QIperfd for system :" << QSysInfo::productType();
 #endif
 }
 
