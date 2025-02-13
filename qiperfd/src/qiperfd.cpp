@@ -126,7 +126,7 @@ void QIperfd::loadcfg(QString apppath)
     }
     mgr_ifname = cfg->value("ifname", default_ifname).toString();
     mgr_port = cfg->value("port", QIPERFD_PORT).toInt();
-    onLog("mgr_ifname: " + mgr_ifname + ", mgr_port: " + QString::number(mgr_port));
+    // onLog("mgr_ifname: " + mgr_ifname + ", mgr_port: " + QString::number(mgr_port));
 
     bNtpserver = cfg->value("EnableNtpServer", false).toBool();
 
@@ -908,31 +908,41 @@ int QIperfd::checkFirewallStatus()
     return uReturn;
 #else
     QProcess process;
+    // process.setProcessChannelMode(QProcess::MergedChannels);
     QString command = "ps";
     QStringList arguments;
-    arguments << "aux" << "| grep -E 'firewalld|ufw|iptables|nft'";
+    // arguments << "aux" << " | grep -E 'firewalld|ufw|iptables|nft'";
+    arguments << "aux";
 
     // Start the process
 #if QT_VERSION < 0x060000  // < 6.0
     process.start(command, arguments);
 #else
-    command = command + arguments.join(" ");
+    command = command + " " +arguments.join(" ");
     process.startCommand(command);
 #endif
-    process.waitForFinished();
+    if (!process.waitForFinished(5000)){
+        qDebug() << "Error run cmd: " << command << " Fail";
+        qDebug() << "(" << process.readAll() << ")";
+        return -1;
+    }
 
     // Read the output
     QByteArray output = process.readAllStandardOutput();
     QByteArray errorOutput = process.readAllStandardError();
-
-    if (!output.isEmpty()) {
-        qDebug() << "Firewall processes found:\n" << output;
-        return 1;
-    } else if (!errorOutput.isEmpty()) {
+    if (!errorOutput.isEmpty()) {
         qDebug() << "checkFirewallStatus Error:\n" << errorOutput << "\n\n CMD:" << command << "\n";
         return -1;
-    } else {
-        qDebug() << "No firewall processes found.";
+    } else{
+        QString lines = QString::fromUtf8(output);
+        foreach (QString line, lines.split("\n")) {
+            if ((line.contains("firewalld", Qt::CaseInsensitive))||
+                (line.contains("ufw", Qt::CaseInsensitive))||
+                (line.contains("iptables", Qt::CaseInsensitive))||
+                (line.contains("nft", Qt::CaseInsensitive))){
+                return 1;
+            }
+        }
         return 0;
     }
 #endif
@@ -1086,7 +1096,10 @@ void QIperfd::getIperfVer(QString cmd, int ver)
     QString c = cmd + " -v";
     process.startCommand(c); //Qt6.0
 #endif
-    process.waitForFinished(5000); //wait 5 sec
+    if (!process.waitForFinished(5000)){//wait 5 sec
+        qDebug() << "Error run cmd: " << cmd << " " << args.join(" ") << " Fail";
+    }
+
     QString out;
     if (ver == static_cast<int>(IPERF_VER::V2)){
         out = process.readAllStandardError();
