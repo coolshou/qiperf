@@ -186,6 +186,8 @@ void TP::loadData(QString data)
         m_omit = o_client.value("omit").toInt();
         m_delaytime = o_client.value("delaytime").toInt();
         m_interval = o_client.value("interval").toInt();
+        m_parallel = o_client.value("parallel").toInt();
+        m_protocal = o_client.value("protocal").toString();
     //    QString m_mclient = o_client["manager"].toString();
         QString direction = TPDIRRx;
         if (o_client.value("bidir").toBool()){
@@ -676,6 +678,16 @@ bool TP::getEnabled()
 int TP::getInterval()
 {
     return m_interval;
+}
+
+int TP::getParallel()
+{
+    return m_parallel;
+}
+
+QString TP::getProtocal()
+{
+    return m_protocal;
 }
 
 

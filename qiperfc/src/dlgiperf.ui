@@ -380,6 +380,9 @@
             </item>
             <item>
              <widget class="QSpinBox" name="sb_port">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;NOTE: Under Windows&lt;/p&gt;&lt;p&gt;UDP with -P &amp;lt;n&amp;gt; will require &amp;lt;n&amp;gt; ports (start with -p &amp;lt;port&amp;gt;)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
               </property>

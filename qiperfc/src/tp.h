@@ -104,6 +104,8 @@ public:
     void setDisabled();
     bool getEnabled();
     int getInterval();
+    int getParallel();
+    QString getProtocal();
 
 private:
     QString m_id; // reference id
@@ -122,6 +124,9 @@ private:
     int m_omit; //test omit time in sec
     int m_delaytime; // delay time
     int m_interval; // interval
+    int m_parallel; // parallel
+    QString m_protocal; // protocal
+
     QString m_tp; // throughput value
     QString m_comment; // comment
 

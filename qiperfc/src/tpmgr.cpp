@@ -327,14 +327,13 @@ bool TPMgr::removeRows(int row, int count, const QModelIndex &parent)
 
 bool TPMgr::moveRow(const QModelIndex &sourceParent, int sourceRow, const QModelIndex &destinationParent, int destinationChild)
 {
-    // if (!sourceParent.isValid() || !destinationParent.isValid()){
+    TP *sourceParentItem;
     if (!sourceParent.isValid()){
         qDebug() << " sourceParent.isValid:" << sourceParent.isValid();
-        // qDebug() << " destinationParent.isValid:" << destinationParent.isValid();
-        return false;
+        sourceParentItem = rootItem;
+    }else {
+        sourceParentItem = static_cast<TP*>(sourceParent.internalPointer());
     }
-
-    TP *sourceParentItem = static_cast<TP*>(sourceParent.internalPointer());
     TP *destinationParentItem;
     if (!destinationParent.isValid()){
         destinationParentItem = rootItem;
@@ -342,7 +341,7 @@ bool TPMgr::moveRow(const QModelIndex &sourceParent, int sourceRow, const QModel
         destinationParentItem = static_cast<TP*>(destinationParent.internalPointer());
     }
 
-    if (sourceRow < 0 || sourceRow >= sourceParentItem->childCount() ||
+    if (sourceRow < 0 || sourceRow > sourceParentItem->childCount() ||
         destinationChild < 0 || destinationChild > destinationParentItem->childCount()){
         return false;
     }
@@ -350,7 +349,7 @@ bool TPMgr::moveRow(const QModelIndex &sourceParent, int sourceRow, const QModel
     qDebug() << "destinationParent:" << destinationParent << " destinationChild:" << QString::number(destinationChild);
     beginMoveRows(sourceParent, sourceRow, sourceRow, destinationParent, destinationChild);
     // data.move(sourceRow, destinationChild);
-    sourceParentItem->parentItem()->removeChild(sourceParentItem);
+    sourceParentItem->removeChild(sourceParentItem);
     // rootItem->removeChild(sourceParentItem);
     // TP *item = sourceParentItem->child(sourceRow);
     // sourceParentItem->removeChild(sourceRow);
@@ -449,9 +448,7 @@ void TPMgr::clear(){
     // TODO: when there is child the folding icon will not remove after clear!!
     TP *itm = getRootItem(); // rootitem or groupitem
     if (itm->haveChilds()){
-        // qDebug() << itm->getID() << " DataType:" << itm->getDataType();
         itm->clearThroughput();
-        // qDebug() << "Throughput:" << itm->getThroughput() << " Max" << itm->getMaxThroughput();
         // itm->resetData();
         foreach(auto tp, itm->getChilds()){
             if (tp->haveChilds()){
@@ -682,6 +679,11 @@ int TPMgr::getMaxPort(QString m_ip, QString targetIP)
         foreach(auto tp, itm->getChilds()){
             if(m_ip == tp->getMgrServer() && (targetIP == tp->getServer())){
                 port = tp->getPort();
+                if (tp->getProtocal().contains("UDP", Qt::CaseInsensitive)){
+                    if (tp->getParallel()>1){
+                        port = port + (tp->getParallel() - 1);
+                    }
+                }
                 if (port>maxPort){
                     maxPort = port;
                 }
@@ -720,16 +722,18 @@ void TPMgr::onPaste(QString data)
            // Get largest iperf port number!!
            int num = getMaxPort(o_server["manager"].toString(),
                                          o_client["target"].toString());
-            o_client["port"]=num+1;
-            o_server["port"]=num+1;
-            jsonRoot.remove("client");
-            jsonRoot.remove("server");
-            jsonRoot.insert("client", o_client);
-            jsonRoot.insert("server", o_server);
-            doc.setObject(jsonRoot);
-            QString strJson(doc.toJson(QJsonDocument::Compact));
-//          qDebug() << "strJson:\n" << strJson;
-            add(strJson);
+           // o_client["protocal"].toString();
+           // o_client["parallel"].toInt();
+           o_client["port"]=num+1;
+           o_server["port"]=num+1;
+           jsonRoot.remove("client");
+           jsonRoot.remove("server");
+           jsonRoot.insert("client", o_client);
+           jsonRoot.insert("server", o_server);
+           doc.setObject(jsonRoot);
+           QString strJson(doc.toJson(QJsonDocument::Compact));
+//         qDebug() << "strJson:\n" << strJson;
+           add(strJson);
        }else{
            qDebug() << "Wrong format of clipboard data: " << data;
        }
@@ -884,6 +888,7 @@ void TPMgr::setShowGroup(bool bShow)
     qDebug() << "TODO: setShowGroup: " << bShow;
     m_showgroup = bShow;
     TP *targetitem;
+    QModelIndex sourceparent;
     QModelIndex targetparent;
 
     QList<TP*> childs;
@@ -891,9 +896,9 @@ void TPMgr::setShowGroup(bool bShow)
         childs = rootItem->getChilds();
         qDebug() << "childs:" << childs << " child count:" << QString::number(childs.count());
         if (groupItem==nullptr){
-            // groupItem = newGroupItem();
             newGroupItem();
         }
+        sourceparent = indexFromItem(rootItem);
         targetitem = groupItem;
         targetparent = indexFromItem(groupItem);
         // foreach (auto *tp, childs) {
@@ -904,13 +909,17 @@ void TPMgr::setShowGroup(bool bShow)
         if (groupItem){
             childs = groupItem->getChilds();
         }
+        sourceparent = indexFromItem(groupItem);
         targetitem = rootItem;
         targetparent = indexFromItem(rootItem);
+        beginRemoveRows(targetparent, groupItem->row(), groupItem->row());
+        rootItem->removeChild(groupItem);
+        endRemoveRows();
     }
     if (childs.length()>0){
         foreach (auto *tp, childs) {
             qDebug() << "tp:" << tp << " row:" << QString::number(tp->row());
-            moveRow(indexFromItem(tp), tp->row(), indexFromItem(targetitem), targetitem->childCount());
+            moveRow(sourceparent, tp->row(), targetparent, targetitem->childCount());
         }
     }else {
         qDebug() << "setShowGroup: No child item to move";
