@@ -182,7 +182,7 @@ bool QIperfC::load(QString filename)
               break;
         }
     }
-    // onNew();
+    onNew();
     if (m_qipconfig->loadFromFile(filename)){
         ui->actionSave->setEnabled(true);
         return true;
@@ -262,7 +262,7 @@ void QIperfC::onOpen()
             return;
         }
         // doClear();
-        onNew();
+        // onNew();
         if (load(fileName)){
             m_oldsavepath = fi.path();
         }
