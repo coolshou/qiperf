@@ -27,7 +27,7 @@ bool TooltipEventFilter::eventFilter(QObject *obj, QEvent *event) {
         if(keyEvent->key() == Qt::Key_C && keyEvent->modifiers().testFlag(Qt::ControlModifier)){ //ctrl+c
             emit doCopy();
         }
-        if(keyEvent->key() == Qt::Key_C && keyEvent->modifiers().testFlag(Qt::ControlModifier)){  //ctrl+v
+        if(keyEvent->key() == Qt::Key_V && keyEvent->modifiers().testFlag(Qt::ControlModifier)){  //ctrl+v
             emit doPaste();
         }
         if(keyEvent->key() == Qt::Key_Delete){       //del key
