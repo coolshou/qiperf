@@ -351,6 +351,8 @@ void WSServer::updateListen()
         connect(m_pWebSocketServer, &QWebSocketServer::closed, this, &WSServer::onClosed);
         connect(m_pWebSocketServer, &QWebSocketServer::sslErrors, this, &WSServer::onSslErrors);
         connect(m_pWebSocketServer, &QWebSocketServer::serverError, this, &WSServer::onServerError);
+    }else {
+        qDebug() << "Fail start WebSocketServer on port:" << QString::number(m_port);
     }
 }
 
@@ -368,9 +370,10 @@ bool WSServer::setIfname(QString mgr_ifname)
     m_ifname = mgr_ifname;
     QList<QHostAddress> addrs;
     addrs = m_myinfo->getIPfromIfname(m_ifname);
+    emit onUpdateInterface(); // no need manager interface
     if (addrs.length()>0){
         m_addr = addrs[0]; // ip address
-        emit onUpdateInterface();
+        // emit onUpdateInterface();
         return true;
     }else{
         qDebug() <<"setIfname: Did not get IP Address from interface:" << mgr_ifname;
