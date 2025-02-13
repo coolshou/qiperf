@@ -670,7 +670,7 @@ void QIperfd::doRestartQIperfd()
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.startDetached(program, arguments);
     if (!process.waitForStarted(5000)){
-        qDebug() << "start schtasks '" << program << " " << arguments.join(" ") << "' Fail or timeout" << Qt::endl()
+        qDebug() << "start schtasks '" << program << " " << arguments.join(" ") << "' Fail or timeout" << Qt::endl
                  << "(" << process.readAll() << ")";
     }else{
         qApp->quit();
