@@ -67,6 +67,7 @@ SOURCES += \
     ../src/port/portsetbox.cpp \
     ../src/port/serialport.cpp \
     lib/axistag.cpp \
+    lib/myqcpgraph.cpp \
     lib/qcustomplot.cpp \
     src/codeeditor.cpp \
     src/customheaderview.cpp \
@@ -83,6 +84,7 @@ SOURCES += \
     src/formqiperfds.cpp \
     src/iperffileworker.cpp \
     src/main.cpp \
+    src/nmessagebox.cpp \
     src/nowrapdelegate.cpp \
     src/pingitem.cpp \
     src/pingmgr.cpp \
@@ -109,6 +111,7 @@ SOURCES += \
     views/terminal/termview.cpp \
     views/viewmanager.cpp
 
+    # lib/tplegenditem.cpp \
     # ../qiperfd/src/wsserver.cpp \
 
 HEADERS += \
@@ -129,6 +132,7 @@ HEADERS += \
     ../src/myfunc.h \
     ../src/tpmgrdata.h \
     lib/axistag.h \
+    lib/myqcpgraph.h \
     lib/qcustomplot.h \
     src/codeeditor.h \
     src/customheaderview.h \
@@ -144,6 +148,7 @@ HEADERS += \
     src/fileserver.h \
     src/formqiperfds.h \
     src/iperffileworker.h \
+    src/nmessagebox.h \
     src/nowrapdelegate.h \
     src/pingitem.h \
     src/pingmgr.h \
@@ -170,7 +175,7 @@ HEADERS += \
     views/terminal/terminalview.h \
     views/terminal/termview.h \
     views/viewmanager.h
-
+    # lib/tplegenditem.h \
     # ../qiperfd/src/wsserver.h \
 
 FORMS += \
