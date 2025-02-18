@@ -68,6 +68,8 @@
 
 // ping
 #define CMD_PING        "PING"
+// plot
+#define GRAPH_TOTAL      "TOTAL"
 
 #define MYTIMESTEMP "yyyy-MM-dd hh:mm:ss.zzz"
 #define DATETIME_NOW_FORMAT "yyyy-MM-dd_hhmmss.zzz"

@@ -3,10 +3,11 @@
 
 #include <QMessageBox>
 #include <QModelIndexList>
+#include <QScrollBar>
 
 #include "tooltipeventfilter.h"
 #include "comm.h"
-
+#include "nmessagebox.h"
 
 // ThroughputView::ThroughputView(QIperfC *main, QWidget *parent) : AbstractView(parent)
 ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
@@ -238,11 +239,11 @@ void ThroughputView::onUpdateTPCfg(QByteArray tpcfg)
 
 void ThroughputView::setShowGroup(bool bShow)
 {
-    //TODO: show group
+    //set show group
     m_showgroup = bShow;
-    // TODO: m_tpmgr
     m_tpmgr->setShowGroup(m_showgroup);
     // TODO: m_tpplot
+    m_tpplot->setShowGroup(m_showgroup);
 }
 
 void ThroughputView::setXRangeUpper(double upper)
@@ -283,12 +284,20 @@ void ThroughputView::initMenus()
     m_tpmenu->addAction(m_actionClientArgs);
     m_tpmenu->addAction(m_actionServerArgs);
 
+    m_actionGroup = new QAction("Group");
+    // m_actionGroup->setIcon();
+    m_actionGroup->setCheckable(true);
+    connect(m_actionGroup, &QAction::triggered, this, &ThroughputView::setShowGroup);
 }
 
 void ThroughputView::onPlotContextMenuRequest(QPoint pos)
 {
     QMenu *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
+    m_actionGroup->setChecked(m_showgroup);
+    menu->addAction(m_actionGroup);
+
+    menu->addSeparator();
     //    if (ui->customPlot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
     //    {
     //        menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignLeft));
@@ -457,6 +466,11 @@ void ThroughputView::onItemDClicked(QModelIndex idx)
             }
         }else{
             qDebug() << "TODO: handle double click on column comment";
+            // QMessageBox::information(this, "comment", tp->data(TP::cols::comment).toString());
+            NMessageBox *msg = new NMessageBox(QMessageBox::Information,
+                                              "comment",
+                                              tp->data(TP::cols::comment).toString());
+            msg->show();
         }
     }
 }
@@ -472,15 +486,28 @@ void ThroughputView::onTPselectionChanged(const QItemSelection &selected, const 
     emit updateActionsEdit(bAct , bAct , bAct, bAct);
 }
 
+void ThroughputView::onVLegendScrollBarRange(int count)
+{
+    // m_vLegendScrollBar->setRange(0, count);
+    m_vLegendScrollBar->setRange(0, count-10);
+}
+
 void ThroughputView::initThroughputChart()
 {
     // throughput chart
-    m_tpplot=new TPPlot(ui->widget_console);
+    m_vLegendScrollBar = new QScrollBar(Qt::Vertical, this);
+    m_tpplot=new TPPlot(m_showgroup, ui->widget_console);
+    qDebug() << "enable openGl:" << m_tpplot->openGl();
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &ThroughputView::onPlotContextMenuRequest);
     connect(m_tpplot, &TPPlot::selectedTPitem, this, &ThroughputView::onSelectedTPitem);
+    connect(m_tpplot, &TPPlot::sigLegendCount, this ,&ThroughputView::onVLegendScrollBarRange);
     connect(this, &ThroughputView::updateInterval, m_tpplot, &TPPlot::setInterval);
     ui->hl_console->addWidget(m_tpplot);
+    ui->hl_console->addWidget(m_vLegendScrollBar);
+    connect(m_vLegendScrollBar, &QScrollBar::valueChanged, m_tpplot, &TPPlot::onVLegendScrollChanged);
+    // m_vLegendScrollBar->setRange(0, m_tpplot->legend->itemCount() - 10);
+    onVLegendScrollBarRange(m_tpplot->legend->itemCount());
 
     // m_tpmgr = new TPMgr(m_showgroup, this);
     m_tpmgr = new TPMgr(m_showgroup, ui->tv_throughput);

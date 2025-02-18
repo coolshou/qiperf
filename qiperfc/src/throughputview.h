@@ -91,6 +91,7 @@ private slots:
     void copyServerArgs(bool checked);
     void onItemDClicked(QModelIndex idx);
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void onVLegendScrollBarRange(int count);
 private:
     Ui::ThroughputView *ui;
     // QIperfC *m_main;
@@ -106,6 +107,7 @@ private:
     QAction *m_actionCopyText;
     QAction *m_actionClientArgs;
     QAction *m_actionServerArgs;
+    QAction *m_actionGroup;
     DlgIperf * dlgiperf;  // dialog of iperf config
     TPDirDelegate *tpdirdelegate;
     TPFoldingDelegate *tpfoldingdelegate;
@@ -113,7 +115,7 @@ private:
     QDateTime m_starttime;
     bool m_showgroup;
     IperfWrapper *m_iperfwrapper;
-
+    QScrollBar *m_vLegendScrollBar;
     void initThroughputChart();
 };
 

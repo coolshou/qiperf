@@ -9,6 +9,7 @@
 
 #include <QDebug>
 
+#include "comm.h"
 #include "tp.h"
 #include "../src/tpmgrdata.h"
 
@@ -260,6 +261,7 @@ QModelIndex TPMgr::indexFromItem(TP *item){
     }
     QModelIndex ix;
     for(int i=0; i < parents.count(); i++){
+        qDebug() << "i:" << QString::number(i) << " parent:"  << parents[i];
         ix = index(parents[i]->row(), 0, ix);
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
@@ -722,8 +724,6 @@ void TPMgr::onPaste(QString data)
            // Get largest iperf port number!!
            int num = getMaxPort(o_server["manager"].toString(),
                                          o_client["target"].toString());
-           // o_client["protocal"].toString();
-           // o_client["parallel"].toInt();
            o_client["port"]=num+1;
            o_server["port"]=num+1;
            jsonRoot.remove("client");
@@ -743,7 +743,7 @@ void TPMgr::onPaste(QString data)
 void TPMgr::startUpdater()
 {
     if (!m_updater->isActive()){
-        m_updater->start(500); // 1 sec, TODO: why slow to show up the throughput/lost rate in cfg row??
+        m_updater->start(500); // 0.5 sec, TODO: why slow to show up the throughput/lost rate in cfg row??
     }
 }
 
@@ -757,7 +757,6 @@ void TPMgr::stopUpdater()
 void TPMgr::setTestData()
 {
     // add test data to show tree
-    // groupItem = new TP("Total", "Total", rootItem);
     TP *parentItm = getRootItem();
     // rootItem->appendChild(groupItem);
     QList<TP*> cfgs;
@@ -797,7 +796,7 @@ TP *TPMgr::newGroupItem()
     QModelIndex midx = indexFromItem(rootItem);
     qDebug() << " root idx: " << midx;
     beginInsertRows(midx, 0, 0);
-    groupItem = new TP("0", "Total", TPMgrData::group, rootItem);
+    groupItem = new TP("0", GRAPH_TOTAL, TPMgrData::group, rootItem);
     rootItem->appendChild(groupItem);
     qDebug() << "newGroupItem: groupItem:" << groupItem << " root:" << rootItem;
     qDebug() << "newGroupItem: groupItem idx: " << indexFromItem(groupItem);
@@ -887,40 +886,48 @@ void TPMgr::setShowGroup(bool bShow)
 {
     qDebug() << "TODO: setShowGroup: " << bShow;
     m_showgroup = bShow;
+    TP *sourceitem;
     TP *targetitem;
     QModelIndex sourceparent;
     QModelIndex targetparent;
 
     QList<TP*> childs;
-    if (m_showgroup){
+    if (m_showgroup){  // not Total to show Total
+        // move root's child to group
         childs = rootItem->getChilds();
         qDebug() << "childs:" << childs << " child count:" << QString::number(childs.count());
         if (groupItem==nullptr){
             newGroupItem();
         }
+        sourceitem = rootItem;
         sourceparent = indexFromItem(rootItem);
         targetitem = groupItem;
         targetparent = indexFromItem(groupItem);
-        // foreach (auto *tp, childs) {
-        //     qDebug() << "tp:" << tp << " row:" << QString::number(tp->row());
-        //     moveRow(indexFromItem(tp), tp->row(), indexFromItem(groupItem), groupItem->childCount());
-        // }
+        qDebug() << "move clinds:" << childs << " from: " << sourceparent << " To:" << targetparent;
+
+        foreach (auto *tp, childs) {
+            qDebug() << "tp:" << tp << " row:" << tp->id;
+        //      moveRow(sourceparent, tp->row(), targetparent, groupItem->childCount());
+            targetitem->appendChild(tp);
+            sourceitem->removeChild(tp);
+        }
     }else{
+        // move group's child to root
         if (groupItem){
             childs = groupItem->getChilds();
         }
         sourceparent = indexFromItem(groupItem);
         targetitem = rootItem;
         targetparent = indexFromItem(rootItem);
-        beginRemoveRows(targetparent, groupItem->row(), groupItem->row());
-        rootItem->removeChild(groupItem);
-        endRemoveRows();
+        // beginRemoveRows(targetparent, groupItem->row(), groupItem->row());
+        // rootItem->removeChild(groupItem);
+        // endRemoveRows();
     }
     if (childs.length()>0){
-        foreach (auto *tp, childs) {
-            qDebug() << "tp:" << tp << " row:" << QString::number(tp->row());
-            moveRow(sourceparent, tp->row(), targetparent, targetitem->childCount());
-        }
+        // foreach (auto *tp, childs) {
+        //     qDebug() << "tp:" << tp << " row:" << QString::number(tp->row());
+        //     moveRow(sourceparent, tp->row(), targetparent, targetitem->childCount());
+        // }
     }else {
         qDebug() << "setShowGroup: No child item to move";
     }
