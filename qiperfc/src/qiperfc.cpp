@@ -365,15 +365,20 @@ void QIperfC::onStart()
                     maxInterval = tp->getInterval();
                 }
                 //RPC to control all server endpoint (iperf server)
+                int testduration=0;
                 iwait = tp->getWaitTime();
-                if (iwait> maxtestduration){
-                    maxtestduration = iwait+iExtraWait;
+                if (iwait> testduration){
+                    testduration = iwait+iExtraWait;
                 }
                 idelaytime = tp->getDelaytime();
                 if (idelaytime>0) {
-                    maxtestduration = maxtestduration + idelaytime;
+                    testduration = testduration + idelaytime;
+                }
+                if (testduration> maxtestduration){
+                    maxtestduration = testduration;
                 }
                 refrow = tp->row();
+                qDebug() << "refrow:" << QString::number(refrow) << " maxtestduration:" << QString::number(maxtestduration);
                 qDebug() << tp << " ==> refrow: " << QString::number(refrow) ;
                 QString serverIP = tp->getMgrServer();
                 //TODO: detect manager server is pingable
