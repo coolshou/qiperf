@@ -327,6 +327,43 @@ bool TPMgr::removeRows(int row, int count, const QModelIndex &parent)
     return success;
 }
 
+bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild)
+{
+    qDebug() << "moveRows: sourceParent:" << sourceParent << " start row:" << sourceRow << " count:" << count
+             << " destinationParent:" << destinationParent << " destination row:"  << destinationChild;
+    if (sourceRow < 0 || sourceRow + count > rowCount(sourceParent) ||
+        destinationChild < 0 || destinationChild > rowCount(destinationParent)){
+        return false;
+    }
+
+    beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
+
+    // if (destinationChild > sourceRow) {
+    //     destinationChild -= count;
+    // }
+
+    //actual data structure change
+    TP *sourceitem = getItem(sourceParent);
+    if (!sourceitem){
+        sourceitem = rootItem;
+    }
+    TP *destitem = getItem(destinationParent);
+    if (!destitem){
+        destitem = rootItem;
+    }
+    int j=destinationChild;
+    for (int i = sourceRow; i < count; ++i) {
+        TP *m = sourceitem->takeAt(i);
+        qDebug() << "move:" << m << " from i:" << i << " to j:" << j;
+        destitem->insertChild(j, m);
+        j++;
+    //     data.insert(destinationChild + i, data.takeAt(sourceRow + i));
+    }
+
+    endMoveRows();
+    return true;
+}
+
 bool TPMgr::moveRow(const QModelIndex &sourceParent, int sourceRow, const QModelIndex &destinationParent, int destinationChild)
 {
     TP *sourceParentItem;
@@ -886,42 +923,38 @@ void TPMgr::setShowGroup(bool bShow)
 {
     qDebug() << "TODO: setShowGroup: " << bShow;
     m_showgroup = bShow;
-    TP *sourceitem;
-    TP *targetitem;
-    QModelIndex sourceparent;
-    QModelIndex targetparent;
-
+    // TP *sourceitem;
+    // TP *targetitem;
+    QModelIndex sourceparentidx;
+    QModelIndex targetparentidx;
+    int count =0;
     QList<TP*> childs;
     if (m_showgroup){  // not Total to show Total
         // move root's child to group
-        childs = rootItem->getChilds();
-        qDebug() << "childs:" << childs << " child count:" << QString::number(childs.count());
+        count = rootItem->childCount();
         if (groupItem==nullptr){
             newGroupItem();
         }
-        sourceitem = rootItem;
-        sourceparent = indexFromItem(rootItem);
-        targetitem = groupItem;
-        targetparent = indexFromItem(groupItem);
-        qDebug() << "move clinds:" << childs << " from: " << sourceparent << " To:" << targetparent;
-
-        foreach (auto *tp, childs) {
-            qDebug() << "tp:" << tp << " row:" << tp->id;
-        //      moveRow(sourceparent, tp->row(), targetparent, groupItem->childCount());
-            targetitem->appendChild(tp);
-            sourceitem->removeChild(tp);
-        }
+        // sourceitem = rootItem;
+        sourceparentidx = indexFromItem(rootItem);
+        // targetitem = groupItem;
+        targetparentidx = indexFromItem(groupItem);
+        moveRows(sourceparentidx, 0 , count-1, targetparentidx, 0);
     }else{
         // move group's child to root
         if (groupItem){
             childs = groupItem->getChilds();
+            foreach (auto c, childs){
+                qDebug() << " child:" << c << " row:" << c->row();
+            }
         }
-        sourceparent = indexFromItem(groupItem);
-        targetitem = rootItem;
-        targetparent = indexFromItem(rootItem);
-        // beginRemoveRows(targetparent, groupItem->row(), groupItem->row());
-        // rootItem->removeChild(groupItem);
-        // endRemoveRows();
+        count = groupItem->childCount();
+        sourceparentidx = indexFromItem(groupItem);
+        // targetitem = rootItem;
+        targetparentidx = indexFromItem(rootItem);
+        qDebug() << "to detail: sourceparentidx:" << sourceparentidx << " targetparentidx:" << targetparentidx
+                 << " count:" << count;
+        moveRows(sourceparentidx, 0 , count-1, targetparentidx, 0);
     }
     if (childs.length()>0){
         // foreach (auto *tp, childs) {

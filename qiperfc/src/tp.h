@@ -54,6 +54,7 @@ public:
     //explicit EndPoint(QString id, QString data, QObject *parent = nullptr);
     TP * removeChild(TP *child);
     void removeChild(int row);
+    TP *takeAt(int row);
     void insertChild(int row, TP *child);
     void setParent(TP *parent);
 

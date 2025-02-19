@@ -151,48 +151,19 @@ void TPPlot::onDataAdded(double key, double value)
 {
     if (m_showgroup){
         if (mTotalGraph){
-            QSharedPointer<QCPGraphDataContainer> dataContainer = mTotalGraph->data();
-            auto it = findKeyValue(*dataContainer.data(), key);
-            if (it != dataContainer.data()->constEnd()) {
-                qDebug() << ((MyQCPGraph*)sender())->name()
-                         << "Found key:" << it->key << "with value:" << it->value;
-            } else {
+            double orgvalue=-1;
+            int rc=mTotalGraph->getValue(key, orgvalue);
+            if (rc>-1){
+                double sumvalue = orgvalue + value;
+                qDebug() << ((MyQCPGraph*)sender())->name() << " idx:"<< rc << " (" << key << ") orgvalue:" << orgvalue
+                         << " sumvalue:" << sumvalue;
+                mTotalGraph->updateValue(key,sumvalue);
+                mTotalGraph->rescaleAxes(true);
+            }else{
                 qDebug() << ((MyQCPGraph*)sender())->name() << " (" << key << ") Key not found";
+                mTotalGraph->addData(key,value);
             }
-            //
-            // qDebug() << "dataCount:" << mTotalGraph->dataCount()
-            //          << "dataMainKey:" << mTotalGraph->dataMainKey(0)
-            //          << "dataSortKey:" << mTotalGraph->dataSortKey(0);
-            // // QCPDataContainer<QCPGraphData>::const_iterator sumIt = dataContainer->findBegin(key, true);
-            // QCPDataContainer<QCPGraphData>::const_iterator sumIt = dataContainer.data()->findEnd(key);
-            // // if (key < range.maxRange) {
-            //     // data exist
-            // // if (sumIt != dataContainer->constEnd() && (sumIt->key == key)) {
-            // qDebug() << "sumIt:" << sumIt;
-            // if (sumIt != dataContainer->constEnd()){
-            //     // if (sumIt->key == key) {
-            //     // already have value, sum it
-            //     qDebug() << ((MyQCPGraph*)sender())->name() << " key:" << key <<
-            //         " => Found data at key:" << sumIt->key << "with value:" << sumIt->value;
-            //     if(0){
-            //         QCPGraphData updatedData = *sumIt;
-            //         // updatedData.key = key;
-            //         updatedData.value = sumIt->value + value;
-            //         dataContainer->remove(key);
-            //         dataContainer->add(updatedData);
-            //         // sumIt->value += value;
-            //         qDebug() << "onDataAdded update key:" << QString::number(key) << "=" << QString::number(value) << " to " << QString::number(updatedData.value);
-            //             // updateYAxisRange(0, updatedData.value);
-            //         // }
-            //         updateYAxisRange(0, updatedData.value);
-            //     }
-            // }else {
-            //     // new data
-            //     qDebug() << ((MyQCPGraph*)sender())->name() << "new data: " << key << " = " << value;
-            //     dataContainer->add(QCPGraphData(key,value));
-            // }
-            // mTotalGraph->rescaleAxes(true);
-            replot();
+            // replot();
         }else {
             qDebug() << "onDataAdded: ERROR does not have mTotalGraph" ;
         }

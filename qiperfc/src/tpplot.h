@@ -58,7 +58,7 @@ private:
     int m_xAxisMaxDefault=30; // 30sec
     int m_interval;
     bool m_showgroup;
-    QCPGraph *mTotalGraph;
+    MyQCPGraph *mTotalGraph;
     QCPAbstractLegendItem *mTotalLegendItem;
     QVector<QCPGraphData> mTotalGraphData;
     QMap<double, double> mTotalData;

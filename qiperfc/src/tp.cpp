@@ -73,7 +73,11 @@ QList<TP *> TP::getChilds()
 
 int TP::childCount() const
 {
-    return m_childItems.count();
+    // if (m_childItems.length()){
+        return m_childItems.count();
+    // }else {
+        // return 0
+    // }
 }
 
 bool TP::haveChilds()
@@ -138,6 +142,11 @@ void TP::removeChild(int row)
     if (row >= 0 && row < m_childItems.size()) {
         m_childItems.removeAt(row);
     }
+}
+
+TP *TP::takeAt(int row)
+{
+    return m_childItems.takeAt(row);
 }
 
 void TP::insertChild(int row, TP *child)

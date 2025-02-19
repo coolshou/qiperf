@@ -51,6 +51,7 @@ public:
     //setHeaderData() const override;  // require emit headerDataChanged()
 //    bool removeRow(int row, const QModelIndex &parent = QModelIndex()) override;
     bool removeRows(int row, int count, const QModelIndex &parent) override;
+    bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild) override;
     bool moveRow(const QModelIndex &sourceParent, int sourceRow,
                  const QModelIndex &destinationParent, int destinationChild) ;
     // ======
