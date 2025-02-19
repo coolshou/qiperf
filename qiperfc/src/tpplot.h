@@ -47,6 +47,7 @@ private:
     QVector<QCPGraphData> convertQMapToQVector(const QMap<double, double>& map);
     QSharedPointer<QCPGraphDataContainer> sumGraphData(const QSharedPointer<QCPGraphDataContainer> &data1, const QSharedPointer<QCPGraphDataContainer>& data2);
     void calculateLegendItems();
+    QCPDataContainer<QCPGraphData>::const_iterator findKeyValue(const QCPDataContainer<QCPGraphData> &container, double key);
     QDateTime m_starttime;
     // QMap<QString, QCPGraph *> m_graphs; // throughput graphs
     QMap<QString, MyQCPGraph *> m_graphs; // throughput graphs

@@ -151,67 +151,47 @@ void TPPlot::onDataAdded(double key, double value)
 {
     if (m_showgroup){
         if (mTotalGraph){
-            /*
-            double newvalue = mTotalData.value(key, 0);
-            newvalue = newvalue + value;
-            mTotalData.insert(key, newvalue);
-            mTotalGraphData = convertQMapToQVector(mTotalData);
-            mTotalGraph->data()->set(mTotalGraphData);
-            */
-            double sumValue=0;
-            // bool foundRange=false;
-            // QCPRange range;
-            // range = mTotalGraph->getKeyRange(foundRange);
-            // if (foundRange){
-
-                QSharedPointer<QCPGraphDataContainer> dataContainer = mTotalGraph->data();
-                QCPDataContainer<QCPGraphData>::const_iterator sumIt = dataContainer->findBegin(key, true);
-                // if (key < range.maxRange) {
-                    // data exist
-                if (sumIt != dataContainer->constEnd() && (sumIt->key == key)) {
-                    // already have value, sum it
-                        qDebug() << key << " => Found data at key:" << sumIt->key << "with value:" << sumIt->value;
-                        QCPGraphData updatedData = *sumIt;
-                        // updatedData.key = key;
-                        updatedData.value = sumIt->value + value;
-                        dataContainer->remove(key);
-                        dataContainer->add(updatedData);
-                        // sumIt->value += value;
-                        qDebug() << "onDataAdded update key:" << QString::number(key) << "=" << QString::number(value) << " to " << QString::number(updatedData.value);
-                            // updateYAxisRange(0, updatedData.value);
-                        // }
-                }else {
-                    // new data
-                    qDebug() << "new data: " << key << " = " << value;
-                    dataContainer->add(QCPGraphData(key,value));
-                }
-            // }
-            // // mTotalData.indexOf();
-            // // mTotalData.contains()
-            // QSharedPointer<QCPGraphDataContainer> dataContainer = mTotalGraph->data();
-            // //read only
-            // // dataContainer->findBegin()
+            QSharedPointer<QCPGraphDataContainer> dataContainer = mTotalGraph->data();
+            auto it = findKeyValue(*dataContainer.data(), key);
+            if (it != dataContainer.data()->constEnd()) {
+                qDebug() << ((MyQCPGraph*)sender())->name()
+                         << "Found key:" << it->key << "with value:" << it->value;
+            } else {
+                qDebug() << ((MyQCPGraph*)sender())->name() << " (" << key << ") Key not found";
+            }
+            //
+            // qDebug() << "dataCount:" << mTotalGraph->dataCount()
+            //          << "dataMainKey:" << mTotalGraph->dataMainKey(0)
+            //          << "dataSortKey:" << mTotalGraph->dataSortKey(0);
             // // QCPDataContainer<QCPGraphData>::const_iterator sumIt = dataContainer->findBegin(key, true);
-            // QCPGraphDataContainer::const_iterator sumIt = dataContainer->findBegin(key, true);
-            // // Use the iterator
-            // if (sumIt != dataContainer->constEnd() && (sumIt->key == key)) {
+            // QCPDataContainer<QCPGraphData>::const_iterator sumIt = dataContainer.data()->findEnd(key);
+            // // if (key < range.maxRange) {
+            //     // data exist
+            // // if (sumIt != dataContainer->constEnd() && (sumIt->key == key)) {
+            // qDebug() << "sumIt:" << sumIt;
+            // if (sumIt != dataContainer->constEnd()){
+            //     // if (sumIt->key == key) {
             //     // already have value, sum it
-            //     qDebug() << key << " => Found data at key:" << sumIt->key << "with value:" << sumIt->value;
-
-            //     QCPGraphData updatedData = *sumIt;
-            //     // updatedData.key = key;
-            //     updatedData.value = sumIt->value + value;
-            //     dataContainer->remove(key);
-            //     dataContainer->add(updatedData);
-            //     // sumIt->value += value;
-            //     qDebug() << "onDataAdded update key:" << QString::number(key) << "=" << QString::number(value) << " to " << QString::number(updatedData.value);
-            //     updateYAxisRange(0, updatedData.value);
-            // }else{ //do not have data of key/value
-            //     qDebug() << "onDataAdded add new data:" << QString::number(key) << "=" << QString::number(value) ;
+            //     qDebug() << ((MyQCPGraph*)sender())->name() << " key:" << key <<
+            //         " => Found data at key:" << sumIt->key << "with value:" << sumIt->value;
+            //     if(0){
+            //         QCPGraphData updatedData = *sumIt;
+            //         // updatedData.key = key;
+            //         updatedData.value = sumIt->value + value;
+            //         dataContainer->remove(key);
+            //         dataContainer->add(updatedData);
+            //         // sumIt->value += value;
+            //         qDebug() << "onDataAdded update key:" << QString::number(key) << "=" << QString::number(value) << " to " << QString::number(updatedData.value);
+            //             // updateYAxisRange(0, updatedData.value);
+            //         // }
+            //         updateYAxisRange(0, updatedData.value);
+            //     }
+            // }else {
+            //     // new data
+            //     qDebug() << ((MyQCPGraph*)sender())->name() << "new data: " << key << " = " << value;
             //     dataContainer->add(QCPGraphData(key,value));
             // }
-            // updateYAxisRange(0, sumValue);
-            mTotalGraph->rescaleAxes(true);
+            // mTotalGraph->rescaleAxes(true);
             replot();
         }else {
             qDebug() << "onDataAdded: ERROR does not have mTotalGraph" ;
@@ -228,6 +208,7 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data)
         sumdata = sumGraphData(data1, data2);
         mTotalGraph->setData(sumdata);
         mTotalGraph->rescaleAxes(true); //TODO: not good to show y Max value
+        mTotalLegendItem->setVisible(true);
     }else{
         qDebug() << "onDatasSetted: ERROR does not have mTotalGraph" ;
     }
@@ -265,7 +246,18 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
     MyQCPGraph *myGraph = getGraph(idx);
     // MyQCPGraph *myGraph = static_cast<MyQCPGraph*>(graph);
     if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+        //throughput graph
         myGraph->addData(xdata, ydata);
+        if (!m_showgroup){
+            if (m_legends.contains(idx)){
+                QCPAbstractLegendItem *itm = m_legends.value(idx);
+                if (itm){
+                    itm->setVisible(true);
+                }
+            }
+        } else {
+            mTotalLegendItem->setVisible(true);
+        }
     }
     // enlarge/shrink y range
      updateYAxisRange(0, ydata);
@@ -323,10 +315,11 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
         myGraph = static_cast<MyQCPGraph*>(g);
         if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             if (m_showgroup){
-                if (!isSignalConnected(QMetaMethod::fromSignal(&MyQCPGraph::dataAdded))){
+                //each throughput graph need to info when data add => to calc total throughput
+                // if (!isSignalConnected(QMetaMethod::fromSignal(&MyQCPGraph::dataAdded))){
                     qDebug() << "getGraph:" << idx << " connect dataAdded of " << myGraph << " ===============";
                     connect(myGraph, &MyQCPGraph::dataAdded, this ,&TPPlot::onDataAdded);
-                }
+                // }
             }
         }
         // qDebug() << "afer addGraph legend Count:" << QString::number(legend->itemCount());
@@ -365,14 +358,15 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
         if ((!m_graphs.contains(idx))){
             // m_graphs.insert(idx,g);
             m_graphs.insert(idx,myGraph);
+            calculateLegendItems();
         }
     }
-    if (m_showgroup){
-        emit sigLegendCount(1);
-    }else{
-        emit sigLegendCount(legend->itemCount());
-    }
-    calculateLegendItems();
+    // if (m_showgroup){
+    //     emit sigLegendCount(1);
+    // }else{
+    //     emit sigLegendCount(legend->itemCount());
+    // }
+    // // calculateLegendItems();
     return myGraph;
 }
 
@@ -406,17 +400,22 @@ QCPBars *TPPlot::getLostRateGraph(QString idx)
     g_lostrate->setName(idx+ " Lost Rate");
     if (!m_lostgraphs.contains(idx)){
         m_lostgraphs.insert(idx,g_lostrate);
+        calculateLegendItems();
     }
-    if (m_showgroup){
-        emit sigLegendCount(1);
-    }else{
-        emit sigLegendCount(legend->itemCount());
-    }
+    // if (m_showgroup){
+    //     emit sigLegendCount(1);
+    // }else{
+    //     emit sigLegendCount(legend->itemCount());
+    // }
     return g_lostrate;
 }
 
 void TPPlot::clear()
 {
+    for (auto it = m_graphs.begin(); it != m_graphs.end(); ++it) {
+
+        // removePlottable(it.value());
+    }
     clearGraphs(); // this will clean all graphs
     if (mTotalGraph){
         mTotalGraph=nullptr;
@@ -476,6 +475,7 @@ void TPPlot::initCustomPlot()
 
     // legend
     legend->setVisible(true);
+    // connect(legend, &QCPLegend::layerChanged)
     if (1){//TODO: not good on layout
         // Add the QCustomPlot legend to the container
         QCPLayoutGrid *subLayout = new QCPLayoutGrid;
@@ -659,11 +659,30 @@ void TPPlot::calculateLegendItems()
 {
     //get the legend size and calculate the number of items can show
     QSize legendSize = legend->rect().size();//->minimumOuterSizeHint();
-    //TODO: calculate Max Legend Items
-    int itemHeight = legend->font().pointSize() + 4; // approximate height of each item
+    //calculate Max Legend Items
+    int itemHeight = legend->font().pointSize() + 9; // approximate height of each item
     int itemsFit = legendSize.height() / itemHeight;
 
-    qDebug() << "Legend size:" << legendSize.height() << " itemHeight:" << itemHeight;
-    qDebug() << "Legend rect:" << legend->rect();
+    // qDebug() << "Legend size:" << legendSize.height() << " itemHeight:" << itemHeight;
+    // qDebug() << "Legend rect:" << legend->rect();
     qDebug() << "Approximate number of items that can fit:" << itemsFit;
+    if(m_showgroup){
+        emit sigLegendCount(1);
+    }else{
+        emit sigLegendCount(itemsFit);
+    }
+}
+
+QCPDataContainer<QCPGraphData>::const_iterator TPPlot::findKeyValue(const QCPDataContainer<QCPGraphData> &container, double key)
+{
+    // Use findBegin to get an iterator to the data point with the closest key
+    auto it = container.findBegin(key, true);
+    // if (it != container.constEnd() && it->key == key) {
+    if (it != container.constEnd()) {
+        qDebug() << "it->key:" << it->key << " key:" << key;
+        if (it->key == key){
+            return it; // Found the exact key
+        }
+    }
+    return container.constEnd(); // Key not found
 }
