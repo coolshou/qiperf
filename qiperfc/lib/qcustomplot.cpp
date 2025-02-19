@@ -679,8 +679,11 @@ QCPPainter *QCPPaintBufferPixmap::startPainting()
 {
   QCPPainter *result = new QCPPainter(&mBuffer);
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-//  result->setRenderHint(QPainter::HighQualityAntialiasing);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
   result->setRenderHint(QPainter::Antialiasing);
+#else
+  result->setRenderHint(QPainter::HighQualityAntialiasing);
+#endif
 #endif
   return result;
 }
@@ -770,8 +773,11 @@ QCPPainter *QCPPaintBufferGlPbuffer::startPainting()
 
   QCPPainter *result = new QCPPainter(mGlPBuffer);
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-  //result->setRenderHint(QPainter::HighQualityAntialiasing);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
   result->setRenderHint(QPainter::Antialiasing);
+#else
+  result->setRenderHint(QPainter::HighQualityAntialiasing);
+#endif
 #endif
 
   return result;
@@ -886,8 +892,11 @@ QCPPainter *QCPPaintBufferGlFbo::startPainting()
   mGlFrameBuffer->bind();
   QCPPainter *result = new QCPPainter(paintDevice.data());
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-  //result->setRenderHint(QPainter::HighQualityAntialiasing);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
   result->setRenderHint(QPainter::Antialiasing);
+#else
+  result->setRenderHint(QPainter::HighQualityAntialiasing);
+#endif
 #endif
   return result;
 }
