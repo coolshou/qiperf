@@ -1,9 +1,13 @@
-qiperf (0.8.11402.12-1) unstable; urgency=medium
+qiperf (0.8.11402.19-1) unstable; urgency=medium
 
+  * Add Total throughput chart
   * Fix Clear() also clear comment column
   * Remove bidir & parallel number check
+  * Update qiperfd: websocketserver listen on any interface
+  * adjust show comment's error message only single line
+  * Fix show Total throughput
 
--- coolshou <coolshou2060@gmail.com>  Wed, 12 Feb 2025 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Wed, 19 Feb 2025 10:00:00 +0800
 
 qiperf (0.8.11402.11-1) unstable; urgency=medium
 
