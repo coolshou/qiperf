@@ -107,16 +107,6 @@ Section "qiperf daemon" SECTION_Daemon
 !else
     File "vc_redist.x86.exe"
 !endif
-    ;File "concrt140${DEBUGSTR}.dll"
-    ;File "msvcp140_1${DEBUGSTR}.dll"
-    ;File "msvcp140_2${DEBUGSTR}.dll"
-    ;File "msvcp140${DEBUGSTR}.dll"
-    ;File "msvcp140${DEBUGSTR}_atomic_wait.dll"
-    ;File "msvcp140${DEBUGSTR}_codecvt_ids.dll"
-    ;File "vccorlib140${DEBUGSTR}.dll"
-    ;File "vcruntime140_1${DEBUGSTR}.dll"
-    ;File "vcruntime140_threads${DEBUGSTR}.dll"
-    ;File "vcruntime140${DEBUGSTR}.dll"
 
 !else
     ;;mingw
