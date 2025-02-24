@@ -1088,10 +1088,12 @@ void QIperfd::initIperf(QString apppath)
 
 #elif defined(Q_OS_WIN32)
     // windows, iperf files
-
     m_iperfexe2 = apppath + QDir::separator() + "windows" +QDir::separator() + "x86"+QDir::separator() + "iperf2.exe";
+    m_iperfexe2 = QDir::toNativeSeparators(m_iperfexe2);
     m_iperfexe21 = apppath + QDir::separator() + "windows"+ QDir::separator() + "x86"+QDir::separator() + "iperf2.1.exe";
+    m_iperfexe21 = QDir::toNativeSeparators(m_iperfexe21);
     m_iperfexe3 = apppath + QDir::separator() + "windows" +QDir::separator() + arch + QDir::separator() + "iperf3.exe";
+    m_iperfexe3 = QDir::toNativeSeparators(m_iperfexe3);
 #else
     qDebug() << " Not Support platform!!";
 #endif
@@ -1108,6 +1110,7 @@ void QIperfd::getIperfVer(QString cmd, int ver)
     process.start(cmd, args);
 #else
     QString c = cmd + " -v";
+
     process.startCommand(c); //Qt6.0
 #endif
     if (!process.waitForFinished(5000)){//wait 5 sec
