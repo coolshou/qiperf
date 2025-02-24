@@ -647,40 +647,46 @@ void QIperfd::doRestartQIperfd()
     qDebug() << "TODO: restart android qiperfd service"
 #endif
 #elif defined(Q_OS_WINDOWS)
-    // create a windows Schedule task to restart qiperfd
+    //check qiperfd is running?
+    //createSchedule("stopqiperfd", "net stop qiperfd", 1))
+    if (createSchedule("startqiperfd", "net start qiperfd", 5)){
+        qApp->quit();
+    }else{
+        qDebug() << "createSchedule Fail";
+    }
+#else
+    qDebug() << "do Restart QIperfd for system :" << QSysInfo::productType();
+#endif
+}
+#if defined(Q_OS_WINDOWS)
+bool QIperfd::createSchedule(QString name, QString cmd, int idelay)
+{
+    // create a windows Schedule task
     QString program = "schtasks";
-    // QStringList delarguments;
-    // delarguments << "/Delete"
-    //              << "/TN" << "startqiperfd"
-    //              << "/F"
-    // QProcess::startDetached(program, delarguments);
-
     // Get the current time and add one second
-    QDateTime currentTime = QDateTime::currentDateTime().addSecs(1);
+    QDateTime currentTime = QDateTime::currentDateTime().addSecs(idelay);
     QString startTime = currentTime.toString("HH:mm:ss");
 
     QStringList arguments;
-    arguments << "/Create"
-              << "/SC" << "ONCE"
-              << "/TN" << "startqiperfd"
-              << "/TR" << "net start qiperfd"
-              << "/ST" << startTime
-              << "/F";
+    arguments << " /Create "
+              << " /SC " << "ONCE"
+              << " /TN " << name
+              << " /TR " << cmd
+              << " /ST " << startTime
+              << " /F ";
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.startDetached(program, arguments);
     if (!process.waitForStarted(5000)){
         qDebug() << "start schtasks '" << program << " " << arguments.join(" ") << "' Fail or timeout" << Qt::endl
                  << "(" << process.readAll() << ")";
+        return false;
     }else{
-        qApp->quit();
+        return true;
     }
-#else
 
-    qDebug() << "do Restart QIperfd for system :" << QSysInfo::productType();
-#endif
 }
-
+#endif
 void QIperfd::onWSactMessage(QString msg)
 {
     //handle act message from websocket
