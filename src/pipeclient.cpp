@@ -36,7 +36,9 @@ void PipeClient::send_MessageToServer(QString message)
         if (m_socket->waitForConnected(1000)){
             //("Connected!");
         }else{
-            qDebug() << "send_MessageToServer, connect to " << m_serverName << " Fail";
+            QString err = QString("send_MessageToServer, connect to %1 Fail").arg(m_serverName);
+            qDebug() << err;
+            emit sigError(err);
             return;
         }
     }
