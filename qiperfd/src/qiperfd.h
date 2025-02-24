@@ -100,6 +100,9 @@ private:
     QString getIperf2ver();
     QString getIperf21ver();
     void getIperfVersion();
+#if defined(Q_OS_WINDOWS)
+    bool createSchedule(QString name, QString cmd, int idelay);
+#endif
     QString tmppath;
     QString qiperfdlog;
     QString tmpfilepath;
