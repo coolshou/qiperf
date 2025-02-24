@@ -677,7 +677,7 @@ Section Uninstall
 
 SectionEnd
 
-BrandingText "Quick iperf daemon"
+BrandingText "Quick iperf"
 
 Function .onInit
 # TODO: Silent mode/ Full mode
