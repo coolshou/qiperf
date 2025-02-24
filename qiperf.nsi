@@ -469,7 +469,7 @@ Section Uninstall
     Delete "$INSTDIR\Qt6Gui${DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Widgets${DEBUGSTR}.dll"
     Delete "$INSTDIR\generic\qtuiotouchplugin${DEBUGSTR}.dll"
-    Delete "$INSTDIR\styles\qmodernwindowsstyle{DEBUGSTR}.dll"
+    Delete "$INSTDIR\styles\qmodernwindowsstyle${DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Core5Compat{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6OpenGL{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Positioning{DEBUGSTR}.dll"
@@ -481,7 +481,6 @@ Section Uninstall
     Delete "$INSTDIR\Qt6Quick3DUtils{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Quick{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6QuickWidgets{DEBUGSTR}.dll"
-    Delete "$INSTDIR\Qt6SerialPort{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Svg{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6VirtualKeyboard{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6WebChannel{DEBUGSTR}.dll"
@@ -514,7 +513,6 @@ Section Uninstall
 !else
     Delete "$INSTDIR\resources\v8_context_snapshot.bin"
 !endif
-    Delete "$INSTDIR\styles\qmodernwindowsstyle{DEBUGSTR}.dll"
     Delete "$INSTDIR\translations\qtwebengine_locales\am.pak"
     Delete "$INSTDIR\translations\qtwebengine_locales\ar.pak"
     Delete "$INSTDIR\translations\qtwebengine_locales\bg.pak"
