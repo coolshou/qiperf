@@ -21,6 +21,9 @@ DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
     ui(new Ui::DlgIperf)
 {
     ui->setupUi(this);
+    ui->wManagement->setVisible(false);
+    adjustSize();
+    connect(ui->pbManagement, &QPushButton::clicked, this, &DlgIperf::showManagement);
     m_tpmgr = tpmgr;
     mgrls.append("");
     old_mss = 0;
@@ -65,7 +68,6 @@ QString DlgIperf::getJsonCfg()
     QJsonObject mainObj;
     mainObj.insert("Action", CMD_IPERF_ADD);
     mainObj.insert("enabled", true);
-//    if (ui->gb_control_server->isChecked())
     {
         //server
         QJsonObject serverObj;
@@ -468,5 +470,17 @@ void DlgIperf::onMSSvalueChanged(int value)
     }else{
         //store value as old_mss
         old_mss = value;
+    }
+}
+
+void DlgIperf::showManagement(bool show)
+{
+    if (show){
+        setMinimumSize(465,540);
+    }
+    ui->wManagement->setVisible(show);
+    if (!show){
+        setMinimumSize(465,462);
+        resize(465, 462);
     }
 }

@@ -43,6 +43,7 @@ public slots:
     void onSelectMServer(QString text);
     void onSelectMClient(QString text);
     void onMSSvalueChanged(int value);
+    void showManagement(bool show);
 
 protected:
     void changeEvent(QEvent *e) override;
