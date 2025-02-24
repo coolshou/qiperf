@@ -139,9 +139,14 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
     if (error.error == QJsonParseError::NoError) {
         QJsonObject mainObj = doc.object();
         QJsonObject serverObj = mainObj["server"].toObject();
+        QJsonObject clientObj = mainObj["client"].toObject();
+
         ui->cb_version->setCurrentText(serverObj["version"].toString());
         ui->sb_port->setValue(serverObj["port"].toInt());
-        ui->cb_mserver_ip->setCurrentText(serverObj["manager"].toString());
+        if ((!serverObj["manager"].toString().isEmpty()) &&
+            (serverObj["manager"].toString() != clientObj["target"].toString())){
+            ui->cb_mserver_ip->setCurrentText(serverObj["manager"].toString());
+        }
         if (!serverObj["bind"].toString().isEmpty()){
             ui->chk_server_bind_ip->setChecked(true);
         }
@@ -152,8 +157,11 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
 
         ui->sb_delaytime->setValue(serverObj["delaytime"].toInt());
 
-        QJsonObject clientObj = mainObj["client"].toObject();
-        ui->cb_mclient_ip->setCurrentText(clientObj["manager"].toString());
+        // client
+        if ((!clientObj["manager"].toString().isEmpty()) &&
+            (clientObj["manager"].toString() != clientObj["bind"].toString())) {
+            ui->cb_mclient_ip->setCurrentText(clientObj["manager"].toString());
+        }
         ui->cb_client_bind_ip->setCurrentText(clientObj["bind"].toString());
         ui->cb_target_ip->setCurrentText(clientObj["target"].toString());
         ui->sb_duration->setValue(clientObj["duration"].toInt());
