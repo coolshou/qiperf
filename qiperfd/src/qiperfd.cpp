@@ -99,6 +99,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 
 QIperfd::~QIperfd()
 {
+    infoQIperfdStopped();
     informMessage(INFO_QIPERFD_STOPED, true);
     savecfg();
 }
@@ -409,8 +410,15 @@ bool QIperfd::isRunning(int idx)
 
 void QIperfd::restartQIperfd()
 {
-    m_udpsrv->setSendMsg(m_myinfo->disableInfo()); // broadcast
+    infoQIperfdStopped();
     QTimer::singleShot(1500, this, SLOT(doRestartQIperfd()));
+}
+
+void QIperfd::infoQIperfdStopped()
+{
+    if (m_udpsrv){
+        m_udpsrv->setSendMsg(m_myinfo->disableInfo()); // broadcast
+    }
 }
 
 void QIperfd::informMessage(QString data, bool bShowAtLocal)

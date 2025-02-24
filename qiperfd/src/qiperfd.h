@@ -64,6 +64,7 @@ public:
     void clear(); //clear all iperf setting
     bool isRunning(int idx); //check if iperf is running
     void restartQIperfd();
+    void infoQIperfdStopped();
 
 public slots:
     void informMessage(QString data, bool bShowAtLocal=false);
