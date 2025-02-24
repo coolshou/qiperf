@@ -1115,6 +1115,7 @@ void QIperfd::getIperfVer(QString cmd, int ver)
 #endif
     if (!process.waitForFinished(5000)){//wait 5 sec
         qDebug() << "Error run cmd: " << cmd << " " << args.join(" ") << " Fail";
+        qDebug() << "(" << process.readAll() << ")";
     }
 
     QString out;
