@@ -228,14 +228,12 @@ Section "qiperf console" SECTION_Console
     File "translations\qtwebengine_locales\zh-TW.pak"
 !else
     File "Qt5PrintSupport.dll"
-!endif
-    SetOutPath "$INSTDIR\template\"
-    File "..\qiperfc\template\result.html"
-!ifdef QT6
-!else
     SetOutPath "$INSTDIR\printsupport\"
     File "printsupport\windowsprintersupport.dll"
 !endif
+    SetOutPath "$INSTDIR\template\"
+    File "..\qiperfc\template\result.html"
+
     !cd ..
     CreateShortCut "$DESKTOP\qiperfc.lnk" "$INSTDIR\${QIPERFC_NAME}"
     CreateShortCut "$SMPROGRAMS\qiperf\qiperfc.lnk" "$INSTDIR\${QIPERFC_NAME}"
@@ -602,10 +600,10 @@ Function un.install_qiperfc
 
 FunctionEnd
 
-Function .oninstsuccess
+#Function .oninstsuccess
     # final install success, run qiperftray
  #   SetOutPath "$INSTDIR\"
  #   Exec "$INSTDIR\${QIPERFTRAY_NAME}"
-FunctionEnd
+#FunctionEnd
 
 ; eof
