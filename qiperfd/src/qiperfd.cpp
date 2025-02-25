@@ -410,7 +410,7 @@ bool QIperfd::isRunning(int idx)
 
 void QIperfd::restartQIperfd()
 {
-    // infoQIperfdStopped();
+    infoQIperfdStopped();
     QTimer::singleShot(1500, this, SLOT(doRestartQIperfd()));
 }
 
