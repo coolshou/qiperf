@@ -101,10 +101,8 @@ Section "qiperf daemon" SECTION_Daemon
     SetOutPath "$INSTDIR\"
 !ifdef WIN64
     File "..\qiperfd-setup-${APPFileVersion}.exe"
-    ExecWait "$INSTDIR\qiperfd-setup-${APPFileVersion}.exe" /s
 !else
     File "..\qiperfd-setup-${APPFileVersion}_x86.exe"
-    ExecWait "$INSTDIR\qiperfd-setup-${APPFileVersion}_x86.exe" /s
 !endif
 
     ;Call check_vc_redist
@@ -473,9 +471,9 @@ FunctionEnd
 
 Function install_qiperfd
     !ifdef WIN64
-        ExecWait "$INSTDIR\qiperfd-setup-${APPFileVersion}.exe" /s
+        ExecWait '$INSTDIR\qiperfd-setup-${APPFileVersion}.exe /s'
     !else
-        ExecWait "$INSTDIR\qiperfd-setup-${APPFileVersion}_x86.exe" /s
+        ExecWait '$INSTDIR\qiperfd-setup-${APPFileVersion}_x86.exe /s'
     !endif
 FunctionEnd
 
