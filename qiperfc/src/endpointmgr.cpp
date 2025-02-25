@@ -40,11 +40,6 @@ QVariant EndPointMgr::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    if (role != Qt::DisplayRole) {
-        return QVariant();
-    }
-
-//    qDebug() << "data:" << index << " ,role:" << QString::number(role) ;
     EndPoint *item = static_cast<EndPoint*>(index.internalPointer());
     if (role == Qt::ForegroundRole){
         // when item is disabled, grayout text
@@ -52,6 +47,10 @@ QVariant EndPointMgr::data(const QModelIndex &index, int role) const
             return m_disabledTextColor;
         }
     }
+    if (role != Qt::DisplayRole) {
+        return QVariant();
+    }
+
     if (index.row()==0 && index.column()==0){
 //        qDebug() << "EndPointMgr::data: " << index  << " flasg: " << flags(index) << " value:" << item->data(index.column());
     }
@@ -254,6 +253,8 @@ void EndPointMgr::disable(QString id)
         EndPoint* ep = getEndPoint(id);
         qDebug() << "disable: " << ep->getID();
         ep->setEnabled(false);
+    }else {
+        qDebug() << "EndPointMgr::disable not found id:" << id << " m_endpoints:" << m_endpoints;
     }
 }
 
