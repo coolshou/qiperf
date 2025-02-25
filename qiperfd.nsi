@@ -429,14 +429,21 @@ SectionEnd
 BrandingText "Quick iperf daemon"
 
 Function .onInit
-# TODO: Silent mode/ Full mode
+    ; Get command line parameters /S for Silent mode
+    GetParameters $R0
+    StrCpy $R1 "/S"
+    StrStr $R0 $R1 +2
+    IfErrors 0 +3
+    MessageBox MB_OK "Silent mode detected."
+    SetSilent silent
+
     ${If} ${RunningX64}
     !ifdef WIN64
             SetRegView 64
     !endif
     ${Else}
     !ifdef WIN64
-            MessageBox MB_OK|MB_ICONSTOP 'This is the 64 bit ${APPNAME} installer$\r$\nPlease download the 32 bit version $\r$\nClick Ok to quit Setup.'
+            MessageBox MB_OK|MB_ICONSTOP 'This is the 64 bit ${APPNAME} installer$\r$\nPlease download the 32 bit version $\r$\nClick Ok to quit  Setup.' /SD IDOK
             Quit
     !endif
     ${EndIf}
@@ -449,7 +456,7 @@ Function .onInit
     ${VersionCompare} $0 ${APPFileVersion} $1
     IntCmp $1 2 init.uninst
       MessageBox MB_YESNO|MB_ICONQUESTION "${APPNAME} version $0 seems to be already installed on your system.$\nWould you like to proceed with the installation of version ${APPFileVersion}?" \
-        IDYES init.uninst
+        /SD IDYES init.uninst
     Quit
 
 init.uninst:
