@@ -58,7 +58,7 @@ SetCompressor LZMA
 !include "nsis\FileAssociation.nsh"
 !include "WordFunc.nsh"
 !include "StrFunc.nsh"
-${Using:StrFunc}
+${Using:StrFunc} StrStr
 !insertmacro VersionCompare
 
 !define MUI_ABORTWARNING
@@ -481,7 +481,7 @@ Function .onInit
     ${VersionCompare} $0 ${APPFileVersion} $1
     IntCmp $1 2 init.uninst
       MessageBox MB_YESNO|MB_ICONQUESTION "${APPNAME} version $0 seems to be already installed on your system.$\nWould you like to proceed with the installation of version ${APPFileVersion}?" \
-        /SD IDYES init.uninst
+        IDYES init.uninst /SD IDYES
     Quit
 
 init.uninst:
