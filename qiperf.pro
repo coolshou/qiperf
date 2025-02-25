@@ -47,4 +47,5 @@ MISC.files += \
     TODO
 
 NSIS.files += \
+    qiperfd.nsi \
     qiperf.nsi

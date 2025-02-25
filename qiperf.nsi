@@ -4,8 +4,12 @@
 
 ; Define your application name
 !define APPNAME "qiperf"
+!ifndef APPVERSION
 !define APPVERSION 0.8
+!endif
+!ifndef APPFileVersion
 !define APPFileVersion 0.8.11402.24
+!endif
 !define APPDOMAIN "coolshou.idv.tw"
 !define APPURL "https://github.com/coolshou/qiperf"
 #!define WIN64 ; force  64 bit, comment out for 32 bit
@@ -95,149 +99,15 @@ Section "qiperf daemon" SECTION_Daemon
 
     ; Set Section Files and Shortcuts
     SetOutPath "$INSTDIR\"
-    File "images\qiperf.ico"
 !ifdef WIN64
-    !cd "qiperfd_x86_64"
+    File "..\qiperfd-setup-${APPFileVersion}.exe"
+    ExecWait "$INSTDIR\qiperfd-setup-${APPFileVersion}.exe" /s
 !else
-    !cd "qiperfd_x86"
-!endif
-!ifdef VCBUILD
-!ifdef WIN64
-    File "vc_redist.x64.exe"
-!else
-    File "vc_redist.x86.exe"
+    File "..\qiperfd-setup-${APPFileVersion}_x86.exe"
+    ExecWait "$INSTDIR\qiperfd-setup-${APPFileVersion}_x86.exe" /s
 !endif
 
-!else
-    ;;mingw
-    File "libgcc_s_seh-1.dll"
-    File "libstdc++-6.dll"
-    File "libwinpthread-1.dll"
-    File "libEGL.dll"
-    File "libGLESv2.dll"
-
-!endif
-    File "${QIPERFD_NAME}"
-!ifdef QT6
-    File "Qt6Core${DEBUGSTR}.dll"
-    File "Qt6Network${DEBUGSTR}.dll"
-    File "Qt6SerialPort${DEBUGSTR}.dll"
-    File "Qt6WebSockets${DEBUGSTR}.dll"
-    SetOutPath "$INSTDIR\networkinformation\"
-    File "networkinformation\qnetworklistmanager${DEBUGSTR}.dll"
-    SetOutPath "$INSTDIR\tls"
-    File "tls\qcertonlybackend${DEBUGSTR}.dll"
-    File "tls\qschannelbackend${DEBUGSTR}.dll"
-!else
-    ;qt5
-    File "Qt5Core.dll"
-    File "Qt5Network.dll"
-    File "Qt5WebSockets.dll"
-    SetOutPath "$INSTDIR\bearer\"
-    File "bearer\qgenericbearer.dll"
-    File "Qt5Gui.dll"
-    File "Qt5Svg.dll"
-    File "Qt5Widgets.dll"
-
-!endif
-    SetOutPath "$INSTDIR\translations\"
-    File "translations\qt_ar.qm"
-    File "translations\qt_bg.qm"
-    File "translations\qt_ca.qm"
-    File "translations\qt_cs.qm"
-    File "translations\qt_da.qm"
-    File "translations\qt_de.qm"
-    File "translations\qt_en.qm"
-    File "translations\qt_es.qm"
-    File "translations\qt_fi.qm"
-    File "translations\qt_fr.qm"
-    File "translations\qt_gd.qm"
-    File "translations\qt_he.qm"
-    File "translations\qt_hu.qm"
-    File "translations\qt_it.qm"
-    File "translations\qt_ja.qm"
-    File "translations\qt_ko.qm"
-    File "translations\qt_lv.qm"
-    File "translations\qt_pl.qm"
-    File "translations\qt_ru.qm"
-    File "translations\qt_sk.qm"
-    File "translations\qt_tr.qm"
-    File "translations\qt_uk.qm"
-    File "translations\qt_zh_TW.qm"
-    SetOutPath "$INSTDIR\windows\x86\"
-    File "windows\x86\cygcrypto-1.1.dll"
-    File "windows\x86\cyggcc_s-1.dll"
-    File "windows\x86\cygwin1.dll"
-    File "windows\x86\cygz.dll"
-    File "windows\x86\iperf2.exe"
-    File "windows\x86\iperf2.1.exe"
-    File "windows\x86\iperf3.exe"
-    SetOutPath "$INSTDIR\windows\x86_64\"
-    File "windows\x86_64\cygcrypto-1.1.dll"
-    File "windows\x86_64\cygwin1.dll"
-    File "windows\x86_64\cygz.dll"
-    File "windows\x86_64\iperf3.exe"
-    File "windows\x86_64\iperf2.2.exe"
-    SetOutPath "$INSTDIR\"
-    !cd ..
-!ifdef WIN64
-    !cd qiperftray_x86_64
-!else
-    !cd qiperftray_x86
-!endif
-
-    File "D3Dcompiler_47.dll"
-    File "opengl32sw.dll"
-!ifdef VCBUILD
-    File "dxil.dll"
-!endif
-    File "${QIPERFTRAY_NAME}"
-!ifdef QT6
-    File "Qt6Gui${DEBUGSTR}.dll"
-    File "Qt6Widgets${DEBUGSTR}.dll"
-    SetOutPath "$INSTDIR\generic\"
-    File "generic\qtuiotouchplugin${DEBUGSTR}.dll"
-!endif
-    SetOutPath "$INSTDIR\iconengines\"
-    File "iconengines\qsvgicon${DEBUGSTR}.dll"
-    SetOutPath "$INSTDIR\imageformats\"
-    File "imageformats\qgif${DEBUGSTR}.dll"
-    File "imageformats\qicns${DEBUGSTR}.dll"
-    File "imageformats\qico${DEBUGSTR}.dll"
-    File "imageformats\qjpeg${DEBUGSTR}.dll"
-    File "imageformats\qsvg${DEBUGSTR}.dll"
-    File "imageformats\qtga${DEBUGSTR}.dll"
-    File "imageformats\qtiff${DEBUGSTR}.dll"
-    File "imageformats\qwbmp${DEBUGSTR}.dll"
-    File "imageformats\qwebp${DEBUGSTR}.dll"
-    SetOutPath "$INSTDIR\platforms\"
-    File "platforms\qwindows${DEBUGSTR}.dll"
-    SetOutPath "$INSTDIR\styles\"
-!ifdef QT6
-    File "styles\qmodernwindowsstyle${DEBUGSTR}.dll"
-!else
-    File "styles\qwindowsvistastyle.dll"
-!endif
-    !cd ..
-    # #  serivice file
-    SetOutPath "$INSTDIR"
-!ifdef WIN64
-    File "lib\nssm.exe"
-!else
-    File "lib\nssm_x86.exe" /oname=nssm.exe
-!endif
-    #CreateShortCut "$DESKTOP\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
-
-    CreateDirectory "$SMPROGRAMS\qiperf"
-    #CreateShortCut "$SMPROGRAMS\qiperf\qiperfd.lnk" "$INSTDIR\${QIPERFD_NAME}"
-    CreateShortCut "$SMPROGRAMS\qiperf\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
-    CreateShortCut "$SMPROGRAMS\qiperf\Uninstall.lnk" "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
-
-    WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode" "0"
-    # set QIPERFTRAY_NAME run on system boot
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "${QIPERFTRAY_NAME}" '"$INSTDIR\${QIPERFTRAY_NAME}"'
-
-    Call check_vc_redist
+    ;Call check_vc_redist
     Call install_qiperfd
 SectionEnd
 
@@ -400,14 +270,14 @@ Section -FinishSection
 SectionEnd
 
 ; Modern install component descriptions
-!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Daemon} "quick iperf daemon && systray"
-    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Console} "quick iperf console"
-!insertmacro MUI_FUNCTION_DESCRIPTION_END
+;!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+;    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Daemon} "quick iperf daemon && systray"
+;    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Console} "quick iperf console"
+;!insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;Uninstall section
 Section Uninstall
-    Call un.install_qiperfd
+    ;Call un.install_qiperfd
     ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode"
     strcpy $OLD_INSTALL_MODE $R0
     ${If} $OLD_INSTALL_MODE  == "1"
@@ -424,52 +294,17 @@ Section Uninstall
     Delete "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
     Delete "$INSTDIR\qiperf.ico"
     ; Delete Shortcuts
-    #Delete "$DESKTOP\qiperftray.lnk"
     Delete "$DESKTOP\qiperfc.lnk"
-    Delete "$SMPROGRAMS\qiperf\qiperfd.lnk"
-    Delete "$SMPROGRAMS\qiperf\qiperftray.lnk"
     Delete "$SMPROGRAMS\qiperf\qiperfc.lnk"
     Delete "$SMPROGRAMS\qiperf\Uninstall.lnk"
 
     ; Clean up qiperf daemon
-!ifdef VCBUILD
 !ifdef WIN64
-    Delete "$INSTDIR\vc_redist.x64.exe"
+    Delete "$INSTDIR\qiperfd-setup-${APPFileVersion}.exe"
 !else
-    Delete "$INSTDIR\vc_redist.x86.exe"
+    Delete "$INSTDIR\qiperfd-setup-${APPFileVersion}_x86.exe"
 !endif
-    ;Delete "$INSTDIR\concrt140${DEBUGSTR}.dll"
-    ;Delete "$INSTDIR\msvcp140_1${DEBUGSTR}.dll"
-    ;Delete "$INSTDIR\msvcp140_2${DEBUGSTR}.dll"
-    ;Delete "$INSTDIR\msvcp140${DEBUGSTR}.dll"
-    ;Delete "$INSTDIR\msvcp140${DEBUGSTR}_atomic_wait.dll"
-    ;Delete "$INSTDIR\msvcp140${DEBUGSTR}_codecvt_ids.dll"
-    ;Delete "$INSTDIR\vccorlib140${DEBUGSTR}.dll"
-    ;Delete "$INSTDIR\vcruntime140_1${DEBUGSTR}.dll"
-    ;Delete "$INSTDIR\vcruntime140_threads${DEBUGSTR}.dll"
-    ;Delete "$INSTDIR\vcruntime140${DEBUGSTR}.dll"
-    Delete "$INSTDIR\dxil.dll"
-!else
-    Delete "$INSTDIR\libgcc_s_seh-1.dll"
-    Delete "$INSTDIR\libstdc++-6.dll"
-    Delete "$INSTDIR\libwinpthread-1.dll"
-    Delete "$INSTDIR\libEGL.dll"
-    Delete "$INSTDIR\libGLESv2.dll"
-
-!endif
-    Delete "$INSTDIR\${QIPERFD_NAME}"
 !ifdef QT6
-    Delete "$INSTDIR\Qt6Core${DEBUGSTR}.dll"
-    Delete "$INSTDIR\Qt6Network${DEBUGSTR}.dll"
-    Delete "$INSTDIR\Qt6SerialPort${DEBUGSTR}.dll"
-    Delete "$INSTDIR\Qt6WebSockets${DEBUGSTR}.dll"
-    Delete "$INSTDIR\networkinformation\qnetworklistmanager${DEBUGSTR}.dll"
-    Delete "$INSTDIR\tls\qcertonlybackend${DEBUGSTR}.dll"
-    Delete "$INSTDIR\tls\qschannelbackend${DEBUGSTR}.dll"
-    Delete "$INSTDIR\Qt6Gui${DEBUGSTR}.dll"
-    Delete "$INSTDIR\Qt6Widgets${DEBUGSTR}.dll"
-    Delete "$INSTDIR\generic\qtuiotouchplugin${DEBUGSTR}.dll"
-    Delete "$INSTDIR\styles\qmodernwindowsstyle${DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Core5Compat{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6OpenGL{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Positioning{DEBUGSTR}.dll"
@@ -503,16 +338,6 @@ Section Uninstall
     Delete "$INSTDIR\qmltooling\qmldbg_quickprofiler{DEBUGSTR}.dll"
     Delete "$INSTDIR\qmltooling\qmldbg_server{DEBUGSTR}.dll"
     Delete "$INSTDIR\qmltooling\qmldbg_tcp{DEBUGSTR}.dll"
-    Delete "$INSTDIR\resources\icudtl.dat"
-    Delete "$INSTDIR\resources\qtwebengine_devtools_resources.pak"
-    Delete "$INSTDIR\resources\qtwebengine_resources.pak"
-    Delete "$INSTDIR\resources\qtwebengine_resources_100p.pak"
-    Delete "$INSTDIR\resources\qtwebengine_resources_200p.pak"
-!ifdef DEBUG
-    Delete "$INSTDIR\resources\v8_context_snapshot.debug.bin"
-!else
-    Delete "$INSTDIR\resources\v8_context_snapshot.bin"
-!endif
     Delete "$INSTDIR\translations\qtwebengine_locales\am.pak"
     Delete "$INSTDIR\translations\qtwebengine_locales\ar.pak"
     Delete "$INSTDIR\translations\qtwebengine_locales\bg.pak"
@@ -566,98 +391,21 @@ Section Uninstall
     Delete "$INSTDIR\translations\qtwebengine_locales\vi.pak"
     Delete "$INSTDIR\translations\qtwebengine_locales\zh-CN.pak"
     Delete "$INSTDIR\translations\qtwebengine_locales\zh-TW.pak"
-!else
-    Delete "$INSTDIR\Qt5Core.dll"
-    Delete "$INSTDIR\Qt5Network.dll"
-    Delete "$INSTDIR\Qt5WebSockets.dll"
-    Delete "$INSTDIR\Qt5Gui.dll"
-    Delete "$INSTDIR\Qt5Svg.dll"
-    Delete "$INSTDIR\Qt5Widgets.dll"
-    Delete "$INSTDIR\bearer\qgenericbearer.dll"
-    Delete "$INSTDIR\styles\qwindowsvistastyle.dll"
-    Delete "$INSTDIR\Qt5PrintSupport.dll"
-    Delete "$INSTDIR\printsupport\windowsprintersupport.dll"
-!endif
 
-    Delete "$INSTDIR\translations\qt_ar.qm"
-    Delete "$INSTDIR\translations\qt_bg.qm"
-    Delete "$INSTDIR\translations\qt_ca.qm"
-    Delete "$INSTDIR\translations\qt_cs.qm"
-    Delete "$INSTDIR\translations\qt_da.qm"
-    Delete "$INSTDIR\translations\qt_de.qm"
-    Delete "$INSTDIR\translations\qt_en.qm"
-    Delete "$INSTDIR\translations\qt_es.qm"
-    Delete "$INSTDIR\translations\qt_fi.qm"
-    Delete "$INSTDIR\translations\qt_fr.qm"
-    Delete "$INSTDIR\translations\qt_gd.qm"
-    Delete "$INSTDIR\translations\qt_he.qm"
-    Delete "$INSTDIR\translations\qt_hu.qm"
-    Delete "$INSTDIR\translations\qt_it.qm"
-    Delete "$INSTDIR\translations\qt_ja.qm"
-    Delete "$INSTDIR\translations\qt_ko.qm"
-    Delete "$INSTDIR\translations\qt_lv.qm"
-    Delete "$INSTDIR\translations\qt_pl.qm"
-    Delete "$INSTDIR\translations\qt_ru.qm"
-    Delete "$INSTDIR\translations\qt_sk.qm"
-    Delete "$INSTDIR\translations\qt_tr.qm"
-    Delete "$INSTDIR\translations\qt_uk.qm"
-    Delete "$INSTDIR\translations\qt_zh_TW.qm"
-    Delete "$INSTDIR\windows\x86\cygcrypto-1.1.dll"
-    Delete "$INSTDIR\windows\x86\cyggcc_s-1.dll"
-    Delete "$INSTDIR\windows\x86\cygwin1.dll"
-    Delete "$INSTDIR\windows\x86\cygz.dll"
-    Delete "$INSTDIR\windows\x86\iperf2.exe"
-    Delete "$INSTDIR\windows\x86\iperf2.1.exe"
-    Delete "$INSTDIR\windows\x86\iperf3.exe"
-    Delete "$INSTDIR\windows\x86_64\cygcrypto-1.1.dll"
-    Delete "$INSTDIR\windows\x86_64\cygwin1.dll"
-    Delete "$INSTDIR\windows\x86_64\cygz.dll"
-    Delete "$INSTDIR\windows\x86_64\iperf2.2.exe"
-    Delete "$INSTDIR\windows\x86_64\iperf3.exe"
-
-    Delete "$INSTDIR\D3Dcompiler_47.dll"
-    Delete "$INSTDIR\opengl32sw.dll"
-    Delete "$INSTDIR\${QIPERFTRAY_NAME}"
-    Delete "$INSTDIR\nssm.exe"
-    Delete "$INSTDIR\iconengines\qsvgicon.dll"
-    Delete "$INSTDIR\imageformats\qgif.dll"
-    Delete "$INSTDIR\imageformats\qicns.dll"
-    Delete "$INSTDIR\imageformats\qico.dll"
-    Delete "$INSTDIR\imageformats\qjpeg.dll"
-    Delete "$INSTDIR\imageformats\qsvg.dll"
-    Delete "$INSTDIR\imageformats\qtga.dll"
-    Delete "$INSTDIR\imageformats\qtiff.dll"
-    Delete "$INSTDIR\imageformats\qwbmp.dll"
-    Delete "$INSTDIR\imageformats\qwebp.dll"
-    Delete "$INSTDIR\platforms\qwindows.dll"
     ; Clean up qiperf console
     Delete "$INSTDIR\${QIPERFC_NAME}"
     Delete "$INSTDIR\template\result.html"
 
     ; Remove remaining directories
     RMDir "$SMPROGRAMS\qiperf"
-    RMDir "$INSTDIR\windows\x86_64\"
-    RMDir "$INSTDIR\windows\x86\"
-    RMDir "$INSTDIR\windows\"
 !ifdef QT6
-    RMDir "$INSTDIR\networkinformation\"
-    RMDir "$INSTDIR\tls\"
-    RMDir "$INSTDIR\generic\"
     RMDir "$INSTDIR\platforminputcontexts\"
     RMDir "$INSTDIR\position\"
     RMDir "$INSTDIR\qml\"
     RMDir "$INSTDIR\qmltooling\"
-    RMDir "$INSTDIR\resources\"
     RMDir "$INSTDIR\translations\qtwebengine_locales\"
-!else
-    RMDir "$INSTDIR\bearer\"
 !endif
-    RMDir "$INSTDIR\translations\"
-    RMDir "$INSTDIR\styles\"
     RMDir "$INSTDIR\printsupport\"
-    RMDir "$INSTDIR\platforms\"
-    RMDir "$INSTDIR\imageformats\"
-    RMDir "$INSTDIR\iconengines\"
     RMDir "$INSTDIR\template"
     RMDir "$INSTDIR\"
 
@@ -716,34 +464,19 @@ init.done:
     SectionSetFlags ${SECTION_Daemon} $0
    # set section 'console' as unselected
    #IntOp $0 ~${SF_SELECTED}
-   ${If} $OLD_INSTALL_MODE  == "1"
-       SectionSetFlags ${SECTION_Console}  ${SF_SELECTED}
-   ${Else}
-      SectionSetFlags ${SECTION_Console} 0
-   ${EndIf}
+   #${If} $OLD_INSTALL_MODE  == "1"
+   #    SectionSetFlags ${SECTION_Console}  ${SF_SELECTED}
+   #${Else}
+   #   SectionSetFlags ${SECTION_Console} 0
+   #${EndIf}
 FunctionEnd
 
 Function install_qiperfd
-    ; Add an application to the firewall exception list - All Networks - All IP Version - Enabled
-    SimpleFC::AddApplication "qiperfd daemon" "$INSTDIR\${QIPERFD_NAME}" 0 2 "" 1
-    Pop $0 ; return error(1)/success(0)
-    ; Add iperf3 to firewall
     !ifdef WIN64
-    SimpleFC::AddApplication "iperf3" "$INSTDIR\x86_64\iperf3.exe" 0 2 "" 1
+        ExecWait "$INSTDIR\qiperfd-setup-${APPFileVersion}.exe" /s
     !else
-    SimpleFC::AddApplication "iperf3" "$INSTDIR\x86\iperf3.exe" 0 2 "" 1
+        ExecWait "$INSTDIR\qiperfd-setup-${APPFileVersion}_x86.exe" /s
     !endif
-    Pop $0 ; return error(1)/success(0)
-    ; Add iperf2.1 to firewall
-    SimpleFC::AddApplication "iperf2.1" "$INSTDIR\x86\iperf2.1.exe" 0 2 "" 1
-    Pop $0 ; return error(1)/success(0)
-    ; Add iperf2 to firewall
-    SimpleFC::AddApplication "iperf2" "$INSTDIR\x86\iperf2.exe" 0 2 "" 1
-    Pop $0 ; return error(1)/success(0)
-
-    # install qiperfd  service & start it
-    ExecWait '"$INSTDIR\nssm.exe" install "qiperfd" "$INSTDIR\${QIPERFD_NAME}"'
-    ExecWait '"$INSTDIR\nssm.exe" start "qiperfd"'
 FunctionEnd
 
 Function install_vc_redist
@@ -873,8 +606,8 @@ FunctionEnd
 
 Function .oninstsuccess
     # final install success, run qiperftray
-    SetOutPath "$INSTDIR\"
-    Exec "$INSTDIR\${QIPERFTRAY_NAME}"
+ #   SetOutPath "$INSTDIR\"
+ #   Exec "$INSTDIR\${QIPERFTRAY_NAME}"
 FunctionEnd
 
 ; eof
