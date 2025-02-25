@@ -60,7 +60,7 @@ SetCompressor LZMA
 !insertmacro VersionCompare
 
 !define MUI_ABORTWARNING
-!define MUI_ICON "images\qiperf.ico"
+!define MUI_ICON "images\${APPNAME}.ico"
 # uninstall icon
 !define MUI_UNICON "images\uninstall.ico"
 !insertmacro MUI_PAGE_WELCOME
@@ -117,6 +117,7 @@ Section "qiperf console" SECTION_Console
 
     ; Set Section Files and Shortcuts
     SetOutPath "$INSTDIR\"
+    File "images\${APPNAME}.ico"
 !ifdef WIN64
     !cd qiperfc_x86_64
 !else
@@ -249,7 +250,7 @@ SectionEnd
 Section -FinishSection
     WriteRegStr HKLM "Software\${APPNAME}" "" "$INSTDIR"
     WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "DisplayName" "${APPNAME}"
-    WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "DisplayIcon" "$INSTDIR\qiperf.ico"
+    WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "DisplayIcon" "$INSTDIR\${APPNAME}.ico"
     WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "Publisher" "${APPDOMAIN}"
     WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "DisplayVersion" "${APPFileVersion}"
     WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "HelpLink" "${APPURL}"
@@ -288,7 +289,7 @@ Section Uninstall
 
     ; Delete self
     Delete "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
-    Delete "$INSTDIR\qiperf.ico"
+    Delete "$INSTDIR\${APPNAME}.ico"
     ; Delete Shortcuts
     Delete "$DESKTOP\qiperfc.lnk"
     Delete "$SMPROGRAMS\qiperf\qiperfc.lnk"
@@ -419,7 +420,7 @@ Function .onInit
     !endif
     ${Else}
     !ifdef WIN64
-            MessageBox MB_OK|MB_ICONSTOP 'This is the 64 bit ${APPNAME} installer$\r$\nPlease download the 32 bit version $\r$\nClick Ok to quit Setup.'
+            MessageBox MB_OK|MB_ICONSTOP 'This is the 64 bit ${APPNAME} installer$\r$\nPlease download the 32 bit version $\r$\nClick Ok to quit Setup.' /SD IDOK
             Quit
     !endif
     ${EndIf}
@@ -432,7 +433,7 @@ Function .onInit
     ${VersionCompare} $0 ${APPFileVersion} $1
     IntCmp $1 2 init.uninst
       MessageBox MB_YESNO|MB_ICONQUESTION "${APPNAME} version $0 seems to be already installed on your system.$\nWould you like to proceed with the installation of version ${APPFileVersion}?" \
-        IDYES init.uninst
+        /SD IDYES init.uninst
     Quit
 
 init.uninst:
@@ -469,9 +470,9 @@ FunctionEnd
 
 Function install_qiperfd
     !ifdef WIN64
-        ExecWait '$INSTDIR\qiperfd-setup-${APPFileVersion}.exe /s'
+        ExecWait '$INSTDIR\qiperfd-setup-${APPFileVersion}.exe /S'
     !else
-        ExecWait '$INSTDIR\qiperfd-setup-${APPFileVersion}_x86.exe /s'
+        ExecWait '$INSTDIR\qiperfd-setup-${APPFileVersion}_x86.exe /S'
     !endif
 FunctionEnd
 
