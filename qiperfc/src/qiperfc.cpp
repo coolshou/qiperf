@@ -761,6 +761,7 @@ void QIperfC::onNotice(QString send_addr, QString msg)
                 break;
             case EndPointAct::Disable:
                 qDebug() << "TODO qiperfd Disable: from(" << send_addr << ") " << msg;
+                m_endpointmgr->disable(send_addr);
                 break;
             default:
                 qDebug() << "TODO on_notice default action: from(" << send_addr << ") " << msg;

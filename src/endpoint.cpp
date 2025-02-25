@@ -86,7 +86,7 @@ void EndPoint::loadData(QString data)
         QString sType = ept->getTypeString(m_type);
         m_Manager = jsonRoot.value("Manager").toString(); // manager interface
         m_HostName = jsonRoot.value("HostName").toString();
-
+        m_enabled = true;
     //    bool update = jsonRoot.value("update").toBool();
         OS_name = jsonRoot.value("OS").toString();
         OS_version = jsonRoot.value("OSVer").toString();

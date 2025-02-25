@@ -28,7 +28,7 @@
 #include "fileserver.h"
 #include "pingmgr.h"
 #include "pingplot.h"
-#include "dlgshowlog.h"
+#include "../../src/dlgshowlog.h"
 #include "exporthtml.h"
 #include "../views/viewmanager.h"
 #include "throughputview.h"
