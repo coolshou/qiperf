@@ -394,7 +394,7 @@ Section Uninstall
 
     ; Remove remaining directories
     RMDir "$SMPROGRAMS\qiperf"
-!ifdef QT6
+
     RMDir "$INSTDIR\platforminputcontexts\"
     RMDir "$INSTDIR\position\"
     RMDir "$INSTDIR\qml\"
