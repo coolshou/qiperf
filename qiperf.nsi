@@ -432,8 +432,7 @@ Function .onInit
     IfErrors init.uninst ; older versions might not have "Version" string set
     ${VersionCompare} $0 ${APPFileVersion} $1
     IntCmp $1 2 init.uninst
-      MessageBox MB_YESNO|MB_ICONQUESTION "${APPNAME} version $0 seems to be already installed on your system.$\nWould you like to proceed with the installation of version ${APPFileVersion}?" \
-         IDYES init.uninst /SD IDYES
+      MessageBox MB_YESNO|MB_ICONQUESTION "${APPNAME} version $0 seems to be already installed on your system.$\nWould you like to proceed with the installation of version ${APPFileVersion}?" /SD IDYES IDYES init.uninst
     Quit
 
 init.uninst:

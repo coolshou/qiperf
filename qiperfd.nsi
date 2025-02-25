@@ -458,7 +458,7 @@ Function .onInit
     StrCpy $R1 "/S"
     ; Check if the /S switch is present
     ${StrStr} $R1 $R0 "/S"
-    StrCmp $R1 "" 0 +3
+    StrCmp $R1 "" 0 +2
     MessageBox MB_OK "Silent mode detected."
     SetSilent silent
 
@@ -616,7 +616,7 @@ Function un.install_qiperfd
     ${nsProcess::Unload}
 
     !ifdef WIN64
-            SetRegView 64
+    SetRegView 64
     !endif
     ; Remove startup run
     DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Run\${QIPERFTRAY_NAME}"
