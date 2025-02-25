@@ -455,8 +455,9 @@ Function .onInit
     Call GetParameters
     Pop $R0
     StrCpy $R1 "/S"
-    StrStr $R0 $R1 +2
-    IfErrors 0 +3
+    ; Check if the /S switch is present
+    ${StrStr} $R1 $R0 "/S"
+    StrCmp $R1 "" 0 +3
     MessageBox MB_OK "Silent mode detected."
     SetSilent silent
 
