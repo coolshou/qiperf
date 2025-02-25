@@ -273,13 +273,8 @@ SectionEnd
 ;Uninstall section
 Section Uninstall
     Call un.install_qiperfd
-    ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode"
-    strcpy $OLD_INSTALL_MODE $R0
-    ${If} $OLD_INSTALL_MODE  == "1"
-    Call un.install_qiperfc
-    ${EndIf}
 !ifdef WIN64
-        SetRegView 64
+    SetRegView 64
 !endif
     ;Remove from registry...
     DeleteRegKey HKLM "Software\${PRODUCT_REG_KEY}"
@@ -402,7 +397,6 @@ Section Uninstall
     Delete "$INSTDIR\imageformats\qwbmp.dll"
     Delete "$INSTDIR\imageformats\qwebp.dll"
     Delete "$INSTDIR\platforms\qwindows.dll"
-
 
     ; Remove remaining directories
     RMDir "$SMPROGRAMS\qiperf"
@@ -611,24 +605,6 @@ Function un.install_qiperfd
     Pop $0 ; return error(1)/success(0)
     ; Remove iperf2 from the firewall
     SimpleFC::RemoveApplication "$INSTDIR\x86\iperf2.exe"
-    Pop $0 ; return error(1)/success(0)
-
-FunctionEnd
-
-Function un.install_qiperfc
-    #kill qiperfc
-    ${nsProcess::FindProcess} "${QIPERFC_NAME}" $R0
-    ${If} $R0 == 0
-        DetailPrint "${QIPERFC_NAME} is running. Closing it down"
-        ${nsProcess::CloseProcess} "${QIPERFC_NAME}" $R0
-        DetailPrint "Waiting for ${QIPERFC_NAME} to close"
-        Sleep 2000
-    ${Else}
-        DetailPrint "${QIPERFC_NAME} was not found to be running"
-    ${EndIf}
-    ${nsProcess::Unload}
-    ; Remove an application from the firewall exception list
-    SimpleFC::RemoveApplication "$INSTDIR\${QIPERFC_NAME}"
     Pop $0 ; return error(1)/success(0)
 
 FunctionEnd
