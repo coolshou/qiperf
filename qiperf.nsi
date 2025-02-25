@@ -700,11 +700,8 @@ init.uninst:
 #${EndIf}
     IfErrors init.done
     strcpy $OLD_VERSION $R0
-    #ExecWait "$R0"
 
 init.done:
-    # TODO: get old setup mode
-
     # get previous install mode
     ClearErrors
     ReadRegStr $R0 HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode"
@@ -745,8 +742,8 @@ Function install_qiperfd
     Pop $0 ; return error(1)/success(0)
 
     # install qiperfd  service & start it
-    Exec '"$INSTDIR\nssm.exe" install "qiperfd" "$INSTDIR\${QIPERFD_NAME}"'
-    Exec '"$INSTDIR\nssm.exe" start "qiperfd"'
+    ExecWait '"$INSTDIR\nssm.exe" install "qiperfd" "$INSTDIR\${QIPERFD_NAME}"'
+    ExecWait '"$INSTDIR\nssm.exe" start "qiperfd"'
 FunctionEnd
 
 Function install_vc_redist
@@ -796,8 +793,8 @@ FunctionEnd
 
 Function un.install_qiperfd
     # uninstall qiperfd  service
-    Exec '"$INSTDIR\nssm.exe" stop "qiperfd"'
-    Exec '"$INSTDIR\nssm.exe" remove "qiperfd" confirm'
+    ExecWait '"$INSTDIR\nssm.exe" stop "qiperfd"'
+    ExecWait '"$INSTDIR\nssm.exe" remove "qiperfd" confirm'
     #kill qiperfd
     ${nsProcess::FindProcess} "${QIPERFD_NAME}" $R0
     ${If} $R0 == 0
