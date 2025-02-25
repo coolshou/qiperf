@@ -58,6 +58,7 @@ SetCompressor LZMA
 !include "nsis\FileAssociation.nsh"
 !include "WordFunc.nsh"
 !include "StrFunc.nsh"
+${Using:StrFunc}
 !insertmacro VersionCompare
 
 !define MUI_ABORTWARNING
