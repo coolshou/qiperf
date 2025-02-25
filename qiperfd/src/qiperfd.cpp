@@ -684,6 +684,7 @@ bool QIperfd::createSchedule(QString name, QString cmd, int idelay)
               << " /F ";
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
+    qDebug() << "createSchedule cmd: " << program << " " << arguments;
     process.startDetached(program, arguments);
     if (!process.waitForStarted(5000)){
         qDebug() << "start schtasks '" << program << " " << arguments.join(" ") << "' Fail or timeout" << Qt::endl
