@@ -6,6 +6,7 @@
 EndPoint::EndPoint(QString id, QString data, EndPoint *parent)
     :m_parentItem(parent), m_id(id)
 {
+    m_enabled = true;
     // m_itemDatas(EndPointMgr::cols::version+1 ,QVariant(""));
     // m_itemDatas.reserve(EndPointMgr::cols::version+1);
     this->loadData(data);
