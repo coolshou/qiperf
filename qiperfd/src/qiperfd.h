@@ -104,6 +104,7 @@ private:
 #if defined(Q_OS_WINDOWS)
     bool createSchedule(QString name, QString cmd, int idelay);
 #endif
+    QString apppath;
     QString tmppath;
     QString qiperfdlog;
     QString tmpfilepath;

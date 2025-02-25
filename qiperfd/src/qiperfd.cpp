@@ -51,7 +51,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     if (!QDir(fi.absolutePath()).exists()){
         QDir().mkdir(fi.absolutePath());
     }
-    QString apppath = qApp->applicationDirPath(); // app run time path:/home/coolshou/sdb/download/work/qiperf/Debug
+    apppath = qApp->applicationDirPath(); // app run time path:/home/coolshou/sdb/download/work/qiperf/Debug
     loadcfg(apppath);
     //
     initIperf(apppath);
@@ -655,9 +655,9 @@ void QIperfd::doRestartQIperfd()
     qDebug() << "TODO: restart android qiperfd service"
 #endif
 #elif defined(Q_OS_WINDOWS)
-    //check qiperfd is running?
-    //createSchedule("stopqiperfd", "net stop qiperfd", 1))
-    if (createSchedule("startqiperfd", "net start qiperfd", 5)){
+    //nssm.exe restart "qiperfd"
+    QString cmd = "\""+ apppath + QDir::separator() + "nssm.exe\" restart qiperfd";
+    if (createSchedule("startqiperfd", cmd, 5)){
         qApp->quit();
     }else{
         qDebug() << "createSchedule Fail";
