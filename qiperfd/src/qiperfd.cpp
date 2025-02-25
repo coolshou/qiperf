@@ -1109,9 +1109,15 @@ void QIperfd::getIperfVer(QString cmd, int ver)
 #if QT_VERSION < 0x060000  // < 6.0
     process.start(cmd, args);
 #else
+#if defined(Q_OS_WIN32)
+    QString c = "\"" + cmd + "\"" + " -v";
+#else
     QString c = cmd + " -v";
-
+#endif
     process.startCommand(c); //Qt6.0
+    // process.setProgram(cmd);
+    // process.setArguments(args);
+    // process.start();
 #endif
     if (!process.waitForFinished(5000)){//wait 5 sec
         qDebug() << "Error run cmd: " << cmd << " " << args.join(" ") << " Fail";
