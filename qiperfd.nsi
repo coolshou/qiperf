@@ -57,8 +57,6 @@ SetCompressor LZMA
 !include "nsis\nsProcess.nsh"
 !include "nsis\FileAssociation.nsh"
 !include "WordFunc.nsh"
-!include "StrFunc.nsh"
-${Using:StrFunc} StrStr
 !insertmacro VersionCompare
 
 !define MUI_ABORTWARNING
@@ -424,52 +422,17 @@ SectionEnd
 
 BrandingText "Quick iperf daemon"
 
-Function GetParameters
-    Exch $R0
-    Push $R1
-    Push $R2
-    Push $R3
-    StrCpy $R2 1
-    StrLen $R3 $CMDLINE
-    StrCpy $R0 $CMDLINE $R2
-    StrCmp $R0 '"' 0 +3
-    StrCpy $R1 '"'
-    Goto loop
-    StrCpy $R1 " "
-loop:
-    IntOp $R2 $R2 + 1
-    StrCpy $R0 $CMDLINE 1 $R2
-    StrCmp $R0 $R1 get
-    StrCmp $R2 $R3 get
-    Goto loop
-get:
-    IntOp $R2 $R2 + 1
-    StrCpy $R0 $CMDLINE "" $R2
-    Pop $R3
-    Pop $R2
-    Pop $R1
-    Exch $R0
-FunctionEnd
-
 Function .onInit
-    ; Get command line parameters /S for Silent mode
-    Call GetParameters
-    Pop $R0
-    StrCpy $R1 "/S"
-    ; Check if the /S switch is present
-    ${StrStr} $R1 $R0 "/S"
-    StrCmp $R1 "" 0 +2
-    MessageBox MB_OK "Silent mode detected."
-    SetSilent silent
+    ; use command line parameters /S for Silent mode
 
     ${If} ${RunningX64}
     !ifdef WIN64
-            SetRegView 64
+        SetRegView 64
     !endif
     ${Else}
     !ifdef WIN64
-            MessageBox MB_OK|MB_ICONSTOP 'This is the 64 bit ${APPNAME} installer$\r$\nPlease download the 32 bit version $\r$\nClick Ok to quit  Setup.' /SD IDOK
-            Quit
+        MessageBox MB_OK|MB_ICONSTOP 'This is the 64 bit ${APPNAME} installer$\r$\nPlease download the 32 bit version $\r$\nClick Ok to quit Setup.' /SD IDOK
+        Quit
     !endif
     ${EndIf}
 
@@ -480,7 +443,7 @@ Function .onInit
     IfErrors init.uninst ; older versions might not have "Version" string set
     ${VersionCompare} $0 ${APPFileVersion} $1
     IntCmp $1 2 init.uninst
-      MessageBox MB_YESNO|MB_ICONQUESTION "${APPNAME} version $0 seems to be already installed on your system.$\nWould you like to proceed with the installation of version ${APPFileVersion}?" /SD IDYES IDYES init.uninst
+    MessageBox MB_YESNO|MB_ICONQUESTION "${APPNAME} version $0 seems to be already installed on your system.$\nWould you like to proceed with the installation of version ${APPFileVersion}?" /SD IDYES IDYES init.uninst
     Quit
 
 init.uninst:
