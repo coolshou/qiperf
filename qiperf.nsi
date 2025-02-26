@@ -105,7 +105,6 @@ Section "qiperf daemon" SECTION_Daemon
     File "..\qiperfd-setup-${APPFileVersion}_x86.exe"
 !endif
 
-    ;Call check_vc_redist
     Call install_qiperfd
 SectionEnd
 
@@ -485,41 +484,6 @@ Function install_vc_redist
     !else
     ExecWait '$INSTDIR\vc_redist.x86.exe /q /norestart'
     !endif
-FunctionEnd
-
-Function check_vc_redist
-    DetailPrint "Check VC runtime..."
-    ${If} ${RunningX64}
-            ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" "Installed"
-            StrCmp $1 1 installed install_vc_redist
-    ${Else}
-            ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Installed"
-            StrCmp $1 1 installed install_vc_redist
-    ${EndIf}
-
-    installed:
-    ; Visual Studio 2017 version 15.6 introduced msvcp140_1
-    ; Visual Studio 2019 ? introduced msvcp140_2
-    ; 14.24 OKs
-
-    ;check vc_redist version <14.20 is not good
-    ${If} ${RunningX64}
-            ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" "Minor"
-            ;StrCmp $1 24 version_ok
-    ${Else}
-            ReadRegStr $1 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Minor"
-            ;StrCmp $1 24 version_ok
-    ${EndIf}
-    IntCmp $1 24 issame install_vc_redist morethan
-    install_vc_redist:
-    ;${If} $var >= 2
-        call install_vc_redist
-    ;${EndIf}
-
-    issame:
-    morethan:
-    ;we are done
-
 FunctionEnd
 
 Function un.install_qiperfd
