@@ -22,17 +22,24 @@ for /f "tokens=2 delims=\" %%i in ('findstr /c:"%qiperfc_pattern%" "%file%"') do
 
 set BUILDAPP=0
 if "%1"=="setup" (
-    echo Argument 1 is setup
+    echo only create setup package
 ) else (
     set BUILDAPP=1
 )
 
 if "%BUILDAPP%"=="1" (
+    echo %PATH% | findstr /c:"Qt" >nul
+    if %errorlevel% equ 0 (
+        echo QT msvc2022_64 is in the PATH
+    ) else (
+        echo set QT msvc2022_64 PATH
+        %comspec% /A /Q /K "C:\Qt\6.8.0\msvc2022_64\bin\qtenv2.bat"
+    )
     echo %PATH% | findstr /c:"Visual Studio\2022\Community" >nul
     if %errorlevel% equ 0 (
         echo "Visual Studio 2022 Community" is in the PATH
     ) else (
-        echo set Visual Studio 2022 Community in PATH
+        echo set Visual Studio 2022 Community PATH
         %comspec% /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
     )
 
