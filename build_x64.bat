@@ -28,14 +28,14 @@ if "%1"=="setup" (
 )
 
 if "%BUILDAPP%"=="1" (
-    echo %PATH% | findstr /c:"Qt" >nul
+    echo "%PATH%" | findstr /c:"Qt" >nul
     if %errorlevel% equ 0 (
         echo QT msvc2022_64 is in the PATH
     ) else (
         echo set QT msvc2022_64 PATH
         %comspec% /A /Q /K "C:\Qt\6.8.0\msvc2022_64\bin\qtenv2.bat"
     )
-    echo %PATH% | findstr /c:"Visual Studio\2022\Community" >nul
+    echo "%PATH%" | findstr /c:"Visual Studio\2022\Community" >nul
     if %errorlevel% equ 0 (
         echo "Visual Studio 2022 Community" is in the PATH
     ) else (
@@ -54,7 +54,7 @@ if "%BUILDAPP%"=="1" (
     nmake
 )
 
-echo %PATH% | findstr /c:"NSIS" >nul
+echo "%PATH%" | findstr /c:"NSIS" >nul
 if %errorlevel% equ 0 (
     echo "NSIS" is in the PATH
 ) else (
