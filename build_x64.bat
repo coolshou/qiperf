@@ -10,14 +10,14 @@ if "%1"=="setup" (
 
 if "%BUILDAPP%"=="1" (
     echo "%PATH%" | findstr /c:"Qt" >nul
-    if %errorlevel% neq 0 (
+    if "%errorlevel%" == "1" (
         set currentDir=%cd%
         echo set QT msvc2022_64 PATH
         %comspec% /A /Q /K "C:\Qt\6.8.0\msvc2022_64\bin\qtenv2.bat"
         cd %currentDir%
     )
     echo "%PATH%" | findstr /c:"Visual Studio\2022\Community" >nul
-    if %errorlevel% neq 0 (
+    if "%errorlevel%" == "1" (
         echo set Visual Studio 2022 Community PATH
         %comspec% /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
     )
@@ -34,7 +34,7 @@ if "%BUILDAPP%"=="1" (
 )
 
 echo "%PATH%" | findstr /c:"NSIS" >nul
-if %errorlevel% neq 0 (
+if "%errorlevel%" == "1" (
     echo set NSIS PATH
     set PATH="C:\Program Files (x86)\NSIS\";%PATH%
 )
