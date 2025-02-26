@@ -1,25 +1,6 @@
 @ECHO OFF
 setlocal enabledelayedexpansion
 
-REM # get version from version.h
-set "file=src\versions.h"
-set "qiperf_pattern=#define QIPERF_VERSION"
-set "qiperfd_pattern=#define QIPERFD_VERSION"
-set "qiperfc_pattern=#define QIPERFC_VERSION"
-
-for /f "tokens=2 delims=\" %%i in ('findstr /c:"%qiperf_pattern%" "%file%"') do (
-    set "APPVERSION=%%i"
-    echo !APPVERSION!
-)
-for /f "tokens=2 delims=\" %%i in ('findstr /c:"%qiperfd_pattern%" "%file%"') do (
-    set "QIPERFD_FileVersion=%%i"
-    echo !QIPERFD_FileVersion!
-)
-for /f "tokens=2 delims=\" %%i in ('findstr /c:"%qiperfc_pattern%" "%file%"') do (
-    set "QIPERFC_FileVersion=%%i"
-    echo !QIPERFC_FileVersion!
-)
-
 set BUILDAPP=0
 if "%1"=="setup" (
     echo only create setup package
@@ -56,6 +37,25 @@ echo "%PATH%" | findstr /c:"NSIS" >nul
 if %errorlevel% neq 0 (
     echo set NSIS PATH
     set PATH="C:\Program Files (x86)\NSIS\";%PATH%
+)
+
+REM # get version from version.h
+set "file=src\versions.h"
+set "qiperf_pattern=#define QIPERF_VERSION"
+set "qiperfd_pattern=#define QIPERFD_VERSION"
+set "qiperfc_pattern=#define QIPERFC_VERSION"
+
+for /f "tokens=2 delims=\" %%i in ('findstr /c:"%qiperf_pattern%" "%file%"') do (
+    set "APPVERSION=%%i"
+    echo !APPVERSION!
+)
+for /f "tokens=2 delims=\" %%i in ('findstr /c:"%qiperfd_pattern%" "%file%"') do (
+    set "QIPERFD_FileVersion=%%i"
+    echo !QIPERFD_FileVersion!
+)
+for /f "tokens=2 delims=\" %%i in ('findstr /c:"%qiperfc_pattern%" "%file%"') do (
+    set "QIPERFC_FileVersion=%%i"
+    echo !QIPERFC_FileVersion!
 )
 
 echo create qiperf daemon setup...
