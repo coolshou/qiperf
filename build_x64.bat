@@ -1,5 +1,4 @@
 @ECHO OFF
-setlocal enabledelayedexpansion
 
 set BUILDAPP=0
 if "%1"=="setup" (
@@ -44,6 +43,8 @@ set "file=src\versions.h"
 set "qiperf_pattern=#define QIPERF_VERSION"
 set "qiperfd_pattern=#define QIPERFD_VERSION"
 set "qiperfc_pattern=#define QIPERFC_VERSION"
+
+setlocal enabledelayedexpansion
 
 for /f "tokens=2 delims=\" %%i in ('findstr /c:"%qiperf_pattern%" "%file%"') do (
     set "APPVERSION=%%i"
