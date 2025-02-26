@@ -341,24 +341,29 @@ void ThroughputView::onTPUTContextMenu(QPoint pos)
         //TODO: check select item status enable/disable menu item
         QModelIndex midx = ui->tv_throughput->indexAt(pos);
         TP *tp = m_tpmgr->getItem(midx);
-        if (tp->getEnabled()){
-            m_aEnable->setEnabled(false);
-            m_aDisable->setEnabled(true);
+        if (tp){
+            if (tp->getEnabled()){
+                m_aEnable->setEnabled(false);
+                m_aDisable->setEnabled(true);
+            }else{
+                m_aEnable->setEnabled(true);
+                m_aDisable->setEnabled(false);
+            }
+            if ((tp->getDataType()!=TPMgrData::config) &&
+                (tp->getDataType()!=TPMgrData::TP)){
+                //don't show menu on not supported item
+                return;
+            }
+            if (tp->getDataType()!=TPMgrData::config){
+                m_actionClientArgs->setEnabled(false);
+                m_actionServerArgs->setEnabled(false);
+            }else{
+                m_actionClientArgs->setEnabled(true);
+                m_actionServerArgs->setEnabled(true);
+            }
         }else{
-            m_aEnable->setEnabled(true);
-            m_aDisable->setEnabled(false);
-        }
-        if ((tp->getDataType()!=TPMgrData::config) &&
-            (tp->getDataType()!=TPMgrData::TP)){
-            //don't show menu on not supported item
+            //don't show menu on no item
             return;
-        }
-        if (tp->getDataType()!=TPMgrData::config){
-            m_actionClientArgs->setEnabled(false);
-            m_actionServerArgs->setEnabled(false);
-        }else{
-            m_actionClientArgs->setEnabled(true);
-            m_actionServerArgs->setEnabled(true);
         }
     }
     //show right menu
