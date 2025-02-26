@@ -242,6 +242,7 @@ Section "qiperf console" SECTION_Console
     WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode" "1"
     # reg ".qip" ext
     ${registerExtension} "$INSTDIR\${QIPERFC_NAME}" ".qip" "Quick Iperf config File"
+    ${registerExtension} "$INSTDIR\${QIPERFC_NAME}" ".qis" "Quick Iperf simple automate File"
     SimpleFC::AddApplication "qiperf console" "$INSTDIR\${QIPERFC_NAME}" 0 2 "" 1
     Pop $0 ; return error(1)/success(0)
 
@@ -407,6 +408,7 @@ Section Uninstall
     RMDir "$INSTDIR\"
 
     ${unregisterExtension} ".qip" "Quick Iperf config File"
+    ${unregisterExtension} ".qis" "Quick Iperf simple automate File"
 
 SectionEnd
 
