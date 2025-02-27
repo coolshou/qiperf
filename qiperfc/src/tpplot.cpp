@@ -86,7 +86,9 @@ void TPPlot::setShowGroup(bool bShow)
         ++lostiterator;
     }
     // total group graphs
-    mTotalGraph->setVisible(m_showgroup);
+    if (mTotalGraph->dataCount()){
+        mTotalGraph->setVisible(m_showgroup);
+    }
     // all Legend Item
     //remove first
     if (!m_showgroup){
@@ -97,7 +99,7 @@ void TPPlot::setShowGroup(bool bShow)
     //for m_legends
     QMap<QString, QCPAbstractLegendItem*>::const_iterator legenditerator = m_legends.constBegin();
     while (legenditerator != m_legends.constEnd()) {
-        qDebug() << "legenditerator:" << legenditerator.key() << "-" << legenditerator.value();
+        // qDebug() << "legenditerator:" << legenditerator.key() << "-" << legenditerator.value();
         legenditerator.value()->setVisible(!m_showgroup);
         if(m_showgroup){
             if (!legend->take(legenditerator.value())){
@@ -126,8 +128,10 @@ void TPPlot::setShowGroup(bool bShow)
         }
         ++lostlegenditerator;
     }
-    mTotalLegendItem->setVisible(m_showgroup);
-    if (m_showgroup){
+    if (mTotalGraph->dataCount()>0){
+        mTotalLegendItem->setVisible(m_showgroup);
+    }
+    if (m_showgroup && (mTotalGraph->dataCount()>0)){
         if (!legend->addElement(mTotalLegendItem)){
             qDebug() << "legend addElement of mTotalLegendItem Fail";
         }
@@ -317,10 +321,11 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
         }else{ // all throughput legend except Total
             litm->setVisible(!m_showgroup); //legend item
             myGraph->setVisible(!m_showgroup); // graph
+            if (!m_legends.contains(idx)) {
+                m_legends.insert(idx, litm);
+            }
         }
-        if (!m_legends.contains(idx)) {
-            m_legends.insert(idx, litm);
-        }
+
     }else{
         myGraph = m_graphs.value(idx);
     }
