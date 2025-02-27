@@ -81,6 +81,7 @@ public slots:
     void onQuit();
     void notificationReceived(const QString key, const QVariant value);
     void setStartTime(QDateTime startTime);
+    void setShowGroup(bool bShow);
     //test
     void onTest();
     void onTestStarted();

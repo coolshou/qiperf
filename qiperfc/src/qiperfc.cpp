@@ -96,6 +96,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_qipconfig, &QIPConfig::updateTPDatas, m_throughputview, &ThroughputView::onUpdateTPDatas);
     connect(m_qipconfig, &QIPConfig::progress, this, &QIperfC::onProgress);
     connect(m_throughputview, &ThroughputView::deleteFiles, m_qipconfig, &QIPConfig::onDeleteFiles);
+    connect(m_throughputview, &ThroughputView::showGroup, this, &QIperfC::setShowGroup);
 
     QString proxyhost="";
     quint16 proxyport=0;
@@ -1022,8 +1023,14 @@ void QIperfC::onHeigthChanged(int heigth)
 
 void QIperfC::onShowGroup(bool bShow)
 {
-    m_TPGroup = bShow;
+    // setShowGroup(bShow);
     m_throughputview->setShowGroup(bShow);
+}
+
+void QIperfC::setShowGroup(bool bShow)
+{
+    m_TPGroup = bShow;
+    m_frm_option->setShowGroup(bShow);
 }
 
 void QIperfC::onIgnoreWrongInterval(bool bIgnore)

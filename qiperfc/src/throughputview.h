@@ -77,6 +77,7 @@ signals:
     void updateActionsEdit(bool bDel, bool bEdit, bool bSwap, bool bSwapIP);
     void deleteFiles(QStringList files);
     void updateInterval(int interval);
+    void showGroup(bool bShow);
 
 private slots:
     void initMenus();

@@ -98,6 +98,11 @@ bool dlgOption::getShowManagerIPWarning()
     return ui->cb_showManagerIPWarning->isChecked();
 }
 
+void dlgOption::setShowGroup(bool bShow)
+{
+    ui->cb_TPGroup->setChecked(bShow);
+}
+
 // void dlgOption::setTPsize(int width, int heigth)
 // {
 //     // ui->sb_width_tp->setValue(width);

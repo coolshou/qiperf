@@ -24,6 +24,8 @@ public:
     int getWaitServerReady();
     bool getShowManagerIPWarning();
     // void setTPsize(int width, int heigth);
+public slots:
+    void setShowGroup(bool bShow);
 
 signals:
     void ipaddressUpdated(QString ipaddress, int port);

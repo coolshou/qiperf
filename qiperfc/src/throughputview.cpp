@@ -244,6 +244,7 @@ void ThroughputView::setShowGroup(bool bShow)
     m_tpmgr->setShowGroup(m_showgroup);
     // TODO: m_tpplot
     m_tpplot->setShowGroup(m_showgroup);
+    emit showGroup(m_showgroup);
 }
 
 void ThroughputView::setXRangeUpper(double upper)
@@ -285,7 +286,6 @@ void ThroughputView::initMenus()
     m_tpmenu->addAction(m_actionServerArgs);
 
     m_actionGroup = new QAction("Group");
-    // m_actionGroup->setIcon();
     m_actionGroup->setCheckable(true);
     connect(m_actionGroup, &QAction::triggered, this, &ThroughputView::setShowGroup);
 }
