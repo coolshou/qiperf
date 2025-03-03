@@ -546,7 +546,7 @@ Function ${un}kill_process
     ${nsProcess::FindProcess} "${QIPERFD_NAME}" $R0
     ${If} $R0 == 0
         DetailPrint "${QIPERFD_NAME} is running. Closing it down"
-        ${nsProcess::CloseProcess} "${QIPERFD_NAME}" $R0
+        ${nsProcess::KillProcess} "${QIPERFD_NAME}" $R0
         DetailPrint "Waiting for ${QIPERFD_NAME} to close"
         Sleep 2000
     ${Else}
@@ -557,7 +557,7 @@ Function ${un}kill_process
     ${nsProcess::FindProcess} "${QIPERFTRAY_NAME}" $R0
     ${If} $R0 == 0
         DetailPrint "${QIPERFTRAY_NAME} is running. Closing it down"
-        ${nsProcess::CloseProcess} "${QIPERFTRAY_NAME}" $R0
+        ${nsProcess::KillProcess} "${QIPERFTRAY_NAME}" $R0
         DetailPrint "Waiting for ${QIPERFTRAY_NAME} to close"
         Sleep 2000
     ${Else}
@@ -568,7 +568,7 @@ Function ${un}kill_process
     ${nsProcess::FindProcess} "${SERVICE_WRAPPER}" $R0
     ${If} $R0 == 0
         DetailPrint "${SERVICE_WRAPPER} is running. Closing it down"
-        ${nsProcess::CloseProcess} "${SERVICE_WRAPPER}" $R0
+        ${nsProcess::KillProcess} "${SERVICE_WRAPPER}" $R0
         DetailPrint "Waiting for ${SERVICE_WRAPPER} to close"
         Sleep 2000
     ${Else}
