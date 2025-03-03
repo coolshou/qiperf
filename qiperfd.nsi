@@ -424,7 +424,7 @@ BrandingText "Quick iperf daemon"
 
 Function .onInit
     ; use command line parameters /S for Silent mode
-    call un.kill_process
+    call kill_process
 
     ${If} ${RunningX64}
     !ifdef WIN64
@@ -541,7 +541,8 @@ Function check_vc_redist
 
 FunctionEnd
 
-Function un.kill_process
+!macro kill_process un
+Function ${un}kill_process
     #kill qiperfd
     ${nsProcess::FindProcess} "${QIPERFD_NAME}" $R0
     ${If} $R0 == 0
@@ -576,6 +577,9 @@ Function un.kill_process
     ${EndIf}
     ${nsProcess::Unload}
 FunctionEnd
+!macroend
+!insertmacro kill_process ""
+!insertmacro kill_process "un."
 
 Function un.install_qiperfd
     # uninstall qiperfd  service
