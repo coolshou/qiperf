@@ -542,6 +542,9 @@ FunctionEnd
 
 !macro kill_process un
 Function ${un}kill_process
+    # uninstall qiperfd  service
+    ExecWait '"$INSTDIR\nssm.exe" stop "qiperfd"'
+
     #kill qiperfd
     ${nsProcess::FindProcess} "${QIPERFD_NAME}" $R0
     ${If} $R0 == 0
@@ -581,11 +584,10 @@ FunctionEnd
 !insertmacro kill_process "un."
 
 Function un.install_qiperfd
-    # uninstall qiperfd  service
-    ExecWait '"$INSTDIR\nssm.exe" stop "qiperfd"'
-    ExecWait '"$INSTDIR\nssm.exe" remove "qiperfd" confirm'
-
     call un.kill_process
+    # uninstall qiperfd  service
+    #ExecWait '"$INSTDIR\nssm.exe" stop "qiperfd"'
+    ExecWait '"$INSTDIR\nssm.exe" remove "qiperfd" confirm'
 
     !ifdef WIN64
     SetRegView 64
