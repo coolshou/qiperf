@@ -14,9 +14,11 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &dlgOption::onReject);
     connect(ui->sb_width_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onWidthChange);
     connect(ui->sb_heigth_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onHeigthChange);
+#if QT_VERSION < QT_VERSION_CHECK(6,9,0)  // < 6.9
     connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
+#endif
     connect(ui->cb_IgnoreWrongInterval, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onIgnoreWrongIntervalChanged);
-
+    connect(ui->cb_TPUnit, &QComboBox::currentTextChanged, this, &dlgOption::onTPUnitChanged);
     ui->tabWidget->setCurrentIndex(0);
 }
 
@@ -27,17 +29,22 @@ dlgOption::~dlgOption()
 
 void dlgOption::loadcfg(QSettings *cfg)
 {
+    int midx=0;
     //load cfg to ui
     cfg->beginGroup("Iperf");
     ui->sb_WaitServerReady->setValue(cfg->value("WaitServerReady", 10).toInt());
     ui->sb_width_tp->setValue(cfg->value("TPExportWidth", 1280).toInt());
     ui->sb_heigth_tp->setValue(cfg->value("TPExportHeigth", 500).toInt());
     ui->cb_TPGroup->setChecked(cfg->value("TPGroup", false).toBool());
+    midx = ui->cb_TPUnit->findText(cfg->value("TPUnit", "Mbits").toString());
+    if (midx>=0){
+        ui->cb_TPUnit->setCurrentIndex(midx);
+    }
     ui->cb_IgnoreWrongInterval->setChecked(cfg->value("IgnoreWrongInterval", false).toBool());
     cfg->endGroup();
 
     cfg->beginGroup("agent");
-    int midx = ui->cb_minterfaces->findText(cfg->value("managerifname", "").toString());
+    midx = ui->cb_minterfaces->findText(cfg->value("managerifname", "").toString());
     if (midx>=0){
         ui->cb_minterfaces->setCurrentIndex(midx);
     }
@@ -59,6 +66,7 @@ void dlgOption::updatecfg()
     m_cfg->setValue("TPExportWidth", ui->sb_width_tp->value());
     m_cfg->setValue("TPExportHeigth", ui->sb_heigth_tp->value());
     m_cfg->setValue("TPGroup", ui->cb_TPGroup->isChecked());
+    m_cfg->setValue("TPUnit", ui->cb_TPUnit->currentText());
     m_cfg->setValue("IgnoreWrongInterval", ui->cb_IgnoreWrongInterval->isChecked());
     m_cfg->endGroup();
 
@@ -100,7 +108,18 @@ bool dlgOption::getShowManagerIPWarning()
 
 void dlgOption::setShowGroup(bool bShow)
 {
+// #if QT_VERSION < QT_VERSION_CHECK(6,9,0)  // < 6.9
+    disconnect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
+// #endif
     ui->cb_TPGroup->setChecked(bShow);
+#if QT_VERSION < QT_VERSION_CHECK(6,9,0)  // < 6.9
+    connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
+#endif
+}
+
+void dlgOption::onTPUnitChanged(QString sunit)
+{
+    emit updateTPUnit(sunit);
 }
 
 // void dlgOption::setTPsize(int width, int heigth)

@@ -82,6 +82,7 @@ public slots:
     void notificationReceived(const QString key, const QVariant value);
     void setStartTime(QDateTime startTime);
     void setShowGroup(bool bShow);
+    void onUpdateTPUnit(QString sunit);
     //test
     void onTest();
     void onTestStarted();
@@ -187,6 +188,7 @@ private:
     int m_TPExportWidth;
     int m_TPExportHeigth;
     bool m_TPGroup; // show throughput group
+    QString m_TPUnit; // store throughput format unit,
     QString m_datapath;
 
     FileServer *m_fileserver;

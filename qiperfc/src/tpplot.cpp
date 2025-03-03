@@ -3,11 +3,11 @@
 #include <numeric>
 
 
-TPPlot::TPPlot(bool showgroup, QWidget *parent)
+TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     :QCustomPlot(parent), m_showgroup(showgroup)
 {
     m_interval = 1;
-    qDebug() << "TPPlot:m_showgroup:" << m_showgroup;
+    setTPUint(sunit);
     initCustomPlot();
     clear();
 
@@ -136,6 +136,30 @@ void TPPlot::setShowGroup(bool bShow)
             qDebug() << "legend addElement of mTotalLegendItem Fail";
         }
     }
+    replot();
+}
+
+void TPPlot::setTPUint(QString tpunit)
+{   //
+    QString sunit="Mbps";
+    if (tpunit.contains("Kbits")){
+        sunit="Kbps";
+    }else if (tpunit.contains("Mbits")){
+        sunit="Mbps";
+    }else if (tpunit.contains("Gbits")){
+        sunit="Gbps";
+    }else if (tpunit.contains("Tbits")){
+        sunit="Tbps";
+    }else if (tpunit.contains("KBytes")){
+        sunit="KB/s";
+    }else if (tpunit.contains("MBytes")){
+        sunit="MB/s";
+    }else if (tpunit.contains("GBytes")){
+        sunit="GB/s";
+    }else if (tpunit.contains("TBytes")){
+        sunit="TB/s";
+    }
+    yAxis->setLabel(sunit);
     replot();
 }
 
@@ -440,7 +464,7 @@ void TPPlot::initCustomPlot()
 
     //set axis Label
     xAxis->setLabel("Time(Sec)");
-    yAxis->setLabel("Mbps");
+    // yAxis->setLabel(m_tpunit);
     yAxis2->setLabel("Lost Rate(%)");
     yAxis2->setTickLabels(true);
     //set axis range

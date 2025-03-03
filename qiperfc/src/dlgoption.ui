@@ -24,13 +24,77 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_iperf">
       <attribute name="title">
        <string>iperf</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
+       <item row="4" column="1">
+        <widget class="QComboBox" name="cb_TPUnit">
+         <item>
+          <property name="text">
+           <string>Kbits</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Mbits</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Gbits</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Tbits</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>KBytes</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>MBytes</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>GBytes</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>TBytes</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="sb_WaitServerReady">
+         <property name="maximum">
+          <number>30</number>
+         </property>
+         <property name="value">
+          <number>10</number>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="cb_IgnoreWrongInterval">
+         <property name="text">
+          <string>Ignore Wrong Interval data</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="0" colspan="3">
         <widget class="QWidget" name="widget" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout">
@@ -78,20 +142,17 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QSpinBox" name="sb_WaitServerReady">
-         <property name="maximum">
-          <number>30</number>
-         </property>
-         <property name="value">
-          <number>10</number>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
           <string>Wait Iperf server ready:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="cb_TPGroup">
+         <property name="text">
+          <string>Throughput in Group</string>
          </property>
         </widget>
        </item>
@@ -103,6 +164,13 @@
         </widget>
        </item>
        <item row="4" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Throughput unit:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -115,20 +183,10 @@
          </property>
         </spacer>
        </item>
-       <item row="2" column="0">
-        <widget class="QCheckBox" name="cb_TPGroup">
+       <item row="4" column="2">
+        <widget class="QLabel" name="label_9">
          <property name="text">
-          <string>Throughput in Group</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QCheckBox" name="cb_IgnoreWrongInterval">
-         <property name="text">
-          <string>Ignore Wrong Interval data</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
+          <string>/sec</string>
          </property>
         </widget>
        </item>

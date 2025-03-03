@@ -11,10 +11,11 @@
 
 // ThroughputView::ThroughputView(QIperfC *main, QWidget *parent) : AbstractView(parent)
 ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
-                               QAction *aCopyText,  bool showgroup,
+                               QAction *aCopyText,  bool showgroup, QString sunit,
                                QWidget *parent) : AbstractView(parent)
     , ui(new Ui::ThroughputView), m_actionCopy(aCopy),m_actionPaste(aPaste),
-    m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_showgroup(showgroup)
+    m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_showgroup(showgroup),
+    m_tpunit(sunit)
 //, m_main(main)
 {
     m_iperfwrapper = new IperfWrapper();
@@ -235,6 +236,12 @@ void ThroughputView::onIperfTPdata(QString refrow, QString sInterval, QString da
 void ThroughputView::onUpdateTPCfg(QByteArray tpcfg)
 {
     m_tpmgr->loaddata(tpcfg);
+}
+
+void ThroughputView::onUpdateTPUnit(QString suint)
+{
+    m_tpmgr->setTPUint(suint);
+    m_tpplot->setTPUint(suint);
 }
 
 void ThroughputView::setShowGroup(bool bShow)
@@ -501,7 +508,7 @@ void ThroughputView::initThroughputChart()
 {
     // throughput chart
     m_vLegendScrollBar = new QScrollBar(Qt::Vertical, this);
-    m_tpplot=new TPPlot(m_showgroup, ui->widget_console);
+    m_tpplot=new TPPlot(m_showgroup, m_tpunit, ui->widget_console);
     qDebug() << "enable openGl:" << m_tpplot->openGl();
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &ThroughputView::onPlotContextMenuRequest);
@@ -514,7 +521,6 @@ void ThroughputView::initThroughputChart()
     // m_vLegendScrollBar->setRange(0, m_tpplot->legend->itemCount() - 10);
     onVLegendScrollBarRange(m_tpplot->legend->itemCount());
 
-    // m_tpmgr = new TPMgr(m_showgroup, this);
     m_tpmgr = new TPMgr(m_showgroup, ui->tv_throughput);
     // connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     // connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);

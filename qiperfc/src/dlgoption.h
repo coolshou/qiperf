@@ -26,13 +26,14 @@ public:
     // void setTPsize(int width, int heigth);
 public slots:
     void setShowGroup(bool bShow);
-
+    void onTPUnitChanged(QString sunit);
 signals:
     void ipaddressUpdated(QString ipaddress, int port);
     void widthChanged(int width);
     void heigthChanged(int heigth);
     void showGroup(bool bShow);
     void IgnoreWrongInterval(bool ignore);
+    void updateTPUnit(QString sunit);
 
 protected:
     void changeEvent(QEvent *e) override;

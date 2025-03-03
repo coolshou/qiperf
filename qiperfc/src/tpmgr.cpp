@@ -13,11 +13,13 @@
 #include "tp.h"
 #include "../src/tpmgrdata.h"
 
-TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QObject *parent)
-    : QAbstractItemModel(parent), m_showgroup(showgroup), m_treeview(treeview)
+TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QString tpunit, QObject *parent)
+    : QAbstractItemModel(parent), m_showgroup(showgroup), m_treeview(treeview),
+    m_TPUint(tpunit)
 {
     connect(this, &QAbstractItemModel::rowsInserted, this, &TPMgr::onRowsInserted);
-
+    m_unit_bits << "Kbits" << "Mbits" << "Gbits" << "Tbits";
+    m_unit_bytes << "KBytes" << "MBytes" << "GBytes" << "TBytes";
     rootItem=nullptr;
     groupItem = nullptr;
 //    item = invisibleRootItem();
@@ -155,7 +157,7 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
         case TP::cols::client:
             return QString("Client");
         case TP::cols::throughput:
-            return QString("TPUT");
+            return QString("TPUT\n(%1/sec)").arg(m_TPUint);
         case TP::cols::mintp:
             return QString("Min\nTPUT");
         case TP::cols::maxtp:
@@ -954,6 +956,15 @@ void TPMgr::onRowsInserted(const QModelIndex &parent, int first, int last)
     }
 }
 
+void TPMgr::setTPUint(QString tpunit)
+{
+    if (m_unit_bits.contains(tpunit) || m_unit_bytes.contains(tpunit)){
+        m_TPUint = tpunit;
+    } else {
+        qDebug() << "unknown unit:" << tpunit;
+    }
+}
+
 QModelIndex TPMgr::setSelectItem(QString idx)
 {
     TP *tp = getItemByIdx(idx);
@@ -965,6 +976,8 @@ QModelIndex TPMgr::setSelectItem(QString idx)
         return QModelIndex();
     }
 }
+
+
 
 void TPMgr::onUpdater()
 {   //update total throughput/lost rate for each iperf test pair (-P >=1) result

@@ -37,7 +37,7 @@ class TPMgr : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit TPMgr(bool showgroup=false, QTreeView *treeview=nullptr,  QObject *parent=nullptr);
+    explicit TPMgr(bool showgroup=false, QTreeView *treeview=nullptr, QString tpunit="Mbits", QObject *parent=nullptr);
     ~TPMgr() override;
     // //basic read only data model
     QVariant data(const QModelIndex &idx, int role) const override;
@@ -97,6 +97,7 @@ public slots:
                        QString pkt_lost, QString pkt_total);
     void setShowGroup(bool bShow);
     void onRowsInserted(const QModelIndex &parent, int first, int last);
+    void setTPUint(QString tpunit);
 
 signals:
     void IperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);//Notice iperf throughput value:  time, idx, throughput value, lost rate
@@ -107,6 +108,9 @@ private slots:
 private:
     bool m_showgroup;
     QTreeView *m_treeview; //relative treeview
+    QString m_TPUint;
+    QList<QString> m_unit_bits;
+    QList<QString> m_unit_bytes;
     TP *rootItem;
     TP *groupItem; //hold group item
     // QList<TP*> m_tps; //QList of tp, data

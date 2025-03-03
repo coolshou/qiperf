@@ -60,7 +60,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 
     m_throughputview = new ThroughputView(ui->actionCopy, ui->actionPaste,
                                           ui->actionDelete, ui->actionCopyText,
-                                          m_TPGroup);
+                                          m_TPGroup, m_TPUnit);
     connect(m_throughputview, &ThroughputView::updateActions, this, &QIperfC::onUpdateActions);
     connect(m_throughputview, &ThroughputView::updateActionsSave, this, &QIperfC::onUpdateActionsSave);
     connect(m_throughputview, &ThroughputView::updateActionsEdit, this, &QIperfC::onUpdateActionsEdit);
@@ -75,6 +75,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_frm_option, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);
     connect(m_frm_option, &dlgOption::showGroup, this, &QIperfC::onShowGroup);
     connect(m_frm_option, &dlgOption::IgnoreWrongInterval, this, &QIperfC::onIgnoreWrongInterval);
+    connect(m_frm_option, &dlgOption::updateTPUnit, this, &QIperfC::onUpdateTPUnit);
+    connect(m_frm_option, &dlgOption::updateTPUnit, m_throughputview, &ThroughputView::onUpdateTPUnit);
     initStatusbar();
 
     //UI actions
@@ -904,6 +906,7 @@ void QIperfC::saveSettings()
     m_settings->setValue("TPExportWidth", m_TPExportWidth);
     m_settings->setValue("TPExportHeigth", m_TPExportHeigth);
     m_settings->setValue("TPGroup", m_TPGroup);
+    m_settings->setValue("TPUnit", m_TPUnit);
     m_settings->setValue("IgnoreWrongInterval", m_IgnoreWrongInterval);
     m_settings->endGroup();
     m_settings->sync();
@@ -929,6 +932,7 @@ void QIperfC::loadSettings()
     m_TPExportWidth =m_settings->value("TPExportWidth", 1280).toInt();
     m_TPExportHeigth =m_settings->value("TPExportHeigth", 180).toInt();
     m_TPGroup = m_settings->value("TPGroup", false).toBool();
+    m_TPUnit = m_settings->value("TPUnit", "MBits").toString();
     m_IgnoreWrongInterval = m_settings->value("IgnoreWrongInterval", false).toBool();
 //    m_frm_option->setWaitServerReady();
     m_settings->endGroup();
@@ -1023,14 +1027,19 @@ void QIperfC::onHeigthChanged(int heigth)
 
 void QIperfC::onShowGroup(bool bShow)
 {
-    // setShowGroup(bShow);
     m_throughputview->setShowGroup(bShow);
 }
 
 void QIperfC::setShowGroup(bool bShow)
 {
     m_TPGroup = bShow;
+    //TODO: update m_frm_option's cb_TPGroup check status.
     m_frm_option->setShowGroup(bShow);
+}
+
+void QIperfC::onUpdateTPUnit(QString sunit)
+{
+    m_TPUnit = sunit;
 }
 
 void QIperfC::onIgnoreWrongInterval(bool bIgnore)

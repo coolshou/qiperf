@@ -13,7 +13,7 @@ class TPPlot : public QCustomPlot
 {
     Q_OBJECT
 public:
-    explicit TPPlot(bool showgroup, QWidget *parent = nullptr);
+    explicit TPPlot(bool showgroup, QString sunit, QWidget *parent = nullptr);
     void addTPData(QString idx, double xdata, double ydata, double lostrate);  //
     void del(QString idx);
     // QCPGraph *getGraph(QString idx, int width=1); // get QCPGraph by index
@@ -29,6 +29,7 @@ public slots:
                          QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates);
     void setInterval(int interval);
     void setShowGroup(bool bShow);
+    void setTPUint(QString tpunit);
     void onVLegendScrollChanged(int value);
     void onDataAdded(double key, double value);
     void onDatasSetted(QSharedPointer<QCPGraphDataContainer> data);
@@ -58,6 +59,7 @@ private:
     int m_xAxisMaxDefault=30; // 30sec
     int m_interval;
     bool m_showgroup;
+    QString m_tpunit;
     MyQCPGraph *mTotalGraph;
     QCPAbstractLegendItem *mTotalLegendItem;
     QVector<QCPGraphData> mTotalGraphData;

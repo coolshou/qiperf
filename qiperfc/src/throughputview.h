@@ -33,7 +33,7 @@ public:
     // explicit ThroughputView(QIperfC *main, QWidget *parent = nullptr);
     //explicit ThroughputView(QWidget *parent = nullptr);
     explicit ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
-                            QAction *aCopyText, bool showgroup=false,
+                            QAction *aCopyText, bool showgroup=false, QString sunit="Mbps",
                             QWidget *parent = nullptr);
     ~ThroughputView() override;
 
@@ -68,6 +68,7 @@ public slots:
                          QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates);
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
     void onUpdateTPCfg(QByteArray tpcfg);
+    void onUpdateTPUnit(QString suint);
     void setShowGroup(bool bShow);
     void setXRangeUpper(double upper);
     void setInterval(int interval);
@@ -115,6 +116,7 @@ private:
     NoWrapDelegate *nowrapdelegate;
     QDateTime m_starttime;
     bool m_showgroup;
+    QString m_tpunit;
     IperfWrapper *m_iperfwrapper;
     QScrollBar *m_vLegendScrollBar;
     void initThroughputChart();
