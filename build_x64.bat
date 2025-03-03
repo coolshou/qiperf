@@ -1,5 +1,5 @@
 @ECHO OFF
-setlocal enabledelayedexpansion
+enabledelayedexpansion
 
 set BUILDAPP=0
 if "%1"=="setup" (
