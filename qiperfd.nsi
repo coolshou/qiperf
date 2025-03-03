@@ -90,10 +90,10 @@ Function uninstallold
     ${If} $OLD_VERSION != ""
         ExecWait "$OLD_VERSION"
     ${EndIf}
-
 FunctionEnd
 
 Section "qiperf daemon" SECTION_Daemon
+    call kill_process
     ; Set Section properties
     SetOverwrite on
 
@@ -424,7 +424,6 @@ BrandingText "Quick iperf daemon"
 
 Function .onInit
     ; use command line parameters /S for Silent mode
-    call kill_process
 
     ${If} ${RunningX64}
     !ifdef WIN64
