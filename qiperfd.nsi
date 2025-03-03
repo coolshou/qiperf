@@ -424,6 +424,7 @@ BrandingText "Quick iperf daemon"
 
 Function .onInit
     ; use command line parameters /S for Silent mode
+    call kill_process
 
     ${If} ${RunningX64}
     !ifdef WIN64
@@ -540,10 +541,7 @@ Function check_vc_redist
 
 FunctionEnd
 
-Function un.install_qiperfd
-    # uninstall qiperfd  service
-    ExecWait '"$INSTDIR\nssm.exe" stop "qiperfd"'
-    ExecWait '"$INSTDIR\nssm.exe" remove "qiperfd" confirm'
+Function kill_process
     #kill qiperfd
     ${nsProcess::FindProcess} "${QIPERFD_NAME}" $R0
     ${If} $R0 == 0
@@ -577,6 +575,13 @@ Function un.install_qiperfd
         DetailPrint "${SERVICE_WRAPPER} was not found to be running"
     ${EndIf}
     ${nsProcess::Unload}
+FunctionEnd
+Function un.install_qiperfd
+    # uninstall qiperfd  service
+    ExecWait '"$INSTDIR\nssm.exe" stop "qiperfd"'
+    ExecWait '"$INSTDIR\nssm.exe" remove "qiperfd" confirm'
+
+    call kill_process
 
     !ifdef WIN64
     SetRegView 64
