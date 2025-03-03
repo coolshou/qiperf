@@ -10,6 +10,7 @@ TP::TP(QString id, QString data,int datatype, TP *parent)
     :m_id(id), m_datatype(datatype), m_parentItem(parent)
 {
     m_childItems = QList<TP *>();
+    m_childItems.clear();
     m_jsondata = "";
     m_enabled = true;
     m_lostpacket = 0;

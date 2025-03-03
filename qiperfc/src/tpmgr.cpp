@@ -238,6 +238,8 @@ TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
     }else{
         pitm = getRootItem();
         qInfo() << "No parent, add:getRootItem " << pitm;
+        qInfo() << "datatype:" << datatype;
+        qInfo() << "data:" << data;
     }
     QModelIndex midx = indexFromItem(pitm);
     int idx = getMaxIdx();
@@ -281,7 +283,6 @@ void TPMgr::del(QModelIndex idx)
 
 int TPMgr::rootChildCount()
 {
-
     return rootItem->childCount();
 }
 
@@ -291,7 +292,6 @@ QList<TP *> TPMgr::getChilds(bool showAll)
     // m_tps.clear();
     TP *itm = getRootItem();
     // qDebug() << "root child:" << itm->childCount() << " cuilds: " << itm->getChilds()  ;
-
     for(int i = 0; i<itm->childCount();i++){
         TP *chitm = itm->child(i);
         if (!showAll){
@@ -310,7 +310,6 @@ QList<TP *> TPMgr::getChilds(bool showAll)
         }
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
-
     // qDebug() << "getChilds tps:" << tps;
     return tps;
 }
@@ -318,30 +317,27 @@ QList<TP *> TPMgr::getChilds(bool showAll)
 bool TPMgr::removeRows(int row, int count, const QModelIndex &parent)
 {
     TP *parentItem = getItem(parent);
+    if (!parentItem){
+        parentItem = rootItem;
+    }
     bool success = true;
-    qDebug() << "parentItem:" << parentItem << " type:" << parentItem->getDataType() ;
-    beginRemoveRows(parent, row, row + count - 1);
-    success = parentItem->removeChildren(row, count);
-    endRemoveRows();
-
+    if (parentItem){
+        if (parentItem->childCount() >= (row+count)){
+            beginRemoveRows(parent, row, row + count - 1);
+            success = parentItem->removeChildren(row, count);
+            endRemoveRows();
+        }
+    }
     return success;
 }
 
 bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild)
 {
-    qDebug() << "moveRows: sourceParent:" << sourceParent << " start row:" << sourceRow << " count:" << count
-             << " destinationParent:" << destinationParent << " destination row:"  << destinationChild;
     if (sourceRow < 0 || sourceRow + count > rowCount(sourceParent) ||
         destinationChild < 0 || destinationChild > rowCount(destinationParent)){
         return false;
     }
-
     beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
-
-    // if (destinationChild > sourceRow) {
-    //     destinationChild -= count;
-    // }
-
     //actual data structure change
     TP *sourceitem = getItem(sourceParent);
     if (!sourceitem){
@@ -351,15 +347,11 @@ bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, 
     if (!destitem){
         destitem = rootItem;
     }
-    int j=destinationChild;
-    for (int i = sourceRow; i < count; ++i) {
-        TP *m = sourceitem->takeAt(i);
-        qDebug() << "move:" << m << " from i:" << i << " to j:" << j;
-        destitem->insertChild(j, m);
-        j++;
-    //     data.insert(destinationChild + i, data.takeAt(sourceRow + i));
+    for (int i = sourceRow; i < count; i++) {
+        TP *m = sourceitem->takeAt(0); // after take, the idx will change
+        m->setParent(destitem);
+        destitem->insertChild(i, m);
     }
-
     endMoveRows();
     return true;
 }
@@ -921,48 +913,37 @@ void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
 
 void TPMgr::setShowGroup(bool bShow)
 {
-    qDebug() << "TODO: setShowGroup: " << bShow;
     m_showgroup = bShow;
-    // TP *sourceitem;
-    // TP *targetitem;
     QModelIndex sourceparentidx;
     QModelIndex targetparentidx;
     int count =0;
-    QList<TP*> childs;
     if (m_showgroup){  // not Total to show Total
         // move root's child to group
         count = rootItem->childCount();
-        if (groupItem==nullptr){
-            newGroupItem();
+        if (count>0){
+            sourceparentidx = indexFromItem(rootItem);
+            if (groupItem==nullptr){
+                newGroupItem();
+            }else {
+                rootItem->appendChild(groupItem);
+            }
+            targetparentidx = indexFromItem(groupItem);
+            if (targetparentidx.isValid()){
+                moveRows(sourceparentidx, 0 , count, targetparentidx, 0);
+            }
         }
-        // sourceitem = rootItem;
-        sourceparentidx = indexFromItem(rootItem);
-        // targetitem = groupItem;
-        targetparentidx = indexFromItem(groupItem);
-        moveRows(sourceparentidx, 0 , count-1, targetparentidx, 0);
     }else{
         // move group's child to root
         if (groupItem){
-            childs = groupItem->getChilds();
-            foreach (auto c, childs){
-                qDebug() << " child:" << c << " row:" << c->row();
+            count = groupItem->childCount();
+            if (count>0){
+                sourceparentidx = indexFromItem(groupItem);
+                targetparentidx = indexFromItem(rootItem);
+                moveRows(sourceparentidx, 0 , count, targetparentidx, 0);
+                //remove groupItem
+                rootItem->takeAt(groupItem->row());
             }
         }
-        count = groupItem->childCount();
-        sourceparentidx = indexFromItem(groupItem);
-        // targetitem = rootItem;
-        targetparentidx = indexFromItem(rootItem);
-        qDebug() << "to detail: sourceparentidx:" << sourceparentidx << " targetparentidx:" << targetparentidx
-                 << " count:" << count;
-        moveRows(sourceparentidx, 0 , count-1, targetparentidx, 0);
-    }
-    if (childs.length()>0){
-        // foreach (auto *tp, childs) {
-        //     qDebug() << "tp:" << tp << " row:" << QString::number(tp->row());
-        //     moveRow(sourceparent, tp->row(), targetparent, targetitem->childCount());
-        // }
-    }else {
-        qDebug() << "setShowGroup: No child item to move";
     }
 }
 
