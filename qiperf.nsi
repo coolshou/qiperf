@@ -267,10 +267,10 @@ Section -FinishSection
 SectionEnd
 
 ; Modern install component descriptions
-;!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-;    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Daemon} "quick iperf daemon && systray"
-;    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Console} "quick iperf console"
-;!insertmacro MUI_FUNCTION_DESCRIPTION_END
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Daemon} "quick iperf daemon && systray"
+    !insertmacro MUI_DESCRIPTION_TEXT ${SECTION_Console} "quick iperf console"
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;Uninstall section
 Section Uninstall
