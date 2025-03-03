@@ -34,7 +34,7 @@ if "%BUILDAPP%"=="1" (
 )
 
 echo "%PATH%" | findstr /c:"NSIS" >nul
-if "%errorlevel%" == "1" (
+if "%errorlevel%"=="1" (
     echo set NSIS PATH
     set PATH="C:\Program Files (x86)\NSIS\";%PATH%
 )
