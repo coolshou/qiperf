@@ -75,7 +75,7 @@ IcmpWrapper::IcmpWrapper(int idx,QString target, quint64 count, uint64_t timeout
     timestempformat=QString("%Y%m%d_%H:%M:%S").toStdString().c_str();
     running=true;
     int protocal=-1;
-    if (!isValidIpAddress(m_target, protocal)){
+    if (!MyFunc::isValidIpAddress(m_target, protocal)){
         qDebug() << "InValid IpAddress:" << m_target;
     }
     if (protocal==QAbstractSocket::IPv4Protocol){
@@ -239,7 +239,9 @@ void IcmpWrapper::work()
             if (n > 0) {
                 struct iphdr* ip_hdr = (struct iphdr*)buffer;
                 struct icmphdr* icmp_hdr = (struct icmphdr*)(buffer + (ip_hdr->ihl * 4));
+#ifdef _WIN32
                 wchar_t straddr[INET_ADDRSTRLEN];
+#endif
                 /*
                  * Verify that this is indeed an echo reply packet.
                  */

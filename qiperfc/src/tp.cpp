@@ -212,15 +212,15 @@ void TP::loadData(QString data)
         m_mgrserver = o_server.value("manager").toString();
 
         //m_itemDatas.clear();// this will remove all data => m_itemDatas.length()=0
-        m_itemDatas.replace(int(TP::cols::id) , m_id);
-        m_itemDatas.replace(int(TP::cols::server), server);
-        m_itemDatas.replace(int(TP::cols::dir), direction);
-        m_itemDatas.replace(int(TP::cols::client), client);
-        m_itemDatas.replace(int(TP::cols::throughput), "");
-        m_itemDatas.replace(int(TP::cols::mintp), "");
-        m_itemDatas.replace(int(TP::cols::maxtp), "");
-        m_itemDatas.replace(int(TP::cols::lostrate), "");
-        m_itemDatas.replace(int(TP::cols::comment), "");
+        m_itemDatas.replace(int(TP::id) , m_id);
+        m_itemDatas.replace(int(TP::server), server);
+        m_itemDatas.replace(int(TP::dir), direction);
+        m_itemDatas.replace(int(TP::client), client);
+        m_itemDatas.replace(int(TP::throughput), "");
+        m_itemDatas.replace(int(TP::mintp), "");
+        m_itemDatas.replace(int(TP::maxtp), "");
+        m_itemDatas.replace(int(TP::lostrate), "");
+        m_itemDatas.replace(int(TP::comment), "");
     }else{
         qDebug() << "TP::loadData wrong format (" << error.errorString() << "\n data:" << data;
     }
@@ -605,11 +605,11 @@ void TP::clearThroughput()
     m_minRx = 0;
     m_maxRx = 0;
     if (m_itemDatas.length()>0){
-        m_itemDatas.replace(int(TP::cols::throughput), "");
-        m_itemDatas.replace(int(TP::cols::mintp), "");
-        m_itemDatas.replace(int(TP::cols::maxtp), "");
-        m_itemDatas.replace(int(TP::cols::lostrate), "");
-        m_itemDatas.replace(int(TP::cols::comment), "");
+        m_itemDatas.replace(int(TP::throughput), "");
+        m_itemDatas.replace(int(TP::mintp), "");
+        m_itemDatas.replace(int(TP::maxtp), "");
+        m_itemDatas.replace(int(TP::lostrate), "");
+        m_itemDatas.replace(int(TP::comment), "");
     }
 }
 

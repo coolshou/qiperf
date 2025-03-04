@@ -303,7 +303,7 @@ private:
     // TODO: size
     int showtimestemp = 0;
     const char *timestempformat = NULL;
-    char addr_str[INET6_ADDRSTRLEN] = "<unknown>";;
+    char addr_str[INET6_ADDRSTRLEN] = "<unknown>";
     QByteArray createIcmpPacket(int packet_id, int sequence);
     uint16_t calculateChecksum(const char *data, int len);
     unsigned short calculateChecksum(void *b, int len);
