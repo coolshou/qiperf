@@ -14,15 +14,15 @@ set "qiperfd_pattern=#define QIPERFD_VERSION"
 set "qiperfc_pattern=#define QIPERFC_VERSION"
 
 echo 'findstr /c:"%qiperf_pattern%" "%file%"'
-for /f "tokens=2 delims=\" %%i in ('findstr /c:"%qiperf_pattern%" "%file%"') do (
+for /f "tokens=3 delims=\ " %%i in ('findstr /c:"%qiperf_pattern%" "%file%"') do (
     set APPVERSION=%%i
     echo !APPVERSION!
 )
-for /f "tokens=2 delims=\" %%i in ('findstr /c:"%qiperfd_pattern%" "%file%"') do (
+for /f "tokens=3 delims=\ " %%i in ('findstr /c:"%qiperfd_pattern%" "%file%"') do (
     set QIPERFD_FileVersion=%%i
     echo !QIPERFD_FileVersion!
 )
-for /f "tokens=2 delims=\" %%i in ('findstr /c:"%qiperfc_pattern%" "%file%"') do (
+for /f "tokens=3 delims=\ " %%i in ('findstr /c:"%qiperfc_pattern%" "%file%"') do (
     set QIPERFC_FileVersion=%%i
     echo !QIPERFC_FileVersion!
 )
