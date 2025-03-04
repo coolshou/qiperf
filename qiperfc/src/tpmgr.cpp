@@ -12,6 +12,7 @@
 #include "comm.h"
 #include "tp.h"
 #include "../src/tpmgrdata.h"
+#include "../src/myfunc.h"
 
 TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QString tpunit, QObject *parent)
     : QAbstractItemModel(parent), m_showgroup(showgroup), m_treeview(treeview),
@@ -46,11 +47,11 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
     }
 
     if (role == Qt::TextAlignmentRole){
-        if ((index.column() == TP::cols::dir)||
-            (index.column() == TP::cols::throughput)||
-            (index.column() == TP::cols::mintp)||
-            (index.column() == TP::cols::maxtp)||
-            (index.column() == TP::cols::lostrate)){
+        if ((index.column() == TP::dir)||
+            (index.column() == TP::throughput)||
+            (index.column() == TP::mintp)||
+            (index.column() == TP::maxtp)||
+            (index.column() == TP::lostrate)){
             // align text data to center
             return Qt::AlignCenter;
         }
@@ -63,7 +64,7 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             return m_disabledTextColor;
         }
     }
-    if ((role == Qt::DisplayRole)&&(index.column() == TP::cols::throughput)&&
+    if ((role == Qt::DisplayRole)&&(index.column() == TP::throughput)&&
         ((item->getDataType()==TPMgrData::group)||
          (item->getDataType()==TPMgrData::config))){
         // sum of subitem's value
@@ -83,24 +84,27 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
                 item->setThroughput("");
                 return QVariant();
             }else{
-                item->setThroughput(s.setNum(sum));
-                return sum;
+                if (sum>0){
+                    item->setThroughput(s.setNum(sum));
+                    return sum;
+                }
             }
             // TODO: Lost Rate
         }
+        return QVariant();
     }
-    if (item->getDataType()==TPMgrData::group){
-        if ((index.column() == TP::cols::throughput)||
-            (index.column() == TP::cols::mintp) ||
-            (index.column() == TP::cols::maxtp) ){
-            if (item->data(index.column()).toDouble()<0){
-                //do not show -1 value
+    if ((item->getDataType()==TPMgrData::config)||(item->getDataType()==TPMgrData::group)){
+        if ((index.column() == TP::throughput)||
+            (index.column() == TP::mintp) ||
+            (index.column() == TP::maxtp) ){
+            if (item->data(index.column()).toDouble()<=0){
+                //do not show  value < 0
                 return QVariant();
             }
         }
     }
     if (item->getDataType()==TPMgrData::config){
-        if (index.column()== TP::cols::dir) {
+        if (index.column()== TP::dir) {
             if (!item->getEnabled()){
                 //when item disabled, let image grayout too.
                 return QVariant("disable"+item->data(index.column()).toString());
@@ -108,14 +112,6 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             //else { // the column dir will be empty!!
             //     return QVariant();
             // }
-        }
-        if ((index.column() == TP::cols::throughput)||
-            (index.column() == TP::cols::mintp) ||
-            (index.column() == TP::cols::maxtp) ){
-            if (item->data(index.column()).toDouble()<0){
-                //do not show -1 value
-                return QVariant();
-            }
         }
     }
 
@@ -148,23 +144,23 @@ QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole){
         switch (section)
         {
-        case TP::cols::id:
+        case TP::id:
             return QString("idx");
-        case TP::cols::server:
+        case TP::server:
             return QString("Server");
-        case TP::cols::dir:
+        case TP::dir:
             return QString("Direction");
-        case TP::cols::client:
+        case TP::client:
             return QString("Client");
-        case TP::cols::throughput:
-            return QString("TPUT\n(%1/sec)").arg(m_TPUint);
-        case TP::cols::mintp:
+        case TP::throughput:
+            return QString("TPUT\n(%1)").arg(MyFunc::formatUnit(m_TPUint));
+        case TP::mintp:
             return QString("Min\nTPUT");
-        case TP::cols::maxtp:
+        case TP::maxtp:
             return QString("Max\nTPUT");
-        case TP::cols::lostrate:
+        case TP::lostrate:
             return QString("Lost Rate %\n(lost/total)");
-        case TP::cols::comment:
+        case TP::comment:
             return QString("comment");
         default:
             return QVariant();
@@ -977,13 +973,11 @@ QModelIndex TPMgr::setSelectItem(QString idx)
     }
 }
 
-
-
 void TPMgr::onUpdater()
 {   //update total throughput/lost rate for each iperf test pair (-P >=1) result
-    double g_tpvalue=-1.0;
-    int g_lostvalue=-1;
-    int g_totalvalue=-1;
+    double g_tpvalue=0.0;
+    int g_lostvalue=0;
+    int g_totalvalue=0;
     TP *itm;
     // if (m_showgroup){
     //     itm = groupItem;
@@ -992,9 +986,9 @@ void TPMgr::onUpdater()
     // }
     if (itm->haveChilds()){
         for (auto &cfg : itm->getChilds() ) {
-            double tpvalue=-1.0;
-            int lostvalue=-1;
-            int totalvalue=-1;
+            double tpvalue=0.0;
+            int lostvalue=0;
+            int totalvalue=0;
             for (auto &tp: cfg->getChilds()){
                 tpvalue = tpvalue + tp->getThroughput().toDouble();
                 lostvalue = lostvalue + tp->getLostPackets();
