@@ -1,3 +1,13 @@
+qiperf (0.8.11403.05-1) unstable; urgency=medium
+
+  * hide manager ip
+  * fix qiperftray can not connect to qiperfd error notice
+  * fix show qiperfd status
+  * fix show error on switch between group/detail throughput
+  * seperate windows setup to qiperf & qiperfd
+
+ -- coolshou <coolshou2060@gmail.com>  Wed, 05 Mar 2025 10:00:00 +0800
+
 qiperf (0.8.11402.19-1) unstable; urgency=medium
 
   * Add Total throughput chart
