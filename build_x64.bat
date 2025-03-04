@@ -1,5 +1,5 @@
 @ECHO OFF
-setlocal enabledelayedexpansion
+enabledelayedexpansion
 
 set BUILDAPP=0
 if "%1"=="setup" (
@@ -32,5 +32,3 @@ if "%BUILDAPP%"=="1" (
     echo nmake...
     nmake
 )
-
-call build_setup.bat
