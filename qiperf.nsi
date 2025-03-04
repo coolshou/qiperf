@@ -109,8 +109,8 @@ Section "qiperf daemon" SECTION_Daemon
 SectionEnd
 
 Section "qiperf console" SECTION_Console
-    #TODO: close qiperfc before copy new file
-
+    #close qiperfc before copy new file
+    call kill_process
     ; Set Section properties
     SetOverwrite on
 
@@ -476,22 +476,26 @@ Function install_qiperfd
     !endif
 FunctionEnd
 
-Function un.install_qiperfc
+!macro kill_process un
+Function ${un}kill_process
     #kill qiperfc
     ${nsProcess::FindProcess} "${QIPERFC_NAME}" $R0
     ${If} $R0 == 0
         DetailPrint "${QIPERFC_NAME} is running. Closing it down"
-        ${nsProcess::CloseProcess} "${QIPERFC_NAME}" $R0
+        ${nsProcess::KillProcess} "${QIPERFC_NAME}" $R0
         DetailPrint "Waiting for ${QIPERFC_NAME} to close"
         Sleep 2000
     ${Else}
         DetailPrint "${QIPERFC_NAME} was not found to be running"
     ${EndIf}
     ${nsProcess::Unload}
+FunctionEnd
+
+Function un.install_qiperfc
+    call un.kill_process
     ; Remove an application from the firewall exception list
     SimpleFC::RemoveApplication "$INSTDIR\${QIPERFC_NAME}"
     Pop $0 ; return error(1)/success(0)
-
 FunctionEnd
 
 #Function .oninstsuccess
