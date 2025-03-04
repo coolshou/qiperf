@@ -38,6 +38,7 @@ win32:{
 SOURCES += \
     ../lib/ntp/ntpserver.cpp \
     ../src/endpointtype.cpp \
+    ../src/myfunc.cpp \
     ../src/icmpping.cpp \
     ../src/icmpwrapper.cpp \
     ../src/iperfwrapper.cpp \
@@ -62,6 +63,7 @@ else: unix:!android: target.path = /opt/qiperf/bin
 HEADERS += \
     ../lib/ntp/ntpserver.h \
     ../src/endpointtype.h \
+    ../src/myfunc.h \
     ../src/icmpping.h \
     ../src/comm.h \
     ../src/icmpwrapper.h \

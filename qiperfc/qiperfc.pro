@@ -57,6 +57,7 @@ include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
 SOURCES += \
     ../src/dlgshowlog.cpp \
     ../src/filewatcher.cpp \
+    ../src/myfunc.cpp \
     ../src/pipeclient.cpp \
     ../src/endpoint.cpp \
     ../src/endpointtype.cpp \
