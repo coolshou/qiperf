@@ -13,27 +13,26 @@ set "qiperf_pattern=#define QIPERF_VERSION"
 set "qiperfd_pattern=#define QIPERFD_VERSION"
 set "qiperfc_pattern=#define QIPERFC_VERSION"
 
-echo 'findstr /c:"%qiperf_pattern%" "%file%"'
 for /f "tokens=3 delims=\ " %%i in ('findstr /c:"%qiperf_pattern%" "%file%"') do (
     set APPVERSION=%%i
-    echo !APPVERSION!
+    echo APPVERSION:!APPVERSION!
 )
 for /f "tokens=3 delims=\ " %%i in ('findstr /c:"%qiperfd_pattern%" "%file%"') do (
     set QIPERFD_FileVersion=%%i
-    echo !QIPERFD_FileVersion!
+    echo QIPERFD_FileVersion:!QIPERFD_FileVersion!
 )
 for /f "tokens=3 delims=\ " %%i in ('findstr /c:"%qiperfc_pattern%" "%file%"') do (
     set QIPERFC_FileVersion=%%i
-    echo !QIPERFC_FileVersion!
+    echo QIPERFC_FileVersion:!QIPERFC_FileVersion!
 )
 
 IF DEFINED APPVERSION (
     echo create qiperf daemon setup...
-    echo "makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFD_FileVersion% /DWIN64 /V3 qiperfd.nsi"
-    makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFD_FileVersion% /DWIN64 /V3 qiperfd.nsi
+    echo "makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFD_FileVersion% /DWIN64 /V4 qiperfd.nsi"
+    makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFD_FileVersion% /DWIN64 /V4 qiperfd.nsi
     echo create qiperf setup...
-    echo "makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFC_FileVersion% /DWIN64 /V3 qiperf.nsi"
-    makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFC_FileVersion% /DWIN64 /V3 qiperf.nsi
+    echo "makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFC_FileVersion% /DWIN64 /V4 qiperf.nsi"
+    makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFC_FileVersion% /DWIN64 /V4 qiperf.nsi
 ) ELSE (
     echo "Did not get APPVERSION"
 )
