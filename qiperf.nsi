@@ -490,6 +490,9 @@ Function ${un}kill_process
     ${EndIf}
     ${nsProcess::Unload}
 FunctionEnd
+!macroend
+!insertmacro kill_process ""
+!insertmacro kill_process "un."
 
 Function un.install_qiperfc
     call un.kill_process
