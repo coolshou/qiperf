@@ -43,6 +43,7 @@ QIPERFTRAYDEBIAN.files += \
 MISC.files += \
     deploy.sh \
     build_x64.bat \
+    build_setup.bat \
     build_deb.sh \
     TODO
 
