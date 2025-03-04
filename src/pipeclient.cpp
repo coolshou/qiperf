@@ -77,7 +77,6 @@ void PipeClient::socket_readReady()
     }
     QString message;
     in >> message;
-    // qInfo() << "Client got Msg : " << message;
     emit newMessage(message);
     send_MessageToServer("OK");
 }
