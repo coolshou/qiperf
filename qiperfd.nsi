@@ -235,7 +235,7 @@ Section "qiperf daemon" SECTION_Daemon
     CreateDirectory "$SMPROGRAMS\qiperf"
     #CreateShortCut "$SMPROGRAMS\qiperf\qiperfd.lnk" "$INSTDIR\${QIPERFD_NAME}"
     CreateShortCut "$SMPROGRAMS\qiperf\qiperftray.lnk" "$INSTDIR\${QIPERFTRAY_NAME}"
-    CreateShortCut "$SMPROGRAMS\qiperf\Uninstall.lnk" "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
+    CreateShortCut "$SMPROGRAMS\qiperf\qiperfd-Uninstall.lnk" "$INSTDIR\${PRODUCT_UNINSTALL_EXE}"
 
     WriteRegStr HKLM "Software\${PRODUCT_REG_KEY}" "InstallMode" "0"
     # set QIPERFTRAY_NAME run on system boot
@@ -287,7 +287,7 @@ Section Uninstall
     #Delete "$DESKTOP\qiperftray.lnk"
     Delete "$SMPROGRAMS\qiperf\qiperfd.lnk"
     Delete "$SMPROGRAMS\qiperf\qiperftray.lnk"
-    Delete "$SMPROGRAMS\qiperf\Uninstall.lnk"
+    Delete "$SMPROGRAMS\qiperf\qiperfd-Uninstall.lnk"
 
     ; Clean up qiperf daemon
 !ifdef VCBUILD
