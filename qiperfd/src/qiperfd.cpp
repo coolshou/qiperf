@@ -380,6 +380,10 @@ void QIperfd::stop(int idx)
 void QIperfd::stopAll()
 {
     // stop all iperfworker
+    // for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end(); ++it)
+    // {
+    //     it.value()->setStop();
+    // }
     emit setStop();
 }
 
@@ -987,6 +991,7 @@ void QIperfd::startNtpServer()
         qInfo() << "start Ntp Server";
         m_ntpserver = new NtpServer(this);
     }else{
+        qInfo() << "Ntp Server not enable!!";
         if (m_ntpserver){
             qInfo() << "stop Ntp Server";
             m_ntpserver->disconnect();

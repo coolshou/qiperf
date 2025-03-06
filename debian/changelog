@@ -1,10 +1,10 @@
 qiperf (0.8.11403.05-1) unstable; urgency=medium
 
-  * hide manager ip
+  * hide iperf manager ip
   * fix qiperftray can not connect to qiperfd error notice
   * fix show qiperfd status
-  * fix show error on switch between group/detail throughput
-  * seperate windows setup to qiperf & qiperfd
+  * Fix switch between Total/Detail the tpmgr show wrong
+  * seperate windows setup to qiperf & qiperfd (daemon & tray)
 
  -- coolshou <coolshou2060@gmail.com>  Wed, 05 Mar 2025 10:00:00 +0800
 

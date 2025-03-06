@@ -15,7 +15,7 @@ if "%BUILDAPP%"=="1" (
         %comspec% /A /Q /K "C:\Qt\6.8.0\msvc2022_64\bin\qtenv2.bat"
         cd %currentDir%
     )
-    echo "%PATH%" | findstr /c:"Visual Studio\2022\Community" >nul
+    echo "%PATH%" | findstr /c:"Visual Studio" >nul
     if %errorlevel% EQU 1 (
         echo set Visual Studio 2022 Community PATH
         %comspec% /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"

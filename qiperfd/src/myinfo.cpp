@@ -195,7 +195,7 @@ QJsonArray MyInfo::collectSerial()
 }
 
 QString MyInfo::disableInfo()
-{
+{   // after setting this, the m_mainObject will be change?
     QJsonObject mainObject = m_mainObject;
     mainObject.insert("ACT", EndPointAct::Disable);
     QJsonDocument jsonDoc;

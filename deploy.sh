@@ -3,11 +3,11 @@
 # build deb package
 DOBUILD=0
 CODENAME=`grep '^VERSION_CODENAME' /etc/os-release | cut -d= -f2`
-WINVERSION=0.8.11402.11
+WINVERSION=0.8.11403.05
 #WINVERSION=0.7.11401.21
 VERSION=${WINVERSION}-1
 
-#VERSION=0.6.11312.04
+
 declare -a DESTFILES=()
 DESTFILES+=(qiperfd_${VERSION}${CODENAME}_amd64.deb)
 DESTFILES+=(qiperftray_${VERSION}${CODENAME}_amd64.deb)

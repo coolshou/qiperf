@@ -41,6 +41,7 @@ QIPERFTRAYDEBIAN.files += \
     qiperftray/debian/qiperftray.links
 
 MISC.files += \
+    README.md \
     deploy.sh \
     build_x64.bat \
     build_setup.bat \
