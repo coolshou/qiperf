@@ -24,6 +24,7 @@ MyTray::MyTray(QObject *parent):QObject(parent)
     trayicon = new QSystemTrayIcon();
     trayicon->setIcon(icon);
     trayicon->setContextMenu(trayIconMenu);
+    trayicon->setToolTip("qiperf daemon");
 
     connect(trayicon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
