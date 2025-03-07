@@ -127,6 +127,7 @@ VERSION = $$extract_version(14)
 message(QIPERFD_VERSION: $$VERSION)
 
 win32 {
+    CONFIG += windeployqt
 # windows resources
     RC_ICONS=$$PWD/../images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
@@ -159,14 +160,12 @@ CONFIG(release, debug|release) {
     debug: iperfbin.commands = \
         $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Debug/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
 }
-    deploy.commands = \
-        windeployqt $$shell_quote($$shell_path($$DIST_FILE))
 
-    first.depends = $(first) iperfdata iperfbin deploy
+    first.depends = $(first) iperfdata iperfbin
     export(first.depends)
     export(iperfdata.commands)
     export(iperfbin.commands)
-    QMAKE_EXTRA_TARGETS += first iperfdata iperfbin deploy
+    QMAKE_EXTRA_TARGETS += first iperfdata iperfbin
 
 }
 macx {

@@ -237,6 +237,7 @@ template.files += \
 win32 {
     # windows resources
     #    CONFIG += embed_manifest_exe
+    CONFIG += windeployqt
 
     RC_ICONS=$$PWD/../images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
@@ -268,20 +269,17 @@ CONFIG(release, debug|release) {
     debug: iperfbin.commands = \
         $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Debug/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
 }
-    deploy.commands = \
-        windeployqt $$shell_quote($$shell_path($$DIST_FILE))
-
     #template.path += $${DIST_DIRECTORY}/template/
     template.commands = \
         $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/template/result.html)) $$shell_quote($$shell_path($${DIST_DIRECTORY}/template/))
     # INSTALLS += template
 
-    first.depends = $(first) iperfbin template deploy
+    first.depends = $(first) iperfbin template
     export(first.depends)
     export(iperfdata.commands)
     export(iperfbin.commands)
     export(template.commands)
-    QMAKE_EXTRA_TARGETS += first iperfbin template deploy
+    QMAKE_EXTRA_TARGETS += first iperfbin template
 
 }
 unix:!android {
