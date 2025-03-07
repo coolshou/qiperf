@@ -54,7 +54,8 @@ void UdpSrv::onTimeout()
     if (m_sendMsg.length()>0){
         //qInfo() << "onTimeout: send to : " << m_baddr << " port:" << m_port << " MSG:" << m_sendMsg;
         QString tmp=m_sendMsg;
-        length = socket->writeDatagram(tmp.toLatin1(),tmp.length(),
+        // length = socket->writeDatagram(tmp.toLatin1(),tmp.length(),
+        length = socket->writeDatagram(tmp.toUtf8(),tmp.length(),
                                        QHostAddress::Broadcast, m_port);
                                        //m_baddr, m_port);
 
