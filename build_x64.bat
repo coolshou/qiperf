@@ -10,7 +10,7 @@ if "%1"=="setup" (
 if "%BUILDAPP%"=="1" (
     echo "Check Qt build environment"
     echo "%PATH%" | findstr /c:"Qt"
-    if %errorlevel% EQU 1 (
+    if %errorlevel% (
         set currentDir=%cd%
         echo set QT msvc2022_64 PATH
         %comspec% /A /Q /K "C:\Qt\6.8.0\msvc2022_64\bin\qtenv2.bat"
@@ -18,7 +18,7 @@ if "%BUILDAPP%"=="1" (
     )
     echo "Check Visual Studio 2022 build environment"
     echo "%PATH%" | findstr /c:"Visual Studio"
-    if %errorlevel% EQU 1 (
+    if %errorlevel% (
         echo set Visual Studio 2022 Community PATH
         %comspec% /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
     )
