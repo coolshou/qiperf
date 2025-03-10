@@ -13,9 +13,10 @@ if "%BUILDAPP%"=="1" (
     echo "%PATH%" | findstr /c:"Qt"
     if !errorlevel! neq 0 (
         set currentDir=%cd%
+        set "driveLetter=%currentDir:~0,2%"
         echo set QT msvc2022_64 PATH
         call "C:\Qt\6.8.0\msvc2022_64\bin\qtenv2.bat"
-        cd %currentDir%
+        %driveLetter%
     )
     echo "Check Visual Studio 2022 build environment"
     echo "%PATH%" | findstr /c:"Visual Studio"
