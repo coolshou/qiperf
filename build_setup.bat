@@ -1,6 +1,14 @@
 @ECHO OFF
 setlocal enabledelayedexpansion
 
+set CREATEQIPERF=0
+if "%1"=="daemon" (
+    echo "only create daemon setup package"
+) else (
+    set CREATEQIPERF=1
+)
+
+
 echo "%PATH%" | findstr /c:"NSIS" >nul
 if "%errorlevel%"=="1" (
     echo setting NSIS PATH
@@ -30,9 +38,11 @@ IF DEFINED APPVERSION (
     echo create qiperf daemon setup...
     echo "makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFD_FileVersion% /DWIN64 /V4 qiperfd.nsi"
     makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFD_FileVersion% /DWIN64 /V4 qiperfd.nsi
-    echo create qiperf setup...
-    echo "makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFC_FileVersion% /DWIN64 /V4 qiperf.nsi"
-    makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFC_FileVersion% /DWIN64 /V4 qiperf.nsi
+    if "%CREATEQIPERF%"=="1" (
+        echo create qiperf setup...
+        echo "makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFC_FileVersion% /DWIN64 /V4 qiperf.nsi"
+        makensis.exe /DAPPVERSION=%APPVERSION% /DAPPFileVersion=%QIPERFC_FileVersion% /DWIN64 /V4 qiperf.nsi
+    )
 ) ELSE (
     echo "Did not get APPVERSION"
 )
