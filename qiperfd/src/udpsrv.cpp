@@ -52,22 +52,18 @@ void UdpSrv::onTimeout()
 {
     qint64 length=0;
     if (m_sendMsg.length()>0){
-        //qInfo() << "onTimeout: send to : " << m_baddr << " port:" << m_port << " MSG:" << m_sendMsg;
         QString tmp=m_sendMsg;
-        // length = socket->writeDatagram(tmp.toLatin1(),tmp.length(),
-        //  writeDatagram Max 1479 bytes?
         length = socket->writeDatagram(tmp.toUtf8(),
                                        QHostAddress::Broadcast, m_port);
                                        //m_baddr, m_port);
-
         if (length<0){
             qInfo() << "ERROR writeDatagram ("<< QString::number(socket->error()) <<"):" << socket->errorString();
             return;
-        }else {
-            qDebug() << "length:" << tmp.length() << " send length:" << length;
+        }else if (length != tmp.toUtf8().size()){
+            qDebug() << "expect length:" << tmp.toUtf8().size() << " ,actual send length:" << length;
         }
-        // don't clear, let it keeps sending
-//        m_sendMsg ="";
+        // don't clear m_sendMsg, let it keeps sending
+        // m_sendMsg ="";
     } else {
         qInfo() <<"("<< QString::number(m_sendMsg.length()) <<")" "wait new m_sendMsg";
     }
