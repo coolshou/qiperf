@@ -59,9 +59,10 @@ void UdpSrv::onTimeout()
         if (length<0){
             qInfo() << "ERROR writeDatagram ("<< QString::number(socket->error()) <<"):" << socket->errorString();
             return;
-        }else if (length != tmp.toUtf8().size()){
-            qDebug() << "expect length:" << tmp.toUtf8().size() << " ,actual send length:" << length;
         }
+        // }else if (length != tmp.toUtf8().length()){
+        //     qDebug() << "expect length:" << tmp.toUtf8().size() << " ,actual send length:" << length;
+        // }
         // don't clear m_sendMsg, let it keeps sending
         // m_sendMsg ="";
     } else {
