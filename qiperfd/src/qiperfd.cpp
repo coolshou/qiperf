@@ -73,6 +73,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     // notice qiperfc info
     m_udpsrv = new UdpSrv(QIPERFD_BPORT, getManagerInterface(), m_myinfo);
     connect(this, &QIperfd::setMgrIfname, m_udpsrv, &UdpSrv::setIfname);
+    qDebug() << "INFO: " << info;
     m_udpsrv->setSendMsg(info); // broadcast
 
 #if (TEST_WS==1)
