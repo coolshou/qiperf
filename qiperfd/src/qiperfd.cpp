@@ -52,6 +52,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
         QDir().mkdir(fi.absolutePath());
     }
     apppath = qApp->applicationDirPath(); // app run time path:/home/coolshou/sdb/download/work/qiperf/Debug
+    m_nssm = QDir::toNativeSeparators(apppath + QDir::separator() +"nssm.exe");
     loadcfg(apppath);
     //
     initIperf(apppath);
@@ -660,7 +661,7 @@ void QIperfd::doRestartQIperfd()
 #endif
 #elif defined(Q_OS_WINDOWS)
     //nssm.exe restart "qiperfd"
-    QString cmd = "\""+ apppath + QDir::separator() + "nssm.exe\" restart qiperfd";
+    QString cmd = "\"" m_nssm + "restart qiperfd\"";
     if (createSchedule("startqiperfd", cmd, 5)){
         qApp->quit();
     }else{

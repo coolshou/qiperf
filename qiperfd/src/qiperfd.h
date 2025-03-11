@@ -108,6 +108,7 @@ private:
     QString tmppath;
     QString qiperfdlog;
     QString tmpfilepath;
+    QString m_nssm;
     IperfWrapper *m_iperfwrapper;
     QSettings *cfg;
     UdpSrv *m_udpsrv;
