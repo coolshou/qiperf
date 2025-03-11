@@ -56,7 +56,7 @@ void UdpSrv::onTimeout()
         QString tmp=m_sendMsg;
         // length = socket->writeDatagram(tmp.toLatin1(),tmp.length(),
         //  writeDatagram Max 1479 bytes?
-        length = socket->writeDatagram(tmp.toUtf8(),tmp.length(),
+        length = socket->writeDatagram(tmp.toUtf8(),
                                        QHostAddress::Broadcast, m_port);
                                        //m_baddr, m_port);
 
