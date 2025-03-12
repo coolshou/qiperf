@@ -521,7 +521,7 @@ void ThroughputView::initThroughputChart()
     // m_vLegendScrollBar->setRange(0, m_tpplot->legend->itemCount() - 10);
     onVLegendScrollBarRange(m_tpplot->legend->itemCount());
 
-    m_tpmgr = new TPMgr(m_showgroup, ui->tv_throughput);
+    m_tpmgr = new TPMgr(m_showgroup, ui->tv_throughput, m_tpunit);
     // connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     // connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
