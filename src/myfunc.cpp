@@ -25,25 +25,26 @@ bool MyFunc::isValidIpAddress(const QString &ip, int &protocal) {
 
 QString MyFunc::formatUnit(QString val)
 {
-    /*/convert val: Kbits, Mbits, Gbits, Tbits, KBytes,MBytes, GBytes, TBytes,
+    /*/convert val: Kbits/sec, Mbits/sec, Gbits/sec, Tbits/sec,
+     *              KBytes/sec, MBytes/sec, GBytes/sec, TBytes/sec,
      * to Kbps, Mbps, Gbps, Tbps, KB/s, MB/s, GB/s, TB/s
     */
     QString rs="Mbps";
-    if (QString::compare(val, "Kbits", Qt::CaseInsensitive) == 0) {
+    if (QString::compare(val, "Kbits/sec", Qt::CaseInsensitive) == 0) {
         rs="Kbps";
-    }else if (QString::compare(val, "Mbits", Qt::CaseInsensitive) == 0) {
+    }else if (QString::compare(val, "Mbits/sec", Qt::CaseInsensitive) == 0) {
         rs="Mbps";
-    }else if (QString::compare(val, "Gbits", Qt::CaseInsensitive) == 0) {
+    }else if (QString::compare(val, "Gbits/sec", Qt::CaseInsensitive) == 0) {
         rs="Gbps";
-    }else if (QString::compare(val, "Tbits", Qt::CaseInsensitive) == 0) {
+    }else if (QString::compare(val, "Tbits/sec", Qt::CaseInsensitive) == 0) {
         rs="Tbps";
-    }else if (QString::compare(val, "KBytes", Qt::CaseInsensitive) == 0) {
+    }else if (QString::compare(val, "KBytes/sec", Qt::CaseInsensitive) == 0) {
         rs="KB/s";
-    }else if (QString::compare(val, "MBytes", Qt::CaseInsensitive) == 0) {
+    }else if (QString::compare(val, "MBytes/sec", Qt::CaseInsensitive) == 0) {
         rs="MB/s";
-    }else if (QString::compare(val, "GBytes", Qt::CaseInsensitive) == 0) {
+    }else if (QString::compare(val, "GBytes/sec", Qt::CaseInsensitive) == 0) {
         rs="GB/s";
-    }else if (QString::compare(val, "TBytes", Qt::CaseInsensitive) == 0) {
+    }else if (QString::compare(val, "TBytes/sec", Qt::CaseInsensitive) == 0) {
         rs="TB/s";
     }else {
         rs="Mbps";
