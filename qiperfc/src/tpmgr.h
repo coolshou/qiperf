@@ -37,7 +37,7 @@ class TPMgr : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit TPMgr(bool showgroup=false, QTreeView *treeview=nullptr, QString tpunit="Mbits", QObject *parent=nullptr);
+    explicit TPMgr(bool showgroup=false, QTreeView *treeview=nullptr, QString tpunit="Mbits/sec", QObject *parent=nullptr);
     ~TPMgr() override;
     // //basic read only data model
     QVariant data(const QModelIndex &idx, int role) const override;
