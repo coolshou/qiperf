@@ -19,8 +19,8 @@ TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QString tpunit, QObject *paren
     m_TPUint(tpunit)
 {
     connect(this, &QAbstractItemModel::rowsInserted, this, &TPMgr::onRowsInserted);
-    m_unit_bits << "Kbits" << "Mbits" << "Gbits" << "Tbits";
-    m_unit_bytes << "KBytes" << "MBytes" << "GBytes" << "TBytes";
+    m_unit_bits << "Kbits/sec" << "Mbits/sec" << "Gbits/sec" << "Tbits/sec";
+    m_unit_bytes << "KBytes/sec" << "MBytes/sec" << "GBytes/sec" << "TBytes/sec";
     rootItem=nullptr;
     groupItem = nullptr;
 //    item = invisibleRootItem();
