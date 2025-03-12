@@ -25,6 +25,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 {
     // pserver : interact with systemtray GUI (qiperftray)
     // bReportTPData = false;
+    m_ntpserver = nullptr;
     onLog(QString(QIPERFD_NAME) + ":" + QIPERFD_VERSION);
     tmppath = QStandardPaths::writableLocation(QStandardPaths::TempLocation)+
             QDir::separator()+QIPERF_NAME+QDir::separator();
