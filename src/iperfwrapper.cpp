@@ -140,8 +140,10 @@ void IperfWrapper::parserIperf3(QString linedata)
         }else if(linedata.contains("sender")){
             // ignore sender
         }else if(linedata.contains("error")){
-                // ignore error line
+            // ignore error line
             qDebug() << "TODO: error message: " << linedata;
+        }else if(linedata.contains("warning:")){
+            // ignore warning: line
         }else{
     //        qDebug() << "parserIperf3: " << linedata;
             QString sDir = nullptr;
