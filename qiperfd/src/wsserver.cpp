@@ -206,7 +206,12 @@ void WSServer::onNewConnection()
 //!
 void WSServer::onClosed()
 {
-    qDebug() << "WSServer::onClosed";
+    // QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    // QString sfrom = pClient->peerAddress().toString();
+    // qDebug() << "WSServer::onClosed:" << sfrom;
+    // if (m_clients.contains(sfrom)){
+    //     m_clients.remove(sfrom);
+    // }
     disconnect(m_pWebSocketServer,&QWebSocketServer::newConnection, 0 ,0);
     disconnect(m_pWebSocketServer,&QWebSocketServer::closed, 0, 0);
     disconnect(m_pWebSocketServer,&QWebSocketServer::sslErrors, 0 ,0);
@@ -250,6 +255,7 @@ void WSServer::socketDisconnected()
     {
         QString sfrom = pClient->peerAddress().toString();
         if (m_clients.contains(sfrom)) {
+            qDebug() << "socketDisconnected: remove " << sfrom;
             m_clients.remove(sfrom);
 //            m_clients.removeAll(pClient);
         }else{

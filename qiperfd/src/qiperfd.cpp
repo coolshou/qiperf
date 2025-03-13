@@ -768,6 +768,7 @@ void QIperfd::onWSactMessage(QString msg)
 
 void QIperfd::onNewClient(QHostAddress addr)
 {
+    onNewLine("onNewClient: " +addr.toString());
 //    qDebug() << "onNewClient: "  << addr.toString();
     if (m_fileclient){
         qDebug() << "m_fileclient exist: " << m_fileclient->getTargetAddress() << " new: " << addr.toString();

@@ -125,6 +125,11 @@ void WSClient::setDatapath(QString datapath)
     m_datapath = datapath;
 }
 
+void WSClient::close()
+{
+    m_webSocket->close();
+}
+
 
 //! [onConnected]
 void WSClient::onConnected()

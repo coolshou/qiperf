@@ -614,6 +614,7 @@ void QIperfC::onStop(){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
             qInfo() << m_wsc[key] << " m_wsc send cmd: " << cmd;
             m_wsc[key]->sendText(cmd);
+            m_wsc[key]->close();
         }
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
@@ -623,6 +624,7 @@ void QIperfC::onStop(){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
             qInfo() << m_wss[key] <<  "m_wss send cmd: " << cmd;
             m_wss[key]->sendText(cmd);
+            m_wss[key]->close();
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
@@ -771,6 +773,7 @@ void QIperfC::onNotice(QString send_addr, QString msg)
         }
     } else {
         qDebug() << "TODO on_notice invalid message: from(" << send_addr << ") " << msg;
+        qDebug() << "ERROR: " << error.errorString();
     }
 }
 

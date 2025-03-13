@@ -71,6 +71,7 @@ public:
     qint64 sendText(QString message);
     bool isConnected();
     void setDatapath(QString datapath);
+    void close();
 
 public slots:
     void onError(QAbstractSocket::SocketError error);
