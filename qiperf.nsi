@@ -8,7 +8,7 @@
 !define APPVERSION 0.8
 !endif
 !ifndef APPFileVersion
-!define APPFileVersion 0.8.11402.24
+!define APPFileVersion 0.8.11403.10
 !endif
 !define APPDOMAIN "coolshou.idv.tw"
 !define APPURL "https://github.com/coolshou/qiperf"
@@ -135,7 +135,6 @@ Section "qiperf console" SECTION_Console
     File "Qt6Quick3DUtils${DEBUGSTR}.dll"
     File "Qt6Quick${DEBUGSTR}.dll"
     File "Qt6QuickWidgets${DEBUGSTR}.dll"
-    File "Qt6Svg${DEBUGSTR}.dll"
     File "Qt6VirtualKeyboard${DEBUGSTR}.dll"
     File "Qt6WebChannel${DEBUGSTR}.dll"
     File "Qt6WebEngineCore${DEBUGSTR}.dll"
@@ -313,7 +312,6 @@ Section Uninstall
     Delete "$INSTDIR\Qt6Quick3DUtils{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Quick{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6QuickWidgets{DEBUGSTR}.dll"
-    Delete "$INSTDIR\Qt6Svg{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6VirtualKeyboard{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6WebChannel{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6WebEngineCore{DEBUGSTR}.dll"

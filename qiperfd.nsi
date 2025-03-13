@@ -8,7 +8,7 @@
 !define APPVERSION 0.8
 !endif
 !ifndef APPFileVersion
-!define APPFileVersion 0.8.11402.24
+!define APPFileVersion 0.8.11403.10
 !endif
 !define APPDOMAIN "coolshou.idv.tw"
 !define APPURL "https://github.com/coolshou/qiperf"
@@ -198,6 +198,7 @@ Section "qiperf daemon" SECTION_Daemon
     File "${QIPERFTRAY_NAME}"
 !ifdef QT6
     File "Qt6Gui${DEBUGSTR}.dll"
+    File "Qt6Svg${DEBUGSTR}.dll"
     File "Qt6Widgets${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\generic\"
     File "generic\qtuiotouchplugin${DEBUGSTR}.dll"
@@ -310,6 +311,7 @@ Section Uninstall
     Delete "$INSTDIR\Qt6Core${DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Gui${DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Network${DEBUGSTR}.dll"
+    Delete "$INSTDIR\Qt6Svg{DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6SerialPort${DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6WebSockets${DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Widgets${DEBUGSTR}.dll"
