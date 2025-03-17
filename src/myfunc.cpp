@@ -30,21 +30,29 @@ QString MyFunc::formatUnit(QString val)
      * to Kbps, Mbps, Gbps, Tbps, KB/s, MB/s, GB/s, TB/s
     */
     QString rs="Mbps";
-    if (QString::compare(val, "Kbits/sec", Qt::CaseInsensitive) == 0) {
+    if ((val=="Kbits")||
+        (QString::compare(val, "Kbits/sec", Qt::CaseInsensitive) == 0)) {
         rs="Kbps";
-    }else if (QString::compare(val, "Mbits/sec", Qt::CaseInsensitive) == 0) {
+    }else if ((val=="Mbits")||
+               (QString::compare(val, "Mbits/sec", Qt::CaseInsensitive) == 0)) {
         rs="Mbps";
-    }else if (QString::compare(val, "Gbits/sec", Qt::CaseInsensitive) == 0) {
+    }else if ((val=="Gbits")||
+               (QString::compare(val, "Gbits/sec", Qt::CaseInsensitive) == 0)) {
         rs="Gbps";
-    }else if (QString::compare(val, "Tbits/sec", Qt::CaseInsensitive) == 0) {
+    }else if ((val=="Tbits")||
+               (QString::compare(val, "Tbits/sec", Qt::CaseInsensitive) == 0)) {
         rs="Tbps";
-    }else if (QString::compare(val, "KBytes/sec", Qt::CaseInsensitive) == 0) {
+    }else if ((val=="KBytes")||
+               (QString::compare(val, "KBytes/sec", Qt::CaseInsensitive) == 0)) {
         rs="KB/s";
-    }else if (QString::compare(val, "MBytes/sec", Qt::CaseInsensitive) == 0) {
+    }else if ((val=="MBytes")||
+               (QString::compare(val, "MBytes/sec", Qt::CaseInsensitive) == 0)) {
         rs="MB/s";
-    }else if (QString::compare(val, "GBytes/sec", Qt::CaseInsensitive) == 0) {
+    }else if ((val=="GBytes")||
+               (QString::compare(val, "GBytes/sec", Qt::CaseInsensitive) == 0)) {
         rs="GB/s";
-    }else if (QString::compare(val, "TBytes/sec", Qt::CaseInsensitive) == 0) {
+    }else if ((val=="TBytes")||
+               (QString::compare(val, "TBytes/sec", Qt::CaseInsensitive) == 0)) {
         rs="TB/s";
     }else {
         rs="Mbps";
