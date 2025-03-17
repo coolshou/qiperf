@@ -497,8 +497,8 @@ void QIperfC::onStart()
         }
         //TODO: record which should report iperf throughput value
         // TODO: list of ping test
-        qDebug() << "maxtestduration:" << QString::number(maxtestduration);
-        qDebug() << "maxInterval:" << QString::number(maxInterval);
+        // qDebug() << "maxtestduration:" << QString::number(maxtestduration);
+        // qDebug() << "maxInterval:" << QString::number(maxInterval);
         emit updateInterval(maxInterval);
         if(bErrorStop>0){
             emit errorStop(4, "Unknown error happen!!("+QString::number(bErrorStop)+")");
