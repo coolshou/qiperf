@@ -597,7 +597,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
     //add throughput item
     Q_UNUSED(sInterval)
     // Q_UNUSED(unit) // TODO: check unit
-    if (QString::compare(unit, m_TPUint,Qt::CaseInsensitive) !=0){
+    if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) !=0){
         qDebug() << " Expect unit:" << m_TPUint << " TP unit:" << unit;
     }
     TP *tp = getItemByIdx(midx); //parent item
