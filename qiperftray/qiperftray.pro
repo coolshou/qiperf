@@ -72,7 +72,7 @@ message(QIPERFTRAY_VERSION: $$VERSION)
 win32 {
     CONFIG += windeployqt
     # windows resources
-    RC_ICONS=$$PWD/../images/qiperf.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
+    RC_ICONS=$$PWD/../images/qiperftray.ico #：指定應該被包含進一個.rc檔案中的圖示，僅適用於Windows
     #QMAKE_LFLAGS_WINDOWS += /MANIFESTUAC:level=\'requireAdministrator\'
 
     QMAKE_TARGET_PRODUCT=$${TARGET} #：指定項目目標的產品名稱，僅適用於Windows
@@ -88,7 +88,7 @@ win32 {
         DESTDIR = Release
     }
 
-    DISTFILES += $$PWD/../images/qiperf.icon
+    DISTFILES += $$PWD/../images/qiperftray.ico
 
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/../$${TARGET}_$${QT_ARCH}))
 

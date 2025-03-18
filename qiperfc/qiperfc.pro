@@ -255,7 +255,7 @@ win32 {
         DESTDIR = Release
     }
 
-    DISTFILES += $$PWD/../images/qiperf.icon
+    DISTFILES += $$PWD/../images/qiperf.ico
 
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/../$${TARGET}_$${QT_ARCH}))
 
