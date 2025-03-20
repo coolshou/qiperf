@@ -74,9 +74,9 @@ QString DlgIperf::getJsonCfg()
         serverObj.insert("version", ui->cb_version->currentText());
         serverObj.insert("port", ui->sb_port->value());
         if (ui->cb_mserver_ip->currentText().isEmpty()){
-            serverObj.insert("manager", ui->cb_target_ip->currentText());
+            serverObj.insert("manager", ui->cb_target_ip->currentText().trimmed());
         }else{
-            serverObj.insert("manager", ui->cb_mserver_ip->currentText());
+            serverObj.insert("manager", ui->cb_mserver_ip->currentText().trimmed());
         }
         serverObj.insert("protocal", ui->cb_protocal->currentText());
         serverObj.insert("parallel", ui->sb_parallel->value());
@@ -85,9 +85,9 @@ QString DlgIperf::getJsonCfg()
         serverObj.insert("interval", ui->sb_interval->value());
 //        serverObj.insert("ipv6", b_ipv6);
         if (ui->chk_server_bind_ip->isChecked()){
-            serverObj.insert("bind", ui->cb_target_ip->currentText());
+            serverObj.insert("bind", ui->cb_target_ip->currentText().trimmed());
         }
-        serverObj.insert("fmtreport", ui->cb_fmtreport->currentText());
+        serverObj.insert("fmtreport", ui->cb_fmtreport->currentText().trimmed());
 
         serverObj.insert("delaytime", ui->sb_delaytime->value());
         mainObj.insert("server", serverObj);
@@ -98,17 +98,17 @@ QString DlgIperf::getJsonCfg()
     clientObj.insert("version", ui->cb_version->currentText());
     clientObj.insert("port", ui->sb_port->value());
     if (ui->cb_mclient_ip->currentText().isEmpty()){
-        clientObj.insert("manager", ui->cb_client_bind_ip->currentText());
+        clientObj.insert("manager", ui->cb_client_bind_ip->currentText().trimmed());
     }else{
-        clientObj.insert("manager", ui->cb_mclient_ip->currentText());
+        clientObj.insert("manager", ui->cb_mclient_ip->currentText().trimmed());
     }
     clientObj.insert("ipv6", b_ipv6);
     if (!ui->cb_client_bind_ip->currentText().isEmpty()) {
         //TODO: check IPv4/IPv6format
-        clientObj.insert("bind", ui->cb_client_bind_ip->currentText());
+        clientObj.insert("bind", ui->cb_client_bind_ip->currentText().trimmed());
     }
     clientObj.insert("protocal", ui->cb_protocal->currentText());
-    clientObj.insert("target", ui->cb_target_ip->currentText());
+    clientObj.insert("target", ui->cb_target_ip->currentText().trimmed());
     clientObj.insert("duration", ui->sb_duration->value());
     clientObj.insert("omit", ui->sb_omit->value());
     clientObj.insert("parallel", ui->sb_parallel->value());
@@ -256,9 +256,10 @@ void DlgIperf::changeEvent(QEvent *e)
 
 bool DlgIperf::isRequireConfigMet()
 {
+    QString targetip = ui->cb_target_ip->currentText().trimmed();
     //check require fields value
     QHostAddress addr_target;
-    bool bok = addr_target.setAddress(ui->cb_target_ip->currentText());
+    bool bok = addr_target.setAddress(targetip);
     if (!bok){
         QMessageBox::warning(this, tr("WARNING!!"),
                              tr("Please specify iperf server ip address!!"),
@@ -337,10 +338,10 @@ bool DlgIperf::isRequireConfigMet()
         return false;
     }
     // TODO: check duplicate <target ip>:<port> binding!!
-    QString bindkey = ui->cb_target_ip->currentText()+"_"+ QString::number(ui->sb_port->value());
-    if (m_tpmgr->isBindkeyExist(ui->cb_mserver_ip->currentText(), bindkey, m_excIdx))
+    QString bindkey = targetip+"_"+ QString::number(ui->sb_port->value());
+    if (m_tpmgr->isBindkeyExist(ui->cb_mserver_ip->currentText().trimmed(), bindkey, m_excIdx))
     {
-        QString msg = ui->cb_mserver_ip->currentText() + " already have " + bindkey+ "\n Please use other value of port";
+        QString msg = ui->cb_mserver_ip->currentText().trimmed() + " already have " + bindkey+ "\n Please use other value of port";
         QMessageBox::warning(this, tr("ERROR!!"), tr(msg.toUtf8()),
                              QMessageBox::Ok);
         ui->sb_port->setFocus();
