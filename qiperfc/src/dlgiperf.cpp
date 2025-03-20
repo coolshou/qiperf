@@ -67,7 +67,7 @@ QString DlgIperf::getJsonCfg()
     //return Json config of iperf pair from UI's value
     QJsonObject mainObj;
     mainObj.insert("Action", CMD_IPERF_ADD);
-    mainObj.insert("enabled", true);
+    mainObj.insert("enabled", m_enabled);// TODO: fix always enable??
     {
         //server
         QJsonObject serverObj;
@@ -140,6 +140,7 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
     QJsonDocument doc=QJsonDocument::fromJson(jsoncfg.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError) {
         QJsonObject mainObj = doc.object();
+        m_enabled = mainObj["enabled"].toBool();
         QJsonObject serverObj = mainObj["server"].toObject();
         QJsonObject clientObj = mainObj["client"].toObject();
 
