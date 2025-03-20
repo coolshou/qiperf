@@ -483,7 +483,7 @@ void QIperfC::onStart()
                 }
                 //tell client add iperf client
                 cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
-                // qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
+                qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
                 rs = m_wsc[clientIP]->sendText(cmd);
                 if (rs<=0){
                     emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
