@@ -114,7 +114,12 @@ int TP::setData(int column, QVariant var)
 
 TP *TP::parentItem()
 {
-    return m_parentItem;
+    if (m_parentItem){
+        return m_parentItem;
+    }else{
+        //TODO: parentItem
+        return nullptr;
+    }
 }
 
 bool TP::removeChildren(int position, int count)
@@ -166,6 +171,7 @@ int TP::row() const
 {
     //TODO: after clear, the may cause problem
     // if (m_parentItem != nullptr){
+    // following must have for switch from No total group => total group setting
     if (m_parentItem){
         if (m_parentItem->haveChilds()){
             return m_parentItem->m_childItems.indexOf(const_cast<TP*>(this));
@@ -604,6 +610,8 @@ void TP::clearThroughput()
     m_maxTx = 0;
     m_minRx = 0;
     m_maxRx = 0;
+    m_lostpacket = 0;
+    m_totalpacket = 0;
     if (m_itemDatas.length()>0){
         m_itemDatas.replace(int(TP::throughput), "");
         m_itemDatas.replace(int(TP::mintp), "");
