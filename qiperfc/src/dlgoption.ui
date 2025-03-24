@@ -34,46 +34,46 @@
        <item row="4" column="1">
         <widget class="QComboBox" name="cb_TPUnit">
          <property name="currentText">
-          <string>Mbits</string>
+          <string>Kbits/sec</string>
          </property>
          <item>
           <property name="text">
-           <string>Kbits</string>
+           <string>Kbits/sec</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Mbits</string>
+           <string>Mbits/sec</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Gbits</string>
+           <string>Gbits/sec</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Tbits</string>
+           <string>Tbits/sec</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>KBytes</string>
+           <string>KBytes/sec</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>MBytes</string>
+           <string>MBytes/sec</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>GBytes</string>
+           <string>GBytes/sec</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>TBytes</string>
+           <string>TBytes/sec</string>
           </property>
          </item>
         </widget>
@@ -185,13 +185,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="4" column="2">
-        <widget class="QLabel" name="label_9">
-         <property name="text">
-          <string>/sec</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>

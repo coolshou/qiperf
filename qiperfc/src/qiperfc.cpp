@@ -935,7 +935,7 @@ void QIperfC::loadSettings()
     m_TPExportWidth =m_settings->value("TPExportWidth", 1280).toInt();
     m_TPExportHeigth =m_settings->value("TPExportHeigth", 180).toInt();
     m_TPGroup = m_settings->value("TPGroup", false).toBool();
-    m_TPUnit = m_settings->value("TPUnit", "Mbits").toString();
+    m_TPUnit = m_settings->value("TPUnit", "Mbits/sec").toString();
     m_IgnoreWrongInterval = m_settings->value("IgnoreWrongInterval", false).toBool();
 //    m_frm_option->setWaitServerReady();
     m_settings->endGroup();
