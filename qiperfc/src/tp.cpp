@@ -44,7 +44,7 @@ void TP::appendChild(TP *item)
 }
 
 void TP::clear(){
-    //TODO: following will cause proble!!
+    qDebug() << "//TODO: clear child item ";
 //    qDeleteAll(m_childItems);
 //    m_childItems.clear();
 }
@@ -174,6 +174,8 @@ int TP::row() const
     // following must have for switch from No total group => total group setting
     if (m_parentItem){
         if (m_parentItem->haveChilds()){
+            // m_parentItem->m_childItems
+
             return m_parentItem->m_childItems.indexOf(const_cast<TP*>(this));
         }
     }
@@ -643,8 +645,9 @@ void TP::setLostRate(QString pkt_lost, QString pkt_total)
     }
     if (m_totalpacket>0){
         double lr = static_cast<double>(m_lostpacket)/m_totalpacket;
-        //TODO: lost rate % not show in scientific notation eq: 5.83509e-05 (3/5141307)
-        QString s= QString::number(lr*100)+
+        //lost rate % not show in scientific notation eq: 5.83509e-05 (3/5141307)
+        // float , Keep 2 Decimal points
+        QString s= QString::number(lr*100, 'f', 2)+
                 " ("+QString::number(m_lostpacket)+"/"+QString::number(m_totalpacket)+")";
         //TODO: only show rate, move lost/total to tooltip?
         m_itemDatas[int(TP::lostrate)] = s;
