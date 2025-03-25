@@ -55,7 +55,8 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
     int sum = std::accumulate(packettotals.begin(), packettotals.end(), 0);
     if (sum>0){
         // int lost = std::accumulate(packetlosts.begin(), packetlosts.end(), 0);
-        QCPBars *g_lostrate = getLostRateGraph(refrow);
+        MyQCPBars *g_lostrate = getLostRateGraph(refrow);
+        connect(g_lostrate, &MyQCPBars::datasSetted, this ,&TPPlot::onLostRateDatasSetted);
         //lostrate
         g_lostrate->setData(timedatas, lostrates);
     }
@@ -79,21 +80,33 @@ void TPPlot::setShowGroup(bool bShow)
         ++iterator;
     }
     // m_lostgraphs
-    QMap<QString, QCPBars*>::const_iterator lostiterator = m_lostgraphs.constBegin();
+    QMap<QString, MyQCPBars*>::const_iterator lostiterator = m_lostgraphs.constBegin();
     while (lostiterator != m_lostgraphs.constEnd()) {
         qDebug() << "lostgraphs:" << lostiterator.key() << "-" << lostiterator.value();
         lostiterator.value()->setVisible(!m_showgroup);
         ++lostiterator;
     }
-    // total group graphs
-    if (mTotalGraph->dataCount()){
-        mTotalGraph->setVisible(m_showgroup);
+    if (mTotalGraph){
+        // total group graphs
+        if (mTotalGraph->dataCount()){
+            mTotalGraph->setVisible(m_showgroup);
+            mTotalLegendItem->setVisible(m_showgroup);
+        }
+    }
+    if(mTotalLostGraph){
+        if (mTotalLostGraph->dataCount()){
+            mTotalLostGraph->setVisible(m_showgroup);
+            mTotalLostLegendItem->setVisible(m_showgroup);
+        }
     }
     // all Legend Item
     //remove first
     if (!m_showgroup){
         if (!legend->take(mTotalLegendItem)){
             qDebug() << "legend take off the mTotalLegendItem " << mTotalLegendItem << " Fail";
+        }
+        if (!legend->take(mTotalLostLegendItem)){
+            qDebug() << "legend take off the mTotalLostLegendItem " << mTotalLostLegendItem << " Fail";
         }
     }
     //for m_legends
@@ -127,14 +140,6 @@ void TPPlot::setShowGroup(bool bShow)
             }
         }
         ++lostlegenditerator;
-    }
-    if (mTotalGraph->dataCount()>0){
-        mTotalLegendItem->setVisible(m_showgroup);
-    }
-    if (m_showgroup && (mTotalGraph->dataCount()>0)){
-        if (!legend->addElement(mTotalLegendItem)){
-            qDebug() << "legend addElement of mTotalLegendItem Fail";
-        }
     }
     replot();
 }
@@ -179,6 +184,7 @@ void TPPlot::onDataAdded(double key, double value)
 {
     if (m_showgroup){
         if (mTotalGraph){
+            //add all value to Total graph's value
             double orgvalue=-1;
             int rc=mTotalGraph->getValue(key, orgvalue);
             if (rc>-1){
@@ -213,6 +219,44 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data)
     }
 }
 
+void TPPlot::onLostRateDataAdded(double key, double value)
+{
+    if (m_showgroup){
+        if(mTotalLostGraph){
+            //add all value to Total graph's value
+            double orgvalue=-1;
+            int rc=mTotalLostGraph->getValue(key, orgvalue);
+            if (rc>-1){
+                double sumvalue = orgvalue + value;
+                qDebug() << ((MyQCPBars*)sender())->name() << " idx:"<< rc << " (" << key << ") orgvalue:" << orgvalue
+                         << " sumvalue:" << sumvalue;
+                mTotalLostGraph->updateValue(key,sumvalue);
+                mTotalLostGraph->rescaleAxes(true);
+            }else{
+                qDebug() << ((MyQCPBars*)sender())->name() << " (" << key << ") Key not found";
+                mTotalLostGraph->addData(key,value);
+            }
+        }else {
+            qDebug() << "onLostRateDataAdded: ERROR does not have mTotalLostGraph" ;
+        }
+    }
+}
+
+void TPPlot::onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data)
+{
+    if(mTotalLostGraph){
+        QSharedPointer<QCPBarsDataContainer> data1 = mTotalLostGraph->data();
+        QSharedPointer<QCPBarsDataContainer> data2 = data;
+        QSharedPointer<QCPBarsDataContainer> sumdata;
+        sumdata = sumLostGraphData(data1, data2);
+        mTotalLostGraph->setData(sumdata);
+        mTotalLostGraph->rescaleAxes(true); //TODO: not good to show y Max value
+        mTotalLostLegendItem->setVisible(true);
+    }else{
+        qDebug() << "onLostRateDatasSetted: ERROR does not have mTotalLostGraph" ;
+    }
+}
+
 void TPPlot::selectionChanged()
 {
     /* synchronize the selection of the graphs with the selection state of the respective
@@ -223,8 +267,12 @@ void TPPlot::selectionChanged()
         QCPGraph *graph = this->graph(i);
         QCPPlottableLegendItem *item = this->legend->itemWithPlottable(graph);
         if (((item&&item->selected()) or graph->selected())){
-            item->setSelected(true);
-            graph->setSelection(QCPDataSelection(graph->data()->dataRange()));
+            if (item){
+                item->setSelected(true);
+            }
+            if (graph){
+                graph->setSelection(QCPDataSelection(graph->data()->dataRange()));
+            }
             emit selectedTPitem(graph->name());
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
@@ -265,13 +313,17 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
     }
     //lost rate
     if (lostrate>0){
-        QCPBars *g_lostrate = getLostRateGraph(idx);
-        // qDebug() << "g_lostrate: " << xdata << " value:" << lostrate;
-        if (m_showgroup){
+        MyQCPBars *g_lostrate = getLostRateGraph(idx);
+        // if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+        //     // normal lostrate legends
 
-        }else {
-            g_lostrate->setVisible(false);
-        }
+        // }
+        // // qDebug() << "g_lostrate: " << xdata << " value:" << lostrate;
+        // if (m_showgroup){
+
+        // }else {
+        //     g_lostrate->setVisible(false);
+        // }
         g_lostrate->addData(xdata, lostrate);
     }
     replot();
@@ -315,10 +367,8 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
         if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             if (m_showgroup){
                 //each throughput graph need to info when data add => to calc total throughput
-                // if (!isSignalConnected(QMetaMethod::fromSignal(&MyQCPGraph::dataAdded))){
-                    qDebug() << "getGraph:" << idx << " connect dataAdded of " << myGraph << " ===============";
-                    connect(myGraph, &MyQCPGraph::dataAdded, this ,&TPPlot::onDataAdded);
-                // }
+                qDebug() << "getGraph:" << idx << " connect dataAdded of " << myGraph << " ===============";
+                connect(myGraph, &MyQCPGraph::dataAdded, this ,&TPPlot::onDataAdded);
             }
         }
         // qDebug() << "afer addGraph legend Count:" << QString::number(legend->itemCount());
@@ -332,14 +382,13 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
         QCPAbstractLegendItem *litm = legend->item(legend->itemCount()-1);
         if (idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){// Total legend
             mTotalLegendItem = litm;
-            qDebug() << "mTotalLegendItem:" << mTotalLegendItem;
+            // qDebug() << "mTotalLegendItem:" << mTotalLegendItem;
             if (!m_showgroup){
-                // TODO: when not m_showgroup, the Total graph's legends will take a place in legend
+                //when not m_showgroup, the Total graph's legends will take a place in legend
                 if (!legend->take(litm)){
                     qDebug() <<"remove mTotalLegendItem:" << mTotalLegendItem << " from legend Fail!!";
                 }
             }
-            // litm->setVisible(m_showgroup); //legend item
             litm->setVisible(false); //total legend item init not Visible
             myGraph->setVisible(m_showgroup); // graph
         }else{ // all throughput legend except Total
@@ -349,7 +398,6 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
                 m_legends.insert(idx, litm);
             }
         }
-
     }else{
         myGraph = m_graphs.value(idx);
     }
@@ -361,20 +409,15 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
             calculateLegendItems();
         }
     }
-    // if (m_showgroup){
-    //     emit sigLegendCount(1);
-    // }else{
-    //     emit sigLegendCount(legend->itemCount());
-    // }
-    // // calculateLegendItems();
+
     return myGraph;
 }
 
-QCPBars *TPPlot::getLostRateGraph(QString idx)
+MyQCPBars *TPPlot::getLostRateGraph(QString idx)
 {
     QPen graphPen;
     QCPGraph *g;
-    QCPBars *g_lostrate;
+    MyQCPBars *g_lostrate;
     if (!m_lostgraphs.contains(idx)){
         if (m_graphs.contains(idx)){
             // use same color as throughput chart
@@ -387,12 +430,40 @@ QCPBars *TPPlot::getLostRateGraph(QString idx)
             graphPen = newColorPen(R, G, B, 1);
         }
         QPen redPen = newColorPen(255, 0, 0, 2);
-        g_lostrate = new QCPBars(xAxis, yAxis2);
+        g_lostrate = new MyQCPBars(xAxis, yAxis2);
+        if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+            if (m_showgroup){
+                qDebug() << "getLostRateGraph:" << idx << " connect dataAdded of " << g_lostrate << " ===============";
+                connect(g_lostrate, &MyQCPBars::dataAdded, this ,&TPPlot::onLostRateDataAdded);
+            }
+        }
         g_lostrate->setPen(redPen);
         g_lostrate->setBrush(graphPen.color());
-        if (!m_lostratelegends.contains(idx)) {
-            QCPAbstractLegendItem *litm = legend->item(legend->itemCount()-1);
-            m_lostratelegends.insert(idx, litm);
+        // if (!m_lostratelegends.contains(idx)) {
+        //     QCPAbstractLegendItem *litm = legend->item(legend->itemCount()-1);
+        //     m_lostratelegends.insert(idx, litm);
+        // }
+        qDebug() << "legend->itemCount:" << legend->itemCount();
+        QCPAbstractLegendItem *litm = legend->item(legend->itemCount()-1);
+
+        if (idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){// Total legend
+            mTotalLostLegendItem = litm;
+            qDebug() << "mTotalLostLegendItem:" << mTotalLostLegendItem;
+            if (!m_showgroup){
+                // TODO: when not m_showgroup, the Total graph's legends will take a place in legend
+                if (!legend->take(litm)){
+                    qDebug() <<"remove mTotalLostLegendItem:" << mTotalLostLegendItem << " from legend Fail!!";
+                }
+            }
+            // litm->setVisible(m_showgroup); //legend item
+            litm->setVisible(false); //total legend item init not Visible
+            g_lostrate->setVisible(m_showgroup); // graph
+        }else{ // all throughput legend except Total
+            litm->setVisible(!m_showgroup); //legend item
+            g_lostrate->setVisible(!m_showgroup); // graph
+            if (!m_legends.contains(idx)) {
+                m_legends.insert(idx, litm);
+            }
         }
     }else{
         g_lostrate = m_lostgraphs.value(idx);
@@ -413,12 +484,20 @@ QCPBars *TPPlot::getLostRateGraph(QString idx)
 void TPPlot::clear()
 {
     for (auto it = m_graphs.begin(); it != m_graphs.end(); ++it) {
-
-        // removePlottable(it.value());
+        removePlottable(it.value());
     }
     clearGraphs(); // this will clean all graphs
     if (mTotalGraph){
         mTotalGraph=nullptr;
+    }
+    if (mTotalLegendItem){
+        mTotalLegendItem=nullptr;
+    }
+    if (mTotalLostGraph){
+        mTotalLostGraph=nullptr;
+    }
+    if (mTotalLostLegendItem){
+        mTotalLostLegendItem=nullptr;
     }
     m_graphs.clear();
     for (auto it = m_lostgraphs.begin(); it != m_lostgraphs.end(); ++it) {
@@ -434,14 +513,20 @@ void TPPlot::clear()
 
     setStartTime(QDateTime());
 
-    if (!mTotalGraph){
-        mTotalGraph = getGraph(GRAPH_TOTAL, 2);
-        qDebug() << "mTotalGraph:" << mTotalGraph;
+    if(m_showgroup){
+        if (!mTotalGraph){
+            mTotalGraph = getGraph(GRAPH_TOTAL, 2);
+            qDebug() << "mTotalGraph:" << mTotalGraph;
+        }
+        mTotalGraph->setVisible(m_showgroup); // TODO 1. crash on here??
+        if (!mTotalLostGraph){
+            mTotalLostGraph = getLostRateGraph(GRAPH_TOTAL);
+        }
+        qDebug() << "mTotalLostGraph:" << mTotalLostGraph;
+        mTotalLostGraph->setVisible(m_showgroup);
     }
-    mTotalGraph->setVisible(m_showgroup);
-    //TODO: mTotalGraph's legend will show in legend
 
-    replot();
+    replot();// when no graph, replot will cause plot area shrink
 }
 
 void TPPlot::setXRangeUpper(double upper)
@@ -461,7 +546,6 @@ void TPPlot::initCustomPlot()
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
     xAxis->setTicker(timeTicker);
-
     //set axis Label
     xAxis->setLabel("Time(Sec)");
     // yAxis->setLabel(m_tpunit);
@@ -655,6 +739,45 @@ QSharedPointer<QCPGraphDataContainer> TPPlot::sumGraphData(const QSharedPointer<
     return result;
 }
 
+QSharedPointer<QCPBarsDataContainer> TPPlot::sumLostGraphData(const QSharedPointer<QCPBarsDataContainer> &data1, const QSharedPointer<QCPBarsDataContainer> &data2)
+{
+    QSharedPointer<QCPBarsDataContainer> result(new QCPBarsDataContainer);
+    auto it1 = data1->constBegin();
+    auto it2 = data2->constBegin();
+
+    while (it1 != data1->constEnd() && it2 != data2->constEnd())
+    {
+        if (it1->key < it2->key)
+        {
+            result->add(QCPBarsData(it1->key, it1->value));
+            ++it1;
+        }
+        else if (it1->key > it2->key)
+        {
+            result->add(QCPBarsData(it2->key, it2->value));
+            ++it2;
+        }
+        else
+        {
+            result->add(QCPBarsData(it1->key, it1->value + it2->value));
+            ++it1;
+            ++it2;
+        }
+    }
+    while (it1 != data1->constEnd())
+    {
+        result->add(QCPBarsData(it1->key, it1->value));
+        ++it1;
+    }
+    while (it2 != data2->constEnd())
+    {
+        result->add(QCPBarsData(it2->key, it2->value));
+        ++it2;
+    }
+
+    return result;
+}
+
 void TPPlot::calculateLegendItems()
 {
     //get the legend size and calculate the number of items can show
@@ -665,7 +788,7 @@ void TPPlot::calculateLegendItems()
 
     // qDebug() << "Legend size:" << legendSize.height() << " itemHeight:" << itemHeight;
     // qDebug() << "Legend rect:" << legend->rect();
-    qDebug() << "Approximate number of items that can fit:" << itemsFit;
+    // qDebug() << "Approximate number of items that can fit:" << itemsFit;
     if(m_showgroup){
         emit sigLegendCount(1);
     }else{

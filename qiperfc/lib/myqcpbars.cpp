@@ -6,6 +6,17 @@ MyQCPBars::MyQCPBars(QCPAxis *keyAxis, QCPAxis *valueAxis)
 
 }
 
+void MyQCPBars::setData(QSharedPointer<QCPBarsDataContainer> data)
+{
+    QCPBars::setData(data);
+}
+
+void MyQCPBars::setData(const QVector<double> &keys, const QVector<double> &values, bool alreadySorted)
+{
+    QCPBars::setData(keys, values, alreadySorted);
+    emit datasSetted(data());
+}
+
 void MyQCPBars::addData(double key, double value)
 {
     QCPBars::addData(key, value);
@@ -34,3 +45,4 @@ void MyQCPBars::updateValue(double keyToUpdate, double newvalue)
         }
     }
 }
+
