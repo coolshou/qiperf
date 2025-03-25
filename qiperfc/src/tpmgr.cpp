@@ -28,6 +28,8 @@ TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QString tpunit, QObject *paren
     m_intervals.clear();
     QWidget widget;
     QPalette palette = widget.palette();
+    // QFont font = widget.font();
+    // font
     m_disabledTextColor = palette.color(QPalette::Disabled, QPalette::Text);
     m_updater = new QTimer();
     connect(m_updater, &QTimer::timeout, this, &TPMgr::onUpdater);
@@ -64,34 +66,50 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
             return m_disabledTextColor;
         }
     }
-    if ((role == Qt::DisplayRole)&&(index.column() == TP::throughput)&&
-        ((item->getDataType()==TPMgrData::group)||
-         (item->getDataType()==TPMgrData::config))){
-        // sum of subitem's value
-        if (item->childCount()>0) {
-            // Sum child values
-            float sum = 0;
-            QString s;
-            int i=0;
-            for (TP* child : item->getChilds()) {
-                if (child->getThroughput().isEmpty()){
-                    i++;
-                }else{
-                    sum += child->getThroughput().toFloat();
+    if (role == Qt::DisplayRole){
+        if((item->getDataType()==TPMgrData::group)||
+           (item->getDataType()==TPMgrData::config)){
+            if (item->childCount()>0) {
+                if (index.column() == TP::throughput){
+                    // sum of subitem's value
+                    float sum = 0;
+                    QString s;
+                    int i=0;
+                    for (TP* child : item->getChilds()) {
+                        if (child->getThroughput().isEmpty()){
+                            i++;
+                        }else{
+                            sum += child->getThroughput().toFloat();
+                        }
+                    }
+                    if (i==item->getChilds().count()){
+                        item->setThroughput("");
+                        return QVariant();
+                    }else{
+                        if (sum>0){
+                            item->setThroughput(s.setNum(sum));
+                            return sum;
+                        }
+                    }
                 }
-            }
-            if (i==item->getChilds().count()){
-                item->setThroughput("");
-                return QVariant();
+                if (index.column() == TP::lostrate){
+                    //calc Lost Rate
+                    int lostpkts=0;
+                    int totalpkts=0;
+                    int i=0;
+                    for (TP* child : item->getChilds()) {
+                        lostpkts += child->getLostPackets();
+                        totalpkts += child->getTotalPackets();
+                        i++;
+                    }
+                    if (totalpkts){
+                        item->setLostRate(QString::number(lostpkts), QString::number(totalpkts));
+                    }
+                }
             }else{
-                if (sum>0){
-                    item->setThroughput(s.setNum(sum));
-                    return sum;
-                }
+                return QVariant();
             }
-            // TODO: Lost Rate
         }
-        return QVariant();
     }
     if ((item->getDataType()==TPMgrData::config)||(item->getDataType()==TPMgrData::group)){
         if ((index.column() == TP::throughput)||
@@ -864,6 +882,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             QString pkt_total = jObj.value("packet_total").toString();
             if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
                 lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
+                qDebug() << "TPMgr::onIperfTPdata: lost_rate:" << lost_rate;
             }
     //        qDebug() << "pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
             sum = sum + value.toDouble();
