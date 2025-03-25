@@ -85,10 +85,9 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
                 double lostrate=0.0;
                 if (pkt_total>0){
                     lostrate = (pkt_lost/pkt_total)*100;
-                    // qDebug() << sInterval << " pkt_lost" << pkt_lost << " pkt_total:" << pkt_total << " ==" << lostrate;
-                    if (lostrate>0){
-                        qDebug() << "sInterval: " << sInterval << " lostrate: " << QString::number(lostrate, 'f', 4);
-                    }
+                    // if (lostrate>0){
+                    //     qDebug() << m_idx <<" sInterval: " << sInterval << " lostrate: " << QString::number(lostrate, 'f', 4);
+                    // }
                 }
                 Q_UNUSED(jitter)
                 Q_UNUSED(jitter_unit)
