@@ -356,8 +356,9 @@ void ThroughputView::onTPUTContextMenu(QPoint pos)
                 m_aEnable->setEnabled(true);
                 m_aDisable->setEnabled(false);
             }
-            if ((tp->getDataType()!=TPMgrData::config) &&
-                (tp->getDataType()!=TPMgrData::TP)){
+            // if ((tp->getDataType()!=TPMgrData::config) &&
+                // (tp->getDataType()!=TPMgrData::TP)){
+            if (tp->getDataType()!=TPMgrData::config){
                 //don't show menu on not supported item
                 return;
             }
