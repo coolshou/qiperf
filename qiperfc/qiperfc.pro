@@ -68,6 +68,7 @@ SOURCES += \
     ../src/port/portsetbox.cpp \
     ../src/port/serialport.cpp \
     lib/axistag.cpp \
+    lib/myqcpbars.cpp \
     lib/myqcpgraph.cpp \
     lib/qcustomplot.cpp \
     src/codeeditor.cpp \
@@ -133,6 +134,7 @@ HEADERS += \
     ../src/myfunc.h \
     ../src/tpmgrdata.h \
     lib/axistag.h \
+    lib/myqcpbars.h \
     lib/myqcpgraph.h \
     lib/qcustomplot.h \
     src/codeeditor.h \
