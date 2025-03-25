@@ -36,7 +36,7 @@ void dlgOption::loadcfg(QSettings *cfg)
     ui->sb_width_tp->setValue(cfg->value("TPExportWidth", 1280).toInt());
     ui->sb_heigth_tp->setValue(cfg->value("TPExportHeigth", 500).toInt());
     ui->cb_TPGroup->setChecked(cfg->value("TPGroup", false).toBool());
-    midx = ui->cb_TPUnit->findText(cfg->value("TPUnit", "Mbits").toString());
+    midx = ui->cb_TPUnit->findText(cfg->value("TPUnit", "Mbits/sec").toString());
     if (midx>=0){
         ui->cb_TPUnit->setCurrentIndex(midx);
     }
