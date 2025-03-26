@@ -64,6 +64,7 @@ private:
     int m_interval;
     bool m_showgroup;
     QString m_tpunit;
+    QCPLayer *m_LostRateLayer;
     MyQCPGraph *mTotalGraph;
     QCPAbstractLegendItem *mTotalLegendItem;
     QVector<QCPGraphData> mTotalGraphData;

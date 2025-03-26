@@ -9,6 +9,11 @@ TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     m_interval = 1;
     setTPUint(sunit);
     initCustomPlot();
+    QCPLayer *mainlayer = layer("main");
+    if (addLayer("LostRate", mainlayer, limBelow)){
+        m_LostRateLayer = layer("LostRate");
+        qDebug() << "m_LostRateLayer:" << m_LostRateLayer;
+    }
     clear();
 
 }
@@ -431,6 +436,7 @@ MyQCPBars *TPPlot::getLostRateGraph(QString idx)
         }
         QPen redPen = newColorPen(255, 0, 0, 2);
         g_lostrate = new MyQCPBars(xAxis, yAxis2);
+        g_lostrate->setLayer(m_LostRateLayer);
         if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             if (m_showgroup){
                 qDebug() << "getLostRateGraph:" << idx << " connect dataAdded of " << g_lostrate << " ===============";
@@ -438,7 +444,9 @@ MyQCPBars *TPPlot::getLostRateGraph(QString idx)
             }
         }
         g_lostrate->setPen(redPen);
-        g_lostrate->setBrush(graphPen.color());
+        QColor c = graphPen.color();
+        c.setAlpha(120); // 0~255, 255 not transparency
+        g_lostrate->setBrush(c);
         // if (!m_lostratelegends.contains(idx)) {
         //     QCPAbstractLegendItem *litm = legend->item(legend->itemCount()-1);
         //     m_lostratelegends.insert(idx, litm);
