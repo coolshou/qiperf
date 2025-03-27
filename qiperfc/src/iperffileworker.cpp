@@ -105,7 +105,8 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
                     }
 
                     // tpdata->timeDatas.append(fInterval+m_delay);
-                    tpdata->timeDatas.append(fInterval);
+                    // qDebug() << "fInterval: " <<fInterval;
+                    tpdata->timeDatas.append((int)fInterval); // the iperf3 report interval may have .0x Difference, ignore it!!
                     // qDebug()<< "m_delay:" << QString::number(m_delay);
                     //tpdata->timeDatas.append(fInterval);
                     tpdata->valueDatas.append(tpvalue);

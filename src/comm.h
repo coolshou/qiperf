@@ -73,6 +73,11 @@
 #define CMD_PING        "PING"
 // plot
 #define GRAPH_TOTAL      "TOTAL"
+#define LAYER_TOTAL      "Total"
+#define LAYER_TOTALOSTRATE      "TotalLostRate"
+
+#define LAYER_MAIN       "main"
+#define LAYER_LOSTRATE   "LostRate"
 
 #define MYTIMESTEMP "yyyy-MM-dd hh:mm:ss.zzz"
 #define DATETIME_NOW_FORMAT "yyyy-MM-dd_hhmmss.zzz"

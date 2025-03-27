@@ -64,12 +64,13 @@ private:
     int m_interval;
     bool m_showgroup;
     QString m_tpunit;
-    QCPLayer *m_LostRateLayer;
-    MyQCPGraph *mTotalGraph;
-    QCPAbstractLegendItem *mTotalLegendItem;
+    // QCPLayer *m_TotalLayer;
+    // QCPLayer *m_LostRateLayer;
+    MyQCPGraph *mTotalGraph;  //store total graph
+    QCPAbstractLegendItem *mTotalLegendItem;//store total graph legend
     QVector<QCPGraphData> mTotalGraphData;
-    MyQCPBars *mTotalLostGraph;
-    QCPAbstractLegendItem *mTotalLostLegendItem;
+    MyQCPBars *mTotalLostGraph;  //store total lost rate graph
+    QCPAbstractLegendItem *mTotalLostLegendItem; //store total lost rate graph legend
 
     QMap<double, double> mTotalData;
 };

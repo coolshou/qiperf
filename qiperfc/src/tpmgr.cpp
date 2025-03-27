@@ -107,7 +107,7 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
                     }
                 }
             }else{
-                return QVariant();
+                // return QVariant(); //this will return nothing => cell show as empty!!
             }
         }
     }
@@ -279,9 +279,7 @@ QModelIndex TPMgr::indexFromItem(TP *item){
     }
     QModelIndex ix;
     for(int i=0; i < parents.count(); i++){
-        qDebug() << "i:" << QString::number(i) << " parent:"  << parents[i];
         ix = index(parents[i]->row(), 0, ix);
-        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     ix = index(item->row(), 0, ix);
     return ix;
@@ -494,15 +492,20 @@ void TPMgr::clear(){
     // clean test record
     // TODO: when there is child the folding icon will not remove after clear!!
     TP *itm = getRootItem(); // rootitem or groupitem
+    qDebug() << "clear:" << itm->getDataType();
     if (itm->haveChilds()){
         itm->clearThroughput();
         // itm->resetData();
         foreach(auto tp, itm->getChilds()){
+            qDebug() << "tp:" << tp->getID() <<" type:"<< tp->getDataType();
             if (tp->haveChilds()){
-                beginRemoveRows(indexFromItem(tp), 0 , tp->childCount()-1);
-                tp->removeChildren(0, tp->childCount());
-                // m_treeview->collapse(indexFromItem(tp));
-                endRemoveRows();
+                // foreach(auto p, tp->getChilds()){ // parallel
+                    // qDebug() << "p:" << tp->getID() <<" type:"<< tp->getDataType();
+                    beginRemoveRows(indexFromItem(tp), 0 , tp->childCount()-1);
+                    tp->removeChildren(0, tp->childCount());
+                    // m_treeview->collapse(indexFromItem(tp));
+                    endRemoveRows();
+                // }
             }
             tp->clearThroughput();
             // tp->resetData();
