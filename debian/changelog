@@ -1,12 +1,15 @@
-qiperf (0.8.11403.05-1) unstable; urgency=medium
+qiperf (0.8.11403.28-1) unstable; urgency=medium
 
   * hide iperf manager ip
-  * fix qiperftray can not connect to qiperfd error notice
-  * fix show qiperfd status
+  * Fix qiperftray can not connect to qiperfd error notice
+  * Fix show qiperfd status
   * Fix switch between Total/Detail the tpmgr show wrong
+  * Fix qiperfd info to utf8 let manager interface show chinese name
+  * Fix close wsclient on test stop
   * seperate windows setup to qiperf & qiperfd (daemon & tray)
+  * Fix edit disabled iperf test pair, it will become enabled
 
- -- coolshou <coolshou2060@gmail.com>  Wed, 05 Mar 2025 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Fri, 28 Mar 2025 10:00:00 +0800
 
 qiperf (0.8.11402.19-1) unstable; urgency=medium
 
