@@ -178,6 +178,7 @@ void TPPlot::onDataAdded(double key, double value)
         if (mTotalGraph){
             //add all value to Total graph's value
             double orgvalue=0;
+            // TODO : last record will be wrong!!??
             int rc=mTotalGraph->getValue(key, orgvalue);
             if (rc>-1){
                 double sumvalue = orgvalue + value;
@@ -360,7 +361,20 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
     if (!m_graphs.contains(idx)){  // new graphs when not exist
         // qDebug() << "legend Count:" << QString::number(legend->itemCount());
         g = addGraph(xAxis, yAxis);
+        qDebug() << "=====idx:" << idx << " legend->itemCount: " << legend->itemCount();
+        qDebug() << legend->elements(false);
+        // if (!g->addToLegend()){
+        //     qDebug() << "add " << g << " to legend FAIL";
+        // }
+
         myGraph = static_cast<MyQCPGraph*>(g);
+        int R =rand()%245+10;
+        int G =rand()%245+10;
+        int B =rand()%245+10;
+        graphPen = newColorPen(R, G, B, width);
+        myGraph->setPen(graphPen);
+        myGraph->setLineStyle(QCPGraph::lsLine);
+
         if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             //normal graph
             myGraph->setLayer(LAYER_MAIN);
@@ -381,17 +395,10 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
             mTotalGraph = myGraph;
         }
         // qDebug() << "afer addGraph legend Count:" << QString::number(legend->itemCount());
-        int R =rand()%245+10;
-        int G =rand()%245+10;
-        int B =rand()%245+10;
-        graphPen = newColorPen(R, G, B, width);
-        myGraph->setPen(graphPen);
-        myGraph->setLineStyle(QCPGraph::lsLine);
 
         // legends item
-        qDebug() << "=====idx:" << idx << " legend->itemCount: " << legend->itemCount();
-        qDebug() << legend->elements(false);
         QCPAbstractLegendItem *litm = legend->item(legend->itemCount()-1);
+        qDebug() << "litm: " << litm ;
         if (!m_legends.contains(idx)) {
             qDebug() << "DO not have m_legend:" << litm << " ADD to m_legends" ;
             m_legends.insert(idx, litm);
@@ -399,7 +406,7 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
 
         if (idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){// Total legend
             qDebug() << "============setup Total legend, m_showgroup:" << m_showgroup;
-            litm->setLayer(LAYER_TOTAL);
+            // litm->setLayer(LAYER_TOTAL); // DO NOT place Legend in other Layer, it will be Not visible
             mTotalLegendItem = litm;
             // qDebug() << "mTotalLegendItem:" << mTotalLegendItem;
             if (!m_showgroup){
@@ -413,7 +420,7 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
             // myGraph->setVisible(m_showgroup); // graph
         }else{
             qDebug() << "============setup normal legend";
-            litm->setLayer(LAYER_MAIN);
+            // litm->setLayer(LAYER_MAIN);// DO NOT place Legend in other Layer, it will be Not visible
             // all throughput legend except Total
             litm->setVisible(!m_showgroup); //legend item
             // myGraph->setVisible(!m_showgroup); // graph
@@ -486,7 +493,7 @@ MyQCPBars *TPPlot::getLostRateGraph(QString idx)
         }
         if (idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){// Total legend
             mTotalLostLegendItem = litm;
-            litm->setLayer(LAYER_TOTALOSTRATE);
+            // litm->setLayer(LAYER_TOTALOSTRATE);// DO NOT place Legend in other Layer, it will be Not visible
             qDebug() << "mTotalLostLegendItem:" << mTotalLostLegendItem;
             if (!m_showgroup){
             //     // TODO: when not m_showgroup, the Total graph's legends will take a place in legend
@@ -498,7 +505,7 @@ MyQCPBars *TPPlot::getLostRateGraph(QString idx)
             litm->setVisible(m_showgroup); //total legend item init not Visible
             // g_lostrate->setVisible(m_showgroup); // graph
         }else{ // all throughput legend except Total
-            litm->setLayer(LAYER_LOSTRATE);
+            // litm->setLayer(LAYER_LOSTRATE);// DO NOT place Legend in other Layer, it will be Not visible
             litm->setVisible(!m_showgroup); //legend item
             // g_lostrate->setVisible(!m_showgroup); // graph
             // if (!m_legends.contains(idx)) {
@@ -562,6 +569,14 @@ void TPPlot::clear()
         }
         qDebug() << "mTotalLostGraph:" << mTotalLostGraph;
         // mTotalLostGraph->setVisible(m_showgroup);
+        if (m_showgroup){
+            if (mTotalLegendItem){
+                mTotalLegendItem->setVisible(false);
+            }
+            if (mTotalLostLegendItem){
+                mTotalLostLegendItem->setVisible(false);
+            }
+        }
     // }
 
     replot();// when no graph, replot will cause plot area shrink
@@ -579,7 +594,7 @@ void TPPlot::initCustomPlot()
     this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                                   QCP::iSelectLegend | QCP::iSelectPlottables);
     this->axisRect()->setupFullAxesBox();
-    this->setAutoAddPlottableToLegend(true); // when adding a plottable, automatically adds the QCPAbstractLegendItem to the legend
+    // this->setAutoAddPlottableToLegend(true); // when adding a plottable, automatically adds the QCPAbstractLegendItem to the legend
     //x Axis
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
