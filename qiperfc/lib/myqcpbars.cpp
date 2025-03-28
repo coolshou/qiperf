@@ -17,6 +17,12 @@ void MyQCPBars::setData(const QVector<double> &keys, const QVector<double> &valu
     emit datasSetted(data());
 }
 
+void MyQCPBars::setData(const QVector<double> &keys, const QVector<int> &lostvalues, const QVector<int> &totalvalues, bool alreadySorted)
+{
+    QVector<double> values = elementWiseDivision(lostvalues, totalvalues);
+    setData(keys, values, alreadySorted);
+}
+
 void MyQCPBars::addData(double key, double value)
 {
     QCPBars::addData(key, value);
@@ -44,5 +50,25 @@ void MyQCPBars::updateValue(double keyToUpdate, double newvalue)
             break;
         }
     }
+}
+
+QVector<double> MyQCPBars::elementWiseDivision(const QVector<int> &vector1, const QVector<int> &vector2)
+{
+    QVector<double> result;
+    if (vector1.size() != vector2.size()) {
+        qDebug() << "Vectors must be of the same size!";
+        return result;
+    }
+    result.reserve(vector1.size()); // Preallocate memory for the result vector
+
+    for (int i = 0; i < vector1.size(); ++i) {
+        if (vector2[i] != 0) {
+            result.append(vector1[i] / vector2[i]);
+        } else {
+            qDebug() << "Division by zero at index " << i ;
+            result.append(0); // or handle as needed
+        }
+    }
+    return result;
 }
 

@@ -71,7 +71,8 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
         MyQCPBars *g_lostrate = getLostRateGraph(refrow);
         connect(g_lostrate, &MyQCPBars::datasSetted, this ,&TPPlot::onLostRateDatasSetted);
         //lostrate
-        g_lostrate->setData(timedatas, lostrates);
+        // g_lostrate->setData(timedatas, lostrates);
+        g_lostrate->setData(timedatas, packetlosts, packettotals);
     }
     // updateTotalGraph();
     this->replot();
@@ -214,6 +215,8 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data)
 
 void TPPlot::onLostRateDataAdded(double key, double value)
 {
+    //LostRate is calc with lost/total packet
+    //
     if (m_showgroup){
         if(mTotalLostGraph){
             //add all value to Total graph's value
