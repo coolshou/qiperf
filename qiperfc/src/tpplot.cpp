@@ -505,7 +505,11 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
                     qDebug() <<"remove mTotalLegendItem:" << mTotalLegendItem << " from legend Fail!!";
                 }
             }
-            litm->setVisible(m_showgroup); //total legend item init not Visible
+            if (myGraph->dataCount()==0){
+                litm->setVisible(false);
+            }else{
+                litm->setVisible(m_showgroup); //total legend item init not Visible
+            }
             // myGraph->setVisible(m_showgroup); // graph
         }else{
             // all throughput legend except Total
@@ -598,10 +602,15 @@ MyQCPBars *TPPlot::getLostRateGraph(QString idx)
                     qDebug() <<"remove mTotalLostLegendItem:" << mTotalLostLegendItem << " from legend Fail!!";
                 }
             }
-            litm->setVisible(m_showgroup); //total legend item init not Visible
+            if (g_lostrate->dataCount()==0){
+                litm->setVisible(false);
+            }else{
+                litm->setVisible(m_showgroup); //total legend item init not Visible
+            }
             // g_lostrate->setVisible(m_showgroup); // graph
         }else{ // all throughput legend except Total
             // litm->setLayer(LAYER_LOSTRATE);// DO NOT place Legend in other Layer, it will be Not visible
+
             litm->setVisible(!m_showgroup); //legend item
             // g_lostrate->setVisible(!m_showgroup); // graph
             // if (!m_legends.contains(idx)) {
@@ -663,6 +672,9 @@ void TPPlot::clear()
     if (!mTotalGraph){
         mTotalGraph = getGraph(GRAPH_TOTAL, 2);
         qDebug() << "mTotalGraph:" << mTotalGraph;
+        if (mTotalGraph->dataCount()){
+
+        }
     }
     // mTotalGraph->setVisible(m_showgroup); // TODO 1. crash on here??
     if (!mTotalLostGraph){
