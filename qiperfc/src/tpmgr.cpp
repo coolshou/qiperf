@@ -219,7 +219,10 @@ QModelIndex TPMgr::parent(const QModelIndex &idx) const
 
     TP *childItem = static_cast<TP*>(idx.internalPointer());
     TP *parentItem = childItem->parentItem();
-
+    if (!parentItem){
+        qDebug() << "==== NO parentItem";
+        return QModelIndex();
+    }
     if (parentItem == rootItem)
         return QModelIndex();
 
@@ -276,6 +279,9 @@ QModelIndex TPMgr::indexFromItem(TP *item){
     while (parent && parent!=rootItem) {
         parents<<parent;
         parent = parent->parentItem();
+        if (!parent){
+            break;
+        }
     }
     QModelIndex ix;
     for(int i=0; i < parents.count(); i++){
@@ -463,12 +469,12 @@ bool TPMgr::loaddata(QByteArray data)
 
 void TPMgr::reset(){
     //reset all data to none
-    if (rootItem){
-        if (rootItem->childCount()>0){
-            rootItem->removeChildren(0,rootItem->childCount());
-        }
-        delete rootItem;
-    }
+    // if (rootItem){
+    //     if (rootItem->childCount()>0){
+    //         // rootItem->removeChildren(0,rootItem->childCount());
+    //     }
+    //     // delete rootItem;
+    // }
     if (m_showgroup){
         if (groupItem){
             if (groupItem->childCount()>0){
@@ -492,27 +498,32 @@ void TPMgr::clear(){
     // clean test record
     // TODO: when there is child the folding icon will not remove after clear!!
     TP *itm = getRootItem(); // rootitem or groupitem
-    qDebug() << "clear:" << itm->getDataType();
-    if (itm->haveChilds()){
-        itm->clearThroughput();
-        // itm->resetData();
-        foreach(auto tp, itm->getChilds()){
-            qDebug() << "tp:" << tp->getID() <<" type:"<< tp->getDataType();
-            if (tp->haveChilds()){
-                // foreach(auto p, tp->getChilds()){ // parallel
+    // qDebug() << "clear:" << itm->getDataType();
+    if (itm){
+        if (itm->haveChilds()){
+            itm->clearThroughput();
+            // itm->resetData();
+            foreach(auto tp, itm->getChilds()){
+                // qDebug() << "tp:" << tp->getID() <<" type:"<< tp->getDataType();
+                if (tp->haveChilds()){
+                    // foreach(auto p, tp->getChilds()){ // parallel
                     // qDebug() << "p:" << tp->getID() <<" type:"<< tp->getDataType();
                     beginRemoveRows(indexFromItem(tp), 0 , tp->childCount()-1);
                     tp->removeChildren(0, tp->childCount());
                     // m_treeview->collapse(indexFromItem(tp));
                     endRemoveRows();
-                // }
+                    // }
+                }
+                tp->clearThroughput();
+                // tp->resetData();
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
             }
-            tp->clearThroughput();
-            // tp->resetData();
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            emit dataChanged(QModelIndex(),QModelIndex());
         }
-        emit dataChanged(QModelIndex(),QModelIndex());
+    }else {
+        qDebug() << "clear: NO root item by getRootItem()";
     }
+
     m_intervals.clear();
 }
 
