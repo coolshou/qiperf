@@ -1004,106 +1004,169 @@ void QIperfd::startNtpServer()
     }
 }
 
-void QIperfd::initIperf(QString apppath)
+void QIperfd::initiperf2(QString tmp, QString tmp_path, QString arch)
 {
-    // iperf control interface, accept add/del iperf setting from remote
-    QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-#if defined(Q_OS_ANDROID) || defined(Q_OS_WIN32)
-    QString arch = QSysInfo::buildCpuArchitecture();
-#endif
-#if defined(Q_OS_LINUX)
-    // linux/android path
-#if !defined(Q_OS_ANDROID)
-    QString tmp_path = QString(QDir::separator()) + "qiperf";
-    QDir dir(tmp + tmp_path);
-    if (!dir.exists())
-    {
-        dir.mkdir(tmp + tmp_path);
-    }
+#if defined(Q_OS_WIN32)
+    // windows, iperf files
+    m_iperfexe2 = apppath + QDir::separator() + "windows" +QDir::separator() + "x86"+QDir::separator() + "iperf2.exe";
+    m_iperfexe2 = QDir::toNativeSeparators(m_iperfexe2);
 #else
-    QString tmp_path = "";
-#endif
-    //TODO: check we have newer version of iperf, remove old !!
+
     m_iperfexe2 = tmp + tmp_path + QDir::separator() + "iperf2";
     if (QFileInfo::exists(m_iperfexe2))
     {
         QFile::remove(m_iperfexe2);
     }
+    // iperf2
+    #if defined(Q_OS_ANDROID)
+        QFile i2File(":/android/" + arch + "/iperf");
+    #else
+        Q_UNUSED(arch)
+        QFile i2File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf2");
+        if (i2File.exists()) {
+            // make file execuable
+            if (i2File.copy(m_iperfexe2)){
+                QFile iperf2File(m_iperfexe2);
+                iperf2File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+                                          QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
+                                          QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
+            }else{
+                qDebug() << "copy file " << " to " << m_iperfexe2 << " fail";
+            }
+        }else{
+            qDebug() << i2File.fileName() << " NOT EXIST!!";
+        }
+    #endif
+#endif
+}
+
+void QIperfd::initiperf21(QString tmp, QString tmp_path, QString arch)
+{
+#if defined(Q_OS_WIN32)
+    // windows, iperf files
+    m_iperfexe21 = apppath + QDir::separator() + "windows"+ QDir::separator() + "x86"+QDir::separator() + "iperf2.1.exe";
+    m_iperfexe21 = QDir::toNativeSeparators(m_iperfexe21);
+#else
     m_iperfexe21 = tmp + tmp_path + QDir::separator() + "iperf2.1";
     if (QFileInfo::exists(m_iperfexe21))
     {
         QFile::remove(m_iperfexe21);
     }
+    // iperf2.1
+    #if defined(Q_OS_ANDROID)
+        QFile i21File(":/android/" + arch + "/iperf");
+    #else
+        Q_UNUSED(arch)
+        QFile i21File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf2.1");
+        if (i21File.exists()) {
+            // make file execuable
+            if (i21File.copy(m_iperfexe21)){
+                QFile iperf21File(m_iperfexe21);
+                iperf21File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+                                           QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
+                                           QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
+            }else{
+                qDebug() << "copy file " << " to " << m_iperfexe21 << " fail";
+            }
+        }else{
+            qDebug() << i21File.fileName() << " NOT EXIST!!";
+        }
+    #endif
+#endif
+}
+void QIperfd::initiperf22(QString tmp, QString tmp_path, QString arch)
+{
+#if defined(Q_OS_WIN32)
+    // windows, iperf files
+    m_iperfexe22 = apppath + QDir::separator() + "windows"+ QDir::separator() + arch +QDir::separator() + "iperf2.2.n.exe";
+    m_iperfexe22 = QDir::toNativeSeparators(m_iperfexe22);
+#else
+    m_iperfexe22 = tmp + tmp_path + QDir::separator() + "iperf2.2.n";
+    if (QFileInfo::exists(m_iperfexe22))
+    {
+        QFile::remove(m_iperfexe22);
+    }
+    // iperf2.1
+    #if defined(Q_OS_ANDROID)
+        QFile i22File(":/android/" + arch + "/iperf");
+    #else
+        Q_UNUSED(arch)
+        QFile i22File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf2.2.n");
+        if (i22File.exists()) {
+            // make file execuable
+            if (i22File.copy(m_iperfexe22)){
+                QFile iperf22File(m_iperfexe22);
+                iperf22File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+                                           QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
+                                           QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
+            }else{
+                qDebug() << "copy file " << " to " << m_iperfexe22 << " fail";
+            }
+        }else{
+            qDebug() << i22File.fileName() << " NOT EXIST!!";
+        }
+    #endif
+#endif
+}
+void QIperfd::initiperf3(QString tmp, QString tmp_path, QString arch)
+{
+#if defined(Q_OS_WIN32)
+    // windows, iperf files
+    m_iperfexe3 = apppath + QDir::separator() + "windows" +QDir::separator() + arch + QDir::separator() + "iperf3.exe";
+    m_iperfexe3 = QDir::toNativeSeparators(m_iperfexe3);
+#else
     m_iperfexe3 = tmp + tmp_path + QDir::separator() + "iperf3";
     if (QFileInfo::exists(m_iperfexe3))
     {
         QFile::remove(m_iperfexe3);
     }
-// iperf2
-#if defined(Q_OS_ANDROID)
-    QFile i2File(":/android/" + arch + "/iperf");
-#else
-    QFile i2File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf2");
-    if (i2File.exists()) {
-        // make file execuable
-        if (i2File.copy(m_iperfexe2)){
-            QFile iperf2File(m_iperfexe2);
-            iperf2File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
-                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
-                                      QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
+    // iperf3
+    #if defined(Q_OS_ANDROID)
+        QFile i3File(":/android/" + arch + "/iperf3");
+    #else
+        Q_UNUSED(arch)
+        QFile i3File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf3");
+        if(i3File.exists()){
+            if (i3File.copy(m_iperfexe3)){
+                QFile iperf3File(m_iperfexe3);
+                iperf3File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
+                                          QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
+                                          QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
+            }else{
+                qDebug() << "copy file " << " to " << m_iperfexe3 << " fail";
+            }
         }else{
-            qDebug() << "copy file " << " to " << m_iperfexe2 << " fail";
+            qDebug() << i3File.fileName() << " NOT EXIST!!";
         }
-    }else{
-        qDebug() << i2File.fileName() << " NOT EXIST!!";
-    }
+    #endif
 #endif
-// iperf2.1
-#if defined(Q_OS_ANDROID)
-    QFile i21File(":/android/" + arch + "/iperf");
-#else
-    QFile i21File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf2.1");
-    if (i21File.exists()) {
-        // make file execuable
-        if (i21File.copy(m_iperfexe21)){
-            QFile iperf21File(m_iperfexe21);
-            iperf21File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
-                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
-                                      QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
-        }else{
-            qDebug() << "copy file " << " to " << m_iperfexe21 << " fail";
-        }
-    }else{
-        qDebug() << i21File.fileName() << " NOT EXIST!!";
-    }
-#endif
-// iperf3
-#if defined(Q_OS_ANDROID)
-    QFile i3File(":/android/" + arch + "/iperf3");
-#else
-    QFile i3File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf3");
-    if(i3File.exists()){
-        if (i3File.copy(m_iperfexe3)){
-            QFile iperf3File(m_iperfexe3);
-            iperf3File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
-                                      QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
-                                      QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
-        }else{
-            qDebug() << "copy file " << " to " << m_iperfexe3 << " fail";
-        }
-    }else{
-        qDebug() << i3File.fileName() << " NOT EXIST!!";
-    }
-#endif
+}
 
-#elif defined(Q_OS_WIN32)
-    // windows, iperf files
-    m_iperfexe2 = apppath + QDir::separator() + "windows" +QDir::separator() + "x86"+QDir::separator() + "iperf2.exe";
-    m_iperfexe2 = QDir::toNativeSeparators(m_iperfexe2);
-    m_iperfexe21 = apppath + QDir::separator() + "windows"+ QDir::separator() + "x86"+QDir::separator() + "iperf2.1.exe";
-    m_iperfexe21 = QDir::toNativeSeparators(m_iperfexe21);
-    m_iperfexe3 = apppath + QDir::separator() + "windows" +QDir::separator() + arch + QDir::separator() + "iperf3.exe";
-    m_iperfexe3 = QDir::toNativeSeparators(m_iperfexe3);
+void QIperfd::initIperf(QString apppath)
+{
+    // iperf control interface, accept add/del iperf setting from remote
+    QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    QString arch = "";
+#if defined(Q_OS_ANDROID) || defined(Q_OS_WIN32)
+    arch = QSysInfo::buildCpuArchitecture();
+#endif
+#if defined(Q_OS_LINUX)
+    // linux/android path
+    #if !defined(Q_OS_ANDROID)
+        QString tmp_path = QString(QDir::separator()) + "qiperf";
+        QDir dir(tmp + tmp_path);
+        if (!dir.exists())
+        {
+            dir.mkdir(tmp + tmp_path);
+        }
+    #else
+        QString tmp_path = "";
+    #endif
+    //TODO: check we have newer version of iperf, remove old !!
+    initiperf2(tmp, tmp_path, arch);
+    initiperf21(tmp, tmp_path, arch);
+    initiperf3(tmp, tmp_path, arch);
+
 #else
     qDebug() << " Not Support platform!!";
 #endif

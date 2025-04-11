@@ -122,6 +122,8 @@ private:
     QString m_iperfexe2ver; //iperf2 version
     QString m_iperfexe21; //iperf2.1
     QString m_iperfexe21ver; //iperf2.1 version
+    QString m_iperfexe22; //iperf2.2
+    QString m_iperfexe22ver; //iperf2.2 version
     QString m_iperfexe3; //iperf3
     QString m_iperfexe3ver; //iperf3 version
     QMap<int, IperfWorker*> m_iperfworkers;
@@ -141,6 +143,10 @@ private:
     bool bNtpserver; // enable NTP server
     NtpServer *m_ntpserver;
     // NtpSync *m_ntpsync;
+    void initiperf2(QString tmp, QString tmp_path, QString arch);
+    void initiperf21(QString tmp, QString tmp_path, QString arch);
+    void initiperf22(QString tmp, QString tmp_path, QString arch);
+    void initiperf3(QString tmp, QString tmp_path, QString arch);
 };
 
 #endif // QIPERFD_H

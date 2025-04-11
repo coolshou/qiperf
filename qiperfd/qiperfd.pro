@@ -185,32 +185,21 @@ unix:!android {
     #
     INSTALLS += SERVICE_FILES IMAGES_FILES
     contains(QT_ARCH, aarch64||arm64) {
-        # IPERF_FILES.files +=\
-        #     linux/arm64/iperf2 \
-        #     linux/arm64/iperf2.1 \
-        #     linux/arm64/iperf3
         B_ARCH="arm64"
-        #RESOURCES += \
-        #    linux-arm64.qrc
     }
     contains(QT_ARCH, armv7||arm) {
         B_ARCH="armhf"
-        #RESOURCES += \
-        #    linux-armhf.qrc
     }
     contains(QT_ARCH, x86_64) {
         B_ARCH="x86_64"
-        # RESOURCES += \
-        #     linux.qrc
     }
     contains(QT_ARCH, i386) {
         B_ARCH="x86"
-        # RESOURCES += \
-        #     linux-i686.qrc
     }
     IPERF_FILES.files +=\
         linux/$$B_ARCH/iperf2 \
         linux/$$B_ARCH/iperf2.1 \
+        linux/$$B_ARCH/iperf2.2.n \
         linux/$$B_ARCH/iperf3
     IPERF_FILES.path += /opt/qiperf/bin/linux/
     INSTALLS += IPERF_FILES
