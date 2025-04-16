@@ -206,5 +206,6 @@ private:
     ThroughputView *m_throughputview;
     ViewManager *m_views;
     bool m_IgnoreWrongInterval;
+    QMap<QString, SerialView*> *m_serialviews; // store serial view
 };
 #endif // QIPERFC_H

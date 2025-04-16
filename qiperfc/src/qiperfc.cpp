@@ -143,6 +143,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_debugdlg->setModal(false);
     m_debugdlg->resize(1280,1024);
 #endif
+
+    m_serialviews = new QMap<QString, SerialView*>();
 }
 
 QIperfC::~QIperfC()
@@ -1153,14 +1155,34 @@ void QIperfC::onAddSerial()
     //TODO: setup manager ip -> ports mapping data
     // m_dlgserial->
     if (m_dlgserial->exec()== QDialog::Accepted){
-        //TODO: ask remote create serialport and connect to websockport?
-        //
-        //TODO: local use websock connect to remote websock server
-        //
-        // local serialport or remote serialport
+        QString managerip = m_dlgserial->getManagerIP();
+        QString serailport = m_dlgserial->getSerialPort();
+        QString mkey = managerip+":"+serailport;
+        if (!m_serialviews->contains(mkey)){
+            int idx = m_serialviews->count();
 
-        SerialView *serialview = new SerialView();
-        m_views->addView(serialview);
+
+            QString serialcfg = m_dlgserial->getSerialCfg();
+            qDebug() << "managerip: " << managerip << " serialcfg:" << serialcfg;
+            //
+            QString url = "ws://"+managerip+":"+QString::number(QIPERFD_WSPORT);
+            WSClient *wsc=new WSClient(managerip, QUrl(url), "");
+            // connect(wsc, &WSClient::disconnected, this, &QIperfC::) // when diwconnect do waht?
+            //TODO: wait connect!!
+            //ask remote create serialport and start tcp server on port
+            wsc->sendText(QString("%1:%2:%3:%4").arg(CMD_SERIAL_ADD,
+                                                     QString::number(idx),
+                                                     serailport, serialcfg));
+            //TODO: local use TCP SOCKET connect to remote TCP server
+            //
+            // local serialport or remote serialport
+
+            SerialView *serialview = new SerialView(mkey);
+            m_views->addView(serialview);
+            m_serialviews->insert(mkey, serialview);
+        }else{
+            qDebug() << "serialviews: " << mkey << " exist, show it?m_views";
+        }
     }
 }
 
