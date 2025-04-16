@@ -25,7 +25,7 @@ public:
     QList<QHostAddress> getIPfromIfname(QString ifname);
 
     int getEndpointType();
-    void setIperfVer(QString v2,QString v21,QString v3);
+    void setIperfVer(QString v2,QString v21, QString v22, QString v3);
     QJsonObject getIperfVer();
     void getCpuMemInfo(QString &cpuModel, QString &totalMemory);
     void getMotherboardInfo(QString &vendor, QString &model, QString &serial);
@@ -70,6 +70,7 @@ private:
     QJsonObject m_mainObject;
     QString m_iperf2ver;
     QString m_iperf21ver;
+    QString m_iperf22ver;
     QString m_iperf3ver;
 };
 

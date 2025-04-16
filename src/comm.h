@@ -69,7 +69,7 @@
 // serial
 #define CMD_SERIAL_ADD    "SERIAL_ADD"   // add SERIAL setting for rs232, comport:BaudRate:DataBits:Parity:StopBits:FlowControl
 #define CMD_SERIAL_DEL    "SERIAL_DEL"   // close SERAIL of comport
-#define CMD_SERIAL_OK   "OK"  //serial start ok
+#define CMD_SERIAL_OK   "OK"  //serial start ok: run on port number
 #define CMD_SERIAL_FAIL "FAIL" //serial error with message
 
 
@@ -92,7 +92,8 @@ enum class IPERF_VER {
     V1=0,  //1.7.0
     V2=1,  //2.0.14
     V21=2, //2.1.9
-    V3=3   //3.14
+    V22=3, //2.2.1
+    V3=4   //3.14
 };
 
 #define READ_BUFFER_SIZE_PATH "/proc/sys/net/core/rmem_max"

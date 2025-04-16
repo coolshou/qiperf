@@ -120,6 +120,7 @@ QString MyInfo::collectInfo()
     //iperf version
     mainObject.insert("iperf2ver", m_iperf2ver);
     mainObject.insert("iperf21ver", m_iperf21ver);
+    mainObject.insert("iperf22ver", m_iperf22ver);
     mainObject.insert("iperf3ver", m_iperf3ver);
     //serial
     mainObject.insert("serial", collectSerial());
@@ -293,10 +294,11 @@ int MyInfo::getEndpointType()
     //    }
 }
 
-void MyInfo::setIperfVer(QString v2, QString v21, QString v3)
+void MyInfo::setIperfVer(QString v2, QString v21, QString v22, QString v3)
 {
     m_iperf2ver = v2;
     m_iperf21ver = v21;
+    m_iperf22ver = v22;
     m_iperf3ver = v3;
 }
 
