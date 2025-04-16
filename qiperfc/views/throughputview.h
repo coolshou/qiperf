@@ -11,15 +11,15 @@
 #include <QMainWindow>
 #include <QItemSelection>
 
-#include "tpplot.h"
-#include "tpmgr.h"
-#include "dlgiperf.h"
-#include "tpdirdelegate.h"
-#include "tpfoldingdelegate.h"
-#include "iperfwrapper.h"
-#include "nowrapdelegate.h"
+#include "../src/tpplot.h"
+#include "../src/tpmgr.h"
+#include "../src/dlgiperf.h"
+#include "../src/tpdirdelegate.h"
+#include "../src/tpfoldingdelegate.h"
+#include "../src/iperfwrapper.h"
+#include "../src/nowrapdelegate.h"
 
-#include "../views/abstractview.h"
+#include "abstractview.h"
 
 namespace Ui {
 class ThroughputView;
@@ -70,6 +70,7 @@ public slots:
     void onUpdateTPCfg(QByteArray tpcfg);
     void onUpdateTPUnit(QString suint);
     void setShowGroup(bool bShow);
+    void getRawData(bool checked);
     void setXRangeUpper(double upper);
     void setInterval(int interval);
 signals:
@@ -110,6 +111,7 @@ private:
     QAction *m_actionClientArgs;
     QAction *m_actionServerArgs;
     QAction *m_actionGroup;
+    QAction *m_actionRawData;
     DlgIperf * dlgiperf;  // dialog of iperf config
     TPDirDelegate *tpdirdelegate;
     TPFoldingDelegate *tpfoldingdelegate;

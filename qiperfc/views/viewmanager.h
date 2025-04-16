@@ -2,7 +2,7 @@
 #define VIEWMANAGER_H
 
 #include <QObject>
-#include "../src/throughputview.h"
+#include "throughputview.h"
 
 class AbstractView;
 class QAction;

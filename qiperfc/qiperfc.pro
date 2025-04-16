@@ -94,8 +94,6 @@ SOURCES += \
     src/pingplot.cpp \
     src/qipconfig.cpp \
     src/qiperfc.cpp \
-    src/serialview.cpp \
-    src/throughputview.cpp \
     src/tp.cpp \
     src/tpfoldingdelegate.cpp \
     src/tpmgr.cpp \
@@ -112,7 +110,9 @@ SOURCES += \
     views/terminal/qvterminal/qvtline.cpp \
     views/terminal/terminalview.cpp \
     views/terminal/termview.cpp \
-    views/viewmanager.cpp
+    views/viewmanager.cpp \
+    views/serialview.cpp \
+    views/throughputview.cpp
 
     # lib/tplegenditem.cpp \
     # ../qiperfd/src/wsserver.cpp \
@@ -160,8 +160,6 @@ HEADERS += \
     src/pingplot.h \
     src/qipconfig.h \
     src/qiperfc.h \
-    src/serialview.h \
-    src/throughputview.h \
     src/tp.h \
     src/tpfoldingdelegate.h \
     src/tpmgr.h \
@@ -179,8 +177,11 @@ HEADERS += \
     views/terminal/qvterminal/qvtline.h \
     views/terminal/terminalview.h \
     views/terminal/termview.h \
-    views/viewmanager.h
-    # lib/tplegenditem.h \
+    views/viewmanager.h \
+    views/serialview.h \
+    views/throughputview.h
+
+# lib/tplegenditem.h \
     # ../qiperfd/src/wsserver.h \
 
 FORMS += \
@@ -196,11 +197,11 @@ FORMS += \
     src/dlgtest.ui \
     src/formqiperfds.ui \
     src/qiperfc.ui \
-    src/serialview.ui \
-    src/throughputview.ui
+    views/serialview.ui \
+    views/throughputview.ui
 
 UI_DIR= \
-    src
+    ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

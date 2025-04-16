@@ -5,9 +5,9 @@
 #include <QModelIndexList>
 #include <QScrollBar>
 
-#include "tooltipeventfilter.h"
+#include "../src/tooltipeventfilter.h"
 #include "comm.h"
-#include "nmessagebox.h"
+#include "../src/nmessagebox.h"
 
 // ThroughputView::ThroughputView(QIperfC *main, QWidget *parent) : AbstractView(parent)
 ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
@@ -254,6 +254,14 @@ void ThroughputView::setShowGroup(bool bShow)
     emit showGroup(m_showgroup);
 }
 
+void ThroughputView::getRawData(bool checked)
+{
+    Q_UNUSED(checked)
+    //selected graph
+    m_tpplot->selectedGraphs();
+    qDebug() << "TODO: copy graph's data to clipboard";
+}
+
 void ThroughputView::setXRangeUpper(double upper)
 {
     if (m_tpplot){
@@ -295,6 +303,8 @@ void ThroughputView::initMenus()
     m_actionGroup = new QAction("Group");
     m_actionGroup->setCheckable(true);
     connect(m_actionGroup, &QAction::triggered, this, &ThroughputView::setShowGroup);
+    m_actionRawData = new QAction("copy Raw Data");
+    connect(m_actionRawData, &QAction::triggered, this, &ThroughputView::getRawData);
 }
 
 void ThroughputView::onPlotContextMenuRequest(QPoint pos)
@@ -303,25 +313,10 @@ void ThroughputView::onPlotContextMenuRequest(QPoint pos)
     menu->setAttribute(Qt::WA_DeleteOnClose);
     m_actionGroup->setChecked(m_showgroup);
     menu->addAction(m_actionGroup);
-
     menu->addSeparator();
-    //    if (ui->customPlot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
-    //    {
-    //        menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignLeft));
-    //        menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignHCenter));
-    //        menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop | Qt::AlignRight));
-    //        menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom | Qt::AlignRight));
-    //        menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom | Qt::AlignLeft));
-    //    }
-    //    else  // general context menu on graphs requested
-    {
-        //        if (ui->customPlot->selectedGraphs().size() > 0)
-        //            menu->addAction("Remove selected graph", this, SLOT(removeSelectedGraph()));
-        //        if (ui->customPlot->graphCount() > 0)
-        //            menu->addAction("Remove all graphs", this, SLOT(removeAllGraphs()));
-        menu->addAction("About", this, &ThroughputView::aboutQCustomPlot);
-    }
-
+    menu->addAction(m_actionRawData);
+    menu->addSeparator();
+    menu->addAction("About", this, &ThroughputView::aboutQCustomPlot);
     menu->popup(m_tpplot->mapToGlobal(pos));
 }
 
@@ -510,6 +505,7 @@ void ThroughputView::initThroughputChart()
     // throughput chart
     m_vLegendScrollBar = new QScrollBar(Qt::Vertical, this);
     m_tpplot=new TPPlot(m_showgroup, m_tpunit, ui->widget_console);
+    // m_tpplot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     qDebug() << "enable openGl:" << m_tpplot->openGl();
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_tpplot, &TPPlot::customContextMenuRequested, this, &ThroughputView::onPlotContextMenuRequest);

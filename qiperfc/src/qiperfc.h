@@ -31,8 +31,8 @@
 #include "../../src/dlgshowlog.h"
 #include "exporthtml.h"
 #include "../views/viewmanager.h"
-#include "throughputview.h"
-#include "serialview.h"
+#include "../views/throughputview.h"
+#include "../views/serialview.h"
 
 #if (TEST_ICMP==1)
 #include "../src/icmpping.h"
