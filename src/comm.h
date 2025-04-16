@@ -69,8 +69,8 @@
 // serial
 #define CMD_SERIAL_ADD    "SERIAL_ADD"   // add SERIAL setting for rs232, comport:BaudRate:DataBits:Parity:StopBits:FlowControl
 #define CMD_SERIAL_DEL    "SERIAL_DEL"   // close SERAIL of comport
-#define CMD_SERIAL_OK   "OK"  //serial start ok: run on port number
-#define CMD_SERIAL_FAIL "FAIL" //serial error with message
+#define CMD_SERIAL_OK   "SERIAL_OK"  //serial start ok: run on port number
+#define CMD_SERIAL_FAIL "SERIAL_FAIL" //serial error with message: error message
 
 
 // ping
