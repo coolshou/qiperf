@@ -1,11 +1,13 @@
 #include "serialview.h"
 #include "ui_serialview.h"
 
-SerialView::SerialView(QWidget *parent) : AbstractView(parent)
-    , ui(new Ui::SerialView)
+SerialView::SerialView(QString title, QWidget *parent)
+    : AbstractView(parent)
+    , ui(new Ui::SerialView), m_title(title)
 {
     ui->setupUi(this);
     m_serialport = new SerialPort();
+
     m_termialview = new TerminalView(parent);
     ui->vLayout->addWidget(m_termialview);
 
@@ -23,7 +25,7 @@ SerialView::~SerialView()
 QString SerialView::title()
 {
     //TODO:title
-    return tr("Serial");
+    return m_title;
 }
 
 QString SerialView::iid()

@@ -15,7 +15,7 @@ class SerialView : public AbstractView
     Q_OBJECT
 
 public:
-    explicit SerialView(QWidget *parent = nullptr);
+    explicit SerialView(QString title, QWidget *parent = nullptr);
     ~SerialView();
     QString title() override;
     QString iid() override;
@@ -29,6 +29,7 @@ private slots:
 
 private:
     Ui::SerialView *ui;
+    QString m_title;
     SerialPort *m_serialport;
     TerminalView *m_termialview;
     bool m_pause = false;
