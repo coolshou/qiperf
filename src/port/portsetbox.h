@@ -15,6 +15,7 @@ public:
     // PortSetBox(QSerialPort *port, QWidget *parent = Q_NULLPTR);
     PortSetBox(QWidget *parent = Q_NULLPTR);
     ~PortSetBox();
+    QString getCfg();
 
 private slots:
     void setDataBits(int index);

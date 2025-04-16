@@ -67,22 +67,38 @@ PortSetBox::~PortSetBox()
     delete ui;
 }
 
+QString PortSetBox::getCfg()
+{
+    return QString("%1:%2:%3:%4").arg(ui->dataBitsBox->currentText(),
+                                      QString::number(ui->paritBox->currentIndex()),
+                                      ui->stopBitsBox->currentText(),
+                                      QString::number(ui->flowControlBox->currentIndex()));
+}
+
 void PortSetBox::setDataBits(int index)
 {
-    serialPort->setDataBits(DataBits[index]);
+    Q_UNUSED(index)
+    //TODO: set serial on remote
+    // serialPort->setDataBits(DataBits[index]);
 }
 
 void PortSetBox::setParity(int index)
 {
-    serialPort->setParity(Parity[index]);
+    Q_UNUSED(index)
+    //TODO: set serial on remote
+    // serialPort->setParity(Parity[index]);
 }
 
 void PortSetBox::setStopBits(int index)
 {
-    serialPort->setStopBits(StopBits[index]);
+    Q_UNUSED(index)
+    //TODO: set serial on remote
+    // serialPort->setStopBits(StopBits[index]);
 }
 
 void PortSetBox::setFlowControl(int index)
 {
-    serialPort->setFlowControl(FlowControl[index]);
+    Q_UNUSED(index)
+    //TODO: set serial on remote
+    // serialPort->setFlowControl(FlowControl[index]);
 }
