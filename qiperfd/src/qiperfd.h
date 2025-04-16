@@ -13,6 +13,7 @@
 
 #include "../src/filewatcher.h"
 #include "../src/icmpping.h"
+#include "serial/serialtask.h"
 
 //#include <QCloseEvent> # require gui
 
@@ -147,6 +148,8 @@ private:
     void initiperf21(QString tmp, QString tmp_path, QString arch);
     void initiperf22(QString tmp, QString tmp_path, QString arch);
     void initiperf3(QString tmp, QString tmp_path, QString arch);
+    // serial
+    QMap<QString, SerialTask*> m_serialtasks;
 };
 
 #endif // QIPERFD_H

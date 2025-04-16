@@ -9,6 +9,7 @@
 #include <QProcess>
 #include <QDateTime>
 #include <QSysInfo>
+#include <QMetaEnum>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
@@ -759,7 +760,45 @@ void QIperfd::onWSactMessage(QString msg)
         qDebug()<< "CMD_NTP_SYNC";
         cut = msg.indexOf(':', 0);
         msg = msg.right(msg.length()-cut-1);
-        // m_ntpsync->sync(msg);
+        //TODO: do ntp sync, m_ntpsync->sync(msg);
+    }else if (act.startsWith(CMD_SERIAL_ADD)){
+        // TODO: create serial and bind to TCP server
+        // comport:BaudRate:DataBits:Parity:StopBits:FlowControl
+        QStringList d = msg.split(":");
+        if (d.length()==6){
+            int port = QIPERF_SERIALPORT + m_serialtasks.count();
+            QString comport = d[0];
+            QString baudrate = d[1];
+            // QMetaEnum metaEnum = QMetaEnum::fromType<QSerialPort::DataBits>();
+            QSerialPort::DataBits databits = static_cast<QSerialPort::DataBits>(d[2].toInt());
+            QSerialPort::Parity parity = static_cast<QSerialPort::Parity>(d[3].toInt());
+            QSerialPort::StopBits stopbits = static_cast<QSerialPort::StopBits>(d[4].toInt());
+            QSerialPort::FlowControl flowcontrol = static_cast<QSerialPort::FlowControl>(d[5].toInt());
+            if (!(m_serialtasks.keys().indexOf(comport)==-1)){
+                SerialTask *task = new SerialTask(comport, baudrate,
+                                                  "any", QString::number(port),
+                                                  ComDeviceTcp::Mode::BINARY,
+                                                  databits, parity, stopbits, flowcontrol,
+                                                  false, false, this);
+                m_serialtasks.insert(comport, task);
+                // QObject::connect(&task, SIGNAL(finished()), &a, SLOT(quit()));
+                QTimer::singleShot(0, task, SLOT(init()));
+            } else{
+                qDebug() << comport << " exist!!";
+            }
+
+        }else{
+            qDebug() << " Wrong format of create serial: " << msg;
+        }
+    }else if (act.startsWith(CMD_SERIAL_DEL)){
+        QString comport = msg;
+        if (m_serialtasks.keys().indexOf(comport)!=-1){
+            SerialTask *task = m_serialtasks.value(comport);
+            task->close();
+            m_serialtasks.remove(comport);
+        }else{
+            qDebug() << comport << " does not opened!!";
+        }
     }else {
         qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;
         qDebug() << "\n==========";
@@ -1144,6 +1183,7 @@ void QIperfd::initiperf3(QString tmp, QString tmp_path, QString arch)
 
 void QIperfd::initIperf(QString apppath)
 {
+    Q_UNUSED(apppath)
     // iperf control interface, accept add/del iperf setting from remote
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
     QString arch = "";
@@ -1165,6 +1205,7 @@ void QIperfd::initIperf(QString apppath)
     //TODO: check we have newer version of iperf, remove old !!
     initiperf2(tmp, tmp_path, arch);
     initiperf21(tmp, tmp_path, arch);
+    initiperf22(tmp, tmp_path, arch);
     initiperf3(tmp, tmp_path, arch);
 
 #else

@@ -67,6 +67,7 @@ SOURCES += \
     ../src/icmpwrapper.cpp \
     ../src/port/portsetbox.cpp \
     ../src/port/serialport.cpp \
+    ../src/port/tcpudpport.cpp \
     lib/axistag.cpp \
     lib/myqcpbars.cpp \
     lib/myqcpgraph.cpp \
@@ -126,6 +127,7 @@ HEADERS += \
     ../src/port/abstractport.h \
     ../src/port/portsetbox.h \
     ../src/port/serialport.h \
+    ../src/port/tcpudpport.h \
     ../src/versions.h \
     ../src/endpointact.h \
     ../src/iperfwrapper.h \
@@ -185,6 +187,7 @@ FORMS += \
     ../src/dlgshowlog.ui \
     ../src/port/portsetbox.ui \
     ../src/port/serialport.ui \
+    ../src/port/tcpudpport.ui \
     src/dlgiperf.ui \
     src/dlgoption.ui \
     src/dlgping.ui \

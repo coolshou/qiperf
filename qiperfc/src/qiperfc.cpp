@@ -69,7 +69,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 
     m_views = new ViewManager(&settingfilepath, m_throughputview, this);
     m_dlgtest = new DlgTest();
-    m_dlgserial = new DlgSerial();
+    m_dlgserial = new DlgSerial(); //for serial port config
     m_frm_option = new dlgOption(m_settings);
     connect(m_frm_option, &dlgOption::widthChanged, this, &QIperfC::onWidthChanged);
     connect(m_frm_option, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);

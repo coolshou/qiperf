@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>424</width>
-    <height>201</height>
+    <width>503</width>
+    <height>110</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -57,6 +57,9 @@
       </item>
       <item>
        <widget class="QLabel" name="label_2">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>manager Port:</string>
         </property>
@@ -64,6 +67,9 @@
       </item>
       <item>
        <widget class="QSpinBox" name="spinBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="minimum">
          <number>47020</number>
         </property>
@@ -80,7 +86,7 @@
    </item>
    <item>
     <widget class="QWidget" name="widget_serial" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0,0">
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0,0,0">
       <property name="spacing">
        <number>3</number>
       </property>
@@ -216,6 +222,23 @@
           <string notr="true">9600</string>
          </property>
         </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbPortConfig">
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../qiperf.qrc">
+          <normaloff>:/portconfig</normaloff>:/portconfig</iconset>
+        </property>
        </widget>
       </item>
      </layout>

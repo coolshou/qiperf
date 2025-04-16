@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QMap>
 
+#include "port/portsetbox.h"
+
 namespace Ui {
 class DlgSerial;
 }
@@ -21,10 +23,12 @@ protected:
     void changeEvent(QEvent *e);
 private slots:
     void onChangeSerial(QString text);
+    void onPortConfig(bool checked);
 
 private:
     Ui::DlgSerial *ui;
     QMap<QString, QStringList> m_serials;
+    PortSetBox *portconfig;
 };
 
 #endif // DLGSERIAL_H

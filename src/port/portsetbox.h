@@ -12,7 +12,8 @@ class PortSetBox : public QDialog {
     Q_OBJECT
 
 public:
-    PortSetBox(QSerialPort *port, QWidget *parent = Q_NULLPTR);
+    // PortSetBox(QSerialPort *port, QWidget *parent = Q_NULLPTR);
+    PortSetBox(QWidget *parent = Q_NULLPTR);
     ~PortSetBox();
 
 private slots:

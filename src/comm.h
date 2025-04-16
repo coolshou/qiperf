@@ -67,7 +67,11 @@
 #define CMD_NTP_SYNC "NTP_SYNC" // request do NTP time sync with server NTP_SYNC:ServerIP
 
 // serial
-#define CMD_SERIAL_ADD    "SERIAL_ADD"   // add SERIAL setting for rs232
+#define CMD_SERIAL_ADD    "SERIAL_ADD"   // add SERIAL setting for rs232, comport:BaudRate:DataBits:Parity:StopBits:FlowControl
+#define CMD_SERIAL_DEL    "SERIAL_DEL"   // close SERAIL of comport
+#define CMD_SERIAL_OK   "OK"  //serial start ok
+#define CMD_SERIAL_FAIL "FAIL" //serial error with message
+
 
 // ping
 #define CMD_PING        "PING"
@@ -78,6 +82,8 @@
 
 #define LAYER_MAIN       "main"
 #define LAYER_LOSTRATE   "LostRate"
+
+
 
 #define MYTIMESTEMP "yyyy-MM-dd hh:mm:ss.zzz"
 #define DATETIME_NOW_FORMAT "yyyy-MM-dd_hhmmss.zzz"

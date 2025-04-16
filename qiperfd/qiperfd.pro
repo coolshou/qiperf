@@ -50,6 +50,10 @@ SOURCES += \
     src/myservice.cpp \
     src/pipeserver.cpp \
     src/qiperfd.cpp \
+    src/serial/comdevice.cpp \
+    src/serial/comdeviceserial.cpp \
+    src/serial/comdevicetcp.cpp \
+    src/serial/serialtask.cpp \
     src/udpsrv.cpp \
     src/wsserver.cpp
 # ../lib/ntp/ntpsync.cpp \
@@ -77,6 +81,10 @@ HEADERS += \
     src/myservice.h \
     src/pipeserver.h \
     src/qiperfd.h \
+    src/serial/comdevice.h \
+    src/serial/comdeviceserial.h \
+    src/serial/comdevicetcp.h \
+    src/serial/serialtask.h \
     src/udpsrv.h \
     src/version.h \
     src/wsserver.h

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>200</width>
-    <height>145</height>
+    <height>172</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,12 +28,7 @@
     <widget class="QComboBox" name="dataBitsBox">
      <item>
       <property name="text">
-       <string notr="true">5</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string notr="true">6</string>
+       <string notr="true">8</string>
       </property>
      </item>
      <item>
@@ -43,7 +38,12 @@
      </item>
      <item>
       <property name="text">
-       <string notr="true">8</string>
+       <string notr="true">6</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string notr="true">5</string>
       </property>
      </item>
     </widget>
@@ -163,6 +163,7 @@
    </item>
   </layout>
  </widget>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

@@ -30,7 +30,8 @@ static const QSerialPort::FlowControl FlowControl[] = {
     QSerialPort::SoftwareControl
 };
 
-PortSetBox::PortSetBox(QSerialPort *port, QWidget *parent) :
+// PortSetBox::PortSetBox(QSerialPort *port, QWidget *parent) :
+PortSetBox::PortSetBox(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::PortSetBox)
 {
@@ -44,8 +45,8 @@ PortSetBox::PortSetBox(QSerialPort *port, QWidget *parent) :
     ui->setupUi(this);
     setFixedSize(200, 200); // 不能伸缩的对话框
 
-    serialPort = port;
-
+    // serialPort = port;
+/*  // TODO: list of support dataBits, parity, stopBits, flowControl
     for (i = 0; port->dataBits() != DataBits[i] && i < _size(DataBits); ++i);
     ui->dataBitsBox->setCurrentIndex(i);
     for (i = 0; port->parity() != Parity[i] && i < _size(Parity); ++i);
@@ -54,7 +55,7 @@ PortSetBox::PortSetBox(QSerialPort *port, QWidget *parent) :
     ui->stopBitsBox->setCurrentIndex(i);
     for (i = 0; port->flowControl() != FlowControl[i] && i < _size(StopBits); ++i);
     ui->flowControlBox->setCurrentIndex(i);
-
+*/
     connect(ui->dataBitsBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setDataBits(int)));
     connect(ui->paritBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setParity(int)));
     connect(ui->stopBitsBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setStopBits(int)));

@@ -177,8 +177,8 @@ bool SerialPort::isOpen()
 
 void SerialPort::portSetDialog()
 {
-    PortSetBox portSet(serialPort, this);
-    portSet.exec();
+    // PortSetBox portSet(serialPort, this);
+    // portSet.exec();
 }
 
 // 扫描端口
@@ -187,9 +187,6 @@ void SerialPort::scanPort()
     bool sync = false;
     QComboBox *box = ui->portNameBox;
     QVector<QSerialPortInfo> vec;
-
-
-
     //查找可用的串口
     foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
         // 检测端口列表变更
