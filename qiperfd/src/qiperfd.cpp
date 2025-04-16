@@ -779,18 +779,23 @@ void QIperfd::onWSactMessage(QString msg)
     }else if (act.startsWith(CMD_SERIAL_ADD)){
         // TODO: create serial and bind to TCP server
         // idx:comport:BaudRate:DataBits:Parity:StopBits:FlowControl
+        qDebug() << "CMD_SERIAL_ADD: " << msg;
         QStringList d = msg.split(":");
         if (d.length()==7){
             int port = QIPERF_SERIALPORT + m_serialtasks.count();
+
             QString idx = d[0];
             QString comport = d[1];
             QString baudrate = d[2];
+
+            qDebug() << "m_serialtasks: " << m_serialtasks << "  comport: " << comport;
+
             // QMetaEnum metaEnum = QMetaEnum::fromType<QSerialPort::DataBits>();
             QSerialPort::DataBits databits = static_cast<QSerialPort::DataBits>(d[3].toInt());
             QSerialPort::Parity parity = static_cast<QSerialPort::Parity>(d[4].toInt());
             QSerialPort::StopBits stopbits = static_cast<QSerialPort::StopBits>(d[5].toInt());
             QSerialPort::FlowControl flowcontrol = static_cast<QSerialPort::FlowControl>(d[6].toInt());
-            if (!(m_serialtasks.keys().indexOf(comport)==-1)){
+            if (!m_serialtasks.contains(comport)){ // not exist
                 SerialTask *task = new SerialTask(idx, comport, baudrate,
                                                   "any", QString::number(port),
                                                   ComDeviceTcp::Mode::BINARY,
@@ -809,13 +814,14 @@ void QIperfd::onWSactMessage(QString msg)
             qDebug() << " Wrong format of create serial: " << msg;
         }
     }else if (act.startsWith(CMD_SERIAL_DEL)){
+        qDebug() << "CMD_SERIAL_DEL: " << msg;
         QString comport = msg;
         if (m_serialtasks.keys().indexOf(comport)!=-1){
             SerialTask *task = m_serialtasks.value(comport);
             task->close();
             m_serialtasks.remove(comport);
         }else{
-            qDebug() << comport << " does not opened!!";
+            qDebug() << comport << " does not in m_serialtasks!! \n" << m_serialtasks;
         }
     }else {
         qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;
