@@ -24,7 +24,7 @@ public:
     void setEnabled(bool enabled);
     void clear(void);
     void setFileAction(QAction *openAction, QAction *saveAction);
-    void addView(AbstractView *view);
+    void addView(AbstractView *view, bool closeable=false);
 
 public slots:
     // void onAddTPdata(QString midx, QString sInterval, QString idx,

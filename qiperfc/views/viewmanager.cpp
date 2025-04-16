@@ -38,7 +38,7 @@ ViewManager::ViewManager(QString *docPath, ThroughputView *tpview, QMainWindow *
     //     addView(view, align, index);
     //     index++;
     // }
-    addView(m_throughputview);
+    addView(m_throughputview, false);
 }
 
 ViewManager::~ViewManager()
@@ -117,11 +117,15 @@ void ViewManager::setFileAction(QAction *openAction, QAction *saveAction)
     connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFile()));
 }
 
-void ViewManager::addView(AbstractView *view)
+void ViewManager::addView(AbstractView *view, bool closeable)
 {
     int idx = m_views->count();
 
     QDockWidget *dock = new QDockWidget(view->title(), m_window);
+    if (!closeable){
+        dock->setFeatures(dock->features() & ~QDockWidget::DockWidgetClosable &
+                          ~QDockWidget::DockWidgetFloatable);
+    }
     dock->setObjectName(view->iid());
     // dock->setFeatures(QDockWidget::AllDockWidgetFeatures);//deprecate
     dock->setWidget(view);
