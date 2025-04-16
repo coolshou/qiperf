@@ -18,6 +18,9 @@ public:
     explicit DlgSerial(QWidget *parent = nullptr);
     ~DlgSerial();
     void setSerialData(QMap<QString, QStringList> data);
+    QString getManagerIP();
+    QString getSerialPort();
+    QString getSerialCfg();
 
 protected:
     void changeEvent(QEvent *e);

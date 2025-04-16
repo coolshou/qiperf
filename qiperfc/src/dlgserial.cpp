@@ -22,10 +22,32 @@ DlgSerial::~DlgSerial()
 
 void DlgSerial::setSerialData(QMap<QString, QStringList> data)
 {
+    //update cbManager list
     m_serials = data;
     ui->cbManager->clear();
     ui->cbManager->addItem("");
     ui->cbManager->addItems(m_serials.keys());
+}
+
+QString DlgSerial::getManagerIP()
+{
+    if (ui->cbManager->currentText().isEmpty()){
+        return "127.0.0.1";
+    }else{
+        return ui->cbManager->currentText();
+    }
+}
+
+QString DlgSerial::getSerialPort()
+{
+    return ui->portNameBox->currentText();
+}
+
+QString DlgSerial::getSerialCfg()
+{
+    //return:  comport:BaudRate:DataBits:Parity:StopBits:FlowControl
+    return QString("%1:%2").arg(ui->baudRateBox->currentText(),
+                                portconfig->getCfg());
 }
 
 void DlgSerial::changeEvent(QEvent *e)
@@ -54,7 +76,15 @@ void DlgSerial::onChangeSerial(QString text)
         // ui->portNameBox->addItems(QSerialPortInfo::availablePorts());
         QList<QSerialPortInfo> serialPortInfoList = QSerialPortInfo::availablePorts();
         foreach(QSerialPortInfo serialPortInfo, serialPortInfoList) {
-            ui->portNameBox->addItem(serialPortInfo.portName());
+            if (serialPortInfo.hasProductIdentifier() &&
+                serialPortInfo.hasVendorIdentifier()){
+                QString com;
+#if defined(Q_OS_LINUX)
+                com="/dev/";
+#endif
+                com=com+serialPortInfo.portName();
+                ui->portNameBox->addItem(com);
+            }
         }
     }
 
