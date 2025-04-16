@@ -11,7 +11,7 @@ class SerialTask: public QObject
 {
     Q_OBJECT
 public:
-    explicit SerialTask(const QString& serialPortName, const QString& serialBaudRate,
+    explicit SerialTask(QString midx, const QString& serialPortName, const QString& serialBaudRate,
                         const QString& localIp, const QString& localPort,
                         ComDeviceTcp::Mode mode,
                         QSerialPort::DataBits serialDataBits = QSerialPort::Data8,
@@ -25,9 +25,11 @@ public:
 public slots:
     void init();
     void close();
+    void onStarted(QString idx, quint16 port);
 
 signals:
-    void finished();
+    void finished(QString serialPortName);
+    void started(QString idx, quint16 port);// notice run on which port
 
 private:
     Q_DISABLE_COPY(SerialTask)
@@ -35,7 +37,9 @@ private:
 private slots:
     void slotFinished();
 
+
 private:
+    QString m_idx;
     const QString _serialPortName;
     const QString _serialBaudRate;
     const QString _localIp;

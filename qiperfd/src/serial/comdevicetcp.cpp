@@ -3,9 +3,10 @@
 #include <QHostAddress>
 #include <QDebug>
 
-ComDeviceTcp::ComDeviceTcp(const QString& localIp, const QString& localPort,
+ComDeviceTcp::ComDeviceTcp(QString idx,const QString& localIp, const QString& localPort,
                            Mode mode, QObject *parent)
     : ComDevice{parent}
+    , m_idx(idx)
     , _localIp(localIp)
     , _localPort(localPort)
     , _mode(mode)
@@ -48,6 +49,7 @@ void ComDeviceTcp::init()
     }
     // L_NOTE(QString("TCP-Server listening: %1 %2").arg(hostAddress.toString()).arg(_localPort));
     qInfo() << QString("TCP-Server listening: %1 %2").arg(hostAddress.toString()).arg(_localPort);
+    emit started(m_idx, localPort);
 }
 
 void ComDeviceTcp::slotDataSend(const QByteArray &data)

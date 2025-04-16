@@ -60,12 +60,13 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     initIperf(apppath);
     getIperfVer(m_iperfexe2, static_cast<int>(IPERF_VER::V2));
     getIperfVer(m_iperfexe21, static_cast<int>(IPERF_VER::V21));
+    getIperfVer(m_iperfexe22, static_cast<int>(IPERF_VER::V22));
     getIperfVer(m_iperfexe3, static_cast<int>(IPERF_VER::V3));
 
     m_iperfwrapper = new IperfWrapper();
 //    m_myinfo = new MyInfo(getManagerInterface());
     m_myinfo = new MyInfo(mgr_ifname);
-    m_myinfo->setIperfVer(m_iperfexe2ver, m_iperfexe21ver, m_iperfexe3ver);
+    m_myinfo->setIperfVer(m_iperfexe2ver, m_iperfexe21ver, m_iperfexe22ver, m_iperfexe3ver);
     connect(this, &QIperfd::setMgrIfname, m_myinfo, &MyInfo::setIfname);
     QString info = m_myinfo->collectInfo();
     quint64 buffsize = m_myinfo->getSysBufferSize();
@@ -674,6 +675,20 @@ void QIperfd::doRestartQIperfd()
     qDebug() << "do Restart QIperfd for system :" << QSysInfo::productType();
 #endif
 }
+
+void QIperfd::onSerialTaskFinished(QString serialPortName)
+{
+    if (m_serialtasks.contains(serialPortName)){
+        //TODO: serialtask delete?
+        m_serialtasks.remove(serialPortName);
+    }
+}
+
+void QIperfd::onSerialTaskStarted(QString idx, quint16 port)
+{
+    informMessage(QString("%1:%2:%3").arg(CMD_SERIAL_OK, idx, QString::number(port)));
+}
+
 #if defined(Q_OS_WINDOWS)
 bool QIperfd::createSchedule(QString name, QString cmd, int idelay)
 {
@@ -763,26 +778,29 @@ void QIperfd::onWSactMessage(QString msg)
         //TODO: do ntp sync, m_ntpsync->sync(msg);
     }else if (act.startsWith(CMD_SERIAL_ADD)){
         // TODO: create serial and bind to TCP server
-        // comport:BaudRate:DataBits:Parity:StopBits:FlowControl
+        // idx:comport:BaudRate:DataBits:Parity:StopBits:FlowControl
         QStringList d = msg.split(":");
-        if (d.length()==6){
+        if (d.length()==7){
             int port = QIPERF_SERIALPORT + m_serialtasks.count();
-            QString comport = d[0];
-            QString baudrate = d[1];
+            QString idx = d[0];
+            QString comport = d[1];
+            QString baudrate = d[2];
             // QMetaEnum metaEnum = QMetaEnum::fromType<QSerialPort::DataBits>();
-            QSerialPort::DataBits databits = static_cast<QSerialPort::DataBits>(d[2].toInt());
-            QSerialPort::Parity parity = static_cast<QSerialPort::Parity>(d[3].toInt());
-            QSerialPort::StopBits stopbits = static_cast<QSerialPort::StopBits>(d[4].toInt());
-            QSerialPort::FlowControl flowcontrol = static_cast<QSerialPort::FlowControl>(d[5].toInt());
+            QSerialPort::DataBits databits = static_cast<QSerialPort::DataBits>(d[3].toInt());
+            QSerialPort::Parity parity = static_cast<QSerialPort::Parity>(d[4].toInt());
+            QSerialPort::StopBits stopbits = static_cast<QSerialPort::StopBits>(d[5].toInt());
+            QSerialPort::FlowControl flowcontrol = static_cast<QSerialPort::FlowControl>(d[6].toInt());
             if (!(m_serialtasks.keys().indexOf(comport)==-1)){
-                SerialTask *task = new SerialTask(comport, baudrate,
+                SerialTask *task = new SerialTask(idx, comport, baudrate,
                                                   "any", QString::number(port),
                                                   ComDeviceTcp::Mode::BINARY,
                                                   databits, parity, stopbits, flowcontrol,
                                                   false, false, this);
+                connect(task, &SerialTask::finished, this, &QIperfd::onSerialTaskFinished);
+                connect(task, &SerialTask::started,  this, &QIperfd::onSerialTaskStarted);
                 m_serialtasks.insert(comport, task);
                 // QObject::connect(&task, SIGNAL(finished()), &a, SLOT(quit()));
-                QTimer::singleShot(0, task, SLOT(init()));
+                QTimer::singleShot(0, task, SLOT(init())); // start it
             } else{
                 qDebug() << comport << " exist!!";
             }
@@ -1254,6 +1272,9 @@ void QIperfd::getIperfVer(QString cmd, int ver)
                 }
                 if (ver == static_cast<int>(IPERF_VER::V21)){
                     m_iperfexe21ver = tmps[2];
+                }
+                if (ver == static_cast<int>(IPERF_VER::V22)){
+                    m_iperfexe22ver = tmps[2];
                 }
                 if (ver == static_cast<int>(IPERF_VER::V3)){
                     m_iperfexe3ver = tmps[1];

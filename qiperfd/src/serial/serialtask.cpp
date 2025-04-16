@@ -2,7 +2,7 @@
 
 #include <QTimer>
 
-SerialTask::SerialTask(const QString& serialPortName, const QString& serialBaudRate,
+SerialTask::SerialTask(QString midx, const QString& serialPortName, const QString& serialBaudRate,
                        const QString& localIp, const QString& localPort,
                        ComDeviceTcp::Mode mode,
                        QSerialPort::DataBits serialDataBits,
@@ -11,6 +11,7 @@ SerialTask::SerialTask(const QString& serialPortName, const QString& serialBaudR
                        QSerialPort::FlowControl serialFlowControl,
                        bool localInput, bool localOutput, QObject *parent)
     : QObject(parent)
+    , m_idx(midx)
     , _serialPortName(serialPortName)
     , _serialBaudRate(serialBaudRate)
     , _localIp(localIp)
@@ -39,11 +40,12 @@ void SerialTask::init()
     _comDeviceSerial = new ComDeviceSerial(_serialPortName, _serialBaudRate, this,
                                            _serialDataBits, _serialParity,
                                            _serialStopBits, _serialFlowControl);
-    _comDeviceTcp = new ComDeviceTcp(_localIp, _localPort, _mode, this);
+    _comDeviceTcp = new ComDeviceTcp(m_idx, _localIp, _localPort, _mode, this);
     // _comDeviceScreen = new ComDeviceScreen(this);
 
     connect(_comDeviceSerial, &ComDevice::finished, this, &SerialTask::slotFinished);
     connect(_comDeviceTcp, &ComDevice::finished, this, &SerialTask::slotFinished);
+    connect(_comDeviceTcp, &ComDeviceTcp::started, this, &SerialTask::onStarted);
     // connect(_comDeviceScreen, &ComDevice::finished, this, &SerialTask::slotFinished);
 
     connect(_comDeviceSerial, &ComDevice::signalDataRecv, _comDeviceTcp, &ComDevice::slotDataSend);
@@ -72,5 +74,10 @@ void SerialTask::close()
 
 void SerialTask::slotFinished()
 {
-    emit finished();
+    emit finished(_serialPortName);
+}
+
+void SerialTask::onStarted(QString idx, quint16 port)
+{
+    emit started(idx, port);
 }
