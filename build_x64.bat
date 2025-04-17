@@ -9,6 +9,13 @@ if "%1"=="setup" (
 )
 
 if "%BUILDAPP%"=="1" (
+    echo "Check Visual Studio 2022 build environment"
+    echo "%PATH%" | findstr /c:"Visual Studio"
+    if !errorlevel! neq 0 (
+        echo set Visual Studio 2022 Community PATH
+        %comspec% /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+    )
+
     echo "Check Qt build environment"
     echo "%PATH%" | findstr /c:"Qt"
     if !errorlevel! neq 0 (
@@ -19,12 +26,7 @@ if "%BUILDAPP%"=="1" (
         %comspec% /k "C:\Qt\6.8.3\msvc2022_64\bin\qtenv2.bat"
         %driveLetter%
     )
-    echo "Check Visual Studio 2022 build environment"
-    echo "%PATH%" | findstr /c:"Visual Studio"
-    if !errorlevel! neq 0 (
-        echo set Visual Studio 2022 Community PATH
-        %comspec% /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
-    )
+
 
     REM nmake  distclean
     REM del /Q /S qiperfc_x86_64\*
