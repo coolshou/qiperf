@@ -686,7 +686,7 @@ void QIperfd::onSerialTaskFinished(QString serialPortName)
 
 void QIperfd::onSerialTaskStarted(QString idx, quint16 port)
 {
-    informMessage(QString("%1:%2:%3").arg(CMD_SERIAL_OK, idx, QString::number(port)));
+    informMessage(QString("%1:%2:%3").arg(CMD_SERIAL_OPENED, idx, QString::number(port)));
 }
 
 #if defined(Q_OS_WINDOWS)
