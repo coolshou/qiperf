@@ -787,10 +787,7 @@ void QIperfd::onWSactMessage(QString msg)
             QString idx = d[0];
             QString comport = d[1];
             QString baudrate = d[2];
-
-            qDebug() << "m_serialtasks: " << m_serialtasks << "  comport: " << comport;
-
-            // QMetaEnum metaEnum = QMetaEnum::fromType<QSerialPort::DataBits>();
+            // qDebug() << "m_serialtasks: " << m_serialtasks << "  comport: " << comport;
             QSerialPort::DataBits databits = static_cast<QSerialPort::DataBits>(d[3].toInt());
             QSerialPort::Parity parity = static_cast<QSerialPort::Parity>(d[4].toInt());
             QSerialPort::StopBits stopbits = static_cast<QSerialPort::StopBits>(d[5].toInt());
@@ -804,12 +801,11 @@ void QIperfd::onWSactMessage(QString msg)
                 connect(task, &SerialTask::finished, this, &QIperfd::onSerialTaskFinished);
                 connect(task, &SerialTask::started,  this, &QIperfd::onSerialTaskStarted);
                 m_serialtasks.insert(comport, task);
-                // QObject::connect(&task, SIGNAL(finished()), &a, SLOT(quit()));
                 QTimer::singleShot(0, task, SLOT(init())); // start it
             } else{
                 qDebug() << comport << " exist!!";
+                onSerialTaskStarted(idx, m_serialtasks.value(comport)->getLocalPort());
             }
-
         }else{
             qDebug() << " Wrong format of create serial: " << msg;
         }
