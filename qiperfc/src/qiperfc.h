@@ -111,9 +111,7 @@ private:
     void loadSettings();
     void doClear();
 
-
 private slots:
-
     void initActions();
     void initToolbar();
     void initStatusbar();
@@ -146,7 +144,7 @@ private slots:
     void onHeigthChanged(int heigth);
     void onShowGroup(bool bShow);
     void onIgnoreWrongInterval(bool bIgnore);
-
+    void onSerialOpened(QString refrow, QString serveraddress, QString serveraPort);
 private:
     Ui::MainWindow *ui;
     // CustomHeaderView *header;

@@ -6,14 +6,17 @@ SerialView::SerialView(QString title, QWidget *parent)
     , ui(new Ui::SerialView), m_title(title)
 {
     ui->setupUi(this);
-    m_serialport = new SerialPort();
-
-    m_termialview = new TerminalView(parent);
+    //following us local serial
+    // m_serialport = new SerialPort();
+    m_currentport = new TcpUdpPort(this);
+    m_currentport->setVisible(false); // no need to show TcpUdpPort's UI
+    m_termialview = new TerminalView(parent); // TODO: log to file?
     ui->vLayout->addWidget(m_termialview);
 
     connect(m_termialview, &TerminalView::transmitData, this, &SerialView::writePortData);
     // connect(m_termialview, &TerminalView::sendMessage, this, &ViewManager::dispatchMessage);
-    connect(m_serialport, &SerialPort::readyRead, this, &SerialView::readPortData);
+    // connect(m_serialport, &SerialPort::readyRead, this, &SerialView::readPortData);
+    connect(m_currentport, &AbstractPort::readyRead, this, &SerialView::readPortData);
 
 }
 
@@ -34,10 +37,17 @@ QString SerialView::iid()
     return "Serial";
 }
 
+void SerialView::setConfig(QString serveraddress, int portnumber, QString protocol)
+{
+    m_currentport->setConfig(serveraddress, portnumber, protocol);
+    m_currentport->open();
+}
+
 void SerialView::readPortData()
 {
     if (m_pause == false) {
-        QByteArray array = m_serialport->readAll();
+        QByteArray array = m_currentport->readAll();
+        // QByteArray array = m_serialport->readAll();
 
         if (!array.isEmpty()) {
             m_rxCount += array.length();
@@ -50,7 +60,8 @@ void SerialView::readPortData()
 void SerialView::writePortData(const QByteArray &array)
 {
     m_txCount += array.length();
-    m_serialport->write(array);
+    // m_serialport->write(array);
+    m_currentport->write(array);
 }
 
 void SerialView::changeEvent(QEvent *e)

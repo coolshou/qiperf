@@ -93,6 +93,7 @@ qint64 WSClient::sendText(QString message)
 {
     qint64 rc=0;
     if (m_webSocket->isValid()){
+
         rc = m_webSocket->sendTextMessage(message);
         if (rc <=0){
             qDebug() << "error sendText size=" << rc << ", " << message;
@@ -221,6 +222,9 @@ void WSClient::onTextMessageReceived(QString message)
                 qDebug() << "onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + message.toUtf8();
             }
             //        emit iperfStarted();
+        } else if (act.startsWith(CMD_SERIAL_OPENED)){
+            qDebug() << "from:" << from << " m_idx:" << m_idx << " message:" << message;
+            emit serialopened(m_idx, from, message);
         } else {
             qDebug() << "Message received: act:" << act <<" refrow:" << m_idx <<
                 " :"<< message << ": "<< from;

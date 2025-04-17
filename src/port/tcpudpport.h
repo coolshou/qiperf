@@ -37,8 +37,8 @@ public:
     bool isOpen(void);
     void retranslate();
     bool portStatus(QString *string);
-
     QString autoOpen(bool open);
+    void setConfig(QString serveraddress, int portnumber, QString protocol = "TCP Client");
 private:
     QString localHost();
     bool openTcpClient();
@@ -53,7 +53,11 @@ private slots:
     void onProtocolChanged();
     void ipAddressEdited();
     void removeUserFormList();
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+    void onError(QAbstractSocket::SocketError socketError);
+#else
     void onError();
+#endif
 
 private:
     Ui::TcpUdpPort *ui;
@@ -63,6 +67,7 @@ private:
     QList<QTcpSocket *> listClient;
     Protocol protocol;
     QString serverIP;
+    int serverPort;
     QByteArray readArray;
     QString autoOpenPortName;
 };

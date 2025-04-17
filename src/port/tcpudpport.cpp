@@ -37,7 +37,7 @@ TcpUdpPort::TcpUdpPort(QWidget *parent) :
 
     connect(ui->protocolBox, &QComboBox::currentTextChanged, this, &TcpUdpPort::onProtocolChanged);
     connect(ui->ipEdit, &QLineEdit::textEdited, this, &TcpUdpPort::ipAddressEdited);
-        autoOpenPortName="";
+    autoOpenPortName="";
 }
 
 TcpUdpPort::~TcpUdpPort()
@@ -142,7 +142,11 @@ bool TcpUdpPort::openTcpClient()
     }
     ui->ipEdit->setReadOnly(true);
     connect(tcpClient, SIGNAL(readyRead()), this,SLOT(readMessage()));
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+    connect(tcpClient, &QAbstractSocket::errorOccurred, this, &TcpUdpPort::onError);
+#else
     connect(tcpClient, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onError()));
+#endif
     return true;
 }
 
@@ -375,17 +379,35 @@ bool TcpUdpPort::portStatus(QString *string)
     return status;
 }
 
+void TcpUdpPort::setConfig(QString serveraddress, int portnumber, QString protocol)
+{
+    ui->ipEdit->setText(serveraddress);
+    serverIP = serveraddress;
+    ui->portEdit->setText(QString::number(portnumber));
+    ui->protocolBox->setCurrentText(protocol);
+}
+
 QHostAddress TcpUdpPort::hostAddress() {
     QString address = serverIP == "localhost" ? localHost() : serverIP;
     return QHostAddress(address);
 }
-
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+void TcpUdpPort::onError(QAbstractSocket::SocketError socketError)
+#else
 void TcpUdpPort::onError()
+#endif
 {
+    QString errmsg="("+QString::number(socketError)+") ";
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+    if (protocol ==Protocol::TCPClient){
+        errmsg =errmsg + tcpClient->errorString();
+    }
+    // errmsg = socketError.errorString();
+#else
+    errmsg =errmsg + tr("The remote host closed the connection.")
+#endif
     QMessageBox err(QMessageBox::Critical,
-        tr("Error"),
-        tr("The remote host closed the connection."),
-        QMessageBox::Cancel, this);
+                    tr("Error"), errmsg, QMessageBox::Cancel, this);
     err.exec();
     emit portError();
 }

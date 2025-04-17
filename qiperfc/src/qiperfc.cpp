@@ -1055,6 +1055,22 @@ void QIperfC::onIgnoreWrongInterval(bool bIgnore)
     //TODO: info all qiperfd Ignore Wrong Interval data on report iperf throughput?or just not show the wrong data??
 }
 
+void QIperfC::onSerialOpened(QString refrow, QString serveraddress, QString serveraPort)
+{
+    if (m_serialviews->count() > refrow.toInt()){
+        int index = refrow.toInt();
+        QList<QString> keys = m_serialviews->keys();
+        if (index >= 0 && index < keys.size()) {
+            QString key = keys.at(index);
+            SerialView* sv = m_serialviews->value(key);
+            // SerialView* sv = m_serialviews->values().at(refrow.toInt());
+            sv->setConfig(serveraddress, serveraPort.toInt());
+        }
+    } else {
+        qDebug() << refrow << " refrow out of index: " << m_serialviews;
+    }
+}
+
 void QIperfC::onRPC_result(const QVariant &result)
 {
     qDebug() << "onRPC_result: " << result;
@@ -1160,19 +1176,27 @@ void QIperfC::onAddSerial()
         QString mkey = managerip+":"+serailport;
         if (!m_serialviews->contains(mkey)){
             int idx = m_serialviews->count();
-
-
             QString serialcfg = m_dlgserial->getSerialCfg();
-            qDebug() << "managerip: " << managerip << " serialcfg:" << serialcfg;
+            qDebug() << "managerip: " << managerip << " serailport:" << serailport << " serialcfg:" << serialcfg;
             //
             QString url = "ws://"+managerip+":"+QString::number(QIPERFD_WSPORT);
             WSClient *wsc=new WSClient(managerip, QUrl(url), "");
-            // connect(wsc, &WSClient::disconnected, this, &QIperfC::) // when diwconnect do waht?
-            //TODO: wait connect!!
+            //TODO: when disconnected do waht?
+            connect(wsc, &WSClient::serialopened, this, &QIperfC::onSerialOpened);
+            int timeout=0;
+            while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
+                qDebug() << " wait WSClient connected";
+                QThread::msleep(100);
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
+                timeout++;
+            }
+            //TODO: wait connect??!!
             //ask remote create serialport and start tcp server on port
-            wsc->sendText(QString("%1:%2:%3:%4").arg(CMD_SERIAL_ADD,
-                                                     QString::number(idx),
-                                                     serailport, serialcfg));
+            QString sendstr = QString("%1:%2:%3:%4").arg(CMD_SERIAL_ADD,
+                                                         QString::number(idx),
+                                                         serailport, serialcfg);
+            qDebug() << "sendstr: " << sendstr;
+            wsc->sendText(sendstr);
             //TODO: local use TCP SOCKET connect to remote TCP server
             //
             // local serialport or remote serialport
