@@ -175,13 +175,15 @@ Section "qiperf daemon" SECTION_Daemon
     File "windows\x86\cygz.dll"
     File "windows\x86\iperf2.exe"
     File "windows\x86\iperf2.1.exe"
+    File "windows\x86\iperf2.2.n.exe"
     File "windows\x86\iperf3.exe"
     SetOutPath "$INSTDIR\windows\x86_64\"
     File "windows\x86_64\cygcrypto-1.1.dll"
     File "windows\x86_64\cygwin1.dll"
     File "windows\x86_64\cygz.dll"
+    File "windows\x86_64\iperf2.1.exe"
+    File "windows\x86_64\iperf2.2.n.exe"
     File "windows\x86_64\iperf3.exe"
-    File "windows\x86_64\iperf2.2.exe"
     SetOutPath "$INSTDIR\"
     !cd ..
 !ifdef WIN64

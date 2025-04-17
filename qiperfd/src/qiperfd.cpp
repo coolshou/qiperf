@@ -1109,7 +1109,7 @@ void QIperfd::initiperf21(QString tmp, QString tmp_path, QString arch)
 {
 #if defined(Q_OS_WIN32)
     // windows, iperf files
-    m_iperfexe21 = apppath + QDir::separator() + "windows"+ QDir::separator() + "x86"+QDir::separator() + "iperf2.1.exe";
+    m_iperfexe21 = apppath + QDir::separator() + "windows"+ QDir::separator() + arch + QDir::separator() + "iperf2.1.exe";
     m_iperfexe21 = QDir::toNativeSeparators(m_iperfexe21);
 #else
     m_iperfexe21 = tmp + tmp_path + QDir::separator() + "iperf2.1";
