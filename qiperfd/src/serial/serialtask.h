@@ -20,7 +20,8 @@ public:
                         QSerialPort::FlowControl serialFlowControl = QSerialPort::NoFlowControl,
                         bool localInput=false, bool localOutput=false, QObject *parent = nullptr);
     ~SerialTask();
-
+    quint16 getLocalPort();
+    QString getIdx();
 
 public slots:
     void init();

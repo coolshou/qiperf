@@ -779,7 +779,7 @@ void QIperfd::onWSactMessage(QString msg)
     }else if (act.startsWith(CMD_SERIAL_ADD)){
         // TODO: create serial and bind to TCP server
         // idx:comport:BaudRate:DataBits:Parity:StopBits:FlowControl
-        qDebug() << "CMD_SERIAL_ADD: " << msg;
+        qInfo() << "CMD_SERIAL_ADD: " << msg;
         QStringList d = msg.split(":");
         if (d.length()==7){
             int port = QIPERF_SERIALPORT + m_serialtasks.count();
@@ -810,14 +810,20 @@ void QIperfd::onWSactMessage(QString msg)
             qDebug() << " Wrong format of create serial: " << msg;
         }
     }else if (act.startsWith(CMD_SERIAL_DEL)){
-        qDebug() << "CMD_SERIAL_DEL: " << msg;
+        qInfo() << "CMD_SERIAL_DEL: " << msg;
         QString comport = msg;
-        if (m_serialtasks.keys().indexOf(comport)!=-1){
+        if (m_serialtasks.contains(comport)){
             SerialTask *task = m_serialtasks.value(comport);
+            QString idx = task->getIdx();
             task->close();
-            m_serialtasks.remove(comport);
+            if (m_serialtasks.remove(comport)){
+                informMessage(QString("%1:%2").arg(CMD_SERIAL_OK, idx));
+            }else{
+                informMessage(QString("%1:%2:%3 %4").arg(CMD_SERIAL_FAIL, idx, comport ,"DEL Fail"));
+            }
         }else{
             qDebug() << comport << " does not in m_serialtasks!! \n" << m_serialtasks;
+            informMessage(QString("%1:%2 %3").arg(CMD_SERIAL_FAIL, comport, "Not Exist"));
         }
     }else {
         qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;

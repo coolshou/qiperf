@@ -35,6 +35,16 @@ SerialTask::~SerialTask()
 
 }
 
+quint16 SerialTask::getLocalPort()
+{
+    return _localPort.toUInt();
+}
+
+QString SerialTask::getIdx()
+{
+    return m_idx;
+}
+
 void SerialTask::init()
 {
     _comDeviceSerial = new ComDeviceSerial(_serialPortName, _serialBaudRate, this,
