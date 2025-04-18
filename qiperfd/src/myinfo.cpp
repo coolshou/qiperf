@@ -179,14 +179,24 @@ QJsonArray MyInfo::collectSerial()
     QStringList serials;
     QList<QSerialPortInfo> qs = QSerialPortInfo::availablePorts();
     foreach(auto q, qs){
-        if (q.hasProductIdentifier() && q.hasVendorIdentifier()){
-            qDebug() << q.portName()
-                     << " ProductId: 0x" << QString::number(q.productIdentifier(), 16).toUpper()
-                     << " VendorId: 0x" << QString::number(q.vendorIdentifier(), 16).toUpper()
-                     << " SN:" << q.serialNumber()
-                     << " description: " << q.description()
-                     << " manufacturer: " << q.manufacturer();
-            serials.append(q.portName());
+#if defined(Q_OS_LINUX)
+        if (!q.hasProductIdentifier() || !q.hasVendorIdentifier()){
+            continue;
+        }
+#endif
+        {
+            QString com="";
+#if defined(Q_OS_LINUX)
+            com="/dev/";
+#endif
+            com = com + q.portName();
+            qDebug() << com
+                 << " ProductId: 0x" << QString::number(q.productIdentifier(), 16).toUpper()
+                 << " VendorId: 0x" << QString::number(q.vendorIdentifier(), 16).toUpper()
+                 << " SN:" << q.serialNumber()
+                 << " description: " << q.description()
+                 << " manufacturer: " << q.manufacturer();
+            serials.append(com);
         }
     }
     qDebug() << "collectSerial:" << serials;
@@ -307,6 +317,7 @@ QJsonObject MyInfo::getIperfVer()
     QJsonObject json;
     json.insert("iperf2ver", m_iperf2ver);
     json.insert("iperf21ver", m_iperf21ver);
+    json.insert("iperf22ver", m_iperf22ver);
     json.insert("iperf3ver", m_iperf3ver);
     return json;
 }
