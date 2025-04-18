@@ -12,8 +12,10 @@ QT += serialport
 QT += opengl
 DEFINES += QCUSTOMPLOT_USE_OPENGL # qcustomplot use OPENGL
 unix:!android {
-    INCLUDEPATH +=/usr/include/GL/
-    LIBS += -L -lglut -lOpenGL
+    # INCLUDEPATH +=/usr/include/GL/
+    # LIBS += -L -lglut -lOpenGL
+    CONFIG += link_pkgconfig
+    PKGCONFIG += glut
 }
 win32: {
     LIBS += \

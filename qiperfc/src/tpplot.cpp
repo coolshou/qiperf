@@ -6,6 +6,7 @@
 TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     :QCustomPlot(parent), m_showgroup(showgroup)
 {
+    // setOpenGl(true);
     m_interval = 1;
     setTPUint(sunit);
     initCustomPlot();
