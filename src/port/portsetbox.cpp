@@ -35,7 +35,7 @@ PortSetBox::PortSetBox(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::PortSetBox)
 {
-    unsigned int i;
+    //unsigned int i;
 
     // 不显示问号
     Qt::WindowFlags flags = Qt::Dialog;
