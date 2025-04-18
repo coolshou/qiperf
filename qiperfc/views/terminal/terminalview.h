@@ -19,6 +19,7 @@ public:
     void receiveData(const QByteArray &array) override;
     void setEnabled(bool enabled) override;
     void clear() override;
+    void setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat);
 
 private slots:
     void sendData(const QString &string);

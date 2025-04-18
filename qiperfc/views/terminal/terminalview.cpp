@@ -7,7 +7,8 @@
 
 #include <QDebug>
 
-TerminalView::TerminalView(QWidget *parent) : AbstractView(parent)
+TerminalView::TerminalView(QWidget *parent)
+    : AbstractView(parent)
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
     m_term = new QVTerminal(this);
@@ -60,4 +61,9 @@ void TerminalView::setEnabled(bool enabled)
 void TerminalView::clear()
 {
     //m_term->clear();
+}
+
+void TerminalView::setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat)
+{
+    m_term->setLogFile(logtofile, logfilename, logtimestemp, timestempformat);
 }

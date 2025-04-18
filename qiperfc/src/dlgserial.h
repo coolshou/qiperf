@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QMap>
-
+#include <QCloseEvent>
 #include "port/portsetbox.h"
 
 namespace Ui {
@@ -21,17 +21,23 @@ public:
     QString getManagerIP();
     QString getSerialPort();
     QString getSerialCfg();
+    QString getLogFilename();
+    QString getLogTimeStempFormat();
 
 protected:
     void changeEvent(QEvent *e);
+    void closeEvent(QCloseEvent *event) override;
+
 private slots:
     void onChangeSerial(QString text);
     void onPortConfig(bool checked);
-
+    void onSelectLogFile(bool checked);
+    void onTimeStempChanged(int checkstatus);
 private:
     Ui::DlgSerial *ui;
     QMap<QString, QStringList> m_serials;
     PortSetBox *portconfig;
+    QString oldpath;
 };
 
 #endif // DLGSERIAL_H

@@ -205,5 +205,10 @@ private:
     ViewManager *m_views;
     bool m_IgnoreWrongInterval;
     QMap<QString, SerialView*> *m_serialviews; // store serial view
+    //log info for serial view
+    bool _logtofile;
+    QString _logfilename;
+    bool _logtimestemp;
+    QString _logtimestempformat;
 };
 #endif // QIPERFC_H

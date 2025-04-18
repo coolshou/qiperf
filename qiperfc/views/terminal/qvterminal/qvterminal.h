@@ -4,6 +4,7 @@
 #include <QAbstractScrollArea>
 #include <QAction>
 #include <QTimer>
+#include <QFile>
 
 #include "qvtlayout.h"
 
@@ -26,7 +27,9 @@ public:
 
     bool crlf() const;
     void setCrlf(bool crlf);
-
+    // log file
+    void setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat);
+    void closelogfile();
 signals:
     void transmitData(const QByteArray &data);
 
@@ -46,6 +49,7 @@ protected slots:
 private:
     void formatChar(const QChar &c);
     void moveCursor(int xpos, int ypos);
+    QByteArray insertTimeStemp(QByteArray data);
 
 private:
     QIODevice *_device;
@@ -74,6 +78,12 @@ private:
     // mode
     bool _echo;
     bool _crlf;
+    // log
+    bool _logtofile;
+    QString _logfilename;
+    QFile *_logfile;
+    bool  _logtimestemp;
+    QString _logtimestempformat;
 
     // QWidget interface
 protected:
@@ -89,6 +99,7 @@ protected:
     // QAbstractScrollArea interface
 protected:
     virtual bool viewportEvent(QEvent *event);
+    void closeEvent(QCloseEvent *event) override;
     QColor vt100color(char c);
 
     QAction *_pasteAction;

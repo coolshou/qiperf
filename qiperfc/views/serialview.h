@@ -22,6 +22,7 @@ public:
     QString title() override;
     QString iid() override;
     void setConfig(QString serveraddress, int portnumber, QString protocol = "TCP Client");
+    void setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat);
 
 protected:
     void changeEvent(QEvent *e);

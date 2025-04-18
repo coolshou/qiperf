@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>539</width>
-    <height>216</height>
+    <width>475</width>
+    <height>247</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <iconset resource="../../qiperf.qrc">
     <normaloff>:/serial</normaloff>:/serial</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,1,0">
    <property name="leftMargin">
     <number>2</number>
    </property>
@@ -48,15 +48,19 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>manager:</string>
+         <string>Remote:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="cbManager"/>
+       <widget class="QComboBox" name="cbManager">
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="lbRemotePort">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -66,7 +70,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinBox">
+       <widget class="QSpinBox" name="sbRemotePort">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -140,6 +144,9 @@
         </property>
         <property name="styleSheet">
          <string notr="true">QComboBox { width: 120px }</string>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
         </property>
         <property name="insertPolicy">
          <enum>QComboBox::InsertAlphabetically</enum>
@@ -245,22 +252,9 @@
     </widget>
    </item>
    <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="gbLogtoFile">
      <property name="title">
-      <string>Log to File(TODO)</string>
+      <string>Log to File</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -276,9 +270,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEdit"/>
-      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
@@ -286,15 +277,65 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QCheckBox" name="cbTimeStemp">
-        <property name="text">
-         <string>Add Time Stemp</string>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="leLogFilename"/>
+      </item>
+      <item row="1" column="0" colspan="3">
+       <widget class="QGroupBox" name="gbAddTimeStemp">
+        <property name="title">
+         <string>Add Time Stemp at begin of each line.</string>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="leftMargin">
+          <number>2</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>2</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="lbTimeStemp">
+           <property name="text">
+            <string>Time Stemp format:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="leTimeStemp">
+           <property name="text">
+            <string>yyyy-MM-dd_hhmmss.zzz</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

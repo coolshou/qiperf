@@ -125,6 +125,8 @@
     <addaction name="actionAddSerial"/>
     <addaction name="actionAddPing"/>
     <addaction name="actionWlanSTA"/>
+    <addaction name="actionSSHTelnet"/>
+    <addaction name="actionWebControl"/>
    </widget>
    <widget class="QMenu" name="menuAutomate">
     <property name="title">
@@ -454,7 +456,7 @@
      <normaloff>:/serial</normaloff>:/serial</iconset>
    </property>
    <property name="text">
-    <string>Serial(TODO)</string>
+    <string>Serial</string>
    </property>
    <property name="toolTip">
     <string>Add Serial Monitor</string>
@@ -482,6 +484,19 @@
   <action name="actionMacro">
    <property name="text">
     <string>Macro(TODO)</string>
+   </property>
+  </action>
+  <action name="actionSSHTelnet">
+   <property name="text">
+    <string>SSH/Telnet(TODO)</string>
+   </property>
+  </action>
+  <action name="actionWebControl">
+   <property name="text">
+    <string>WebControl(TODO)</string>
+   </property>
+   <property name="toolTip">
+    <string>WebControl(TODO) by Selenium</string>
    </property>
   </action>
  </widget>

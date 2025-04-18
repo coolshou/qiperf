@@ -1065,7 +1065,9 @@ void QIperfC::onSerialOpened(QString refrow, QString serveraddress, QString serv
             SerialView* sv = m_serialviews->value(key);
             // SerialView* sv = m_serialviews->values().at(refrow.toInt());
             sv->setConfig(serveraddress, serveraPort.toInt());
+            // sv->setLogFile(_logtofile, _logfilename, _logtimestemp, _logtimestempformat);
         }
+        //TODO: switch to current view
     } else {
         qDebug() << refrow << " refrow out of index: " << m_serialviews;
     }
@@ -1174,6 +1176,17 @@ void QIperfC::onAddSerial()
         QString managerip = m_dlgserial->getManagerIP();
         QString serailport = m_dlgserial->getSerialPort();
         QString mkey = managerip+":"+serailport;
+        _logtofile=false;
+        _logfilename = m_dlgserial->getLogFilename();
+        if (!_logfilename.isEmpty()){
+            _logtofile = true;
+        }
+        _logtimestemp=false;
+        _logtimestempformat = m_dlgserial->getLogTimeStempFormat();
+        if (!_logtimestempformat.isEmpty()){
+            _logtimestemp = true;
+        }
+
         if (!m_serialviews->contains(mkey)){
             int idx = m_serialviews->count();
             QString serialcfg = m_dlgserial->getSerialCfg();

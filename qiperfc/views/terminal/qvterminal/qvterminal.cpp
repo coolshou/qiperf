@@ -6,6 +6,8 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QAction>
+#include <QDateTime>
+
 #include <QDebug>
 #include <QMenu>
 
@@ -13,6 +15,9 @@ QVTerminal::QVTerminal(QWidget *parent)
     : QAbstractScrollArea(parent)
 {
     _device = Q_NULLPTR;
+    _logfile = new QFile();
+    _logtofile = false;
+    _logtimestemp = false;
 
     _cursorPos.setX(0);
     _cursorPos.setY(0);
@@ -29,10 +34,15 @@ QVTerminal::QVTerminal(QWidget *parent)
     _pasteAction->setShortcut(QKeySequence("Ctrl+V"));
     connect(_pasteAction, &QAction::triggered, this, &QVTerminal::paste);
     addAction(_pasteAction);
+
+    _logtofile = false;
 }
 
 QVTerminal::~QVTerminal()
 {
+    if(_logfile->isOpen()){
+        closelogfile();
+    }
 }
 
 void QVTerminal::setIODevice(QIODevice *device)
@@ -49,9 +59,27 @@ void QVTerminal::appendData(const QByteArray &data)
     QByteArray text;
 
     setUpdatesEnabled(false);
+    if (_logtofile){
+        QByteArray newdata = data;
+        if(_logtimestemp){
+            //TODO: append time stemp on begin of line
+            if (data.contains("\n")){
+                // qDebug() << "TODO: insert time stemp";
+                // QByteArray newdata = insertTimeStemp(newdata);
+            }
+        }
+        // log to file
+        if (_logfile->isWritable()){
+            _logfile->write(newdata);
+            // _logfile->flush();
+        }else{
+            qDebug() << "logfile not writeable " << _logfilename;
+        }
+    }
+    // qDebug() << "appendData="+data;
+
     QByteArray::const_iterator it = data.cbegin();
 
-    qDebug() << "appendData="+data;
 
     while (it != data.cend()) {
         QChar c = *it;
@@ -185,6 +213,32 @@ void QVTerminal::moveCursor(int xpos, int ypos)
     }
 }
 
+QByteArray QVTerminal::insertTimeStemp(QByteArray data)
+{
+    if(data.isNull() || data.isEmpty()){
+        return data;
+    }
+    if (_logtimestemp){
+        // Split and rebuild with timestamp after each line
+        QByteArray timestamp = "[" + QDateTime::currentDateTime().toString(_logtimestempformat).toUtf8() + "] ";
+
+        int pos = 0;
+        int lastPos = 0;
+        QByteArray modifiedData;
+        //FIXME following will cause crash!!
+        while ((pos = data.indexOf('\n', pos)) != -1) {
+            modifiedData.append(data.mid(lastPos, pos - lastPos + 1));  // include newline
+            modifiedData.append(timestamp);  // append the timestamp
+            lastPos = pos + 1;  // advance past the newline
+        }
+        modifiedData.append(data.mid(lastPos));  // append the rest of the data after the last newline
+
+        return data;
+    }else {
+        return data;
+    }
+}
+
 void QVTerminal::paste()
 {
     QByteArray data;
@@ -253,6 +307,28 @@ bool QVTerminal::crlf() const
 void QVTerminal::setCrlf(bool crlf)
 {
     _crlf = crlf;
+}
+
+void QVTerminal::setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat)
+{
+    closelogfile();
+
+    _logtofile = logtofile;
+    _logfilename = logfilename;
+    _logtimestemp = logtimestemp;
+    _logtimestempformat = timestempformat;
+    if (_logtofile){
+        _logfile->setFileName(_logfilename);
+        _logfile->open(QIODevice::Append);
+    }
+}
+
+void QVTerminal::closelogfile()
+{
+    if(_logfile->isOpen()){
+        _logfile->flush();
+        _logfile->close();
+    }
 }
 
 void QVTerminal::writeData(QByteArray data)
@@ -417,9 +493,15 @@ void QVTerminal::contextMenuEvent(QContextMenuEvent *event)
     _pasteAction->setEnabled(!QApplication::clipboard()->text().isEmpty());
     menu.exec(event->globalPos());
 }
+
 #endif // QT_NO_CONTEXTMENU
 
 bool QVTerminal::viewportEvent(QEvent *event)
 {
     return QAbstractScrollArea::viewportEvent(event);
+}
+
+void QVTerminal::closeEvent(QCloseEvent *event)
+{
+    qDebug() << "QVTerminal closeEvent";
 }

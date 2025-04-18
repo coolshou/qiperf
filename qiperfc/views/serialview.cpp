@@ -22,6 +22,7 @@ SerialView::SerialView(QString title, QWidget *parent)
 
 SerialView::~SerialView()
 {
+    qDebug() << "~SerialView";
     delete ui;
 }
 
@@ -41,6 +42,11 @@ void SerialView::setConfig(QString serveraddress, int portnumber, QString protoc
 {
     m_currentport->setConfig(serveraddress, portnumber, protocol);
     m_currentport->open();
+}
+
+void SerialView::setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat)
+{
+    m_termialview->setLogFile(logtofile, logfilename, logtimestemp, timestempformat);
 }
 
 void SerialView::readPortData()

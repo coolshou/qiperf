@@ -3,6 +3,10 @@
 
 #include <QPushButton>
 #include <QSerialPortInfo>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include "comm.h"
+
 #include <QDebug>
 
 DlgSerial::DlgSerial(QWidget *parent)
@@ -10,9 +14,14 @@ DlgSerial::DlgSerial(QWidget *parent)
     , ui(new Ui::DlgSerial)
 {
     ui->setupUi(this);
+    ui->lbRemotePort->setVisible(false);
+    ui->sbRemotePort->setVisible(false);
+    oldpath = "";
     portconfig = new PortSetBox();
     connect(ui->cbManager, &QComboBox::currentTextChanged, this , &DlgSerial::onChangeSerial);
-    // connect(ui->pbPortConfig, &QPushButton::clicked, this, &DlgSerial::onPortConfig);
+    connect(ui->pbPortConfig, &QPushButton::clicked, this, &DlgSerial::onPortConfig);
+    connect(ui->pbSelectLogFile, &QPushButton::clicked, this, &DlgSerial::onSelectLogFile);
+    // connect(ui->cbAddTimeStemp, &QCheckBox::stateChanged, this, &DlgSerial::onTimeStempChanged);
 }
 
 DlgSerial::~DlgSerial()
@@ -50,6 +59,24 @@ QString DlgSerial::getSerialCfg()
                                 portconfig->getCfg());
 }
 
+QString DlgSerial::getLogFilename()
+{
+    if (ui->gbLogtoFile->isChecked()){
+        return ui->leLogFilename->text();
+    }else{
+        return "";
+    }
+}
+
+QString DlgSerial::getLogTimeStempFormat()
+{
+    if (ui->gbAddTimeStemp->isChecked()){
+        return ui->leTimeStemp->text();
+    } else {
+        return "";
+    }
+}
+
 void DlgSerial::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
@@ -59,6 +86,25 @@ void DlgSerial::changeEvent(QEvent *e)
         break;
     default:
         break;
+    }
+}
+
+void DlgSerial::closeEvent(QCloseEvent *event)
+{
+    if(ui->gbLogtoFile->isChecked()){
+        if (ui->leLogFilename->text().isEmpty()){
+            ui->leLogFilename->setFocus();
+            event->ignore();
+            return;
+        }
+        if (ui->gbAddTimeStemp->isChecked()){
+            if(ui->leTimeStemp->text().isEmpty()){
+                ui->leTimeStemp->setFocus();
+                event->ignore();
+                return;
+            }
+            //TODO: check time stemp format
+        }
     }
 }
 
@@ -76,8 +122,12 @@ void DlgSerial::onChangeSerial(QString text)
         // ui->portNameBox->addItems(QSerialPortInfo::availablePorts());
         QList<QSerialPortInfo> serialPortInfoList = QSerialPortInfo::availablePorts();
         foreach(QSerialPortInfo serialPortInfo, serialPortInfoList) {
-            if (serialPortInfo.hasProductIdentifier() &&
-                serialPortInfo.hasVendorIdentifier()){
+#if defined(Q_OS_LINUX)
+            if (!serialPortInfo.hasProductIdentifier() || !serialPortInfo.hasVendorIdentifier()){
+                continue;
+            }
+#endif
+            {
                 QString com;
 #if defined(Q_OS_LINUX)
                 com="/dev/";
@@ -95,4 +145,33 @@ void DlgSerial::onPortConfig(bool checked)
     Q_UNUSED(checked)
     //TODO: portconfig
     portconfig->exec();
+}
+
+void DlgSerial::onSelectLogFile(bool checked)
+{
+    Q_UNUSED(checked)
+    //select log filename, can be not exist
+    if (oldpath.isEmpty()){
+        oldpath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    }
+    QString path = oldpath + QDir::separator() + "serial.log";
+    QString fileName = QFileDialog::getSaveFileName(this, tr("set log filename"),
+                                                    path, tr(ALL_EXT_FILTER));
+    if (!fileName.isEmpty()){
+        ui->leLogFilename->setText(fileName);
+        QFileInfo fi(fileName);
+        oldpath = fi.path();
+    }
+}
+
+void DlgSerial::onTimeStempChanged(int checkstatus)
+{
+    //TODO: onTimeStempChanged
+    if (checkstatus== Qt::CheckState::Checked){
+        ui->lbTimeStemp->setEnabled(true);
+        ui->leTimeStemp->setEnabled(true);
+    }else{
+        ui->lbTimeStemp->setEnabled(false);
+        ui->leTimeStemp->setEnabled(false);
+    }
 }
