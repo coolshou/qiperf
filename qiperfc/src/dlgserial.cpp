@@ -22,6 +22,7 @@ DlgSerial::DlgSerial(QWidget *parent)
     connect(ui->pbPortConfig, &QPushButton::clicked, this, &DlgSerial::onPortConfig);
     connect(ui->pbSelectLogFile, &QPushButton::clicked, this, &DlgSerial::onSelectLogFile);
     // connect(ui->cbAddTimeStemp, &QCheckBox::stateChanged, this, &DlgSerial::onTimeStempChanged);
+    initLocalSerialPort();
 }
 
 DlgSerial::~DlgSerial()
@@ -31,6 +32,7 @@ DlgSerial::~DlgSerial()
 
 void DlgSerial::setSerialData(QMap<QString, QStringList> data)
 {
+    // TODO: when known serials update, update this?
     //update cbManager list
     m_serials = data;
     ui->cbManager->clear();
@@ -108,6 +110,28 @@ void DlgSerial::closeEvent(QCloseEvent *event)
     }
 }
 
+void DlgSerial::initLocalSerialPort()
+{
+    //local serial port
+    QList<QSerialPortInfo> serialPortInfoList = QSerialPortInfo::availablePorts();
+    foreach(QSerialPortInfo serialPortInfo, serialPortInfoList) {
+#if defined(Q_OS_LINUX)
+        if (serialPortInfo.hasProductIdentifier() && serialPortInfo.hasVendorIdentifier())
+        // qDebug() << "ignore " << serialPortInfo.portName();
+        // continue;
+        // }
+#endif
+        {
+            QString com;
+#if defined(Q_OS_LINUX)
+            com="/dev/";
+#endif
+            com=com+serialPortInfo.portName();
+            ui->portNameBox->addItem(com);
+        }
+    }
+}
+
 void DlgSerial::onChangeSerial(QString text)
 {
     ui->portNameBox->clear();
@@ -118,24 +142,7 @@ void DlgSerial::onChangeSerial(QString text)
             ui->portNameBox->addItems(ss);
         }
     }else {
-        //local serial ports
-        // ui->portNameBox->addItems(QSerialPortInfo::availablePorts());
-        QList<QSerialPortInfo> serialPortInfoList = QSerialPortInfo::availablePorts();
-        foreach(QSerialPortInfo serialPortInfo, serialPortInfoList) {
-#if defined(Q_OS_LINUX)
-            if (!serialPortInfo.hasProductIdentifier() || !serialPortInfo.hasVendorIdentifier()){
-                continue;
-            }
-#endif
-            {
-                QString com;
-#if defined(Q_OS_LINUX)
-                com="/dev/";
-#endif
-                com=com+serialPortInfo.portName();
-                ui->portNameBox->addItem(com);
-            }
-        }
+        initLocalSerialPort();
     }
 
 }

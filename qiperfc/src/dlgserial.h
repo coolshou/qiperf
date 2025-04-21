@@ -24,6 +24,8 @@ public:
     QString getLogFilename();
     QString getLogTimeStempFormat();
 
+void initLocalSerialPort();
+
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event) override;
