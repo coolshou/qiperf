@@ -680,7 +680,7 @@ void QIperfd::onSerialTaskFinished(QString serialPortName)
 {
     if (m_serialtasks.contains(serialPortName)){
         //TODO: serialtask delete?
-        SerialTask st = m_serialtasks.value(serialPortName);
+        SerialTask *st = m_serialtasks.value(serialPortName);
         st.close();
         m_serialtasks.remove(serialPortName);
     }
