@@ -18,6 +18,7 @@ public:
                              QSerialPort::FlowControl serialFlowControl = QSerialPort::NoFlowControl
                              );
     virtual ~ComDeviceSerial();
+    bool isRunning();
 
 public slots:
     virtual void init();
@@ -37,6 +38,7 @@ private:
     QSerialPort::StopBits _serialStopBits;
     QSerialPort::FlowControl _serialFlowControl;
     QSerialPort* _serialPort;
+    QString _lasterror;
 };
 
 #endif // COMDEVICESERIAL_H

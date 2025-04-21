@@ -17,6 +17,15 @@ ComDeviceTcp::~ComDeviceTcp()
     close();
 }
 
+bool ComDeviceTcp::isRunning()
+{
+    if (_tcpServer){
+        return _tcpServer->isListening();
+    }else{
+        return false;
+    }
+}
+
 void ComDeviceTcp::init()
 {
     _tcpServer = new QTcpServer(this);

@@ -24,12 +24,27 @@ ComDeviceSerial::~ComDeviceSerial()
     close();
 }
 
+bool ComDeviceSerial::isRunning()
+{
+    if (_serialPort){
+        return _serialPort->isOpen();
+    }else {
+        return false;
+    }
+}
+
 void ComDeviceSerial::init()
 {
     _serialPort = new QSerialPort(this);
     _serialPort->setPortName(_serialPortName);
 
-    if (_serialBaudRate == "4800") {
+    if (_serialBaudRate == "1200") {
+        _serialPort->setBaudRate(QSerialPort::Baud1200);
+    }
+    else if (_serialBaudRate == "2400") {
+        _serialPort->setBaudRate(QSerialPort::Baud2400);
+    }
+    else if (_serialBaudRate == "4800") {
         _serialPort->setBaudRate(QSerialPort::Baud4800);
     }
     else if (_serialBaudRate == "9600") {
@@ -48,7 +63,8 @@ void ComDeviceSerial::init()
         _serialPort->setBaudRate(QSerialPort::Baud115200);
     }
     else{
-        qDebug() << " Not supported BaudRate: " << _serialBaudRate;
+        qDebug() << " Not standard BaudRate: " << _serialBaudRate;
+        _serialPort->setBaudRate(_serialBaudRate.toInt());
     }
     _serialPort->setDataBits(_serialDataBits);
     _serialPort->setParity(_serialParity);
@@ -64,7 +80,8 @@ void ComDeviceSerial::init()
 
     if (!_serialPort->open(QIODevice::ReadWrite)) {
         // L_ERROR("Serial port open failed");
-        qDebug() << "Serial port open failed";
+        _lasterror = "Serial port open failed";
+        qDebug() << _lasterror;
         emit finished();
     }
 }
@@ -77,11 +94,13 @@ void ComDeviceSerial::slotDataSend(const QByteArray &data)
 
     qint64 number = _serialPort->write(data);
     if (number == -1) {
-        qDebug() << "Serial port write failed";
+        _lasterror = "Serial port write failed";
+        qDebug() << _lasterror;
         emit finished();
     }
     else if (number != data.size()) {
-        qWarning() << "Serial port write partial data";
+        _lasterror = "Serial port write partial data";
+        qWarning() << _lasterror;
         emit finished();
     }
 }
@@ -108,6 +127,7 @@ void ComDeviceSerial::slotError(QSerialPort::SerialPortError error)
     if (error == QSerialPort::NoError) {
         return;
     }
-    qWarning() << (QString("Serial port error: %1").arg(error));
+    _lasterror = QString("Serial port error: %1").arg(error);
+    qWarning() << _lasterror;
     emit finished();
 }

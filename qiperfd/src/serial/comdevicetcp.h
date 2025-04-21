@@ -16,6 +16,8 @@ public:
                           Mode mode=Mode::BINARY,
                           QObject *parent = nullptr);
     virtual ~ComDeviceTcp();
+    bool isRunning();
+
 signals:
     void started(QString idx, quint16 port);// notice run on which port
 
