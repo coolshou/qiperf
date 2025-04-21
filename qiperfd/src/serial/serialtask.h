@@ -22,6 +22,8 @@ public:
     ~SerialTask();
     quint16 getLocalPort();
     QString getIdx();
+    bool isRunning();
+    QString getLastError();
 
 public slots:
     void init();
@@ -56,6 +58,7 @@ private:
     ComDeviceSerial *_comDeviceSerial;
     ComDeviceTcp *_comDeviceTcp;
     // ComDevice* _comDeviceScreen;
+    QString _lasterror;
 };
 
 #endif // SERIALTASK_H

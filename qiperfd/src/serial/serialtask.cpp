@@ -27,7 +27,7 @@ SerialTask::SerialTask(QString midx, const QString& serialPortName, const QStrin
     , _comDeviceTcp(0)
     // , _comDeviceScreen(0)
 {
-
+    _lasterror = "";
 }
 
 SerialTask::~SerialTask()
@@ -43,6 +43,33 @@ quint16 SerialTask::getLocalPort()
 QString SerialTask::getIdx()
 {
     return m_idx;
+}
+
+bool SerialTask::isRunning()
+{
+    if (_comDeviceSerial && _comDeviceTcp){
+        if (_comDeviceSerial->isRunning() && _comDeviceTcp->isRunning()){
+            return true;
+        }else{
+            if (!_comDeviceSerial->isRunning()){
+                _lasterror = "_comDeviceSerial not running";
+                qDebug() << _lasterror;
+            }
+            if (!_comDeviceTcp->isRunning()){
+                _lasterror = _lasterror + " _comDeviceTcp not running";
+                qDebug() << _lasterror;
+            }
+            return false;
+        }
+    }else {
+        _lasterror = "_comDeviceSerial or _comDeviceTcp not exist";
+        return false;
+    }
+}
+
+QString SerialTask::getLastError()
+{
+    return _lasterror;
 }
 
 void SerialTask::init()
