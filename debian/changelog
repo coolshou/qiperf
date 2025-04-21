@@ -1,3 +1,9 @@
+qiperf (0.9.11404.21-1) unstable; urgency=medium
+
+  * add serial (rs232) terminal for local/remote control, prepare for automate.
+
+ -- coolshou <coolshou2060@gmail.com>  Mon, 21 Apr 2025 10:00:00 +0800
+
 qiperf (0.8.11403.28-1) unstable; urgency=medium
 
   * hide iperf manager ip
