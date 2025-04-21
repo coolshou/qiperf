@@ -1213,6 +1213,8 @@ void QIperfC::onAddSerial()
 
         }else{
             qDebug() << "serialviews: " << mkey << " exist, show it?m_views";
+            SerialView *sv = m_serialviews->value(mkey);
+            m_views->activateDock(sv);
         }
     }
 }
