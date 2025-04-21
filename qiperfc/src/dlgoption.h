@@ -37,6 +37,7 @@ signals:
 
 protected:
     void changeEvent(QEvent *e) override;
+    void hidetab(QString tabname);
 
 private slots:
     void onReject();

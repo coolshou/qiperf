@@ -7,6 +7,7 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     ui(new Ui::DlgOption)
 {
     ui->setupUi(this);
+    hidetab("main");
     m_cfg = cfg;
 //    ui->cb_minterfaces->addItems(interfaces);
     loadcfg(cfg);
@@ -138,6 +139,19 @@ void dlgOption::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+
+void dlgOption::hidetab(QString tabname)
+{
+    int i;
+    for (i = 0; i < ui->tabWidget->count(); ++i) {
+        if (ui->tabWidget->tabText(i) == tabname) {
+            // return parent;
+            break;
+        }
+    }
+    qDebug() << "hidetab : " << tabname << " idx:" << QString::number(i);
+    ui->tabWidget->removeTab(i);
 }
 
 void dlgOption::onReject()
