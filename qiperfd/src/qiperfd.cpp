@@ -678,12 +678,15 @@ void QIperfd::doRestartQIperfd()
 
 void QIperfd::onSerialTaskFinished(QString serialPortName)
 {
-    if (m_serialtasks.contains(serialPortName)){
-        //TODO: serialtask delete?
-        SerialTask *st = m_serialtasks.value(serialPortName);
-        st->close();
-        m_serialtasks.remove(serialPortName);
-    }
+    Q_UNUSED(serialPortName)
+    //only receive CMD_SERIAL_DEL do serial close
+
+    // if (m_serialtasks.contains(serialPortName)){
+    //     //TODO: serialtask delete?
+    //     SerialTask *st = m_serialtasks.value(serialPortName);
+    //     st->close();
+    //     m_serialtasks.remove(serialPortName);
+    // }
 }
 
 void QIperfd::onSerialTaskStarted(QString idx, quint16 port)
