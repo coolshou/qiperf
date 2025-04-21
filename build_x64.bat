@@ -24,6 +24,7 @@ if "%BUILDAPP%"=="1" (
         echo set QT msvc2022_64 PATH
         REM this will enter another comspec!
         "C:\Qt\6.8.3\msvc2022_64\bin\qtenv2.bat"
+        echo "back to %driveLetter%"
         %driveLetter%
     )
 
