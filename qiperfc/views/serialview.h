@@ -34,10 +34,7 @@ private slots:
 private:
     Ui::SerialView *ui;
     QString m_title;
-    // AbstractPortFactory *m_portfactory;
-    // AbstractPort    *m_currentport;
     TcpUdpPort *m_currentport;
-    // SerialPort *m_serialport;
     TerminalView *m_termialview;
     bool m_pause = false;
     int m_rxCount = 0;

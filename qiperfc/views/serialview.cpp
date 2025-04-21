@@ -6,18 +6,13 @@ SerialView::SerialView(QString title, QWidget *parent)
     , ui(new Ui::SerialView), m_title(title)
 {
     ui->setupUi(this);
-    //following us local serial
-    // m_serialport = new SerialPort();
     m_currentport = new TcpUdpPort(this);
     m_currentport->setVisible(false); // no need to show TcpUdpPort's UI
     m_termialview = new TerminalView(parent); // TODO: log to file?
     ui->vLayout->addWidget(m_termialview);
 
     connect(m_termialview, &TerminalView::transmitData, this, &SerialView::writePortData);
-    // connect(m_termialview, &TerminalView::sendMessage, this, &ViewManager::dispatchMessage);
-    // connect(m_serialport, &SerialPort::readyRead, this, &SerialView::readPortData);
     connect(m_currentport, &AbstractPort::readyRead, this, &SerialView::readPortData);
-
 }
 
 SerialView::~SerialView()
