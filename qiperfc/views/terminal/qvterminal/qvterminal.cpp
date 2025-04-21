@@ -333,10 +333,17 @@ void QVTerminal::closelogfile()
 
 void QVTerminal::writeData(QByteArray data)
 {
-    _device->write(data);
-    if (_echo) {
-        appendData(data);
+    if (_device){
+        //FIXME: right click-> paste => cause APP crash?
+        _device->write(data);
+        if (_echo) {
+            appendData(data);
+        }
+    }else{
+
+        qDebug() << "_device not init? ";
     }
+
 }
 
 bool QVTerminal::echo() const
