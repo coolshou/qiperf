@@ -20,6 +20,7 @@ ViewManager::ViewManager(QString *docPath, ThroughputView *tpview, QMainWindow *
     m_docPath(docPath), m_throughputview(tpview), m_window(window)
 {
     m_views = new QVector<AbstractView *>;
+    m_docks = new QMap<AbstractView *, QDockWidget *>;
 
     // create views
     //m_views->append(new TextTRView());
@@ -47,6 +48,10 @@ ViewManager::~ViewManager()
         delete view;
     }
     delete m_views;
+    // for (QDockWidget *dock : std::as_const(*m_docks)) {
+    //     delete dock;
+    // }
+    // delete m_docks;
 }
 
 void ViewManager::loadConfig(QSettings *config)
@@ -54,6 +59,7 @@ void ViewManager::loadConfig(QSettings *config)
     for (AbstractView *view : std::as_const(*m_views)) {
         view->loadConfig(config);
     }
+    //TODO: loadConfig of dock
 }
 
 void ViewManager::saveConfig(QSettings *config)
@@ -61,6 +67,7 @@ void ViewManager::saveConfig(QSettings *config)
     for (AbstractView *view : std::as_const(*m_views)) {
         view->saveConfig(config);
     }
+    //TODO: saveConfig of dock
 }
 
 void ViewManager::loadSettings(QSettings *config)
@@ -68,6 +75,7 @@ void ViewManager::loadSettings(QSettings *config)
     for (AbstractView *view : std::as_const(*m_views)) {
         view->loadSettings(config);
     }
+    //TODO: loadSettings of dock
 }
 
 void ViewManager::retranslate()
@@ -140,6 +148,14 @@ void ViewManager::addView(AbstractView *view, bool closeable)
     connect(view, &AbstractView::sendMessage, this, &ViewManager::dispatchMessage);
 
     m_views->append(view);
+    m_docks->insert(view, dock);
+}
+
+void ViewManager::activateDock(AbstractView *view)
+{
+    if (m_docks->contains(view)){
+        m_docks->value(view)->raise();
+    }
 }
 
 AbstractView* ViewManager::findActiveView()
