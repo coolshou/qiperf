@@ -13,7 +13,7 @@ if "%BUILDAPP%"=="1" (
     echo "%PATH%" | findstr /c:"Visual Studio"
     if !errorlevel! neq 0 (
         echo set Visual Studio 2022 Community PATH
-        %comspec% /k "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+        "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
     )
 
     echo "Check Qt build environment"
@@ -23,7 +23,7 @@ if "%BUILDAPP%"=="1" (
         set "driveLetter=%currentDir:~0,2%"
         echo set QT msvc2022_64 PATH
         REM this will enter another comspec!
-        %comspec% /k "C:\Qt\6.8.3\msvc2022_64\bin\qtenv2.bat"
+        "C:\Qt\6.8.3\msvc2022_64\bin\qtenv2.bat"
         %driveLetter%
     )
 
