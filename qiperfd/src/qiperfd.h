@@ -83,6 +83,7 @@ public slots:
     void doRestartQIperfd();
     void onSerialTaskFinished(QString serialPortName);
     void onSerialTaskStarted(QString idx, quint16 port);
+    void onSerialTaskError(QString idx, QString errormsg);
 signals:
     void setMgrIfname(QString ifname);
     void iperfStarted(QString bindkey); // iperf thrad started

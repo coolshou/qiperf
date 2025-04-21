@@ -681,17 +681,16 @@ void QIperfd::onSerialTaskFinished(QString serialPortName)
     Q_UNUSED(serialPortName)
     //only receive CMD_SERIAL_DEL do serial close
 
-    // if (m_serialtasks.contains(serialPortName)){
-    //     //TODO: serialtask delete?
-    //     SerialTask *st = m_serialtasks.value(serialPortName);
-    //     st->close();
-    //     m_serialtasks.remove(serialPortName);
-    // }
 }
 
 void QIperfd::onSerialTaskStarted(QString idx, quint16 port)
 {
     informMessage(QString("%1:%2:%3").arg(CMD_SERIAL_OPENED, idx, QString::number(port)));
+}
+
+void QIperfd::onSerialTaskError(QString idx, QString errormsg)
+{
+    informMessage(QString("%1:%2:%3").arg(CMD_SERIAL_FAIL, idx, errormsg));
 }
 
 #if defined(Q_OS_WINDOWS)
@@ -808,8 +807,16 @@ void QIperfd::onWSactMessage(QString msg)
                 m_serialtasks.insert(comport, task);
                 QTimer::singleShot(0, task, SLOT(init())); // start it
             } else{
-                qDebug() << comport << " exist!!";
-                onSerialTaskStarted(idx, m_serialtasks.value(comport)->getLocalPort());
+                SerialTask *st = m_serialtasks.value(comport);
+                quint16 localport = st->getLocalPort();
+                if (st->isRunning()){
+                    qDebug() << comport << " exist!! Using port:" << QString::number(localport);
+                    onSerialTaskStarted(idx, localport);
+                }else{
+                    QString emsg = st->getLastError();
+                    qDebug() << "SerialTask is not running: " << emsg;
+                    onSerialTaskError(idx, emsg);
+                }
             }
         }else{
             qDebug() << " Wrong format of create serial: " << msg;
