@@ -1063,11 +1063,11 @@ void QIperfC::onSerialOpened(QString refrow, QString serveraddress, QString serv
         if (index >= 0 && index < keys.size()) {
             QString key = keys.at(index);
             SerialView* sv = m_serialviews->value(key);
-            // SerialView* sv = m_serialviews->values().at(refrow.toInt());
             sv->setConfig(serveraddress, serveraPort.toInt());
-            // sv->setLogFile(_logtofile, _logfilename, _logtimestemp, _logtimestempformat);
+            sv->setLogFile(_logtofile, _logfilename, _logtimestemp, _logtimestempformat);
+            // switch to view
+            m_views->activateDock(sv);
         }
-        //TODO: switch to current view
     } else {
         qDebug() << refrow << " refrow out of index: " << m_serialviews;
     }
@@ -1167,11 +1167,7 @@ int QIperfC::getStatusClients()
 
 void QIperfC::onAddSerial()
 {
-    // SerialPort *ser = new SerialPort();
     m_dlgserial->setSerialData(m_endpointmgr->getSerials());
-
-    //TODO: setup manager ip -> ports mapping data
-    // m_dlgserial->
     if (m_dlgserial->exec()== QDialog::Accepted){
         QString managerip = m_dlgserial->getManagerIP();
         QString serailport = m_dlgserial->getSerialPort();
@@ -1196,6 +1192,7 @@ void QIperfC::onAddSerial()
             WSClient *wsc=new WSClient(managerip, QUrl(url), "");
             //TODO: when disconnected do waht?
             connect(wsc, &WSClient::serialopened, this, &QIperfC::onSerialOpened);
+            //wait connect
             int timeout=0;
             while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
                 qDebug() << " wait WSClient connected";
@@ -1203,20 +1200,17 @@ void QIperfC::onAddSerial()
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
                 timeout++;
             }
-            //TODO: wait connect??!!
             //ask remote create serialport and start tcp server on port
             QString sendstr = QString("%1:%2:%3:%4").arg(CMD_SERIAL_ADD,
                                                          QString::number(idx),
                                                          serailport, serialcfg);
-            qDebug() << "sendstr: " << sendstr;
+            qDebug() << "onAddSerial sendstr: " << sendstr;
             wsc->sendText(sendstr);
-            //TODO: local use TCP SOCKET connect to remote TCP server
-            //
-            // local serialport or remote serialport
 
             SerialView *serialview = new SerialView(mkey);
             m_views->addView(serialview);
             m_serialviews->insert(mkey, serialview);
+
         }else{
             qDebug() << "serialviews: " << mkey << " exist, show it?m_views";
         }

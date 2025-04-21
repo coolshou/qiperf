@@ -59,7 +59,6 @@ public:
     bool save(QString filename); // save tp config
     QString getNowString();
 
-
 public slots:
     void onNewMessage(const QString msg);
     void onNew();
