@@ -44,5 +44,6 @@
         <file alias="ping">images/ping.png</file>
         <file alias="serial">images/serial.png</file>
         <file alias="portconfig">images/portconfig.png</file>
+        <file alias="iperf2">images/iperf2.png</file>
     </qresource>
 </RCC>
