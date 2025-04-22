@@ -386,6 +386,66 @@ void DlgIperf::ChangeVersion(const QString ver)
         port=5001;
     }
     ui->sb_port->setValue(port);
+    // bandwidth unit
+    QStringList unitBW;
+    if (ver.indexOf("2")==0){
+        unitBW << "k" << "m" << "g" << "K" << "M" << "G" << "pps";
+    }else{
+        unitBW << "K" << "M" << "G";
+    }
+    ui->cb_unit_bitrate->clear();
+    ui->cb_unit_bitrate->addItems(unitBW);
+    // length of buffer
+    QStringList unitBuffer;
+    if (ver.indexOf("2")==0){
+        unitBuffer << "k" << "m" << "K" << "M";
+    }else{
+        unitBuffer << "K" << "M" << "G";
+    }
+    ui->cb_unit_buffer->clear();
+    ui->cb_unit_buffer->addItems(unitBuffer);
+    // window size
+    QStringList unitWindowSize;
+    if (ver.indexOf("2")==0){
+        unitWindowSize << "K" << "M";
+    }else{
+        unitWindowSize << "K" << "M" << "G";
+    }
+    ui->cb_unit_windowsize->clear();
+    ui->cb_unit_windowsize->addItems(unitWindowSize);
+    // format unit
+    QStringList unitFormat;
+    if (ver.indexOf("2")==0){
+        unitFormat << "k" << "m" << "g" << "K" << "M" << "G";
+    }else{
+        unitFormat << "k" << "m" << "g" << "t" << "K" << "M" << "G" << "T";
+    }
+    ui->cb_fmtreport->clear();
+    ui->cb_fmtreport->addItems(unitFormat);
+    ui->cb_fmtreport->setCurrentText("m");
+    QString sBidir;
+    if (ver.indexOf("2")==0){
+        sBidir = "bidirectional(-d)";
+        ui->chk_reverse->setChecked(false);
+        ui->chk_reverse->setEnabled(false);
+    }else{
+        sBidir = "bidirectional(--bidir)";
+        ui->chk_reverse->setEnabled(true);
+    }
+    ui->chk_bidir->setText(sBidir);
+
+    //TODO: Type of service (TOS)
+    if (ver.indexOf("2")==0){
+        // ui->lb_tos
+        // ui->sb_tos
+        /* Accepted tos values are: af11, af12, af13, af21, af22, af23, af31, af32, af33, af41, af42, af43,
+        cs0, cs1, cs2, cs3, cs4, cs5, cs6, cs7, ef, le, nqb, nqb2, ac_be, ac_bk, ac_vi, ac_vo, lowdelay, throughput,
+            reliability, or a numeric value.
+        */
+    }else {
+        // numeric value
+        // ui->sb_tos
+    }
 }
 
 void DlgIperf::onAccepted()
