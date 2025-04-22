@@ -425,12 +425,9 @@ void DlgIperf::ChangeVersion(const QString ver)
     ui->cb_fmtreport->setCurrentText("m");
     QString sBidir;
     if (ver.indexOf("2")==0){
-        sBidir = "bidirectional(-d)";
-        ui->chk_reverse->setChecked(false);
-        ui->chk_reverse->setEnabled(false);
+        sBidir = "bidirectional(-d, --dualtest)";
     }else{
         sBidir = "bidirectional(--bidir)";
-        ui->chk_reverse->setEnabled(true);
     }
     ui->chk_bidir->setText(sBidir);
 
