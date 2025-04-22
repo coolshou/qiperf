@@ -8,10 +8,12 @@ SerialView::SerialView(QString title, QWidget *parent)
     ui->setupUi(this);
     m_currentport = new TcpUdpPort(this);
     m_currentport->setVisible(false); // no need to show TcpUdpPort's UI
-    m_termialview = new TerminalView(parent); // TODO: log to file?
+    m_termialview = new TerminalView(parent);
     ui->vLayout->addWidget(m_termialview);
 
+    // terminal input data => write to m_currentport (TcpUdpPort)
     connect(m_termialview, &TerminalView::transmitData, this, &SerialView::writePortData);
+    // m_currentport data ready to read => readall and show on m_termialview
     connect(m_currentport, &AbstractPort::readyRead, this, &SerialView::readPortData);
 }
 
@@ -41,6 +43,7 @@ void SerialView::setConfig(QString serveraddress, int portnumber, QString protoc
 
 void SerialView::setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat)
 {
+    //setup log to file
     m_termialview->setLogFile(logtofile, logfilename, logtimestemp, timestempformat);
 }
 
