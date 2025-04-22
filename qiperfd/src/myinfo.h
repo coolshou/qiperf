@@ -68,7 +68,7 @@ private:
     QString m_old_manager_ip;
     QString m_new_manager_ip;
     QJsonObject m_mainObject;
-    QString m_iperf2ver;
+    QString m_iperf20ver;
     QString m_iperf21ver;
     QString m_iperf22ver;
     QString m_iperf3ver;

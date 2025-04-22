@@ -121,8 +121,9 @@ private:
 #endif
     PipeServer *m_pserver;
     //TODO: iperf1
-    QString m_iperfexe2; //iperf2
-    QString m_iperfexe2ver; //iperf2 version
+    QString m_iperfexe2; // iperf2 use version
+    QString m_iperfexe20; //iperf2.0
+    QString m_iperfexe20ver; //iperf2 version
     QString m_iperfexe21; //iperf2.1
     QString m_iperfexe21ver; //iperf2.1 version
     QString m_iperfexe22; //iperf2.2

@@ -37,16 +37,10 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
     m_arguments = arg.split(" ");
     if (m_arguments.contains("-s")){
         m_servermode=true;
-        if (m_version==3){
-            // m_arguments.append("--one-off"); //handle one client connection then exit//move to iperfwrapper
-        }
     }
 //    m_port = port;
 //    m_bindaddr = bindaddr;
 //    m_target = target;
-    if (m_version>=static_cast<int>(IPERF_VER::V3)){
-        // m_arguments.append("--forceflush");//move to iperfwrapper
-    }
     if (m_servermode){
         if (m_bidir){
             setBidirTag(TPDIRRx);
@@ -189,12 +183,13 @@ void IperfWorker::setRefRow(QString refrow)
     m_refrow = refrow.toInt();
 }
 
-void IperfWorker::setExtra(QString parallel, QString protocal)
+void IperfWorker::setExtra(QString parallel, QString protocal, uint port)
 {
     m_parallel=parallel;
     m_protocal=protocal;
+    m_port = port;
     if (m_iperfwrapper){
-        m_iperfwrapper->setIperf(QString::number(m_version), m_protocal);
+        m_iperfwrapper->setIperf(QString::number(m_version), m_protocal, m_port);
     }
 }
 
@@ -318,7 +313,7 @@ void IperfWorker::parserStdOut(QString msg)
 void IperfWorker::onThroughputData(int idx, QString sInterval, QString data)
 {
     if(m_bidirtag.isEmpty()){
-        // qInfo() << "No m_bidirtag, not reprort ThroughputData: ("<<sInterval<<")" << data;
+        qInfo() << "No m_bidirtag, not reprort ThroughputData: ("<<sInterval<<")" << data;
     }else{
         emit onThroughput(idx, sInterval, data);
     }

@@ -58,7 +58,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     loadcfg(apppath);
     //
     initIperf(apppath);
-    getIperfVer(m_iperfexe2, static_cast<int>(IPERF_VER::V2));
+    getIperfVer(m_iperfexe20, static_cast<int>(IPERF_VER::V2));
     getIperfVer(m_iperfexe21, static_cast<int>(IPERF_VER::V21));
     getIperfVer(m_iperfexe22, static_cast<int>(IPERF_VER::V22));
     getIperfVer(m_iperfexe3, static_cast<int>(IPERF_VER::V3));
@@ -66,7 +66,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     m_iperfwrapper = new IperfWrapper();
 //    m_myinfo = new MyInfo(getManagerInterface());
     m_myinfo = new MyInfo(mgr_ifname);
-    m_myinfo->setIperfVer(m_iperfexe2ver, m_iperfexe21ver, m_iperfexe22ver, m_iperfexe3ver);
+    m_myinfo->setIperfVer(m_iperfexe20ver, m_iperfexe21ver, m_iperfexe22ver, m_iperfexe3ver);
     connect(this, &QIperfd::setMgrIfname, m_myinfo, &MyInfo::setIfname);
     QString info = m_myinfo->collectInfo();
     quint64 buffsize = m_myinfo->getSysBufferSize();
@@ -235,7 +235,7 @@ int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint 
                                            bndaddr, target, bidir, reverse,
                                            interval, delaytime);
     iperfer->setRefRow(refrow);
-    iperfer->setExtra(parallel, protocal);
+    iperfer->setExtra(parallel, protocal, port);
 //    connect(iperfer, &IperfWorker::onStdout, this, &QIperfd::readStdOut);
     connect(iperfer, &IperfWorker::onStderr, this, &QIperfd::onErrored);
     connect(iperfer, &IperfWorker::log, this, &QIperfd::onIperfLog);
@@ -261,7 +261,10 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
     QString cmd;
     if (ver == static_cast<int>(IPERF_VER::V3)){
         cmd = m_iperfexe3;
-    }else if (ver==static_cast<int>(IPERF_VER::V2)){
+    }else if ((ver==static_cast<int>(IPERF_VER::V2))||
+              (ver==static_cast<int>(IPERF_VER::V21))||
+              (ver==static_cast<int>(IPERF_VER::V22))
+               ){
         cmd = m_iperfexe2;
     }else{
         qDebug() << "Not support Iperf version:" << ver;
@@ -282,8 +285,12 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
     if (ver == static_cast<int>(IPERF_VER::V3)){
         args = m_iperfwrapper->toIperf3args(jsondata);
 //        args = toIperf3args(jsondata);
-    }else if (ver==static_cast<int>(IPERF_VER::V2)){
+    }else if ((ver==static_cast<int>(IPERF_VER::V2))||
+               (ver==static_cast<int>(IPERF_VER::V21))||
+               (ver==static_cast<int>(IPERF_VER::V22))
+               ){
         qDebug() << "TODO convert json format to Iperf2 args";
+        args = m_iperfwrapper->toIperf2args(jsondata);
     }else {
         qDebug() << "Not support Iperf version:" << ver;
         return -1;
@@ -318,7 +325,10 @@ int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bind
     // add a iperf server
     if (version==static_cast<int>(IPERF_VER::V3)){
         cmd = m_iperfexe3;
-    }else if (version==static_cast<int>(IPERF_VER::V2)){
+    }else if ((version==static_cast<int>(IPERF_VER::V2))||
+               (version==static_cast<int>(IPERF_VER::V21))||
+               (version==static_cast<int>(IPERF_VER::V22))
+               ){
         cmd = m_iperfexe2;
     }else{
         qDebug() << "Not support Iperf version:" << version ;
@@ -339,7 +349,10 @@ int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host
     // add a iperf server
     if (version==static_cast<int>(IPERF_VER::V3)){
         cmd = m_iperfexe3;
-    }else if (version==static_cast<int>(IPERF_VER::V2)){
+    }else if ((version==static_cast<int>(IPERF_VER::V2))||
+               (version==static_cast<int>(IPERF_VER::V21))||
+               (version==static_cast<int>(IPERF_VER::V22))
+               ){
         cmd = m_iperfexe2;
     }else{
         qDebug() << "Not support Iperf version:" << version ;
@@ -539,7 +552,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
                 if (ver == static_cast<int>(IPERF_VER::V3)) {
                     cmd = m_iperfexe3;
                 } else {
-                    cmd = m_iperfexe2;
+                    cmd = m_iperfexe20;
                 }
                 uint port = iperf_args["port"].toUInt();
                 QString args;
@@ -1089,10 +1102,10 @@ void QIperfd::initiperf2(QString tmp, QString tmp_path, QString arch)
     m_iperfexe2 = QDir::toNativeSeparators(m_iperfexe2);
 #else
 
-    m_iperfexe2 = tmp + tmp_path + QDir::separator() + "iperf2";
-    if (QFileInfo::exists(m_iperfexe2))
+    m_iperfexe20 = tmp + tmp_path + QDir::separator() + "iperf2";
+    if (QFileInfo::exists(m_iperfexe20))
     {
-        QFile::remove(m_iperfexe2);
+        QFile::remove(m_iperfexe20);
     }
     // iperf2
     #if defined(Q_OS_ANDROID)
@@ -1102,13 +1115,13 @@ void QIperfd::initiperf2(QString tmp, QString tmp_path, QString arch)
         QFile i2File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf2");
         if (i2File.exists()) {
             // make file execuable
-            if (i2File.copy(m_iperfexe2)){
-                QFile iperf2File(m_iperfexe2);
+            if (i2File.copy(m_iperfexe20)){
+                QFile iperf2File(m_iperfexe20);
                 iperf2File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
                                           QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
                                           QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
             }else{
-                qDebug() << "copy file " << " to " << m_iperfexe2 << " fail";
+                qDebug() << "copy file " << " to " << m_iperfexe20 << " fail";
             }
         }else{
             qDebug() << i2File.fileName() << " NOT EXIST!!";
@@ -1244,6 +1257,7 @@ void QIperfd::initIperf(QString apppath)
     initiperf2(tmp, tmp_path, arch);
     initiperf21(tmp, tmp_path, arch);
     initiperf22(tmp, tmp_path, arch);
+    m_iperfexe2 = m_iperfexe22;
     initiperf3(tmp, tmp_path, arch);
 
 #else
@@ -1277,7 +1291,10 @@ void QIperfd::getIperfVer(QString cmd, int ver)
     }
 
     QString out;
-    if (ver == static_cast<int>(IPERF_VER::V2)){
+    if ((ver == static_cast<int>(IPERF_VER::V2))||
+        (ver==static_cast<int>(IPERF_VER::V21))||
+        (ver==static_cast<int>(IPERF_VER::V22))
+        ){
         out = process.readAllStandardError();
     }else{
         out = process.readAllStandardOutput();
@@ -1288,7 +1305,7 @@ void QIperfd::getIperfVer(QString cmd, int ver)
             QStringList tmps =line.split(" ");
             if (tmps.length()>=2){
                 if (ver == static_cast<int>(IPERF_VER::V2)){
-                    m_iperfexe2ver = tmps[2];
+                    m_iperfexe20ver = tmps[2];
                 }
                 if (ver == static_cast<int>(IPERF_VER::V21)){
                     m_iperfexe21ver = tmps[2];

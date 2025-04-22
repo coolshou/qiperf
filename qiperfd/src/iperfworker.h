@@ -30,7 +30,7 @@ public:
     void setIperfLogPath(QString filepath); //full path of iperf log filename
     void setBidirTag(QString bidir);
     void setRefRow(QString refrow);
-    void setExtra(QString parallel, QString protocal);
+    void setExtra(QString parallel, QString protocal, uint port);
     void toLogFile(QString msg);
     bool getServerMode();
     int getRefRow();

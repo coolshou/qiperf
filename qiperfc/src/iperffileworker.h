@@ -20,7 +20,7 @@ class IperfFileWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit IperfFileWorker(QString version, QString protocal,
+    explicit IperfFileWorker(QString version, QString protocal, uint port,
                              int idx, bool servermode, int parallel,
                              bool bidir, QString bidirtag , QString filename,
                              int delay=0, uint interval=1,
@@ -39,6 +39,8 @@ signals:
                      QString value, QString unit, QString dir,
                      QString pkt_lost, QString pkt_total);
     void progress(QString filename, int currentlineno);
+    void workFinished();
+
 private slots:
     void onThroughputData(int midx, QString sInterval,  QString data);
     void onWorkFinished();
@@ -48,6 +50,7 @@ private:
 //    QMap<
     QString m_version;
     QString m_protocal;
+    uint m_port;
     int m_idx;
     bool m_servermode;
     int m_parallel;

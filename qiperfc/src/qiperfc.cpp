@@ -312,6 +312,26 @@ void QIperfC::onImportIperf3Log()
     }
 }
 
+void QIperfC::onImportIperf2Log()
+{
+    /*
+    qDebug() << "TODO:  Import Iperf2 Log file to throughput chart";
+    QString path;
+    if (!m_oldsavepath.isNull()){
+        path = m_oldsavepath;
+    }else {
+        path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    }
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    tr("Open Iperf2 log file"), path , tr(ALL_EXT_FILTER));
+*/
+    // QString fileName = "/home/jimmy/work/qiperf/src/iperf2-TCP.txt"; //TCP tmp
+    QString fileName = "/home/jimmy/work/qiperf/src/iperf2-UDP.txt"; //UDP tmp
+    if(!m_qipconfig->importIperf2Log(fileName)){
+        qDebug() << "Import file: " << fileName << " Fail!!";
+    }
+}
+
 bool QIperfC::on_Clear(bool showNotice)
 {
     // this will clean iperf test pair config
@@ -1228,6 +1248,7 @@ void QIperfC::initActions()
     connect(ui->actionSave, &QAction::triggered, this, &QIperfC::onSave);
     ui->actionSave->setEnabled(false);
     connect(ui->actionIperf3Log, &QAction::triggered, this, &QIperfC::onImportIperf3Log);
+    connect(ui->actionIperf2Log, &QAction::triggered, this, &QIperfC::onImportIperf2Log);
     connect(ui->actionExport, &QAction::triggered, this, &QIperfC::onExport);
     connect(ui->actionQuit, &QAction::triggered, this, &QIperfC::onQuit);
     // edit

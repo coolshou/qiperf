@@ -61,6 +61,7 @@
        <normaloff>:/import</normaloff>:/import</iconset>
      </property>
      <addaction name="actionIperf3Log"/>
+     <addaction name="actionIperf2Log"/>
     </widget>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
@@ -497,6 +498,15 @@
    </property>
    <property name="toolTip">
     <string>WebControl(TODO) by Selenium</string>
+   </property>
+  </action>
+  <action name="actionIperf2Log">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/iperf2</normaloff>:/iperf2</iconset>
+   </property>
+   <property name="text">
+    <string>Iperf2 log</string>
    </property>
   </action>
  </widget>

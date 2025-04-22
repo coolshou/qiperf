@@ -118,7 +118,7 @@ QString MyInfo::collectInfo()
     mainObject.insert("qiperfd", QString(QIPERFD_VERSION));
     mainObject.insert("buildver", QString(GITBRANCH)+"-"+QString(GITVER));
     //iperf version
-    mainObject.insert("iperf2ver", m_iperf2ver);
+    mainObject.insert("iperf2ver", m_iperf20ver);
     mainObject.insert("iperf21ver", m_iperf21ver);
     mainObject.insert("iperf22ver", m_iperf22ver);
     mainObject.insert("iperf3ver", m_iperf3ver);
@@ -306,7 +306,7 @@ int MyInfo::getEndpointType()
 
 void MyInfo::setIperfVer(QString v2, QString v21, QString v22, QString v3)
 {
-    m_iperf2ver = v2;
+    m_iperf20ver = v2;
     m_iperf21ver = v21;
     m_iperf22ver = v22;
     m_iperf3ver = v3;
@@ -315,7 +315,7 @@ void MyInfo::setIperfVer(QString v2, QString v21, QString v22, QString v3)
 QJsonObject MyInfo::getIperfVer()
 {
     QJsonObject json;
-    json.insert("iperf2ver", m_iperf2ver);
+    json.insert("iperf2ver", m_iperf20ver);
     json.insert("iperf21ver", m_iperf21ver);
     json.insert("iperf22ver", m_iperf22ver);
     json.insert("iperf3ver", m_iperf3ver);

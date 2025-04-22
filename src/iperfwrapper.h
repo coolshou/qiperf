@@ -15,10 +15,12 @@ public:
 
     QString toIperf3args(QVariantMap jsondata); // to iperf3 args
     QString toIperf2args(QVariantMap jsondata); // to iperf2 args
-    void parserIperf3(QString msg);
+    void parserIperf2(QString linedata); // parser Iperf2 output line log
+    void parserIperf3(QString linedata); // parser Iperf3 output line log
+    QString getIdx(QString linedata, QString &idx);
     void setSetting(int idx, bool servermode, QString parallel, bool bidir, QString bidirtag);
     void setFile(QString filename);
-    void setIperf(QString version, QString protocal);
+    void setIperf(QString version, QString protocal, uint port);
     void setDelaytime(int delaytime);
     void setInterval(uint interval);
 
@@ -38,8 +40,10 @@ private:
     QString m_bidirtag;
     QString m_filename;
     QMap<QString, QJsonArray> m_tpdatas;
+    QMap<QString, QString> m_idxdir; // record each idx's direction (iperf2 use)
     QString m_version;
     QString m_protocal;
+    uint m_port; //use port number;
     int m_delaytime;
     uint m_interval;
     bool m_ignorewronginterval;

@@ -7,12 +7,12 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-IperfFileWorker::IperfFileWorker(QString version, QString protocal,
+IperfFileWorker::IperfFileWorker(QString version, QString protocal, uint port,
                                  int idx, bool servermode, int parallel,
                                  bool bidir, QString bidirtag , QString filename,
                                  int delay, uint interval,
                                  bool ignoreWrongInterval, QObject *parent)
-    : QObject{parent}, m_version(version), m_protocal(protocal),
+    : QObject{parent}, m_version(version), m_protocal(protocal), m_port(port),
     m_idx(idx), m_servermode(servermode), m_parallel(parallel),
     m_bidir(bidir), m_bidirtag(bidirtag), m_filename(filename),
     m_delay(delay), m_ignoreWrongInterval(ignoreWrongInterval)
@@ -21,7 +21,7 @@ IperfFileWorker::IperfFileWorker(QString version, QString protocal,
     m_iperfwrapper= new IperfWrapper(m_ignoreWrongInterval);
     m_iperfwrapper->setSetting(idx, servermode, QString::number(parallel), bidir, bidirtag);
     m_iperfwrapper->setFile(filename);
-    m_iperfwrapper->setIperf(version, protocal);
+    m_iperfwrapper->setIperf(version, protocal, port);
     m_iperfwrapper->setDelaytime(delay);
     m_iperfwrapper->setInterval(interval);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfFileWorker::onThroughputData);
@@ -135,4 +135,5 @@ void IperfFileWorker::onWorkFinished()
         ++iterator;
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
+    emit workFinished();
 }

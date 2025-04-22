@@ -65,6 +65,7 @@ public slots:
     void onOpen();
     void onSave();
     void onImportIperf3Log();
+    void onImportIperf2Log();
     bool on_Clear(bool showNotice=true);
     void initStart();
     void onStart();

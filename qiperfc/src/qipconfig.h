@@ -31,6 +31,7 @@ public:
     void setTPCfg(QByteArray tpcfg, QString env="", QString testdate="", QStringList datafilenames={});
     void clear();
     bool importIperf3Log(QString filename);
+    bool importIperf2Log(QString filename);
     bool detectSystemProxy(QString &hostname, quint16 &port);
     QString getPCsInfo();
     QStringList getIperfRawFilenames();
