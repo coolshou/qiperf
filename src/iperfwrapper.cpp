@@ -93,7 +93,7 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
             QString unit_buffer = jsondata["unit_buffer"].toString();
             args = args + " -l " +QString::number(buffer)+ unit_buffer;
         }
-        int dscp = jsondata["dscp"].toUInt();
+        int dscp = jsondata["dscp"].toInt();
         if ((dscp>=0)&&(dscp<=64)){
             args = args + " --dscp " +QString::number(dscp);
         }
@@ -101,7 +101,7 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
         if (mss>0){
             args = args + " -M " +QString::number(mss);
         }
-        int tos = jsondata["tos"].toUInt();
+        int tos = jsondata["tos"].toInt();
         if ((tos>=0)&&(tos<=255)){
             args = args + " --tos " +QString::number(tos);
         }
@@ -194,7 +194,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
             QString unit_buffer = jsondata["unit_buffer"].toString();
             args = args + " -l " +QString::number(buffer)+ unit_buffer;
         }
-        int dscp = jsondata["dscp"].toUInt();
+        int dscp = jsondata["dscp"].toInt();
         if ((dscp>=0)&&(dscp<=64)){
             args = args + " --dscp " +QString::number(dscp);
         }
@@ -206,7 +206,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
     // else {
     //     args = args +" --one-off ";
     // }
-    int tos = jsondata["tos"].toUInt();
+    int tos = jsondata["tos"].toInt();
     if ((tos>=0)&&(tos<=255)){
         args = args + " --tos " +QString::number(tos);
     }
