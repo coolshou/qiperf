@@ -51,3 +51,7 @@ MISC.files += \
 NSIS.files += \
     qiperfd.nsi \
     qiperf.nsi
+
+TEST.files += \
+    pytest/test_qtwebsocket.py \
+    pytest/test_websocket.py
