@@ -297,7 +297,9 @@ void ExportHtml::procressData()
     QJsonParseError error;//= new QJsonParseError();
     QJsonDocument doc;
     // qDebug() << "procressData:" << m_pcs;
-    for (const QJsonValue &value: std::as_const(m_pcs)) {
+    // std::as_const require C++17
+    // for (const QJsonValue &value: std::as_const(m_pcs)) {
+    for (const QJsonValue &value: m_pcs) {
         hostls.clear();
         if (value.isString()) {
             QString pcinfo = value.toString();
@@ -361,7 +363,8 @@ void ExportHtml::procressData()
 
     //iperf log raw data
     if(m_iperf_raw_filenames.length()>0){
-        for ( const auto& filename : std::as_const(m_iperf_raw_filenames)){
+        // for ( const auto& filename : std::as_const(m_iperf_raw_filenames)){
+        for ( const auto& filename : m_iperf_raw_filenames){
             QFileInfo fileInfo(filename);
             QString filenameonly(fileInfo.fileName());
             QString rawdata;
