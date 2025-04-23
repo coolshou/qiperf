@@ -16,7 +16,7 @@ bool TooltipEventFilter::eventFilter(QObject *obj, QEvent *event) {
             //                qDebug() << "pos:"<< mouseEvent->globalPos() <<" data" << data;
 #if QT_VERSION < 0x060000  // < 6.0
             QToolTip::showText(mouseEvent->globalPos(), data, view);
-#elif
+#else
             QToolTip::showText(mouseEvent->globalPosition().toPoint(), data, view);
 #endif
         } else {
