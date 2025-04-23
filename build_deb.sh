@@ -18,6 +18,6 @@ for package in ${BUILDPACKAGES[@]} ; do
     fi
     cd $package
     #debuild -b -uc -us
-    dpkg-buildpackage -b --no-sign -nc
+    dpkg-buildpackage -b --no-sign
     cd ..
 done
