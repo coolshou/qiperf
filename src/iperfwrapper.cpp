@@ -136,7 +136,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
     }
     QString bindaddr = jsondata["bind"].toString();
     if (!bindaddr.isEmpty()){
-        args = args + " --bind " + bindaddr;
+        args = args + " -B " + bindaddr;
     }
     if (!bServer){
         bool bidir = jsondata["bidir"].toBool();
@@ -208,7 +208,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
     // }
     int tos = jsondata["tos"].toInt();
     if ((tos>=0)&&(tos<=255)){
-        args = args + " --tos " +QString::number(tos);
+        args = args + " -S " +QString::number(tos);
     }
     QString fmtreport = jsondata["fmtreport"].toString();
     if (!fmtreport.isEmpty()){
