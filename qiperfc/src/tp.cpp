@@ -129,7 +129,10 @@ bool TP::removeChildren(int position, int count)
     }
     QList<TP *>::ConstIterator begin = m_childItems.begin()+position;
     QList<TP *>::ConstIterator end = m_childItems.begin()+position+count;
-    m_childItems.erase(begin, end);
+    // m_childItems.erase(begin, end);
+    for (int i = 0; i < count; ++i) {
+        m_childItems.removeAt(position);  // Always remove at 'start'
+    }
     return true;
 }
 

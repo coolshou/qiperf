@@ -44,7 +44,8 @@ ViewManager::ViewManager(QString *docPath, ThroughputView *tpview, QMainWindow *
 
 ViewManager::~ViewManager()
 {
-    for (AbstractView *view : std::as_const(*m_views)) {
+    // for (AbstractView *view : std::as_const(*m_views)) {
+    for (AbstractView *view : *m_views) {
         delete view;
     }
     delete m_views;
@@ -56,7 +57,8 @@ ViewManager::~ViewManager()
 
 void ViewManager::loadConfig(QSettings *config)
 {
-    for (AbstractView *view : std::as_const(*m_views)) {
+    // for (AbstractView *view : std::as_const(*m_views)) {
+    for (AbstractView *view : *m_views) {
         view->loadConfig(config);
     }
     //TODO: loadConfig of dock
@@ -64,7 +66,8 @@ void ViewManager::loadConfig(QSettings *config)
 
 void ViewManager::saveConfig(QSettings *config)
 {
-    for (AbstractView *view : std::as_const(*m_views)) {
+    // for (AbstractView *view : std::as_const(*m_views)) {
+    for (AbstractView *view : *m_views) {
         view->saveConfig(config);
     }
     //TODO: saveConfig of dock
@@ -72,7 +75,8 @@ void ViewManager::saveConfig(QSettings *config)
 
 void ViewManager::loadSettings(QSettings *config)
 {
-    for (AbstractView *view : std::as_const(*m_views)) {
+    // for (AbstractView *view : std::as_const(*m_views)) {
+    for (AbstractView *view : *m_views) {
         view->loadSettings(config);
     }
     //TODO: loadSettings of dock
@@ -89,7 +93,8 @@ void ViewManager::retranslate()
 void ViewManager::dispatchMessage(const QString &receiver, const QByteArray &message)
 {
     AbstractView *sender = dynamic_cast<AbstractView *>(QObject::sender());
-    for (AbstractView *view : std::as_const(*m_views)) {
+    // for (AbstractView *view : std::as_const(*m_views)) {
+    for (AbstractView *view : *m_views) {
         if (view->iid() == receiver || receiver.isEmpty()) {
             view->takeMessage(sender->iid(), message);
         }
@@ -98,7 +103,8 @@ void ViewManager::dispatchMessage(const QString &receiver, const QByteArray &mes
 
 void ViewManager::receiveData(const QByteArray &array)
 {
-    for (AbstractView *view : std::as_const(*m_views)) {
+    // for (AbstractView *view : std::as_const(*m_views)) {
+    for (AbstractView *view : *m_views) {
         if (view->isVisible()) {
             view->receiveData(array);
         }
@@ -107,14 +113,16 @@ void ViewManager::receiveData(const QByteArray &array)
 
 void ViewManager::setEnabled(bool enabled)
 {
-    for (AbstractView *view : std::as_const(*m_views)) {
+    // for (AbstractView *view : std::as_const(*m_views)) {
+    for (AbstractView *view : *m_views) {
         view->setEnabled(enabled);
     }
 }
 
 void ViewManager::clear(void)
 {
-    for (AbstractView *view : std::as_const(*m_views)) {
+    // for (AbstractView *view : std::as_const(*m_views)) {
+    for (AbstractView *view : *m_views) {
         view->clear();
     }
 }
@@ -215,7 +223,8 @@ QVector<AbstractView *> ViewManager::loadExtensions(const QString &path)
     QDir dir(path);
     QVector<AbstractView *> list;
     QStringList filenames = dir.entryList(QDir::Files);
-    for (QString fileName : std::as_const(filenames)) {
+    // for (QString fileName : std::as_const(filenames)) {
+    for (QString fileName : filenames) {
         QPluginLoader loader(dir.absoluteFilePath(fileName));
         AbstractView *view = dynamic_cast<AbstractView *>(loader.instance());
         if (view) {

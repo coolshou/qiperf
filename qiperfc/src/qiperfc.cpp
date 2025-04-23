@@ -757,7 +757,6 @@ void QIperfC::onErrorStop(int err, QString msg)
     emit updateStarttime("");
     emit updateStatus(msg);
     updateRunStatus(false);
-//    onStop();
     emit testStoped(bErrorStop);
 }
 
@@ -1170,7 +1169,8 @@ void QIperfC::onProgress(QString filename, int currentlineno)
 int QIperfC::getStatusServers()
 {
     int sum = 0;
-    for (auto value : std::as_const(m_status_server)) {
+    // for (auto value : std::as_const(m_status_server)) {
+    for (auto value : m_status_server) {
         sum += value;
     }
     return sum;
@@ -1179,7 +1179,8 @@ int QIperfC::getStatusServers()
 int QIperfC::getStatusClients()
 {
     int sum = 0;
-    for (auto value : std::as_const(m_status_client)) {
+    // for (auto value : std::as_const(m_status_client)) {
+    for (auto value : m_status_client) {
         sum += value;
     }
     return sum;

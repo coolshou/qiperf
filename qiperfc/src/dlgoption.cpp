@@ -1,6 +1,8 @@
 #include "dlgoption.h"
 #include "ui_dlgoption.h"
 
+#include <QDebug>
+
 dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
 //FormOption::FormOption(QSettings *cfg, QStringList interfaces, QWidget *parent) :
     QDialog(parent),

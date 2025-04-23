@@ -14,8 +14,11 @@ bool TooltipEventFilter::eventFilter(QObject *obj, QEvent *event) {
         if (index.isValid()) {
             QString data = index.data().toString();
             //                qDebug() << "pos:"<< mouseEvent->globalPos() <<" data" << data;
-            // QToolTip::showText(mouseEvent->globalPos(), data, view);
+#if QT_VERSION < 0x060000  // < 6.0
+            QToolTip::showText(mouseEvent->globalPos(), data, view);
+#elif
             QToolTip::showText(mouseEvent->globalPosition().toPoint(), data, view);
+#endif
         } else {
             QToolTip::hideText();
         }

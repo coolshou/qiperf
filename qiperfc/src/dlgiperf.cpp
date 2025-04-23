@@ -219,7 +219,10 @@ bool DlgIperf::add(QString mgr, QString mdata)
                                 // foreach(auto addr, addrs){
                                 for (const auto &addr: addrs){
                                     if (addr.isArray()){
-                                        ds.append(addr[0].toString());
+                                        QJsonArray addrArray = addr.toArray();
+                                        if (!addrArray.isEmpty()) {
+                                            ds.append(addrArray[0].toString());
+                                        }
                                     }
                                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                                 }
