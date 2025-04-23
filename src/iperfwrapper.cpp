@@ -141,11 +141,11 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
     if (!bServer){
         bool bidir = jsondata["bidir"].toBool();
         if (bidir){
-            args = args + " --dualtest"; // can not use with localhost/127.0.0.1
+            args = args + " --dualtest "; // can not use with localhost/127.0.0.1
         }
         bool reverse = jsondata["reverse"].toBool();
         if (reverse){
-            args = args + " -R";
+            args = args + " -R ";
         }
         uint duration = jsondata["duration"].toUInt();
         if (duration>0){
@@ -215,8 +215,6 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
         args = args + " -f " + fmtreport;
     }
     // args = args + " --forceflush ";
-    // report as a Comma-Separated Values for better parser
-    // args = args + "--reportstyle C";
     return args;
 }
 
