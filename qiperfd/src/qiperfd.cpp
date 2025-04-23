@@ -289,8 +289,8 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
                (ver==static_cast<int>(IPERF_VER::V21))||
                (ver==static_cast<int>(IPERF_VER::V22))
                ){
-        qDebug() << "TODO convert json format to Iperf2 args";
         args = m_iperfwrapper->toIperf2args(jsondata);
+        qDebug() << "iperf2 args:" << args;
     }else {
         qDebug() << "Not support Iperf version:" << ver;
         return -1;
@@ -322,21 +322,24 @@ int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bind
     qDebug() << "addIperfServer:" << bindHost << ":" << port ;
 
     QString cmd;
+    QString argbind;
     // add a iperf server
     if (version==static_cast<int>(IPERF_VER::V3)){
         cmd = m_iperfexe3;
+        argbind = " --bind ";
     }else if ((version==static_cast<int>(IPERF_VER::V2))||
                (version==static_cast<int>(IPERF_VER::V21))||
                (version==static_cast<int>(IPERF_VER::V22))
                ){
         cmd = m_iperfexe2;
+        argbind = " -B ";
     }else{
         qDebug() << "Not support Iperf version:" << version ;
         return -1;
     }
-    QString args="-s";
+    QString args=" -s ";
     if (!(bindHost=="")) {
-        args.append("--bind");
+        args.append(argbind);
         args.append(bindHost);
     }
     return add(refrow, version, cmd, args, port, bindHost);

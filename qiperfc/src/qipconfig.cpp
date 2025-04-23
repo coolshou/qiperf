@@ -412,7 +412,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 //iperf server record file
                                 IperfFileWorker *ifw = new IperfFileWorker(version, protocal, clientport,
                                                                            idx, true, parallel,
-                                                                           bidir, TPDIRRx, serverfile, delaytime, serverinterval,
+                                                                           bidir, TPDIRRx, serverfile,
+                                                                           delaytime, serverinterval,
                                                                            m_IgnoreWrongInterval);
                                 m_fileworkers.append(ifw);
                                 // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
@@ -428,8 +429,9 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                                 qInfo() << "delaytime: " << QString::number(delaytime) << " clientfile:" << clientfile;
                                 //iperf client record file
                                 IperfFileWorker *ifwc = new IperfFileWorker(version, protocal, clientport,
-                                                                           idx, false, parallel,
-                                                                           bidir, TPDIRTx, clientfile, delaytime, clientinterval,
+                                                                            idx, false, parallel,
+                                                                            bidir, TPDIRTx, clientfile,
+                                                                            delaytime, clientinterval,
                                                                             m_IgnoreWrongInterval);
                                 m_fileworkers.append(ifwc);
                                 // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
@@ -446,7 +448,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             qInfo()<< "delaytime: " << QString::number(delaytime) << "bidir serverfile:" << serverfile;
                             IperfFileWorker *ifw = new IperfFileWorker(version, protocal, clientport,
                                                                        idx, true, parallel,
-                                                                       bidir, TPDIRTx, serverfile, delaytime, serverinterval,
+                                                                       bidir, TPDIRTx, serverfile,
+                                                                       delaytime, serverinterval,
                                                                        m_IgnoreWrongInterval);
                             m_fileworkers.append(ifw);
                             // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
@@ -461,7 +464,8 @@ bool QIPConfig::parserTPCfgLogFiles(QString logpath)
                             qInfo()<< "delaytime: " << QString::number(delaytime) << "bidir clientfile:" << clientfile;
                             IperfFileWorker *ifwc = new IperfFileWorker(version, protocal, clientport,
                                                                         idx, false, parallel,
-                                                                        bidir, TPDIRRx, clientfile, delaytime, clientinterval,
+                                                                        bidir, TPDIRRx, clientfile,
+                                                                        delaytime, clientinterval,
                                                                         m_IgnoreWrongInterval);
                             m_fileworkers.append(ifwc);
                             // connect(ifwc, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);

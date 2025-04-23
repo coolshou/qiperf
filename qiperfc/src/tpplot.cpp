@@ -271,7 +271,7 @@ void TPPlot::onDataAdded(double key, double value)
                 mTotalGraph->updateValue(key,sumvalue);
                 mTotalGraph->rescaleAxes(true);
             }else{
-                qDebug() << ((MyQCPGraph*)sender())->name() << " (" << key << ") Key not found";
+                // qDebug() << ((MyQCPGraph*)sender())->name() << " (" << key << ") Key not found";
                 mTotalGraph->addData(key,value);
             }
             // replot();
