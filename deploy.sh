@@ -1,9 +1,12 @@
 #/bin/bash
 
+# sudo apt install sshpass
+
 # build deb package
 DOBUILD=0
 CODENAME=`grep '^VERSION_CODENAME' /etc/os-release | cut -d= -f2`
-WINVERSION=0.8.11403.05
+WINVERSION=`grep '#define QIPERFD_VERSION' src/versions.h | cut -d\"  -f2`
+#WINVERSION=0.8.11403.13
 #WINVERSION=0.7.11401.21
 VERSION=${WINVERSION}-1
 
@@ -16,13 +19,14 @@ declare -a WDESTFILES=()
 WDESTFILES+=(qiperf-setup-${WINVERSION}.exe)
 
 # ================================================
-UPDATE_LINUX=0
+UPDATE_LINUX=1
 declare -a IPS=()
 #IPS+=("192.168.70.11")
-#IPS+=("192.168.70.13")
+IPS+=("192.168.70.13")
+IPS+=("192.168.70.14")
 #IPS+=("192.168.70.12")
-IPS+=("192.168.70.23")
-IPS+=("192.168.70.24")
+#IPS+=("192.168.70.23")
+#IPS+=("192.168.70.24")
 #IPS+=("192.168.70.135")
 #IPS+=("192.168.70.31")
 #IPS+=("192.168.70.154")
@@ -44,7 +48,7 @@ RVRPORT+=(60020)
 RVRPORT+=(60010)
 
 # Room6 - TR398 PCs
-DOREMOTE=1
+DOREMOTE=0
 DOREMOTEWIN=0 #; remote is windows
 DOREMOTEIP="172.31.117.120"
 
@@ -53,18 +57,18 @@ if [ $DOREMOTEWIN -eq 1 ]; then
   DESTFILES=${WDESTFILES}
   INSTCMD="/D:/${WDESTFILES} -s"
 else
-  TARGET=test@${DOREMOTEIP}:/home/test/
+  TARGET=test@${DOREMOTEIP}
   INSTCMD="sudo dpkg -i /home/test/${DESTFILES}"
 fi
 
 declare -a PORTS=()
 PORTS+=(55901)
 PORTS+=(55902)
-PORTS+=(55903)
-PORTS+=(55904)
-PORTS+=(55905)
-#PORTS+=(55906)
-PORTS+=(55908)
+#PORTS+=(55903)
+#PORTS+=(55904)
+#PORTS+=(55905)
+PORTS+=(55906)
+#PORTS+=(55908)
 #PORTS+=(55911) # LAN
 #PORTS+=(55912) # LAN2
 #PORTS+=(55920)
@@ -81,10 +85,16 @@ if [ "x$?" == "x0" ]; then
         do
             for DESTFILE in "${DESTFILES[@]}"
             do
+                echo "===== ssh test@${IP} rm /home/test/${DESTFILE}"
+                ssh test@${IP} rm /home/test/${DESTFILE}
                 echo "===== scp ${DESTFILE} test@${IP}:/home/test/${DESTFILE}"
-                scp ${DESTFILE} test@${IP}:/home/test/${DESTFILE}
-                echo "===== ssh test@${IP} sudo dpkg -i /home/test/${DESTFILE}"
-                ssh test@${IP} sudo dpkg -i /home/test/${DESTFILE}
+                scp ${DESTFILE} test@${IP}:/home/test/${DESTFILE} > /dev/null 2>&1
+                if [ $? == 0 ]; then
+                    echo "===== ssh test@${IP} sshpass -p '123456' sudo dpkg -i /home/test/${DESTFILE}"
+                    ssh test@${IP} sshpass -p '123456' sudo dpkg -i /home/test/${DESTFILE} > /dev/null 2>&1
+                else
+                    echo "upload ${DESTFILE} Fail"
+                fi
             done
         done
     fi
@@ -95,10 +105,14 @@ if [ "x$?" == "x0" ]; then
         do
             for DESTFILE in "${DESTFILES[@]}"
             do
-                echo "===== scp -P $PORT ${DESTFILE}  ${TARGET}${DESTFILE}"
-                scp -P $PORT ${DESTFILE} ${TARGET}${DESTFILE}
-                echo "===== ssh -p $PORT test@${DOREMOTEIP} ${INSTCMD}"
-                ssh -p $PORT test@${DOREMOTEIP} ${INSTCMD}
+                echo "===== scp -P $PORT ${DESTFILE}  ${TARGET}/home/test/${DESTFILE}"
+                scp -P $PORT ${DESTFILE} ${TARGET}/home/test/${DESTFILE}
+                if [ $? == 0 ]; then
+                    echo "===== ssh -p $PORT test@${DOREMOTEIP} ${INSTCMD}"
+                    ssh -p $PORT test@${DOREMOTEIP} ${INSTCMD}
+                else
+                    echo "upload ${DESTFILE} Fail"
+                fi
             done
         done
     fi
@@ -109,8 +123,12 @@ if [ "x$?" == "x0" ]; then
         do
             echo "===== scp ${WINSETUP} test@${IP}:D:\\${WINSETUP}"
             scp ${WINSETUP} test@${IP}:D:\\${WINSETUP}
-            echo "===== ssh test@${IP} D:\\${WINSETUP} /S"
-            ssh test@${IP} D:\\${WINSETUP} /S
+            if [ $? == 0 ]; then
+                echo "===== ssh test@${IP} D:\\${WINSETUP} /S"
+                ssh test@${IP} D:\\${WINSETUP} /S
+            else
+                echo "upload ${WINSETUP} Fail"
+            fi
         done
     done
     if [ $UPDATE_RVR -eq 1 ]; then
@@ -120,8 +138,12 @@ if [ "x$?" == "x0" ]; then
             do
                 echo "===== scp -P ${PORT} ${WINSETUP} test@${RVRIP}:D:\\${WINSETUP}"
                 scp -P ${PORT} ${WINSETUP} test@${RVRIP}:D:\\${WINSETUP}
-                echo "===== ssh -P ${PORT} test@${RVRIP} D:\\${WINSETUP} /S"
-                ssh -P ${PORT} test@${RVRIP} D:\\${WINSETUP} /S
+                if [ $? == 0 ]; then
+                    echo "===== ssh -P ${PORT} test@${RVRIP} D:\\${WINSETUP} /S"
+                    ssh -P ${PORT} test@${RVRIP} D:\\${WINSETUP} /S
+                else
+                    echo "upload ${WINSETUP} Fail"
+                fi
             done
         done
     fi
