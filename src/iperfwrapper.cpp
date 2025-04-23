@@ -216,7 +216,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
     }
     // args = args + " --forceflush ";
     // report as a Comma-Separated Values for better parser
-    args = args + "--reportstyle C";
+    // args = args + "--reportstyle C";
     return args;
 }
 
