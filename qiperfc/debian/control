@@ -8,7 +8,7 @@ Build-Depends: debhelper-compat (= 13), libsystemd-dev,
     libqt5serialport5-dev | libqt6serialport6-dev | qt6-serialport-dev,
     qtwebengine5-dev | qt6-webengine-dev,
     qtbase5-private-dev | qt6-base-private-dev,
-    libglut-dev
+    freeglut3-dev | libglut-dev
 Standards-Version: 4.6.0
 Homepage: https://github.com/coolshou/qiperf.git
 #Vcs-Browser: https://salsa.debian.org/debian/qiperf
