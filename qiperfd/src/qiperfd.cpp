@@ -284,13 +284,11 @@ int QIperfd::add(QString refrow, QVariantMap jsondata)
     QString args;
     if (ver == static_cast<int>(IPERF_VER::V3)){
         args = m_iperfwrapper->toIperf3args(jsondata);
-//        args = toIperf3args(jsondata);
     }else if ((ver==static_cast<int>(IPERF_VER::V2))||
                (ver==static_cast<int>(IPERF_VER::V21))||
                (ver==static_cast<int>(IPERF_VER::V22))
                ){
         args = m_iperfwrapper->toIperf2args(jsondata);
-        qDebug() << "iperf2 args:" << args;
     }else {
         qDebug() << "Not support Iperf version:" << ver;
         return -1;

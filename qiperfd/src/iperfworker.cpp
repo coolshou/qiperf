@@ -84,7 +84,7 @@ void IperfWorker::work()
         //create iperf procress
         m_iperf =  new QProcess(m_parent);
         m_iperf->setProgram(m_cmd);
-        qDebug() <<"m_cmd:"<< m_cmd << " m_arguments:" << m_arguments;
+        // qDebug() <<"m_cmd:"<< m_cmd << " m_arguments:" << m_arguments;
         m_iperf->setArguments(m_arguments);
         connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
         connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
