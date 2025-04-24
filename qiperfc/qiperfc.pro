@@ -12,10 +12,12 @@ QT += serialport
 QT += opengl
 DEFINES += QCUSTOMPLOT_USE_OPENGL # qcustomplot use OPENGL
 unix:!android {
-    # INCLUDEPATH +=/usr/include/GL/
-    # LIBS += -L -lglut -lOpenGL
-    CONFIG += link_pkgconfig
-    PKGCONFIG += glut
+    # 22.04 (freeglut3-dev)
+    INCLUDEPATH +=/usr/include/GL/
+    LIBS += -L -lglut -lOpenGL
+    # 24.04 (libglut-dev)
+    #CONFIG += link_pkgconfig
+    #PKGCONFIG += glut
 }
 win32: {
     LIBS += \
@@ -24,7 +26,7 @@ win32: {
     LIBS += -lws2_32
 }
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-greaterThan(QT_MAJOR_VERSION, 4): CONFIG += c++11
+# greaterThan(QT_MAJOR_VERSION, 4): CONFIG += c++11
 lessThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -std=c++11
 greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat # requite by QT6 QTextCodec
 
@@ -33,7 +35,7 @@ win32:unix:!android:{
 }
 
 # following will cause QCustomPlot double free on APP exit!!
-#CONFIG += c++17
+CONFIG += c++17
 
 include(../qiperf.pri)
 unix {
@@ -57,6 +59,9 @@ include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ../aip/aip.cpp \
+    ../aip/cyntec.cpp \
+    ../aip/hanwha.cpp \
     ../src/dlgshowlog.cpp \
     ../src/filewatcher.cpp \
     ../src/myfunc.cpp \
@@ -120,6 +125,9 @@ SOURCES += \
     # ../qiperfd/src/wsserver.cpp \
 
 HEADERS += \
+    ../aip/aip.h \
+    ../aip/cyntec.h \
+    ../aip/hanwha.h \
     ../src/dlgshowlog.h \
     ../src/filewatcher.h \
     ../src/pipeclient.h \
