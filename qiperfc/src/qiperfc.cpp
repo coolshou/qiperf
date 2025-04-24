@@ -25,6 +25,7 @@
 #include "endpointact.h"
 #include "tp.h"
 #include "versions.h"
+// #include "../aip/hanwha.h"
 
 #include <QDebug>
 
@@ -145,6 +146,10 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 #endif
 
     m_serialviews = new QMap<QString, SerialView*>();
+
+    // qDebug() << "Hanwha";
+    // Hanwha aip_hw = Hanwha();
+    // aip_hw.getBeamData();
 }
 
 QIperfC::~QIperfC()

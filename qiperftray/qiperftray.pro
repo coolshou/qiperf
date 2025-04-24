@@ -36,6 +36,9 @@ FORMS += \
     ../src/dlgshowlog.ui \
     src/qiperftray.ui
 
+UI_DIR= \
+    ui
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/qiperf/bin

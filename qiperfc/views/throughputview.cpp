@@ -467,6 +467,7 @@ void ThroughputView::onItemDClicked(QModelIndex idx)
             dlgiperf->loadJsonCfg(tp->saveData());
             dlgiperf->setExcIdx(idx);
             int rc = dlgiperf->exec();// show dlgiperf
+            //TODO: why m_tpmgr's item become disable??
             if (rc == QDialog::Accepted){
                 QString rs= dlgiperf->getJsonCfg();
                 tp->loadData(rs);
