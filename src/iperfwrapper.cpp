@@ -186,7 +186,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
         }else{
             // force UDP use Max throughput, default 1 Mbit/sec for UDP
             if (protocal.contains("UDP")){
-                args = args + " -b 0 ";
+                args = args + " -b -1 "; // iperf2 UDP with -R can not use -b 0 for Max throughput, use -1 instead
             }
         }
         uint buffer = jsondata["buffer"].toUInt();
@@ -263,11 +263,19 @@ void IperfWrapper::parserIperf2(QString linedata)
             ds = linedata.split(" ", Qt::SkipEmptyParts); // qt 5.14
 #endif
             qDebug() << "ds:" << ds << " length:" << ds.length();
-            if(ds.length()==9){
-                if (ds.last().contains(QString::number(m_port))){
-                    sDir = TPDIRTx;
+            if(ds.length()>=9){
+                if (linedata.contains("reverse")){
+                    if (ds.last().contains(QString::number(m_port))){
+                        sDir = TPDIRRx;
+                    }else{
+                        sDir = TPDIRTx;
+                    }
                 }else{
-                    sDir = TPDIRRx;
+                    if (ds.last().contains(QString::number(m_port))){
+                        sDir = TPDIRTx;
+                    }else{
+                        sDir = TPDIRRx;
+                    }
                 }
             }
             if (!m_idxdir.contains(idx)){
@@ -288,13 +296,6 @@ void IperfWrapper::parserIperf2(QString linedata)
         }else if(linedata.contains("warning:")){
             // ignore warning: line
         }else{
-            // qDebug() << "parserIperf2: " << linedata;
-
-            // int iS;
-            // int iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
-            // QString idx = linedata.mid(1,iS-1).trimmed();  // extract [ idx]
-            // linedata = linedata.right(linedata.length()-iS-1);
-
             linedata = getIdx(linedata, idx);
             // qDebug() << "parserIperf2 after idx: " << idx << " linedata: " << linedata;
             QString sTag="";
@@ -361,8 +362,8 @@ void IperfWrapper::parserIperf2(QString linedata)
                 }
                 // qDebug() << "sInterval: " << sInterval << " m_tpdatas[sInterval].count(): " << m_tpdatas[sInterval].count();
                 if (m_tpdatas[sInterval].count()<iparallel){
-                    qDebug() << "m_interval: " << QString::number(m_interval)
-                             << " interval:" << QString::number(interval);
+                    // qDebug() << "m_interval: " << QString::number(m_interval)
+                    //          << " interval:" << QString::number(interval);
 
                     if (qAbs(m_interval-interval)>0.5){
                         qDebug() << " skip this interval:" << QString::number(interval);
@@ -633,7 +634,7 @@ void IperfWrapper::setDelaytime(int delaytime)
 
 void IperfWrapper::setInterval(uint interval)
 {
-    qDebug() << " setInterval:" << interval;
+    // qDebug() << " setInterval:" << interval;
     m_interval = interval;
 }
 
