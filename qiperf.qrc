@@ -45,5 +45,6 @@
         <file alias="serial">images/serial.png</file>
         <file alias="portconfig">images/portconfig.png</file>
         <file alias="iperf2">images/iperf2.png</file>
+        <file alias="view">images/view.png</file>
     </qresource>
 </RCC>
