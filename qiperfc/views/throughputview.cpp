@@ -124,25 +124,27 @@ void ThroughputView::onPaste()
 void ThroughputView::onDelete()
 {
     QModelIndex curIdx = ui->tv_throughput->selectionModel()->currentIndex();
-    TP *tp = m_tpmgr->getItem(curIdx);
-    if (tp->getDataType() == TPMgrData::DataType::config){
-        // remove releative iperf3 log file
-        QString client = tp->getBindKey(false); //client
-        QString server = tp->getBindKey(); //server
-        QString d = getStartTime().toString(DATETIME_NOW_FORMAT);
+    if (curIdx.isValid()){
+        TP *tp = m_tpmgr->getItem(curIdx);
+        if (tp->getDataType() == TPMgrData::DataType::config){
+            // remove releative iperf3 log file
+            QString client = tp->getBindKey(false); //client
+            QString server = tp->getBindKey(); //server
+            QString d = getStartTime().toString(DATETIME_NOW_FORMAT);
 
-        if (tp->haveChilds()){
-            foreach(TP *p, tp->getChilds()){
-                m_tpplot->del(p->getID());
+            if (tp->haveChilds()){
+                foreach(TP *p, tp->getChilds()){
+                    m_tpplot->del(p->getID());
+                }
             }
+            m_tpmgr->del(curIdx);
+            // TODO: should/how we modify remain item's idx??
+            // signal remove files
+            QStringList fs;
+            fs.append(d+QDir::separator()+client+".log");
+            fs.append(d+QDir::separator()+server+".log");
+            emit deleteFiles(fs);
         }
-        m_tpmgr->del(curIdx);
-        // TODO: should/how we modify remain item's idx??
-        // signal remove files
-        QStringList fs;
-        fs.append(d+QDir::separator()+client+".log");
-        fs.append(d+QDir::separator()+server+".log");
-        emit deleteFiles(fs);
     }
 }
 
