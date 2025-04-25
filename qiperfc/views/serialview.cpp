@@ -25,13 +25,11 @@ SerialView::~SerialView()
 
 QString SerialView::title()
 {
-    //TODO:title
     return m_title;
 }
 
 QString SerialView::iid()
 {
-    //TODO: iid
     return "Serial";
 }
 
