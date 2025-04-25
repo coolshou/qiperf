@@ -1,8 +1,9 @@
-qiperf (0.10.11404.24-1) unstable; urgency=medium
+qiperf (0.10.11404.25-1) unstable; urgency=medium
 
   * add support iperf2
+  * Fix edit iperf test pair cause it become disable.
 
- -- coolshou <coolshou2060@gmail.com>  Thu, 24 Apr 2025 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Fri, 25 Apr 2025 10:00:00 +0800
 
 qiperf (0.9.11404.21-1) unstable; urgency=medium
 
