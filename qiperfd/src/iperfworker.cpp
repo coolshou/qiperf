@@ -35,7 +35,11 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfWorker::onThroughputData);
 //    this->deleteLater(); //this will cause stdout not flush??
 //    m_cmd = cmd; //iperf exec fullpath
+#if QT_VERSION < 0x050E00 // < 5.14.0
+    ds = linedata.split(" ", QString::SkipEmptyParts);
+#else
     m_arguments = arg.split(" ", Qt::SkipEmptyParts);
+#endi
     if (m_arguments.contains("-s")){
         m_servermode=true;
     }
