@@ -38,7 +38,7 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
 #if QT_VERSION < 0x050E00 // < 5.14.0
     m_arguments = linedata.split(" ", QString::SkipEmptyParts);
 #else
-    m_arguments = arg.split(" ", Qt::SkipEmptyParts);
+    m_arguments = linedata.split(" ", Qt::SkipEmptyParts);
 #endif
     if (m_arguments.contains("-s")){
         m_servermode=true;
