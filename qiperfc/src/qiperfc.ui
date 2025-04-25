@@ -52,13 +52,13 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <widget class="QMenu" name="menuImport">
+    <widget class="QMenu" name="menuView">
      <property name="title">
-      <string>Import</string>
+      <string>View</string>
      </property>
      <property name="icon">
       <iconset resource="../../qiperf.qrc">
-       <normaloff>:/import</normaloff>:/import</iconset>
+       <normaloff>:/view</normaloff>:/view</iconset>
      </property>
      <addaction name="actionIperf3Log"/>
      <addaction name="actionIperf2Log"/>
@@ -69,7 +69,7 @@
     <addaction name="separator"/>
     <addaction name="actionExport"/>
     <addaction name="separator"/>
-    <addaction name="menuImport"/>
+    <addaction name="menuView"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
