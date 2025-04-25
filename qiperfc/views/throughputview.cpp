@@ -182,15 +182,18 @@ void ThroughputView::onAddIperf()
 void ThroughputView::onPairEdit()
 {
     QModelIndex idx = ui->tv_throughput->selectionModel()->currentIndex();
-    onItemDClicked(idx);
+    if (idx.isValid()){
+        onItemDClicked(idx);
+    }
 }
 
 void ThroughputView::onPairDelete()
 {
     //TODO: do not use this, use onDelete()
     QModelIndex idx = ui->tv_throughput->selectionModel()->currentIndex();
-    qDebug() << "TODO: onPairDelete:" << idx;
-    m_tpmgr->del(idx);
+    if (idx.isValid()){
+        m_tpmgr->del(idx);
+    }
 }
 
 void ThroughputView::onPairSwap()
@@ -458,28 +461,29 @@ void ThroughputView::copyServerArgs(bool checked)
 void ThroughputView::onItemDClicked(QModelIndex idx)
 {
     TP *tp = m_tpmgr->getItem(idx);
-    if (tp->getDataType() == TPMgrData::config) {
-        QPoint globalPos = QCursor::pos();
-        QPoint widgetPos = ui->tv_throughput->mapFromGlobal(globalPos);
-        int col = ui->tv_throughput->columnAt(widgetPos.x());
-        if (col != TP::cols::comment) {
-            // only iperf pair config can be edit
-            dlgiperf->loadJsonCfg(tp->saveData());
-            dlgiperf->setExcIdx(idx);
-            int rc = dlgiperf->exec();// show dlgiperf
-            //TODO: why m_tpmgr's item become disable??
-            if (rc == QDialog::Accepted){
-                QString rs= dlgiperf->getJsonCfg();
-                tp->loadData(rs);
-                m_tpmgr->setItem(idx, tp);
+    if (tp){
+        if (tp->getDataType() == TPMgrData::config) {
+            QPoint globalPos = QCursor::pos();
+            QPoint widgetPos = ui->tv_throughput->mapFromGlobal(globalPos);
+            int col = ui->tv_throughput->columnAt(widgetPos.x());
+            if (col != TP::cols::comment) {
+                // only iperf pair config can be edit
+                dlgiperf->loadJsonCfg(tp->saveData());
+                dlgiperf->setExcIdx(idx);
+                int rc = dlgiperf->exec();// show dlgiperf
+                if (rc == QDialog::Accepted){
+                    QString rs= dlgiperf->getJsonCfg();
+                    tp->loadData(rs);
+                    m_tpmgr->setItem(idx, tp);
+                }
+            }else{
+                qDebug() << "TODO: handle double click on column comment";
+                // QMessageBox::information(this, "comment", tp->data(TP::cols::comment).toString());
+                NMessageBox *msg = new NMessageBox(QMessageBox::Information,
+                                                   "comment",
+                                                   tp->data(TP::cols::comment).toString());
+                msg->show();
             }
-        }else{
-            qDebug() << "TODO: handle double click on column comment";
-            // QMessageBox::information(this, "comment", tp->data(TP::cols::comment).toString());
-            NMessageBox *msg = new NMessageBox(QMessageBox::Information,
-                                              "comment",
-                                              tp->data(TP::cols::comment).toString());
-            msg->show();
         }
     }
 }
