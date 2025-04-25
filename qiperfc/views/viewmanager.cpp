@@ -9,26 +9,12 @@
 #include <QMessageBox>
 #include <QDebug>
 #include "abstractview.h"
-//#include "scriptextension/scriptextensionview.h"
-//#include "texttr/texttrview.h"
-#include "terminal/terminalview.h"
-
-//#include "oscilloscope/oscilloscopeview.h"
-//#include "filetransmit/filetransmitview.h"
 
 ViewManager::ViewManager(QString *docPath, ThroughputView *tpview, QMainWindow *window) :
     m_docPath(docPath), m_throughputview(tpview), m_window(window)
 {
     m_views = new QVector<AbstractView *>;
     m_docks = new QMap<AbstractView *, QDockWidget *>;
-
-    // create views
-    //m_views->append(new TextTRView());
-    // m_views->append(m_throughputview);
-    // m_views->append(new TerminalView()); //TODO: add manuy TerminalView...
-    //m_views->append(new OscilloscopeView());
-    //m_views->append(new FileTransmitView());
-    // m_views->append(loadExtensions("extensions"));
 
     delete window->takeCentralWidget();
     window->setDockNestingEnabled(true);
