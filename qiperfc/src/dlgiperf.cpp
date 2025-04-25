@@ -140,7 +140,7 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
     QJsonDocument doc=QJsonDocument::fromJson(jsoncfg.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError) {
         QJsonObject mainObj = doc.object();
-        m_enabled = mainObj["enabled"].toBool();
+        m_enabled = mainObj["enabled"].toBool(true);
         QJsonObject serverObj = mainObj["server"].toObject();
         QJsonObject clientObj = mainObj["client"].toObject();
 
