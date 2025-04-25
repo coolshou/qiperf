@@ -129,11 +129,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 #endif
     m_dlgshowlog=new DlgShowLog(logpath+QIPERFC_NAME+".log", this);
     connect(this, &QIperfC::closeAll, m_dlgshowlog, &DlgShowLog::close);
-//    connect(this, &QIperfC::closeAll, dp, &DlgPing::close); // model mode, no need
     connect(this, &QIperfC::closeAll, m_dlgrecord, &DlgRecord::close);
-//    connect(this, &QIperfC::closeAll, dlgiperf, &DlgIperf::close);// model mode, no need
     connect(this, &QIperfC::closeAll, m_frm_qiperfds, &FormQIperfds::close);
-//    connect(this, &QIperfC::closeAll, m_frm_option, &dlgOption::close);// model mode, no need
     connect(this, &QIperfC::closeAll, m_dlgserial, &DlgSerial::close);
 
     connect(this, &QIperfC::closeAll, m_dlgtest, &DlgTest::close);
