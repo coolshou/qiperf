@@ -510,5 +510,6 @@ bool QVTerminal::viewportEvent(QEvent *event)
 
 void QVTerminal::closeEvent(QCloseEvent *event)
 {
+    Q_UNUSED(event)
     qDebug() << "QVTerminal closeEvent";
 }

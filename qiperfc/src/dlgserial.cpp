@@ -79,10 +79,10 @@ QString DlgSerial::getLogTimeStempFormat()
     }
 }
 
-void DlgSerial::changeEvent(QEvent *e)
+void DlgSerial::changeEvent(QEvent *event)
 {
-    QDialog::changeEvent(e);
-    switch (e->type()) {
+    QDialog::changeEvent(event);
+    switch (event->type()) {
     case QEvent::LanguageChange:
         ui->retranslateUi(this);
         break;

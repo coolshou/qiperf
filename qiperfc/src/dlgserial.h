@@ -16,7 +16,7 @@ class DlgSerial : public QDialog
 
 public:
     explicit DlgSerial(QWidget *parent = nullptr);
-    ~DlgSerial();
+    ~DlgSerial() override;
     void setSerialData(QMap<QString, QStringList> data);
     QString getManagerIP();
     QString getSerialPort();
@@ -27,7 +27,7 @@ public:
 void initLocalSerialPort();
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
 
 private slots:

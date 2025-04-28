@@ -87,18 +87,18 @@ private:
 
     // QWidget interface
 protected:
-    virtual bool event(QEvent *event);
-    virtual void keyPressEvent(QKeyEvent *event);
-    virtual void paintEvent(QPaintEvent *event);
-    virtual void resizeEvent(QResizeEvent *event);
-    virtual void mousePressEvent(QMouseEvent* event);
+    virtual bool event(QEvent *event) override;
+    virtual void keyPressEvent(QKeyEvent *event) override;
+    virtual void paintEvent(QPaintEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void mousePressEvent(QMouseEvent* event) override;
 #ifndef QT_NO_CONTEXTMENU
-    virtual void contextMenuEvent(QContextMenuEvent *event);
+    virtual void contextMenuEvent(QContextMenuEvent *event) override;
 #endif // QT_NO_CONTEXTMENU
 
     // QAbstractScrollArea interface
 protected:
-    virtual bool viewportEvent(QEvent *event);
+    virtual bool viewportEvent(QEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
     QColor vt100color(char c);
 

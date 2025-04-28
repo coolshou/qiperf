@@ -18,14 +18,14 @@ class SerialView : public AbstractView
 
 public:
     explicit SerialView(QString title, QWidget *parent = nullptr);
-    ~SerialView();
+    ~SerialView() override;
     QString title() override;
     QString iid() override;
     void setConfig(QString serveraddress, int portnumber, QString protocol = "TCP Client");
     void setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat);
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
 
 private slots:
     void readPortData();
