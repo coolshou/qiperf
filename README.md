@@ -24,7 +24,29 @@ Quick iperf tray
 Quick iperf console
 
 # Build
-	build_deb.sh
+## ubuntu 24.04:
+```
+sudo apt install libglut-dev libsystemd-dev
+sudo apt install qmake6 qt6-base-dev  qt6-websockets-dev qt6-serialport-dev qt6-webengine-dev qt6-base-private-dev libqt6core5compat6-dev
+./build_deb.sh
+```
+## build packets for ubuntu 22.04 by Dockerfile.ubuntu22.04:
+```
+# build ubuntu 22.04 qt5 image
+docker build -t ubuntu-qt5:22.04 -f Dockerfile.ubuntu22.04 .
+
+# run it
+
+docker run --name ubuntu2204-qt5  -it \
+    --rm \
+    --network host \
+    -v /home/jimmy/SOFT/work/qiperf:/media/qiperf \
+    ubuntu-qt5:22.04 /bin/bash
+
+
+cd /media/qiperf
+./build_deb-qt5.sh
+```
 
 # cross-compile for Raspberry 3 (aarch64)
 	sudo dpkg --add-architecture arm64
@@ -57,5 +79,3 @@ sbuild --host=armhf
 * when ip address changed => update UI
 * add Mac OS support
 * add iOS support
-* add Control UI to control multi-iperf at once (like IxChariot)
-* add Control UI with throughput chart
