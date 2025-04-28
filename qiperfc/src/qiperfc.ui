@@ -124,9 +124,9 @@
      <string>Monitor</string>
     </property>
     <addaction name="actionAddSerial"/>
+    <addaction name="actionSSH"/>
     <addaction name="actionAddPing"/>
     <addaction name="actionWlanSTA"/>
-    <addaction name="actionSSHTelnet"/>
     <addaction name="actionWebControl"/>
    </widget>
    <widget class="QMenu" name="menuAutomate">
@@ -487,9 +487,9 @@
     <string>Macro(TODO)</string>
    </property>
   </action>
-  <action name="actionSSHTelnet">
+  <action name="actionSSH">
    <property name="text">
-    <string>SSH/Telnet(TODO)</string>
+    <string>SSH</string>
    </property>
   </action>
   <action name="actionWebControl">

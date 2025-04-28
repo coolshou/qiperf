@@ -58,7 +58,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     }
     connect(this, &QIperfC::testStarted, this, &QIperfC::onTestStarted);
     connect(this, &QIperfC::testStoped, this, &QIperfC::onTestStoped);
-
+    ui->actionPaste->setShortcutContext(Qt::WidgetShortcut);
     m_throughputview = new ThroughputView(ui->actionCopy, ui->actionPaste,
                                           ui->actionDelete, ui->actionCopyText,
                                           m_TPGroup, m_TPUnit);
@@ -627,6 +627,7 @@ void QIperfC::onStart()
         emit setEndTime(maxtestduration-iExtraWait);
     } else {
         QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");
+        emit testStoped(-1);
     }
 }
 
@@ -1242,6 +1243,11 @@ void QIperfC::onAddSerial()
     }
 }
 
+void QIperfC::onAddSSH()
+{
+    qDebug() << "TODO onAddSSH";
+}
+
 void QIperfC::initActions()
 {
     // init actions
@@ -1255,14 +1261,11 @@ void QIperfC::initActions()
     connect(ui->actionExport, &QAction::triggered, this, &QIperfC::onExport);
     connect(ui->actionQuit, &QAction::triggered, this, &QIperfC::onQuit);
     // edit
-    // connect(ui->actionCopy, &QAction::triggered, this, &QIperfC::onCopy);
     connect(ui->actionCopy, &QAction::triggered, m_throughputview, &ThroughputView::onCopy);
     // copy column text
     connect(ui->actionCopyText, &QAction::triggered, m_throughputview, &ThroughputView::onCopyText);
-    // connect(ui->actionPaste, &QAction::triggered, this, &QIperfC::onPaste);
     connect(ui->actionPaste, &QAction::triggered, m_throughputview, &ThroughputView::onPaste);
     connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onDelete);
-    // connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onPairDelete);
 
     connect(ui->actionAddIperf, &QAction::triggered, m_throughputview, &ThroughputView::onAddIperf);
     connect(ui->actionEdit, &QAction::triggered, m_throughputview, &ThroughputView::onPairEdit);
@@ -1276,6 +1279,7 @@ void QIperfC::initActions()
     // monitor
     // connect(ui->actionAddPing, &QAction::triggered, this, &QIperfC::onAddPing);
     connect(ui->actionAddSerial, &QAction::triggered, this, &QIperfC::onAddSerial);
+    connect(ui->actionSSH, &QAction::triggered, this, &QIperfC::onAddSSH);
     if (!m_testping){
         ui->actionAddPing->setVisible(false);
     }
