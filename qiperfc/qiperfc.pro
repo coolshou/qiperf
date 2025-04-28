@@ -42,7 +42,8 @@ unix {
 #include(../sigwatch.pri)
 }
 INCLUDEPATH += \
-    $$PWD/lib
+    $$PWD/lib \
+    $$PWD/lib/QXlsx/QXlsx/header
 
 # for excel
 QXLSX_PARENTPATH=$$PWD/lib/QXlsx/QXlsx         # current QXlsx path is . (. means curret directory)
@@ -214,7 +215,7 @@ FORMS += \
     views/throughputview.ui
 
 UI_DIR= \
-    ui
+    $$PWD/ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
