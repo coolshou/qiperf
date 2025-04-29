@@ -3,6 +3,7 @@ QT += network websockets
 QT += printsupport # require by qcustomplot
 QT += webenginewidgets
 QT += serialport
+QT += positioning # for QGeoCoordinate
 
 
 #following setting will overwrite qtcreater's setting
@@ -65,6 +66,9 @@ SOURCES += \
     ../aip/hanwha.cpp \
     ../src/dlgshowlog.cpp \
     ../src/filewatcher.cpp \
+    ../src/gps/dlggpscalc.cpp \
+    ../src/gps/geotranslate.cpp \
+    ../src/gps/gpsfunc.cpp \
     ../src/myfunc.cpp \
     ../src/pipeclient.cpp \
     ../src/endpoint.cpp \
@@ -132,6 +136,9 @@ HEADERS += \
     ../aip/hanwha.h \
     ../src/dlgshowlog.h \
     ../src/filewatcher.h \
+    ../src/gps/dlggpscalc.h \
+    ../src/gps/geotranslate.h \
+    ../src/gps/gpsfunc.h \
     ../src/pipeclient.h \
     ../src/comm.h \
     ../src/endpoint.h \
@@ -199,6 +206,7 @@ HEADERS += \
 
 FORMS += \
     ../src/dlgshowlog.ui \
+    ../src/gps/dlggpscalc.ui \
     ../src/port/portsetbox.ui \
     ../src/port/serialport.ui \
     ../src/port/tcpudpport.ui \

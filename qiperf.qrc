@@ -46,5 +46,6 @@
         <file alias="portconfig">images/portconfig.png</file>
         <file alias="iperf2">images/iperf2.png</file>
         <file alias="view">images/view.png</file>
+        <file alias="gps">images/gps.png</file>
     </qresource>
 </RCC>

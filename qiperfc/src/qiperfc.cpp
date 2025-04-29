@@ -25,6 +25,7 @@
 #include "endpointact.h"
 #include "tp.h"
 #include "versions.h"
+#include "../src/gps/dlggpscalc.h"
 // #include "../aip/hanwha.h"
 
 #include <QDebug>
@@ -1248,6 +1249,15 @@ void QIperfC::onAddSSH()
     qDebug() << "TODO onAddSSH";
 }
 
+void QIperfC::onGPScalc()
+{
+    DlgGpsCalc dlg_gps = DlgGpsCalc(); //for serial port config
+    if (dlg_gps.exec()== QDialog::Accepted){
+        //TODO: onGPScalc Accepted
+    }
+
+}
+
 void QIperfC::initActions()
 {
     // init actions
@@ -1285,6 +1295,8 @@ void QIperfC::initActions()
     }
     connect(ui->actionAddPing, &QAction::triggered, this, &QIperfC::onAddPing);
     connect(ui->actionWlanSTA, &QAction::triggered, this, &QIperfC::onWlanSTA);
+    //tools
+    connect(ui->actionGPScalc, &QAction::triggered, this, &QIperfC::onGPScalc);
     //option
     connect(ui->actionConfig, &QAction::triggered, this, &QIperfC::onConfig);
     //help

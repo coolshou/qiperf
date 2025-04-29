@@ -136,12 +136,19 @@
     <addaction name="actionSimple"/>
     <addaction name="actionMacro"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionGPScalc"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuRun"/>
    <addaction name="menuOption"/>
    <addaction name="menuAutomate"/>
    <addaction name="menuMonitor"/>
+   <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
    <addaction name="menuTest"/>
   </widget>
@@ -507,6 +514,15 @@
    </property>
    <property name="text">
     <string>Iperf2 log</string>
+   </property>
+  </action>
+  <action name="actionGPScalc">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/gps</normaloff>:/gps</iconset>
+   </property>
+   <property name="text">
+    <string>GPS calc</string>
    </property>
   </action>
  </widget>

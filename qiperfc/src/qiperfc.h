@@ -136,6 +136,7 @@ private slots:
     int getStatusClients();
     void onAddSerial();
     void onAddSSH();
+    void onGPScalc();
     void onAddPing();
     void onWlanSTA();
     void onError(QString msg);
