@@ -11,6 +11,9 @@
 #include <QDebug>
 #include <QMenu>
 
+static const int xMargin = 3;
+static const int yMargin = 3;
+
 QVTerminal::QVTerminal(QWidget *parent)
     : QAbstractScrollArea(parent)
 {
@@ -31,7 +34,8 @@ QVTerminal::QVTerminal(QWidget *parent)
     setFormat(QVTCharFormat());
     _layout = new QVTLayout();
     _pasteAction = new QAction("Paste", this);
-    _pasteAction->setShortcut(QKeySequence("Ctrl+V"));
+    _pasteAction->setShortcut(QKeySequence("Ctrl+V")); //TODO: FIXME conflect to MENU->Edit->Paste Shortcut
+    _pasteAction->setShortcutContext(Qt::WidgetShortcut);
     connect(_pasteAction, &QAction::triggered, this, &QVTerminal::paste);
     addAction(_pasteAction);
 
@@ -331,6 +335,11 @@ void QVTerminal::closelogfile()
     }
 }
 
+QPoint QVTerminal::posToCursor(const QPoint &cursorPos) const
+{
+    return QPoint((cursorPos.x() - xMargin) / _cw, (cursorPos.y() - yMargin + verticalScrollBar()->value()) / _ch);
+}
+
 void QVTerminal::writeData(QByteArray data)
 {
     if (_device){
@@ -482,14 +491,56 @@ void QVTerminal::resizeEvent(QResizeEvent */* event */)
 
 void QVTerminal::mousePressEvent(QMouseEvent *event)
 {
+    if (event->button() == Qt::LeftButton)
+    {
+        _endSelectPos = QPoint();
+        _startCursorSelectPos = posToCursor(event->pos());
+        setMouseTracking(true);
+    }
     if (event->button() == Qt::MiddleButton) {
-        if( QApplication::clipboard()->supportsSelection()) {
+        if (QApplication::clipboard()->supportsSelection()) {
             QByteArray data;
             data.append(QApplication::clipboard()->text(QClipboard::Selection).toUtf8());
             writeData(data);
         }
     }
     QWidget::mousePressEvent(event);
+}
+
+void QVTerminal::mouseMoveEvent(QMouseEvent *event)
+{
+    if (!_startCursorSelectPos.isNull())
+    {
+        _endSelectPos = posToCursor(event->pos());
+        if ((_startCursorSelectPos.y() > _endSelectPos.y())
+            || (_startCursorSelectPos.y() == _endSelectPos.y() && _startCursorSelectPos.x() > _endSelectPos.x()))
+        {
+            _startSelectPos = posToCursor(event->pos());
+            _endSelectPos = _startCursorSelectPos;
+        }
+        else
+        {
+            _startSelectPos = _startCursorSelectPos;
+            _endSelectPos = posToCursor(event->pos());
+        }
+        viewport()->update();
+    }
+}
+
+void QVTerminal::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        if (_startCursorSelectPos == _endSelectPos)
+        {
+            _startSelectPos = QPoint();
+            _endSelectPos = QPoint();
+        }
+        _startCursorSelectPos = QPoint();
+        viewport()->update();
+        setMouseTracking(false);
+    }
+    QAbstractScrollArea::mouseReleaseEvent(event);
 }
 
 #ifndef QT_NO_CONTEXTMENU

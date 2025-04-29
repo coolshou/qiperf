@@ -30,6 +30,7 @@ public:
     // log file
     void setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat);
     void closelogfile();
+    QPoint posToCursor(const QPoint &cursorPos) const;
 signals:
     void transmitData(const QByteArray &data);
 
@@ -71,7 +72,10 @@ private:
     QPoint _cursorPos;
     QTimer _cursorTimer;
     bool _cvisible;
-
+    // select
+    QPoint _startCursorSelectPos;
+    QPoint _startSelectPos;
+    QPoint _endSelectPos;
     // data
     QVTLayout *_layout;
 
@@ -92,6 +96,8 @@ protected:
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
 #ifndef QT_NO_CONTEXTMENU
     virtual void contextMenuEvent(QContextMenuEvent *event) override;
 #endif // QT_NO_CONTEXTMENU
