@@ -13,6 +13,18 @@ Quick iperf control tool
  * QCustomPlot
  * Qt MaintenanceTool to install android support
 
+# Build
+```
+    sudo apt install libsystemd-dev
+    # use qt5
+    export QT_SELECT=qt5
+    sudo apt install qt5-qmake qtbase5-dev libqt5websockets5-dev libqt5serialport5-dev qtwebengine5-dev qtbase5-private-dev
+    # use qt6
+    export QT_SELECT=qt5
+    sudo apt install qmake6  qt6-base-dev libqt6websockets6-dev libqt6serialport6-dev qt6-webengine-dev qt6-base-private-dev
+    # build qiperfc, qiperfd and qiperftray
+    build_deb.sh
+```
 # qiperfd
 Quick iperf daemon
 
@@ -54,14 +66,14 @@ cd /media/qiperf
 	sudo apt-get install build-essential crossbuild-essential-arm64
 	cd qiperf
 	dpkg-buildpackage -us -uc -b --host-arch arm64
-	
+
 sbuild --host=armhf
 
-## Windows	
+## Windows
 	requirement
 	Qt
-	Visual Studio 2022 Community 
-	
+	Visual Studio 2022 Community
+
 
 # Support
 
