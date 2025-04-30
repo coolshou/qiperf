@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
 #if defined (Q_OS_ANDROID)
     // android path
 //    m_path = "/data/local/tmp";
-    m_iperfexe2 = tmp +"/iperf";
+    m_iperfexe2 = tmp +"/iperf2";
     if (QFileInfo::exists(m_iperfexe2)){
         QFile::remove(m_iperfexe2);
     }
@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
         QFile::remove(m_iperfexe3);
     }
     //iperf2
-    QFile i2File(":/"+arch+"/iperf");
+    QFile i2File(":/"+arch+"/iperf2");
 //    onLog("iperf2: " + i2File.fileName());
     if (!i2File.open(QIODevice::ReadOnly)){
         onLog("could not open " + i2File.fileName()) ;
@@ -158,7 +158,7 @@ void MainWindow::onStarted()
 void MainWindow::onFinished(int exitCode, int exitStatus)
 {
     ui->pb_run->setText("Run");
-    ui->te_log->append("iperf finish: ("+ QString(exitCode)+ "): " + QString(exitStatus));
+    ui->te_log->append("iperf finish: ("+ QString::number(exitCode)+ "): " + QString::number(exitStatus));
 }
 
 void MainWindow::onLog(QString text)
