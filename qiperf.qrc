@@ -1,9 +1,13 @@
 <RCC>
     <qresource prefix="/">
         <file alias="qiperf">images/qiperf.png</file>
-        <file alias="arm/iperf">android/res/raw/arm/iperf</file>
         <file alias="arm/iperf3">android/res/raw/arm/iperf3</file>
-        <file alias="i386/iperf">android/res/raw/x86/iperf</file>
         <file alias="i386/iperf3">android/res/raw/x86/iperf3</file>
+        <file alias="arm/iperf2">android/res/raw/arm/iperf2</file>
+        <file alias="i386/iperf2">android/res/raw/x86/iperf2</file>
+        <file alias="aarch64/iperf2">android/res/raw/arm64/iperf2</file>
+        <file alias="aarch64/iperf3">android/res/raw/arm64/iperf3</file>
+        <file alias="x86_64/iperf2">android/res/raw/x86_64/iperf2</file>
+        <file alias="x86_64/iperf3">android/res/raw/x86_64/iperf3</file>
     </qresource>
 </RCC>
