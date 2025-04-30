@@ -38,12 +38,12 @@ void IperfWorker::work()
 
     // create iperf procress
     m_iperf =  new QProcess(m_parent);
-    m_iperf->start();
+    // m_iperf->start();
     connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
     connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
-    connect(m_iperf, SIGNAL(readyRead()), this, SLOT(readyReadStdOut()));
-    connect(m_iperf, SIGNAL(started()), this, SLOT(onStarted()));
-    connect(m_iperf, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(onFinished(int,QProcess::ExitStatus)));
+    connect(m_iperf, &QProcess::readyRead, this, &IperfWorker::readyReadStdOut);
+    connect(m_iperf, &QProcess::started, this, &IperfWorker::onStarted);
+    connect(m_iperf, &QProcess::finished, this, &IperfWorker::onFinished);
     //errorOccurred(QProcess::ProcessError error)
 
     m_iperf->start(m_cmd, m_arguments, QProcess::Unbuffered | QProcess::ReadWrite);
@@ -57,7 +57,7 @@ void IperfWorker::work()
         }
     }else{
         emit log("iperf not started!!" + m_cmd + " " + m_arguments.join(" "));
-        emit log(m_iperf->readAllStandardError());
+        emit log("ERROR:" + m_iperf->readAllStandardError());
     }
     emit finished(m_iperf->exitCode(), m_iperf->exitStatus());
 }

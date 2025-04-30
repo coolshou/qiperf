@@ -13,7 +13,11 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+#ifdef Q_OS_ANDROID
+    QString tmp = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+#else
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+#endif
 
     QString arch = QSysInfo::buildCpuArchitecture();
 //    onLog("arch: " + arch);
@@ -54,7 +58,8 @@ MainWindow::MainWindow(QWidget *parent)
         } else {
             // make file execuable
             QFile iperf2File(m_iperfexe2);
-            iperf2File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner| QFileDevice::ExeOwner|
+            iperf2File.setPermissions(QFileDevice::ExeUser | QFileDevice::ReadUser | QFileDevice::WriteUser|
+                                      QFileDevice::ReadOwner | QFileDevice::WriteOwner| QFileDevice::ExeOwner|
                                       QFileDevice::ReadGroup | QFileDevice::WriteGroup| QFileDevice::ExeGroup|
                                       QFileDevice::ReadOther | QFileDevice::WriteOther| QFileDevice::ExeOther);
         }
@@ -70,7 +75,8 @@ MainWindow::MainWindow(QWidget *parent)
         } else {
             // make file execuable
             QFile iperf3File(m_iperfexe3);
-            iperf3File.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner| QFileDevice::ExeOwner|
+            iperf3File.setPermissions(QFileDevice::ExeUser | QFileDevice::ReadUser | QFileDevice::WriteUser|
+                                      QFileDevice::ReadOwner | QFileDevice::WriteOwner| QFileDevice::ExeOwner|
                                       QFileDevice::ReadGroup | QFileDevice::WriteGroup| QFileDevice::ExeGroup|
                                       QFileDevice::ReadOther | QFileDevice::WriteOther| QFileDevice::ExeOther);
         }
