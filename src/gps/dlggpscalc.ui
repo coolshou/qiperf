@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>579</width>
-    <height>301</height>
+    <width>886</width>
+    <height>442</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,114 +34,106 @@
        <number>9</number>
       </property>
       <item>
-       <widget class="QWidget" name="widgetPos1" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="leftMargin">
-          <number>2</number>
+       <widget class="QTableWidget" name="tableWidget">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::CustomContextMenu</enum>
+        </property>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>200</number>
+        </attribute>
+        <row>
+         <property name="text">
+          <string>1</string>
          </property>
-         <property name="topMargin">
-          <number>2</number>
+        </row>
+        <row>
+         <property name="text">
+          <string>2</string>
          </property>
-         <property name="rightMargin">
-          <number>2</number>
+        </row>
+        <row>
+         <property name="text">
+          <string>3</string>
          </property>
-         <property name="bottomMargin">
-          <number>2</number>
+        </row>
+        <column>
+         <property name="text">
+          <string>Position</string>
          </property>
-         <item>
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>GPS1</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>Latitude:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lat1">
-           <property name="text">
-            <string>24.803962</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Longitude:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lon1">
-           <property name="text">
-            <string>121.038664</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="widgetPos2" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="leftMargin">
-          <number>2</number>
+        </column>
+        <column>
+         <property name="text">
+          <string>Latitude</string>
          </property>
-         <property name="topMargin">
-          <number>2</number>
+        </column>
+        <column>
+         <property name="text">
+          <string>Longitude</string>
          </property>
-         <property name="rightMargin">
-          <number>2</number>
+        </column>
+        <item row="0" column="0">
+         <property name="text">
+          <string>AM7</string>
          </property>
-         <property name="bottomMargin">
-          <number>2</number>
+        </item>
+        <item row="0" column="1">
+         <property name="text">
+          <string>24.804162</string>
          </property>
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>GPS2</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Latitude:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lat2">
-           <property name="text">
-            <string>24.802570</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>Longitude:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lon2">
-           <property name="text">
-            <string>121.038354</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        </item>
+        <item row="0" column="2">
+         <property name="text">
+          <string>121.027736</string>
+         </property>
+        </item>
+        <item row="1" column="0">
+         <property name="text">
+          <string>CM7-1</string>
+         </property>
+        </item>
+        <item row="1" column="1">
+         <property name="text">
+          <string>24.802636</string>
+         </property>
+        </item>
+        <item row="1" column="2">
+         <property name="text">
+          <string>121.022431</string>
+         </property>
+        </item>
+        <item row="2" column="0">
+         <property name="text">
+          <string>CM7-2</string>
+         </property>
+        </item>
+        <item row="2" column="1">
+         <property name="text">
+          <string>24.799918</string>
+         </property>
+        </item>
+        <item row="2" column="2">
+         <property name="text">
+          <string>121.026686</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
        <widget class="QWidget" name="widget" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QPushButton" name="pbClear">
+           <property name="text">
+            <string>Clear</string>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QPushButton" name="pbTaipei101SkyTree">
            <property name="text">
@@ -164,6 +156,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="pbPos">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
             <string>show</string>
            </property>
@@ -222,65 +217,47 @@
            </attribute>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="pbCalc">
+           <property name="text">
+            <string>Calc</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pbCalc">
-        <property name="text">
-         <string>Calc</string>
+       <widget class="QTableWidget" name="twResult">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>150</height>
+         </size>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="widget_4" native="true">
-        <layout class="QFormLayout" name="formLayout">
-         <property name="horizontalSpacing">
-          <number>2</number>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>150</number>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>P1 : P2</string>
          </property>
-         <property name="leftMargin">
-          <number>2</number>
+        </column>
+        <column>
+         <property name="text">
+          <string>Distance(KM)</string>
          </property>
-         <property name="topMargin">
-          <number>2</number>
+        </column>
+        <column>
+         <property name="text">
+          <string extracomment="從北方順時針轉度數">P1 azimuth(°)</string>
          </property>
-         <property name="rightMargin">
-          <number>2</number>
+        </column>
+        <column>
+         <property name="text">
+          <string extracomment="從北方順時針轉度數">P2 azimuth(°)</string>
          </property>
-         <property name="bottomMargin">
-          <number>2</number>
-         </property>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="azimuthGPS12"/>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_7">
-           <property name="text">
-            <string>GPS1 - GPS2:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="azimuthGPS21"/>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_8">
-           <property name="text">
-            <string>GPS2 - GPS1:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_9">
-           <property name="text">
-            <string>Distance(KM):</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QLineEdit" name="leDistance"/>
-         </item>
-        </layout>
+        </column>
        </widget>
       </item>
      </layout>
