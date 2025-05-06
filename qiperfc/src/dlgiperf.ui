@@ -29,7 +29,7 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QWidget" name="widget_5" native="true">
-     <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0,0">
+     <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0">
       <property name="leftMargin">
        <number>2</number>
       </property>
@@ -180,6 +180,11 @@
        <widget class="QComboBox" name="cb_unit_buffer">
         <item>
          <property name="text">
+          <string/>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>K</string>
          </property>
         </item>
@@ -214,7 +219,7 @@
          <set>Qt::AlignCenter</set>
         </property>
         <property name="maximum">
-         <number>999</number>
+         <number>9999</number>
         </property>
        </widget>
       </item>
