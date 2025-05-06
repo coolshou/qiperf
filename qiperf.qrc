@@ -47,5 +47,7 @@
         <file alias="iperf2">images/iperf2.png</file>
         <file alias="view">images/view.png</file>
         <file alias="gps">images/gps.png</file>
+        <file alias="ssh">images/ssh.png</file>
+        <file alias="telnet">images/telnet.png</file>
     </qresource>
 </RCC>
