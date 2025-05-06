@@ -30,9 +30,9 @@ QGeoCoordinate GeoTranslate::wgs84ToGcj02(QGeoCoordinate wgLoc)
 
 QGeoCoordinate GeoTranslate::gcj02ToWgs84(QGeoCoordinate gcLoc)
 {
-    //TODO
+    //TODO gcj02ToWgs84
     Q_UNUSED(gcLoc)
-    // QGeoCoordinate wgLoc = gcLoc;
+    QGeoCoordinate wgLoc = gcLoc;
     // QGeoCoordinate currGcLoc, dLoc;
     // while (1) {
     //     currGcLoc = transformFromWGSToGCJ(wgLoc);
@@ -48,7 +48,7 @@ QGeoCoordinate GeoTranslate::gcj02ToWgs84(QGeoCoordinate gcLoc)
     //     wgLoc.lng += dLoc.lng;
     // }
 
-    // return wgLoc;
+    return wgLoc;
 }
 
 QGeoCoordinate GeoTranslate::wgs84ToGcj02(double lat, double lon)
@@ -62,34 +62,43 @@ QGeoCoordinate GeoTranslate::gcj02ToWgs84(double lat, double lon)
 {
     Q_UNUSED(lat)
     Q_UNUSED(lon)
-    //TODO
+    //TODO gcj02ToWgs84
+    QGeoCoordinate gcj02Loc(lat,lon);
+    return gcj02Loc;
 }
 
 QGeoCoordinate GeoTranslate::gcj02ToBd09(QGeoCoordinate coordinate)
 {
     Q_UNUSED(coordinate)
-    //TODO
+    //TODO gcj02ToBd09
+    QGeoCoordinate gcj02Loc(lat,lon);
+    return gcj02Loc;
 }
 
 QGeoCoordinate GeoTranslate::bd09ToGcj02(QGeoCoordinate coordinate)
 {
     Q_UNUSED(coordinate)
-    //TODO
+    //TODO bd09ToGcj02
+    QGeoCoordinate bd09Loc(lat,lon);
+    return bd09Loc;
 }
 
 QGeoCoordinate GeoTranslate::gcj02ToBd09(double gg_lat, double gg_lon)
 {
     Q_UNUSED(gg_lat)
     Q_UNUSED(gg_lon)
-    //TODO
+    //TODO gcj02ToBd09
+    QGeoCoordinate gcj02Loc(lat,lon);
+    return gcj02Loc;
 }
 
 QGeoCoordinate GeoTranslate::bd09ToGcj02(double bd_lat, double bd_lon)
 {
     Q_UNUSED(bd_lat)
     Q_UNUSED(bd_lon)
-
-    //TODO
+    //TODO bd09ToGcj02
+    QGeoCoordinate bd09Loc(lat,lon);
+    return bd09Loc;
 }
 
 double GeoTranslate::transformLat(double x, double y)
