@@ -119,6 +119,21 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
                              QMessageBox::Ok);
         return;
     }
+    //check all cell have value
+    QTableWidgetItem *itm=nullptr;
+    int iCol = ui->tableWidget->columnCount();
+    for (int row=0;row<iRow;row++){
+        for (int col=0;col<iCol;col++){
+            itm = ui->tableWidget->item(row,col);
+            if(itm){
+                if (itm->text().isEmpty()){
+                    ui->tableWidget->setFocus();
+                    ui->tableWidget->setCurrentCell(row,col);
+                    return;
+                }
+            }
+        }
+    }
     QString pos1 = ui->tableWidget->item(0,0)->text();
     double lat1 = ui->tableWidget->item(0,1)->text().toDouble();
     double lon1 = ui->tableWidget->item(0,2)->text().toDouble();
