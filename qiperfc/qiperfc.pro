@@ -226,8 +226,8 @@ UI_DIR= \
     $$PWD/ui
 
 # Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/qiperf/bin
+qnx: target.path = /tmp/$${TARGET}
+else: unix:!android: target.path = /opt/qiperf
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
