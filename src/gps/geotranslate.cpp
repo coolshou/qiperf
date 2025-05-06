@@ -71,7 +71,7 @@ QGeoCoordinate GeoTranslate::gcj02ToBd09(QGeoCoordinate coordinate)
 {
     Q_UNUSED(coordinate)
     //TODO gcj02ToBd09
-    QGeoCoordinate gcj02Loc(lat,lon);
+    QGeoCoordinate gcj02Loc=coordinate;
     return gcj02Loc;
 }
 
@@ -79,25 +79,25 @@ QGeoCoordinate GeoTranslate::bd09ToGcj02(QGeoCoordinate coordinate)
 {
     Q_UNUSED(coordinate)
     //TODO bd09ToGcj02
-    QGeoCoordinate bd09Loc(lat,lon);
+    QGeoCoordinate bd09Loc=coordinate;
     return bd09Loc;
 }
 
 QGeoCoordinate GeoTranslate::gcj02ToBd09(double gg_lat, double gg_lon)
 {
-    Q_UNUSED(gg_lat)
-    Q_UNUSED(gg_lon)
+    // Q_UNUSED(gg_lat)
+    // Q_UNUSED(gg_lon)
     //TODO gcj02ToBd09
-    QGeoCoordinate gcj02Loc(lat,lon);
+    QGeoCoordinate gcj02Loc(gg_lat,gg_lon);
     return gcj02Loc;
 }
 
 QGeoCoordinate GeoTranslate::bd09ToGcj02(double bd_lat, double bd_lon)
 {
-    Q_UNUSED(bd_lat)
-    Q_UNUSED(bd_lon)
+    // Q_UNUSED(bd_lat)
+    // Q_UNUSED(bd_lon)
     //TODO bd09ToGcj02
-    QGeoCoordinate bd09Loc(lat,lon);
+    QGeoCoordinate bd09Loc(bd_lat,bd_lon);
     return bd09Loc;
 }
 
