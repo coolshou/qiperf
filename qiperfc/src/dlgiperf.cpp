@@ -401,9 +401,9 @@ void DlgIperf::ChangeVersion(const QString ver)
     // length of buffer
     QStringList unitBuffer;
     if (ver.indexOf("2")==0){
-        unitBuffer << "k" << "m" << "K" << "M";
+        unitBuffer << "" << "k" << "m" << "K" << "M";
     }else{
-        unitBuffer << "K" << "M" << "G";
+        unitBuffer << "" << "K" << "M" << "G";
     }
     ui->cb_unit_buffer->clear();
     ui->cb_unit_buffer->addItems(unitBuffer);
