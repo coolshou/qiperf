@@ -990,7 +990,9 @@ void QIperfC::onExport()
 {
     if (m_TestStartTime.isValid()){
         //export test record to html file
-        QString templatefile = qApp->applicationDirPath()+QDir::separator()+"template"+QDir::separator()+"result.html";
+        // QString templatefile = qApp->applicationDirPath()+QDir::separator()+"template"+QDir::separator()+"result.html";
+        QString templatefile = ":/template/result.html";
+        qDebug() << "templatefile: " << templatefile;
 
         QString path;
         if (!m_oldsavepath.isNull()){
