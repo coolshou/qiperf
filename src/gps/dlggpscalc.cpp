@@ -16,10 +16,12 @@ DlgGpsCalc::DlgGpsCalc(QWidget *parent) :
     ui->setupUi(this);
     ui->pbTaipei101SkyTree->setVisible(false);
     initAction();
+    m_dlgOSM = new DlgOpenStreetMap();
     connect(ui->pbTaipei101SkyTree, &QPushButton::clicked, this, &DlgGpsCalc::onTaipei101SkyTree);
     connect(ui->pbCalc, &QPushButton::clicked, this, &DlgGpsCalc::onCalcCliecked);
-    connect(ui->pbPos, &QPushButton::clicked, this, &DlgGpsCalc::onPosCliecked);
+    connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgGpsCalc::onShowMap);
     connect(ui->pbClear, &QPushButton::clicked, m_clearAction, &QAction::triggered);
+
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
             this, &DlgGpsCalc::showContextMenu);
 
@@ -165,46 +167,30 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
         ui->twResult->setItem(i-1, 2, new QTableWidgetItem(QString::number(azimuth)));
         ui->twResult->setItem(i-1, 3, new QTableWidgetItem(QString::number(azimuth2)));
     }
-    /*
-    if (ui->lat1->text().isEmpty()){
-        return;
-    }
-    // TODO: check lat1/lon1/lat2/lon2 format
-    // DD°mm'ss.sssss" N/S/E/W
-    // DD°mm.mmmmm' N/S/E/W
-    // DD.DDDDD°
-    //
-    double lat1 = ui->lat1->text().toDouble();
-    double lon1 = ui->lon1->text().toDouble();
-    double lat2 = ui->lat2->text().toDouble();
-    double lon2 = ui->lon2->text().toDouble();
 
-    double distance = 0;
-    double azimuth = 0;
-    double azimuth2 = 0;
-    if (ui->rbVincenty->isChecked()){
-        VincentyResult vrs = vincentyInverse(lat1 , lon1, lat2, lon2);
-        distance = vrs.distance/1000; // m -> KM
-        azimuth = vrs.initialBearing;
-        azimuth2 = vrs.finalBearing;
-    }
-    if (ui->rbHaversine->isChecked()){
-        azimuth = calcBearing(lat1 , lon1, lat2, lon2);
-        azimuth2 = calcBearing(lat2, lon2,lat1 , lon1);
-        distance = haversine(lat1 , lon1, lat2, lon2);
-    }
-
-    ui->azimuthGPS12->setText(QString::number(azimuth));
-    ui->azimuthGPS21->setText(QString::number(azimuth2));
-    ui->leDistance->setText(QString::number(distance));
-*/
 
 }
 
-void DlgGpsCalc::onPosCliecked(bool checked)
+void DlgGpsCalc::onShowMap(bool checked)
 {
     Q_UNUSED(checked)
-    qDebug() << "//TODO show google map" ;
+    //TODO: check openstreetmap can be accessable
+    if (ui->tableWidget->rowCount()<1){
+        QMessageBox::information(this, "Info",
+                                 "Require at last one GPS locaton",
+                                 QMessageBox::Ok);
+        return;
+    }
+
+    if (m_dlgOSM){
+        // QString pos1 = ui->tableWidget->item(0,0)->text();
+        QString lat1 = ui->tableWidget->item(0,1)->text();
+        QString lon1 = ui->tableWidget->item(0,2)->text();
+        m_dlgOSM->load(lat1, lon1);
+        //TODO: marker
+
+        m_dlgOSM->show();
+    }
 }
 
 void DlgGpsCalc::showContextMenu(const QPoint &pos)

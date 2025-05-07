@@ -33,6 +33,7 @@
 #include "../views/viewmanager.h"
 #include "../views/throughputview.h"
 #include "../views/serialview.h"
+#include "../src/gps/dlggpscalc.h"
 
 #if (TEST_ICMP==1)
 #include "../src/icmpping.h"
@@ -212,5 +213,6 @@ private:
     QString _logfilename;
     bool _logtimestemp;
     QString _logtimestempformat;
+    DlgGpsCalc *dlg_gps;
 };
 #endif // QIPERFC_H

@@ -53,4 +53,11 @@
     <qresource prefix="/template">
         <file alias="result.html">qiperfc/template/result.html</file>
     </qresource>
+    <qresource prefix="/openstreetmap">
+        <file alias="leaflet.css">src/map/openstreetmap/leaflet.css</file>
+        <file alias="leaflet.js">src/map/openstreetmap/leaflet.js</file>
+        <file alias="map.html">src/map/openstreetmap/map.html</file>
+        <file alias="marker.png">src/map/openstreetmap/marker.png</file>
+        <file alias="logo.png">src/map/openstreetmap/openstreetmap-logo.png</file>
+    </qresource>
 </RCC>

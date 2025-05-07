@@ -25,7 +25,7 @@
 #include "endpointact.h"
 #include "tp.h"
 #include "versions.h"
-#include "../src/gps/dlggpscalc.h"
+
 // #include "../aip/hanwha.h"
 
 #include <QDebug>
@@ -1253,11 +1253,8 @@ void QIperfC::onAddSSH()
 
 void QIperfC::onGPScalc()
 {
-    DlgGpsCalc dlg_gps = DlgGpsCalc(); //for serial port config
-    if (dlg_gps.exec()== QDialog::Accepted){
-        //TODO: onGPScalc Accepted
-    }
-
+    dlg_gps = new DlgGpsCalc();
+    dlg_gps->show();
 }
 
 void QIperfC::initActions()

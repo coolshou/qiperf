@@ -5,6 +5,7 @@
 #include <QPoint>
 #include <QMenu>
 #include <QAction>
+#include "../map/dlgopenstreetmap.h"
 
 namespace Ui {
 class DlgGpsCalc;
@@ -28,7 +29,7 @@ private slots:
     void onClear(bool checked);
     void onTaipei101SkyTree(bool checked);
     void onCalcCliecked(bool checked);
-    void onPosCliecked(bool checked);
+    void onShowMap(bool checked);
 
     void showContextMenu(const QPoint &pos);
 private:
@@ -37,6 +38,7 @@ private:
     QAction *m_insertAction;
     QAction *m_deleteAction;
     QAction *m_clearAction;
+    DlgOpenStreetMap *m_dlgOSM;
 };
 
 #endif // DLGGPSCALC_H

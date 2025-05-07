@@ -69,6 +69,7 @@ SOURCES += \
     ../src/gps/dlggpscalc.cpp \
     ../src/gps/geotranslate.cpp \
     ../src/gps/gpsfunc.cpp \
+    ../src/map/dlgopenstreetmap.cpp \
     ../src/myfunc.cpp \
     ../src/pipeclient.cpp \
     ../src/endpoint.cpp \
@@ -139,6 +140,7 @@ HEADERS += \
     ../src/gps/dlggpscalc.h \
     ../src/gps/geotranslate.h \
     ../src/gps/gpsfunc.h \
+    ../src/map/dlgopenstreetmap.h \
     ../src/pipeclient.h \
     ../src/comm.h \
     ../src/endpoint.h \
@@ -207,6 +209,7 @@ HEADERS += \
 FORMS += \
     ../src/dlgshowlog.ui \
     ../src/gps/dlggpscalc.ui \
+    ../src/map/dlgopenstreetmap.ui \
     ../src/port/portsetbox.ui \
     ../src/port/serialport.ui \
     ../src/port/tcpudpport.ui \
