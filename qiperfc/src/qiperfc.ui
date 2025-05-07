@@ -128,6 +128,7 @@
     <addaction name="actionAddPing"/>
     <addaction name="actionWlanSTA"/>
     <addaction name="actionWebControl"/>
+    <addaction name="actionTelnet"/>
    </widget>
    <widget class="QMenu" name="menuAutomate">
     <property name="title">
@@ -495,8 +496,12 @@
    </property>
   </action>
   <action name="actionSSH">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/ssh</normaloff>:/ssh</iconset>
+   </property>
    <property name="text">
-    <string>SSH</string>
+    <string>SSH(TODO)</string>
    </property>
   </action>
   <action name="actionWebControl">
@@ -523,6 +528,15 @@
    </property>
    <property name="text">
     <string>GPS calc</string>
+   </property>
+  </action>
+  <action name="actionTelnet">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/telnet</normaloff>:/telnet</iconset>
+   </property>
+   <property name="text">
+    <string>Telnet(TODO)</string>
    </property>
   </action>
  </widget>
