@@ -265,7 +265,9 @@ void ExportHtml::procressData()
     // iperf test pairs
     foreach (TP *tp, m_tps) {
         ls.clear();
-
+        if (tp->getDataType() != TPMgrData::config){
+            continue;
+        }
         QString s = tp->getServer();
         if (!ips.contains(s)) {
             ips.append(s);
