@@ -230,8 +230,8 @@ Section "qiperf console" SECTION_Console
     SetOutPath "$INSTDIR\printsupport\"
     File "printsupport\windowsprintersupport.dll"
 !endif
-    SetOutPath "$INSTDIR\template\"
-    File "..\qiperfc\template\result.html"
+    ;#SetOutPath "$INSTDIR\template\"
+    ;#File "..\qiperfc\template\result.html"
 
     !cd ..
     CreateShortCut "$DESKTOP\qiperfc.lnk" "$INSTDIR\${QIPERFC_NAME}"
@@ -389,7 +389,7 @@ Section Uninstall
 
     ; Clean up qiperf console
     Delete "$INSTDIR\${QIPERFC_NAME}"
-    Delete "$INSTDIR\template\result.html"
+    ; Delete "$INSTDIR\template\result.html"
 
     ; Remove remaining directories
     RMDir "$SMPROGRAMS\qiperf"
@@ -401,7 +401,7 @@ Section Uninstall
     RMDir "$INSTDIR\translations\qtwebengine_locales\"
 !endif
     RMDir "$INSTDIR\printsupport\"
-    RMDir "$INSTDIR\template"
+    ;RMDir "$INSTDIR\template"
     RMDir "$INSTDIR\"
 
     ${unregisterExtension} ".qip" "Quick Iperf config File"

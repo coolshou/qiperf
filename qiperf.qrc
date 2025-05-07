@@ -50,4 +50,7 @@
         <file alias="ssh">images/ssh.png</file>
         <file alias="telnet">images/telnet.png</file>
     </qresource>
+    <qresource prefix="/template">
+        <file alias="result.html">qiperfc/template/result.html</file>
+    </qresource>
 </RCC>

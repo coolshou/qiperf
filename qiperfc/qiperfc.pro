@@ -227,7 +227,7 @@ UI_DIR= \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}
-else: unix:!android: target.path = /opt/qiperf
+else: unix:!android: target.path = /opt/qiperf/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
@@ -258,8 +258,8 @@ VERSION = $$extract_version(20)
 #VERSION = $$system(cat $$PWD/../src/versions.h | grep "\"define QIPERFC_VERSION\"" | awk -F\' \'  \'{print $3}\' | awk -F\'\"\'  \'{print $2}\')
 message(QIPERFC_VERSION: $$VERSION)
 
-template.files += \
-        template/result.html
+# template.files += \
+#         template/result.html
 
 
 win32 {
@@ -302,12 +302,12 @@ CONFIG(release, debug|release) {
         $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/template/result.html)) $$shell_quote($$shell_path($${DIST_DIRECTORY}/template/))
     # INSTALLS += template
 
-    first.depends = $(first) iperfbin template
+    first.depends = $(first) iperfbin #template
     export(first.depends)
     export(iperfdata.commands)
     export(iperfbin.commands)
-    export(template.commands)
-    QMAKE_EXTRA_TARGETS += first iperfbin template
+    # export(template.commands)
+    QMAKE_EXTRA_TARGETS += first iperfbin #template
 
 }
 unix:!android {
