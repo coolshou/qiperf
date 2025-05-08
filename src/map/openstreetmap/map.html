@@ -44,10 +44,12 @@
     <script>
         let markerid = 0;
         let markerMap = {};  // key: ID, value: marker
-        var map = L.map('map').setView([%1, %2], 16);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        var map = L.map('map').setView([%2, %3], 16);
+        L.tileLayer('%1', {
             attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
         }).addTo(map);
+        // Add scale control
+        L.control.scale({position: 'bottomleft', imperial: false}).addTo(map);
         // Add or update a marker by ID
         function setMarker(id, lat, lng, label) {
             // If it already exists, remove it
