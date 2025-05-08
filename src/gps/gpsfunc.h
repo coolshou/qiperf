@@ -1,6 +1,8 @@
 #ifndef GPSFUNC_H
 #define GPSFUNC_H
 
+#include <QString>
+
 // 結構體用於返回距離和方位角
 struct VincentyResult {
     double distance;    // 距離（米）
@@ -33,5 +35,7 @@ double haversine(double lat1, double lon1, double lat2, double lon2);
 VincentyResult vincentyInverse(double lat1, double lon1, double lat2, double lon2);
 DMS degreeToDegreeMinSec(double degree);
 DM  degreeToDegreeMin(double degree);
+double DegreeMinSecToDegree(QString degree, QString min, QString sec);
+double DegreeMinToDegree(QString degree, QString min);
 
 #endif

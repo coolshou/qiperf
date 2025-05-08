@@ -176,9 +176,9 @@ DMS degreeToDegreeMinSec(double degree)
 {
     //convert degree to DDD° MM' SS.SSSSS"
     int d = static_cast<int>(degree);
-    double minuteDecimal = std::abs(degree - d) * 60.0;
+    double minuteDecimal = qAbs(degree - d)*60;
     int m = static_cast<int>(minuteDecimal);
-    double secondDecimal = std::abs(minuteDecimal - m) * 60.0;
+    double secondDecimal = qAbs(minuteDecimal - m) * 60.0;
     DMS dms;
     dms.degrees = d;
     dms.minutes = m;
@@ -195,4 +195,22 @@ DM degreeToDegreeMin(double degree)
     dm.degrees = d;
     dm.minutes = minuteDecimal;
     return dm;
+}
+//TODO: generic dms string conver to degree
+
+double DegreeMinSecToDegree(QString degree, QString min, QString sec)
+{
+    //DDD° MM' SS.SSSSS" to degree
+    double degrees = degree.toDouble();
+    double minutes = min.toDouble();
+    double seconds = sec.toDouble();
+    return degrees + (minutes / 60.0) + (seconds / 3600.0);
+}
+
+double DegreeMinToDegree(QString degree, QString min)
+{
+    //DDD° MM.MMMMM' to degree
+    double degrees = degree.toDouble();
+    double minutes = min.toDouble();
+    return degrees + (minutes / 60.0);
 }
