@@ -34,7 +34,7 @@ signals:
     void showGroup(bool bShow);
     void IgnoreWrongInterval(bool ignore);
     void updateTPUnit(QString sunit);
-
+    void updateOpenStreetMapTile(QString tile);
 protected:
     void changeEvent(QEvent *e) override;
     void hidetab(QString tabname);

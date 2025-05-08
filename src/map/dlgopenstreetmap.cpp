@@ -12,9 +12,10 @@ DlgOpenStreetMap::DlgOpenStreetMap(QWidget *parent)
     connect(ui->pbSet, &QPushButton::clicked, this, &DlgOpenStreetMap::onSet);
     connect(ui->pbAddMarker, &QPushButton::clicked, this, &DlgOpenStreetMap::onAddMarker);
     connect(ui->pbClearMarker, &QPushButton::clicked, this, &DlgOpenStreetMap::onClearMarker);
+
     // pbSet
     view = new QWebEngineView(ui->wMap);
-    // connect(view,&QWebEngineView::loadFinished, this, &DlgOpenStreetMap::onLoadFinished);
+    connect(view,&QWebEngineView::loadFinished, this, &DlgOpenStreetMap::onLoadFinished);
     ui->vlMap->addWidget(view);
 }
 
@@ -48,14 +49,16 @@ void DlgOpenStreetMap::getMarkersCountAsync()
 
 }
 
-void DlgOpenStreetMap::load(QString lat, QString lon)
+void DlgOpenStreetMap::load(QString tile, QString lat, QString lon)
 {
     // Load HTML from resource using qrc path
     QFile file(":/openstreetmap/map.html");
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QString html = file.readAll();
         file.close();
-        view->setHtml(html.arg(lat,lon), QUrl("qrc:/"));  // Use qrc base URL for relative paths
+        view->setHtml(html.arg(tile, lat,lon), QUrl("qrc:/"));  // Use qrc base URL for relative paths
+        ui->leLat->setText(lat);
+        ui->leLon->setText(lon);
     }
 }
 
@@ -65,7 +68,7 @@ void DlgOpenStreetMap::onSet(bool checked)
     if (view){
         QString lat = ui->leLat->text();
         QString lon = ui->leLon->text();
-        QString js=QString("map.setView([%1, %2], 13);").arg(lat, lon);
+        QString js=QString("map.setView([%1, %2], 16);").arg(lat, lon);
         view->page()->runJavaScript(js);
     }
 }
@@ -93,14 +96,7 @@ void DlgOpenStreetMap::onClearMarker(bool checked)
 void DlgOpenStreetMap::onLoadFinished(bool ok)
 {
     if (ok){
-        getMarkersCountAsync();
-        addMarker("24.804162", "121.027736", "AM7");
-        // QThread::sleep(2);//this will block ui
-        getMarkersCountAsync();
-        addMarker("24.802636", "121.022431", "CM7-1");
-        // QThread::sleep(2);
-        getMarkersCountAsync();
-        addMarker("24.799918", "121.026686", "CM7-2");
+        emit loadFinished(ok);
     }
 }
 void DlgOpenStreetMap::changeEvent(QEvent *e)

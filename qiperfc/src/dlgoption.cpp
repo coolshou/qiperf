@@ -57,6 +57,9 @@ void dlgOption::loadcfg(QSettings *cfg)
     cfg->beginGroup("notice");
     ui->cb_showManagerIPWarning->setChecked(cfg->value("showManagerIPWarning", true).toBool());
     cfg->endGroup();
+    cfg->beginGroup("gps");
+    ui->leOpenStreetMapTile->setText(cfg->value("OpenStreetMapTile", "https://tile.openstreetmap.org/{z}/{x}/{y}.png").toString());
+    cfg->endGroup();
 }
 
 void dlgOption::updatecfg()
@@ -86,6 +89,11 @@ void dlgOption::updatecfg()
 
     m_cfg->beginGroup("notice");
     m_cfg->setValue("showManagerIPWarning", ui->cb_showManagerIPWarning->isChecked());
+    m_cfg->endGroup();
+
+    m_cfg->beginGroup("gps");
+    m_cfg->setValue("OpenStreetMapTile", ui->leOpenStreetMapTile->text());
+    emit updateOpenStreetMapTile(ui->leOpenStreetMapTile->text());
     m_cfg->endGroup();
 
     m_cfg->sync();

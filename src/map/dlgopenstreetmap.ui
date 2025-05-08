@@ -86,7 +86,7 @@
          <item>
           <widget class="QPushButton" name="pbSet">
            <property name="text">
-            <string>Set</string>
+            <string>Set Map Center</string>
            </property>
           </widget>
          </item>

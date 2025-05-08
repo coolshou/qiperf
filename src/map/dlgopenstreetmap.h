@@ -18,8 +18,9 @@ public:
     void addMarker(QString lat, QString lon, QString label="lable");
     void clearMarker();
     void getMarkersCountAsync();
-    void load(QString lat="24.804162", QString lon="121.027736"); //24.804162, 121.027736
-
+    void load(QString tile, QString lat="24.804162", QString lon="121.027736"); //24.804162, 121.027736
+signals:
+    void loadFinished(bool ok);
 protected slots:
     void onSet(bool checked);
     void onAddMarker(bool checked);

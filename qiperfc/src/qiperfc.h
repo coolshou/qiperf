@@ -147,6 +147,7 @@ private slots:
     void onHeigthChanged(int heigth);
     void onShowGroup(bool bShow);
     void onIgnoreWrongInterval(bool bIgnore);
+    void onUpdateOpenStreetMapTile(QString tile);
     void onSerialOpened(QString refrow, QString serveraddress, QString serveraPort);
 private:
     Ui::MainWindow *ui;
@@ -214,5 +215,6 @@ private:
     bool _logtimestemp;
     QString _logtimestempformat;
     DlgGpsCalc *dlg_gps;
+    QString m_OpenStreetMapTile;
 };
 #endif // QIPERFC_H

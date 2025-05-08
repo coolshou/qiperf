@@ -5,6 +5,9 @@
 #include <QPoint>
 #include <QMenu>
 #include <QAction>
+#include <QSettings>
+#include <QNetworkReply>
+
 #include "../map/dlgopenstreetmap.h"
 
 namespace Ui {
@@ -16,9 +19,12 @@ class DlgGpsCalc : public QDialog
     Q_OBJECT
 
 public:
-    explicit DlgGpsCalc(QWidget *parent = nullptr);
+    explicit DlgGpsCalc(QSettings *cfg, QWidget *parent = nullptr);
     ~DlgGpsCalc();
-
+    void isTileAvailable();
+    QString getTile();
+signals:
+    void TileAvailable(bool ok);
 protected:
     void changeEvent(QEvent *e);
 
@@ -30,15 +36,22 @@ private slots:
     void onTaipei101SkyTree(bool checked);
     void onCalcCliecked(bool checked);
     void onShowMap(bool checked);
-
+    void onToDMS(bool checked);
+    void onToDegree(bool checked);
     void showContextMenu(const QPoint &pos);
+    void onLoadFinished(bool ok);
+    void onTileAvailable(bool ok);
+    void onCheckTileFinished();
+    void onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode);
 private:
     Ui::DlgGpsCalc *ui;
+    QSettings *m_cfg;
     QMenu *m_contextMenu;
     QAction *m_insertAction;
     QAction *m_deleteAction;
     QAction *m_clearAction;
     DlgOpenStreetMap *m_dlgOSM;
+    QNetworkReply *reply = nullptr;
 };
 
 #endif // DLGGPSCALC_H

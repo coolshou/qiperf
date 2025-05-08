@@ -79,6 +79,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_frm_option, &dlgOption::IgnoreWrongInterval, this, &QIperfC::onIgnoreWrongInterval);
     connect(m_frm_option, &dlgOption::updateTPUnit, this, &QIperfC::onUpdateTPUnit);
     connect(m_frm_option, &dlgOption::updateTPUnit, m_throughputview, &ThroughputView::onUpdateTPUnit);
+    connect(m_frm_option, &dlgOption::updateOpenStreetMapTile, this, &QIperfC::onUpdateOpenStreetMapTile);
     initStatusbar();
 
     //UI actions
@@ -937,6 +938,9 @@ void QIperfC::saveSettings()
     m_settings->setValue("TPUnit", m_TPUnit);
     m_settings->setValue("IgnoreWrongInterval", m_IgnoreWrongInterval);
     m_settings->endGroup();
+    m_settings->beginGroup("gps");
+    m_settings->setValue("OpenStreetMapTile", m_OpenStreetMapTile);
+    m_settings->endGroup();
     m_settings->sync();
 }
 
@@ -971,6 +975,9 @@ void QIperfC::loadSettings()
 
     m_settings->beginGroup("Terminal");
 //TODO
+    m_settings->endGroup();
+    m_settings->beginGroup("gps");
+    m_OpenStreetMapTile = m_settings->value("OpenStreetMapTile", "https://tile.openstreetmap.org/{z}/{x}/{y}.png").toString();
     m_settings->endGroup();
 }
 
@@ -1078,6 +1085,11 @@ void QIperfC::onIgnoreWrongInterval(bool bIgnore)
     qDebug() << "onIgnoreWrongInterval:" << bIgnore;
     m_qipconfig->setIgnoreWrongInterval(m_IgnoreWrongInterval);
     //TODO: info all qiperfd Ignore Wrong Interval data on report iperf throughput?or just not show the wrong data??
+}
+
+void QIperfC::onUpdateOpenStreetMapTile(QString tile)
+{
+    m_OpenStreetMapTile = tile;
 }
 
 void QIperfC::onSerialOpened(QString refrow, QString serveraddress, QString serveraPort)
@@ -1253,7 +1265,7 @@ void QIperfC::onAddSSH()
 
 void QIperfC::onGPScalc()
 {
-    dlg_gps = new DlgGpsCalc();
+    dlg_gps = new DlgGpsCalc(m_settings);
     dlg_gps->show();
 }
 
