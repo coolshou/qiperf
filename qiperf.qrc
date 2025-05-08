@@ -59,5 +59,6 @@
         <file alias="map.html">src/map/openstreetmap/map.html</file>
         <file alias="marker.png">src/map/openstreetmap/marker.png</file>
         <file alias="logo.png">src/map/openstreetmap/openstreetmap-logo.png</file>
+        <file alias="marker0.png">src/map/openstreetmap/marker0.png</file>
     </qresource>
 </RCC>
