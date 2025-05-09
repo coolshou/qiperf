@@ -637,9 +637,11 @@ void QIperfC::onStart()
             iWait = waitStartTime.secsTo(waitEndTime);
         }
         onStop();
-        if (!isRunforever){
-            emit setEndTime(maxtestduration-iExtraWait);
-        }
+        // qDebug() << "iWait:" << QString::number(iWait)
+        //          << "maxtestduration: " <<  QString::number(maxtestduration);
+        // // if (!isRunforever){
+        // //     emit setEndTime(maxtestduration-iExtraWait);
+        // // }
     } else {
         QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");
         emit testStoped(-1);
@@ -658,6 +660,7 @@ void QIperfC::onStop(){
         }
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
+    QThread::sleep(1);
     // Stop reg iperf server
     foreach (auto key, m_wss.keys()){
         if (m_wss[key]){
@@ -679,7 +682,9 @@ void QIperfC::onStop(){
     QDateTime enddatetime = QDateTime::fromString(endtime,DATETIME_NOW_FORMAT);
     //TODO: error end message?
     qInfo() << "m_status_server:" << m_status_server << " m_status_client:" << m_status_client;
-    emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(m_TestStartTime.secsTo(enddatetime))+" sec)");
+    double consumetime = m_TestStartTime.secsTo(enddatetime);
+    emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(consumetime)+" sec)");
+    emit setEndTime(consumetime); //update x-axis max value
 }
 
 bool QIperfC::onClear(bool showNotice){
