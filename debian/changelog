@@ -1,3 +1,13 @@
+qiperf (0.11.11405.09-1) unstable; urgency=medium
+
+  * Update iperf config Buffer Length(-l): allow input Max 9999 without Buffer Length unit
+  * Update template/result.html into qiperfc.qrc to Fix worng export html template path
+  * Fix exportHTML only export config when datatype is TPMgrData::config
+  * add OpenStreetMap to show GPS location marker
+  * Fix set -t 0 only run <7sec,  did not run forever!!
+  * Fix on group mode, update y-axis max value
+
+ -- coolshou <coolshou2060@gmail.com>  Fri, 9 May 2025 10:00:00 +0800
 
 qiperf (0.11.11405.06-1) unstable; urgency=medium
 

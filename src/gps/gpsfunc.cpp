@@ -212,5 +212,6 @@ double DegreeMinToDegree(QString degree, QString min)
     //DDD° MM.MMMMM' to degree
     double degrees = degree.toDouble();
     double minutes = min.toDouble();
-    return degrees + (minutes / 60.0);
+    double result = degrees + (minutes / 60.0);
+    return result;
 }
