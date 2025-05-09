@@ -266,13 +266,13 @@ void TPPlot::onDataAdded(double key, double value)
             int rc=mTotalGraph->getValue(key, orgvalue);
             if (rc>-1){
                 double sumvalue = orgvalue + value;
+                updateYAxisRange(0, sumvalue);
                 mTotalGraph->updateValue(key,sumvalue);
                 mTotalGraph->rescaleAxes(true);
             }else{
                 // qDebug() << ((MyQCPGraph*)sender())->name() << " (" << key << ") Key not found";
                 mTotalGraph->addData(key,value);
             }
-            // replot();
         }else {
             qDebug() << "onDataAdded: ERROR does not have mTotalGraph" ;
         }
@@ -281,6 +281,7 @@ void TPPlot::onDataAdded(double key, double value)
 
 void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data)
 {
+    //combine two data in to Total graph
     if(mTotalGraph){
         QSharedPointer<QCPGraphDataContainer> data1 = mTotalGraph->data();
         QSharedPointer<QCPGraphDataContainer> data2 = data;
@@ -307,6 +308,7 @@ void TPPlot::onLostRateDataAdded(double key, double value)
             int rc=mTotalLostGraph->getValue(key, orgvalue);
             if (rc>-1){
                 double sumvalue = orgvalue + value;
+                // updateYAxisRange(0, sumvalue);
                 mTotalLostGraph->updateValue(key,sumvalue);
                 mTotalLostGraph->rescaleAxes(true);
             }else{
@@ -801,13 +803,15 @@ void TPPlot::updateYAxisRange(double minvalue, double maxvalue)
     }else{
         minvalue = minvalue - (0.1*minvalue);
     }
-    if (yAxis->range().upper > maxvalue){
+    if ((yAxis->range().upper / maxvalue)>1.1){
         maxvalue = yAxis->range().upper;
     }else{
         if (maxvalue < 100){
-            maxvalue = maxvalue + (0.5*maxvalue);
+            // maxvalue = maxvalue + (0.5*maxvalue);
+            maxvalue = maxvalue * 1.5;
         }else{
-            maxvalue = maxvalue + (0.1*maxvalue);
+            // maxvalue = maxvalue + (0.1*maxvalue);
+            maxvalue = maxvalue * 1.1;
         }
     }
     yAxis->setRange(minvalue, maxvalue);
@@ -835,6 +839,7 @@ QSharedPointer<QCPGraphDataContainer> TPPlot::sumGraphData(const QSharedPointer<
     auto it1 = data1->constBegin();
     auto it2 = data2->constBegin();
 
+    double sumvalue=0.0;
     while (it1 != data1->constEnd() && it2 != data2->constEnd())
     {
         if (it1->key < it2->key)
@@ -849,7 +854,8 @@ QSharedPointer<QCPGraphDataContainer> TPPlot::sumGraphData(const QSharedPointer<
         }
         else
         {
-            result->add(QCPGraphData(it1->key, it1->value + it2->value));
+            sumvalue =  it1->value + it2->value;
+            result->add(QCPGraphData(it1->key, sumvalue));
             ++it1;
             ++it2;
         }
