@@ -60,5 +60,8 @@
         <file alias="marker.png">src/map/openstreetmap/marker.png</file>
         <file alias="logo.png">src/map/openstreetmap/openstreetmap-logo.png</file>
         <file alias="marker0.png">src/map/openstreetmap/marker0.png</file>
+        <file alias="L.PolylineDecorator.js">src/map/openstreetmap/L.PolylineDecorator.js</file>
+        <file alias="L.Symbol.js">src/map/openstreetmap/L.Symbol.js</file>
+        <file alias="patternUtils.js">src/map/openstreetmap/patternUtils.js</file>
     </qresource>
 </RCC>
