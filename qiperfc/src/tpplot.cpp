@@ -42,21 +42,7 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
 
     double minT = *std::min_element(timedatas.begin(), timedatas.end());// x: min time
     double maxT = *std::max_element(timedatas.begin(), timedatas.end());// x: max time
-    //when have several serial chart, set correct min/max
-    // qDebug() << "minRange: " << QString::number(xAxis->range().lower)
-    //          << "maxRange: " << QString::number(xAxis->range().upper)
-    //          << "minT: " << QString::number(minT)
-    //          << "maxT: " << QString::number(maxT);
-    if (xAxis->range().lower < minT){
-        minT = xAxis->range().lower;
-    }
-    if (xAxis->range().upper > maxT){
-        maxT = xAxis->range().upper;
-    }
-    minT = minT - (0.1*minT);
-    maxT = maxT + (0.1*maxT);
-    // xAxis->setRange(minT-30, maxT+30);
-    xAxis->setRange(minT, maxT);
+    updateXAxisRange(minT, maxT);
 
     double minV = *std::min_element(valuedatas.begin(), valuedatas.end()); // y: min value
     double maxV = *std::max_element(valuedatas.begin(), valuedatas.end()); // y: max value
@@ -76,7 +62,6 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
         // g_lostrate->setData(timedatas, lostrates);
         g_lostrate->setData(timedatas, packetlosts, packettotals);
     }
-    // updateTotalGraph();
     this->replot();
 }
 
@@ -390,10 +375,9 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
         }
     }
     // enlarge/shrink y range
-     updateYAxisRange(0, ydata);
-    if (xdata >= xAxis->range().upper){
-        xAxis->setRange(0, xdata + m_interval); // add m_interval sec
-    }
+    updateYAxisRange(0, ydata);
+    updateXAxisRange(0, xdata + m_interval);
+
     //lost rate
     if (lostrate>0){
         MyQCPBars *g_lostrate = getLostRateGraph(idx);
@@ -730,71 +714,20 @@ QPen TPPlot::newColorPen(int r, int g, int b, int width)
     return graphPen;
 }
 
-// void TPPlot::updateTotalGraph()
-// {
-//     if (m_graphs.values().length()>0){
-//         // QSharedPointer<QCPGraphDataContainer> sumData(new QCPGraphDataContainer);
-//         QSharedPointer<QCPGraphDataContainer> sumData = mTotalGraph->data();
-//         for (auto graph : m_graphs.values()) {
-//             QSharedPointer<QCPGraphDataContainer> dataContainer = graph->data();
-//             for (auto it = dataContainer->constBegin(); it != dataContainer->constEnd(); ++it) {
-//                 auto sumIt = sumData->findBegin(it->key);
-//                 // if (!sumIt){
-
-//                 // }
-//                 // if((sumIt != sumData->end()) && sumIt){ //found
-//                 //     qDebug() << "sumIt:" << sumIt->key << " value:" << sumIt->value;
-
-//                 // }else {  //not found
-//                 //     qDebug() << " Did no find sumData key" << it->key;
-//                 // }
-//                 if (sumIt != sumData->end() && sumIt->key == it->key) {
-//                     QCPGraphData updatedData = *sumIt;
-//                     updatedData.key = it->key;
-//                     qDebug() << graph << " : updatedData.value:" << QString::number(updatedData.value);
-//                     updatedData.value += it->value;
-//                     sumData->remove(it->key);
-//                     sumData->add(updatedData);
-//                     // sumIt->value += it->value;
-//                 } else {
-//                     qDebug() << graph << " new: " <<  QString::number(it->key) << " = "<< QString::number(it->value);
-//                     sumData->add(QCPGraphData(it->key, it->value));
-//                 }
-//             }
-//         }
-//         qDebug() << "updateTotalGraph:" << sumData ;//<< " size:" << QString::number(sumData.value->size());
-//         mTotalGraph->setData(sumData);
-//     }else{
-//         qDebug() << "updateTotalGraph: No graphs";
-//     }
-// }
-
-// void TPPlot::updateTotalGraphData(double targetKey, double value)
-// {
-//     QSharedPointer<QCPGraphDataContainer> dataContainer = mTotalGraph->data();
-//     // Iterate through the data and update the value
-//     bool keyExists = false;
-//     double existingValue = 0.0; // Variable to store the existing value
-//     for (auto it = dataContainer->begin(); it != dataContainer->end(); ++it) {
-//         if (it->key == targetKey) { // targetKey is the x-value you want to update
-//             // it->value = value; // newValue is the new y-value
-//             keyExists = true;
-//             existingValue = it->value; // Get the existing value
-//             it->value = existingValue + value;
-//             break;
-//         }
-//     }
-//     if (!keyExists){
-//         // Create a new QCPGraphData object with the new key and value
-//         QCPGraphData newData;
-//         newData.key = targetKey; // newKey is the x-value you want to add
-//         newData.value = value; // newValue is the y-value you want to add
-
-//         // Add the new data to the container
-//         dataContainer->add(newData);
-//     }
-//     replot();
-// }
+void TPPlot::updateXAxisRange(double mintime, double maxtime)
+{
+    if (xAxis->range().lower < mintime){
+        mintime = xAxis->range().lower;
+    }else{
+        mintime = mintime *0.9;
+    }
+    if ((xAxis->range().upper / maxtime)>1.1){
+        maxtime = xAxis->range().upper;
+    }else{
+        maxtime = maxtime *1.1;
+    }
+    xAxis->setRange(mintime, maxtime);
+}
 
 void TPPlot::updateYAxisRange(double minvalue, double maxvalue)
 {

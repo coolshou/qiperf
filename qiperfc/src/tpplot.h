@@ -45,8 +45,7 @@ private slots:
 private:
     void initCustomPlot();
     QPen newColorPen(int r, int g, int b, int width);
-    // void updateTotalGraph();
-    // void updateTotalGraphData(double targetKey, double value);
+    void updateXAxisRange(double mintime, double maxtime);
     void updateYAxisRange(double minvalue, double maxvalue);
     QVector<QCPGraphData> convertQMapToQVector(const QMap<double, double>& map);
     QSharedPointer<QCPGraphDataContainer> sumGraphData(const QSharedPointer<QCPGraphDataContainer> &data1, const QSharedPointer<QCPGraphDataContainer>& data2);
