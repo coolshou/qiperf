@@ -384,9 +384,11 @@ void QIperfC::onStart()
         int maxtestduration=0; // max wait test time
         int maxInterval=0; // max Interval time
         int iwait=0;
+        int iomit=0;
         int idelaytime=0;
         int itimeout;
         int refrow;
+        bool isRunforever=false;
         foreach (TP *tp, tps) {
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             if (tp->getEnabled()){
@@ -394,11 +396,15 @@ void QIperfC::onStart()
                     maxInterval = tp->getInterval();
                 }
                 //RPC to control all server endpoint (iperf server)
+                isRunforever = isRunforever | tp->getRunforever();
+                qDebug() << "isRunforever: " << isRunforever;
                 int testduration=0;
                 iwait = tp->getWaitTime();
                 if (iwait> testduration){
                     testduration = iwait+iExtraWait;
                 }
+                iomit = tp->getOmitTime();
+                testduration = testduration + iomit;
                 idelaytime = tp->getDelaytime();
                 if (idelaytime>0) {
                     testduration = testduration + idelaytime;
@@ -609,7 +615,7 @@ void QIperfC::onStart()
         QDateTime waitStartTime = QDateTime::currentDateTime();
         QDateTime waitEndTime = QDateTime::currentDateTime();
         qint64 iWait = waitStartTime.secsTo(waitEndTime);
-        while ((iWait < maxtestduration) && (bUserStop==false)){
+        while (((iWait < maxtestduration) || isRunforever) && (bUserStop==false)){
             if ((getStatusServers()>m_status_server.keys().length()) ||
                 (getStatusClients()>m_status_client.keys().length())) {
                 qDebug() << "Some problem happen!! abort!! server:" << m_status_server <<
@@ -621,8 +627,13 @@ void QIperfC::onStart()
             }
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             QThread::msleep(100);
-            emit updateStatus("Remain "+ QString::number(maxtestduration-iWait) + " sec");
             waitEndTime = QDateTime::currentDateTime();
+            if (isRunforever){
+                emit updateStatus("Runtime "+  QString::number(iWait) + " sec");
+            }else{
+                emit updateStatus("Remain "+ QString::number(maxtestduration-iWait) + " sec");
+            }
+
             iWait = waitStartTime.secsTo(waitEndTime);
         }
         onStop();
