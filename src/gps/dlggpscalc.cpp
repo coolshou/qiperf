@@ -19,6 +19,7 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
     ui->pbTaipei101SkyTree->setVisible(false);
     initAction();
     m_dlgOSM = new DlgOpenStreetMap();
+    connect(this, &DlgGpsCalc::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
     connect(ui->pbTaipei101SkyTree, &QPushButton::clicked, this, &DlgGpsCalc::onTaipei101SkyTree);
     connect(ui->pbCalc, &QPushButton::clicked, this, &DlgGpsCalc::onCalcCliecked);
     connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgGpsCalc::onShowMap);
@@ -30,6 +31,7 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
     connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgGpsCalc::onLoadFinished);
     connect(this, &DlgGpsCalc::TileAvailable, this , &DlgGpsCalc::onTileAvailable);
     isTileAvailable();
+
 }
 
 DlgGpsCalc::~DlgGpsCalc()
@@ -74,6 +76,12 @@ void DlgGpsCalc::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+
+void DlgGpsCalc::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event)
+    emit closeAll();
 }
 
 void DlgGpsCalc::initAction()
@@ -176,6 +184,7 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
     double lon=0.0;
     double distance = 0;
     double azimuth = 0;
+    double totalazimuth = 0.0;
     double azimuth2 = 0;
     ui->twResult->setRowCount(iRow-1);
 
@@ -197,9 +206,24 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
         ui->twResult->setItem(i-1, 0, new QTableWidgetItem(pos1 + " : " + pos));
         ui->twResult->setItem(i-1, 1, new QTableWidgetItem(QString::number(distance)));
         ui->twResult->setItem(i-1, 2, new QTableWidgetItem(QString::number(azimuth)));
+        totalazimuth = totalazimuth + azimuth;
         ui->twResult->setItem(i-1, 3, new QTableWidgetItem(QString::number(azimuth2)));
+        if (showline){
+            if (m_dlgOSM){
+                m_dlgOSM->addDistLine(QString::number(lat1), QString::number(lon1),
+                                      QString::number(lat), QString::number(lon),
+                                      QString::number(distance));
+            }
+        }
     }
-
+    double azimuthDegree = totalazimuth/ui->tableWidget->rowCount();
+    ui->leExpectAzimuth->setText(QString::number(azimuthDegree));
+    if (showline){
+        if (m_dlgOSM){
+            m_dlgOSM->addAzimuthIndicator(QString::number(lat1), QString::number(lon1),
+                                          QString::number(azimuthDegree), QString::number(3000));
+        }
+    }
 
 }
 
@@ -243,7 +267,7 @@ void DlgGpsCalc::onToDMS(bool checked)
         DMS dms = degreeToDegreeMinSec(degree);
         ui->leDeg->setText(QString::number(dms.degrees));
         ui->leMin->setText(QString::number(dms.minutes));
-        ui->leSec->setText(QString::number(dms.seconds));
+        ui->leSec->setText(QString::number(dms.seconds, 'f', 6));
     }
 
 }
@@ -264,7 +288,7 @@ void DlgGpsCalc::onToDegree(bool checked)
         qDebug() << "unknown format" ;
     }
     if (degree>0){
-        ui->leDegree->setText(QString::number(degree));
+        ui->leDegree->setText(QString::number(degree, 'f', 6));
     }
 }
 
@@ -296,7 +320,11 @@ void DlgGpsCalc::onLoadFinished(bool ok)
                 label = ui->tableWidget->item(row,0)->text();
                 lat = ui->tableWidget->item(row,1)->text();
                 lon = ui->tableWidget->item(row,2)->text();
-                m_dlgOSM->addMarker(lat, lon, label);
+                if (row==0){
+                    m_dlgOSM->addMarker(lat, lon, label, "marker0");
+                }else{
+                    m_dlgOSM->addMarker(lat, lon, label);
+                }
             }
         }
     }
@@ -310,8 +338,8 @@ void DlgGpsCalc::onTileAvailable(bool ok)
 void DlgGpsCalc::onCheckTileFinished()
 {
     if (reply->error() == QNetworkReply::NoError) {
-        QByteArray response = reply->readAll();
-        qDebug() << "Response:" << response;
+        // QByteArray response = reply->readAll();
+        // qDebug() << "Response:" << response;
         emit TileAvailable(true);
     } else {
         QString errmsg= reply->errorString();

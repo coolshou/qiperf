@@ -24,12 +24,27 @@ DlgOpenStreetMap::~DlgOpenStreetMap()
     delete ui;
 }
 
-void DlgOpenStreetMap::addMarker(QString lat, QString lon, QString label)
+void DlgOpenStreetMap::addMarker(QString lat, QString lon, QString label, QString marker)
 {
     //    alert('markerid:' + ${markerid});
     QString js=QString("markerid = Object.keys(markerMap).length;\
-    setMarker(markerid, %2, %3, '%4');").arg(lat, lon, label.replace("'", "\\'"));
+    setMarker(markerid, %1, %2, '%3', '%4');").arg(lat, lon, label.replace("'", "\\'"), marker);
     qDebug() << "addMarker: " << js;
+    view->page()->runJavaScript(js);
+}
+
+void DlgOpenStreetMap::addDistLine(QString lat1, QString lon1, QString lat2, QString lon2, QString label)
+{
+    // add a distance line between two point with a label
+    QString js=QString("addDistLine(%1, %2, %3, %4, '%5');").arg(lat1, lon1,
+                                                                 lat2, lon2, label);
+    view->page()->runJavaScript(js);
+}
+
+void DlgOpenStreetMap::addAzimuthIndicator(QString lat, QString lon, QString azimuthDeg, QString lengthMeters)
+{
+    QString js=QString("drawAzimuthIndicator(%1, %2, %3, %4);").arg(lat, lon,
+                                                                   azimuthDeg, lengthMeters);
     view->page()->runJavaScript(js);
 }
 

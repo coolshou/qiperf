@@ -15,7 +15,9 @@ class DlgOpenStreetMap : public QDialog
 public:
     explicit DlgOpenStreetMap(QWidget *parent = nullptr);
     ~DlgOpenStreetMap();
-    void addMarker(QString lat, QString lon, QString label="lable");
+    void addMarker(QString lat, QString lon, QString label="lable", QString marker="marker");
+    void addDistLine(QString lat1, QString lon1, QString lat2, QString lon2, QString label);
+    void addAzimuthIndicator(QString lat, QString lon, QString azimuthDeg, QString lengthMeters="1000");
     void clearMarker();
     void getMarkersCountAsync();
     void load(QString tile, QString lat="24.804162", QString lon="121.027736"); //24.804162, 121.027736

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>830</width>
-    <height>434</height>
+    <width>871</width>
+    <height>493</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -96,109 +96,160 @@
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="widgetPos" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
+    <widget class="QWidget" name="widget_3" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,0">
       <property name="leftMargin">
-       <number>9</number>
+       <number>2</number>
       </property>
       <property name="topMargin">
-       <number>9</number>
+       <number>2</number>
       </property>
       <property name="rightMargin">
-       <number>9</number>
+       <number>2</number>
       </property>
       <property name="bottomMargin">
-       <number>9</number>
+       <number>2</number>
       </property>
       <item>
-       <widget class="QTableWidget" name="tableWidget">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>150</height>
-         </size>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::CustomContextMenu</enum>
-        </property>
-        <attribute name="horizontalHeaderDefaultSectionSize">
-         <number>200</number>
-        </attribute>
-        <row>
-         <property name="text">
-          <string>1</string>
+       <widget class="QWidget" name="widgetPos" native="true">
+        <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0">
+         <property name="leftMargin">
+          <number>9</number>
          </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>2</string>
+         <property name="topMargin">
+          <number>9</number>
          </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>3</string>
+         <property name="rightMargin">
+          <number>9</number>
          </property>
-        </row>
-        <column>
-         <property name="text">
-          <string>Position</string>
+         <property name="bottomMargin">
+          <number>9</number>
          </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Latitude</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Longitude</string>
-         </property>
-        </column>
-        <item row="0" column="0">
-         <property name="text">
-          <string>AM7</string>
-         </property>
-        </item>
-        <item row="0" column="1">
-         <property name="text">
-          <string>24.804162</string>
-         </property>
-        </item>
-        <item row="0" column="2">
-         <property name="text">
-          <string>121.027736</string>
-         </property>
-        </item>
-        <item row="1" column="0">
-         <property name="text">
-          <string>CM7-1</string>
-         </property>
-        </item>
-        <item row="1" column="1">
-         <property name="text">
-          <string>24.802636</string>
-         </property>
-        </item>
-        <item row="1" column="2">
-         <property name="text">
-          <string>121.022431</string>
-         </property>
-        </item>
-        <item row="2" column="0">
-         <property name="text">
-          <string>CM7-2</string>
-         </property>
-        </item>
-        <item row="2" column="1">
-         <property name="text">
-          <string>24.799918</string>
-         </property>
-        </item>
-        <item row="2" column="2">
-         <property name="text">
-          <string>121.026686</string>
-         </property>
-        </item>
+         <item>
+          <widget class="QTableWidget" name="tableWidget">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>150</height>
+            </size>
+           </property>
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <attribute name="horizontalHeaderDefaultSectionSize">
+            <number>150</number>
+           </attribute>
+           <row>
+            <property name="text">
+             <string>1</string>
+            </property>
+           </row>
+           <row>
+            <property name="text">
+             <string>2</string>
+            </property>
+           </row>
+           <row>
+            <property name="text">
+             <string>3</string>
+            </property>
+           </row>
+           <column>
+            <property name="text">
+             <string>Position</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Latitude</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Longitude</string>
+            </property>
+           </column>
+           <item row="0" column="0">
+            <property name="text">
+             <string>AM7</string>
+            </property>
+           </item>
+           <item row="0" column="1">
+            <property name="text">
+             <string>24.804162</string>
+            </property>
+           </item>
+           <item row="0" column="2">
+            <property name="text">
+             <string>121.027736</string>
+            </property>
+           </item>
+           <item row="1" column="0">
+            <property name="text">
+             <string>CM7-1</string>
+            </property>
+           </item>
+           <item row="1" column="1">
+            <property name="text">
+             <string>24.802636</string>
+            </property>
+           </item>
+           <item row="1" column="2">
+            <property name="text">
+             <string>121.022431</string>
+            </property>
+           </item>
+           <item row="2" column="0">
+            <property name="text">
+             <string>CM7-2</string>
+            </property>
+           </item>
+           <item row="2" column="1">
+            <property name="text">
+             <string>24.799918</string>
+            </property>
+           </item>
+           <item row="2" column="2">
+            <property name="text">
+             <string>121.026686</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTableWidget" name="twResult">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>150</height>
+            </size>
+           </property>
+           <attribute name="horizontalHeaderDefaultSectionSize">
+            <number>140</number>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>P1 : P2</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Distance(KM)</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string extracomment="從北方順時針轉度數">P1 azimuth(°)</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string extracomment="從北方順時針轉度數">P2 azimuth(°)</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
@@ -210,7 +261,7 @@
             <bool>false</bool>
            </property>
            <property name="toolTip">
-            <string>Require internet to access openstreetmap</string>
+            <string>Require internet to access openstreetmap.org</string>
            </property>
            <property name="text">
             <string>show map</string>
@@ -232,6 +283,48 @@
           </widget>
          </item>
          <item>
+          <widget class="QGroupBox" name="groupBox">
+           <property name="title">
+            <string>formula:</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QRadioButton" name="rbHaversine">
+              <property name="text">
+               <string>Haversine(誤差約0.5-2%)</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbVincenty">
+              <property name="text">
+               <string>Vincenty(誤差&lt;0.5毫米)</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbCalc">
+              <property name="text">
+               <string>Calc</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer_2">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -244,100 +337,17 @@
            </property>
           </spacer>
          </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QWidget" name="widgetCalc" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <property name="leftMargin">
-       <number>2</number>
-      </property>
-      <property name="topMargin">
-       <number>2</number>
-      </property>
-      <property name="rightMargin">
-       <number>2</number>
-      </property>
-      <property name="bottomMargin">
-       <number>2</number>
-      </property>
-      <item>
-       <widget class="QGroupBox" name="groupBox">
-        <property name="title">
-         <string>formula:</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QRadioButton" name="rbHaversine">
+          <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>Haversine(誤差約0.5-2%)</string>
+            <string>Expect azimuth(°):</string>
            </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-           <attribute name="buttonGroup">
-            <string notr="true">buttonGroup</string>
-           </attribute>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="rbVincenty">
-           <property name="text">
-            <string>Vincenty(誤差&lt;0.5毫米)</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-           <attribute name="buttonGroup">
-            <string notr="true">buttonGroup</string>
-           </attribute>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbCalc">
-           <property name="text">
-            <string>Calc</string>
-           </property>
-          </widget>
+          <widget class="QLineEdit" name="leExpectAzimuth"/>
          </item>
         </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTableWidget" name="twResult">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>150</height>
-         </size>
-        </property>
-        <attribute name="horizontalHeaderDefaultSectionSize">
-         <number>150</number>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>P1 : P2</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Distance(KM)</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string extracomment="從北方順時針轉度數">P1 azimuth(°)</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string extracomment="從北方順時針轉度數">P2 azimuth(°)</string>
-         </property>
-        </column>
        </widget>
       </item>
      </layout>

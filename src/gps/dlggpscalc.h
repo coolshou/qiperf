@@ -25,8 +25,10 @@ public:
     QString getTile();
 signals:
     void TileAvailable(bool ok);
+    void closeAll();
 protected:
     void changeEvent(QEvent *e);
+    void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void initAction();
@@ -52,6 +54,7 @@ private:
     QAction *m_clearAction;
     DlgOpenStreetMap *m_dlgOSM;
     QNetworkReply *reply = nullptr;
+    bool showline=false;
 };
 
 #endif // DLGGPSCALC_H
