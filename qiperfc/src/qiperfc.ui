@@ -304,7 +304,7 @@
      <normaloff>:/config</normaloff>:/config</iconset>
    </property>
    <property name="text">
-    <string>Config (TODO)</string>
+    <string>Config</string>
    </property>
   </action>
   <action name="actionCopy">
