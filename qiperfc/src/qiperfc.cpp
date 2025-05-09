@@ -637,7 +637,9 @@ void QIperfC::onStart()
             iWait = waitStartTime.secsTo(waitEndTime);
         }
         onStop();
-        emit setEndTime(maxtestduration-iExtraWait);
+        if (!isRunforever){
+            emit setEndTime(maxtestduration-iExtraWait);
+        }
     } else {
         QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");
         emit testStoped(-1);
