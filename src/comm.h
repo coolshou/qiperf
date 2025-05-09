@@ -95,11 +95,11 @@
 #define DATETIME_NOW_FORMAT "yyyy-MM-dd_hhmmss.zzz"
 
 enum class IPERF_VER {
-    V1=0,  //1.7.0
-    V2=1,  //2.0.14
+    V1=1,  //1.7.0
+    V2=2,  //2.0.14
     V21=2, //2.1.9
-    V22=3, //2.2.1
-    V3=4   //3.14
+    V22=2, //2.2.1
+    V3=3   //3.14
 };
 
 #define READ_BUFFER_SIZE_PATH "/proc/sys/net/core/rmem_max"
