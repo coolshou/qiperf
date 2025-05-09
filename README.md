@@ -12,6 +12,19 @@ Quick iperf control tool
  * libsystemd-dev
  * QCustomPlot
  * Qt MaintenanceTool to install android support
+# Install
+
+## Ubuntu 24.04:
+```
+sudo apt install libqt6positioning6 libqt6quickwidgets6 libqt6serialport6 \
+  libqt6webchannel6 libqt6webengine6-data libqt6webenginecore6 \
+  libqt6webenginecore6-bin libqt6webenginewidgets6 \
+  libqt6websockets6
+```
+## Ubuntu 22.04:
+```
+
+```
 
 # Build
 ```
@@ -42,7 +55,7 @@ sudo apt install libglut-dev libsystemd-dev
 sudo apt install qmake6 qt6-base-dev  qt6-websockets-dev qt6-serialport-dev qt6-webengine-dev qt6-base-private-dev libqt6core5compat6-dev
 ./build_deb.sh
 ```
-## build packets for ubuntu 22.04 by Dockerfile.ubuntu22.04:
+## build pdeb ackets for ubuntu 22.04 by Dockerfile.ubuntu22.04:
 ```
 # build ubuntu 22.04 qt5 image
 docker build -t ubuntu-qt5:22.04 -f Dockerfile.ubuntu22.04 .
