@@ -266,8 +266,6 @@ void TPPlot::onDataAdded(double key, double value)
             int rc=mTotalGraph->getValue(key, orgvalue);
             if (rc>-1){
                 double sumvalue = orgvalue + value;
-                qDebug() << ((MyQCPGraph*)sender())->name() << " idx:"<< rc << " (" << key << ") orgvalue:" << orgvalue
-                         << " sumvalue:" << sumvalue;
                 mTotalGraph->updateValue(key,sumvalue);
                 mTotalGraph->rescaleAxes(true);
             }else{
@@ -309,8 +307,6 @@ void TPPlot::onLostRateDataAdded(double key, double value)
             int rc=mTotalLostGraph->getValue(key, orgvalue);
             if (rc>-1){
                 double sumvalue = orgvalue + value;
-                qDebug() << ((MyQCPBars*)sender())->name() << " idx:"<< rc << " (" << key << ") orgvalue:" << orgvalue
-                         << " sumvalue:" << sumvalue;
                 mTotalLostGraph->updateValue(key,sumvalue);
                 mTotalLostGraph->rescaleAxes(true);
             }else{
