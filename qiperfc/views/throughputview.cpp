@@ -308,7 +308,7 @@ void ThroughputView::initMenus()
     m_actionGroup = new QAction("Group");
     m_actionGroup->setCheckable(true);
     connect(m_actionGroup, &QAction::triggered, this, &ThroughputView::setShowGroup);
-    m_actionRawData = new QAction("copy Raw Data");
+    m_actionRawData = new QAction("copy Raw Data(TODO)");
     connect(m_actionRawData, &QAction::triggered, this, &ThroughputView::getRawData);
 }
 
