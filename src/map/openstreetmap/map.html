@@ -36,11 +36,18 @@
         .marker-box img {
             margin-right: 6px;
         }
+        .text-label {
+              background: white;
+              padding: 2px 4px;
+              border-radius: 4px;
+              font-size: 12px;
+            }
     </style>
 </head>
 <body>
     <div id="map"></div>
     <script src="qrc:/openstreetmap/leaflet.js"></script>
+    <script src="qrc:/openstreetmap/L.PolylineDecorator.js"></script>
     <script>
         let markerid = 0;
         let markerMap = {};  // key: ID, value: marker
@@ -51,17 +58,17 @@
         // Add scale control
         L.control.scale({position: 'bottomleft', imperial: false}).addTo(map);
         // Add or update a marker by ID
-        function setMarker(id, lat, lng, label) {
+        function setMarker(id, lat, lng, label, markerimg) {
             // If it already exists, remove it
             if (markerMap[id]) {
                 map.removeLayer(markerMap[id]);
             }
             var customIcon = L.divIcon({
                 html: `<div class="marker-box">
-                        <img src="qrc:/openstreetmap/marker.png" width="24" height="24">
+                        <img src="qrc:/openstreetmap/${markerimg}.png" width="24" height="24">
                         <span>${label}</span>
                     </div>`,
-                iconSize: [48, 24],  // size of the outer div
+                iconSize: [50, 20],  // size of the outer div
                 className: ''  // prevents default Leaflet styles
             });
             var spopup = lat + " , " + lng;
@@ -85,6 +92,48 @@
             }
             markerMap = {};  // Clear the reference map
         }
+        function addDistLine(lat1, lon1, lat2, lon2, labelText, lineColor = 'blue') {
+          const pointA = [lat1, lon1];
+          const pointB = [lat2, lon2];
+          const polyline = L.polyline([pointA, pointB], {color: lineColor}).addTo(map);
+          map.fitBounds(polyline.getBounds());
+          // Add a text label at the middle of the line
+          const centerLat = (lat1 + lat2) / 2;
+          const centerLng = (lon1 + lon2) / 2;
+
+          const labelIcon = L.divIcon({
+            className: 'text-label',
+            html: labelText,
+            iconSize: [50, 20]
+          });
+
+          L.marker([centerLat, centerLng], {icon: labelIcon}).addTo(map);
+          // Optional: return polyline object
+          //return polyline;
+        }
+        function drawAzimuthIndicator(lat, lng, azimuthDeg, lengthMeters = 1000) {
+            const earthRadius = 6378137; // meters
+            const azimuthRad = azimuthDeg * Math.PI / 180;
+
+            const dLat = (lengthMeters * Math.cos(azimuthRad)) / earthRadius;
+            const dLng = (lengthMeters * Math.sin(azimuthRad)) / (earthRadius * Math.cos(lat * Math.PI / 180));
+
+            const endLat = lat + dLat * (180 / Math.PI);
+            const endLng = lng + dLng * (180 / Math.PI);
+
+            const line = L.polyline([[lat, lng], [endLat, endLng]], { color: 'red' }).addTo(map);
+
+            // Add arrowhead using PolylineDecorator
+            L.polylineDecorator(line, {
+              patterns: [
+                {
+                  offset: '100%',
+                  repeat: 0,
+                  symbol: L.Symbol.arrowHead({ pixelSize: 15, polygon: true, pathOptions: { color: 'red', fillOpacity: 1 } })
+                }
+              ]
+            }).addTo(map);
+          }
     </script>
 </body>
 </html>
