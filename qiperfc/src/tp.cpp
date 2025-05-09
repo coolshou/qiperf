@@ -203,6 +203,7 @@ void TP::loadData(QString data)
         QString client = o_client.value("bind").toString();
         m_mgrclient = o_client.value("manager").toString();
         m_port = o_client.value("port").toInt();
+        //TODO: duration set to 0 => iperf3 -t 0 run forever
         m_duration = o_client.value("duration").toInt();
         m_omit = o_client.value("omit").toInt();
         m_delaytime = o_client.value("delaytime").toInt();
@@ -417,7 +418,22 @@ QString TP::getThroughput()
 int TP::getWaitTime()
 {
     //omit time + test duration
-    return m_omit + m_duration;
+    return m_duration;
+}
+
+int TP::getOmitTime()
+{
+    return m_omit;
+}
+
+bool TP::getRunforever()
+{
+    if (m_duration==0){
+        return true;
+    }else{
+        return false;
+    }
+
 }
 
 int TP::getDelaytime()

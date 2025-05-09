@@ -81,6 +81,8 @@ public:
     void swapServerClient(QString mgrServer, QString server, QString mgrClient, QString client);
     QString getThroughput();
     int getWaitTime();
+    int getOmitTime();
+    bool getRunforever();
     int getDelaytime();
     int setDirection(DirType direction);
     int setDirection(QString direction);
