@@ -19,10 +19,29 @@ class DlgGpsCalc : public QDialog
     Q_OBJECT
 
 public:
+    enum GPScols{
+        PositionName=0,
+        Latitude=1,
+        Longitude=2,
+        Altitude=3
+    };
+    Q_ENUM(GPScols)
+    enum AZEIcols{
+        Name=0,
+        Distance=1,
+        Azimuth1=2,
+        Azimuth2=3,
+        Elevation1=4,
+        Elevation2=5
+    };
+    Q_ENUM(AZEIcols)
+
     explicit DlgGpsCalc(QSettings *cfg, QWidget *parent = nullptr);
     ~DlgGpsCalc();
     void isTileAvailable();
     QString getTile();
+    void setShowLine(bool show);
+
 signals:
     void TileAvailable(bool ok);
     void closeAll();

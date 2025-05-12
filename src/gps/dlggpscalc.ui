@@ -169,6 +169,11 @@
              <string>Longitude</string>
             </property>
            </column>
+           <column>
+            <property name="text">
+             <string>Altitude</string>
+            </property>
+           </column>
            <item row="0" column="0">
             <property name="text">
              <string>AM7</string>
@@ -182,6 +187,11 @@
            <item row="0" column="2">
             <property name="text">
              <string>121.027736</string>
+            </property>
+           </item>
+           <item row="0" column="3">
+            <property name="text">
+             <string>40</string>
             </property>
            </item>
            <item row="1" column="0">
@@ -199,6 +209,11 @@
              <string>121.022431</string>
             </property>
            </item>
+           <item row="1" column="3">
+            <property name="text">
+             <string>31</string>
+            </property>
+           </item>
            <item row="2" column="0">
             <property name="text">
              <string>CM7-2</string>
@@ -214,6 +229,11 @@
              <string>121.026686</string>
             </property>
            </item>
+           <item row="2" column="3">
+            <property name="text">
+             <string>32</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item>
@@ -225,7 +245,7 @@
             </size>
            </property>
            <attribute name="horizontalHeaderDefaultSectionSize">
-            <number>140</number>
+            <number>120</number>
            </attribute>
            <column>
             <property name="text">
@@ -245,6 +265,16 @@
            <column>
             <property name="text">
              <string extracomment="從北方順時針轉度數">P2 azimuth(°)</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>P1 Elevation(°)</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>P2 Elevation(°)</string>
             </property>
            </column>
           </widget>
@@ -340,12 +370,22 @@
          <item>
           <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>Expect azimuth(°):</string>
+            <string>Expect Azimuth(°):</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QLineEdit" name="leExpectAzimuth"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Expect Elevation(°):</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="leExpectElevation"/>
          </item>
         </layout>
        </widget>

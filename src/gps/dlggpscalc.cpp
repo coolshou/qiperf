@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
+#include "geotranslate.h"
 
 #include <QDebug>
 
@@ -16,6 +17,15 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
     ui(new Ui::DlgGpsCalc), m_cfg(cfg)
 {
     ui->setupUi(this);
+    ui->tableWidget->setColumnWidth(GPScols::Latitude, 100);
+    ui->tableWidget->setColumnWidth(GPScols::Longitude, 100);
+    ui->tableWidget->setColumnWidth(GPScols::Altitude, 80);
+    ui->twResult->setColumnWidth(AZEIcols::Distance, 90);
+    ui->twResult->setColumnWidth(AZEIcols::Azimuth1, 90);
+    ui->twResult->setColumnWidth(AZEIcols::Azimuth2, 90);
+    ui->twResult->setColumnWidth(AZEIcols::Elevation1, 100);
+    ui->twResult->setColumnWidth(AZEIcols::Elevation2, 100);
+
     ui->pbTaipei101SkyTree->setVisible(false);
     initAction();
     m_dlgOSM = new DlgOpenStreetMap();
@@ -64,6 +74,11 @@ QString DlgGpsCalc::getTile()
     QString tile = m_cfg->value("OpenStreetMapTile").toString();
     m_cfg->endGroup();
     return tile;
+}
+
+void DlgGpsCalc::setShowLine(bool show)
+{
+    showline = show;
 }
 
 void DlgGpsCalc::changeEvent(QEvent *e)
@@ -176,22 +191,33 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
             }
         }
     }
-    QString pos1 = ui->tableWidget->item(0,0)->text();
-    double lat1 = ui->tableWidget->item(0,1)->text().toDouble();
-    double lon1 = ui->tableWidget->item(0,2)->text().toDouble();
+    QString pos1 = ui->tableWidget->item(0,GPScols::PositionName)->text();
+    double lat1 = ui->tableWidget->item(0,GPScols::Latitude)->text().toDouble();
+    double lon1 = ui->tableWidget->item(0,GPScols::Longitude)->text().toDouble();
+    double alt1 = ui->tableWidget->item(0,GPScols::Altitude)->text().toDouble();
+    double msl1 = GeoTranslate::convertEllipsoidToMSL(lat1, lon1, alt1);
+    qDebug() << " Pos:" << pos1 << " Elevation hight:" << QString::number(msl1);
     QString pos = "";
     double lat=0.0;
     double lon=0.0;
+    double alt=0.0;
+    double msl=0.0;
     double distance = 0;
     double azimuth = 0;
     double totalazimuth = 0.0;
     double azimuth2 = 0;
+    double el1=0.0;
+    double el2=0.0;
+    double totalel=0.0;
     ui->twResult->setRowCount(iRow-1);
 
     for (int i=1; i<ui->tableWidget->rowCount(); i++){
-        pos = ui->tableWidget->item(i,0)->text();
-        lat = ui->tableWidget->item(i,1)->text().toDouble();
-        lon = ui->tableWidget->item(i,2)->text().toDouble();
+        pos = ui->tableWidget->item(i,GPScols::PositionName)->text();
+        lat = ui->tableWidget->item(i,GPScols::Latitude)->text().toDouble();
+        lon = ui->tableWidget->item(i,GPScols::Longitude)->text().toDouble();
+        alt = ui->tableWidget->item(i,GPScols::Altitude)->text().toDouble();
+        msl =  GeoTranslate::convertEllipsoidToMSL(lat, lon, alt);
+        qDebug() << " Pos:" << pos << " Elevation hight:" << QString::number(msl);
         if (ui->rbVincenty->isChecked()){
             VincentyResult vrs = vincentyInverse(lat1 , lon1, lat, lon);
             distance = vrs.distance/1000; // m -> KM
@@ -203,11 +229,21 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
             azimuth = calcBearing(lat1 , lon1, lat, lon);
             azimuth2 = calcBearing(lat, lon, lat1 , lon1);
         }
-        ui->twResult->setItem(i-1, 0, new QTableWidgetItem(pos1 + " : " + pos));
-        ui->twResult->setItem(i-1, 1, new QTableWidgetItem(QString::number(distance)));
-        ui->twResult->setItem(i-1, 2, new QTableWidgetItem(QString::number(azimuth)));
+        ui->twResult->setItem(i-1, AZEIcols::Name, new QTableWidgetItem(pos1 + " : " + pos));
+        ui->twResult->setItem(i-1, AZEIcols::Distance, new QTableWidgetItem(QString::number(distance)));
+        ui->twResult->setItem(i-1, AZEIcols::Azimuth1, new QTableWidgetItem(QString::number(azimuth)));
+        ui->twResult->setItem(i-1, AZEIcols::Azimuth2, new QTableWidgetItem(QString::number(azimuth2)));
+
         totalazimuth = totalazimuth + azimuth;
-        ui->twResult->setItem(i-1, 3, new QTableWidgetItem(QString::number(azimuth2)));
+        el1 = GeoTranslate::calcElevationAngle(msl1, msl, distance*1000);
+        el2 = GeoTranslate::calcElevationAngle(msl, msl1, distance*1000);
+        qDebug() << " " << QString::number(msl1) << " - "  << QString::number(msl)
+                 << " distance:" << QString::number(distance)
+                 << " el1:" << QString::number(el1) << " el2:" << QString::number(el2);
+
+        ui->twResult->setItem(i-1, AZEIcols::Elevation1, new QTableWidgetItem(QString::number(el1)));
+        ui->twResult->setItem(i-1, AZEIcols::Elevation2, new QTableWidgetItem(QString::number(el2)));
+        totalel = totalel + el1;
         if (showline){
             if (m_dlgOSM){
                 m_dlgOSM->addDistLine(QString::number(lat1), QString::number(lon1),
@@ -216,12 +252,16 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
             }
         }
     }
-    double azimuthDegree = totalazimuth/ui->tableWidget->rowCount();
+    double azimuthDegree = totalazimuth/ui->twResult->rowCount();
     ui->leExpectAzimuth->setText(QString::number(azimuthDegree));
+    qDebug() << "totalel:" << QString::number(totalel);
+    double elDegree = totalel/ui->twResult->rowCount();
+    ui->leExpectElevation->setText(QString::number(elDegree));
+
     if (showline){
         if (m_dlgOSM){
             m_dlgOSM->addAzimuthIndicator(QString::number(lat1), QString::number(lon1),
-                                          QString::number(azimuthDegree), QString::number(3000));
+                                          QString::number(azimuthDegree), QString::number(200));
         }
     }
 
