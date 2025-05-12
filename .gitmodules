@@ -16,3 +16,7 @@
 [submodule "lib/qssh"]
 	path = lib/qssh
 	url = https://github.com/coolshou/qssh.git
+[submodule "lib/geographiclib"]
+	path = lib/geographiclib
+	#url = https://github.com/geographiclib/geographiclib.git
+	url = https://github.com/coolshou/geographiclib

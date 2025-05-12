@@ -42,9 +42,25 @@ include(../qiperf.pri)
 unix {
 #include(../sigwatch.pri)
 }
+
+#GeographicLib
+# cmake .. -DBUILD_SHARED_LIBS=OFF
+INCLUDEPATH += \
+    $$PWD/../lib/geographiclib/build/include \
+    $$PWD/../lib/geographiclib/include
+LIBS += \
+    -L$$PWD/../lib/geographiclib/build/src -lGeographicLib
+
 INCLUDEPATH += \
     $$PWD/lib \
     $$PWD/lib/QXlsx/QXlsx/header
+
+GEOFILES.file += \
+    $$PWD/../lib/geoids/egm96-5.pgm \
+    $$PWD/../lib/geoids/egm96-5.pgm.aux.xml \
+    $$PWD/../lib/geoids/egm96-5.wld
+GEOFILES.path += \
+    "/opt/qiperf/bin/geoids"
 
 # for excel
 QXLSX_PARENTPATH=$$PWD/lib/QXlsx/QXlsx         # current QXlsx path is . (. means curret directory)
@@ -334,8 +350,9 @@ unix:!android {
     IMAGES.path += \
         "/usr/share/pixmaps/"
 
-    template.path += /opt/qiperf/template/
+    #template.path += /opt/qiperf/template/
 
-    INSTALLS += MIME ICONS DESKTOP IMAGES template
+    INSTALLS += MIME ICONS DESKTOP IMAGES #template
 }
 
+INSTALLS += GEOFILES
