@@ -232,6 +232,10 @@ Section "qiperf console" SECTION_Console
 !endif
     ;#SetOutPath "$INSTDIR\template\"
     ;#File "..\qiperfc\template\result.html"
+    SetOutPath "$INSTDIR\geoids"
+    File "lib\geoids\egm96-5.pgm"
+    File "lib\geoids\egm96-5.pgm.aux.xml"
+    File "lib\geoids\egm96-5.wld"
 
     !cd ..
     CreateShortCut "$DESKTOP\qiperfc.lnk" "$INSTDIR\${QIPERFC_NAME}"
@@ -390,6 +394,9 @@ Section Uninstall
     ; Clean up qiperf console
     Delete "$INSTDIR\${QIPERFC_NAME}"
     ; Delete "$INSTDIR\template\result.html"
+    Delete "$INSTDIR\geoids\egm96-5.pgm"
+    Delete "$INSTDIR\geoids\egm96-5.pgm.aux.xml"
+    Delete "$INSTDIR\geoids\egm96-5.wld"
 
     ; Remove remaining directories
     RMDir "$SMPROGRAMS\qiperf"
