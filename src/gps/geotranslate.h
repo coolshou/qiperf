@@ -5,6 +5,8 @@
 #include <QObject>
 #include <QGeoCoordinate>
 
+#include <GeographicLib/Geoid.hpp>
+
 class GeoTranslate : public QObject
 {
 public:
@@ -23,6 +25,9 @@ public:
     Q_INVOKABLE static QGeoCoordinate bd09ToGcj02(QGeoCoordinate coordinate);
     Q_INVOKABLE static QGeoCoordinate gcj02ToBd09(double gg_lat, double gg_lon);
     Q_INVOKABLE static QGeoCoordinate bd09ToGcj02(double bd_lat,double bd_lon);
+
+    Q_INVOKABLE static double convertEllipsoidToMSL(double lat, double lon, double ellipsoidHeight);
+    Q_INVOKABLE static double calcElevationAngle(double h1, double h2, double distanceMeters);
 
 private:
     static double transformLat(double x,double y);

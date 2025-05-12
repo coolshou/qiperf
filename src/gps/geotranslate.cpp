@@ -1,5 +1,8 @@
 #include "geotranslate.h"
 
+#include <QDir>
+#include <QDebug>
+
 GeoTranslate::GeoTranslate(QObject *parent)
     :QObject(parent)
 {
@@ -99,6 +102,38 @@ QGeoCoordinate GeoTranslate::bd09ToGcj02(double bd_lat, double bd_lon)
     //TODO bd09ToGcj02
     QGeoCoordinate bd09Loc(bd_lat,bd_lon);
     return bd09Loc;
+}
+
+double GeoTranslate::convertEllipsoidToMSL(double lat, double lon, double ellipsoidHeight)
+{
+    //https://www.maps.ie/coordinates.html
+    //conver GPS ellipsoidHeight (Altitude) to elevation (height above mean sea level)
+    try {
+        // const GeographicLib::Geoid& geoid = GeographicLib::Geoid::EGM96(); // or EGM2008
+        // Construct with the geoid model name (must be installed!)
+#ifdef Q_OS_LINUX
+        QString geodatapath="/opt/qiperf/bin/geoids";
+#elif Q_OS_WINDOWS
+        QString geodatapath=qApp->applicationDirPath() + QDir::separator() + "geoids";
+#else
+        qDebug() << "Not support platform";
+        return ellipsoidHeight;
+#endif
+        GeographicLib::Geoid geoid("egm96-5", geodatapath.toStdString());  // or "egm2008-1"
+        double geoidHeight = geoid(lat, lon);
+        return ellipsoidHeight - geoidHeight;
+    } catch (const std::exception& e) {
+        qWarning() << "Geoid error:" << e.what();
+        return ellipsoidHeight;
+    }
+}
+
+double GeoTranslate::calcElevationAngle(double h1, double h2, double distanceMeters)
+{
+    //h1, h2 in meter
+    double deltaH = h2 - h1;
+    double angleRadians = qAtan(deltaH / distanceMeters);
+    return qRadiansToDegrees(angleRadians);
 }
 
 double GeoTranslate::transformLat(double x, double y)
