@@ -946,7 +946,6 @@ void QIperfC::saveSettings()
     m_settings->setValue("geometry", saveGeometry());
     m_settings->setValue("windowState", saveState());
     m_settings->setValue("oldsavepath", m_oldsavepath);
-    m_settings->sync(); // forces to write the settings to storage
     m_settings->endGroup();
     m_settings->beginGroup("Iperf");
     m_settings->setValue("WaitServerReady", m_WaitServerReady);
@@ -959,7 +958,7 @@ void QIperfC::saveSettings()
     m_settings->beginGroup("gps");
     m_settings->setValue("OpenStreetMapTile", m_OpenStreetMapTile);
     m_settings->endGroup();
-    m_settings->sync();
+    m_settings->sync();  // forces to write the settings to storage
 }
 
 void QIperfC::loadSettings()
