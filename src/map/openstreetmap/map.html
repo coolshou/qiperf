@@ -20,7 +20,8 @@
         }
         .marker-box {
             display: flex;
-            align-items: center;
+            /*align-items: center;*/
+            align-items: left;
             /*background: white;*/
             border: 0px solid #333;
             border-radius: 6px;
@@ -47,7 +48,7 @@
 <body>
     <div id="map"></div>
     <script src="qrc:/openstreetmap/leaflet.js"></script>
-    <script src="qrc:/openstreetmap/L.PolylineDecorator.js"></script>
+    <script src="qrc:/openstreetmap/leaflet.polylineDecorator.js"></script>
     <script>
         let markerid = 0;
         let markerMap = {};  // key: ID, value: marker
