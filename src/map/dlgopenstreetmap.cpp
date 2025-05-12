@@ -29,7 +29,7 @@ void DlgOpenStreetMap::addMarker(QString lat, QString lon, QString label, QStrin
     //    alert('markerid:' + ${markerid});
     QString js=QString("markerid = Object.keys(markerMap).length;\
     setMarker(markerid, %1, %2, '%3', '%4');").arg(lat, lon, label.replace("'", "\\'"), marker);
-    qDebug() << "addMarker: " << js;
+    // qDebug() << "addMarker: " << js;
     view->page()->runJavaScript(js);
 }
 
@@ -38,6 +38,7 @@ void DlgOpenStreetMap::addDistLine(QString lat1, QString lon1, QString lat2, QSt
     // add a distance line between two point with a label
     QString js=QString("addDistLine(%1, %2, %3, %4, '%5');").arg(lat1, lon1,
                                                                  lat2, lon2, label);
+    qDebug() << "addDistLine: " << js;
     view->page()->runJavaScript(js);
 }
 
@@ -45,6 +46,7 @@ void DlgOpenStreetMap::addAzimuthIndicator(QString lat, QString lon, QString azi
 {
     QString js=QString("drawAzimuthIndicator(%1, %2, %3, %4);").arg(lat, lon,
                                                                    azimuthDeg, lengthMeters);
+    qDebug() << "addAzimuthIndicator: " << js;
     view->page()->runJavaScript(js);
 }
 
