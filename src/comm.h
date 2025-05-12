@@ -15,6 +15,8 @@
 #define QIPERF_EXT_FILTER "qiperf (*.qip)"
 #define QIPERF_AUTOS_EXT "qis"  // qiperf automate simple config file
 #define QIPERF_AUTOS_EXT_FILTER "qiperf simple automate (*.qis)"
+#define QIPERF_EXT_PNG "png"
+#define QIPERF_EXT_FILTER_PNG "png (*.png)"
 
 #define ALL_EXT_FILTER "All (*.*)"
 #define HTML_EXT "html"

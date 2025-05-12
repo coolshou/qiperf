@@ -4,6 +4,11 @@
 #include <QMessageBox>
 #include <QModelIndexList>
 #include <QScrollBar>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 #include "../src/tooltipeventfilter.h"
 #include "comm.h"
@@ -263,8 +268,37 @@ void ThroughputView::getRawData(bool checked)
 {
     Q_UNUSED(checked)
     //selected graph
-    m_tpplot->selectedGraphs();
-    qDebug() << "TODO: copy graph's data to clipboard";
+    QString jstr="";
+    foreach (QCPGraph *g , m_tpplot->selectedGraphs()){
+        if (!jstr.isEmpty()){
+            jstr.append(",");
+        }
+        jstr.append(getGraphDataToJsonStr(g));
+    }
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    clipboard->setText(jstr);
+}
+
+void ThroughputView::onSaveImg(bool checked)
+{
+    Q_UNUSED(checked)
+    //
+    QString path;
+    if (!m_oldsavepath.isNull()){
+        path = m_oldsavepath;
+    }else {
+        path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    }
+
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Save throughput plotchart to png"),
+                                                    path, tr(QIPERF_EXT_FILTER_PNG));
+    QFileInfo fi(fileName);
+    QString ext = fi.suffix();
+    if (ext.compare(QIPERF_EXT_PNG)!=0){
+        fileName = fi.path()+ "/" + fi.baseName() + "."+ QIPERF_EXT_PNG;
+    }
+    m_tpplot->savePng(fileName);
 }
 
 void ThroughputView::setXRangeUpper(double upper)
@@ -308,8 +342,10 @@ void ThroughputView::initMenus()
     m_actionGroup = new QAction("Group");
     m_actionGroup->setCheckable(true);
     connect(m_actionGroup, &QAction::triggered, this, &ThroughputView::setShowGroup);
-    m_actionRawData = new QAction("copy Raw Data(TODO)");
+    m_actionRawData = new QAction("Copy plotchart Raw Data");
     connect(m_actionRawData, &QAction::triggered, this, &ThroughputView::getRawData);
+    m_actionSaveImg = new QAction("Save to Image");
+    connect(m_actionSaveImg, &QAction::triggered, this, &ThroughputView::onSaveImg);
 }
 
 void ThroughputView::onPlotContextMenuRequest(QPoint pos)
@@ -319,7 +355,10 @@ void ThroughputView::onPlotContextMenuRequest(QPoint pos)
     m_actionGroup->setChecked(m_showgroup);
     menu->addAction(m_actionGroup);
     menu->addSeparator();
-    menu->addAction(m_actionRawData);
+    menu->addAction(m_actionSaveImg);
+    if (m_tpplot->selectedGraphs().count()>0){
+        menu->addAction(m_actionRawData);
+    }
     menu->addSeparator();
     menu->addAction("About", this, &ThroughputView::aboutQCustomPlot);
     menu->popup(m_tpplot->mapToGlobal(pos));
@@ -331,6 +370,7 @@ void ThroughputView::onSelectedTPitem(QString idx)
     QModelIndex indexToSelect =  m_tpmgr->setSelectItem(idx);
     // Get the selection model
     QItemSelectionModel *selectionModel = ui->tv_throughput->selectionModel();
+    qDebug() << "(TODO) how to multi-select?, check if ctrl key is down?";
     selectionModel->select(indexToSelect, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
 
     // Optionally, make the selection visible
@@ -505,6 +545,26 @@ void ThroughputView::onVLegendScrollBarRange(int count)
 {
     // m_vLegendScrollBar->setRange(0, count);
     m_vLegendScrollBar->setRange(0, count-10);
+}
+
+QString ThroughputView::getGraphDataToJsonStr(QCPGraph *graph)
+{
+    if (!graph) {
+        return "";
+    }
+
+    QJsonArray dataArray;
+    auto data = graph->data();
+
+    for (auto it = data->constBegin(); it != data->constEnd(); ++it) {
+        QJsonObject point;
+        point["key"] = it->key;
+        point["value"] = it->value;
+        dataArray.append(point);
+    }
+
+    QJsonDocument doc(dataArray);
+    return doc.toJson(QJsonDocument::Compact);
 }
 
 void ThroughputView::initThroughputChart()

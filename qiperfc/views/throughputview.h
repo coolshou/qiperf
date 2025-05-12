@@ -71,6 +71,7 @@ public slots:
     void onUpdateTPUnit(QString suint);
     void setShowGroup(bool bShow);
     void getRawData(bool checked);
+    void onSaveImg(bool checked);
     void setXRangeUpper(double upper);
     void setInterval(int interval);
 signals:
@@ -95,6 +96,7 @@ private slots:
     void onItemDClicked(QModelIndex idx);
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onVLegendScrollBarRange(int count);
+    QString getGraphDataToJsonStr(QCPGraph *graph);
 private:
     Ui::ThroughputView *ui;
     // QIperfC *m_main;
@@ -111,6 +113,7 @@ private:
     QAction *m_actionClientArgs;
     QAction *m_actionServerArgs;
     QAction *m_actionGroup;
+    QAction *m_actionSaveImg;
     QAction *m_actionRawData;
     DlgIperf * dlgiperf;  // dialog of iperf config
     TPDirDelegate *tpdirdelegate;
@@ -121,6 +124,7 @@ private:
     QString m_tpunit;
     IperfWrapper *m_iperfwrapper;
     QScrollBar *m_vLegendScrollBar;
+    QString m_oldsavepath;
     void initThroughputChart();
 };
 
