@@ -34,6 +34,7 @@
 #include "../views/throughputview.h"
 #include "../views/serialview.h"
 #include "../src/gps/dlggpscalc.h"
+#include "../views/serialdata.h"
 
 #if (TEST_ICMP==1)
 #include "../src/icmpping.h"
@@ -149,6 +150,7 @@ private slots:
     void onIgnoreWrongInterval(bool bIgnore);
     void onUpdateOpenStreetMapTile(QString tile);
     void onSerialOpened(QString refrow, QString serveraddress, QString serveraPort);
+    void onSerialClosed(QString idx);
 private:
     Ui::MainWindow *ui;
     // CustomHeaderView *header;
@@ -208,7 +210,7 @@ private:
     ThroughputView *m_throughputview;
     ViewManager *m_views;
     bool m_IgnoreWrongInterval;
-    QMap<QString, SerialView*> *m_serialviews; // store serial view
+    QMap<QString, SerialData> *m_serialviews; // store serial view
     //log info for serial view
     bool _logtofile;
     QString _logfilename;

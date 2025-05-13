@@ -144,7 +144,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_debugdlg->resize(1280,1024);
 #endif
 
-    m_serialviews = new QMap<QString, SerialView*>();
+    m_serialviews = new QMap<QString, SerialData>();
 
     // qDebug() << "Hanwha";
     // Hanwha aip_hw = Hanwha();
@@ -1116,14 +1116,23 @@ void QIperfC::onSerialOpened(QString refrow, QString serveraddress, QString serv
         QList<QString> keys = m_serialviews->keys();
         if (index >= 0 && index < keys.size()) {
             QString key = keys.at(index);
-            SerialView* sv = m_serialviews->value(key);
-            sv->setConfig(serveraddress, serveraPort.toInt());
-            sv->setLogFile(_logtofile, _logfilename, _logtimestemp, _logtimestempformat);
-            // switch to view
-            m_views->activateDock(sv);
+            // SerialView* sv = m_serialviews->value(key);
+            SerialData sd = m_serialviews->value(key);
+            sd.sv->setConfig(serveraddress, serveraPort.toInt());
+            sd.sv->setLogFile(_logtofile, _logfilename, _logtimestemp, _logtimestempformat);
+                // switch to view
+            m_views->activateDock(sd.sv);
         }
     } else {
         qDebug() << refrow << " refrow out of index: " << m_serialviews;
+    }
+}
+void QIperfC::onSerialClosed(QString idx)
+{
+    if (m_serialviews->contains(idx)){
+        // m_serialviews->take(idx);
+
+
     }
 }
 
@@ -1264,13 +1273,15 @@ void QIperfC::onAddSerial()
             wsc->sendText(sendstr);
 
             SerialView *serialview = new SerialView(mkey);
-            m_views->addView(serialview);
-            m_serialviews->insert(mkey, serialview);
-
+            connect(serialview, &SerialView::closed, this, &QIperfC::onSerialClosed);
+            m_views->addView(serialview, true);
+            m_serialviews->insert(mkey, {serialview, wsc});
         }else{
             qDebug() << "serialviews: " << mkey << " exist, show it?m_views";
-            SerialView *sv = m_serialviews->value(mkey);
-            m_views->activateDock(sv);
+            // SerialView *sv = m_serialviews->value(mkey);
+            SerialData sd =  m_serialviews->value(mkey);
+            m_views->activateDock(sd.sv);
+
         }
     }
 }
