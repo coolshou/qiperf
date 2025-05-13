@@ -221,6 +221,7 @@ HEADERS += \
     src/wsclient.h \
     src/tooltipeventfilter.h \
     views/abstractview.h \
+    views/serialdata.h \
     views/terminal/highlighter.h \
     views/terminal/qvterminal/qvtchar.h \
     views/terminal/qvterminal/qvtcharformat.h \
