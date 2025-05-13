@@ -1350,15 +1350,10 @@ void QIperfC::initActions()
     // edit
     connect(ui->actionCopy, &QAction::triggered, this, &QIperfC::onCopy);
     connect(ui->actionCopyText, &QAction::triggered, this, &QIperfC::onCopyText);
+    ui->actionPaste->setShortcutContext(Qt::ApplicationShortcut);//for shortcut Ctrl+V to work on ThroughputView
     connect(ui->actionPaste, &QAction::triggered, this, &QIperfC::onPaste);
     connect(ui->actionDelete, &QAction::triggered, this, &QIperfC::onDelete);
-    /*
-    connect(ui->actionCopy, &QAction::triggered, m_throughputview, &ThroughputView::onCopy);
-    // copy column text
-    connect(ui->actionCopyText, &QAction::triggered, m_throughputview, &ThroughputView::onCopyText);
-    connect(ui->actionPaste, &QAction::triggered, m_throughputview, &ThroughputView::onPaste);
-    connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onDelete);
-    */
+    // iperf
     connect(ui->actionAddIperf, &QAction::triggered, m_throughputview, &ThroughputView::onAddIperf);
     connect(ui->actionEdit, &QAction::triggered, m_throughputview, &ThroughputView::onPairEdit);
     connect(ui->actionSwap, &QAction::triggered, m_throughputview, &ThroughputView::onPairSwap);
