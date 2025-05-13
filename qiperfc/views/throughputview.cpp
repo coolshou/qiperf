@@ -533,7 +533,7 @@ void ThroughputView::onItemDClicked(QModelIndex idx)
 void ThroughputView::onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
     Q_UNUSED(deselected)
-
+    //TODO: when delete item, this will cause actionDelete be disable => can not delete item continus
     bool bAct=false;
     if (selected.length()>0){
         bAct = true;
@@ -615,15 +615,14 @@ void ThroughputView::initThroughputChart()
     ui->tv_throughput->setColumnWidth(TP::cols::dir, 80);
     ui->tv_throughput->setColumnWidth(TP::cols::client, 150);
     ui->tv_throughput->setColumnWidth(TP::cols::lostrate, 110);
-
+/*
     TooltipEventFilter* filter = new TooltipEventFilter(ui->tv_throughput);
     connect(filter, &TooltipEventFilter::doCopy, this, &ThroughputView::onCopy);
     connect(filter, &TooltipEventFilter::doPaste, this, &ThroughputView::onPaste);
     connect(filter, &TooltipEventFilter::doDelete, this, &ThroughputView::onDelete);
     ui->tv_throughput->viewport()->installEventFilter(filter);
+*/
     ui->tv_throughput->setRootIsDecorated(true); //show folding icon
-    // ui->tv_throughput->setRootIndex(m_tpmgr->getRootItemIdx()); //enable this will cause total/group item disappear!!
-    //    ui->tv_throughput->expand(m_tpmgr->getRootItemIdx());
 
     ui->tv_throughput->setContextMenuPolicy(Qt::CustomContextMenu);  // custom right click menu
     connect(ui->tv_throughput, &QTreeView::customContextMenuRequested, this, &ThroughputView::onTPUTContextMenu);
