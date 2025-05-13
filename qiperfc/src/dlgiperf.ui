@@ -541,7 +541,7 @@
       </item>
       <item row="0" column="0" colspan="4">
        <widget class="QWidget" name="widget_7" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0,1">
+        <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0,0,0">
          <property name="spacing">
           <number>2</number>
          </property>
@@ -575,16 +575,23 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_6">
+          <widget class="QLabel" name="lb_delaytime">
            <property name="text">
             <string>sec</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="lb_delaytime">
+          <widget class="QCheckBox" name="cbRestartOnError">
            <property name="text">
-            <string/>
+            <string>Restart On Iperf Error(TODO)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbRestartRule">
+           <property name="text">
+            <string>Rule</string>
            </property>
           </widget>
          </item>

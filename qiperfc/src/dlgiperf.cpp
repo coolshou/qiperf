@@ -258,7 +258,7 @@ void DlgIperf::changeEvent(QEvent *e)
     }
 }
 
-bool DlgIperf::isRequireConfigMet()
+bool DlgIperf::isRequireConfigMeet()
 {
     QString targetip = ui->cb_target_ip->currentText().trimmed();
     //check require fields value
@@ -450,7 +450,7 @@ void DlgIperf::ChangeVersion(const QString ver)
 
 void DlgIperf::onAccepted()
 {
-    if (isRequireConfigMet()){
+    if (isRequireConfigMeet()){
         accept();
     }else{
         return;

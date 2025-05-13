@@ -50,7 +50,7 @@ protected:
 //    void closeEvent(QCloseEvent *event) override;
 
 private:
-    bool isRequireConfigMet();
+    bool isRequireConfigMeet();
     Ui::DlgIperf *ui;
     TPMgr *m_tpmgr;
     QStringList mgrls; //manager ip address list
