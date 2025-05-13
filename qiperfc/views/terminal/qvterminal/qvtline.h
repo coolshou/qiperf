@@ -14,7 +14,9 @@ public:
     void reserve(int size);
     const QVector<QVTChar> &chars() const;
     int size() const;
-
+    QString text() const;
+    QString mid(qsizetype position, qsizetype n = -1) const;
+    QString left(qsizetype position);
 protected:
     QVector<QVTChar> _chars;
 };

@@ -34,7 +34,7 @@ QVTerminal::QVTerminal(QWidget *parent)
     setFormat(QVTCharFormat());
     _layout = new QVTLayout();
     _pasteAction = new QAction("Paste", this);
-    _pasteAction->setShortcut(QKeySequence("Ctrl+V")); //TODO: FIXME conflect to MENU->Edit->Paste Shortcut
+    _pasteAction->setShortcut(QKeySequence("Qt::SHIFT + Qt::Key_Insert"));
     _pasteAction->setShortcutContext(Qt::WidgetShortcut);
     connect(_pasteAction, &QAction::triggered, this, &QVTerminal::paste);
     addAction(_pasteAction);
@@ -243,6 +243,50 @@ QByteArray QVTerminal::insertTimeStemp(QByteArray data)
     }
 }
 
+bool QVTerminal::isRowInSelection(int row) const
+{
+    int y1 = _startSelectPos.y();
+    int y2 = _endSelectPos.y();
+    if (y1 > y2) std::swap(y1, y2);
+    return _selecting && (row >= y1 && row <= y2);
+}
+
+void QVTerminal::copySelectedText()
+{
+    if (_layout->lineCount()<=0)
+        return;
+
+    int y1 = _startSelectPos.y();
+    int y2 = _endSelectPos.y();
+    int x1 = _startSelectPos.x();
+    int x2 = _endSelectPos.x();
+
+    // Ensure proper order
+    if (y1 > y2 || (y1 == y2 && x1 > x2)) {
+        std::swap(y1, y2);
+        std::swap(x1, x2);
+    }
+
+    QStringList selectedLines;
+
+    for (int row = y1; row <= y2 && row < _layout->lineCount(); ++row) {
+        // QString line = lines[row];
+        QVTLine line = _layout->lineAt(row);
+        if (row == y1 && row == y2) {
+            selectedLines << line.mid(x1, x2 - x1);
+        } else if (row == y1) {
+            selectedLines << line.mid(x1);
+        } else if (row == y2) {
+            selectedLines << line.left(x2);
+        } else {
+            selectedLines << line.text();
+        }
+    }
+
+    QString selectedText = selectedLines.join('\n');
+    QGuiApplication::clipboard()->setText(selectedText);
+}
+
 void QVTerminal::paste()
 {
     QByteArray data;
@@ -349,8 +393,7 @@ void QVTerminal::writeData(QByteArray data)
             appendData(data);
         }
     }else{
-
-        qDebug() << "_device not init? ";
+        qDebug() << "_device not init!!";
     }
 
 }
@@ -464,11 +507,31 @@ void QVTerminal::paintEvent(QPaintEvent */* paintEvent */)
     if (_cvisible) {
         p.fillRect(QRect(curPos, QSize(_cw, _ch)), _format.foreground());
     }
+    // QFontMetrics fm = fontMetrics();
+    // int charWidth = fm.horizontalAdvance('M');
+    // int charHeight = fm.height();
 
     // draw text
-    for (int l = firstLine; l < lastLine; l++) {
+    for (int row = firstLine; row < lastLine; row++) {
+        // draw selection background
+        QVTLine line = _layout->lineAt(row);
+        int y = (row - firstLine) * _ch;
+
+        if (isRowInSelection(row)) {
+            int selStart = (row == _startSelectPos.y()) ? _startSelectPos.x() : 0;
+            //TODO current line length
+            int selEnd   = (row == _endSelectPos.y()) ? _endSelectPos.x() : line.size();
+
+            if (selStart > selEnd) std::swap(selStart, selEnd);
+
+            int x1 = selStart * _cw;
+            int x2 = selEnd * _cw;
+
+            p.fillRect(QRect(x1, y, x2 - x1, _ch), QColor(0x33, 0x99, 0xff));
+        }
+
         pos.setX(0);
-        for (auto vtc : _layout->lineAt(l).chars()) {
+        for (auto vtc : _layout->lineAt(row).chars()) {
             p.setPen(pos == curPos ? vtc.background() : vtc.foreground());
             p.drawText(pos.x(), pos.y() + _cascent, vtc.c());
             //p.setBrush(QBrush());
@@ -493,6 +556,7 @@ void QVTerminal::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
+        _selecting = true;
         _endSelectPos = QPoint();
         _startCursorSelectPos = posToCursor(event->pos());
         setMouseTracking(true);
@@ -511,19 +575,21 @@ void QVTerminal::mouseMoveEvent(QMouseEvent *event)
 {
     if (!_startCursorSelectPos.isNull())
     {
-        _endSelectPos = posToCursor(event->pos());
-        if ((_startCursorSelectPos.y() > _endSelectPos.y())
-            || (_startCursorSelectPos.y() == _endSelectPos.y() && _startCursorSelectPos.x() > _endSelectPos.x()))
-        {
-            _startSelectPos = posToCursor(event->pos());
-            _endSelectPos = _startCursorSelectPos;
-        }
-        else
-        {
-            _startSelectPos = _startCursorSelectPos;
+        if (_selecting) {
             _endSelectPos = posToCursor(event->pos());
+            if ((_startCursorSelectPos.y() > _endSelectPos.y())
+                || (_startCursorSelectPos.y() == _endSelectPos.y() && _startCursorSelectPos.x() > _endSelectPos.x()))
+            {
+                _startSelectPos = posToCursor(event->pos());
+                _endSelectPos = _startCursorSelectPos;
+            }
+            else
+            {
+                _startSelectPos = _startCursorSelectPos;
+                _endSelectPos = posToCursor(event->pos());
+            }
+            viewport()->update();
         }
-        viewport()->update();
     }
 }
 
@@ -536,6 +602,8 @@ void QVTerminal::mouseReleaseEvent(QMouseEvent *event)
             _startSelectPos = QPoint();
             _endSelectPos = QPoint();
         }
+        _selecting = false;
+        copySelectedText();
         _startCursorSelectPos = QPoint();
         viewport()->update();
         setMouseTracking(false);

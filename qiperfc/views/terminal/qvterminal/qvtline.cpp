@@ -41,3 +41,49 @@ int QVTLine::size() const
 {
     return _chars.size();
 }
+
+QString QVTLine::text() const
+{
+    QString text;
+    for (const QVTChar &c : _chars)
+    {
+        text.append(c.c());
+    }
+    return text;
+}
+
+QString QVTLine::mid(qsizetype position, qsizetype n) const
+{
+    if (position >= _chars.size() || position < 0)
+    {
+        return QString();
+    }
+
+    qsizetype size = n;
+    if (position + size > _chars.size())
+    {
+        size = _chars.size() - position;
+    }
+
+    QString text;
+    for (qsizetype col = position; col < position + size; col++)
+    {
+        text.append(_chars[col].c());
+    }
+    return text;
+
+}
+
+QString QVTLine::left(qsizetype position)
+{
+    if (position >= _chars.size() || position < 0)
+    {
+        position = _chars.size();
+    }
+    QString text;
+    for (qsizetype col = 0; col < position ; col++)
+    {
+        text.append(_chars[col].c());
+    }
+    return text;
+}

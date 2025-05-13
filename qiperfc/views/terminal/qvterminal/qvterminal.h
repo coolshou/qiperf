@@ -51,7 +51,8 @@ private:
     void formatChar(const QChar &c);
     void moveCursor(int xpos, int ypos);
     QByteArray insertTimeStemp(QByteArray data);
-
+    bool isRowInSelection(int row) const;
+    void copySelectedText();
 private:
     QIODevice *_device;
 
@@ -73,6 +74,7 @@ private:
     QTimer _cursorTimer;
     bool _cvisible;
     // select
+    bool _selecting = true;
     QPoint _startCursorSelectPos;
     QPoint _startSelectPos;
     QPoint _endSelectPos;
