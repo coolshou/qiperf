@@ -33,7 +33,7 @@ QVTerminal::QVTerminal(QWidget *parent)
     _pasteAction = new QAction("Paste", this);
     _pasteAction->setShortcut(QKeySequence("Qt::SHIFT + Qt::Key_Insert"));
     _pasteAction->setShortcutContext(Qt::WidgetShortcut);
-    connect(_pasteAction, &QAction::triggered, this, &QVTerminal::paste);
+    connect(_pasteAction, &QAction::triggered, this, &QVTerminal::onPaste);
     addAction(_pasteAction);
 
     _logtofile = false;
@@ -284,11 +284,26 @@ void QVTerminal::copySelectedText()
     QGuiApplication::clipboard()->setText(selectedText);
 }
 
-void QVTerminal::paste()
+void QVTerminal::onCopy()
+{
+    copySelectedText();
+}
+
+void QVTerminal::onPaste()
 {
     QByteArray data;
     data.append(QApplication::clipboard()->text().toUtf8());
     emit transmitData(data);
+}
+
+void QVTerminal::onDelete()
+{
+    //TODO: implement Delete
+}
+
+void QVTerminal::onCopyText()
+{
+    onCopy();
 }
 
 QColor QVTerminal::vt100color(char c)

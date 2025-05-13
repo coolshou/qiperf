@@ -2,6 +2,8 @@
 #define SERIALVIEW_H
 
 #include <QWidget>
+#include <QCloseEvent>
+
 #include "../views/abstractview.h"
 #include "../src/port/abstractport.h"
 #include "../src/port/serialport.h"
@@ -23,10 +25,17 @@ public:
     QString iid() override;
     void setConfig(QString serveraddress, int portnumber, QString protocol = "TCP Client");
     void setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat);
+public slots:
+    void onCopy() override;
+    void onPaste() override;
+    void onDelete() override;
+    void onCopyText() override;
 
+signals:
+    void closed(QString title);
 protected:
     void changeEvent(QEvent *e) override;
-
+    void closeEvent(QCloseEvent *event) override;
 private slots:
     void readPortData();
     void writePortData(const QByteArray &array);

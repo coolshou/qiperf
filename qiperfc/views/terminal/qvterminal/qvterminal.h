@@ -36,8 +36,11 @@ signals:
 
 public slots:
     void writeData(QByteArray data);
+    void onCopy();
+    void onPaste();
+    void onDelete();
+    void onCopyText();
 
-    void paste();
     void appendData(const QByteArray &data);
 
 protected slots:

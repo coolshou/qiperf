@@ -143,11 +143,24 @@
     </property>
     <addaction name="actionGPScalc"/>
    </widget>
+   <widget class="QMenu" name="menuDevice">
+    <property name="title">
+     <string>Device</string>
+    </property>
+    <widget class="QMenu" name="menuJio">
+     <property name="title">
+      <string>Jio</string>
+     </property>
+     <addaction name="actionLBR"/>
+    </widget>
+    <addaction name="menuJio"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuRun"/>
    <addaction name="menuOption"/>
    <addaction name="menuAutomate"/>
+   <addaction name="menuDevice"/>
    <addaction name="menuMonitor"/>
    <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
@@ -537,6 +550,11 @@
    </property>
    <property name="text">
     <string>Telnet(TODO)</string>
+   </property>
+  </action>
+  <action name="actionLBR">
+   <property name="text">
+    <string>LBR</string>
    </property>
   </action>
  </widget>

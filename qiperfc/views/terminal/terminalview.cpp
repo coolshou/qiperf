@@ -67,3 +67,23 @@ void TerminalView::setLogFile(bool logtofile, QString logfilename, bool logtimes
 {
     m_term->setLogFile(logtofile, logfilename, logtimestemp, timestempformat);
 }
+
+void TerminalView::onCopy()
+{
+    m_term->onCopy();
+}
+
+void TerminalView::onPaste()
+{
+    m_term->onPaste();
+}
+
+void TerminalView::onDelete()
+{
+    m_term->onDelete();
+}
+
+void TerminalView::onCopyText()
+{
+    m_term->onCopyText();
+}

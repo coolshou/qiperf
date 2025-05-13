@@ -18,13 +18,6 @@ ViewManager::ViewManager(QString *docPath, ThroughputView *tpview, QMainWindow *
 
     delete window->takeCentralWidget();
     window->setDockNestingEnabled(true);
-
-    // int index = 0;
-    // QDockWidget *align = nullptr;
-    // for (AbstractView *view : std::as_const(*m_views)) {
-    //     addView(view, align, index);
-    //     index++;
-    // }
     addView(m_throughputview, false);
 }
 
@@ -52,7 +45,6 @@ void ViewManager::loadConfig(QSettings *config)
 
 void ViewManager::saveConfig(QSettings *config)
 {
-    // for (AbstractView *view : std::as_const(*m_views)) {
     for (AbstractView *view : *m_views) {
         view->saveConfig(config);
     }
@@ -61,7 +53,6 @@ void ViewManager::saveConfig(QSettings *config)
 
 void ViewManager::loadSettings(QSettings *config)
 {
-    // for (AbstractView *view : std::as_const(*m_views)) {
     for (AbstractView *view : *m_views) {
         view->loadSettings(config);
     }

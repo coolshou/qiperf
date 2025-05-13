@@ -881,6 +881,39 @@ void QIperfC::onTestStoped(int err)
     }
 }
 
+void QIperfC::onCopy()
+{
+    AbstractView* v = m_views->findActiveView();
+    if(v){
+        v->onCopy();
+    }
+
+}
+
+void QIperfC::onPaste()
+{
+    AbstractView* v = m_views->findActiveView();
+    if(v){
+        v->onPaste();
+    }
+}
+
+void QIperfC::onDelete()
+{
+    AbstractView* v = m_views->findActiveView();
+    if(v){
+        v->onDelete();
+    }
+}
+
+void QIperfC::onCopyText()
+{
+    AbstractView* v = m_views->findActiveView();
+    if(v){
+        v->onCopyText();
+    }
+}
+
 void QIperfC::closeEvent(QCloseEvent *event)
 {
     //TODO: check config edit.
@@ -1130,8 +1163,12 @@ void QIperfC::onSerialOpened(QString refrow, QString serveraddress, QString serv
 void QIperfC::onSerialClosed(QString idx)
 {
     if (m_serialviews->contains(idx)){
-        // m_serialviews->take(idx);
-
+        SerialData sd = m_serialviews->take(idx);
+        QString cmd= QString("%1:%2").arg(CMD_SERIAL_DEL, idx);
+        sd.ws->sendText(cmd);
+        sd.ws->deleteLater();
+        sd.sv->deleteLater();
+        // qDeleteAll(sd);
 
     }
 }
@@ -1251,7 +1288,7 @@ void QIperfC::onAddSerial()
         if (!m_serialviews->contains(mkey)){
             int idx = m_serialviews->count();
             QString serialcfg = m_dlgserial->getSerialCfg();
-            qDebug() << "managerip: " << managerip << " serailport:" << serailport << " serialcfg:" << serialcfg;
+            qInfo() << "managerip: " << managerip << " serailport:" << serailport << " serialcfg:" << serialcfg;
             //
             QString url = "ws://"+managerip+":"+QString::number(QIPERFD_WSPORT);
             WSClient *wsc=new WSClient(managerip, QUrl(url), "");
@@ -1260,7 +1297,7 @@ void QIperfC::onAddSerial()
             //wait connect
             int timeout=0;
             while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
-                qDebug() << " wait WSClient connected";
+                // qDebug() << " wait WSClient connected";
                 QThread::msleep(100);
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
                 timeout++;
@@ -1311,12 +1348,17 @@ void QIperfC::initActions()
     connect(ui->actionExport, &QAction::triggered, this, &QIperfC::onExport);
     connect(ui->actionQuit, &QAction::triggered, this, &QIperfC::onQuit);
     // edit
+    connect(ui->actionCopy, &QAction::triggered, this, &QIperfC::onCopy);
+    connect(ui->actionCopyText, &QAction::triggered, this, &QIperfC::onCopyText);
+    connect(ui->actionPaste, &QAction::triggered, this, &QIperfC::onPaste);
+    connect(ui->actionDelete, &QAction::triggered, this, &QIperfC::onDelete);
+    /*
     connect(ui->actionCopy, &QAction::triggered, m_throughputview, &ThroughputView::onCopy);
     // copy column text
     connect(ui->actionCopyText, &QAction::triggered, m_throughputview, &ThroughputView::onCopyText);
     connect(ui->actionPaste, &QAction::triggered, m_throughputview, &ThroughputView::onPaste);
     connect(ui->actionDelete, &QAction::triggered, m_throughputview, &ThroughputView::onDelete);
-
+    */
     connect(ui->actionAddIperf, &QAction::triggered, m_throughputview, &ThroughputView::onAddIperf);
     connect(ui->actionEdit, &QAction::triggered, m_throughputview, &ThroughputView::onPairEdit);
     connect(ui->actionSwap, &QAction::triggered, m_throughputview, &ThroughputView::onPairSwap);

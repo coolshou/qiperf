@@ -51,10 +51,10 @@ public:
     QDateTime getStartTime();
 
 public slots:
-    void onCopy();
-    void onPaste();
-    void onDelete();
-    void onCopyText();
+    void onCopy() override;
+    void onPaste() override;
+    void onDelete() override;
+    void onCopyText() override;
     void onAddIperf();
     void onPairEdit();
     void onPairDelete();

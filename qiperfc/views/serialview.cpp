@@ -45,12 +45,38 @@ void SerialView::setLogFile(bool logtofile, QString logfilename, bool logtimeste
     m_termialview->setLogFile(logtofile, logfilename, logtimestemp, timestempformat);
 }
 
+void SerialView::onCopy()
+{
+    if(m_termialview){
+        m_termialview->onCopy();
+    }
+}
+
+void SerialView::onPaste()
+{
+    if(m_termialview){
+        m_termialview->onPaste();
+    }
+}
+
+void SerialView::onDelete()
+{
+    if(m_termialview){
+        m_termialview->onDelete();
+    }
+}
+
+void SerialView::onCopyText()
+{
+    if(m_termialview){
+        m_termialview->onCopyText();
+    }
+}
+
 void SerialView::readPortData()
 {
     if (m_pause == false) {
         QByteArray array = m_currentport->readAll();
-        // QByteArray array = m_serialport->readAll();
-
         if (!array.isEmpty()) {
             m_rxCount += array.length();
             m_termialview->receiveData(array);
@@ -62,7 +88,6 @@ void SerialView::readPortData()
 void SerialView::writePortData(const QByteArray &array)
 {
     m_txCount += array.length();
-    // m_serialport->write(array);
     m_currentport->write(array);
 }
 
@@ -76,4 +101,10 @@ void SerialView::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+
+void SerialView::closeEvent(QCloseEvent *event)
+{
+    qDebug() << "TODO SerialView::closeEvent:" << event;
+    emit closed(m_title);
 }

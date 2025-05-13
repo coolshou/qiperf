@@ -90,6 +90,11 @@ public slots:
     void onTestStarted();
     void onTestStoped(int err);
 
+    void onCopy();
+    void onPaste();
+    void onDelete();
+    void onCopyText();
+
 signals:
     void updateEndpointNum(int n);
     void updateStarttime(QString stime);

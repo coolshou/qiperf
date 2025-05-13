@@ -26,6 +26,11 @@ public:
     virtual void openFile(const QString & /* fileName */, const QString & /* filter */) {}
 
     virtual void takeMessage(const QString & /* sender */, const QByteArray & /* message */) {}
+public slots:
+    virtual void onCopy() {}
+    virtual void onPaste() {}
+    virtual void onDelete() {}
+    virtual void onCopyText() {}
 
 signals:
     void transmitData(const QByteArray &data);

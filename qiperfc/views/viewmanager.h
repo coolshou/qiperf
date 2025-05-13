@@ -26,6 +26,8 @@ public:
     void setFileAction(QAction *openAction, QAction *saveAction);
     void addView(AbstractView *view, bool closeable=false);
     void activateDock(AbstractView *view);
+    AbstractView* findActiveView();
+
 public slots:
     // void onAddTPdata(QString midx, QString sInterval, QString idx,
     //                QString value, QString unit, QString dir=nullptr,
@@ -43,7 +45,7 @@ private slots:
 
 private:
     QVector<AbstractView *> loadExtensions(const QString &path);
-    AbstractView* findActiveView();
+
 
 private:
     struct Hotspot {

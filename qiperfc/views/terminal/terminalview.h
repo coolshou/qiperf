@@ -20,7 +20,11 @@ public:
     void setEnabled(bool enabled) override;
     void clear() override;
     void setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat);
-
+public slots:
+    void onCopy() override;
+    void onPaste() override;
+    void onDelete() override;
+    void onCopyText() override;
 private slots:
     void sendData(const QString &string);
 
