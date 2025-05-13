@@ -112,7 +112,7 @@ void DlgSerial::closeEvent(QCloseEvent *event)
 
 void DlgSerial::initLocalSerialPort()
 {
-    //local serial port
+    //list local serial port
     QList<QSerialPortInfo> serialPortInfoList = QSerialPortInfo::availablePorts();
     foreach(QSerialPortInfo serialPortInfo, serialPortInfoList) {
 #if defined(Q_OS_LINUX)

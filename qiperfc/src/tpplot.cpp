@@ -82,7 +82,9 @@ void TPPlot::setShowGroup(bool bShow)
             // normal graph
             iterator.value()->setVisible(!m_showgroup);
         }else{
+            //show total/group graph
             iterator.value()->setVisible(m_showgroup);
+            // TODO: update y-axis Max value
         }
         ++iterator;
     }
@@ -565,8 +567,6 @@ MyQCPBars *TPPlot::getLostRateGraph(QString idx)
             // litm->setLayer(LAYER_TOTALOSTRATE);// DO NOT place Legend in other Layer, it will be Not visible
             // qDebug() << "mTotalLostLegendItem:" << mTotalLostLegendItem;
             if (!m_showgroup){
-            //     // TODO: when not m_showgroup, the Total graph's legends will take a place in legend
-                // qDebug() << "remove mTotalLostLegendItem:" << litm;
                 if (!legend->take(litm)){
                     qDebug() <<"remove mTotalLostLegendItem:" << mTotalLostLegendItem << " from legend Fail!!";
                 }
