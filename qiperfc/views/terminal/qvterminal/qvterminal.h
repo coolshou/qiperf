@@ -46,52 +46,6 @@ protected slots:
     void reduceString(int position);
     void toggleCursor();
     void clearToEnd();
-
-private:
-    void formatChar(const QChar &c);
-    void moveCursor(int xpos, int ypos);
-    QByteArray insertTimeStemp(QByteArray data);
-    bool isRowInSelection(int row) const;
-    void copySelectedText();
-private:
-    QIODevice *_device;
-
-    // parser
-    enum State {
-        Text,
-        Escape,
-        Format,
-        ResetFont
-    };
-    State _state;
-    int _formatValue;
-
-    // cursor
-    QVTCharFormat _format;
-    QVTCharFormat _curentFormat;
-    int _cw, _ch, _cascent;
-    QPoint _cursorPos;
-    QTimer _cursorTimer;
-    bool _cvisible;
-    // select
-    bool _selecting = true;
-    QPoint _startCursorSelectPos;
-    QPoint _startSelectPos;
-    QPoint _endSelectPos;
-    // data
-    QVTLayout *_layout;
-
-    // mode
-    bool _echo;
-    bool _crlf;
-    // log
-    bool _logtofile;
-    QString _logfilename;
-    QFile *_logfile;
-    bool  _logtimestemp;
-    QString _logtimestempformat;
-
-    // QWidget interface
 protected:
     virtual bool event(QEvent *event) override;
     virtual void keyPressEvent(QKeyEvent *event) override;
@@ -111,6 +65,48 @@ protected:
     QColor vt100color(char c);
 
     QAction *_pasteAction;
+private:
+    void formatChar(const QChar &c);
+    void moveCursor(int xpos, int ypos);
+    QByteArray insertTimeStemp(QByteArray data);
+    bool isRowInSelection(int row) const;
+    void copySelectedText();
+private:
+    QIODevice *_device;
+    // parser
+    enum State {
+        Text,
+        Escape,
+        Format,
+        ResetFont
+    };
+    State _state;
+    int _formatValue;
+    // cursor
+    QVTCharFormat _format;
+    QVTCharFormat _curentFormat;
+    int _cw, _ch, _cascent;
+    QPoint _cursorPos;
+    QTimer _cursorTimer;
+    bool _cvisible;
+    // select
+    bool _selecting = true;
+    QPoint _startCursorSelectPos;
+    QPoint _startSelectPos;
+    QPoint _endSelectPos;
+    // data
+    QVTLayout *_layout;
+    // mode
+    bool _echo;
+    bool _crlf;
+    // log
+    bool _logtofile;
+    QString _logfilename;
+    QFile *_logfile;
+    bool  _logtimestemp;
+    QString _logtimestempformat;
+    static const int xMargin = 3;
+    static const int yMargin = 3;
 };
 
 #endif // QVTERMINAL_H

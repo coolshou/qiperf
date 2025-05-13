@@ -11,9 +11,6 @@
 #include <QDebug>
 #include <QMenu>
 
-static const int xMargin = 3;
-static const int yMargin = 3;
-
 QVTerminal::QVTerminal(QWidget *parent)
     : QAbstractScrollArea(parent)
 {
@@ -291,7 +288,7 @@ void QVTerminal::paste()
 {
     QByteArray data;
     data.append(QApplication::clipboard()->text().toUtf8());
-    writeData(data);
+    emit transmitData(data);
 }
 
 QColor QVTerminal::vt100color(char c)
@@ -318,7 +315,6 @@ void QVTerminal::read()
 
 void QVTerminal::appendString(QString str)
 {
-//      qDebug() << "appendString="+str;
     foreach (QChar c, str) {
         QVTChar termChar(c, _curentFormat);
         _layout->lineAt(_cursorPos.y()).append(termChar, _cursorPos.x());
@@ -565,7 +561,8 @@ void QVTerminal::mousePressEvent(QMouseEvent *event)
         if (QApplication::clipboard()->supportsSelection()) {
             QByteArray data;
             data.append(QApplication::clipboard()->text(QClipboard::Selection).toUtf8());
-            writeData(data);
+            // writeData(data);
+            emit transmitData(data);
         }
     }
     QWidget::mousePressEvent(event);
