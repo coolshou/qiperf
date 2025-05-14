@@ -292,6 +292,8 @@ void DlgGpsCalc::onShowMap(bool checked)
         QString lat1 = ui->tableWidget->item(0,1)->text();
         QString lon1 = ui->tableWidget->item(0,2)->text();
         m_dlgOSM->load(tile , lat1, lon1);
+        m_dlgOSM->raise();
+        m_dlgOSM->activateWindow();
         m_dlgOSM->show();
     }
 }
