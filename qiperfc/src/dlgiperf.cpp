@@ -67,7 +67,7 @@ QString DlgIperf::getJsonCfg()
     //return Json config of iperf pair from UI's value
     QJsonObject mainObj;
     mainObj.insert("Action", CMD_IPERF_ADD);
-    mainObj.insert("enabled", m_enabled);// TODO: fix always enable??
+    mainObj.insert("enabled", m_enabled);
     {
         //server
         QJsonObject serverObj;
@@ -90,6 +90,7 @@ QString DlgIperf::getJsonCfg()
         serverObj.insert("fmtreport", ui->cb_fmtreport->currentText().trimmed());
 
         serverObj.insert("delaytime", ui->sb_delaytime->value());
+        serverObj.insert("restartonerror", ui->cbRestartOnError->isChecked()); // TODO how to restart iperf pair on detect iperf running error?
         mainObj.insert("server", serverObj);
 
     }
@@ -128,6 +129,7 @@ QString DlgIperf::getJsonCfg()
     clientObj.insert("zerocopy", ui->cb_zerocopy->isChecked());
 
     clientObj.insert("delaytime", ui->sb_delaytime->value());
+    clientObj.insert("restartonerror", ui->cbRestartOnError->isChecked());
     mainObj.insert("client", clientObj);
     QJsonDocument doc(mainObj);
     QString strJson(doc.toJson(QJsonDocument::Compact));
@@ -159,7 +161,7 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
         ui->sb_interval->setValue(serverObj["interval"].toInt());
 
         ui->sb_delaytime->setValue(serverObj["delaytime"].toInt());
-
+        ui->cbRestartOnError->setChecked(serverObj["restartonerror"].toBool());
         // client
         if ((!clientObj["manager"].toString().isEmpty()) &&
             (clientObj["manager"].toString() != clientObj["bind"].toString())) {
