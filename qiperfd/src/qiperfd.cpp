@@ -836,7 +836,7 @@ void QIperfd::onWSactMessage(QString msg)
             qDebug() << " Wrong format of create serial: " << msg;
         }
     }else if (act.startsWith(CMD_SERIAL_DEL)){
-        qInfo() << "CMD_SERIAL_DEL: " << msg;
+        // qInfo() << "CMD_SERIAL_DEL: " << msg;
         QString comport = msg;
         if (m_serialtasks.contains(comport)){
             SerialTask *task = m_serialtasks.value(comport);

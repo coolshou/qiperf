@@ -222,7 +222,6 @@ void WSClient::onTextMessageReceived(QString message)
             }
             //        emit iperfStarted();
         } else if (act.startsWith(CMD_SERIAL_OPENED)){
-            qDebug() << "CMD_SERIAL_OPENED from:" << from << " m_idx:" << m_idx << " message:" << message;
             emit serialopened(m_idx, from, message);
         } else {
             qDebug() << "Message received: act:" << act <<" refrow:" << m_idx <<

@@ -54,7 +54,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_logpath = logpath + "data";
     QDir logdir(m_logpath);
     if (!logdir.exists()){
-        qDebug() << "create path: " << m_logpath;
+        // qDebug() << "create path: " << m_logpath;
         logdir.mkpath(".");
     }
     connect(this, &QIperfC::testStarted, this, &QIperfC::onTestStarted);
@@ -1162,9 +1162,11 @@ void QIperfC::onSerialOpened(QString refrow, QString serveraddress, QString serv
 }
 void QIperfC::onSerialClosed(QString idx)
 {
+    qDebug() << "onSerialClosed";
     if (m_serialviews->contains(idx)){
         SerialData sd = m_serialviews->take(idx);
         QString cmd= QString("%1:%2").arg(CMD_SERIAL_DEL, idx);
+        qDebug() << "onSerialClosed:" << cmd;
         sd.ws->sendText(cmd);
         sd.ws->deleteLater();
         sd.sv->deleteLater();
@@ -1306,7 +1308,7 @@ void QIperfC::onAddSerial()
             QString sendstr = QString("%1:%2:%3:%4").arg(CMD_SERIAL_ADD,
                                                          QString::number(idx),
                                                          serailport, serialcfg);
-            qDebug() << "onAddSerial sendstr: " << sendstr;
+            qInfo() << "onAddSerial sendstr: " << sendstr;
             wsc->sendText(sendstr);
 
             SerialView *serialview = new SerialView(mkey);
