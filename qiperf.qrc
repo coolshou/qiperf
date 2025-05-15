@@ -49,6 +49,8 @@
         <file alias="gps">images/gps.png</file>
         <file alias="ssh">images/ssh.png</file>
         <file alias="telnet">images/telnet.png</file>
+        <file alias="wlan">images/wlan.png</file>
+        <file alias="web">images/web.png</file>
     </qresource>
     <qresource prefix="/template">
         <file alias="result.html">qiperfc/template/result.html</file>
