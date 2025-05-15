@@ -194,14 +194,14 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
     QString pos1 = ui->tableWidget->item(0,GPScols::PositionName)->text();
     double lat1 = ui->tableWidget->item(0,GPScols::Latitude)->text().toDouble();
     double lon1 = ui->tableWidget->item(0,GPScols::Longitude)->text().toDouble();
-    double alt1 = ui->tableWidget->item(0,GPScols::Altitude)->text().toDouble();
-    double msl1 = GeoTranslate::convertEllipsoidToMSL(lat1, lon1, alt1);
-    qDebug() << " Pos:" << pos1 << " Elevation hight:" << QString::number(msl1);
+    double altmsl1 = ui->tableWidget->item(0,GPScols::Altitude)->text().toDouble();
+    // double msl1 = GeoTranslate::convertEllipsoidToMSL(lat1, lon1, alt1);
+    // qDebug() << " Pos:" << pos1 << " Elevation hight:" << QString::number(msl1);
     QString pos = "";
     double lat=0.0;
     double lon=0.0;
-    double alt=0.0;
-    double msl=0.0;
+    double altmsl=0.0;
+    // double msl=0.0;
     double distance = 0;
     double azimuth = 0;
     double totalazimuth = 0.0;
@@ -215,9 +215,9 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
         pos = ui->tableWidget->item(i,GPScols::PositionName)->text();
         lat = ui->tableWidget->item(i,GPScols::Latitude)->text().toDouble();
         lon = ui->tableWidget->item(i,GPScols::Longitude)->text().toDouble();
-        alt = ui->tableWidget->item(i,GPScols::Altitude)->text().toDouble();
-        msl =  GeoTranslate::convertEllipsoidToMSL(lat, lon, alt);
-        qDebug() << " Pos:" << pos << " Elevation hight:" << QString::number(msl);
+        altmsl = ui->tableWidget->item(i,GPScols::Altitude)->text().toDouble();
+        // msl =  GeoTranslate::convertEllipsoidToMSL(lat, lon, alt);
+        // qDebug() << " Pos:" << pos << " Elevation hight:" << QString::number(msl);
         if (ui->rbVincenty->isChecked()){
             VincentyResult vrs = vincentyInverse(lat1 , lon1, lat, lon);
             distance = vrs.distance/1000; // m -> KM
@@ -235,9 +235,9 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
         ui->twResult->setItem(i-1, AZEIcols::Azimuth2, new QTableWidgetItem(QString::number(azimuth2)));
 
         totalazimuth = totalazimuth + azimuth;
-        el1 = GeoTranslate::calcElevationAngle(msl1, msl, distance*1000);
-        el2 = GeoTranslate::calcElevationAngle(msl, msl1, distance*1000);
-        qDebug() << " " << QString::number(msl1) << " - "  << QString::number(msl)
+        el1 = GeoTranslate::calcElevationAngle(altmsl1, altmsl, distance*1000);
+        el2 = GeoTranslate::calcElevationAngle(altmsl, altmsl1, distance*1000);
+        qDebug() << " " << QString::number(altmsl1) << " - "  << QString::number(altmsl)
                  << " distance:" << QString::number(distance)
                  << " el1:" << QString::number(el1) << " el2:" << QString::number(el2);
 
