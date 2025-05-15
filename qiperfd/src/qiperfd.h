@@ -100,7 +100,7 @@ private:
     void setNtpServer(QString mode);
     void startNtpServer();
     void initIperf(QString apppath);
-    void getIperfVer(QString cmd, int ver);
+    void getIperfVer(QString cmd, float ver);
     QString getIperf2ver();
     QString getIperf21ver();
     void getIperfVersion();

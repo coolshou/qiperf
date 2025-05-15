@@ -58,10 +58,10 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     loadcfg(apppath);
     //
     initIperf(apppath);
-    getIperfVer(m_iperfexe20, static_cast<int>(IPERF_VER::V2));
-    getIperfVer(m_iperfexe21, static_cast<int>(IPERF_VER::V21));
-    getIperfVer(m_iperfexe22, static_cast<int>(IPERF_VER::V22));
-    getIperfVer(m_iperfexe3, static_cast<int>(IPERF_VER::V3));
+    getIperfVer(m_iperfexe20, 2.0);
+    getIperfVer(m_iperfexe21, 2.1);
+    getIperfVer(m_iperfexe22, 2.2);
+    getIperfVer(m_iperfexe3, 3.0);
 
     m_iperfwrapper = new IperfWrapper();
 //    m_myinfo = new MyInfo(getManagerInterface());
@@ -1271,7 +1271,7 @@ void QIperfd::initIperf(QString apppath)
 #endif
 }
 
-void QIperfd::getIperfVer(QString cmd, int ver)
+void QIperfd::getIperfVer(QString cmd, float ver)
 {
 
     QProcess process;
@@ -1297,9 +1297,9 @@ void QIperfd::getIperfVer(QString cmd, int ver)
     }
 
     QString out;
-    if ((ver == static_cast<int>(IPERF_VER::V2))||
-        (ver==static_cast<int>(IPERF_VER::V21))||
-        (ver==static_cast<int>(IPERF_VER::V22))
+    if ((ver == 2.0)||
+        (ver == 2.1)||
+        (ver == 2.2)
         ){
         out = process.readAllStandardError();
     }else{
@@ -1310,16 +1310,16 @@ void QIperfd::getIperfVer(QString cmd, int ver)
         if (line.startsWith("iperf")){
             QStringList tmps =line.split(" ");
             if (tmps.length()>=2){
-                if (ver == static_cast<int>(IPERF_VER::V2)){
+                if (ver == 2.0){
                     m_iperfexe20ver = tmps[2];
                 }
-                if (ver == static_cast<int>(IPERF_VER::V21)){
+                if (ver == 2.1){
                     m_iperfexe21ver = tmps[2];
                 }
-                if (ver == static_cast<int>(IPERF_VER::V22)){
+                if (ver == 2.2){
                     m_iperfexe22ver = tmps[2];
                 }
-                if (ver == static_cast<int>(IPERF_VER::V3)){
+                if (ver == 3.0){
                     m_iperfexe3ver = tmps[1];
                 }
                 break;
