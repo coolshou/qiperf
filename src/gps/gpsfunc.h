@@ -2,6 +2,7 @@
 #define GPSFUNC_H
 
 #include <QString>
+#include <QVector3D>
 
 // 結構體用於返回距離和方位角
 struct VincentyResult {
@@ -37,5 +38,12 @@ DMS degreeToDegreeMinSec(double degree);
 DM  degreeToDegreeMin(double degree);
 double DegreeMinSecToDegree(QString degree, QString min, QString sec);
 double DegreeMinToDegree(QString degree, QString min);
+/* gyro: Gyroscope (x,y,z)
+ * accel: Acceleration meter (x,y,z)
+ * mag: Magnetic meter (x,y,z)
+ * dt: delta time, gyro Output Data Rate: 200Hz => 1/200 = 0.005 */
+QVector3D calcMagneticNorth(const QVector3D& gyro, const QVector3D& accel,
+                            const QVector3D& mag, double dt=0.005);
+
 
 #endif

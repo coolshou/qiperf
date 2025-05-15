@@ -215,3 +215,22 @@ double DegreeMinToDegree(QString degree, QString min)
     double result = degrees + (minutes / 60.0);
     return result;
 }
+
+QVector3D calcMagneticNorth(const QVector3D &gyro, const QVector3D &accel,
+                            const QVector3D &mag, double dt)
+{
+    // 步驟 1: 正規化加速度計數據 (表示地球的重力方向)
+    QVector3D accelNorm = accel.normalized();
+    // 步驟 2: 正規化磁力計數據
+    QVector3D magNorm = mag.normalized();
+    // 步驟 3: 計算東向 (East) 向量
+    QVector3D east = QVector3D::crossProduct(magNorm, accelNorm).normalized();
+    // 步驟 4: 計算北向 (North) 向量
+    QVector3D north = QVector3D::crossProduct(accelNorm, east).normalized();
+    // 5. 使用陀螺儀數據進行航向角修正
+    QVector3D gyroDelta = gyro * dt; // 角速度積分得到角度變化
+    north = north + gyroDelta; // 簡單融合陀螺儀影響
+    north.normalize(); // 確保方向仍然正規化
+
+    return north; // 這個向量指向磁北
+}
