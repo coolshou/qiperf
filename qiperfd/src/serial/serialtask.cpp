@@ -72,6 +72,20 @@ QString SerialTask::getLastError()
     return _lasterror;
 }
 
+void SerialTask::setConfig(QString localPort, QString serialBaudRate,
+                           QSerialPort::DataBits serialDataBits,
+                           QSerialPort::Parity serialParity,
+                           QSerialPort::StopBits serialStopBits,
+                           QSerialPort::FlowControl serialFlowControl)
+{
+    _localPort = localPort;
+    _serialBaudRate = serialBaudRate;
+    _serialDataBits = serialDataBits;
+    _serialParity = serialParity;
+    _serialStopBits = serialStopBits;
+    _serialFlowControl = serialFlowControl;
+}
+
 void SerialTask::init()
 {
     _comDeviceSerial = new ComDeviceSerial(_serialPortName, _serialBaudRate, this,

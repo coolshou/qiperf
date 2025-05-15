@@ -24,7 +24,11 @@ public:
     QString getIdx();
     bool isRunning();
     QString getLastError();
-
+    void setConfig(QString localPort, QString serialBaudRate,
+                   QSerialPort::DataBits serialDataBits = QSerialPort::Data8,
+                   QSerialPort::Parity serialParity = QSerialPort::NoParity,
+                   QSerialPort::StopBits serialStopBits = QSerialPort::OneStop,
+                   QSerialPort::FlowControl serialFlowControl = QSerialPort::NoFlowControl);
 public slots:
     void init();
     void close();
@@ -43,10 +47,10 @@ private slots:
 
 private:
     QString m_idx;
-    const QString _serialPortName;
-    const QString _serialBaudRate;
-    const QString _localIp;
-    const QString _localPort;
+    QString _serialPortName;
+    QString _serialBaudRate;
+    QString _localIp;
+    QString _localPort;
     const ComDeviceTcp::Mode _mode;
     QSerialPort::DataBits _serialDataBits;
     QSerialPort::Parity _serialParity;

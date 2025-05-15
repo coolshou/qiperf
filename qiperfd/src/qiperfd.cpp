@@ -801,7 +801,7 @@ void QIperfd::onWSactMessage(QString msg)
         QStringList d = msg.split(":");
         if (d.length()==7){
             int port = QIPERF_SERIALPORT + m_serialtasks.count();
-
+            SerialTask *task = nullptr;
             QString idx = d[0];
             QString comport = d[1];
             QString baudrate = d[2];
@@ -811,7 +811,7 @@ void QIperfd::onWSactMessage(QString msg)
             QSerialPort::StopBits stopbits = static_cast<QSerialPort::StopBits>(d[5].toInt());
             QSerialPort::FlowControl flowcontrol = static_cast<QSerialPort::FlowControl>(d[6].toInt());
             if (!m_serialtasks.contains(comport)){ // not exist
-                SerialTask *task = new SerialTask(idx, comport, baudrate,
+                task = new SerialTask(idx, comport, baudrate,
                                                   "any", QString::number(port),
                                                   ComDeviceTcp::Mode::BINARY,
                                                   databits, parity, stopbits, flowcontrol,
@@ -821,13 +821,18 @@ void QIperfd::onWSactMessage(QString msg)
                 m_serialtasks.insert(comport, task);
                 QTimer::singleShot(0, task, SLOT(init())); // start it
             } else{
-                SerialTask *st = m_serialtasks.value(comport);
-                quint16 localport = st->getLocalPort();
-                if (st->isRunning()){
+                task = m_serialtasks.value(comport);
+                quint16 localport = task->getLocalPort();
+                if (task->isRunning()){
                     qDebug() << comport << " exist!! Using port:" << QString::number(localport);
+                    // TODO: update setting?
+                    task->setConfig(QString::number(port), baudrate,
+                                    databits, parity, stopbits, flowcontrol);
+                    task->close();
+                    QTimer::singleShot(0, task, SLOT(init())); // start it
                     onSerialTaskStarted(idx, localport);
                 }else{
-                    QString emsg = st->getLastError();
+                    QString emsg = task->getLastError();
                     qDebug() << "SerialTask is not running: " << emsg;
                     onSerialTaskError(idx, emsg);
                 }
