@@ -21,16 +21,12 @@
 
 #include <QVBoxLayout>
 
-
 #include "endpointact.h"
 #include "tp.h"
 #include "versions.h"
-
-// #include "../aip/hanwha.h"
+#include "views/viewtype.h"
 
 #include <QDebug>
-
-
 
 QIperfC::QIperfC(QString logpath, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -145,10 +141,6 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 #endif
 
     m_serialviews = new QMap<QString, SerialData>();
-
-    // qDebug() << "Hanwha";
-    // Hanwha aip_hw = Hanwha();
-    // aip_hw.getBeamData();
 }
 
 QIperfC::~QIperfC()
@@ -1043,6 +1035,17 @@ void QIperfC::doClear()
     ui->actionShowLog->setEnabled(false);
 }
 
+void QIperfC::AddSerialView(QString mkey, SerialView *serialview, WSClient *wsc)
+{
+    //windows menu
+    QAction *act = new QAction(QIcon(":/serial"), mkey, this);
+    act->setData(ViewType::Serial);
+    connect(act, &QAction::triggered, this, &QIperfC::showView);
+    ui->menuWindows->addAction(act);
+    m_views->addView(serialview, true);
+    m_serialviews->insert(mkey, {serialview, wsc});
+}
+
 void QIperfC::onExport()
 {
     if (m_TestStartTime.isValid()){
@@ -1172,6 +1175,23 @@ void QIperfC::onSerialClosed(QString idx)
         sd.sv->deleteLater();
         // qDeleteAll(sd);
 
+    }
+}
+
+void QIperfC::showView()
+{
+    QAction* act = qobject_cast<QAction*>(sender());
+    if (act != nullptr) {
+        if (act->data() == ViewType::Serial){
+            QString mkey = act->text();
+            qDebug() << mkey << " data:" << act->data().toString();
+            if (m_serialviews->contains(mkey)){
+                SerialData sd =  m_serialviews->value(mkey);
+                m_views->activateDock(sd.sv);
+            }else{
+                qDebug() << " no " << mkey << " in " << m_serialviews;
+            }
+        }
     }
 }
 
@@ -1313,8 +1333,7 @@ void QIperfC::onAddSerial()
 
             SerialView *serialview = new SerialView(mkey);
             connect(serialview, &SerialView::closed, this, &QIperfC::onSerialClosed);
-            m_views->addView(serialview, true);
-            m_serialviews->insert(mkey, {serialview, wsc});
+            AddSerialView(mkey, serialview, wsc);
         }else{
             qDebug() << "serialviews: " << mkey << " exist, show it?m_views";
             // SerialView *sv = m_serialviews->value(mkey);

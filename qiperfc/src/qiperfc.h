@@ -117,6 +117,7 @@ private:
     void saveSettings();
     void loadSettings();
     void doClear();
+    void AddSerialView(QString mkey, SerialView *serialview, WSClient *wsc);
 
 private slots:
     void initActions();
@@ -156,6 +157,7 @@ private slots:
     void onUpdateOpenStreetMapTile(QString tile);
     void onSerialOpened(QString refrow, QString serveraddress, QString serveraPort);
     void onSerialClosed(QString idx);
+    void showView();
 private:
     Ui::MainWindow *ui;
     // CustomHeaderView *header;

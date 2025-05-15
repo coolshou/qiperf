@@ -139,7 +139,13 @@ void ViewManager::addView(AbstractView *view, bool closeable)
 void ViewManager::activateDock(AbstractView *view)
 {
     if (m_docks->contains(view)){
-        m_docks->value(view)->raise();
+        QDockWidget *dw = m_docks->value(view);
+        if (!dw->isVisible()){
+            dw->show();
+        }
+        dw->raise();
+    }else{
+        qDebug() << "m_docks do not have " << view;
     }
 }
 
