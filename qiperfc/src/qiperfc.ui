@@ -500,6 +500,10 @@
    </property>
   </action>
   <action name="actionWlanSTA">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/wlan</normaloff>:/wlan</iconset>
+   </property>
    <property name="text">
     <string>WLAN STA(TODO)</string>
    </property>
@@ -524,6 +528,10 @@
    </property>
   </action>
   <action name="actionWebControl">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/web</normaloff>:/web</iconset>
+   </property>
    <property name="text">
     <string>WebControl(TODO)</string>
    </property>
