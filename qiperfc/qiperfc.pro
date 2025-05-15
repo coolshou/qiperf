@@ -14,11 +14,11 @@ QT += opengl
 DEFINES += QCUSTOMPLOT_USE_OPENGL # qcustomplot use OPENGL
 unix:!android {
     # 22.04 (freeglut3-dev)
-    INCLUDEPATH +=/usr/include/GL/
-    LIBS += -L -lglut -lOpenGL
+    #INCLUDEPATH +=/usr/include/GL/
+    #LIBS += -L -lglut -lOpenGL
     # 24.04 (libglut-dev)
-    #CONFIG += link_pkgconfig
-    #PKGCONFIG += glut
+    CONFIG += link_pkgconfig
+    PKGCONFIG += glut
 }
 win32: {
     LIBS += \
@@ -232,7 +232,8 @@ HEADERS += \
     views/terminal/termview.h \
     views/viewmanager.h \
     views/serialview.h \
-    views/throughputview.h
+    views/throughputview.h \
+    views/viewtype.h
 
 # lib/tplegenditem.h \
     # ../qiperfd/src/wsserver.h \
