@@ -153,6 +153,7 @@ private:
     void initiperf3(QString tmp, QString tmp_path, QString arch);
     // serial
     QMap<QString, SerialTask*> m_serialtasks;
+    QMap<QString, SSHTask*> m_sshtasks;
 };
 
 #endif // QIPERFD_H

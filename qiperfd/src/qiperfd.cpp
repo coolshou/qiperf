@@ -857,6 +857,8 @@ void QIperfd::onWSactMessage(QString msg)
             qDebug() << comport << " does not in m_serialtasks!! \n" << m_serialtasks;
             informMessage(QString("%1:%2 %3").arg(CMD_SERIAL_FAIL, comport, "Not Exist"));
         }
+    }else if (act.startsWith(CMD_SSH_ADD)){
+    }else if (act.startsWith(CMD_SSH_DEL)){
     }else {
         qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;
         qDebug() << "\n==========";

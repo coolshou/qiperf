@@ -11,6 +11,7 @@ CONFIG -= app_bundle
 
 #include(../jcon-cpp.pri)
 include(../qiperf.pri)
+include(../lib/qssh/qssh.pri)
 unix {
 include(../QCtrlSignals/qctrlsignals.pri)
 #include(../sigwatch.pri)
@@ -54,6 +55,7 @@ SOURCES += \
     src/serial/comdeviceserial.cpp \
     src/serial/comdevicetcp.cpp \
     src/serial/serialtask.cpp \
+    src/ssh/sshtask.cpp \
     src/udpsrv.cpp \
     src/wsserver.cpp
 # ../lib/ntp/ntpsync.cpp \
@@ -85,6 +87,7 @@ HEADERS += \
     src/serial/comdeviceserial.h \
     src/serial/comdevicetcp.h \
     src/serial/serialtask.h \
+    src/ssh/sshtask.h \
     src/udpsrv.h \
     src/version.h \
     src/wsserver.h
