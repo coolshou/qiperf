@@ -10,8 +10,8 @@ PipeClient::PipeClient(QString remoteServername, QObject *parent)
     connect(m_socket, SIGNAL(disconnected()), this, SLOT(socket_disconnected()));
 
     connect(m_socket, SIGNAL(readyRead()), this, SLOT(socket_readReady()));
-    connect(m_socket, SIGNAL(error(QLocalSocket::LocalSocketError)),
-            this, SLOT(socket_error(QLocalSocket::LocalSocketError)));
+    // connect(m_socket, SIGNAL(error(QLocalSocket::LocalSocketError)),
+    //         this, SLOT(socket_error(QLocalSocket::LocalSocketError)));
 }
 
 PipeClient::~PipeClient()
