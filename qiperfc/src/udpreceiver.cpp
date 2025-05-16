@@ -8,11 +8,13 @@ UdpReceiver::UdpReceiver(quint16 port, QObject *parent)
     : QObject{parent}
 {
     m_socket = new QUdpSocket(this);
-    connect(m_socket, SIGNAL(readyRead()), this, SLOT(dataReceived()));
+    // connect(m_socket, SIGNAL(readyRead()), this, SLOT(dataReceived()));
+    connect(m_socket, &QUdpSocket::readyRead, this, &UdpReceiver::dataReceived);
     if (!m_socket->bind(port, QUdpSocket::ShareAddress)){
         QString msg = "UdpReceiver:QUdpSocket bind port: " + QString::number(port) + " Fail";
         msg = msg + "\n It will not receive " + QIPERFD_NAME + " information message";
-        emit error(msg);
+        qDebug() << "ERROR: " << msg;
+        // emit error(msg);
     }else{
         qInfo() << "UdpReceiver bind to port:" << port;
     }
