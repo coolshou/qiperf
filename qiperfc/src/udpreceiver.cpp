@@ -16,7 +16,7 @@ void UdpReceiver::start()
 {
     if (!m_socket->bind(m_port, QUdpSocket::ShareAddress)){
         QString msg = "UdpReceiver:QUdpSocket bind port: " + QString::number(m_port) + " Fail";
-        msg = msg + "\n It will not receive " + QIPERFD_NAME + " information message";
+        msg = msg + "\n qiperfconsole will not receive " + QIPERFD_NAME + " information message";
         qDebug() << "ERROR: " << msg;
         emit error(msg);
     }else{
