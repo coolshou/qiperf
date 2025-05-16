@@ -100,10 +100,10 @@ private:
     void setNtpServer(QString mode);
     void startNtpServer();
     void initIperf(QString apppath);
-    void getIperfVer(QString cmd, float ver);
-    QString getIperf2ver();
-    QString getIperf21ver();
-    void getIperfVersion();
+    void getIperfVer(QString cmd, double ver);
+    // QString getIperf2ver();
+    // QString getIperf21ver();
+    // void getIperfVersion();
 #if defined(Q_OS_WINDOWS)
     bool createSchedule(QString name, QString cmd, int idelay);
 #endif

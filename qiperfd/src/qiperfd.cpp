@@ -76,7 +76,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     // notice qiperfc info
     m_udpsrv = new UdpSrv(QIPERFD_BPORT, getManagerInterface(), m_myinfo);
     connect(this, &QIperfd::setMgrIfname, m_udpsrv, &UdpSrv::setIfname);
-    qDebug() << "INFO: " << info;
+    // qDebug() << "INFO: " << info;
     m_udpsrv->setSendMsg(info); // broadcast
 
 #if (TEST_WS==1)
@@ -1272,7 +1272,7 @@ void QIperfd::initIperf(QString apppath)
 #endif
 }
 
-void QIperfd::getIperfVer(QString cmd, float ver)
+void QIperfd::getIperfVer(QString cmd, double ver)
 {
 
     QProcess process;
@@ -1300,24 +1300,29 @@ void QIperfd::getIperfVer(QString cmd, float ver)
     }
 
     QString out;
-    if (ver == 2.0){
+    if ((ver == 2.0)||(ver == 2.1)||(ver == 2.2)){
         out = process.readAllStandardError();
+        out = out + process.readAllStandardOutput();
     }else{
         out = process.readAllStandardOutput();
     }
     QStringList ds = out.split("\n");
+    QString extra="";
     foreach (QString line, ds) {
         if (line.startsWith("iperf")){
             QStringList tmps =line.split(" ");
             if (tmps.length()>=2){
+                if (tmps.length()>=7){
+                    extra = QString("%1 %2 %3").arg(tmps[3], tmps[4], tmps[5]);
+                }
                 if (ver == 2.0){
-                    m_iperfexe20ver = tmps[2];
+                    m_iperfexe20ver = tmps[2] + " "+ extra;
                 }
                 if (ver == 2.1){
-                    m_iperfexe21ver = tmps[2];
+                    m_iperfexe21ver = tmps[2] + " "+ extra;
                 }
                 if (ver == 2.2){
-                    m_iperfexe22ver = tmps[2];
+                    m_iperfexe22ver = tmps[2] + " "+ extra;
                 }
                 if (ver == 3.0){
                     m_iperfexe3ver = tmps[1];
@@ -1326,4 +1331,8 @@ void QIperfd::getIperfVer(QString cmd, float ver)
             }
         }
     }
+    qDebug() << "m_iperfexe20ver:" << m_iperfexe20ver
+             << " m_iperfexe21ver:" << m_iperfexe21ver
+             << " m_iperfexe22ver:" << m_iperfexe22ver
+             << " m_iperfexe3ver:" << m_iperfexe3ver;
 }
