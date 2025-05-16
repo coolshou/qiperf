@@ -800,7 +800,7 @@ void QIperfd::onWSactMessage(QString msg)
         qInfo() << "CMD_SERIAL_ADD: " << msg;
         QStringList d = msg.split(":");
         if (d.length()==7){
-            int port = QIPERF_SERIALPORT + m_serialtasks.count();
+            int port = 0;
             SerialTask *task = nullptr;
             QString idx = d[0];
             QString comport = d[1];
@@ -811,6 +811,7 @@ void QIperfd::onWSactMessage(QString msg)
             QSerialPort::StopBits stopbits = static_cast<QSerialPort::StopBits>(d[5].toInt());
             QSerialPort::FlowControl flowcontrol = static_cast<QSerialPort::FlowControl>(d[6].toInt());
             if (!m_serialtasks.contains(comport)){ // not exist
+                port =  QIPERF_SERIALPORT + m_serialtasks.count();
                 task = new SerialTask(idx, comport, baudrate,
                                                   "any", QString::number(port),
                                                   ComDeviceTcp::Mode::BINARY,
@@ -826,7 +827,7 @@ void QIperfd::onWSactMessage(QString msg)
                 if (task->isRunning()){
                     qDebug() << comport << " exist!! Using port:" << QString::number(localport);
                     // TODO: update setting?
-                    task->setConfig(QString::number(port), baudrate,
+                    task->setConfig(QString::number(localport), baudrate,
                                     databits, parity, stopbits, flowcontrol);
                     task->close();
                     QTimer::singleShot(0, task, SLOT(init())); // start it
@@ -1286,6 +1287,8 @@ void QIperfd::getIperfVer(QString cmd, float ver)
 #else
     QString c = cmd + " -v";
 #endif
+    qDebug() << "Qt6 getIperfVer: " << c << " arg:" << args;
+
     process.startCommand(c); //Qt6.0
     // process.setProgram(cmd);
     // process.setArguments(args);
@@ -1297,10 +1300,7 @@ void QIperfd::getIperfVer(QString cmd, float ver)
     }
 
     QString out;
-    if ((ver == 2.0)||
-        (ver == 2.1)||
-        (ver == 2.2)
-        ){
+    if (ver == 2.0){
         out = process.readAllStandardError();
     }else{
         out = process.readAllStandardOutput();
