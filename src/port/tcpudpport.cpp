@@ -128,14 +128,15 @@ bool TcpUdpPort::openTcpClient()
     }
     tcpClient = new QTcpSocket();
     tcpClient->connectToHost(hostAddress(), ui->portEdit->text().toInt());
-    if (!tcpClient->waitForConnected(1000)) {
+    int itimeout = 3000;
+    if (!tcpClient->waitForConnected(itimeout)) {
         tcpClient->close();
         delete tcpClient;
         tcpClient = NULL;
         QMessageBox err(QMessageBox::Critical,
             tr("Error"),
-            tr("Can not connect to server!\n"
-                "Please check the network, IP address and port number."),
+            tr("Can not connect to server in %1 sec!\n"
+                "Please check the network, IP address and port number.").arg(itimeout/1000),
             QMessageBox::Cancel, this);
         err.exec();
         return false; // Return false when network error.
@@ -407,7 +408,7 @@ void TcpUdpPort::onError()
     errmsg =errmsg + tr("The remote host closed the connection.")
 #endif
     QMessageBox err(QMessageBox::Critical,
-                    tr("Error"), errmsg, QMessageBox::Cancel, this);
+                    tr("Error"), errmsg, QMessageBox::Ok, this);
     err.exec();
     emit portError();
 }
