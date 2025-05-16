@@ -14,7 +14,12 @@ class DlgSSH : public QDialog
 public:
     explicit DlgSSH(QWidget *parent = nullptr);
     ~DlgSSH();
-
+    QString getManagerIP();
+    QString getTargetip();
+    int getTargetport();
+    QString getSSHCfg();
+    QString getLogFilename();
+    QString getLogTimeStempFormat();
 protected:
     void changeEvent(QEvent *e);
 

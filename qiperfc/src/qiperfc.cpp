@@ -68,6 +68,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_views = new ViewManager(&settingfilepath, m_throughputview, this);
     m_dlgtest = new DlgTest();
     m_dlgserial = new DlgSerial(); //for serial port config
+    m_dlgssh = new DlgSSH();
     m_frm_option = new dlgOption(m_settings);
     connect(m_frm_option, &dlgOption::widthChanged, this, &QIperfC::onWidthChanged);
     connect(m_frm_option, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);
@@ -112,6 +113,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_receiver = new UdpReceiver(QIPERFD_BPORT, this);
     connect(m_receiver, &UdpReceiver::notice, this, &QIperfC::onNotice);
     connect(m_receiver, &UdpReceiver::error, this, &QIperfC::onError);
+    m_receiver->start();
 
     // control local qiperfd?
 //    pclient = new PipeClient(QIPERFD_NAME);
@@ -1042,8 +1044,22 @@ void QIperfC::AddSerialView(QString mkey, SerialView *serialview, WSClient *wsc)
     act->setData(ViewType::Serial);
     connect(act, &QAction::triggered, this, &QIperfC::showView);
     ui->menuWindows->addAction(act);
+
     m_views->addView(serialview, true);
     m_serialviews->insert(mkey, {serialview, wsc});
+}
+
+void QIperfC::AddSSHView(QString mkey, SSHView *sshview, WSClient *wsc)
+{
+    //windows menu
+    QAction *act = new QAction(QIcon(":/ssh"), mkey, this);
+    act->setData(ViewType::SSH);
+    connect(act, &QAction::triggered, this, &QIperfC::showView);
+    ui->menuWindows->addAction(act);
+
+    m_views->addView(sshview, true);
+    m_sshviews->insert(mkey, {sshview, wsc});
+
 }
 
 void QIperfC::onExport()
@@ -1165,16 +1181,43 @@ void QIperfC::onSerialOpened(QString refrow, QString serveraddress, QString serv
 }
 void QIperfC::onSerialClosed(QString idx)
 {
-    qDebug() << "onSerialClosed";
     if (m_serialviews->contains(idx)){
         SerialData sd = m_serialviews->take(idx);
         QString cmd= QString("%1:%2").arg(CMD_SERIAL_DEL, idx);
-        qDebug() << "onSerialClosed:" << cmd;
+        qInfo() << "onSerialClosed:" << cmd;
         sd.ws->sendText(cmd);
         sd.ws->deleteLater();
         sd.sv->deleteLater();
-        // qDeleteAll(sd);
+    }
+}
 
+void QIperfC::onSSHOpened(QString refrow, QString serveraddress, QString serveraPort)
+{
+    if (m_sshviews->count() > refrow.toInt()){
+        int index = refrow.toInt();
+        QList<QString> keys = m_sshviews->keys();
+        if (index >= 0 && index < keys.size()) {
+            QString key = keys.at(index);
+            SSHData sd = m_sshviews->value(key);
+            sd.sv->setConfig(serveraddress, serveraPort.toInt());
+            sd.sv->setLogFile(_logtofile, _logfilename, _logtimestemp, _logtimestempformat);
+            // switch to view
+            m_views->activateDock(sd.sv);
+        }
+    } else {
+        qDebug() << refrow << " refrow out of index: " << m_sshviews;
+    }
+}
+
+void QIperfC::onSSHClosed(QString idx)
+{
+    if (m_sshviews->contains(idx)){
+        SSHData sd = m_sshviews->take(idx);
+        QString cmd= QString("%1:%2").arg(CMD_SSH_DEL, idx);
+        qInfo() << "onSSHClosed:" << cmd;
+        sd.ws->sendText(cmd);
+        sd.ws->deleteLater();
+        sd.sv->deleteLater();
     }
 }
 
@@ -1335,8 +1378,7 @@ void QIperfC::onAddSerial()
             connect(serialview, &SerialView::closed, this, &QIperfC::onSerialClosed);
             AddSerialView(mkey, serialview, wsc);
         }else{
-            qDebug() << "serialviews: " << mkey << " exist, show it?m_views";
-            // SerialView *sv = m_serialviews->value(mkey);
+            qInfo() << "serialviews: " << mkey << " exist, show it";
             SerialData sd =  m_serialviews->value(mkey);
             m_views->activateDock(sd.sv);
 
@@ -1346,7 +1388,57 @@ void QIperfC::onAddSerial()
 
 void QIperfC::onAddSSH()
 {
-    qDebug() << "TODO onAddSSH";
+    if (m_dlgssh->exec()== QDialog::Accepted){
+        qDebug() << "TODO onAddSSH";
+        QString managerip = m_dlgssh->getManagerIP();
+        QString targetip = m_dlgssh->getTargetip();
+        int targetport = m_dlgssh->getTargetport();
+        QString mkey = managerip+":"+targetip+":"+QString::number(targetport);
+        _logtofile=false;
+        _logfilename = m_dlgssh->getLogFilename();
+        if (!_logfilename.isEmpty()){
+            _logtofile = true;
+        }
+        _logtimestemp=false;
+        _logtimestempformat = m_dlgssh->getLogTimeStempFormat();
+        if (!_logtimestempformat.isEmpty()){
+            _logtimestemp = true;
+        }
+        if (!m_sshviews->contains(mkey)){
+            int idx = m_sshviews->count();
+            QString sshcfg = m_dlgssh->getSSHCfg();
+            qInfo() << "managerip: " << managerip << " targetip:" << targetip
+                    << " targetport:" << QString::number(targetport);
+
+            QString url = "ws://"+managerip+":"+QString::number(QIPERFD_WSPORT);
+            WSClient *wsc=new WSClient(managerip, QUrl(url), "");
+            //TODO: when disconnected do waht?
+            connect(wsc, &WSClient::sshopened, this, &QIperfC::onSSHOpened);
+            //wait connect
+            int timeout=0;
+            while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
+                // qDebug() << " wait WSClient connected";
+                QThread::msleep(100);
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
+                timeout++;
+            }
+            //ask remote create sshport and start tcp server on port
+            QString sendstr = QString("%1:%2:%3:%4:%5").arg(CMD_SSH_ADD,
+                                                         QString::number(idx),
+                                                         targetip, QString::number(targetport),
+                                                         sshcfg);
+            qInfo() << "onAddSSH sendstr: " << sendstr;
+            wsc->sendText(sendstr);
+
+            SSHView *sshview = new SSHView(mkey);
+            connect(sshview, &SSHView::closed, this, &QIperfC::onSSHClosed);
+            AddSSHView(mkey, sshview, wsc);
+        }else{
+            qInfo() << "serialviews: " << mkey << " exist, show it";
+            SSHData sd =  m_sshviews->value(mkey);
+            m_views->activateDock(sd.sv);
+        }
+    }
 }
 
 void QIperfC::onGPScalc()

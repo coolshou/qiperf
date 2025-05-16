@@ -72,14 +72,14 @@
 #define CMD_SERIAL_ADD    "SERIAL_ADD"   // add SERIAL setting for rs232, comport:BaudRate:DataBits:Parity:StopBits:FlowControl
 #define CMD_SERIAL_DEL    "SERIAL_DEL"   // close SERAIL of comport
 #define CMD_SERIAL_OPENED "SERIAL_OPENED" // serial opened: run on port number
-#define CMD_SERIAL_OK   "SERIAL_OK"  //serial start ok
-#define CMD_SERIAL_FAIL "SERIAL_FAIL" //serial error with message: error message
+#define CMD_SERIAL_OK     "SERIAL_OK"  //serial start ok
+#define CMD_SERIAL_FAIL   "SERIAL_FAIL" //serial error with message: error message
 // ssh
 #define CMD_SSH_ADD    "SSH_ADD"
 #define CMD_SSH_DEL    "SSH_DEL"
-#define CMD_SSH_OPENED    "SSH_OPENED" // run on port number
-#define CMD_SSH_OK    "SSH_OK"
-#define CMD_SSH_FAIL    "SSH_FAIL"
+#define CMD_SSH_OPENED "SSH_OPENED" // run on port number
+#define CMD_SSH_OK     "SSH_OK"
+#define CMD_SSH_FAIL   "SSH_FAIL"
 
 // ping
 #define CMD_PING        "PING"

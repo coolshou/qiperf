@@ -31,8 +31,8 @@ public slots:
     void onDelete() override;
     void onCopyText() override;
 
-signals:
-    void closed(QString title);
+// signals:
+//     void closed(QString title);
 protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *event) override;

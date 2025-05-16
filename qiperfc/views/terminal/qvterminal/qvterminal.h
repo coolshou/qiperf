@@ -31,6 +31,8 @@ public:
     void setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat);
     void closelogfile();
     QPoint posToCursor(const QPoint &cursorPos) const;
+    // TODO: font size zoom in/out by ctrl+mouse wheel?
+    // TODO: change font name
 signals:
     void transmitData(const QByteArray &data);
 

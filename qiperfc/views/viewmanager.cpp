@@ -115,6 +115,7 @@ void ViewManager::addView(AbstractView *view, bool closeable)
     int idx = m_views->count();
 
     QDockWidget *dock = new QDockWidget(view->title(), m_window);
+    connect(dock, &QDockWidget::visibilityChanged, this, &ViewManager::onVisibilityChanged);
     if (!closeable){
         dock->setFeatures(dock->features() & ~QDockWidget::DockWidgetClosable &
                           ~QDockWidget::DockWidgetFloatable);
@@ -134,6 +135,24 @@ void ViewManager::addView(AbstractView *view, bool closeable)
 
     m_views->append(view);
     m_docks->insert(view, dock);
+    // Access the tab widget
+    QTabWidget *tabWidget = findChild<QTabWidget *>();
+    if (tabWidget) {
+        QTabBar *tabBar = tabWidget->tabBar();
+        qDebug() << "tabBar:"  << QString::number(tabBar->count());
+        // for (int i = 0; i < tabBar->count(); ++i) {
+        //     QPushButton *closeButton = new QPushButton("×");
+        //     closeButton->setFixedSize(16, 16);
+        //     tabBar->setTabButton(i, QTabBar::RightSide, closeButton);
+
+        //     connect(closeButton, &QPushButton::clicked, this, [=]() {
+        //         QWidget *w = tabWidget->widget(i);
+        //         if (w) {
+        //             w->close();
+        //         }
+        //     });
+        // }
+    }
 }
 
 void ViewManager::activateDock(AbstractView *view)
@@ -199,6 +218,12 @@ void ViewManager::openFile()
         QMessageBox::warning(m_window, tr("Warning"),
                              tr("This view does not support this operation."));
     }
+}
+
+void ViewManager::onVisibilityChanged(bool visible)
+{
+    Q_UNUSED(visible)
+    // qDebug() << "onVisibilityChanged: " << visible;
 }
 
 QVector<AbstractView *> ViewManager::loadExtensions(const QString &path)

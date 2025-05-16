@@ -146,6 +146,7 @@ SOURCES += \
     src/udpreceiver.cpp \
     src/wsclient.cpp \
     src/tooltipeventfilter.cpp \
+    views/sshview.cpp \
     views/terminal/highlighter.cpp \
     views/terminal/qvterminal/qvtchar.cpp \
     views/terminal/qvterminal/qvtcharformat.cpp \
@@ -222,6 +223,8 @@ HEADERS += \
     src/tooltipeventfilter.h \
     views/abstractview.h \
     views/serialdata.h \
+    views/sshdata.h \
+    views/sshview.h \
     views/terminal/highlighter.h \
     views/terminal/qvterminal/qvtchar.h \
     views/terminal/qvterminal/qvtcharformat.h \
@@ -254,7 +257,9 @@ FORMS += \
     src/dlgtest.ui \
     src/formqiperfds.ui \
     src/qiperfc.ui \
+    views/abstractview.ui \
     views/serialview.ui \
+    views/sshview.ui \
     views/throughputview.ui
 
 UI_DIR= \

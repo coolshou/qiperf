@@ -223,6 +223,8 @@ void WSClient::onTextMessageReceived(QString message)
             //        emit iperfStarted();
         } else if (act.startsWith(CMD_SERIAL_OPENED)){
             emit serialopened(m_idx, from, message);
+        } else if (act.startsWith(CMD_SSH_OPENED)){
+            emit sshopened(m_idx, from, message);
         } else {
             qDebug() << "Message received: act:" << act <<" refrow:" << m_idx <<
                 " :"<< message << ": "<< from;

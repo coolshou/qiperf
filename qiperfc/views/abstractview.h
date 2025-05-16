@@ -31,10 +31,17 @@ public slots:
     virtual void onPaste() {}
     virtual void onDelete() {}
     virtual void onCopyText() {}
-
+protected:
+    virtual void closeEvent(QCloseEvent * event)
+    {
+        qDebug() << "AbstractView closeEvent:" << event;
+    }
 signals:
     void transmitData(const QByteArray &data);
     void sendMessage(const QString &receiver, const QByteArray &message);
+signals:
+    void closed(QString title);
+
 };
 
 Q_DECLARE_INTERFACE(AbstractView, "gztss.SerialTool.AbstractView/1.1")

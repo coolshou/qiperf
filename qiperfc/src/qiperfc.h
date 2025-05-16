@@ -23,6 +23,7 @@
 #include "dlgoption.h"
 #include "dlgrecord.h"
 #include "dlgserial.h"
+#include "dlgssh.h"
 
 // #include "customheaderview.h"
 #include "fileserver.h"
@@ -35,6 +36,7 @@
 #include "../views/serialview.h"
 #include "../src/gps/dlggpscalc.h"
 #include "../views/serialdata.h"
+#include "../views/sshdata.h"
 
 #if (TEST_ICMP==1)
 #include "../src/icmpping.h"
@@ -118,6 +120,7 @@ private:
     void loadSettings();
     void doClear();
     void AddSerialView(QString mkey, SerialView *serialview, WSClient *wsc);
+    void AddSSHView(QString mkey, SSHView *sshview, WSClient *wsc);
 
 private slots:
     void initActions();
@@ -157,6 +160,8 @@ private slots:
     void onUpdateOpenStreetMapTile(QString tile);
     void onSerialOpened(QString refrow, QString serveraddress, QString serveraPort);
     void onSerialClosed(QString idx);
+    void onSSHOpened(QString refrow, QString serveraddress, QString serveraPort);
+    void onSSHClosed(QString idx);
     void showView();
 private:
     Ui::MainWindow *ui;
@@ -169,6 +174,7 @@ private:
     DlgTest *m_dlgtest;
     DlgRecord *m_dlgrecord; //TODO: store final test result
     DlgSerial *m_dlgserial; // serial select dialog
+    DlgSSH *m_dlgssh; // ssh select dialog
     PingPlot *m_pingplot;
     QSettings *m_settings;
     bool m_testping;
@@ -218,6 +224,7 @@ private:
     ViewManager *m_views;
     bool m_IgnoreWrongInterval;
     QMap<QString, SerialData> *m_serialviews; // store serial view
+    QMap<QString, SSHData> *m_sshviews; // store serial view
     //log info for serial view
     bool _logtofile;
     QString _logfilename;

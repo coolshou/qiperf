@@ -82,6 +82,7 @@ signals:
     void disconnected(QString serverip);
     void iperfTPdata(QString refrow, QString sInterval, QString data); // refrow, throughput data
     void serialopened(QString refrow, QString serveraddress, QString serveraPort);
+    void sshopened(QString refrow, QString serveraddress, QString serveraPort);
 
 private Q_SLOTS:
     void onConnected();
