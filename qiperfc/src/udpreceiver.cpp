@@ -5,20 +5,23 @@
 #include <QDebug>
 
 UdpReceiver::UdpReceiver(quint16 port, QObject *parent)
-    : QObject{parent}
+    : QObject{parent}, m_port(port)
 {
     m_socket = new QUdpSocket(this);
     // connect(m_socket, SIGNAL(readyRead()), this, SLOT(dataReceived()));
     connect(m_socket, &QUdpSocket::readyRead, this, &UdpReceiver::dataReceived);
-    if (!m_socket->bind(port, QUdpSocket::ShareAddress)){
-        QString msg = "UdpReceiver:QUdpSocket bind port: " + QString::number(port) + " Fail";
+}
+
+void UdpReceiver::start()
+{
+    if (!m_socket->bind(m_port, QUdpSocket::ShareAddress)){
+        QString msg = "UdpReceiver:QUdpSocket bind port: " + QString::number(m_port) + " Fail";
         msg = msg + "\n It will not receive " + QIPERFD_NAME + " information message";
         qDebug() << "ERROR: " << msg;
-        // emit error(msg);
+        emit error(msg);
     }else{
-        qInfo() << "UdpReceiver bind to port:" << port;
+        qInfo() << "UdpReceiver bind to port:" << m_port;
     }
-
 }
 
 void UdpReceiver::dataReceived()

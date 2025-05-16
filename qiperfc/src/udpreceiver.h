@@ -10,6 +10,7 @@ class UdpReceiver : public QObject
     Q_OBJECT
 public:
     explicit UdpReceiver(quint16 port, QObject *parent = nullptr);
+    void start();
 signals:
     void notice(QString send_addr, QString msg); //send_addr, msg: json format info
     void error(QString msg);
@@ -20,6 +21,7 @@ public slots:
 
 private:
     QUdpSocket *m_socket;
+    quint16 m_port;
 };
 
 #endif // UDPRECEIVER_H
