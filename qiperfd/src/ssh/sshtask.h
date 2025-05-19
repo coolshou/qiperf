@@ -3,6 +3,9 @@
 
 #include <QObject>
 
+#include "sshdeviceshell.h"
+#include "../virtualdevicetcp.h"
+
 class SSHTask : public QObject
 {
     Q_OBJECT
