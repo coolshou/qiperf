@@ -1,6 +1,8 @@
-QT -= gui
+# QT -= gui
+QT += widgets
 QT += core network websockets
 QT += serialport
+
 
 CONFIG += c++17 console
 CONFIG -= app_bundle
@@ -11,7 +13,6 @@ CONFIG -= app_bundle
 
 #include(../jcon-cpp.pri)
 include(../qiperf.pri)
-include(../lib/qssh/qssh.pri)
 unix {
 include(../QCtrlSignals/qctrlsignals.pri)
 #include(../sigwatch.pri)
@@ -32,6 +33,27 @@ win32:{
     LIBS += -ladvapi32
     # -lcomsuppw //mingw not support
 }
+# include(../lib/qssh.pri)
+# QSSH
+include(../lib/qssh/qssh.pri)  # this will cause compile error??why
+# Don't clutter the example
+DEFINES -= QT_NO_CAST_FROM_ASCII
+DEFINES -= QT_NO_CAST_TO_ASCII
+# require compile qssh.pro first
+message(QT_INSTALL_LIBS: $$OUT_PWD/../lib/qssh/lib/)
+# LIBS += -L$$PWD/lib/qssh/lib \
+#    -l$$qtLibraryName(QSsh)
+LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
+    -lQSsh
+
+#    -l$$OUT_PWD/../lib/qssh/lib/libQSsh.a
+
+    # -l$$qtLibraryName(QSsh)
+#     -l$$qtLibraryName(botan-2) \
+
+     # -lQSsh
+# QSSH END
+
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
@@ -51,10 +73,11 @@ SOURCES += \
     src/myservice.cpp \
     src/pipeserver.cpp \
     src/qiperfd.cpp \
-    src/serial/comdevice.cpp \
+    src/virtualdevice.cpp \
+    src/virtualdevicetcp.cpp \
     src/serial/comdeviceserial.cpp \
-    src/serial/comdevicetcp.cpp \
     src/serial/serialtask.cpp \
+    src/ssh/sshdeviceshell.cpp \
     src/ssh/sshtask.cpp \
     src/udpsrv.cpp \
     src/wsserver.cpp
@@ -83,10 +106,11 @@ HEADERS += \
     src/myservice.h \
     src/pipeserver.h \
     src/qiperfd.h \
-    src/serial/comdevice.h \
+    src/virtualdevice.h \
+    src/virtualdevicetcp.h \
     src/serial/comdeviceserial.h \
-    src/serial/comdevicetcp.h \
     src/serial/serialtask.h \
+    src/ssh/sshdeviceshell.h \
     src/ssh/sshtask.h \
     src/udpsrv.h \
     src/version.h \
