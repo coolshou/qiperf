@@ -132,6 +132,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(this, &QIperfC::closeAll, m_dlgrecord, &DlgRecord::close);
     connect(this, &QIperfC::closeAll, m_frm_qiperfds, &FormQIperfds::close);
     connect(this, &QIperfC::closeAll, m_dlgserial, &DlgSerial::close);
+    connect(this, &QIperfC::closeAll, m_dlgssh, &DlgSerial::close);
 
     connect(this, &QIperfC::closeAll, m_dlgtest, &DlgTest::close);
 

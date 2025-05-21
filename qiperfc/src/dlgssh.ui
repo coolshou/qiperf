@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
-    <height>377</height>
+    <width>596</width>
+    <height>322</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -183,40 +183,10 @@
       <property name="spacing">
        <number>2</number>
       </property>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="lePromptLogin"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Username:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="leUsername"/>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Login Prompt:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QLineEdit" name="lePromptReady"/>
-      </item>
       <item row="1" column="2">
        <widget class="QLabel" name="label_7">
         <property name="text">
          <string>Password:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Password Prompt</string>
         </property>
        </widget>
       </item>
@@ -241,7 +211,7 @@
          <item>
           <widget class="QLabel" name="label_9">
            <property name="text">
-            <string>Private Key File:</string>
+            <string>Private Key File(TODO):</string>
            </property>
           </widget>
          </item>
@@ -264,10 +234,13 @@
         </layout>
        </widget>
       </item>
-      <item row="4" column="3">
-       <widget class="QLineEdit" name="lePromptPassword">
-        <property name="echoMode">
-         <enum>QLineEdit::Password</enum>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="leUsername"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Username:</string>
         </property>
        </widget>
       </item>
@@ -278,13 +251,6 @@
         </property>
         <property name="echoMode">
          <enum>QLineEdit::Password</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>Ready Prompt:</string>
         </property>
        </widget>
       </item>
@@ -398,9 +364,6 @@
   <tabstop>lePassword</tabstop>
   <tabstop>lePrivateKeyFile</tabstop>
   <tabstop>pbPrivateKeyFile</tabstop>
-  <tabstop>lePromptLogin</tabstop>
-  <tabstop>lePromptPassword</tabstop>
-  <tabstop>lePromptReady</tabstop>
   <tabstop>gbLogtoFile</tabstop>
   <tabstop>leLogFilename</tabstop>
   <tabstop>pbSelectLogFile</tabstop>
