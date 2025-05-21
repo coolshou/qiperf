@@ -143,6 +143,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 #endif
 
     m_serialviews = new QMap<QString, SerialData>();
+    m_sshviews = new QMap<QString, SSHData>();
 }
 
 QIperfC::~QIperfC()
@@ -1205,7 +1206,7 @@ void QIperfC::onSSHOpened(QString refrow, QString serveraddress, QString servera
             m_views->activateDock(sd.sv);
         }
     } else {
-        qDebug() << refrow << " refrow out of index: " << m_sshviews;
+        qDebug() << refrow << "onSSHOpened refrow out of index: " << m_sshviews;
     }
 }
 
@@ -1389,7 +1390,6 @@ void QIperfC::onAddSerial()
 void QIperfC::onAddSSH()
 {
     if (m_dlgssh->exec()== QDialog::Accepted){
-        qDebug() << "TODO onAddSSH";
         QString managerip = m_dlgssh->getManagerIP();
         QString targetip = m_dlgssh->getTargetip();
         int targetport = m_dlgssh->getTargetport();
@@ -1407,8 +1407,8 @@ void QIperfC::onAddSSH()
         if (!m_sshviews->contains(mkey)){
             int idx = m_sshviews->count();
             QString sshcfg = m_dlgssh->getSSHCfg();
-            qInfo() << "managerip: " << managerip << " targetip:" << targetip
-                    << " targetport:" << QString::number(targetport);
+            // qInfo() << "managerip: " << managerip << " targetip:" << targetip
+            //         << " targetport:" << QString::number(targetport);
 
             QString url = "ws://"+managerip+":"+QString::number(QIPERFD_WSPORT);
             WSClient *wsc=new WSClient(managerip, QUrl(url), "");
@@ -1417,12 +1417,12 @@ void QIperfC::onAddSSH()
             //wait connect
             int timeout=0;
             while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
-                // qDebug() << " wait WSClient connected";
                 QThread::msleep(100);
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
                 timeout++;
             }
             //ask remote create sshport and start tcp server on port
+            //idx, sshTarget, sshPort, username, password, privateKeyFile, timeout
             QString sendstr = QString("%1:%2:%3:%4:%5").arg(CMD_SSH_ADD,
                                                          QString::number(idx),
                                                          targetip, QString::number(targetport),

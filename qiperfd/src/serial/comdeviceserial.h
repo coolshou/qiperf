@@ -4,9 +4,10 @@
 #include <QObject>
 #include <QSerialPort>
 
-#include "comdevice.h"
+// #include "comdevice.h"
+#include "../virtualdevice.h"
 
-class ComDeviceSerial : public ComDevice
+class ComDeviceSerial : public VirtualDevice
 {
     Q_OBJECT
 public:

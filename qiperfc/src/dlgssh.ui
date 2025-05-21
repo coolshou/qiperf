@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>509</width>
-    <height>360</height>
+    <width>520</width>
+    <height>377</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -145,6 +145,23 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Timeout(sec):</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="sshtimeout">
+        <property name="maximum">
+         <number>999</number>
+        </property>
+        <property name="value">
+         <number>30</number>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -166,58 +183,110 @@
       <property name="spacing">
        <number>2</number>
       </property>
-      <item row="0" column="0">
-       <widget class="QWidget" name="widget_2" native="true"/>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>Password:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="3">
-       <widget class="QLineEdit" name="lePromptPassword"/>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="leUsername"/>
-      </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Password Prompt</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="QLineEdit" name="lePromptLogin"/>
       </item>
-      <item row="2" column="3">
-       <widget class="QLineEdit" name="lePassword"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Login Prompt:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
+      <item row="1" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
          <string>Username:</string>
         </property>
        </widget>
       </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="leUsername"/>
+      </item>
       <item row="4" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Login Prompt:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="lePromptReady"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Password:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Password Prompt</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="4">
+       <widget class="QWidget" name="wPrivateKeyFile" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_9">
+           <property name="text">
+            <string>Private Key File:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lePrivateKeyFile"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbPrivateKeyFile">
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QLineEdit" name="lePromptPassword">
+        <property name="echoMode">
+         <enum>QLineEdit::Password</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLineEdit" name="lePassword">
+        <property name="inputMask">
+         <string/>
+        </property>
+        <property name="echoMode">
+         <enum>QLineEdit::Password</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
        <widget class="QLabel" name="label_8">
         <property name="text">
          <string>Ready Prompt:</string>
         </property>
        </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="lePromptReady"/>
       </item>
      </layout>
     </widget>
@@ -320,6 +389,24 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cbManager</tabstop>
+  <tabstop>sshserver</tabstop>
+  <tabstop>sshport</tabstop>
+  <tabstop>sshtimeout</tabstop>
+  <tabstop>leUsername</tabstop>
+  <tabstop>lePassword</tabstop>
+  <tabstop>lePrivateKeyFile</tabstop>
+  <tabstop>pbPrivateKeyFile</tabstop>
+  <tabstop>lePromptLogin</tabstop>
+  <tabstop>lePromptPassword</tabstop>
+  <tabstop>lePromptReady</tabstop>
+  <tabstop>gbLogtoFile</tabstop>
+  <tabstop>leLogFilename</tabstop>
+  <tabstop>pbSelectLogFile</tabstop>
+  <tabstop>gbAddTimeStemp</tabstop>
+  <tabstop>leTimeStemp</tabstop>
+ </tabstops>
  <resources>
   <include location="../../qiperf.qrc"/>
  </resources>

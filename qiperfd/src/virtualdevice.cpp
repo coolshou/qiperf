@@ -1,5 +1,7 @@
 #include "virtualdevice.h"
 
+#include <QDebug>
+
 VirtualDevice::VirtualDevice(QObject *parent)
     : QObject{parent}
 {}
@@ -16,6 +18,6 @@ void VirtualDevice::init()
 
 void VirtualDevice::slotDataSend(const QByteArray &data)
 {
-    //"No implementation"
+    qDebug() << "VirtualDevice::slotDataSend No implementation";
     Q_UNUSED(data)
 }

@@ -28,6 +28,7 @@
 #define QIPERFD_WSNAME "WS Server"
 #define QIPERF_FILEPORT 47017 //FileServer Port
 #define QIPERF_SERIALPORT 47020 // basic port use for serial data transfer
+#define QIPERF_SSHPORT 47220 // basic port use for ssh data transfer
 #define RPC_PORT 57025
 
 

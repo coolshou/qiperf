@@ -22,8 +22,8 @@ signals:
     void started(QString idx, quint16 port);// notice run on which port
 
 public slots:
-    virtual void init();
-    virtual void slotDataSend(const QByteArray& data);
+    void init() override;
+    void slotDataSend(const QByteArray& data) override;
     void close();
     void slotAcceptError(QAbstractSocket::SocketError socketError);
     void slotNewConnection();

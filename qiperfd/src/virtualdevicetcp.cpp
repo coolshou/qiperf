@@ -15,7 +15,18 @@ VirtualDeviceTcp::VirtualDeviceTcp(QString idx, const QString& localIp, const QS
 
 VirtualDeviceTcp::~VirtualDeviceTcp()
 {
+    if (_tcpServer){
+        _tcpServer->close();
+    }
+}
 
+bool VirtualDeviceTcp::isRunning()
+{
+    if (_tcpServer){
+        return _tcpServer->isListening();
+    }else{
+        return false;
+    }
 }
 
 void VirtualDeviceTcp::init()
@@ -49,17 +60,20 @@ void VirtualDeviceTcp::init()
         return;
     }
     // L_NOTE(QString("TCP-Server listening: %1 %2").arg(hostAddress.toString()).arg(_localPort));
-    qInfo() << QString("TCP-Server listening: %1 %2").arg(hostAddress.toString()).arg(_localPort);
+    qInfo() << QString("TCP-Server listening: %1 %2").arg(hostAddress.toString(), _localPort);
     emit started(m_idx, localPort);
 }
 
 void VirtualDeviceTcp::slotDataSend(const QByteArray &data)
 {
     if (!_tcpServer) {
+        qDebug() << "No _tcpServer";
         return;
     }
-
     foreach (QTcpSocket* tcpSocket, _tcpSocketList) {
+        if (!tcpSocket->isWritable()){
+            qDebug() << "tcpSocket is NOT Writable";
+        }
         qint64 number = tcpSocket->write(data);
         if (number == -1) {
             // L_ERROR("TCP-Socket write failed");
@@ -107,7 +121,7 @@ void VirtualDeviceTcp::slotNewConnection()
     }
 
     if (_mode == Mode::BINARY && !_tcpSocketList.isEmpty()) {
-        // limit to one connection
+        qDebug() << "VirtualDeviceTcp // limit to one connection: " << _tcpSocketList;
         tcpSocket->disconnectFromHost();
         return;
     }
@@ -147,6 +161,7 @@ void VirtualDeviceTcp::slotReadyRead()
     }
     QByteArray data = tcpSocket->readAll();
     if (_mode == Mode::BINARY) {
+        qDebug() << "VirtualDeviceTcp::slotReadyRead" << data;
         emit signalDataRecv(data);
         return;
     }

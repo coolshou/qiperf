@@ -17,5 +17,5 @@ void ComDevice::init()
 void ComDevice::slotDataSend(const QByteArray &data)
 {
     //"No implementation"
-    Q_UNUSED(data);
+    Q_UNUSED(data)
 }

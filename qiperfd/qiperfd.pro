@@ -39,19 +39,10 @@ include(../lib/qssh/qssh.pri)  # this will cause compile error??why
 # Don't clutter the example
 DEFINES -= QT_NO_CAST_FROM_ASCII
 DEFINES -= QT_NO_CAST_TO_ASCII
-# require compile qssh.pro first
-message(QT_INSTALL_LIBS: $$OUT_PWD/../lib/qssh/lib/)
-# LIBS += -L$$PWD/lib/qssh/lib \
-#    -l$$qtLibraryName(QSsh)
+# require compile qssh.pro first (lib/qssh/lib/libQSsh.a)
+# or cd lib/qssh; dpkg-buildpackage -b --no-sign
 LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
     -lQSsh
-
-#    -l$$OUT_PWD/../lib/qssh/lib/libQSsh.a
-
-    # -l$$qtLibraryName(QSsh)
-#     -l$$qtLibraryName(botan-2) \
-
-     # -lQSsh
 # QSSH END
 
 # You can make your code fail to compile if it uses deprecated APIs.

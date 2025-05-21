@@ -94,7 +94,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 
     // system service manager
     qiperfdlog = tmppath+QIPERFD_NAME+".log";
-    qDebug() << "FileWatcher: " << QDir::toNativeSeparators(qiperfdlog);
+    qInfo() << "FileWatcher: " << QDir::toNativeSeparators(qiperfdlog);
     m_filewatcher = new FileWatcher(qiperfdlog);
     connect(m_filewatcher, &FileWatcher::onNewLine, this, &QIperfd::onNewLine);
 
@@ -707,6 +707,24 @@ void QIperfd::onSerialTaskError(QString idx, QString errormsg)
     informMessage(QString("%1:%2:%3").arg(CMD_SERIAL_FAIL, idx, errormsg));
 }
 
+void QIperfd::onSSHTaskFinished(QString target)
+{
+    Q_UNUSED(target)
+    //TODO: onSSHTaskFinished
+}
+
+void QIperfd::onSSHTaskStarted(QString idx, quint16 port)
+{
+    qDebug() << "onSSHTaskStarted:" << QString::number(port);
+    informMessage(QString("%1:%2:%3").arg(CMD_SSH_OPENED, idx, QString::number(port)));
+}
+
+void QIperfd::onSSHTaskError(QString idx, QString errormsg)
+{
+    qDebug() << idx <<" onSSHTaskError:" << errormsg;
+    informMessage(QString("%1:%2:%3").arg(CMD_SSH_FAIL, idx, errormsg));
+}
+
 #if defined(Q_OS_WINDOWS)
 bool QIperfd::createSchedule(QString name, QString cmd, int idelay)
 {
@@ -814,7 +832,7 @@ void QIperfd::onWSactMessage(QString msg)
                 port =  QIPERF_SERIALPORT + m_serialtasks.count();
                 task = new SerialTask(idx, comport, baudrate,
                                                   "any", QString::number(port),
-                                                  ComDeviceTcp::Mode::BINARY,
+                                                  VirtualDeviceTcp::Mode::BINARY,
                                                   databits, parity, stopbits, flowcontrol,
                                                   false, false, this);
                 connect(task, &SerialTask::finished, this, &QIperfd::onSerialTaskFinished);
@@ -858,7 +876,78 @@ void QIperfd::onWSactMessage(QString msg)
             informMessage(QString("%1:%2 %3").arg(CMD_SERIAL_FAIL, comport, "Not Exist"));
         }
     }else if (act.startsWith(CMD_SSH_ADD)){
+        qInfo() << "CMD_SSH_ADD: " << msg;
+        QStringList d = msg.split(":");
+        if (d.length()==7){
+            int port = 0;
+            SSHTask *task = nullptr;
+            try{
+                QString idx = d[0];
+                QString sshTarget = d[1];
+                QString sshPort = d[2];
+                QString username = d[3];
+                QString password = d[4];
+                QString privateKeyFile = d[5];
+                int timeout = d[6].toInt();
+                qDebug() << "idx:" << idx << " sshTarget:" << sshTarget
+                         << " sshPort:" << sshPort
+                         << " username:" << username
+                         << " password:" << password
+                         << " privateKeyFile:" <<  privateKeyFile
+                         << " timeout:" <<  QString::number(timeout);
+
+                if (!m_sshtasks.contains(sshTarget)){ // not exist
+                    port =  QIPERF_SSHPORT + m_sshtasks.count();
+                    task = new SSHTask(idx, sshTarget, sshPort,
+                                       "any", QString::number(port),
+                                       VirtualDeviceTcp::Mode::BINARY,
+                                       username, password, privateKeyFile, timeout);
+                    connect(task, &SSHTask::finished, this, &QIperfd::onSSHTaskFinished);
+                    connect(task, &SSHTask::started,  this, &QIperfd::onSSHTaskStarted);
+                    m_sshtasks.insert(sshTarget, task);
+                    qDebug() << "init SSHTask";
+                    QTimer::singleShot(0, task, SLOT(init())); // start it
+                } else {
+                    task = m_sshtasks.value(sshTarget);
+                    quint16 localport = task->getLocalPort();
+                    if (task->isRunning()){
+                        qDebug() << sshTarget << " exist!! Using port:" << QString::number(localport);
+                        // TODO: update setting?
+                        // task->setConfig(QString::number(localport), baudrate,
+                        //                 databits, parity, stopbits, flowcontrol);
+                        qDebug() << "SSHTask close";
+                        task->close();
+                        qDebug() << "reinit SSHTask";
+                        QTimer::singleShot(0, task, SLOT(init())); // start it
+                        onSSHTaskStarted(idx, localport);
+                    }else{
+                        QString emsg = task->getLastError();
+                        qDebug() << "SerialTask is not running: " << emsg;
+                        onSerialTaskError(idx, emsg);
+                    }
+                }
+            } catch (const std::exception &e) {
+                qDebug() << "SSHTask error: " << e.what();
+            }
+        }else{
+            qDebug() << " Wrong format of create ssh: " << msg;
+            // onSSHTaskError(idx, QString("Wrong format of create ssh: %1").arg(msg));
+        }
     }else if (act.startsWith(CMD_SSH_DEL)){
+        QString target = msg;
+        if (m_sshtasks.contains(target)){
+            SerialTask *task = m_serialtasks.value(target);
+            QString idx = task->getIdx();
+            task->close();
+            if (m_serialtasks.remove(target)){
+                informMessage(QString("%1:%2").arg(CMD_SSH_OK, idx));
+            }else{
+                onSSHTaskError(idx, QString("%1:%2").arg(target ,"DEL Fail"));
+            }
+        }else{
+            qDebug() << target << " does not in m_sshtasks!! \n" << m_sshtasks;
+            // onSSHTaskError(idx, QString("%1:%2").arg(target, "Not Exist"))
+        }
     }else {
         qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;
         qDebug() << "\n==========";
@@ -868,7 +957,7 @@ void QIperfd::onWSactMessage(QString msg)
 void QIperfd::onNewClient(QHostAddress addr)
 {
     onNewLine("onNewClient: " +addr.toString());
-//    qDebug() << "onNewClient: "  << addr.toString();
+    qDebug() << "onNewClient: "  << addr.toString();
     if (m_fileclient){
         qDebug() << "m_fileclient exist: " << m_fileclient->getTargetAddress() << " new: " << addr.toString();
     }

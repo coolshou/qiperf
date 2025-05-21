@@ -9,7 +9,7 @@ ComDeviceSerial::ComDeviceSerial(const QString& serialPortName, const QString& s
                                  QSerialPort::StopBits serialStopBits,
                                  QSerialPort::FlowControl serialFlowControl
                                  )
-    : ComDevice{parent}
+    : VirtualDevice{parent}
     , _serialPortName(serialPortName)
     , _serialBaudRate(serialBaudRate)
     , _serialDataBits(serialDataBits)
@@ -88,6 +88,7 @@ void ComDeviceSerial::init()
 
 void ComDeviceSerial::slotDataSend(const QByteArray &data)
 {
+    //write data to serial port
     if (!_serialPort) {
         return;
     }
@@ -114,6 +115,7 @@ void ComDeviceSerial::close()
 
 void ComDeviceSerial::slotReadyRead()
 {
+    //read data from serial port
     if (!_serialPort) {
         return;
     }

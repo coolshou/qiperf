@@ -5,7 +5,7 @@
 #include <QSerialPort>
 
 #include "comdeviceserial.h"
-#include "comdevicetcp.h"
+#include "../virtualdevicetcp.h"
 
 class SerialTask: public QObject
 {
@@ -13,7 +13,7 @@ class SerialTask: public QObject
 public:
     explicit SerialTask(QString midx, const QString& serialPortName, const QString& serialBaudRate,
                         const QString& localIp, const QString& localPort,
-                        ComDeviceTcp::Mode mode,
+                        VirtualDeviceTcp::Mode mode,
                         QSerialPort::DataBits serialDataBits = QSerialPort::Data8,
                         QSerialPort::Parity serialParity = QSerialPort::NoParity,
                         QSerialPort::StopBits serialStopBits = QSerialPort::OneStop,
@@ -51,7 +51,7 @@ private:
     QString _serialBaudRate;
     QString _localIp;
     QString _localPort;
-    const ComDeviceTcp::Mode _mode;
+    const VirtualDeviceTcp::Mode _mode;
     QSerialPort::DataBits _serialDataBits;
     QSerialPort::Parity _serialParity;
     QSerialPort::StopBits _serialStopBits;
@@ -60,7 +60,7 @@ private:
     const bool _localOutput;
 
     ComDeviceSerial *_comDeviceSerial;
-    ComDeviceTcp *_comDeviceTcp;
+    VirtualDeviceTcp *_DeviceTcp;
     // ComDevice* _comDeviceScreen;
     QString _lasterror;
 };

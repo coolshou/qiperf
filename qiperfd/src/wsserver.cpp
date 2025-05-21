@@ -186,8 +186,10 @@ void WSServer::onNewConnection()
 {
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
     QString sfrom = pSocket->peerAddress().toString();
-    onLog("Client  " + sfrom + " connected");
-    if (!m_clients.contains(sfrom)) {
+    QString sfromPort = QString::number(pSocket->peerPort());
+    QString speer= QString("%1:%2").arg(sfrom, sfromPort);
+    onLog("Client  " + speer + " connected");
+    if (!m_clients.contains(speer)) {
         emit newClient(pSocket->peerAddress());
         connect(pSocket, &QWebSocket::textMessageReceived, this, &WSServer::processTextMessage);
         connect(pSocket, &QWebSocket::binaryMessageReceived, this, &WSServer::processBinaryMessage);
@@ -195,10 +197,10 @@ void WSServer::onNewConnection()
         //TODO: when sendTextMessage following will also trigger!
         connect(pSocket, &QWebSocket::bytesWritten, this, &WSServer::onBytesWritten);
 
-        m_clients[sfrom] =  pSocket;
-        m_currentClient = sfrom;
+        m_clients[speer] =  pSocket;
+        m_currentClient = speer; // TODO: this will be change when any client connected!!
     }else{
-        onLog("m_clients already contain:" + sfrom);
+        onLog("m_clients already contain:" + speer);
     }
 
 }
@@ -206,12 +208,6 @@ void WSServer::onNewConnection()
 //!
 void WSServer::onClosed()
 {
-    // QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    // QString sfrom = pClient->peerAddress().toString();
-    // qDebug() << "WSServer::onClosed:" << sfrom;
-    // if (m_clients.contains(sfrom)){
-    //     m_clients.remove(sfrom);
-    // }
     disconnect(m_pWebSocketServer,&QWebSocketServer::newConnection, 0 ,0);
     disconnect(m_pWebSocketServer,&QWebSocketServer::closed, 0, 0);
     disconnect(m_pWebSocketServer,&QWebSocketServer::sslErrors, 0 ,0);
@@ -223,15 +219,7 @@ void WSServer::onClosed()
 //! [processTextMessage]
 void WSServer::processTextMessage(QString message)
 {
-//    qDebug() << "processTextMessage:" << message ;
-//    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     emit actMessage(message);
-
-    //TODO: response msg back
-//    if (pClient)
-//    {
-//        pClient->sendTextMessage(message);
-//    }
 }
 //! [processTextMessage]
 
@@ -254,12 +242,13 @@ void WSServer::socketDisconnected()
     if (pClient)
     {
         QString sfrom = pClient->peerAddress().toString();
-        if (m_clients.contains(sfrom)) {
-            qDebug() << "socketDisconnected: remove " << sfrom;
-            m_clients.remove(sfrom);
-//            m_clients.removeAll(pClient);
+        QString sfromPort = QString::number(pClient->peerPort());
+        QString speer= QString("%1:%2").arg(sfrom, sfromPort);
+        if (m_clients.contains(speer)) {
+            qDebug() << "socketDisconnected: remove " << speer;
+            m_clients.remove(speer);
         }else{
-            qDebug() << "m_clients does not have " << sfrom;
+            qDebug() << "m_clients does not have " << speer;
         }
         pClient->deleteLater();
         pClient = nullptr;
@@ -294,6 +283,7 @@ void WSServer::onBytesWritten(qint64 bytes)
 
 void WSServer::sendNextChunk(QString target)
 {
+    //target: ip:port
     if (!m_clients.contains(target)){
         qDebug() << "No target client: " << target;
         return;

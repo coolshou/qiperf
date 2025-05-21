@@ -14,6 +14,7 @@
 #include "../src/filewatcher.h"
 #include "../src/icmpping.h"
 #include "serial/serialtask.h"
+#include "ssh/sshtask.h"
 
 //#include <QCloseEvent> # require gui
 
@@ -84,6 +85,10 @@ public slots:
     void onSerialTaskFinished(QString serialPortName);
     void onSerialTaskStarted(QString idx, quint16 port);
     void onSerialTaskError(QString idx, QString errormsg);
+    void onSSHTaskFinished(QString target);
+    void onSSHTaskStarted(QString idx, quint16 port);
+    void onSSHTaskError(QString idx, QString errormsg);
+
 signals:
     void setMgrIfname(QString ifname);
     void iperfStarted(QString bindkey); // iperf thrad started

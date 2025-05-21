@@ -4,7 +4,7 @@
 
 SerialTask::SerialTask(QString midx, const QString& serialPortName, const QString& serialBaudRate,
                        const QString& localIp, const QString& localPort,
-                       ComDeviceTcp::Mode mode,
+                       VirtualDeviceTcp::Mode mode,
                        QSerialPort::DataBits serialDataBits,
                        QSerialPort::Parity serialParity,
                        QSerialPort::StopBits serialStopBits,
@@ -24,7 +24,7 @@ SerialTask::SerialTask(QString midx, const QString& serialPortName, const QStrin
     , _localInput(localInput)
     , _localOutput(localOutput)
     , _comDeviceSerial(0)
-    , _comDeviceTcp(0)
+    , _DeviceTcp(0)
     // , _comDeviceScreen(0)
 {
     _lasterror = "";
@@ -47,22 +47,22 @@ QString SerialTask::getIdx()
 
 bool SerialTask::isRunning()
 {
-    if (_comDeviceSerial && _comDeviceTcp){
-        if (_comDeviceSerial->isRunning() && _comDeviceTcp->isRunning()){
+    if (_comDeviceSerial && _DeviceTcp){
+        if (_comDeviceSerial->isRunning() && _DeviceTcp->isRunning()){
             return true;
         }else{
             if (!_comDeviceSerial->isRunning()){
                 _lasterror = "_comDeviceSerial not running";
                 qDebug() << _lasterror;
             }
-            if (!_comDeviceTcp->isRunning()){
-                _lasterror = _lasterror + " _comDeviceTcp not running";
+            if (!_DeviceTcp->isRunning()){
+                _lasterror = _lasterror + " _DeviceTcp not running";
                 qDebug() << _lasterror;
             }
             return false;
         }
     }else {
-        _lasterror = "_comDeviceSerial or _comDeviceTcp not exist";
+        _lasterror = "_comDeviceSerial or _DeviceTcp not exist";
         return false;
     }
 }
@@ -91,25 +91,25 @@ void SerialTask::init()
     _comDeviceSerial = new ComDeviceSerial(_serialPortName, _serialBaudRate, this,
                                            _serialDataBits, _serialParity,
                                            _serialStopBits, _serialFlowControl);
-    _comDeviceTcp = new ComDeviceTcp(m_idx, _localIp, _localPort, _mode, this);
+    _DeviceTcp = new VirtualDeviceTcp(m_idx, _localIp, _localPort, _mode, this);
     // _comDeviceScreen = new ComDeviceScreen(this);
 
-    connect(_comDeviceSerial, &ComDevice::finished, this, &SerialTask::slotFinished);
-    connect(_comDeviceTcp, &ComDevice::finished, this, &SerialTask::slotFinished);
-    connect(_comDeviceTcp, &ComDeviceTcp::started, this, &SerialTask::onStarted);
+    connect(_comDeviceSerial, &VirtualDevice::finished, this, &SerialTask::slotFinished);
+    connect(_DeviceTcp, &VirtualDevice::finished, this, &SerialTask::slotFinished);
+    connect(_DeviceTcp, &VirtualDeviceTcp::started, this, &SerialTask::onStarted);
     // connect(_comDeviceScreen, &ComDevice::finished, this, &SerialTask::slotFinished);
 
-    connect(_comDeviceSerial, &ComDevice::signalDataRecv, _comDeviceTcp, &ComDevice::slotDataSend);
-    connect(_comDeviceTcp, &ComDevice::signalDataRecv, _comDeviceSerial, &ComDevice::slotDataSend);
+    connect(_comDeviceSerial, &VirtualDevice::signalDataRecv, _DeviceTcp, &VirtualDevice::slotDataSend);
+    connect(_DeviceTcp, &VirtualDevice::signalDataRecv, _comDeviceSerial, &VirtualDevice::slotDataSend);
     // if (_localOutput) {
-    //     connect(_comDeviceSerial, &ComDevice::signalDataRecv, _comDeviceScreen, &ComDevice::slotDataSend);
+    //     connect(_comDeviceSerial, &VirtualDevice::signalDataRecv, _comDeviceScreen, &VirtualDevice::slotDataSend);
     // }
     // if (_localInput) {
-    //     connect(_comDeviceScreen, &ComDevice::signalDataRecv, _comDeviceSerial, &ComDevice::slotDataSend);
+    //     connect(_comDeviceScreen, &VirtualDevice::signalDataRecv, _comDeviceSerial, &VirtualDevice::slotDataSend);
     // }
 
     QTimer::singleShot(0, _comDeviceSerial, SLOT(init()));
-    QTimer::singleShot(0, _comDeviceTcp, SLOT(init()));
+    QTimer::singleShot(0, _DeviceTcp, SLOT(init()));
     // QTimer::singleShot(0, _comDeviceScreen, SLOT(init()));
 }
 
@@ -118,8 +118,8 @@ void SerialTask::close()
     if(_comDeviceSerial){
         _comDeviceSerial->close();
     }
-    if(_comDeviceTcp){
-        _comDeviceTcp->close();
+    if(_DeviceTcp){
+        _DeviceTcp->close();
     }
 }
 

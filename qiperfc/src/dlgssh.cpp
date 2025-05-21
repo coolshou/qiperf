@@ -34,11 +34,11 @@ int DlgSSH::getTargetport()
 
 QString DlgSSH::getSSHCfg()
 {
-    return QString("%1:%2:%3:%4:%5").arg(ui->leUsername->text(),
-                                         ui->lePassword->text(),
-                                         ui->lePromptLogin->text(),
-                                         ui->lePromptPassword->text(),
-                                         ui->lePromptReady->text());
+    return QString("%1:%2:%3:%4").arg(ui->leUsername->text(),
+                                      ui->lePassword->text(),
+                                      ui->lePrivateKeyFile->text(),
+                                      QString::number(ui->sshtimeout->value()));
+
 }
 
 QString DlgSSH::getLogFilename()

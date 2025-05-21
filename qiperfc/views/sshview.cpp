@@ -25,11 +25,14 @@ SSHView::~SSHView()
 
 void SSHView::setConfig(QString serveraddress, int portnumber, QString protocol)
 {
-
+    m_currentport->setConfig(serveraddress, portnumber, protocol);
+    m_currentport->open();
 }
 
 void SSHView::setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat)
 {
+    //setup log to file
+    m_termialview->setLogFile(logtofile, logfilename, logtimestemp, timestempformat);
 
 }
 
@@ -59,6 +62,7 @@ void SSHView::readPortData()
 {
     if (m_pause == false) {
         QByteArray array = m_currentport->readAll();
+        qDebug() << "SSHView::readPortData:" << array;
         if (!array.isEmpty()) {
             m_rxCount += array.length();
             m_termialview->receiveData(array);
