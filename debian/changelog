@@ -1,3 +1,13 @@
+qiperf (0.11.11405.21-1) unstable; urgency=medium
+
+  * Add SSH terminal
+  * update GPS add Altitude and Elevation calc
+  * throughput plot chart add save to png
+  * throughput plot chart add copy raw data in json string format to clipboard
+  * QVTerminal add mouse left select & copy text, paste text
+
+ -- coolshou <coolshou2060@gmail.com>  Wed, 21 May 2025 10:00:00 +0800
+
 qiperf (0.11.11405.09-1) unstable; urgency=medium
 
   * Update iperf config Buffer Length(-l): allow input Max 9999 without Buffer Length unit
