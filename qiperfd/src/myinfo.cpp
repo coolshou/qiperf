@@ -116,7 +116,7 @@ QString MyInfo::collectInfo()
     mainObject.insert("Manager", m_ifname);
     mainObject.insert("update", update);
     mainObject.insert("qiperfd", QString(QIPERFD_VERSION));
-    mainObject.insert("buildver", QString(GITBRANCH)+"-"+QString(GITVER));
+    mainObject.insert("buildver", QString("%1-%2").arg(GITBRANCH, GITVER));
     //iperf version
     mainObject.insert("iperf2ver", m_iperf20ver);
     mainObject.insert("iperf21ver", m_iperf21ver);
@@ -190,12 +190,12 @@ QJsonArray MyInfo::collectSerial()
             com="/dev/";
 #endif
             com = com + q.portName();
-            qDebug() << com
-                 << " ProductId: 0x" << QString::number(q.productIdentifier(), 16).toUpper()
-                 << " VendorId: 0x" << QString::number(q.vendorIdentifier(), 16).toUpper()
-                 << " SN:" << q.serialNumber()
-                 << " description: " << q.description()
-                 << " manufacturer: " << q.manufacturer();
+            // qDebug() << com
+            //      << " ProductId: 0x" << QString::number(q.productIdentifier(), 16).toUpper()
+            //      << " VendorId: 0x" << QString::number(q.vendorIdentifier(), 16).toUpper()
+            //      << " SN:" << q.serialNumber()
+            //      << " description: " << q.description()
+            //      << " manufacturer: " << q.manufacturer();
             serials.append(com);
         }
     }
