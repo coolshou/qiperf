@@ -48,7 +48,7 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
             args = args + " -R";
         }
         uint duration = jsondata["duration"].toUInt();
-        if (duration>=0){
+        if (duration){
             args = args + " -t " + QString::number(duration);
         }
         bool zerocopy = jsondata["zerocopy"].toBool();
@@ -369,7 +369,7 @@ void IperfWrapper::parserIperf2(QString linedata)
                         qDebug() << " skip this interval:" << QString::number(interval);
                     }else{
                         QJsonObject irec = QJsonObject();
-                        irec.insert("idx", idx+sTag);  // parallel num
+                        irec.insert("idx", QString("%1%2").arg(idx,sTag));  // parallel num
                         irec.insert("interval", interval);  // interval
                         irec.insert("value", data[4]);  // Bitrate
                         irec.insert("unit", data[5]);  // Bitrate unit
@@ -530,7 +530,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                 }
                 if (m_tpdatas[sInterval].count()<iparallel){
                     QJsonObject irec = QJsonObject();
-                    irec.insert("idx", idx+sTag);  // parallel num
+                    irec.insert("idx", QString("%1%2").arg(idx,sTag));  // parallel num
                     irec.insert("interval", interval);  // interval
                     irec.insert("value", data[4]);  // Bitrate
                     irec.insert("unit", data[5]);  // Bitrate unit
