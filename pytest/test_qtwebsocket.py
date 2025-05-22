@@ -88,10 +88,12 @@ class WebSocketTest(unittest.TestCase):
         #self.managerIP = "192.168.70.24"
         #self.bindIP = "192.168.111.125"
         self.port = 5201
-        self.managerIP = "192.168.70.11"
+        self.managerIP = "192.168.70.147"
         self.bindIP = self.managerIP #"192.168.0.198"
-        self.client_managerIP = "192.168.70.21"
-        self.client_bindIP = self.client_managerIP
+        self.bUseClient = False
+        if self.bUseClient:
+            self.client_managerIP = "192.168.70.21"
+            self.client_bindIP = self.client_managerIP
         url = "ws://%s:47016/" % (self.managerIP)
         print("open %s" % url)
         self.client.open(QUrl(url))
@@ -99,13 +101,14 @@ class WebSocketTest(unittest.TestCase):
             print("wait client connect")
             time.sleep(1)
             QCoreApplication.processEvents(QEventLoop.ProcessEventsFlag.AllEvents)
-        url2 = "ws://%s:47016/" % (self.client_managerIP)
-        print("open %s" % url2)
-        self.client2.open(QUrl(url2))
-        while self.client2.state() != QAbstractSocket.SocketState.ConnectedState:
-            print("wait client2 connect")
-            time.sleep(1)
-            QCoreApplication.processEvents(QEventLoop.ProcessEventsFlag.AllEvents)
+        if self.bUseClient:
+            url2 = "ws://%s:47016/" % (self.client_managerIP)
+            print("open %s" % url2)
+            self.client2.open(QUrl(url2))
+            while self.client2.state() != QAbstractSocket.SocketState.ConnectedState:
+                print("wait client2 connect")
+                time.sleep(1)
+                QCoreApplication.processEvents(QEventLoop.ProcessEventsFlag.AllEvents)
         self.currtime = QDateTime.currentDateTime().toString(DATETIME_NOW_FORMAT);
 
     def init_client(self):
@@ -159,6 +162,12 @@ class WebSocketTest(unittest.TestCase):
     def test_ws_stopIperf(self):
         cmd = "IPERF_STOP:%s" % (self.managerIP)
         self.send_message(cmd)
+        QThread.sleep(5)
+
+    def test_ws_addSSH(self):
+        # add ssh client
+        cmd = "SSH_ADD:0:192.168.70.24:22:test:123456::30"
+        self.send_message2(cmd)
         QThread.sleep(5)
 
     def send_message(self, msg):
@@ -231,8 +240,9 @@ class WebSocketTest(unittest.TestCase):
 if __name__ == '__main__':
     suite = unittest.TestSuite()
     # suite.addTest(WebSocketTest('test_websocket'))
-    suite.addTest(WebSocketTest('test_ws_addIperf'))
-    suite.addTest(WebSocketTest('test_ws_addIperfClient'))
+    #suite.addTest(WebSocketTest('test_ws_addIperf'))
+    #suite.addTest(WebSocketTest('test_ws_addIperfClient'))
     #suite.addTest(WebSocketTest('test_ws_stopIperf'))
+    suite.addTest(WebSocketTest('test_ws_addSSH'))
 
     unittest.TextTestRunner(verbosity=2).run(suite)
