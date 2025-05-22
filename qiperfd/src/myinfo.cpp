@@ -243,10 +243,12 @@ QList<QHostAddress> MyInfo::getIPfromIfname(QString ifname)
 
     foreach (QNetworkInterface niface, interfaces) {
         if (niface.name() == ifname) {
+            qDebug() << "found: interfaces: " << ifname;
             QList<QNetworkAddressEntry> addresses = niface.addressEntries();
             foreach (QNetworkAddressEntry address, addresses) {
-                if (address.ip().protocol() == QAbstractSocket::IPv4Protocol) {
-                    ipAddress = address.ip();
+                ipAddress = address.ip();
+                qDebug() << "ipAddress:" <<ipAddress << " protocol:" << ipAddress.protocol();
+                if (ipAddress.protocol() == QAbstractSocket::IPv4Protocol) {
                     addrs.append(ipAddress);
                     bAddress = address.broadcast();
                     addrs.append(bAddress);
