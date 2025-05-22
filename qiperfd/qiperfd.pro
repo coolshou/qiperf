@@ -33,7 +33,7 @@ win32:{
     LIBS += -ladvapi32
     # -lcomsuppw //mingw not support
 }
-# include(../lib/qssh.pri)
+
 # QSSH
 include(../lib/qssh/qssh.pri)  # this will cause compile error??why
 # Don't clutter the example
@@ -41,6 +41,7 @@ DEFINES -= QT_NO_CAST_FROM_ASCII
 DEFINES -= QT_NO_CAST_TO_ASCII
 # require compile qssh.pro first (lib/qssh/lib/libQSsh.a)
 # or cd lib/qssh; dpkg-buildpackage -b --no-sign
+INCLUDEPATH += ../lib/qssh/src/libs/
 LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
      -lQSsh
 # QSSH END
