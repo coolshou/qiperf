@@ -111,7 +111,7 @@ double GeoTranslate::convertEllipsoidToMSL(double lat, double lon, double ellips
     try {
         // const GeographicLib::Geoid& geoid = GeographicLib::Geoid::EGM96(); // or EGM2008
         // Construct with the geoid model name (must be installed!)
-#ifdef defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX)
         QString geodatapath="/opt/qiperf/bin/geoids";
 #elif defined(Q_OS_WINDOWS)
         QString geodatapath=qApp->applicationDirPath() + QDir::separator() + "geoids";
