@@ -109,6 +109,9 @@ Section "qiperf daemon" SECTION_Daemon
     File "vc_redist.x86.exe"
 !endif
     File "${QIPERFD_NAME}"
+    File "D3Dcompiler_47.dll"
+    File "opengl32sw.dll"
+    File "..\lib\qssh\botan\botan.dll"
     File "Qt6Core${DEBUGSTR}.dll"
     File "Qt6Gui${DEBUGSTR}.dll"
     File "Qt6Network${DEBUGSTR}.dll"
@@ -116,64 +119,6 @@ Section "qiperf daemon" SECTION_Daemon
     File "Qt6Svg${DEBUGSTR}.dll"
     File "Qt6WebSockets${DEBUGSTR}.dll"
     File "Qt6Widgets${DEBUGSTR}.dll"
-    File "..\lib\qssh\botan\botan.dll"
-    SetOutPath "$INSTDIR\networkinformation\"
-    File "networkinformation\qnetworklistmanager${DEBUGSTR}.dll"
-    SetOutPath "$INSTDIR\tls"
-    File "tls\qcertonlybackend${DEBUGSTR}.dll"
-    File "tls\qschannelbackend${DEBUGSTR}.dll"
-    SetOutPath "$INSTDIR\translations\"
-    File "translations\qt_ar.qm"
-    File "translations\qt_bg.qm"
-    File "translations\qt_ca.qm"
-    File "translations\qt_cs.qm"
-    File "translations\qt_da.qm"
-    File "translations\qt_de.qm"
-    File "translations\qt_en.qm"
-    File "translations\qt_es.qm"
-    File "translations\qt_fi.qm"
-    File "translations\qt_fr.qm"
-    File "translations\qt_gd.qm"
-    File "translations\qt_he.qm"
-    File "translations\qt_hu.qm"
-    File "translations\qt_it.qm"
-    File "translations\qt_ja.qm"
-    File "translations\qt_ko.qm"
-    File "translations\qt_lv.qm"
-    File "translations\qt_pl.qm"
-    File "translations\qt_ru.qm"
-    File "translations\qt_sk.qm"
-    File "translations\qt_tr.qm"
-    File "translations\qt_uk.qm"
-    File "translations\qt_zh_TW.qm"
-    SetOutPath "$INSTDIR\windows\x86\"
-    File "windows\x86\cygcrypto-1.1.dll"
-    File "windows\x86\cyggcc_s-1.dll"
-    File "windows\x86\cygwin1.dll"
-    File "windows\x86\cygz.dll"
-    File "windows\x86\iperf2.exe"
-    File "windows\x86\iperf2.1.exe"
-    File "windows\x86\iperf2.2.n.exe"
-    File "windows\x86\iperf3.exe"
-    SetOutPath "$INSTDIR\windows\x86_64\"
-    File "windows\x86_64\cygcrypto-1.1.dll"
-    File "windows\x86_64\cygwin1.dll"
-    File "windows\x86_64\cygz.dll"
-    File "windows\x86_64\iperf2.1.exe"
-    File "windows\x86_64\iperf2.2.n.exe"
-    File "windows\x86_64\iperf3.exe"
-    SetOutPath "$INSTDIR\"
-    !cd ..
-!ifdef WIN64
-    !cd qiperftray_x86_64
-!else
-    !cd qiperftray_x86
-!endif
-
-    File "D3Dcompiler_47.dll"
-    File "opengl32sw.dll"
-    File "dxil.dll"
-    File "${QIPERFTRAY_NAME}"
     SetOutPath "$INSTDIR\generic\"
     File "generic\qtuiotouchplugin${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\iconengines\"
@@ -188,10 +133,73 @@ Section "qiperf daemon" SECTION_Daemon
     File "imageformats\qtiff${DEBUGSTR}.dll"
     File "imageformats\qwbmp${DEBUGSTR}.dll"
     File "imageformats\qwebp${DEBUGSTR}.dll"
+    SetOutPath "$INSTDIR\networkinformation\"
+    File "networkinformation\qnetworklistmanager${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\platforms\"
     File "platforms\qwindows${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\styles\"
     File "styles\qmodernwindowsstyle${DEBUGSTR}.dll"
+    SetOutPath "$INSTDIR\tls"
+    File "tls\qcertonlybackend${DEBUGSTR}.dll"
+    File "tls\qschannelbackend${DEBUGSTR}.dll"
+    SetOutPath "$INSTDIR\translations\"
+    ;File "translations\qt_ar.qm"
+    ;File "translations\qt_bg.qm"
+    ;File "translations\qt_ca.qm"
+    ;File "translations\qt_cs.qm"
+    ;File "translations\qt_da.qm"
+    ;File "translations\qt_de.qm"
+    File "translations\qt_en.qm"
+    ;File "translations\qt_es.qm"
+    ;File "translations\qt_fa.qm"
+    ;File "translations\qt_fi.qm"
+    ;File "translations\qt_fr.qm"
+    ;File "translations\qt_gd.qm"
+    ;File "translations\qt_he.qm"
+    ;File "translations\qt_hu.qm"
+    ;File "translations\qt_it.qm"
+    ;File "translations\qt_ja.qm"
+    ;File "translations\qt_ka.qm"
+    ;File "translations\qt_ko.qm"
+    ;File "translations\qt_lg.qm"
+    ;File "translations\qt_lv.qm"
+    ;File "translations\qt_nl.qm"
+    ;File "translations\qt_nn.qm"
+    ;File "translations\qt_pl.qm"
+    ;File "translations\qt_pt_BR.qm"
+    ;File "translations\qt_ru.qm"
+    ;File "translations\qt_sk.qm"
+    ;File "translations\qt_tr.qm"
+    ;File "translations\qt_uk.qm"
+    File "translations\qt_zh_CN.qm"
+    File "translations\qt_zh_TW.qm"
+    ;SetOutPath "$INSTDIR\windows\x86\"
+    ;File "windows\x86\cygcrypto-1.1.dll"
+    ;File "windows\x86\cyggcc_s-1.dll"
+    ;File "windows\x86\cygwin1.dll"
+    ;File "windows\x86\cygz.dll"
+    ;File "windows\x86\iperf2.exe"
+    ;File "windows\x86\iperf2.1.exe"
+    ;File "windows\x86\iperf2.2.n.exe"
+    ;File "windows\x86\iperf3.exe"
+    SetOutPath "$INSTDIR\windows\x86_64\"
+    File "windows\x86_64\cygcrypto-1.1.dll"
+    File "windows\x86_64\cygwin1.dll"
+    File "windows\x86_64\cygz.dll"
+    File "windows\x86_64\iperf2.1.exe"
+    File "windows\x86_64\iperf2.2.n.exe"
+    File "windows\x86_64\iperf3.exe"
+    SetOutPath "$INSTDIR\"
+    !cd ..
+
+!ifdef WIN64
+    !cd qiperftray_x86_64
+!else
+    !cd qiperftray_x86
+!endif
+    File "dxcompiler.dll"
+    File "dxil.dll"
+    File "${QIPERFTRAY_NAME}"
     !cd ..
     # #  serivice file
     SetOutPath "$INSTDIR"
@@ -265,6 +273,7 @@ Section Uninstall
 !else
     Delete "$INSTDIR\vc_redist.x86.exe"
 !endif
+    Delete "$INSTDIR\dxcompiler.dll"
     Delete "$INSTDIR\dxil.dll"
     Delete "$INSTDIR\${QIPERFD_NAME}"
     Delete "$INSTDIR\Qt6Core${DEBUGSTR}.dll"
@@ -292,41 +301,50 @@ Section Uninstall
     Delete "$INSTDIR\resources\v8_context_snapshot.bin"
 !endif
 
-    Delete "$INSTDIR\translations\qt_ar.qm"
-    Delete "$INSTDIR\translations\qt_bg.qm"
-    Delete "$INSTDIR\translations\qt_ca.qm"
-    Delete "$INSTDIR\translations\qt_cs.qm"
-    Delete "$INSTDIR\translations\qt_da.qm"
-    Delete "$INSTDIR\translations\qt_de.qm"
+    ;Delete "$INSTDIR\translations\qt_ar.qm"
+    ;Delete "$INSTDIR\translations\qt_bg.qm"
+    ;Delete "$INSTDIR\translations\qt_ca.qm"
+    ;Delete "$INSTDIR\translations\qt_cs.qm"
+    ;Delete "$INSTDIR\translations\qt_da.qm"
+    ;Delete "$INSTDIR\translations\qt_de.qm"
     Delete "$INSTDIR\translations\qt_en.qm"
-    Delete "$INSTDIR\translations\qt_es.qm"
-    Delete "$INSTDIR\translations\qt_fi.qm"
-    Delete "$INSTDIR\translations\qt_fr.qm"
-    Delete "$INSTDIR\translations\qt_gd.qm"
-    Delete "$INSTDIR\translations\qt_he.qm"
-    Delete "$INSTDIR\translations\qt_hu.qm"
-    Delete "$INSTDIR\translations\qt_it.qm"
-    Delete "$INSTDIR\translations\qt_ja.qm"
-    Delete "$INSTDIR\translations\qt_ko.qm"
-    Delete "$INSTDIR\translations\qt_lv.qm"
-    Delete "$INSTDIR\translations\qt_pl.qm"
-    Delete "$INSTDIR\translations\qt_ru.qm"
-    Delete "$INSTDIR\translations\qt_sk.qm"
-    Delete "$INSTDIR\translations\qt_tr.qm"
-    Delete "$INSTDIR\translations\qt_uk.qm"
+    ;Delete "$INSTDIR\translations\qt_es.qm"
+    ;Delete "$INSTDIR\translations\qt_fa.qm"
+    ;Delete "$INSTDIR\translations\qt_fi.qm"
+    ;Delete "$INSTDIR\translations\qt_fr.qm"
+    ;Delete "$INSTDIR\translations\qt_gd.qm"
+    ;Delete "$INSTDIR\translations\qt_he.qm"
+    ;Delete "$INSTDIR\translations\qt_hu.qm"
+    ;Delete "$INSTDIR\translations\qt_it.qm"
+    ;Delete "$INSTDIR\translations\qt_ja.qm"
+    ;Delete "$INSTDIR\translations\qt_ka.qm"
+    ;Delete "$INSTDIR\translations\qt_ko.qm"
+    ;Delete "$INSTDIR\translations\qt_lg.qm"
+    ;Delete "$INSTDIR\translations\qt_lv.qm"
+    ;Delete "$INSTDIR\translations\qt_nl.qm"
+    ;Delete "$INSTDIR\translations\qt_nn.qm"
+    ;Delete "$INSTDIR\translations\qt_pl.qm"
+    ;Delete "$INSTDIR\translations\qt_pt_BR.qm"
+    ;Delete "$INSTDIR\translations\qt_ru.qm"
+    ;Delete "$INSTDIR\translations\qt_sk.qm"
+    ;Delete "$INSTDIR\translations\qt_tr.qm"
+    ;Delete "$INSTDIR\translations\qt_uk.qm"
+    Delete "$INSTDIR\translations\qt_zh_CN.qm"
     Delete "$INSTDIR\translations\qt_zh_TW.qm"
 
-    Delete "$INSTDIR\windows\x86\cygcrypto-1.1.dll"
-    Delete "$INSTDIR\windows\x86\cyggcc_s-1.dll"
-    Delete "$INSTDIR\windows\x86\cygwin1.dll"
-    Delete "$INSTDIR\windows\x86\cygz.dll"
-    Delete "$INSTDIR\windows\x86\iperf2.exe"
-    Delete "$INSTDIR\windows\x86\iperf2.1.exe"
-    Delete "$INSTDIR\windows\x86\iperf3.exe"
+    ;Delete "$INSTDIR\windows\x86\cygcrypto-1.1.dll"
+    ;Delete "$INSTDIR\windows\x86\cyggcc_s-1.dll"
+    ;Delete "$INSTDIR\windows\x86\cygwin1.dll"
+    ;Delete "$INSTDIR\windows\x86\cygz.dll"
+    ;Delete "$INSTDIR\windows\x86\iperf2.exe"
+    ;Delete "$INSTDIR\windows\x86\iperf2.1.exe"
+    ;Delete "$INSTDIR\windows\x86\iperf2.2.n.exe"
+    ;Delete "$INSTDIR\windows\x86\iperf3.exe"
     Delete "$INSTDIR\windows\x86_64\cygcrypto-1.1.dll"
     Delete "$INSTDIR\windows\x86_64\cygwin1.dll"
     Delete "$INSTDIR\windows\x86_64\cygz.dll"
-    Delete "$INSTDIR\windows\x86_64\iperf2.2.exe"
+    Delete "$INSTDIR\windows\x86_64\iperf2.1.exe"
+    Delete "$INSTDIR\windows\x86_64\iperf2.2.n.exe"
     Delete "$INSTDIR\windows\x86_64\iperf3.exe"
 
     Delete "$INSTDIR\D3Dcompiler_47.dll"
@@ -349,7 +367,7 @@ Section Uninstall
     ; Remove remaining directories
     RMDir "$SMPROGRAMS\qiperf"
     RMDir "$INSTDIR\windows\x86_64\"
-    RMDir "$INSTDIR\windows\x86\"
+    ;RMDir "$INSTDIR\windows\x86\"
     RMDir "$INSTDIR\windows\"
     RMDir "$INSTDIR\networkinformation\"
     RMDir "$INSTDIR\tls\"
@@ -427,12 +445,19 @@ Function install_qiperfd
     SimpleFC::AddApplication "iperf3" "$INSTDIR\x86\iperf3.exe" 0 2 "" 1
     !endif
     Pop $0 ; return error(1)/success(0)
+    ; Add iperf2.2.n to firewall
+    !ifdef WIN64
+    SimpleFC::AddApplication "iperf2.2.n" "$INSTDIR\x86_64\iperf2.2.n.exe" 0 2 "" 1
+    !else
+    SimpleFC::AddApplication "iperf2.2.n" "$INSTDIR\x86\iperf2.2.n.exe" 0 2 "" 1
+    !endif
+    Pop $0 ; return error(1)/success(0)
     ; Add iperf2.1 to firewall
-    SimpleFC::AddApplication "iperf2.1" "$INSTDIR\x86\iperf2.1.exe" 0 2 "" 1
-    Pop $0 ; return error(1)/success(0)
+    ;SimpleFC::AddApplication "iperf2.1" "$INSTDIR\x86\iperf2.1.exe" 0 2 "" 1
+    ;Pop $0 ; return error(1)/success(0)
     ; Add iperf2 to firewall
-    SimpleFC::AddApplication "iperf2" "$INSTDIR\x86\iperf2.exe" 0 2 "" 1
-    Pop $0 ; return error(1)/success(0)
+    ;SimpleFC::AddApplication "iperf2" "$INSTDIR\x86\iperf2.exe" 0 2 "" 1
+    ;Pop $0 ; return error(1)/success(0)
 
     # install qiperfd  service & start it
     ExecWait '"$INSTDIR\nssm.exe" install "qiperfd" "$INSTDIR\${QIPERFD_NAME}"'
@@ -548,12 +573,20 @@ Function un.install_qiperfd
     SimpleFC::RemoveApplication "$INSTDIR\x86\iperf3.exe"
     !endif
     Pop $0 ; return error(1)/success(0)
+    ; Remove iperf2.2.n from the firewall
+    !ifdef WIN64
+    SimpleFC::RemoveApplication "$INSTDIR\x86_64\iperf2.2.n.exe"
+    !else
+    SimpleFC::RemoveApplication "$INSTDIR\x86\iperf2.2.n.exe"
+    !endif
+    Pop $0 ; return error(1)/success(0)
+
     ; Remove iperf2.1 from the firewall
-    SimpleFC::RemoveApplication "$INSTDIR\x86\iperf2.1.exe"
-    Pop $0 ; return error(1)/success(0)
+    ;SimpleFC::RemoveApplication "$INSTDIR\x86\iperf2.1.exe"
+    ;Pop $0 ; return error(1)/success(0)
     ; Remove iperf2 from the firewall
-    SimpleFC::RemoveApplication "$INSTDIR\x86\iperf2.exe"
-    Pop $0 ; return error(1)/success(0)
+    ;SimpleFC::RemoveApplication "$INSTDIR\x86\iperf2.exe"
+    ;Pop $0 ; return error(1)/success(0)
 
 FunctionEnd
 
