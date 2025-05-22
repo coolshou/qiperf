@@ -251,7 +251,6 @@ void EndPointMgr::disable(QString id)
 {
     if (isExist(id)){
         EndPoint* ep = getEndPoint(id);
-        qDebug() << "disable: " << ep->getID();
         ep->setEnabled(false);
     }else {
         qDebug() << "EndPointMgr::disable not found id:" << id << " m_endpoints:" << m_endpoints;
