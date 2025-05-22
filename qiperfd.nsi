@@ -21,8 +21,6 @@
 !define PRODUCT_REG_KEY "Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
 !define PRODUCT_UNINSTALL_EXE "${APPNAME}-uninstall.exe"
 
-!define VCBUILD 1 ; vs2022
-!define QT6
 ;!define DEBUG
 !ifdef DEBUG
  !define DEBUGSTR "d"
@@ -105,27 +103,17 @@ Section "qiperf daemon" SECTION_Daemon
 !else
     !cd "qiperfd_x86"
 !endif
-!ifdef VCBUILD
 !ifdef WIN64
     File "vc_redist.x64.exe"
 !else
     File "vc_redist.x86.exe"
 !endif
-
-!else
-    ;;mingw
-    File "libgcc_s_seh-1.dll"
-    File "libstdc++-6.dll"
-    File "libwinpthread-1.dll"
-    File "libEGL.dll"
-    File "libGLESv2.dll"
-
-!endif
     File "${QIPERFD_NAME}"
-!ifdef QT6
     File "Qt6Core${DEBUGSTR}.dll"
+    File "Qt6Gui${DEBUGSTR}.dll"
     File "Qt6Network${DEBUGSTR}.dll"
     File "Qt6SerialPort${DEBUGSTR}.dll"
+    File "Qt6Svg${DEBUGSTR}.dll"
     File "Qt6WebSockets${DEBUGSTR}.dll"
     File "Qt6Widgets${DEBUGSTR}.dll"
     File "..\lib\qssh\botan\botan.dll"
@@ -134,18 +122,6 @@ Section "qiperf daemon" SECTION_Daemon
     SetOutPath "$INSTDIR\tls"
     File "tls\qcertonlybackend${DEBUGSTR}.dll"
     File "tls\qschannelbackend${DEBUGSTR}.dll"
-!else
-    ;qt5
-    File "Qt5Core.dll"
-    File "Qt5Network.dll"
-    File "Qt5WebSockets.dll"
-    SetOutPath "$INSTDIR\bearer\"
-    File "bearer\qgenericbearer.dll"
-    File "Qt5Gui.dll"
-    File "Qt5Svg.dll"
-    File "Qt5Widgets.dll"
-
-!endif
     SetOutPath "$INSTDIR\translations\"
     File "translations\qt_ar.qm"
     File "translations\qt_bg.qm"
@@ -196,16 +172,10 @@ Section "qiperf daemon" SECTION_Daemon
 
     File "D3Dcompiler_47.dll"
     File "opengl32sw.dll"
-!ifdef VCBUILD
     File "dxil.dll"
-!endif
     File "${QIPERFTRAY_NAME}"
-!ifdef QT6
-    File "Qt6Gui${DEBUGSTR}.dll"
-    File "Qt6Svg${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\generic\"
     File "generic\qtuiotouchplugin${DEBUGSTR}.dll"
-!endif
     SetOutPath "$INSTDIR\iconengines\"
     File "iconengines\qsvgicon${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\imageformats\"
@@ -221,11 +191,7 @@ Section "qiperf daemon" SECTION_Daemon
     SetOutPath "$INSTDIR\platforms\"
     File "platforms\qwindows${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\styles\"
-!ifdef QT6
     File "styles\qmodernwindowsstyle${DEBUGSTR}.dll"
-!else
-    File "styles\qwindowsvistastyle.dll"
-!endif
     !cd ..
     # #  serivice file
     SetOutPath "$INSTDIR"
@@ -294,23 +260,13 @@ Section Uninstall
     Delete "$SMPROGRAMS\qiperf\qiperfd-Uninstall.lnk"
 
     ; Clean up qiperf daemon
-!ifdef VCBUILD
 !ifdef WIN64
     Delete "$INSTDIR\vc_redist.x64.exe"
 !else
     Delete "$INSTDIR\vc_redist.x86.exe"
 !endif
     Delete "$INSTDIR\dxil.dll"
-!else
-    Delete "$INSTDIR\libgcc_s_seh-1.dll"
-    Delete "$INSTDIR\libstdc++-6.dll"
-    Delete "$INSTDIR\libwinpthread-1.dll"
-    Delete "$INSTDIR\libEGL.dll"
-    Delete "$INSTDIR\libGLESv2.dll"
-
-!endif
     Delete "$INSTDIR\${QIPERFD_NAME}"
-!ifdef QT6
     Delete "$INSTDIR\Qt6Core${DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Gui${DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Network${DEBUGSTR}.dll"
@@ -320,7 +276,6 @@ Section Uninstall
     Delete "$INSTDIR\Qt6Widgets${DEBUGSTR}.dll"
     Delete "$INSTDIR\botan.dll"
     Delete "$INSTDIR\generic\qtuiotouchplugin${DEBUGSTR}.dll"
-
     Delete "$INSTDIR\networkinformation\qnetworklistmanager${DEBUGSTR}.dll"
     Delete "$INSTDIR\tls\qcertonlybackend${DEBUGSTR}.dll"
     Delete "$INSTDIR\tls\qschannelbackend${DEBUGSTR}.dll"
@@ -335,19 +290,6 @@ Section Uninstall
     Delete "$INSTDIR\resources\v8_context_snapshot.debug.bin"
 !else
     Delete "$INSTDIR\resources\v8_context_snapshot.bin"
-!endif
-
-!else
-    Delete "$INSTDIR\Qt5Core.dll"
-    Delete "$INSTDIR\Qt5Network.dll"
-    Delete "$INSTDIR\Qt5WebSockets.dll"
-    Delete "$INSTDIR\Qt5Gui.dll"
-    Delete "$INSTDIR\Qt5Svg.dll"
-    Delete "$INSTDIR\Qt5Widgets.dll"
-    Delete "$INSTDIR\bearer\qgenericbearer.dll"
-    Delete "$INSTDIR\styles\qwindowsvistastyle.dll"
-    Delete "$INSTDIR\Qt5PrintSupport.dll"
-    Delete "$INSTDIR\printsupport\windowsprintersupport.dll"
 !endif
 
     Delete "$INSTDIR\translations\qt_ar.qm"
@@ -409,14 +351,10 @@ Section Uninstall
     RMDir "$INSTDIR\windows\x86_64\"
     RMDir "$INSTDIR\windows\x86\"
     RMDir "$INSTDIR\windows\"
-!ifdef QT6
     RMDir "$INSTDIR\networkinformation\"
     RMDir "$INSTDIR\tls\"
     RMDir "$INSTDIR\generic\"
     RMDir "$INSTDIR\resources\"
-!else
-    RMDir "$INSTDIR\bearer\"
-!endif
     RMDir "$INSTDIR\translations\"
     RMDir "$INSTDIR\styles\"
     RMDir "$INSTDIR\platforms\"
