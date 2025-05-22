@@ -1,5 +1,6 @@
 #include "geotranslate.h"
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QDebug>
 
@@ -114,7 +115,7 @@ double GeoTranslate::convertEllipsoidToMSL(double lat, double lon, double ellips
 #if defined(Q_OS_LINUX)
         QString geodatapath="/opt/qiperf/bin/geoids";
 #elif defined(Q_OS_WINDOWS)
-        QString geodatapath=qApp->applicationDirPath() + QDir::separator() + "geoids";
+        QString geodatapath=QCoreApplication::instance()->applicationDirPath() + QDir::separator() + "geoids";
 #else
         qDebug() << "Not support platform";
         return ellipsoidHeight;
