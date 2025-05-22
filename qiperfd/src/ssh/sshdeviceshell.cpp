@@ -37,7 +37,6 @@ bool SSHDeviceShell::isRunning()
 
 void SSHDeviceShell::init()
 {
-    qDebug() << "SSHDeviceShell::init";
     m_connection->connectToHost();
 }
 
@@ -70,14 +69,11 @@ void SSHDeviceShell::close()
 
 void SSHDeviceShell::handleConnectionError()
 {
-    // std::cerr << "SSH connection error: " << qPrintable(m_connection->errorString()) << std::endl;
     qDebug() << "SSH connection error: " << qPrintable(m_connection->errorString());
-    // QCoreApplication::exit(EXIT_FAILURE);
 }
 
 void SSHDeviceShell::handleShellMessage(const QString &message)
 {
-    // std::cout << qPrintable(message);
     qDebug() << qPrintable(message);
 }
 
@@ -107,15 +103,12 @@ void SSHDeviceShell::handleShellStarted()
 
 void SSHDeviceShell::handleRemoteStdout()
 {
-    // std::cout << m_shell->readAllStandardOutput().data() << std::flush;
     QByteArray data = m_shell->readAllStandardOutput().data();
-    qDebug() << "TODO: handleRemoteStdout: " << data;
     emit signalDataRecv(data);
 }
 
 void SSHDeviceShell::handleRemoteStderr()
 {
-    // std::cerr << m_shell->readAllStandardError().data() << std::flush;
     QByteArray data = m_shell->readAllStandardError().data();
     qDebug() << "TODO: handleRemoteStderr: " << data;
     emit signalDataRecv(data);
@@ -128,8 +121,6 @@ void SSHDeviceShell::handleChannelClosed(int exitStatus)
     //           << m_shell->exitCode() << "." << std::endl;
     qDebug() << "TODO: Shell closed. Exit status was " << exitStatus << ", exit code was "
              << m_shell->exitCode() << ".";
-    // QCoreApplication::exit(exitStatus == SshRemoteProcess::NormalExit && m_shell->exitCode() == 0
-    //                            ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
 void SSHDeviceShell::handleStdin()
