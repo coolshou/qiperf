@@ -233,9 +233,9 @@ Section "qiperf console" SECTION_Console
     ;#SetOutPath "$INSTDIR\template\"
     ;#File "..\qiperfc\template\result.html"
     SetOutPath "$INSTDIR\geoids"
-    File "lib\geoids\egm96-5.pgm"
-    File "lib\geoids\egm96-5.pgm.aux.xml"
-    File "lib\geoids\egm96-5.wld"
+    File "..\lib\geoids\egm96-5.pgm"
+    File "..\lib\geoids\egm96-5.pgm.aux.xml"
+    File "..\lib\geoids\egm96-5.wld"
 
     !cd ..
     CreateShortCut "$DESKTOP\qiperfc.lnk" "$INSTDIR\${QIPERFC_NAME}"
