@@ -127,6 +127,8 @@ Section "qiperf daemon" SECTION_Daemon
     File "Qt6Network${DEBUGSTR}.dll"
     File "Qt6SerialPort${DEBUGSTR}.dll"
     File "Qt6WebSockets${DEBUGSTR}.dll"
+    File "Qt6Widgets${DEBUGSTR}.dll"
+    File "..\lib\qssh\botan\botan.dll"
     SetOutPath "$INSTDIR\networkinformation\"
     File "networkinformation\qnetworklistmanager${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\tls"
@@ -201,7 +203,6 @@ Section "qiperf daemon" SECTION_Daemon
 !ifdef QT6
     File "Qt6Gui${DEBUGSTR}.dll"
     File "Qt6Svg${DEBUGSTR}.dll"
-    File "Qt6Widgets${DEBUGSTR}.dll"
     SetOutPath "$INSTDIR\generic\"
     File "generic\qtuiotouchplugin${DEBUGSTR}.dll"
 !endif
@@ -317,6 +318,7 @@ Section Uninstall
     Delete "$INSTDIR\Qt6SerialPort${DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6WebSockets${DEBUGSTR}.dll"
     Delete "$INSTDIR\Qt6Widgets${DEBUGSTR}.dll"
+    Delete "$INSTDIR\botan.dll"
     Delete "$INSTDIR\generic\qtuiotouchplugin${DEBUGSTR}.dll"
 
     Delete "$INSTDIR\networkinformation\qnetworklistmanager${DEBUGSTR}.dll"
