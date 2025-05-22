@@ -31,7 +31,26 @@ if "%BUILDAPP%"=="1" (
     REM del /Q /S qiperfc_x86_64\*
     REM del /Q /S qiperfd_x86_64\*
     REM del /Q /S qiperftray_x86_64\*
-
+    IF NOT EXIST "lib\geographiclib\build\lib\Release\GeographicLib.lib" (
+      cd lib\geographiclib
+      mkdir build
+      cd build
+      cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="/EHsc /wd4819  /wd4456  /wd4244 /WX-"  ..
+      msbuild -p:Configuration=Release GeographicLib.sln
+      cd ../../../
+    )
+    IF NOT EXIST "lib/qssh/lib/libqssh.lib" (
+      cd lib/qssh
+      IF NOT EXIST "botan/botan.lib" (
+         cd botan
+         python configure.py --cc=msvc --os=windows --cpu=x64
+         nmake
+         cd ..
+      )
+      qmake
+      nmake
+      cd ../../
+    )
     echo qmake...
     qmake
     echo nmake...
