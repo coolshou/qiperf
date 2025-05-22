@@ -1335,6 +1335,7 @@ void QIperfd::initIperf(QString apppath)
     Q_UNUSED(apppath)
     // iperf control interface, accept add/del iperf setting from remote
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    QString tmp_path = "";
     QString arch = "";
 #if defined(Q_OS_ANDROID) || defined(Q_OS_WIN32)
     arch = QSysInfo::buildCpuArchitecture();
@@ -1342,7 +1343,7 @@ void QIperfd::initIperf(QString apppath)
 #if defined(Q_OS_LINUX)
     // linux/android path
     #if !defined(Q_OS_ANDROID)
-        QString tmp_path = QString(QDir::separator()) + "qiperf";
+        tmp_path = QString(QDir::separator()) + "qiperf";
         QDir dir(tmp + tmp_path);
         if (!dir.exists())
         {
@@ -1351,6 +1352,11 @@ void QIperfd::initIperf(QString apppath)
     #else
         QString tmp_path = "";
     #endif
+
+#else
+    qDebug() << " Not Support platform!!";
+
+#endif \
     //TODO: check we have newer version of iperf, remove old !!
     initiperf2(tmp, tmp_path, arch);
     initiperf21(tmp, tmp_path, arch);
@@ -1358,9 +1364,6 @@ void QIperfd::initIperf(QString apppath)
     m_iperfexe2 = m_iperfexe22;
     initiperf3(tmp, tmp_path, arch);
 
-#else
-    qDebug() << " Not Support platform!!";
-#endif
 }
 
 void QIperfd::getIperfVer(QString cmd, double ver)
