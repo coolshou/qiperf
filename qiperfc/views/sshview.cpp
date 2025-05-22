@@ -62,7 +62,7 @@ void SSHView::readPortData()
 {
     if (m_pause == false) {
         QByteArray array = m_currentport->readAll();
-        qDebug() << "SSHView::readPortData:" << array;
+        // qDebug() << "SSHView::readPortData:" << array;
         if (!array.isEmpty()) {
             m_rxCount += array.length();
             m_termialview->receiveData(array);
