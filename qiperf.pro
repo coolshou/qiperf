@@ -1,7 +1,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    lib/qssh/src/libs/qssh \
     qiperfd \
     qiperftray
 
@@ -13,7 +12,7 @@ qiperftray.subdir = qiperftray
 qiperfd.subdir = qiperfd
 qiperfc.subdir = qiperfc
 qiperftray.depends = qiperfd
-qssh.subdir = lib/qssh/src/libs/qssh
+# qssh.subdir = lib/qssh/src/libs/qssh
 # qiperfd.depends = qssh
 
 DEBIAN.files += \

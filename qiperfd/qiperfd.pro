@@ -42,7 +42,7 @@ DEFINES -= QT_NO_CAST_TO_ASCII
 # require compile qssh.pro first (lib/qssh/lib/libQSsh.a)
 # or cd lib/qssh; dpkg-buildpackage -b --no-sign
 LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
-    -lQSsh
+     -lQSsh
 # QSSH END
 
 # You can make your code fail to compile if it uses deprecated APIs.
