@@ -43,7 +43,7 @@ DEFINES -= QT_NO_CAST_TO_ASCII
 # or cd lib/qssh; dpkg-buildpackage -b --no-sign
 INCLUDEPATH += ../lib/qssh/src/libs/
 LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
-     -lQSsh
+     $$OUT_PWD/../lib/qssh/lib/QSsh.lib
 # QSSH END
 
 # You can make your code fail to compile if it uses deprecated APIs.
