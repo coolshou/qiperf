@@ -895,7 +895,7 @@ void QIperfd::onWSactMessage(QString msg)
                          << " password:" << password
                          << " privateKeyFile:" <<  privateKeyFile
                          << " timeout:" <<  QString::number(timeout);
-
+                //TODO: m_sshtasks's key format?
                 if (!m_sshtasks.contains(sshTarget)){ // not exist
                     port =  QIPERF_SSHPORT + m_sshtasks.count();
                     task = new SSHTask(idx, sshTarget, sshPort,
@@ -934,6 +934,7 @@ void QIperfd::onWSactMessage(QString msg)
             // onSSHTaskError(idx, QString("Wrong format of create ssh: %1").arg(msg));
         }
     }else if (act.startsWith(CMD_SSH_DEL)){
+        qInfo() << "CMD_SSH_DEL: " << msg;
         QString target = msg;
         if (m_sshtasks.contains(target)){
             SerialTask *task = m_serialtasks.value(target);

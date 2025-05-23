@@ -122,7 +122,8 @@ void VirtualDeviceTcp::slotNewConnection()
 
     _tcpSocketList << tcpSocket;
 
-    qInfo() << QString("TCP-Socket connected: %1 %2").arg(tcpSocket->peerAddress().toString(), tcpSocket->peerPort());
+    qInfo() << QString("TCP-Socket connected");
+    // %1 %2").arg(tcpSocket->peerAddress().toString(), tcpSocket->peerPort());
 }
 
 void VirtualDeviceTcp::slotDisconnected()
@@ -139,8 +140,10 @@ void VirtualDeviceTcp::slotDisconnected()
         }
     }
     _tcpSocketList.removeAll(tcpSocket);
+    QString ip = tcpSocket->peerAddress().toString();
+    QString port = QString::number(tcpSocket->peerPort());
     tcpSocket->deleteLater();
-    qInfo() << QString("TCP-Socket closed: %1 %2").arg(tcpSocket->peerAddress().toString(), tcpSocket->peerPort());
+    qInfo() << QString("TCP-Socket closed: %1 %2").arg(ip, port);
 }
 
 void VirtualDeviceTcp::slotReadyRead()

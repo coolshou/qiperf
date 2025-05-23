@@ -148,7 +148,7 @@
       <item>
        <widget class="QLabel" name="label_10">
         <property name="text">
-         <string>Timeout(sec):</string>
+         <string>Timeout(sec)(TODO):</string>
         </property>
        </widget>
       </item>

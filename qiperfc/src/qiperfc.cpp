@@ -1424,6 +1424,7 @@ void QIperfC::onAddSSH()
             //wait connect
             int timeout=0;
             while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
+                qDebug() << "wait WSClient connect to " << url;
                 QThread::msleep(100);
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
                 timeout++;

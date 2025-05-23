@@ -84,7 +84,9 @@ void SSHTask::init()
             para.authenticationType = SshConnectionParameters::AuthenticationTypePublicKey;
             para.privateKeyFile = _sshPrivateKeyFile;
         }
-        para.timeout = _timeout;
+        // para.timeout = _timeout; // this is not connect timeout?
+        para.timeout = 3;
+
         // if (!para.host().isEmpty())
         {
             try{
