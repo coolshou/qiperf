@@ -173,7 +173,7 @@ Section "qiperf daemon" SECTION_Daemon
     ;File "translations\qt_uk.qm"
     File "translations\qt_zh_CN.qm"
     File "translations\qt_zh_TW.qm"
-    ;SetOutPath "$INSTDIR\windows\x86\"
+    SetOutPath "$INSTDIR\windows\x86\"
     ;File "windows\x86\cygcrypto-1.1.dll"
     ;File "windows\x86\cyggcc_s-1.dll"
     ;File "windows\x86\cygwin1.dll"
