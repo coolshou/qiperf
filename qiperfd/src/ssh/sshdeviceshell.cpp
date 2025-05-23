@@ -43,7 +43,6 @@ void SSHDeviceShell::init()
 void SSHDeviceShell::slotDataSend(const QByteArray &data)
 {
     //write data to shell
-    qDebug() << "//TODO: SSHDeviceShell::slotDataSend" << data;
     if (m_shell){
         if (m_shell->isWritable()){
             m_shell->write(data);
@@ -69,12 +68,13 @@ void SSHDeviceShell::close()
 
 void SSHDeviceShell::handleConnectionError()
 {
-    qDebug() << "SSH connection error: " << qPrintable(m_connection->errorString());
+    QString errmsg = QString("SSH connection error: %1").arg(qPrintable(m_connection->errorString()));
+    emit signalDataRecv(errmsg.toUtf8());
 }
 
 void SSHDeviceShell::handleShellMessage(const QString &message)
 {
-    qDebug() << qPrintable(message);
+    qDebug() << "SSHDeviceShell::handleShellMessage: " << qPrintable(message);
 }
 
 void SSHDeviceShell::handleConnected()
@@ -97,6 +97,7 @@ void SSHDeviceShell::handleDisconnected()
 void SSHDeviceShell::handleShellStarted()
 {
     _connected = true;
+    qDebug() << "TODO: handleShellStarted: ";
     // QSocketNotifier * const notifier = new QSocketNotifier(0, QSocketNotifier::Read, this);
     // connect(notifier, &QSocketNotifier::activated, this, &SSHDeviceShell::handleStdin);
 }
@@ -117,9 +118,7 @@ void SSHDeviceShell::handleRemoteStderr()
 void SSHDeviceShell::handleChannelClosed(int exitStatus)
 {
     _connected = false;
-    // std::cerr << "Shell closed. Exit status was " << exitStatus << ", exit code was "
-    //           << m_shell->exitCode() << "." << std::endl;
-    qDebug() << "TODO: Shell closed. Exit status was " << exitStatus << ", exit code was "
+    qDebug() << "TODO: SSHDeviceShell::handleChannelClosed Shell closed. Exit status was " << exitStatus << ", exit code was "
              << m_shell->exitCode() << ".";
 }
 

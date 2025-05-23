@@ -1219,6 +1219,13 @@ void QIperfC::onSSHClosed(QString idx)
         sd.ws->sendText(cmd);
         sd.ws->deleteLater();
         sd.sv->deleteLater();
+        for (auto it = m_sshviews->begin(); it != m_sshviews->end(); /* don't increment here */) {
+            if (it.key() == idx) {
+                it = m_sshviews->erase(it);
+            } else {
+                ++it;
+            }
+        }
     }
 }
 

@@ -42,10 +42,11 @@ DEFINES -= QT_NO_CAST_TO_ASCII
 # require compile qssh.pro first (lib/qssh/lib/libQSsh.a)
 # or cd lib/qssh; dpkg-buildpackage -b --no-sign
 INCLUDEPATH += ../lib/qssh/src/libs/
+win32:{
 LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
      $$OUT_PWD/../lib/qssh/lib/QSsh.lib
+}
 # QSSH END
-
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0

@@ -38,7 +38,6 @@ void VirtualDeviceTcp::init()
 
     QHostAddress hostAddress = _localIp.compare("any", Qt::CaseInsensitive) == 0 ? QHostAddress::Any : QHostAddress(_localIp);
     if (hostAddress.isNull()) {
-        // L_ERROR("TCP-Server listen address invalid");
         qDebug() << "TCP-Server listen address invalid";
         emit finished();
         return;
@@ -47,19 +46,16 @@ void VirtualDeviceTcp::init()
     bool ok = false;
     quint16 localPort = _localPort.toUShort(&ok);
     if (!ok) {
-        // L_ERROR("TCP-Server local port invalid");
         qDebug() << "TCP-Server local port invalid";
         emit finished();
         return;
     }
 
     if (!_tcpServer->listen(hostAddress, localPort)) {
-        // L_ERROR("TCP-Server listen failed");
         qDebug() << "TCP-Server listen failed";
         emit finished();
         return;
     }
-    // L_NOTE(QString("TCP-Server listening: %1 %2").arg(hostAddress.toString()).arg(_localPort));
     qInfo() << QString("TCP-Server listening: %1 %2").arg(hostAddress.toString(), _localPort);
     emit started(m_idx, localPort);
 }
@@ -67,7 +63,7 @@ void VirtualDeviceTcp::init()
 void VirtualDeviceTcp::slotDataSend(const QByteArray &data)
 {
     if (!_tcpServer) {
-        qDebug() << "No _tcpServer";
+        qDebug() << "VirtualDeviceTcp::slotDataSend No _tcpServer";
         return;
     }
     foreach (QTcpSocket* tcpSocket, _tcpSocketList) {
@@ -76,12 +72,10 @@ void VirtualDeviceTcp::slotDataSend(const QByteArray &data)
         }
         qint64 number = tcpSocket->write(data);
         if (number == -1) {
-            // L_ERROR("TCP-Socket write failed");
             qDebug() << "TCP-Socket write failed";
             emit finished();
         }
         else if (number != data.size()) {
-            // L_WARN("TCP-Socket write partial data"); // TODO
             qWarning() << "TCP-Socket write partial data";
             emit finished();
         }
@@ -93,18 +87,15 @@ void VirtualDeviceTcp::close()
     if (_tcpServer) {
         foreach (QTcpSocket* tcpSocket, _tcpSocketList) {
             tcpSocket->disconnectFromHost();
-            // L_NOTE("TCP-Socket closed");
             qInfo() << "TCP-Socket closed";
         }
         _tcpServer->close();
-        // L_NOTE("TCP-Server closed");
         qInfo() << "TCP-Server closed";
     }
 }
 
 void VirtualDeviceTcp::slotAcceptError(QAbstractSocket::SocketError socketError)
 {
-    // L_ERROR(QString("TCP-Server accept error: %1").arg(socketError));
     qDebug() << QString("TCP-Server accept error: %1").arg(socketError);
     emit finished();
 }
@@ -131,26 +122,25 @@ void VirtualDeviceTcp::slotNewConnection()
 
     _tcpSocketList << tcpSocket;
 
-    qInfo() << QString("TCP-Socket connected: %1 %2").arg(tcpSocket->peerAddress().toString()).arg(tcpSocket->peerPort());
+    qInfo() << QString("TCP-Socket connected: %1 %2").arg(tcpSocket->peerAddress().toString(), tcpSocket->peerPort());
 }
 
 void VirtualDeviceTcp::slotDisconnected()
 {
     QTcpSocket* tcpSocket = qobject_cast<QTcpSocket*>(sender());
     if (!tcpSocket) {
+        qDebug() << "VirtualDeviceTcp::slotDisconnected sender not tcpSocket:" << sender();
         return;
     }
     if (_mode == Mode::TEXT) {
         QString key = peerString(tcpSocket); // map key
         if (_dataRecv.remove(key) > 0) {
-            // L_DEBUG(QString("key remove: %1").arg(key));
             qDebug() << QString("key remove: %1").arg(key);
         }
     }
     _tcpSocketList.removeAll(tcpSocket);
     tcpSocket->deleteLater();
-    // L_NOTE(QString("TCP-Socket closed: %1 %2").arg(tcpSocket->peerAddress().toString()).arg(tcpSocket->peerPort()));
-    qInfo() << QString("TCP-Socket closed: %1 %2").arg(tcpSocket->peerAddress().toString()).arg(tcpSocket->peerPort());
+    qInfo() << QString("TCP-Socket closed: %1 %2").arg(tcpSocket->peerAddress().toString(), tcpSocket->peerPort());
 }
 
 void VirtualDeviceTcp::slotReadyRead()
@@ -161,7 +151,7 @@ void VirtualDeviceTcp::slotReadyRead()
     }
     QByteArray data = tcpSocket->readAll();
     if (_mode == Mode::BINARY) {
-        qDebug() << "VirtualDeviceTcp::slotReadyRead" << data;
+        // qDebug() << "VirtualDeviceTcp::slotReadyRead" << data;
         emit signalDataRecv(data);
         return;
     }
@@ -177,7 +167,6 @@ void VirtualDeviceTcp::slotReadyRead()
         while (dataRecvListTrimmed.size() >= 2) {
             QString dataRecv = dataRecvListTrimmed.takeFirst();
             _dataRecv[key] = dataRecvListTrimmed.join("\n");
-            // L_DEBUG(QString("dataRecvListTrimmed.size: %1").arg(dataRecvListTrimmed.size()));
             QByteArray data = dataRecv.toUtf8();
             data.append("\n");
             emit signalDataRecv(data);
@@ -188,7 +177,8 @@ void VirtualDeviceTcp::slotReadyRead()
 QString VirtualDeviceTcp::peerString(const QTcpSocket *tcpSocket)
 {
     if (!tcpSocket) {
+        qDebug() << "VirtualDeviceTcp::peerString no tcpSocket, return -";
         return "-";
     }
-    return QString("%1:%2").arg(tcpSocket->peerAddress().toString()).arg(tcpSocket->peerPort());
+    return QString("%1:%2").arg(tcpSocket->peerAddress().toString(), tcpSocket->peerPort());
 }

@@ -35,6 +35,7 @@ protected:
     virtual void closeEvent(QCloseEvent * event)
     {
         qDebug() << "AbstractView closeEvent:" << event;
+        emit closed(title());
     }
 signals:
     void transmitData(const QByteArray &data);

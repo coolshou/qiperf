@@ -13,7 +13,7 @@
 ViewManager::ViewManager(QString *docPath, ThroughputView *tpview, QMainWindow *window) :
     m_docPath(docPath), m_throughputview(tpview), m_window(window)
 {
-    m_views = new QVector<AbstractView *>;
+    m_views = new QMap<QString, AbstractView *>;
     m_docks = new QMap<AbstractView *, QDockWidget *>;
 
     delete window->takeCentralWidget();
@@ -24,7 +24,9 @@ ViewManager::ViewManager(QString *docPath, ThroughputView *tpview, QMainWindow *
 ViewManager::~ViewManager()
 {
     // for (AbstractView *view : std::as_const(*m_views)) {
-    for (AbstractView *view : *m_views) {
+    // for (AbstractView *view : *m_views) {
+    for (auto key: m_views->keys()){
+        AbstractView *view = m_views->value(key);
         delete view;
     }
     delete m_views;
@@ -37,7 +39,9 @@ ViewManager::~ViewManager()
 void ViewManager::loadConfig(QSettings *config)
 {
     // for (AbstractView *view : std::as_const(*m_views)) {
-    for (AbstractView *view : *m_views) {
+    // for (AbstractView *view : *m_views) {
+    for (auto key: m_views->keys()){
+        AbstractView *view = m_views->value(key);
         view->loadConfig(config);
     }
     //TODO: loadConfig of dock
@@ -45,7 +49,9 @@ void ViewManager::loadConfig(QSettings *config)
 
 void ViewManager::saveConfig(QSettings *config)
 {
-    for (AbstractView *view : *m_views) {
+    // for (AbstractView *view : *m_views) {
+    for (auto key: m_views->keys()){
+        AbstractView *view = m_views->value(key);
         view->saveConfig(config);
     }
     //TODO: saveConfig of dock
@@ -53,7 +59,9 @@ void ViewManager::saveConfig(QSettings *config)
 
 void ViewManager::loadSettings(QSettings *config)
 {
-    for (AbstractView *view : *m_views) {
+    // for (AbstractView *view : *m_views) {
+    for (auto key: m_views->keys()){
+        AbstractView *view = m_views->value(key);
         view->loadSettings(config);
     }
     //TODO: loadSettings of dock
@@ -61,8 +69,8 @@ void ViewManager::loadSettings(QSettings *config)
 
 void ViewManager::retranslate()
 {
-    for (int i = 0; i < m_views->size(); ++i) {
-        AbstractView *view = m_views->at(i);
+    for (auto key: m_views->keys()){
+        AbstractView *view = m_views->value(key);
         view->retranslate();
     }
 }
@@ -71,7 +79,9 @@ void ViewManager::dispatchMessage(const QString &receiver, const QByteArray &mes
 {
     AbstractView *sender = dynamic_cast<AbstractView *>(QObject::sender());
     // for (AbstractView *view : std::as_const(*m_views)) {
-    for (AbstractView *view : *m_views) {
+    // for (AbstractView *view : *m_views) {
+    for (auto key: m_views->keys()){
+        AbstractView *view = m_views->value(key);
         if (view->iid() == receiver || receiver.isEmpty()) {
             view->takeMessage(sender->iid(), message);
         }
@@ -81,7 +91,9 @@ void ViewManager::dispatchMessage(const QString &receiver, const QByteArray &mes
 void ViewManager::receiveData(const QByteArray &array)
 {
     // for (AbstractView *view : std::as_const(*m_views)) {
-    for (AbstractView *view : *m_views) {
+    // for (AbstractView *view : *m_views) {
+    for (auto key: m_views->keys()){
+        AbstractView *view = m_views->value(key);
         if (view->isVisible()) {
             view->receiveData(array);
         }
@@ -91,7 +103,9 @@ void ViewManager::receiveData(const QByteArray &array)
 void ViewManager::setEnabled(bool enabled)
 {
     // for (AbstractView *view : std::as_const(*m_views)) {
-    for (AbstractView *view : *m_views) {
+    // for (AbstractView *view : *m_views) {
+    for (auto key: m_views->keys()){
+        AbstractView *view = m_views->value(key);
         view->setEnabled(enabled);
     }
 }
@@ -99,7 +113,9 @@ void ViewManager::setEnabled(bool enabled)
 void ViewManager::clear(void)
 {
     // for (AbstractView *view : std::as_const(*m_views)) {
-    for (AbstractView *view : *m_views) {
+    // for (AbstractView *view : *m_views) {
+    for (auto key: m_views->keys()){
+        AbstractView *view = m_views->value(key);
         view->clear();
     }
 }
@@ -112,10 +128,14 @@ void ViewManager::setFileAction(QAction *openAction, QAction *saveAction)
 
 void ViewManager::addView(AbstractView *view, bool closeable)
 {
-    int idx = m_views->count();
-
-    QDockWidget *dock = new QDockWidget(view->title(), m_window);
-    connect(dock, &QDockWidget::visibilityChanged, this, &ViewManager::onVisibilityChanged);
+    // int idx = m_views->count();
+    int idx = m_views->keys().count();
+    QString title = view->title();
+    QDockWidget *dock = new QDockWidget(title, m_window);
+    qDebug() << "ViewManager::addView dock title:" << dock->windowTitle();
+    dock->installEventFilter(this);
+    // connect(dock, &QDockWidget::visibilityChanged, this, &ViewManager::onVisibilityChanged);
+    // connect(dock, &QDockWidget::closeEvent, this, &ViewManager::onDockWidgetClose);
     if (!closeable){
         dock->setFeatures(dock->features() & ~QDockWidget::DockWidgetClosable &
                           ~QDockWidget::DockWidgetFloatable);
@@ -133,7 +153,8 @@ void ViewManager::addView(AbstractView *view, bool closeable)
     connect(view, &AbstractView::transmitData, this, &ViewManager::transmitData);
     connect(view, &AbstractView::sendMessage, this, &ViewManager::dispatchMessage);
 
-    m_views->append(view);
+    // m_views->append(view);
+    m_views->insert(title, view);
     m_docks->insert(view, dock);
     // Access the tab widget
     QTabWidget *tabWidget = findChild<QTabWidget *>();
@@ -222,8 +243,48 @@ void ViewManager::openFile()
 
 void ViewManager::onVisibilityChanged(bool visible)
 {
+    // each time switch QDockWidget will also trigger this, not good for closeevent!!
     Q_UNUSED(visible)
-    // qDebug() << "onVisibilityChanged: " << visible;
+    qDebug() << "onVisibilityChanged: " << visible;
+}
+
+void ViewManager::onDockWidgetClose(QCloseEvent *event)
+{
+    qDebug() << "onDockWidgetClose:" << event;
+}
+
+bool ViewManager::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::Close) {
+        QDockWidget *dock = qobject_cast<QDockWidget*>(watched);
+        if (dock) {
+            qDebug() << "QDockWidget receive close event!";
+            QString key = dock->windowTitle();
+            AbstractView *view = m_views->value(key);
+            //clear view
+            view->close();
+            view->deleteLater();
+            dock->deleteLater();
+            // m_views->erase()
+            for (auto it = m_views->begin(); it != m_views->end(); /* don't increment here */) {
+                if (it.key() == key) {
+                    auto v = m_views->value(it.key());
+                    for (auto itd = m_docks->begin(); itd != m_docks->end(); /* don't increment here */) {
+                        if (itd.key() == v){
+                            itd = m_docks->erase(itd);
+                        }else{
+                            ++itd;
+                        }
+                    }
+                    it = m_views->erase(it);
+                } else {
+                    ++it;
+                }
+            }
+            return true; // 事件已處理
+        }
+    }
+    return QObject::eventFilter(watched, event);
 }
 
 QVector<AbstractView *> ViewManager::loadExtensions(const QString &path)

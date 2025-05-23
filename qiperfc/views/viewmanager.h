@@ -2,6 +2,7 @@
 #define VIEWMANAGER_H
 
 #include <QObject>
+#include <QCloseEvent>
 #include "throughputview.h"
 
 class AbstractView;
@@ -38,11 +39,16 @@ public slots:
 signals:
     void transmitData(const QByteArray &);
 
+protected slots:
+    void onDockWidgetClose(QCloseEvent* event);
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 private slots:
     void dispatchMessage(const QString &receiver, const QByteArray &message);
     void saveFile();
     void openFile();
     void onVisibilityChanged(bool visible);
+
 private:
     QVector<AbstractView *> loadExtensions(const QString &path);
 
@@ -53,7 +59,8 @@ private:
         int postion;
     };
     QDockWidget *m_align = nullptr;
-    QVector<AbstractView *> *m_views;
+    // QVector<AbstractView *> *m_views;
+    QMap<QString, AbstractView *> *m_views;
     QMap<AbstractView *, QDockWidget *> *m_docks;
     QString *m_docPath;
     ThroughputView *m_throughputview;
