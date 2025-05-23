@@ -28,15 +28,50 @@ sudo apt install libqt6positioning6 libqt6quickwidgets6 libqt6serialport6 \
 
 # Build
 ```
-    sudo apt install libsystemd-dev
+    sudo apt install libsystemd-dev cmake libbotan-2-dev
     # use qt5
     export QT_SELECT=qt5
     sudo apt install qt5-qmake qtbase5-dev libqt5websockets5-dev libqt5serialport5-dev qtwebengine5-dev qtbase5-private-dev
     # use qt6
     export QT_SELECT=qt5
     sudo apt install qmake6  qt6-base-dev libqt6websockets6-dev libqt6serialport6-dev qt6-webengine-dev qt6-base-private-dev
-    # build qiperfc, qiperfd and qiperftray
-    build_deb.sh
+   git clone https://github.com/coolshou/qiperf
+   cd qiperf
+   git submodule init
+   git submodule update
+   ###################
+   # geographiclib
+   cd lib/geographiclib
+   mkdir build
+   cd build
+   # linux
+   cmake -DBUILD_SHARED_LIBS=OFF
+   make
+   # windows (require VC 2022 )
+   cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="/EHsc /wd4819  /wd4456  /wd4244 /WX-"  ..
+   msbuild -p:Configuration=Release GeographicLib.sln 
+   cd ../../../
+   ###################
+   # botan (windows, python <=3.11)
+   #git clone https://github.com/coolshou/botan.git
+   #cd botan
+   #git checkout 2.19.5
+   #python configure.py --cc=msvc --os=windows --cpu=x64
+   #nmake
+   ###################
+   # QSsh
+   cd lib/qssh
+   git submodule init
+   git submodule update
+   cd botan
+   python configure.py --cc=msvc --os=windows --cpu=x64
+   nmake
+   cd ..
+   qmake
+   make
+   cd ../../
+   # build qiperfc, qiperfd and qiperftray
+   build_x64.bat or ./build_deb.sh
 ```
 # qiperfd
 Quick iperf daemon
