@@ -1,4 +1,4 @@
-qiperf (0.11.11405.21-1) unstable; urgency=medium
+qiperf (0.11.11405.23-1) unstable; urgency=medium
 
   * Add SSH terminal
   * update GPS add Altitude and Elevation calc
@@ -6,7 +6,7 @@ qiperf (0.11.11405.21-1) unstable; urgency=medium
   * throughput plot chart add copy raw data in json string format to clipboard
   * QVTerminal add mouse left select & copy text, paste text
 
- -- coolshou <coolshou2060@gmail.com>  Wed, 21 May 2025 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Fri, 23 May 2025 10:00:00 +0800
 
 qiperf (0.11.11405.09-1) unstable; urgency=medium
 
