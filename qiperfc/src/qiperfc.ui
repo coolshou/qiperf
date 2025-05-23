@@ -524,7 +524,7 @@
      <normaloff>:/ssh</normaloff>:/ssh</iconset>
    </property>
    <property name="text">
-    <string>SSH(TODO)</string>
+    <string>SSH</string>
    </property>
   </action>
   <action name="actionWebControl">
