@@ -882,7 +882,7 @@ unsigned short IcmpWrapper::calculateChecksum(void *b, int len) {
 
 void IcmpWrapper::current_time(const char *timestempformat) {
     Q_UNUSED(timestempformat) // TODO: custom timestemp format
-    time_t rawtime;
+    time_t rawtime= time(nullptr);;
     char buffer[80];
 
 #ifdef _WIN32
