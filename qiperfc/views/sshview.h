@@ -23,7 +23,7 @@ public:
     void setLogFile(bool logtofile, QString logfilename, bool logtimestemp, QString timestempformat);
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
 private slots:
     void readPortData();
     void writePortData(const QByteArray &array);
