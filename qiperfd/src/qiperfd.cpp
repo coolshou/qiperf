@@ -523,7 +523,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
     }
     else if (msg.startsWith(CMD_NTP_START, Qt::CaseInsensitive))
     {
-        int cut = msg.indexOf(':');
+        long long cut = msg.indexOf(':');
         QString ntpmode = msg.right(msg.length()-cut-1);
         qDebug() << "CMD_NTP_START:ntpmode:" << ntpmode;
         setNtpServer(ntpmode);
@@ -818,7 +818,7 @@ void QIperfd::onWSactMessage(QString msg)
         qInfo() << "CMD_SERIAL_ADD: " << msg;
         QStringList d = msg.split(":");
         if (d.length()==7){
-            int port = 0;
+            long long port = 0;
             SerialTask *task = nullptr;
             QString idx = d[0];
             QString comport = d[1];
@@ -860,20 +860,26 @@ void QIperfd::onWSactMessage(QString msg)
             qDebug() << " Wrong format of create serial: " << msg;
         }
     }else if (act.startsWith(CMD_SERIAL_DEL)){
+        //
         // qInfo() << "CMD_SERIAL_DEL: " << msg;
-        QString comport = msg;
-        if (m_serialtasks.contains(comport)){
-            SerialTask *task = m_serialtasks.value(comport);
-            QString idx = task->getIdx();
-            task->close();
-            if (m_serialtasks.remove(comport)){
-                informMessage(QString("%1:%2").arg(CMD_SERIAL_OK, idx));
+        QStringList d = msg.split(":");
+        if (d.length()==2){
+            QString comport = d[1];
+            if (m_serialtasks.contains(comport)){
+                SerialTask *task = m_serialtasks.value(comport);
+                QString idx = task->getIdx();
+                task->close();
+                if (m_serialtasks.remove(comport)){
+                    informMessage(QString("%1:%2").arg(CMD_SERIAL_OK, idx));
+                }else{
+                    informMessage(QString("%1:%2:%3 %4").arg(CMD_SERIAL_FAIL, idx, comport ,"DEL Fail"));
+                }
             }else{
-                informMessage(QString("%1:%2:%3 %4").arg(CMD_SERIAL_FAIL, idx, comport ,"DEL Fail"));
+                qDebug() << comport << " does not in m_serialtasks!! \n" << m_serialtasks;
+                informMessage(QString("%1:%2 %3").arg(CMD_SERIAL_FAIL, comport, "Not Exist"));
             }
         }else{
-            qDebug() << comport << " does not in m_serialtasks!! \n" << m_serialtasks;
-            informMessage(QString("%1:%2 %3").arg(CMD_SERIAL_FAIL, comport, "Not Exist"));
+            qDebug() << " Wrong format of delete serial: " << msg;
         }
     }else if (act.startsWith(CMD_SSH_ADD)){
         // qInfo() << "CMD_SSH_ADD: " << msg;
