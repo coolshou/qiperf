@@ -1447,14 +1447,13 @@ void QIperfC::onAddSSH()
                                                          QString::number(idx),
                                                          targetip, QString::number(targetport),
                                                          sshcfg);
-            qInfo() << "onAddSSH sendstr: " << sendstr;
             wsc->sendText(sendstr);
 
             SSHView *sshview = new SSHView(mkey);
             connect(sshview, &SSHView::closed, this, &QIperfC::onSSHClosed);
             AddSSHView(mkey, sshview, wsc);
         }else{
-            qInfo() << "serialviews: " << mkey << " exist, show it";
+            qInfo() << "sshview: " << mkey << " exist, show it";
             SSHData sd =  m_sshviews->value(mkey);
             m_views->activateDock(sd.sv);
         }
