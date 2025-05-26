@@ -1196,6 +1196,12 @@ void QIperfC::onSerialClosed(QString idx)
                 ++it;
             }
         }
+        foreach (auto *act, ui->menuWindows->actions()){
+            if (act->text() == idx){
+                qDebug() << "remove action menu";
+                ui->menuWindows->removeAction(act);
+            }
+        }
     }else {
         qDebug() << "m_serialviews does not have " << idx;
     }
@@ -1236,6 +1242,13 @@ void QIperfC::onSSHClosed(QString idx)
                 ++it;
             }
         }
+        foreach (auto *act, ui->menuWindows->actions()){
+            if (act->text() == idx){
+                qDebug() << "remove action menu";
+                ui->menuWindows->removeAction(act);
+            }
+        }
+
     }else {
         qDebug() << "m_sshviews does not have " << idx;
     }
