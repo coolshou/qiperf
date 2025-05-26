@@ -39,14 +39,14 @@ if "%BUILDAPP%"=="1" (
       msbuild -p:Configuration=Release GeographicLib.sln
       cd ../../../
     )
+    IF NOT EXIST "lib/qssh/botan/botan.lib" (
+       cd lib/qssh/botan
+       python configure.py --cc=msvc --os=windows --cpu=x64
+       nmake
+       cd ../../../
+    )
     IF NOT EXIST "lib/qssh/lib/libqssh.lib" (
       cd lib/qssh
-      IF NOT EXIST "botan/botan.lib" (
-         cd botan
-         python configure.py --cc=msvc --os=windows --cpu=x64
-         nmake
-         cd ..
-      )
       qmake
       nmake
       cd ../../
