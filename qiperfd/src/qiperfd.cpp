@@ -715,7 +715,7 @@ void QIperfd::onSSHTaskFinished(QString target)
 
 void QIperfd::onSSHTaskStarted(QString idx, quint16 port)
 {
-    qDebug() << "onSSHTaskStarted:" << QString::number(port);
+    // qDebug() << "onSSHTaskStarted:" << QString::number(port);
     informMessage(QString("%1:%2:%3").arg(CMD_SSH_OPENED, idx, QString::number(port)));
 }
 
@@ -758,7 +758,7 @@ bool QIperfd::createSchedule(QString name, QString cmd, int idelay)
 void QIperfd::onWSactMessage(QString msg)
 {
     //handle act message from websocket
-    int cut = msg.indexOf(':', 0);
+    long long cut = msg.indexOf(':', 0);
     QString act = msg.left(cut);
     qDebug()<< "onWSactMessage: " << act;
     msg = msg.right(msg.length()-cut-1);
@@ -876,27 +876,28 @@ void QIperfd::onWSactMessage(QString msg)
             informMessage(QString("%1:%2 %3").arg(CMD_SERIAL_FAIL, comport, "Not Exist"));
         }
     }else if (act.startsWith(CMD_SSH_ADD)){
-        qInfo() << "CMD_SSH_ADD: " << msg;
+        // qInfo() << "CMD_SSH_ADD: " << msg;
         QStringList d = msg.split(":");
         if (d.length()==7){
-            int port = 0;
+            long long port = 0;
             SSHTask *task = nullptr;
             try{
                 QString idx = d[0];
                 QString sshTarget = d[1];
                 QString sshPort = d[2];
+                QString key = sshTarget + ":" + sshPort;
                 QString username = d[3];
                 QString password = d[4];
                 QString privateKeyFile = d[5];
                 int timeout = d[6].toInt();
-                qDebug() << "idx:" << idx << " sshTarget:" << sshTarget
-                         << " sshPort:" << sshPort
-                         << " username:" << username
-                         << " password:" << password
-                         << " privateKeyFile:" <<  privateKeyFile
-                         << " timeout:" <<  QString::number(timeout);
+                // qDebug() << "idx:" << idx << " sshTarget:" << sshTarget
+                //          << " sshPort:" << sshPort
+                //          << " username:" << username
+                //          << " password:" << password
+                //          << " privateKeyFile:" <<  privateKeyFile
+                //          << " timeout:" <<  QString::number(timeout);
                 //TODO: m_sshtasks's key format?
-                if (!m_sshtasks.contains(sshTarget)){ // not exist
+                if (!m_sshtasks.contains(key)){ // not exist
                     port =  QIPERF_SSHPORT + m_sshtasks.count();
                     task = new SSHTask(idx, sshTarget, sshPort,
                                        "any", QString::number(port),
@@ -904,25 +905,24 @@ void QIperfd::onWSactMessage(QString msg)
                                        username, password, privateKeyFile, timeout);
                     connect(task, &SSHTask::finished, this, &QIperfd::onSSHTaskFinished);
                     connect(task, &SSHTask::started,  this, &QIperfd::onSSHTaskStarted);
-                    m_sshtasks.insert(sshTarget, task);
-                    qDebug() << "init SSHTask";
+                    m_sshtasks.insert(key, task);
                     QTimer::singleShot(0, task, SLOT(init())); // start it
                 } else {
-                    task = m_sshtasks.value(sshTarget);
+                    task = m_sshtasks.value(key);
                     quint16 localport = task->getLocalPort();
                     if (task->isRunning()){
                         qDebug() << sshTarget << " exist!! Using port:" << QString::number(localport);
                         // TODO: update setting?
                         // task->setConfig(QString::number(localport), baudrate,
                         //                 databits, parity, stopbits, flowcontrol);
-                        qDebug() << "SSHTask close";
+                        // qDebug() << "SSHTask close";
                         task->close();
-                        qDebug() << "reinit SSHTask";
+                        // qDebug() << "reinit SSHTask";
                         QTimer::singleShot(0, task, SLOT(init())); // start it
                         onSSHTaskStarted(idx, localport);
                     }else{
                         QString emsg = task->getLastError();
-                        qDebug() << "SerialTask is not running: " << emsg;
+                        qDebug() << "SSHTask is not running: " << emsg;
                         onSerialTaskError(idx, emsg);
                     }
                 }
@@ -934,20 +934,28 @@ void QIperfd::onWSactMessage(QString msg)
             // onSSHTaskError(idx, QString("Wrong format of create ssh: %1").arg(msg));
         }
     }else if (act.startsWith(CMD_SSH_DEL)){
+        // msg format: "127.0.0.1:192.168.0.90:22"
         qInfo() << "CMD_SSH_DEL: " << msg;
-        QString target = msg;
-        if (m_sshtasks.contains(target)){
-            SerialTask *task = m_serialtasks.value(target);
-            QString idx = task->getIdx();
-            task->close();
-            if (m_serialtasks.remove(target)){
-                informMessage(QString("%1:%2").arg(CMD_SSH_OK, idx));
+        QStringList d = msg.split(":");
+        if (d.length()==3){
+            QString target = d[1];
+            QString port = d[2];
+            QString key = target + ":" + port;
+            if (m_sshtasks.contains(key)){
+                SSHTask *task = m_sshtasks.value(key);
+                QString idx = task->getIdx();
+                task->close();
+                if (m_sshtasks.remove(key)){
+                    informMessage(QString("%1:%2").arg(CMD_SSH_OK, idx));
+                }else{
+                    onSSHTaskError(idx, QString("%1:%2").arg(key ,"DEL Fail"));
+                }
             }else{
-                onSSHTaskError(idx, QString("%1:%2").arg(target ,"DEL Fail"));
+                qDebug() << key << " does not in m_sshtasks!! \n" << m_sshtasks;
+                // onSSHTaskError(idx, QString("%1:%2").arg(target, "Not Exist"))
             }
         }else{
-            qDebug() << target << " does not in m_sshtasks!! \n" << m_sshtasks;
-            // onSSHTaskError(idx, QString("%1:%2").arg(target, "Not Exist"))
+            qDebug() << " Wrong format of delete ssh: " << msg;
         }
     }else {
         qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;

@@ -91,13 +91,13 @@ void SSHDeviceShell::handleConnected()
 
 void SSHDeviceShell::handleDisconnected()
 {
-    qDebug() << "TODO: SSHDeviceShell::handleDisconnected";
+    qInfo() << "SSHDeviceShell::handleDisconnected";
 }
 
 void SSHDeviceShell::handleShellStarted()
 {
     _connected = true;
-    qDebug() << "TODO: handleShellStarted: ";
+    // qDebug() << "TODO: SSHDeviceShell::handleShellStarted: ";
     // QSocketNotifier * const notifier = new QSocketNotifier(0, QSocketNotifier::Read, this);
     // connect(notifier, &QSocketNotifier::activated, this, &SSHDeviceShell::handleStdin);
 }

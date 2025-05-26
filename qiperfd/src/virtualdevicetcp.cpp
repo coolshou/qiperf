@@ -122,7 +122,7 @@ void VirtualDeviceTcp::slotNewConnection()
 
     _tcpSocketList << tcpSocket;
 
-    qInfo() << QString("TCP-Socket connected");
+    // qInfo() << QString("TCP-Socket connected");
     // %1 %2").arg(tcpSocket->peerAddress().toString(), tcpSocket->peerPort());
 }
 

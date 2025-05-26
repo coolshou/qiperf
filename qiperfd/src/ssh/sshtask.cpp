@@ -95,7 +95,7 @@ void SSHTask::init()
                 qDebug() << "SSHDeviceShell error: " << e.what();
             }
             try{
-                qDebug() << QString("new VirtualDeviceTcp: %1,%2,%3").arg(m_idx, _localIp, _localPort);
+                // qDebug() << QString("new VirtualDeviceTcp: %1,%2,%3").arg(m_idx, _localIp, _localPort);
                 _DeviceTcp = new VirtualDeviceTcp(m_idx, _localIp, _localPort, _mode, this);
             } catch (const std::exception &e) {
                 qDebug() << "VirtualDeviceTcp error: " << e.what();

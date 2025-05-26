@@ -1189,6 +1189,15 @@ void QIperfC::onSerialClosed(QString idx)
         sd.ws->sendText(cmd);
         sd.ws->deleteLater();
         sd.sv->deleteLater();
+        for (auto it = m_serialviews->begin(); it != m_serialviews->end(); /* don't increment here */){
+            if (it.key() == idx) {
+                it = m_serialviews->erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }else {
+        qDebug() << "m_serialviews does not have " << idx;
     }
 }
 
@@ -1212,6 +1221,7 @@ void QIperfC::onSSHOpened(QString refrow, QString serveraddress, QString servera
 
 void QIperfC::onSSHClosed(QString idx)
 {
+    qInfo() << "onSSHClosed: idx" << idx;
     if (m_sshviews->contains(idx)){
         SSHData sd = m_sshviews->take(idx);
         QString cmd= QString("%1:%2").arg(CMD_SSH_DEL, idx);
@@ -1226,6 +1236,8 @@ void QIperfC::onSSHClosed(QString idx)
                 ++it;
             }
         }
+    }else {
+        qDebug() << "m_sshviews does not have " << idx;
     }
 }
 
@@ -1359,7 +1371,7 @@ void QIperfC::onAddSerial()
         }
 
         if (!m_serialviews->contains(mkey)){
-            int idx = m_serialviews->count();
+            long long idx = m_serialviews->count();
             QString serialcfg = m_dlgserial->getSerialCfg();
             qInfo() << "managerip: " << managerip << " serailport:" << serailport << " serialcfg:" << serialcfg;
             //
@@ -1412,7 +1424,7 @@ void QIperfC::onAddSSH()
             _logtimestemp = true;
         }
         if (!m_sshviews->contains(mkey)){
-            int idx = m_sshviews->count();
+            long long idx = m_sshviews->count();
             QString sshcfg = m_dlgssh->getSSHCfg();
             // qInfo() << "managerip: " << managerip << " targetip:" << targetip
             //         << " targetport:" << QString::number(targetport);
