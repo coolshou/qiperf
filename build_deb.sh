@@ -13,6 +13,12 @@ fi
 rm -f *.buildinfo *.changes *.deb
 if [ ! -e lib/qssh/lib/libQSsh.a ]; then
   cd lib/qssh
+  if [ ! -e botan/libbotan-2.a ]; then
+    cd botan
+    python3 ./configure.py --disable-shared-library
+    make
+    cd ..
+  fi
   dpkg-buildpackage -b --no-sign
   cd -
 fi

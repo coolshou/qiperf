@@ -52,21 +52,21 @@ sudo apt install libqt6positioning6 libqt6quickwidgets6 libqt6serialport6 \
    msbuild -p:Configuration=Release GeographicLib.sln 
    cd ../../../
    ###################
-   # botan (windows, python <=3.11)
-   #git clone https://github.com/coolshou/botan.git
-   #cd botan
-   #git checkout 2.19.5
-   #python configure.py --cc=msvc --os=windows --cpu=x64
-   #nmake
-   ###################
    # QSsh
    cd lib/qssh
    git submodule init
    git submodule update
-   cd botan
-   python configure.py --cc=msvc --os=windows --cpu=x64
-   nmake
-   cd ..
+     ###################
+     # botan
+     cd botan
+     #  botan (windows, python <=3.11)
+     python configure.py --cc=msvc --os=windows --cpu=x64
+     nmake
+     # linux 
+     python3 ./configure.py --disable-shared-library
+     make
+     cd ..
+     ###################
    qmake
    make
    cd ../../
