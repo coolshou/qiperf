@@ -11,16 +11,26 @@ export QT_SELECT=qt5
 fi
 
 rm -f *.buildinfo *.changes *.deb
+if [ ! -e lib/geographiclib/build/src/libGeographicLib.a ]; then
+    cd lib/geographiclib
+    if [ ! -e build ]; then
+        mkdir build
+    fi
+    cd build
+    cmake -DBUILD_SHARED_LIBS=OFF ..
+    make
+    cd ../../../
+fi
+if [ ! -e lib/qssh/botan/libbotan-2.a ]; then
+  cd lib/qssh/botan
+  python3 ./configure.py --disable-shared-library
+  make
+  cd ../../../
+fi
 if [ ! -e lib/qssh/lib/libQSsh.a ]; then
   cd lib/qssh
-  if [ ! -e botan/libbotan-2.a ]; then
-    cd botan
-    python3 ./configure.py --disable-shared-library
-    make
-    cd ..
-  fi
   dpkg-buildpackage -b --no-sign
-  cd -
+  cd ../../
 fi
 for package in ${BUILDPACKAGES[@]} ; do
     if [ ! -e $package/debian/changelog ]; then
