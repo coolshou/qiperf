@@ -58,7 +58,7 @@ private:
     bool b_ipv6;
     QModelIndex m_excIdx;
     int old_mss; // store old mss value
-    bool m_enabled;
+    bool m_enabled=true;
 };
 
 #endif // DLGIPERF_H
