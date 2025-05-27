@@ -171,10 +171,10 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
         }
     }
     if (!bServer){
-        uint omit = jsondata["omit"].toUInt();
-        if (omit>0){
-            args = args + " --txdelay-time " + QString::number(omit);
-        }
+        // uint omit = jsondata["omit"].toUInt();
+        // if (omit>0){
+        //     args = args + " --txdelay-time " + QString::number(omit);
+        // }
         uint parallel = jsondata["parallel"].toUInt();
         if (parallel>1){
             args = args + " -P " + QString::number(parallel);
