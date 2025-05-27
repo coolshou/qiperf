@@ -200,7 +200,7 @@ void TP::loadData(QString data)
         m_enabled = jsonRoot.value("enabled").toBool(true);
         //client
         QJsonObject o_client = jsonRoot.value("client").toObject();
-        m_version = o_client.value("version").toInt();
+        m_version = o_client.value("version").toString().toInt(); //QJsonValue string can not direct conver to Int
         QString client = o_client.value("bind").toString();
         m_mgrclient = o_client.value("manager").toString();
         m_port = o_client.value("port").toInt();
