@@ -482,7 +482,12 @@ void ThroughputView::copyClientArgs(bool checked)
     QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
     if (idxs.length()>0){
         TP *tp= m_tpmgr->getItem(idxs[0]);
-        QString args = m_iperfwrapper->toIperf3args(tp->getClientArgsMap());
+        QString args = "" ;
+        if (tp->getVersion()==3){
+            args = m_iperfwrapper->toIperf3args(tp->getClientArgsMap());
+        }else{
+            args = m_iperfwrapper->toIperf2args(tp->getClientArgsMap());
+        }
         m_clipboard->setText(args);
     }
 }
@@ -493,8 +498,13 @@ void ThroughputView::copyServerArgs(bool checked)
     QModelIndexList idxs = ui->tv_throughput->selectionModel()->selectedRows();
     if (idxs.length()>0){
         TP *tp= m_tpmgr->getItem(idxs[0]);
-        m_clipboard->setText(tp->getServerArgs());
-        QString args = m_iperfwrapper->toIperf3args(tp->getServerArgsMap());
+        qDebug() << "copyServerArgs getVersion:" << tp->getVersion();
+        QString args ="";
+        if (tp->getVersion()==3){
+            args = m_iperfwrapper->toIperf3args(tp->getServerArgsMap());
+        } else {
+            args = m_iperfwrapper->toIperf2args(tp->getServerArgsMap());
+        }
         m_clipboard->setText(args);
 
     }
