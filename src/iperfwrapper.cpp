@@ -164,6 +164,11 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
     QString protocal = jsondata["protocal"].toString();
     if (protocal.contains("UDP")){
         args = args + " -u ";
+    }else{
+        uint omit = jsondata["omit"].toUInt();
+        if (omit>0){
+            args = args + " --omit " + QString::number(omit);
+        }
     }
     if (!bServer){
         uint omit = jsondata["omit"].toUInt();
@@ -400,7 +405,7 @@ void IperfWrapper::parserIperf2(QString linedata)
                             if (linedata.contains("receiver")){
                                 irec.insert("AVG", true); //final data is the average of throughput
                             }
-                            qDebug() << "sInterval: " << sInterval << " append:" << irec;
+                            // qDebug() << "sInterval: " << sInterval << " append:" << irec;
                             m_tpdatas[sInterval].append(irec);
                         }
                     }
@@ -422,7 +427,7 @@ void IperfWrapper::parserIperf2(QString linedata)
                     if (m_delaytime>0){
                         sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
                     }
-                    qDebug() << "sendThroughput sInterval-key:" << sInterval << " data: " << doc.toJson(QJsonDocument::Compact);
+                    qInfo() << "sendThroughput sInterval-key:" << sInterval << " data: " << doc.toJson(QJsonDocument::Compact);
                     emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
                     //clear record
                     m_tpdatas.remove(sInterval);

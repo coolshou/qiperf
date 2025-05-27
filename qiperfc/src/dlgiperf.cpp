@@ -435,7 +435,12 @@ void DlgIperf::ChangeVersion(const QString ver)
         sBidir = "bidirectional(--bidir)";
     }
     ui->chk_bidir->setText(sBidir);
-
+    // omit
+    if (ver.indexOf("2")==0){
+        ui->lbOmit->setText("omit(--omit, sec(TCP only)):");
+    }else{
+        ui->lbOmit->setText("omit(-O, sec):");
+    }
     //TODO: Type of service (TOS)
     if (ver.indexOf("2")==0){
         // ui->lb_tos
