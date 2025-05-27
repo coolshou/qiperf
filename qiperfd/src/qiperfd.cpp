@@ -1440,8 +1440,4 @@ void QIperfd::getIperfVer(QString cmd, double ver)
             }
         }
     }
-    qDebug() << "m_iperfexe20ver:" << m_iperfexe20ver
-             << " m_iperfexe21ver:" << m_iperfexe21ver
-             << " m_iperfexe22ver:" << m_iperfexe22ver
-             << " m_iperfexe3ver:" << m_iperfexe3ver;
 }

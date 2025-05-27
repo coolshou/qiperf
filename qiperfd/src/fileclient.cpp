@@ -54,7 +54,7 @@ void FileClient::enqueueFile(QString filename)
         //If the client is connected and not currently transferring a file, it will start sending the next file in the queue
         sendNextFile();
     }else {
-        qDebug() << "fileSocket->state(): " << (int)fileSocket->state() << "  (3=ConnectedState)" ;
+        qInfo() << "fileSocket->state(): " << (int)fileSocket->state() << "  (2=ConnectingState,3=ConnectedState)" ;
         if (m_currentFile){
             qDebug() << "enqueueFile m_currentFile: " << m_currentFile->fileName();
         }
@@ -95,7 +95,7 @@ void FileClient::onBytesWritten(qint64 bytes)
 
 void FileClient::onDisconnected()
 {
-    qDebug() << "Disconnected from server";
+    // qInfo() << "FileClient Disconnected from server";
     if (m_currentFile) {
         m_currentFile->close();
         delete m_currentFile;

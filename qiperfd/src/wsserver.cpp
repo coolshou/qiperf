@@ -245,7 +245,7 @@ void WSServer::socketDisconnected()
         QString sfromPort = QString::number(pClient->peerPort());
         QString speer= QString("%1:%2").arg(sfrom, sfromPort);
         if (m_clients.contains(speer)) {
-            qDebug() << "socketDisconnected: remove " << speer;
+            // qDebug() << "socketDisconnected: remove " << speer;
             m_clients.remove(speer);
         }else{
             qDebug() << "m_clients does not have " << speer;
