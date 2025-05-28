@@ -1,6 +1,8 @@
 #include "dlgoption.h"
 #include "ui_dlgoption.h"
 
+#include <QFontDatabase>
+#include <QStringList>
 #include <QDebug>
 
 dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
@@ -10,6 +12,11 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
 {
     ui->setupUi(this);
     hidetab("main");
+    // font init
+    QStringList fs = getSysFontFamilies();
+    ui->cbFontFamily->addItem("");
+    ui->cbFontFamily->addItems(fs);
+    connect(ui->cbFontFamily, &QComboBox::currentTextChanged, this , &dlgOption::updateFontStyle);
     m_cfg = cfg;
 //    ui->cb_minterfaces->addItems(interfaces);
     loadcfg(cfg);
@@ -59,6 +66,21 @@ void dlgOption::loadcfg(QSettings *cfg)
     cfg->endGroup();
     cfg->beginGroup("gps");
     ui->leOpenStreetMapTile->setText(cfg->value("OpenStreetMapTile", "https://tile.openstreetmap.org/{z}/{x}/{y}.png").toString());
+    cfg->endGroup();
+
+    cfg->beginGroup("terminal");
+    QString fontfamily = cfg->value("FontFamily","Noto Mono").toString();
+    int idx = ui->cbFontFamily->findText(fontfamily);
+    if (idx){
+        ui->cbFontFamily->setCurrentIndex(idx);
+    }
+    QString fontstyle = cfg->value("FontStyle","Regular").toString();
+    idx = ui->cbFontStyle->findText(fontstyle);
+    if (idx){
+        ui->cbFontStyle->setCurrentIndex(idx);
+    }
+    ui->cbFontStyle;
+    ui->sbFontPonitSize->setValue(cfg->value("FontSize", 10).toInt());
     cfg->endGroup();
 }
 
@@ -117,6 +139,22 @@ bool dlgOption::getShowManagerIPWarning()
     return ui->cb_showManagerIPWarning->isChecked();
 }
 
+QStringList dlgOption::getSysFontFamilies()
+{
+    QFontDatabase db;
+    QStringList families = db.families();
+    return families;
+}
+
+QStringList dlgOption::getFontStyles(QString fontfamily)
+{
+    if (fontfamily.isEmpty()){
+        return QStringList();
+    }
+    QFontDatabase db;
+    return db.styles(fontfamily);
+}
+
 void dlgOption::setShowGroup(bool bShow)
 {
 // #if QT_VERSION < QT_VERSION_CHECK(6,9,0)  // < 6.9
@@ -131,6 +169,16 @@ void dlgOption::setShowGroup(bool bShow)
 void dlgOption::onTPUnitChanged(QString sunit)
 {
     emit updateTPUnit(sunit);
+}
+
+void dlgOption::updateFontStyle(QString fontfamily)
+{
+    QStringList ffs = getFontStyles(fontfamily);
+    if (ffs.length()>0){
+        ui->cbFontStyle->clear();
+        ui->cbFontStyle->addItem("");
+        ui->cbFontStyle->addItems(ffs);
+    }
 }
 
 // void dlgOption::setTPsize(int width, int heigth)

@@ -23,10 +23,13 @@ public:
     void setWaitServerReady(int val);
     int getWaitServerReady();
     bool getShowManagerIPWarning();
+    QStringList getSysFontFamilies();
+
     // void setTPsize(int width, int heigth);
 public slots:
     void setShowGroup(bool bShow);
     void onTPUnitChanged(QString sunit);
+    void updateFontStyle(QString fontfamily);
 signals:
     void ipaddressUpdated(QString ipaddress, int port);
     void widthChanged(int width);
@@ -46,6 +49,7 @@ private slots:
     void onHeigthChange(int heigth);
     void onStateChanged(int state);
     void onIgnoreWrongIntervalChanged(int state);
+    QStringList getFontStyles(QString fontfamily);
 
 private:
     Ui::DlgOption *ui;
