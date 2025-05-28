@@ -28,6 +28,7 @@ public:
     void addView(AbstractView *view, bool closeable=false);
     void activateDock(AbstractView *view);
     AbstractView* findActiveView();
+    void close();
 
 public slots:
     // void onAddTPdata(QString midx, QString sInterval, QString idx,
@@ -40,7 +41,6 @@ signals:
     void transmitData(const QByteArray &);
 
 protected slots:
-    void onDockWidgetClose(QCloseEvent* event);
     bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:

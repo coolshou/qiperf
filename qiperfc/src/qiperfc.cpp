@@ -135,6 +135,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(this, &QIperfC::closeAll, m_dlgssh, &DlgSerial::close);
 
     connect(this, &QIperfC::closeAll, m_dlgtest, &DlgTest::close);
+    connect(this, &QIperfC::closeAll, m_views, &ViewManager::close);
 
 
 #if (DEBUG_EXPORT_HTML==1)

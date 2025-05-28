@@ -135,7 +135,6 @@ void ViewManager::addView(AbstractView *view, bool closeable)
     qDebug() << "ViewManager::addView dock title:" << dock->windowTitle();
     dock->installEventFilter(this);
     // connect(dock, &QDockWidget::visibilityChanged, this, &ViewManager::onVisibilityChanged);
-    // connect(dock, &QDockWidget::closeEvent, this, &ViewManager::onDockWidgetClose);
     if (!closeable){
         dock->setFeatures(dock->features() & ~QDockWidget::DockWidgetClosable &
                           ~QDockWidget::DockWidgetFloatable);
@@ -203,6 +202,21 @@ AbstractView* ViewManager::findActiveView()
     return view;
 }
 
+void ViewManager::close()
+{
+    // close all window
+    for (auto itd = m_docks->begin(); itd != m_docks->end(); /* don't increment here */) {
+        itd = m_docks->erase(itd);
+        ++itd;
+    }
+    for (auto it = m_views->begin(); it != m_views->end(); /* don't increment here */) {
+        auto view = m_views->value(it.key());
+        view->close();
+        it = m_views->erase(it);
+        ++it;
+    }
+}
+
 void ViewManager::saveFile()
 {
     QString filter;
@@ -246,11 +260,6 @@ void ViewManager::onVisibilityChanged(bool visible)
     // each time switch QDockWidget will also trigger this, not good for closeevent!!
     Q_UNUSED(visible)
     qDebug() << "onVisibilityChanged: " << visible;
-}
-
-void ViewManager::onDockWidgetClose(QCloseEvent *event)
-{
-    qDebug() << "onDockWidgetClose:" << event;
 }
 
 bool ViewManager::eventFilter(QObject *watched, QEvent *event)
