@@ -3,8 +3,10 @@
 QVTCharFormat::QVTCharFormat()
 {
     QFont font;
-    font.setFamily("monospace");
-    font.setStyleHint(QFont::Monospace);
+    // font.setFamily("monospace");
+    font.setFamily("Noto Mono");
+    // font.setStyle();
+    font.setStyleHint(QFont::Monospace); //Qt does not support style hints on X11 since this information is not provided by the window system.
     font.setPointSize(10);
     setFont(font);
     setForeground(QColor(187, 187, 187));

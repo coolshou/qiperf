@@ -58,6 +58,8 @@ void QVTerminal::setIODevice(QIODevice *device)
 void QVTerminal::appendData(const QByteArray &data)
 {
     QByteArray text;
+    QByteArray utext; // utf8, big-5 ... text
+    // bool isnotPrint=false;
 
     setUpdatesEnabled(false);
     if (_logtofile){
@@ -84,6 +86,11 @@ void QVTerminal::appendData(const QByteArray &data)
 
     while (it != data.cend()) {
         QChar c = *it;
+        if (utext.length()>0) {
+            qDebug() << " handle utext:" << utext;
+            text.append(utext);
+            utext.clear();
+        }
         switch (_state) {
         case QVTerminal::Text:
             switch (c.unicode()) {
@@ -109,12 +116,20 @@ void QVTerminal::appendData(const QByteArray &data)
                 text.clear();
                 moveCursor(-1, 0);
                 break;
+            case '\t':
+                // qDebug() <<"tab";
+                appendString(text);
+                text.clear();
+                break;
             default:
-                if (c.isPrint()) {
+                if (!c.isPrint()) {
+                    utext.append(c.unicode());
+                    qDebug() << "appendData: " << " c:" << c;
+                }else {
                     QByteArray byteArray;
-                    byteArray.append(c.toLatin1());
+                    // byteArray.append(c.toLatin1());
+                    byteArray.append(c.unicode());
                     text.append(byteArray);
-                    //text.append(c);
                 }
             }
             break;
@@ -140,8 +155,10 @@ void QVTerminal::appendData(const QByteArray &data)
                         _curentFormat.setForeground(_curentFormat.background());
                         _curentFormat.setBackground(foreground);
                     } else if (_formatValue / 10 == 3) { // foreground
+                        // TODO 90~97
                         _curentFormat.setForeground(vt100color(_formatValue % 10 + '0'));
                     } else if (_formatValue / 10 == 4) { // background
+                        // TODO 100~107
                         _curentFormat.setBackground(vt100color(_formatValue % 10 + '0'));
                     }
                     if (c == ';') {
@@ -429,7 +446,7 @@ void QVTerminal::setFormat(const QVTCharFormat &format)
     _format = format;
     _curentFormat = format;
     QFontMetrics fm(*_format.font());
-    _cw = fm.boundingRect('M').width();
+    _cw = fm.boundingRect('M').width(); // how to Decide the chinese font width
     _ch = fm.height();
     _cascent = fm.ascent();
 }
@@ -486,7 +503,8 @@ void QVTerminal::keyPressEvent(QKeyEvent *event)
         data.append("\033[6~");
         break;
     case Qt::Key_Return:
-        data.append('\n');
+        // data.append('\n');
+        data.append('\r'); // for windows cmd
         break;
     default:
         data.append(event->text().toUtf8());
