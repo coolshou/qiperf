@@ -15,7 +15,9 @@ class SSHView : public AbstractView
     Q_OBJECT
 
 public:
-    explicit SSHView(QString title, QWidget *parent = nullptr);
+    explicit SSHView(QString title,
+                     QString fontname, QString fontstyle="Regular", int fontsize=10,
+                     QWidget *parent = nullptr);
     ~SSHView() override;
     QString title() override;
     QString iid() override;

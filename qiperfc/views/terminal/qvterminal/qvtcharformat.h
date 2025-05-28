@@ -3,6 +3,7 @@
 
 #include <QColor>
 #include <QFont>
+#include <QString>
 
 class QVTCharFormat
 {
@@ -11,6 +12,7 @@ public:
 
     QFont* font();
     void setFont(const QFont &font);
+    void updateFont(QString fontname, QString fontstyle, int fontsize);
 
     const QColor &foreground() const;
     void setForeground(const QColor &foreground);
@@ -18,6 +20,7 @@ public:
     const QColor &background() const;
     void setBackground(const QColor &background);
 
+    QFont::Style stringToFontStyle(const QString &styleStr);
 protected:
     QFont _font;
     QColor _foreground;

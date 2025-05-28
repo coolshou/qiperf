@@ -10,7 +10,8 @@ class TerminalView : public AbstractView
     Q_OBJECT
 
 public:
-    explicit TerminalView(QWidget *parent = nullptr);
+    explicit TerminalView(QString fontname, QString fontstyle="Regular", int fontsize=10,
+                          QWidget *parent = nullptr);
     ~TerminalView() override;
 
     QString title() override { return tr("Terminal"); }

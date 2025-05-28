@@ -13,10 +13,8 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     ui->setupUi(this);
     hidetab("main");
     // font init
-    QStringList fs = getSysFontFamilies();
-    ui->cbFontFamily->addItem("");
-    ui->cbFontFamily->addItems(fs);
-    connect(ui->cbFontFamily, &QComboBox::currentTextChanged, this , &dlgOption::updateFontStyle);
+    initFonts();
+
     m_cfg = cfg;
 //    ui->cb_minterfaces->addItems(interfaces);
     loadcfg(cfg);
@@ -79,7 +77,6 @@ void dlgOption::loadcfg(QSettings *cfg)
     if (idx){
         ui->cbFontStyle->setCurrentIndex(idx);
     }
-    ui->cbFontStyle;
     ui->sbFontPonitSize->setValue(cfg->value("FontSize", 10).toInt());
     cfg->endGroup();
 }
@@ -118,6 +115,12 @@ void dlgOption::updatecfg()
     emit updateOpenStreetMapTile(ui->leOpenStreetMapTile->text());
     m_cfg->endGroup();
 
+    m_cfg->beginGroup("terminal");
+    m_cfg->value("FontFamily",ui->cbFontFamily->currentText());
+    m_cfg->value("FontStyle",ui->cbFontStyle->currentText());
+    m_cfg->value("FontSize",ui->sbFontPonitSize->value());
+    m_cfg->endGroup();
+
     m_cfg->sync();
 }
 
@@ -137,6 +140,21 @@ int dlgOption::getWaitServerReady()
 bool dlgOption::getShowManagerIPWarning()
 {
     return ui->cb_showManagerIPWarning->isChecked();
+}
+
+QString dlgOption::getFontName()
+{
+    return ui->cbFontFamily->currentText();
+}
+
+QString dlgOption::getFontStyle()
+{
+    return ui->cbFontStyle->currentText();
+}
+
+int dlgOption::getFontSize()
+{
+    return ui->sbFontPonitSize->value();
 }
 
 QStringList dlgOption::getSysFontFamilies()
@@ -210,6 +228,14 @@ void dlgOption::hidetab(QString tabname)
     }
     qDebug() << "hidetab : " << tabname << " idx:" << QString::number(i);
     ui->tabWidget->removeTab(i);
+}
+
+void dlgOption::initFonts()
+{
+    QStringList fs = getSysFontFamilies();
+    ui->cbFontFamily->addItem("");
+    ui->cbFontFamily->addItems(fs);
+    connect(ui->cbFontFamily, &QComboBox::currentTextChanged, this , &dlgOption::updateFontStyle);
 }
 
 void dlgOption::onReject()

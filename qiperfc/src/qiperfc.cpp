@@ -69,14 +69,14 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_dlgtest = new DlgTest();
     m_dlgserial = new DlgSerial(); //for serial port config
     m_dlgssh = new DlgSSH();
-    m_frm_option = new dlgOption(m_settings);
-    connect(m_frm_option, &dlgOption::widthChanged, this, &QIperfC::onWidthChanged);
-    connect(m_frm_option, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);
-    connect(m_frm_option, &dlgOption::showGroup, this, &QIperfC::onShowGroup);
-    connect(m_frm_option, &dlgOption::IgnoreWrongInterval, this, &QIperfC::onIgnoreWrongInterval);
-    connect(m_frm_option, &dlgOption::updateTPUnit, this, &QIperfC::onUpdateTPUnit);
-    connect(m_frm_option, &dlgOption::updateTPUnit, m_throughputview, &ThroughputView::onUpdateTPUnit);
-    connect(m_frm_option, &dlgOption::updateOpenStreetMapTile, this, &QIperfC::onUpdateOpenStreetMapTile);
+    m_dlgoption = new dlgOption(m_settings);
+    connect(m_dlgoption, &dlgOption::widthChanged, this, &QIperfC::onWidthChanged);
+    connect(m_dlgoption, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);
+    connect(m_dlgoption, &dlgOption::showGroup, this, &QIperfC::onShowGroup);
+    connect(m_dlgoption, &dlgOption::IgnoreWrongInterval, this, &QIperfC::onIgnoreWrongInterval);
+    connect(m_dlgoption, &dlgOption::updateTPUnit, this, &QIperfC::onUpdateTPUnit);
+    connect(m_dlgoption, &dlgOption::updateTPUnit, m_throughputview, &ThroughputView::onUpdateTPUnit);
+    connect(m_dlgoption, &dlgOption::updateOpenStreetMapTile, this, &QIperfC::onUpdateOpenStreetMapTile);
     initStatusbar();
 
     //UI actions
@@ -752,11 +752,11 @@ void QIperfC::onShowLog()
 
 void QIperfC::onConfig()
 {
-    m_frm_option->setWaitServerReady(m_WaitServerReady);
-    int rc = m_frm_option->exec();
+    m_dlgoption->setWaitServerReady(m_WaitServerReady);
+    int rc = m_dlgoption->exec();
     if (rc == QDialog::Accepted){
         //update setting
-        m_WaitServerReady = m_frm_option->getWaitServerReady();
+        m_WaitServerReady = m_dlgoption->getWaitServerReady();
     }
 }
 
@@ -1150,7 +1150,7 @@ void QIperfC::setShowGroup(bool bShow)
 {
     m_TPGroup = bShow;
     //TODO: update m_frm_option's cb_TPGroup check status.
-    m_frm_option->setShowGroup(bShow);
+    m_dlgoption->setShowGroup(bShow);
 }
 
 void QIperfC::onUpdateTPUnit(QString sunit)
@@ -1267,14 +1267,23 @@ void QIperfC::showView()
 {
     QAction* act = qobject_cast<QAction*>(sender());
     if (act != nullptr) {
+        QString mkey = act->text();
         if (act->data() == ViewType::Serial){
-            QString mkey = act->text();
-            qDebug() << mkey << " data:" << act->data().toString();
+            qDebug() << mkey << "Serial data:" << act->data().toString();
             if (m_serialviews->contains(mkey)){
                 SerialData sd =  m_serialviews->value(mkey);
                 m_views->activateDock(sd.sv);
             }else{
                 qDebug() << " no " << mkey << " in " << m_serialviews;
+            }
+        }
+        if (act->data() == ViewType::SSH){
+            qDebug() << mkey << "SSH data:" << act->data().toString();
+            if (m_sshviews->contains(mkey)){
+                SSHData sd =  m_sshviews->value(mkey);
+                m_views->activateDock(sd.sv);
+            }else{
+                qDebug() << " no " << mkey << " in " << m_sshviews;
             }
         }
     }
@@ -1421,7 +1430,10 @@ void QIperfC::onAddSerial()
             qInfo() << "onAddSerial sendstr: " << sendstr;
             wsc->sendText(sendstr);
 
-            SerialView *serialview = new SerialView(mkey);
+            SerialView *serialview = new SerialView(mkey,
+                                                    m_dlgoption->getFontName(),
+                                                    m_dlgoption->getFontStyle(),
+                                                    m_dlgoption->getFontSize());
             connect(serialview, &SerialView::closed, this, &QIperfC::onSerialClosed);
             AddSerialView(mkey, serialview, wsc);
         }else{
@@ -1476,7 +1488,10 @@ void QIperfC::onAddSSH()
                                                          sshcfg);
             wsc->sendText(sendstr);
 
-            SSHView *sshview = new SSHView(mkey);
+            SSHView *sshview = new SSHView(mkey,
+                                           m_dlgoption->getFontName(),
+                                           m_dlgoption->getFontStyle(),
+                                           m_dlgoption->getFontSize());
             connect(sshview, &SSHView::closed, this, &QIperfC::onSSHClosed);
             AddSSHView(mkey, sshview, wsc);
         }else{

@@ -5,14 +5,17 @@
 #include <QAction>
 #include <QTimer>
 #include <QFile>
+#include <QString>
 
 #include "qvtlayout.h"
+#include "qvtcharformat.h"
 
 class QVTerminal : public QAbstractScrollArea
 {
     Q_OBJECT
 public:
-    explicit QVTerminal(QWidget *parent = nullptr);
+    explicit QVTerminal(QString fontname, QString fontstyle="Regular", int fontsize=10,
+                        QWidget *parent = nullptr);
     ~QVTerminal() override;
 
     void setIODevice(QIODevice *device);
@@ -112,6 +115,9 @@ private:
     QString _logtimestempformat;
     static const int xMargin = 3;
     static const int yMargin = 3;
+    QString m_fontname;
+    QString m_fontstyle;
+    int m_fontsize;
 };
 
 #endif // QVTERMINAL_H

@@ -5,12 +5,20 @@ QVTCharFormat::QVTCharFormat()
     QFont font;
     // font.setFamily("monospace");
     font.setFamily("Noto Mono");
-    // font.setStyle();
+    font.setStyle(QFont::StyleNormal);
     font.setStyleHint(QFont::Monospace); //Qt does not support style hints on X11 since this information is not provided by the window system.
     font.setPointSize(10);
     setFont(font);
     setForeground(QColor(187, 187, 187));
     setBackground(QColor(0, 0, 0));
+}
+
+QFont::Style QVTCharFormat::stringToFontStyle(const QString &styleStr) {
+    QString s = styleStr.trimmed().toLower();
+
+    if (s == "italic")  return QFont::StyleItalic;
+    if (s == "oblique") return QFont::StyleOblique;
+    return QFont::StyleNormal; // default fallback
 }
 
 QFont* QVTCharFormat::font()
@@ -21,6 +29,13 @@ QFont* QVTCharFormat::font()
 void QVTCharFormat::setFont(const QFont &font)
 {
     _font = font;
+}
+
+void QVTCharFormat::updateFont(QString fontname, QString fontstyle, int fontsize)
+{
+    _font.setFamily(fontname);
+    _font.setStyle(stringToFontStyle(fontstyle));
+    _font.setPointSize(fontsize);
 }
 
 const QColor &QVTCharFormat::foreground() const

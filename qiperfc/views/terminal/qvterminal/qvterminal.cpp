@@ -11,8 +11,10 @@
 #include <QDebug>
 #include <QMenu>
 
-QVTerminal::QVTerminal(QWidget *parent)
-    : QAbstractScrollArea(parent)
+QVTerminal::QVTerminal(QString fontname, QString fontstyle, int fontsize,
+                       QWidget *parent)
+    : QAbstractScrollArea(parent),
+    m_fontname(fontname), m_fontstyle(fontstyle), m_fontsize(fontsize)
 {
     _device = Q_NULLPTR;
     _logfile = new QFile();
@@ -28,7 +30,9 @@ QVTerminal::QVTerminal(QWidget *parent)
     _echo = false;
     _crlf = false;
     _state = QVTerminal::Text;
-    setFormat(QVTCharFormat());
+    QVTCharFormat vtcf = QVTCharFormat();
+    vtcf.updateFont(fontname, fontstyle, fontsize);
+    setFormat(vtcf);
     _layout = new QVTLayout();
     _pasteAction = new QAction("Paste", this);
     _pasteAction->setShortcut(QKeySequence("Qt::SHIFT + Qt::Key_Insert"));
@@ -124,7 +128,6 @@ void QVTerminal::appendData(const QByteArray &data)
             default:
                 if (!c.isPrint()) {
                     utext.append(c.unicode());
-                    qDebug() << "appendData: " << " c:" << c;
                 }else {
                     QByteArray byteArray;
                     // byteArray.append(c.toLatin1());
@@ -447,6 +450,7 @@ void QVTerminal::setFormat(const QVTCharFormat &format)
     _curentFormat = format;
     QFontMetrics fm(*_format.font());
     _cw = fm.boundingRect('M').width(); // how to Decide the chinese font width
+    qDebug() << "QVTerminal::setFormat: cw:" << QString::number(_cw);
     _ch = fm.height();
     _cascent = fm.ascent();
 }
@@ -565,9 +569,9 @@ void QVTerminal::paintEvent(QPaintEvent */* paintEvent */)
             p.drawText(pos.x(), pos.y() + _cascent, vtc.c());
             //p.setBrush(QBrush());
             //p.drawRect(QRect(pos, QSize(_cw, _ch)));
-            pos.setX(pos.x() + _cw);
+            pos.setX(pos.x() + _cw); // TODO: adj chinese char width?
         }
-        pos.setY(pos.y() + _ch);
+        pos.setY(pos.y() + _ch); // another row
     }
 }
 

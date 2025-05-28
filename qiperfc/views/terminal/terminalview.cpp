@@ -7,11 +7,12 @@
 
 #include <QDebug>
 
-TerminalView::TerminalView(QWidget *parent)
+TerminalView::TerminalView(QString fontname, QString fontstyle, int fontsize,
+                           QWidget *parent)
     : AbstractView(parent)
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
-    m_term = new QVTerminal(this);
+    m_term = new QVTerminal(fontname, fontstyle, fontsize, this);
     layout->addWidget(m_term);
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
     layout->setContentsMargins(2,2,2,2);
@@ -19,7 +20,6 @@ TerminalView::TerminalView(QWidget *parent)
     layout->setMargin(2);
 #endif
     this->setLayout(layout);
-    m_term->format()->font()->setFamily("Consolas");
     connect(m_term, SIGNAL(transmitData(QByteArray)), this, SIGNAL(transmitData(QByteArray)));
 }
 

@@ -23,8 +23,9 @@ public:
     void setWaitServerReady(int val);
     int getWaitServerReady();
     bool getShowManagerIPWarning();
-    QStringList getSysFontFamilies();
-
+    QString getFontName();
+    QString getFontStyle();
+    int getFontSize();
     // void setTPsize(int width, int heigth);
 public slots:
     void setShowGroup(bool bShow);
@@ -43,6 +44,8 @@ protected:
     void hidetab(QString tabname);
 
 private slots:
+    void initFonts();
+    QStringList getSysFontFamilies();
     void onReject();
     void onAccept();
     void onWidthChange(int width);

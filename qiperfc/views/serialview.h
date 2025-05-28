@@ -19,7 +19,9 @@ class SerialView : public AbstractView
     Q_OBJECT
 
 public:
-    explicit SerialView(QString title, QWidget *parent = nullptr);
+    explicit SerialView(QString title,
+                        QString fontname, QString fontstyle="Regular", int fontsize=10,
+                        QWidget *parent = nullptr);
     ~SerialView() override;
     QString title() override;
     QString iid() override;

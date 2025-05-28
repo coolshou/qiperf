@@ -1,14 +1,16 @@
 #include "serialview.h"
 #include "ui_serialview.h"
 
-SerialView::SerialView(QString title, QWidget *parent)
+SerialView::SerialView(QString title,
+                       QString fontname, QString fontstyle, int fontsize,
+                       QWidget *parent)
     : AbstractView(parent)
     , ui(new Ui::SerialView), m_title(title)
 {
     ui->setupUi(this);
     m_currentport = new TcpUdpPort(this);
     m_currentport->setVisible(false); // no need to show TcpUdpPort's UI
-    m_termialview = new TerminalView(parent);
+    m_termialview = new TerminalView(fontname, fontstyle, fontsize, parent);
     ui->vLayout->addWidget(m_termialview);
 
     // terminal input data => write to m_currentport (TcpUdpPort)

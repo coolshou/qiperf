@@ -171,7 +171,7 @@ private:
     QString m_logpath;
     QClipboard *m_clipboard;
     FormQIperfds *m_frm_qiperfds;
-    dlgOption *m_frm_option;
+    dlgOption *m_dlgoption;
     DlgTest *m_dlgtest;
     DlgRecord *m_dlgrecord; //TODO: store final test result
     DlgSerial *m_dlgserial; // serial select dialog
