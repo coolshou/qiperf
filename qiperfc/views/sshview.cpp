@@ -15,7 +15,8 @@ SSHView::SSHView(QString title, QWidget *parent)
     connect(m_termialview, &TerminalView::transmitData, this, &SSHView::writePortData);
     // m_currentport data ready to read => readall and show on m_termialview
     connect(m_currentport, &AbstractPort::readyRead, this, &SSHView::readPortData);
-
+    // TODO:
+    // connect(this, &SSHView::closed, m_currentport, &TcpUdpPort::close);
 }
 
 SSHView::~SSHView()

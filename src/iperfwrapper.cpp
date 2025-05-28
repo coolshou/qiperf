@@ -210,9 +210,6 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
             args = args + " -M " +QString::number(mss);
         }
     }
-    // else {
-    //     args = args +" --one-off ";
-    // }
     if (jsondata.contains("tos")){
         int tos = jsondata["tos"].toInt();
         if ((tos>=0)&&(tos<=255)){
@@ -223,7 +220,6 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
     if (!fmtreport.isEmpty()){
         args = args + " -f " + fmtreport;
     }
-    // args = args + " --forceflush ";
     return args;
 }
 
