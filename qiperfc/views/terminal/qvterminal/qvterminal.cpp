@@ -39,8 +39,6 @@ QVTerminal::QVTerminal(QString fontname, QString fontstyle, int fontsize,
     _pasteAction->setShortcutContext(Qt::WidgetShortcut);
     connect(_pasteAction, &QAction::triggered, this, &QVTerminal::onPaste);
     addAction(_pasteAction);
-
-    _logtofile = false;
 }
 
 QVTerminal::~QVTerminal()
