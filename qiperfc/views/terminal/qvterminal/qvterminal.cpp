@@ -23,9 +23,9 @@ QVTerminal::QVTerminal(QString fontname, QString fontstyle, int fontsize,
 
     _cursorPos.setX(0);
     _cursorPos.setY(0);
-    //_cursorTimer.start(500);
+    _cursorTimer.start(500); //blink the cursor
     _cvisible = true;
-    // connect(&_cursorTimer, &QTimer::timeout, this, &QVTerminal::toggleCursor);
+    connect(&_cursorTimer, &QTimer::timeout, this, &QVTerminal::toggleCursor);
 
     _echo = false;
     _crlf = false;
@@ -89,7 +89,6 @@ void QVTerminal::appendData(const QByteArray &data)
     while (it != data.cend()) {
         QChar c = *it;
         if (utext.length()>0) {
-            qDebug() << " handle utext:" << utext;
             text.append(utext);
             utext.clear();
         }
@@ -447,7 +446,7 @@ void QVTerminal::setFormat(const QVTCharFormat &format)
     _format = format;
     _curentFormat = format;
     QFontMetrics fm(*_format.font());
-    _cw = fm.boundingRect('M').width(); // how to Decide the chinese font width
+    _cw = fm.boundingRect('W').width(); // how to Decide the chinese font width
     qDebug() << "QVTerminal::setFormat: cw:" << QString::number(_cw);
     _ch = fm.height();
     _cascent = fm.ascent();
