@@ -80,6 +80,8 @@ QString DlgIperf::getJsonCfg()
         }
         serverObj.insert("protocal", ui->cb_protocal->currentText());
         serverObj.insert("parallel", ui->sb_parallel->value());
+        serverObj.insert("windowsize", ui->sb_windowsize->value());
+        serverObj.insert("unit_windowsize", ui->cb_unit_windowsize->currentText());
         serverObj.insert("reverse", ui->chk_reverse->isChecked());
         serverObj.insert("bidir", ui->chk_bidir->isChecked());
         serverObj.insert("interval", ui->sb_interval->value());
