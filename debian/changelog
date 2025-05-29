@@ -1,3 +1,15 @@
+qiperf (0.11.11405.29-1) unstable; urgency=medium
+
+  * Fix copy wrong iperf arg cmd of iperf2
+  * Fix iperf2 miss --omit arg
+  * Fix iperf2 remove --txdelay-time arg
+  * Fix terminal to display unicode, still not good on chinese char width
+  * Fix close app also close ssh view connection
+  * Fix terminal ENTER key send \r Instead of \n (for windows)
+  * Fix terminal showup require mouse left click to get focus
+
+ -- coolshou <coolshou2060@gmail.com>  Thu, 29 May 2025 10:00:00 +0800
+
 qiperf (0.11.11405.27-1) unstable; urgency=medium
 
   * Add SSH terminal
