@@ -170,6 +170,11 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
             args = args + " --omit " + QString::number(omit);
         }
     }
+    uint windowsize = jsondata["windowsize"].toUInt();
+    if (windowsize>0){
+        QString unit_windowsize = jsondata["unit_windowsize"].toString();
+        args = args + " -w " +QString::number(windowsize)+ unit_windowsize;
+    }
     if (!bServer){
         // uint omit = jsondata["omit"].toUInt();
         // if (omit>0){
@@ -179,11 +184,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
         if (parallel>1){
             args = args + " -P " + QString::number(parallel);
         }
-        uint windowsize = jsondata["windowsize"].toUInt();
-        if (windowsize>0){
-            QString unit_windowsize = jsondata["unit_windowsize"].toString();
-            args = args + " -w " +QString::number(windowsize)+ unit_windowsize;
-        }
+
         uint bitrate = jsondata["bitrate"].toUInt();
         if (bitrate>0){
             QString unit_bitrate = jsondata["unit_bitrate"].toString();
