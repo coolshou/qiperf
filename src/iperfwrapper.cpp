@@ -48,7 +48,7 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
             args = args + " -R";
         }
         uint duration = jsondata["duration"].toUInt();
-        if (duration){
+        if (duration>=0){
             args = args + " -t " + QString::number(duration);
         }
         bool zerocopy = jsondata["zerocopy"].toBool();
@@ -148,7 +148,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
             args = args + " -R ";
         }
         uint duration = jsondata["duration"].toUInt();
-        if (duration>0){
+        if (duration>=0){
             args = args + " -t " + QString::number(duration);
         }
         // bool zerocopy = jsondata["zerocopy"].toBool();
@@ -357,7 +357,15 @@ void IperfWrapper::parserIperf2(QString linedata)
                         }
                     }
                 }
-
+                if (m_omit>0){
+                    qInfo() << "iperf2 precess m_omit:" << QString::number(m_omit);
+                    int dInterval = sInterval.toInt() - m_omit;
+                    if (dInterval<=0){
+                        qInfo() << "iperf2 ignore omit time";
+                        return;
+                    }
+                    sInterval = QString::number(dInterval);
+                }
                 if (!m_tpdatas.contains(sInterval)){
                     QJsonArray lst =QJsonArray();
                     m_tpdatas.insert(sInterval, lst);
@@ -638,6 +646,11 @@ void IperfWrapper::setInterval(uint interval)
 {
     // qDebug() << " setInterval:" << interval;
     m_interval = interval;
+}
+
+void IperfWrapper::setOmit(int omit)
+{
+    m_omit = omit;
 }
 
 void IperfWrapper::work()

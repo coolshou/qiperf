@@ -23,6 +23,7 @@ public:
     void setIperf(QString version, QString protocal, uint port);
     void setDelaytime(int delaytime);
     void setInterval(uint interval);
+    void setOmit(int omit);
 
 public slots:
     void work();
@@ -46,6 +47,7 @@ private:
     uint m_port; //use port number;
     int m_delaytime;
     uint m_interval;
+    int m_omit=0;
     bool m_ignorewronginterval;
 };
 
