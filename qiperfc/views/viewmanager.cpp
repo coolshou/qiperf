@@ -183,6 +183,9 @@ void ViewManager::activateDock(AbstractView *view)
             dw->show();
         }
         dw->raise();
+        // dw->setFocus();
+        qInfo() << "activateDock";
+        view->setFocus();
     }else{
         qDebug() << "m_docks do not have " << view;
     }

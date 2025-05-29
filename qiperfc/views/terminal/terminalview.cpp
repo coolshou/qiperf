@@ -13,6 +13,7 @@ TerminalView::TerminalView(QString fontname, QString fontstyle, int fontsize,
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
     m_term = new QVTerminal(fontname, fontstyle, fontsize, this);
+    setFocusProxy(m_term);
     layout->addWidget(m_term);
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
     layout->setContentsMargins(2,2,2,2);
