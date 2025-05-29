@@ -86,6 +86,7 @@ private:
     QTextStream *m_logtextstream;
 
     QStringList m_arguments;  //iperf args
+    int m_omit=0;
     QProcess *m_iperf; // iperf procress
     QMap<QString, QJsonArray> m_tpdatas;
 

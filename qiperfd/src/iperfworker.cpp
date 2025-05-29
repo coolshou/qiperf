@@ -43,6 +43,8 @@ IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
     if (m_arguments.contains("-s")){
         m_servermode=true;
     }
+    int omitidx = m_arguments.indexOf("--omit");
+    m_omit = m_arguments.value(omitidx+1, 0).toInt();
 //    m_port = port;
 //    m_bindaddr = bindaddr;
 //    m_target = target;
