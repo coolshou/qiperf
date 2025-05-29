@@ -602,10 +602,10 @@ void QIperfd::onErrored(int m_idx, int refrow, QString text, QString ipport)
     msg = msg + ":1:"+ text+":"+ipport; // error no, error
     m_wsserver->sendTextResult(msg);
     //remove error process??
-    if (isRunning(m_idx)){
-        stop(m_idx);
-    }
-    del(m_idx);
+    // if (isRunning(m_idx)){
+    //     stop(m_idx);
+    // }
+    // del(m_idx);
 }
 
 void QIperfd::onIperfLog(int idx, QString text)

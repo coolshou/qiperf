@@ -432,7 +432,7 @@ void IperfWrapper::parserIperf2(QString linedata)
                     if (m_delaytime>0){
                         sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
                     }
-                    qInfo() << "sendThroughput sInterval-key:" << sInterval << " data: " << doc.toJson(QJsonDocument::Compact);
+                    // qInfo() << "sendThroughput sInterval-key:" << sInterval << " data: " << doc.toJson(QJsonDocument::Compact);
                     emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
                     //clear record
                     m_tpdatas.remove(sInterval);

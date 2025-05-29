@@ -279,7 +279,8 @@ void IperfWorker::readyReadStdErr()
     m_running = false;
     m_stop = true;
     emit onStderr(m_idx, m_refrow, err, getBindKey());
-    onFinished(1, QProcess::ExitStatus(1)); // something error
+    //When there is stderr output, this will cause TP test stop
+    // onFinished(1, QProcess::ExitStatus(1)); // something error
 
 }
 
