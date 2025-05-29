@@ -275,7 +275,14 @@ void IperfWorker::readyReadStdErr()
         qDebug() << "readyReadStdErr: " << err;
         toLogFile(processOutput);
     }
-
+    if (m_version==2){
+        if (err.contains("WARNING")){
+            // ignore iperf2 WARNING, eq:
+            // -t 0 => run forever
+//WARNING: client will send traffic forever or until an external signal (e.g. SIGINT or SIGTERM) occurs to stop it
+            return;
+        }
+    }
     m_running = false;
     m_stop = true;
     emit onStderr(m_idx, m_refrow, err, getBindKey());
