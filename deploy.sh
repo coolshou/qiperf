@@ -6,14 +6,12 @@
 DOBUILD=0
 CODENAME=`grep '^VERSION_CODENAME' /etc/os-release | cut -d= -f2`
 WINVERSION=`grep '#define QIPERFD_VERSION' src/versions.h | cut -d\"  -f2`
-#WINVERSION=0.8.11403.13
-#WINVERSION=0.7.11401.21
 VERSION=${WINVERSION}-1
 
 
 declare -a DESTFILES=()
 DESTFILES+=(qiperfd_${VERSION}${CODENAME}_amd64.deb)
-DESTFILES+=(qiperftray_${VERSION}${CODENAME}_amd64.deb)
+#DESTFILES+=(qiperftray_${VERSION}${CODENAME}_amd64.deb)
 
 declare -a WDESTFILES=()
 WDESTFILES+=(qiperf-setup-${WINVERSION}.exe)
@@ -22,13 +20,14 @@ WDESTFILES+=(qiperf-setup-${WINVERSION}.exe)
 UPDATE_LINUX=1
 declare -a IPS=()
 #IPS+=("192.168.70.11")
-#IPS+=("192.168.70.13")
-#IPS+=("192.168.70.14")
+IPS+=("192.168.70.13")
+IPS+=("192.168.70.14")
 #IPS+=("192.168.70.12")
-IPS+=("192.168.70.23")
-IPS+=("192.168.70.24")
+#IPS+=("192.168.70.23")
+#IPS+=("192.168.70.24")
 #IPS+=("192.168.70.135")
 #IPS+=("192.168.70.31")
+#IPS+=("192.168.70.32")
 #IPS+=("192.168.70.154")
 #IPS+=("192.168.70.162")
 #IPS+=("192.168.70.147") # not test user
@@ -38,8 +37,9 @@ declare -a WIPS=()
 #WIPS+=("192.168.70.21")
 #WIPS+=("192.168.70.11")
 
-
-
+#
+USERNAME=test
+PASSWORD=123456
 #RvR
 UPDATE_RVR=0
 RVRIP="172.31.117.119"
@@ -86,13 +86,16 @@ if [ "x$?" == "x0" ]; then
             for DESTFILE in "${DESTFILES[@]}"
             do
                 echo "================================================================================"
-                echo "===== ssh test@${IP} rm /home/test/${DESTFILE}"
-                ssh test@${IP} rm /home/test/${DESTFILE} > /dev/null
-                echo "===== scp ${DESTFILE} test@${IP}:/home/test/${DESTFILE}"
-                scp ${DESTFILE} test@${IP}:/home/test/${DESTFILE} > /dev/null 2>&1
+                echo "===== ssh ${USERNAME}@${IP} rm /home/test/${DESTFILE}"
+                ssh ${USERNAME}@${IP} rm /home/test/${DESTFILE} > /dev/null
+                echo "===== scp ${DESTFILE} ${USERNAME}@${IP}:/home/test/${DESTFILE}"
+                scp ${DESTFILE} ${USERNAME}@${IP}:/home/test/${DESTFILE} > /dev/null 2>&1
                 if [ $? == 0 ]; then
-                    echo "===== ssh test@${IP} sshpass -p '123456' sudo dpkg -i /home/test/${DESTFILE}"
-                    ssh test@${IP} sshpass -p '123456' sudo dpkg -i /home/test/${DESTFILE} > /dev/null 2>&1
+                    echo "===== ssh ${USERNAME}@${IP} sshpass -p '123456' sudo dpkg -i /home/test/${DESTFILE}"
+                    ssh ${USERNAME}@${IP} sshpass -p '123456' sudo dpkg -i /home/test/${DESTFILE} > /dev/null 2>&1
+                    if [ $? != 0 ]; then
+                       echo "***** Fail install /home/test/${DESTFILE} on ${USERNAME}@${IP} *****"
+                    fi
                 else
                     echo "**** upload ${DESTFILE} Fail"
                 fi
@@ -109,8 +112,8 @@ if [ "x$?" == "x0" ]; then
                 echo "===== scp -P $PORT ${DESTFILE}  ${TARGET}/home/test/${DESTFILE}"
                 scp -P $PORT ${DESTFILE} ${TARGET}/home/test/${DESTFILE}
                 if [ $? == 0 ]; then
-                    echo "===== ssh -p $PORT test@${DOREMOTEIP} ${INSTCMD}"
-                    ssh -p $PORT test@${DOREMOTEIP} ${INSTCMD}
+                    echo "===== ssh -p $PORT ${USERNAME}@${DOREMOTEIP} ${INSTCMD}"
+                    ssh -p $PORT ${USERNAME}@${DOREMOTEIP} ${INSTCMD}
                 else
                     echo "upload ${DESTFILE} Fail"
                 fi
@@ -122,11 +125,11 @@ if [ "x$?" == "x0" ]; then
     do
         for WINSETUP in "${WDESTFILES[@]}"
         do
-            echo "===== scp ${WINSETUP} test@${IP}:D:\\${WINSETUP}"
-            scp ${WINSETUP} test@${IP}:D:\\${WINSETUP}
+            echo "===== scp ${WINSETUP} ${USERNAME}@${IP}:D:\\${WINSETUP}"
+            scp ${WINSETUP} ${USERNAME}@${IP}:D:\\${WINSETUP}
             if [ $? == 0 ]; then
-                echo "===== ssh test@${IP} D:\\${WINSETUP} /S"
-                ssh test@${IP} D:\\${WINSETUP} /S
+                echo "===== ssh ${USERNAME}@${IP} D:\\${WINSETUP} /S"
+                ssh ${USERNAME}@${IP} D:\\${WINSETUP} /S
             else
                 echo "upload ${WINSETUP} Fail"
             fi
@@ -137,11 +140,11 @@ if [ "x$?" == "x0" ]; then
         do
             for WINSETUP in "${WDESTFILES[@]}"
             do
-                echo "===== scp -P ${PORT} ${WINSETUP} test@${RVRIP}:D:\\${WINSETUP}"
-                scp -P ${PORT} ${WINSETUP} test@${RVRIP}:D:\\${WINSETUP}
+                echo "===== scp -P ${PORT} ${WINSETUP} ${USERNAME}@${RVRIP}:D:\\${WINSETUP}"
+                scp -P ${PORT} ${WINSETUP} ${USERNAME}@${RVRIP}:D:\\${WINSETUP}
                 if [ $? == 0 ]; then
-                    echo "===== ssh -P ${PORT} test@${RVRIP} D:\\${WINSETUP} /S"
-                    ssh -P ${PORT} test@${RVRIP} D:\\${WINSETUP} /S
+                    echo "===== ssh -P ${PORT} ${USERNAME}@${RVRIP} D:\\${WINSETUP} /S"
+                    ssh -P ${PORT} ${USERNAME}@${RVRIP} D:\\${WINSETUP} /S
                 else
                     echo "upload ${WINSETUP} Fail"
                 fi
