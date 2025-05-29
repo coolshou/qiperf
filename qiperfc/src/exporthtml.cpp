@@ -262,12 +262,14 @@ void ExportHtml::procressData()
 
     QStringList ips;
     QList<QString> ls;// store managed ip in list
+    int iperfver=0;
     // iperf test pairs
     foreach (TP *tp, m_tps) {
         ls.clear();
         if (tp->getDataType() != TPMgrData::config){
             continue;
         }
+        iperfver = tp->getVersion();
         QString s = tp->getServer();
         if (!ips.contains(s)) {
             ips.append(s);
@@ -284,7 +286,15 @@ void ExportHtml::procressData()
         //Parameter: Delay time, iperf args
         QString para = "(Delay: "+ QString::number(tp->getDelaytime())+" sec)";
         para.append("<br>");
-        para.append(m_iperfwrapper->toIperf3args(tp->getClientArgsMap()));
+        if(iperfver==2){
+            para.append(m_iperfwrapper->toIperf2args(tp->getClientArgsMap()));
+            para.append("<br>");
+            para.append(m_iperfwrapper->toIperf2args(tp->getServerArgsMap()));
+        }else {
+            para.append(m_iperfwrapper->toIperf3args(tp->getClientArgsMap()));
+            para.append("<br>");
+            para.append(m_iperfwrapper->toIperf3args(tp->getServerArgsMap()));
+        }
         ls.append(para);
         AddDivRow("Config", ls);
     }
@@ -301,66 +311,70 @@ void ExportHtml::procressData()
     // qDebug() << "procressData:" << m_pcs;
     // std::as_const require C++17
     // for (const QJsonValue &value: std::as_const(m_pcs)) {
-    for (const QJsonValue &value: m_pcs) {
-        hostls.clear();
-        if (value.isString()) {
-            QString pcinfo = value.toString();
-            // qDebug() << "pcinfo:" << pcinfo;
-            doc = QJsonDocument::fromJson(pcinfo.toUtf8(), &error);
-            if (error.error == QJsonParseError::NoError){
-                QJsonObject jObj = doc.object();
-                QJsonObject jObjNet = jObj.value("Net").toObject();
-                QJsonObject data;
-                // qDebug() << "net interfaces: " << jObjNet.keys();
-                foreach(const QString& key, jObjNet.keys()) {
-                    data = jObjNet.value(key).toObject();
-                    // qDebug() << "TODO NET address: " << data.value("address");
-                    QJsonArray addrs = data.value("address").toArray();
-                    for (QJsonArray::const_iterator it=addrs.constBegin(); it!=addrs.constEnd(); ++it) {
-                        QJsonArray jAddr= it->toArray();
-                        // qDebug() << "QJsonArray: " << jAddr;
-                        for (int i=0;i< jAddr.count();i++){
-                            QJsonValue v = jAddr.at(i);
-                            if (ls.contains(v.toString())){
-                                // if address is in managed ip list
-                                hostls.append(v.toString());
-                                QString hostname = jObj.value("HostName").toString();
-                                if (jObj.value("MB_Model").toString().length()>0) {
-                                    hostname = hostname + "<br>" + jObj.value("MB_Model").toString();
+    if (m_pcs.count()>0){
+        for (const QJsonValue &value: m_pcs) {
+            hostls.clear();
+            if (value.isString()) {
+                QString pcinfo = value.toString();
+                // qDebug() << "pcinfo:" << pcinfo;
+                doc = QJsonDocument::fromJson(pcinfo.toUtf8(), &error);
+                if (error.error == QJsonParseError::NoError){
+                    QJsonObject jObj = doc.object();
+                    QJsonObject jObjNet = jObj.value("Net").toObject();
+                    QJsonObject data;
+                    // qDebug() << "net interfaces: " << jObjNet.keys();
+                    foreach(const QString& key, jObjNet.keys()) {
+                        data = jObjNet.value(key).toObject();
+                        // qDebug() << "TODO NET address: " << data.value("address");
+                        QJsonArray addrs = data.value("address").toArray();
+                        for (QJsonArray::const_iterator it=addrs.constBegin(); it!=addrs.constEnd(); ++it) {
+                            QJsonArray jAddr= it->toArray();
+                            // qDebug() << "QJsonArray: " << jAddr;
+                            for (int i=0;i< jAddr.count();i++){
+                                QJsonValue v = jAddr.at(i);
+                                if (ls.contains(v.toString())){
+                                    // if address is in managed ip list
+                                    hostls.append(v.toString());
+                                    QString hostname = jObj.value("HostName").toString();
+                                    if (jObj.value("MB_Model").toString().length()>0) {
+                                        hostname = hostname + "<br>" + jObj.value("MB_Model").toString();
+                                    }
+                                    hostls.append(hostname);
+                                    hostls.append(jObj.value("OS").toString());
+                                    hostls.append(jObj.value("OSVer").toString());
+                                    QString ifname = key;
+                                    if (data.value("driverName").toString().length()>0){
+                                        ifname = ifname + "<br>("+data.value("driverName").toString()+")";
+                                    }
+                                    hostls.append(ifname);
+                                    hostls.append(data.value("driverVersion").toString());
+                                    break;
                                 }
-                                hostls.append(hostname);
-                                hostls.append(jObj.value("OS").toString());
-                                hostls.append(jObj.value("OSVer").toString());
-                                QString ifname = key;
-                                if (data.value("driverName").toString().length()>0){
-                                    ifname = ifname + "<br>("+data.value("driverName").toString()+")";
-                                }
-                                hostls.append(ifname);
-                                hostls.append(data.value("driverVersion").toString());
-                                break;
+                                QCoreApplication::processEvents(QEventLoop::AllEvents);
                             }
                             QCoreApplication::processEvents(QEventLoop::AllEvents);
+                            if (hostls.count()>0){
+                                break;
+                            }
                         }
                         QCoreApplication::processEvents(QEventLoop::AllEvents);
                         if (hostls.count()>0){
                             break;
                         }
                     }
-                    QCoreApplication::processEvents(QEventLoop::AllEvents);
-                    if (hostls.count()>0){
-                        break;
-                    }
+                }else {
+                    qDebug() << " ERROR: " << error.errorString();
                 }
-            }else {
-                qDebug() << " ERROR: " << error.errorString();
+            }else{
+                qDebug() << "TODO QJsonArray value: " << value;
             }
-        }else{
-            qDebug() << "TODO QJsonArray value: " << value;
+            if (hostls.count()>0){
+                // qDebug() << "hostls.count: " << hostls.count();
+                AddDivRow("HostInfo", hostls);
+            }
         }
-        if (hostls.count()>0){
-            // qDebug() << "hostls.count: " << hostls.count();
-            AddDivRow("HostInfo", hostls);
-        }
+    } else{
+        qDebug() << "No m_pcs data";
     }
 
     //iperf log raw data
@@ -381,6 +395,8 @@ void ExportHtml::procressData()
             AddRawData("RawData",filenameonly, rawdata);
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
+    }else{
+        qDebug() << "Does not have data in m_iperf_raw_filenames";
     }
     save(m_savefile);
 }
