@@ -52,6 +52,8 @@ void DlgRecord::onClose()
 void DlgRecord::onClosing(QString filename)
 {
     if (m_logfiles.contains(filename)){
+        CodeEditor *ce = m_logfiles.value(filename);
+        ce->deleteLater();
         m_logfiles.remove(filename);
     }
 }
