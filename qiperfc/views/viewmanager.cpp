@@ -208,14 +208,16 @@ AbstractView* ViewManager::findActiveView()
 void ViewManager::close()
 {
     // close all window
-    for (auto itd = m_docks->begin(); itd != m_docks->end(); /* don't increment here */) {
-        itd = m_docks->erase(itd);
-        ++itd;
-    }
     for (auto it = m_views->begin(); it != m_views->end(); /* don't increment here */) {
         auto view = m_views->value(it.key());
+        if (m_docks->contains(view)){
+            QDockWidget *dw = m_docks->value(view);
+            dw->deleteLater();
+            m_docks->remove(view);
+        }
         view->close();
-        it = m_views->erase(it);
+        view->deleteLater();
+        m_views->remove(it.key());
         ++it;
     }
 }
