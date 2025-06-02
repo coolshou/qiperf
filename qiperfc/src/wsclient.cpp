@@ -58,7 +58,7 @@ QT_USE_NAMESPACE
 
 //! [constructor]
 WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject *parent) :
-    QObject(parent),m_serverip(serverip),m_url(url),m_datapath(datapath),
+    QObject(parent), m_serverip(serverip), m_url(url),
     m_webSocket(nullptr)
 {
     m_webSocket = new QWebSocket();
@@ -122,7 +122,7 @@ void WSClient::setDatapath(QString datapath)
     if (!datapath.endsWith(QDir::separator())) {
             datapath.append(QDir::separator());
     }
-    m_datapath = datapath;
+    m_datapath = QDir::toNativeSeparators(datapath);
 }
 
 void WSClient::close()

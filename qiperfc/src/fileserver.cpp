@@ -35,7 +35,7 @@ void FileServer::setRootPath(QString pathname)
             return;
         }
     }
-    m_rootpath = pathname;
+    m_rootpath = QDir::toNativeSeparators(pathname);
     // qDebug()  << "FileServer::setRootPath: m_filesocks.count: " << m_filesocks.count();
     //update all FileSaveSocket's m_rootpath
     // foreach(auto *fsock, m_filesocks){
