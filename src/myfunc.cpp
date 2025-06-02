@@ -60,3 +60,33 @@ QString MyFunc::formatUnit(QString val)
     }
     return rs;
 }
+
+QString MyFunc::secToHumanReadable(int seconds)
+{
+    // Handle negative numbers
+    if (seconds < 0) {
+        return "Invalid input: seconds cannot be negative";
+    }
+
+    // Handle zero
+    if (seconds == 0) {
+        return "0 seconds";
+    }
+    TimeComponents tcompon = secondsToComponents(seconds);
+    QString result= QString("%1 day, %2 hour, %3 min, %4 sec")
+                         .arg(QString::number(tcompon.days),
+                              QString::number(tcompon.hours),
+                              QString::number(tcompon.minutes),
+                              QString::number(tcompon.seconds));
+    return result;
+}
+
+TimeComponents MyFunc::secondsToComponents(int totalSeconds)
+{
+    TimeComponents result;
+    result.days = totalSeconds / 86400;
+    result.hours = (totalSeconds % 86400) / 3600;
+    result.minutes = (totalSeconds % 3600) / 60;
+    result.seconds = totalSeconds % 60;
+    return result;
+}

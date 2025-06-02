@@ -1,6 +1,7 @@
 #include "dlgiperf.h"
 #include "ui_dlgiperf.h"
 #include "../src/comm.h"
+#include "../src/myfunc.h"
 
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -45,7 +46,8 @@ DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
 //            this,&DlgIperf::onSelectMServer);
     connect(ui->cb_mserver_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMServer);
     connect(ui->cb_mclient_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMClient);
-
+    connect(ui->sb_duration, &QSpinBox::valueChanged, this, &DlgIperf::onDurationValueChanged);
+// lbDuration
     // connect(ui->sb_mss, &QSpinBox::valueChanged, this, &DlgIperf::onMSSvalueChanged); //TODO: Not good for UI interaction
 
     // TODD: temp disable item of UDP/SCTP
@@ -554,4 +556,10 @@ void DlgIperf::showManagement(bool show)
         setMinimumSize(465,462);
         resize(465, 462);
     }
+}
+
+void DlgIperf::onDurationValueChanged(int value)
+{
+    QString s = MyFunc::secToHumanReadable(value);
+    ui->lbDuration->setText(s);
 }

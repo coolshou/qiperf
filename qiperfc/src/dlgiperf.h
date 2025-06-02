@@ -44,6 +44,7 @@ public slots:
     void onSelectMClient(QString text);
     void onMSSvalueChanged(int value);
     void showManagement(bool show);
+    void onDurationValueChanged(int value);
 
 protected:
     void changeEvent(QEvent *e) override;
