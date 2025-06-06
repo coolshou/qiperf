@@ -236,7 +236,8 @@ HEADERS += \
     views/viewmanager.h \
     views/serialview.h \
     views/throughputview.h \
-    views/viewtype.h
+    views/viewtype.h \
+    plugin/plugininterface.h
 
 HEADERS += \
     ../JIO/aip.h \

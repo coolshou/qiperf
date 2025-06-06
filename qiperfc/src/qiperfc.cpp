@@ -46,6 +46,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     m_clipboard = QApplication::clipboard();
     ui->setupUi(this);
+    loadPlugins();
     loadSettings();
 
     m_logpath = logpath + "data";
@@ -952,6 +953,74 @@ bool QIperfC::eventFilter(QObject *obj, QEvent *event)
 //    }
 
     return QObject::eventFilter(obj,event);
+}
+
+void QIperfC::loadPlugins()
+{
+    QDir pluginsDir(qApp->applicationDirPath());
+        // Adjust path for deployment: usually 'plugins' or specific subdirectories
+#ifdef Q_OS_WIN
+    if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
+        pluginsDir.cdUp();
+    pluginsDir.cd("plugins"); // Example: expect plugins in a 'plugins' subdirectory
+#elif defined(Q_OS_UNIX)
+    if (pluginsDir.dirName().toLower() == "bin") // Common for Linux/macOS build structures
+        pluginsDir.cdUp();
+    pluginsDir.cd("plugins"); // Example: expect plugins in a 'plugins' subdirectory
+#endif
+
+    if (!pluginsDir.exists()) {
+        qWarning() << "Plugins directory not found:" << pluginsDir.absolutePath();
+        return;
+    }
+
+    qDebug() << "Searching for plugins folder in:" << pluginsDir.absolutePath();
+
+    for (const QString &fileName : pluginsDir.entryList(QDir::Files)) {
+        if (QLibrary::isLibrary(fileName)) { // Check if it's a valid library file
+            QPluginLoader *loader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
+            QObject *plugin = loader->instance();
+
+            if (plugin) {
+                // Try to cast the loaded plugin to our interface
+                PluginInterface *iPlugin = qobject_cast<PluginInterface *>(plugin);
+                if (iPlugin) {
+                    qDebug() << "Loaded plugin:" << iPlugin->pluginName();
+                    plugins.append(iPlugin);
+                    pluginLoaders.append(loader);
+
+                    // Add plugin's menu to the main menu bar
+                    QMenu* pluginMenu = iPlugin->createPluginMenu(this);
+                    if (pluginMenu) {
+                        // ui->menubar->addMenu(pluginMenu);
+                        ui->menuDevice->addMenu(pluginMenu);
+                    }
+
+                    iPlugin->initialize(); // Call plugin's initialization method
+                } else {
+                    qWarning() << "Could not cast plugin" << fileName << "to PluginInterface.";
+                    qWarning() << loader->errorString();
+                    loader->unload(); // Unload if it's not our expected plugin type
+                    delete loader;
+                }
+            } else {
+                qWarning() << "Failed to load plugin:" << fileName;
+                qWarning() << loader->errorString();
+                delete loader;
+            }
+        }
+    }
+}
+
+void QIperfC::unloadPlugins()
+{
+    // Unload plugins
+    for (QPluginLoader* loader : qAsConst(pluginLoaders)) {
+        if (loader->isLoaded()) {
+            loader->unload();
+        }
+        delete loader;
+    }
 }
 void QIperfC::updateRunStatus(bool bStart)
 {

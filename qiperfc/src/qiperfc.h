@@ -37,6 +37,7 @@
 #include "../src/gps/dlggpscalc.h"
 #include "../views/serialdata.h"
 #include "../views/sshdata.h"
+#include "plugin/plugininterface.h"
 
 #if (TEST_ICMP==1)
 #include "../src/icmpping.h"
@@ -112,6 +113,8 @@ protected:
     void closeEvent(QCloseEvent *event)override;
     bool eventFilter(QObject *obj, QEvent *event) override;
 private:
+    void loadPlugins();
+    void unloadPlugins();
     void updateRunStatus(bool bStart);
 
     // void initPingChart();
@@ -166,6 +169,8 @@ private slots:
     void showView();
 private:
     Ui::MainWindow *ui;
+    QList<QPluginLoader*> pluginLoaders;
+    QList<PluginInterface*> plugins;
     // CustomHeaderView *header;
     QString settingfilepath;
     QString m_logpath;
