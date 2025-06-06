@@ -1,6 +1,7 @@
 #include "qiperfc.h"
 #include "ui_qiperfc.h"
 #include "../src/comm.h"
+#include "../src/myfunc.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
@@ -634,13 +635,16 @@ void QIperfC::onStart()
             QThread::msleep(100);
             waitEndTime = QDateTime::currentDateTime();
             if (isRunforever){
-                emit updateStatus("Runtime "+  QString::number(iWait) + " sec");
+                emit updateStatus("Runtime "+  QString::number(iWait) + " sec"
+                                  + "("+MyFunc::secToHumanReadable(iWait)+")");
             }else{
                 emit updateStatus("Remain "+ QString::number(maxtestduration-iWait) + " sec");
             }
 
             iWait = waitStartTime.secsTo(waitEndTime);
         }
+        qDebug() << "iWait:" << QString::number(iWait) << "/" << QString::number(maxtestduration)
+                 << " isRunforever:" << isRunforever << " bUserStop:" << bUserStop;
         onStop();
         // qDebug() << "iWait:" << QString::number(iWait)
         //          << "maxtestduration: " <<  QString::number(maxtestduration);
