@@ -421,9 +421,6 @@ void ThroughputView::onTPUTContextMenu(QPoint pos)
 void ThroughputView::onTPDataUpdate(const QModelIndex &parent, int first, int last)
 {
     qDebug() << "parent:" << parent << " first:" << QString::number(first) << " last:" << QString::number(last);
-    // Q_UNUSED(parent)
-    // Q_UNUSED(first)
-    // Q_UNUSED(last)
     //TODO: when throughput is running, add new TP item?
     // when new throughput data insert, this will trugger,
     bool bStart;

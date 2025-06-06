@@ -68,9 +68,9 @@ void QVTerminal::appendData(const QByteArray &data)
         QByteArray newdata = data;
         if(_logtimestemp){
             //TODO: append time stemp on begin of line
-            if (data.contains("\n")){
+            if (newdata.contains("\n")){
                 // qDebug() << "TODO: insert time stemp";
-                // QByteArray newdata = insertTimeStemp(newdata);
+                QByteArray newdata = insertTimeStemp(newdata);
             }
         }
         // log to file
@@ -244,14 +244,14 @@ QByteArray QVTerminal::insertTimeStemp(QByteArray data)
         int lastPos = 0;
         QByteArray modifiedData;
         //FIXME following will cause crash!!
-        while ((pos = data.indexOf('\n', pos)) != -1) {
+        while ((pos = data.indexOf('\n', lastPos)) != -1) {
             modifiedData.append(data.mid(lastPos, pos - lastPos + 1));  // include newline
             modifiedData.append(timestamp);  // append the timestamp
             lastPos = pos + 1;  // advance past the newline
         }
         modifiedData.append(data.mid(lastPos));  // append the rest of the data after the last newline
 
-        return data;
+        return modifiedData;
     }else {
         return data;
     }

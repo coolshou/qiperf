@@ -1,3 +1,10 @@
+qiperf (0.11.11406.06-1) unstable; urgency=medium
+
+  * Fix memory leak of CodeEditor
+  * update iperf3 to 3.19
+
+ -- coolshou <coolshou2060@gmail.com>  Fri, 6 Jun 2025 10:00:00 +0800
+
 qiperf (0.11.11405.29-1) unstable; urgency=medium
 
   * Fix copy wrong iperf arg cmd of iperf2
@@ -7,6 +14,11 @@ qiperf (0.11.11405.29-1) unstable; urgency=medium
   * Fix close app also close ssh view connection
   * Fix terminal ENTER key send \r Instead of \n (for windows)
   * Fix terminal showup require mouse left click to get focus
+  * adjust iperf2 -w for both client/server
+  * Fix iperf2 --omit report different to iperf3
+  * Fix set Test Duration = 0 did not set -t 0, which cause iperf2=10sec, iperf3=30sec
+  * Fix when iperf2/3 output stderr, do not stop the TP test pair
+  * Fix Do not stop on iperf2 -t 0 output stderr "WARNING"
 
  -- coolshou <coolshou2060@gmail.com>  Thu, 29 May 2025 10:00:00 +0800
 

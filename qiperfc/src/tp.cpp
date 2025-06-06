@@ -204,7 +204,7 @@ void TP::loadData(QString data)
         QString client = o_client.value("bind").toString();
         m_mgrclient = o_client.value("manager").toString();
         m_port = o_client.value("port").toInt();
-        //TODO: duration set to 0 => iperf3 -t 0 run forever
+        //TODO: duration set to 0 => iperf2/3 -t 0 run forever
         m_duration = o_client.value("duration").toInt();
         m_omit = o_client.value("omit").toInt();
         m_delaytime = o_client.value("delaytime").toInt();

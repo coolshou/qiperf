@@ -17,6 +17,9 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
     ui(new Ui::DlgGpsCalc), m_cfg(cfg)
 {
     ui->setupUi(this);
+
+    ui->pbShow3D->setVisible(false);
+
     ui->tableWidget->setColumnWidth(GPScols::Latitude, 100);
     ui->tableWidget->setColumnWidth(GPScols::Longitude, 100);
     ui->tableWidget->setColumnWidth(GPScols::Altitude, 80);

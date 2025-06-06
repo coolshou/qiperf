@@ -44,7 +44,6 @@ void ViewManager::loadConfig(QSettings *config)
         AbstractView *view = m_views->value(key);
         view->loadConfig(config);
     }
-    //TODO: loadConfig of dock
 }
 
 void ViewManager::saveConfig(QSettings *config)
@@ -54,7 +53,6 @@ void ViewManager::saveConfig(QSettings *config)
         AbstractView *view = m_views->value(key);
         view->saveConfig(config);
     }
-    //TODO: saveConfig of dock
 }
 
 void ViewManager::loadSettings(QSettings *config)
@@ -64,7 +62,6 @@ void ViewManager::loadSettings(QSettings *config)
         AbstractView *view = m_views->value(key);
         view->loadSettings(config);
     }
-    //TODO: loadSettings of dock
 }
 
 void ViewManager::retranslate()
@@ -184,8 +181,9 @@ void ViewManager::activateDock(AbstractView *view)
         }
         dw->raise();
         // dw->setFocus();
+        dw->setFocus();
         qInfo() << "activateDock";
-        view->setFocus();
+        // view->setFocus();
     }else{
         qDebug() << "m_docks do not have " << view;
     }
@@ -208,18 +206,19 @@ AbstractView* ViewManager::findActiveView()
 void ViewManager::close()
 {
     // close all window
-    for (auto it = m_views->begin(); it != m_views->end(); /* don't increment here */) {
-        auto view = m_views->value(it.key());
-        if (m_docks->contains(view)){
-            QDockWidget *dw = m_docks->value(view);
-            dw->deleteLater();
-            m_docks->remove(view);
-        }
-        view->close();
-        view->deleteLater();
-        m_views->remove(it.key());
-        ++it;
-    }
+    // for (auto it = m_views->begin(); it != m_views->end(); /* don't increment here */) {
+    //     auto view = m_views->value(it.key());
+    //     if (m_docks->contains(view)){
+    //         QDockWidget *dw = m_docks->value(view);
+    //         dw->deleteLater();
+    //         m_docks->remove(view);
+    //     }
+    //     view->close();
+    //     view->deleteLater();
+    //     // m_views->remove(it.key());
+    //     it = m_views->erase(it);
+    //     ++it;
+    // }
 }
 
 void ViewManager::saveFile()
@@ -272,10 +271,10 @@ bool ViewManager::eventFilter(QObject *watched, QEvent *event)
     if (event->type() == QEvent::Close) {
         QDockWidget *dock = qobject_cast<QDockWidget*>(watched);
         if (dock) {
-            qDebug() << "QDockWidget receive close event!";
+            // qDebug() << "QDockWidget receive close event!";
             QString key = dock->windowTitle();
             AbstractView *view = m_views->value(key);
-            //clear view
+            // //clear view
             view->close();
             view->deleteLater();
             dock->deleteLater();
