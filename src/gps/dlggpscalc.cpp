@@ -26,13 +26,12 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
     ui->twResult->setColumnWidth(AZEIcols::Elevation1, 100);
     ui->twResult->setColumnWidth(AZEIcols::Elevation2, 100);
 
-    ui->pbTaipei101SkyTree->setVisible(false);
     initAction();
     m_dlgOSM = new DlgOpenStreetMap();
     connect(this, &DlgGpsCalc::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
-    connect(ui->pbTaipei101SkyTree, &QPushButton::clicked, this, &DlgGpsCalc::onTaipei101SkyTree);
     connect(ui->pbCalc, &QPushButton::clicked, this, &DlgGpsCalc::onCalcCliecked);
     connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgGpsCalc::onShowMap);
+    connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgGpsCalc::onShow3D);
     connect(ui->pbClear, &QPushButton::clicked, m_clearAction, &QAction::triggered);
     connect(ui->pbToDMS, &QPushButton::clicked, this, &DlgGpsCalc::onToDMS);
     connect(ui->pbToDegree, &QPushButton::clicked, this, &DlgGpsCalc::onToDegree);
@@ -139,33 +138,6 @@ void DlgGpsCalc::onClear(bool checked)
     }
 }
 
-void DlgGpsCalc::onTaipei101SkyTree(bool checked)
-{
-    Q_UNUSED(checked)
-    // 台北 101 大樓座標
-    double lat1 = 25.033964;
-    double lon1 = 121.564472;
-    // ui->lat1->setText(QString::number(lat1));
-    // ui->lon1->setText(QString::number(lon1));
-    // 東京晴空塔座標
-    double lat2 = 35.710046;
-    double lon2 = 139.810718;
-    // ui->lat2->setText(QString::number(lat2));
-    // ui->lon2->setText(QString::number(lon2));
-
-    ui->tableWidget->clearContents();
-    // int irow = ui->tableWidget->currentRow();
-    // ui->tableWidget->insertRow(irow+1);
-    ui->tableWidget->setRowCount(2);
-
-    ui->tableWidget->setItem(0,0, new QTableWidgetItem("taipei101"));
-    ui->tableWidget->setItem(0,1, new QTableWidgetItem(QString::number(lat1)));
-    ui->tableWidget->setItem(0,2, new QTableWidgetItem(QString::number(lon1)));
-    ui->tableWidget->setItem(1,0, new QTableWidgetItem("SkyTree"));
-    ui->tableWidget->setItem(1,1, new QTableWidgetItem(QString::number(lat2)));
-    ui->tableWidget->setItem(1,2, new QTableWidgetItem(QString::number(lon2)));
-
-}
 void DlgGpsCalc::onCalcCliecked(bool checked)
 {
     Q_UNUSED(checked)
@@ -296,6 +268,13 @@ void DlgGpsCalc::onShowMap(bool checked)
         m_dlgOSM->activateWindow();
         m_dlgOSM->show();
     }
+}
+
+void DlgGpsCalc::onShow3D(bool checked)
+{
+    Q_UNUSED(checked)
+    qDebug() << "TODO Show 3D plot";
+
 }
 
 void DlgGpsCalc::onToDMS(bool checked)

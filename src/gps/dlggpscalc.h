@@ -54,9 +54,9 @@ private slots:
     void onInsert(bool checked);
     void onDelete(bool checked);
     void onClear(bool checked);
-    void onTaipei101SkyTree(bool checked);
     void onCalcCliecked(bool checked);
     void onShowMap(bool checked);
+    void onShow3D(bool checked);
     void onToDMS(bool checked);
     void onToDegree(bool checked);
     void showContextMenu(const QPoint &pos);
