@@ -91,9 +91,6 @@ include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../aip/aip.cpp \
-    ../aip/cyntec.cpp \
-    ../aip/hanwha.cpp \
     ../src/dlgshowlog.cpp \
     ../src/filewatcher.cpp \
     ../src/gps/dlggpscalc.cpp \
@@ -159,13 +156,16 @@ SOURCES += \
     views/serialview.cpp \
     views/throughputview.cpp
 
+SOURCES += \
+    ../JIO/aip.cpp \
+    ../JIO/cyntec.cpp \
+    ../JIO/hanwha.cpp \
+    ../JIO/lbrrestclient.cpp
+
     # lib/tplegenditem.cpp \
     # ../qiperfd/src/wsserver.cpp \
 
 HEADERS += \
-    ../aip/aip.h \
-    ../aip/cyntec.h \
-    ../aip/hanwha.h \
     ../src/dlgshowlog.h \
     ../src/filewatcher.h \
     ../src/gps/dlggpscalc.h \
@@ -237,6 +237,12 @@ HEADERS += \
     views/serialview.h \
     views/throughputview.h \
     views/viewtype.h
+
+HEADERS += \
+    ../JIO/aip.h \
+    ../JIO/cyntec.h \
+    ../JIO/hanwha.h \
+    ../JIO/lbrrestclient.h
 
 # lib/tplegenditem.h \
     # ../qiperfd/src/wsserver.h \
