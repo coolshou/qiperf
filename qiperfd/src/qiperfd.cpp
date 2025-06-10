@@ -927,9 +927,9 @@ void QIperfd::onWSactMessage(QString msg)
                         QTimer::singleShot(0, task, SLOT(init())); // start it
                         onSSHTaskStarted(idx, localport);
                     }else{
-                        QString emsg = task->getLastError();
-                        qDebug() << "SSHTask is not running: " << emsg;
-                        onSerialTaskError(idx, emsg);
+                        QString emsg = "SSHTask is not running: " + task->getLastError();
+                        qDebug() << emsg;
+                        onSSHTaskError(idx, emsg);
                     }
                 }
             } catch (const std::exception &e) {
