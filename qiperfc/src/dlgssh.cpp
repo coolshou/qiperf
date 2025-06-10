@@ -11,6 +11,7 @@ DlgSSH::DlgSSH(QWidget *parent)
     , ui(new Ui::DlgSSH)
 {
     ui->setupUi(this);
+    connect(ui->pbPrivateKeyFile, &QPushButton::clicked, this, &DlgSSH::onSelectPrivateKeyFile);
     connect(ui->pbSelectLogFile, &QPushButton::clicked, this, &DlgSSH::onSelectLogFile);
 }
 
@@ -42,7 +43,7 @@ QString DlgSSH::getSSHCfg()
 {
     return QString("%1:%2:%3:%4").arg(ui->leUsername->text(),
                                       ui->lePassword->text(),
-                                      ui->lePrivateKeyFile->text(),
+                                      getPrivateKeyFilename(),
                                       QString::number(ui->sshtimeout->value()));
 
 }
@@ -65,6 +66,15 @@ QString DlgSSH::getLogTimeStempFormat()
     }
 }
 
+QString DlgSSH::getPrivateKeyFilename()
+{
+    if (!ui->lePrivateKeyFile->text().isEmpty()){
+        return ui->lePrivateKeyFile->text();
+    } else {
+        return "";
+    }
+}
+
 void DlgSSH::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
@@ -74,6 +84,22 @@ void DlgSSH::changeEvent(QEvent *e)
         break;
     default:
         break;
+    }
+}
+
+void DlgSSH::onSelectPrivateKeyFile(bool checked)
+{
+    Q_UNUSED(checked)
+    if (oldsshpath.isEmpty()){
+        oldsshpath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    }
+    QString path = oldsshpath + QDir::separator() + ".ssh";
+    QString fileName = QFileDialog::getOpenFileName(this, tr("set Private Key filename"),
+                                                    path, tr(ALL_EXT_FILTER));
+    if (!fileName.isEmpty()){
+        ui->lePrivateKeyFile->setText(fileName);
+        QFileInfo fi(fileName);
+        oldsshpath = fi.path();
     }
 }
 

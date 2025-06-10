@@ -20,13 +20,16 @@ public:
     QString getSSHCfg();
     QString getLogFilename();
     QString getLogTimeStempFormat();
+    QString getPrivateKeyFilename();
 protected:
     void changeEvent(QEvent *e);
 private slots:
+    void onSelectPrivateKeyFile(bool checked);
     void onSelectLogFile(bool checked);
 private:
     Ui::DlgSSH *ui;
     QString oldpath;
+    QString oldsshpath;
 };
 
 #endif // DLGSSH_H
