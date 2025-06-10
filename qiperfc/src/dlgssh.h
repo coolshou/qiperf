@@ -22,9 +22,11 @@ public:
     QString getLogTimeStempFormat();
 protected:
     void changeEvent(QEvent *e);
-
+private slots:
+    void onSelectLogFile(bool checked);
 private:
     Ui::DlgSSH *ui;
+    QString oldpath;
 };
 
 #endif // DLGSSH_H

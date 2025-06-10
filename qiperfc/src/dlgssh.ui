@@ -289,7 +289,7 @@
       <item row="1" column="0" colspan="3">
        <widget class="QGroupBox" name="gbAddTimeStemp">
         <property name="title">
-         <string>Add Time Stemp at begin of each line.(TODO)</string>
+         <string>Add Time Stemp at begin of each line.</string>
         </property>
         <property name="checkable">
          <bool>true</bool>

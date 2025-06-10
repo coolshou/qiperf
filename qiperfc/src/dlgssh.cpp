@@ -1,11 +1,17 @@
 #include "dlgssh.h"
 #include "ui_dlgssh.h"
 
+#include <QStandardPaths>
+#include <QFileDialog>
+#include <QDir>
+#include "comm.h"
+
 DlgSSH::DlgSSH(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::DlgSSH)
 {
     ui->setupUi(this);
+    connect(ui->pbSelectLogFile, &QPushButton::clicked, this, &DlgSSH::onSelectLogFile);
 }
 
 DlgSSH::~DlgSSH()
@@ -68,5 +74,21 @@ void DlgSSH::changeEvent(QEvent *e)
         break;
     default:
         break;
+    }
+}
+
+void DlgSSH::onSelectLogFile(bool checked)
+{
+    Q_UNUSED(checked)
+    if (oldpath.isEmpty()){
+        oldpath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    }
+    QString path = oldpath + QDir::separator() + "ssh.log";
+    QString fileName = QFileDialog::getSaveFileName(this, tr("set log filename"),
+                                                    path, tr(ALL_EXT_FILTER));
+    if (!fileName.isEmpty()){
+        ui->leLogFilename->setText(fileName);
+        QFileInfo fi(fileName);
+        oldpath = fi.path();
     }
 }

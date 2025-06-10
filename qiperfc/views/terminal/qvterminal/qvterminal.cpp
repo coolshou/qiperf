@@ -70,13 +70,13 @@ void QVTerminal::appendData(const QByteArray &data)
             //TODO: append time stemp on begin of line
             if (newdata.contains("\n")){
                 // qDebug() << "TODO: insert time stemp";
-                QByteArray newdata = insertTimeStemp(newdata);
+                newdata = insertTimeStemp(newdata);
             }
         }
         // log to file
         if (_logfile->isWritable()){
             _logfile->write(newdata);
-            // _logfile->flush();
+            _logfile->flush();
         }else{
             qDebug() << "logfile not writeable " << _logfilename;
         }
@@ -237,21 +237,26 @@ QByteArray QVTerminal::insertTimeStemp(QByteArray data)
         return data;
     }
     if (_logtimestemp){
-        // Split and rebuild with timestamp after each line
-        QByteArray timestamp = "[" + QDateTime::currentDateTime().toString(_logtimestempformat).toUtf8() + "] ";
+        if (data.indexOf('\n')>=0){
+            // Split and rebuild with timestamp after each line
+            QByteArray timestamp = "[" + QDateTime::currentDateTime().toString(_logtimestempformat).toUtf8() + "] ";
 
-        int pos = 0;
-        int lastPos = 0;
-        QByteArray modifiedData;
-        //FIXME following will cause crash!!
-        while ((pos = data.indexOf('\n', lastPos)) != -1) {
-            modifiedData.append(data.mid(lastPos, pos - lastPos + 1));  // include newline
-            modifiedData.append(timestamp);  // append the timestamp
-            lastPos = pos + 1;  // advance past the newline
+            int pos = 0;
+            int lastPos = 0;
+            QByteArray modifiedData;
+            //FIXME following will cause crash!!
+            while ((pos = data.indexOf('\n', lastPos)) != -1) {
+                modifiedData.append(data.mid(lastPos, pos - lastPos + 1));  // include newline
+                modifiedData.append(timestamp);  // append the timestamp
+                lastPos = pos + 1;  // advance past the newline
+                QApplication::processEvents(QEventLoop::AllEvents);
+            }
+            // append the rest of the data after the last newline
+            modifiedData.append(data.mid(lastPos));
+            return modifiedData;
+        }else{
+            return data;
         }
-        modifiedData.append(data.mid(lastPos));  // append the rest of the data after the last newline
-
-        return modifiedData;
     }else {
         return data;
     }
