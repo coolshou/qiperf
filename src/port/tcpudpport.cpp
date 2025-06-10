@@ -127,7 +127,8 @@ bool TcpUdpPort::openTcpClient()
         return false; // Returns false when the IP address or port number is wrong.
     }
     tcpClient = new QTcpSocket();
-    tcpClient->connectToHost(hostAddress(), ui->portEdit->text().toInt());
+    int iport = ui->portEdit->text().toInt();
+    tcpClient->connectToHost(hostAddress(), iport);
     int itimeout = 3000;
     if (!tcpClient->waitForConnected(itimeout)) {
         tcpClient->close();
@@ -135,8 +136,9 @@ bool TcpUdpPort::openTcpClient()
         tcpClient = NULL;
         QMessageBox err(QMessageBox::Critical,
             tr("Error"),
-            tr("Can not connect to server in %1 sec!\n"
-                "Please check the network, IP address and port number.").arg(itimeout/1000),
+            tr("Can not connect to server %1:%2 in %3 sec!\n"
+                           "Please check the network, IP address and port number.").arg(
+                                hostAddress().toString(), QString::number(iport),  QString::number(itimeout/1000)),
             QMessageBox::Cancel, this);
         err.exec();
         return false; // Return false when network error.
