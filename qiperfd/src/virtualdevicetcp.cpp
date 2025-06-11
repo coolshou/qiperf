@@ -52,11 +52,12 @@ void VirtualDeviceTcp::init()
     }
 
     if (!_tcpServer->listen(hostAddress, localPort)) {
-        qDebug() << "TCP-Server listen failed";
+        qDebug() << "TCP-Server listen failed:" << hostAddress.toString()
+                 << " port:" << QString::number(localPort);
         emit finished();
         return;
     }
-    qInfo() << QString("TCP-Server listening: %1 %2").arg(hostAddress.toString(), _localPort);
+    qInfo() << QString("TCP-Server listening: %1 %2").arg(hostAddress.toString(), localPort);
     emit started(m_idx, localPort);
 }
 
