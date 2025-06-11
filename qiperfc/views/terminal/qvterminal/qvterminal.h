@@ -71,6 +71,7 @@ protected:
     virtual bool viewportEvent(QEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
     QColor vt100color(char c);
+    QColor vt100color2(char c);
 
     QAction *_pasteAction;
 private:
@@ -118,6 +119,7 @@ private:
     QString m_fontname;
     QString m_fontstyle;
     int m_fontsize;
+    bool _isPrivateMode = false;
 };
 
 #endif // QVTERMINAL_H

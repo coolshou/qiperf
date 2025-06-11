@@ -135,6 +135,7 @@ void QVTerminal::appendData(const QByteArray &data)
             break;
         case QVTerminal::Escape:
             _formatValue = 0;
+            _isPrivateMode = false; // Reset private mode flag
             if (c == '[') {
                 _state = QVTerminal::Format;
             } else if (c == '(') {
@@ -144,35 +145,75 @@ void QVTerminal::appendData(const QByteArray &data)
         case QVTerminal::Format:
             if (c >= '0' && c <= '9') {
                 _formatValue = _formatValue * 10 + (c.cell() - '0');
+            } else if (c == '?') { // Detect private mode indicator
+                _isPrivateMode = true;
+                // No change to _formatValue, it's just a flag
             } else {
-                if (c == ';' || c == 'm') {
-                    if (_formatValue == 0) { // reset format
-                        _curentFormat = _format;
-                    } else if (_formatValue == 4) { // underline
-                        _curentFormat.font()->setUnderline(true);
-                    } else if (_formatValue == 7) { // reverse
-                        QColor foreground = _curentFormat.foreground();
-                        _curentFormat.setForeground(_curentFormat.background());
-                        _curentFormat.setBackground(foreground);
-                    } else if (_formatValue / 10 == 3) { // foreground
-                        // TODO 90~97
-                        _curentFormat.setForeground(vt100color(_formatValue % 10 + '0'));
-                    } else if (_formatValue / 10 == 4) { // background
-                        // TODO 100~107
-                        _curentFormat.setBackground(vt100color(_formatValue % 10 + '0'));
-                    }
-                    if (c == ';') {
-                        _formatValue = 0;
-                        _state = QVTerminal::Format;
+                if (_isPrivateMode) {
+                    if (c == 'h') { // Set mode
+                        if (_formatValue == 2004) {
+                            // Bracketed paste mode: ENABLE
+                            // Perform internal state update if needed, but DO NOT print
+                            // For example: _bracketedPasteModeEnabled = true;
+                            qDebug() << "Bracketed paste mode ENABLED";
+                        }
+                        // Handle other private modes if necessary (e.g., 1049 for alternate screen buffer)
+                        // If unrecognized, simply ignore.
+                        _state = QVTerminal::Text; // Return to text mode
+                    } else if (c == 'l') { // Reset mode
+                        if (_formatValue == 2004) {
+                            // Bracketed paste mode: DISABLE
+                            // Perform internal state update if needed, but DO NOT print
+                            // For example: _bracketedPasteModeEnabled = false;
+                            qDebug() << "Bracketed paste mode DISABLED";
+                        }
+                        // Handle other private modes
+                        // If unrecognized, simply ignore.
+                        _state = QVTerminal::Text; // Return to text mode
                     } else {
+                        // Unrecognized private mode sequence, fall through to text
+                        qDebug() << "Unrecognized private mode sequence: " << _formatValue << c.unicode();
                         _state = QVTerminal::Text;
                     }
-                }else if(c=='J') {
-                    reduceString(-1);
-                    _state = QVTerminal::Text;
                 } else {
-                    formatChar(c);
-                    _state = QVTerminal::Text;
+                    if (c == ';' || c == 'm') {
+                        if (_formatValue == 0) { // reset format
+                            _curentFormat = _format;
+                        } else if (_formatValue == 1) { // Bold/Bright
+                            _curentFormat.font()->setBold(true);
+                        } else if (_formatValue == 2) { // Dim
+                            //TODO: Dim
+                            _curentFormat.setForeground(Qt::gray);
+                        } else if (_formatValue == 4) { // underline
+                            _curentFormat.font()->setUnderline(true);
+                        } else if (_formatValue == 7) { // reverse
+                            QColor foreground = _curentFormat.foreground();
+                            _curentFormat.setForeground(_curentFormat.background());
+                            _curentFormat.setBackground(foreground);
+                        } else if (_formatValue / 10 == 3) { // foreground
+                            _curentFormat.setForeground(vt100color(_formatValue % 10 + '0'));
+                        } else if (_formatValue / 10 == 4) { // background
+                            _curentFormat.setBackground(vt100color(_formatValue % 10 + '0'));
+                        } else if (_formatValue / 10 == 9) { //Light foreground
+                            //ESC[90~97;
+                            _curentFormat.setForeground(vt100color2(_formatValue % 10 + '0'));
+                        } else if (_formatValue / 10 == 10) { // background
+                            //ESC[100~107;
+                            _curentFormat.setBackground(vt100color2(_formatValue % 10 + '0'));
+                        }
+                        if (c == ';') {
+                            _formatValue = 0;
+                            _state = QVTerminal::Format;
+                        } else {
+                            _state = QVTerminal::Text;
+                        }
+                    }else if(c=='J') {
+                        reduceString(-1);
+                        _state = QVTerminal::Text;
+                    } else {
+                        formatChar(c);
+                        _state = QVTerminal::Text;
+                    }
                 }
             }
             break;
@@ -342,6 +383,20 @@ QColor QVTerminal::vt100color(char c)
     }
 }
 
+QColor QVTerminal::vt100color2(char c)
+{
+    switch (c) {
+    case '1': return QColor(255, 71, 76);     //Light red
+    case '2': return QColor(144, 238, 144);   //Light green
+    case '3': return QColor(255, 255, 224);   //Light yellow
+    case '4': return QColor(173, 216, 230);   //Light blue
+    case '5': return QColor(255, 144, 255);   //Light magenta
+    case '6': return QColor(224, 255, 255);   //Light cyan
+    case '7': return QColor(Qt::white);
+    default:  return QColor(53, 50, 47);    //0 Dark gray
+    }
+}
+
 void QVTerminal::read()
 {
     if (!_device)
@@ -469,6 +524,22 @@ bool QVTerminal::event(QEvent *event)
 void QVTerminal::keyPressEvent(QKeyEvent *event)
 {
     QByteArray data;
+    // Check for Ctrl+C specifically
+    if (event->key() == Qt::Key_C && (event->modifiers() & Qt::ControlModifier)) {
+        // Handle Ctrl+C. (DO NOT assign ctrl+c to any item as short-cut key!!
+        // In most terminals, Ctrl+C sends an interrupt signal (SIGINT).
+        // This is often represented by ASCII character 0x03 (ETX - End of Text).
+        data.append('\x03');
+        // You might also want to prevent further processing of this key event
+        // if you've fully handled it.
+        event->accept();
+        // Emit a signal or call a function to handle the interrupt,
+        // e.g., if you have a process running in the terminal.
+        // emit sendData(data); // Or whatever mechanism you use to send data
+        emit transmitData(data);
+        return; // Exit the function after handling Ctrl+C
+    }
+
     switch (event->key()) {
     case Qt::Key_Up:
         data.append("\033[A");
@@ -513,10 +584,21 @@ void QVTerminal::keyPressEvent(QKeyEvent *event)
         data.append('\r'); // for windows cmd
         break;
     default:
-        data.append(event->text().toUtf8());
+        if (event->text().isEmpty() && (event->modifiers() & Qt::ControlModifier)) {
+            // This block can catch other Ctrl combinations that don't produce a text character,
+            // but you need to map them to specific control codes if desired.
+            // For example, Ctrl+D (EOT - End of Transmission) is 0x04.
+            // Ctrl+Z (SUB - Substitute) is 0x1A.
+            // If you want to pass these through as control characters, you'd add more cases here.
+            // For now, if no text is produced and it's a Ctrl key, we might do nothing or a specific action.
+        } else {
+            data.append(event->text().toUtf8());
+        }
         QAbstractScrollArea::keyPressEvent(event);
     }
-    emit transmitData(data);
+    if (!data.isEmpty()) {
+        emit transmitData(data);
+    }
 }
 
 void QVTerminal::paintEvent(QPaintEvent */* paintEvent */)
