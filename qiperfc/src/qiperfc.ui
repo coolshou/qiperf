@@ -21,6 +21,9 @@
     <normaloff>:/console</normaloff>:/console</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
      <number>1</number>
@@ -333,9 +336,6 @@
    </property>
    <property name="text">
     <string>Copy</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
    </property>
   </action>
   <action name="actionPaste">
