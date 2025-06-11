@@ -220,7 +220,7 @@ QModelIndex TPMgr::parent(const QModelIndex &idx) const
     TP *childItem = static_cast<TP*>(idx.internalPointer());
     TP *parentItem = childItem->parentItem();
     if (!parentItem){
-        qDebug() << "==== NO parentItem";
+        // qDebug() << "==== NO parentItem";
         return QModelIndex();
     }
     if (parentItem == rootItem)
