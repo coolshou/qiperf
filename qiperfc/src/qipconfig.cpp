@@ -499,7 +499,7 @@ void QIPConfig::init()
     m_magic = QByteArray();
     m_loadversion = 0;
     if (m_fileworkers.length()>0){
-        qDebug() << "clear m_fileworkers:" << m_fileworkers;
+        // qDebug() << "clear m_fileworkers:" << m_fileworkers;
         m_fileworkers.clear();
         // qDeleteAll(m_fileworkers); // this may cause app crash!!
     }

@@ -256,15 +256,15 @@ TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
         pitm = parent;
     }else{
         pitm = getRootItem();
-        qInfo() << "No parent, add:getRootItem " << pitm;
-        qInfo() << "datatype:" << datatype;
-        qInfo() << "data:" << data;
+        // qInfo() << "No parent, add:getRootItem " << pitm;
+        // qInfo() << "datatype:" << datatype;
+        qInfo() << "TPMgr::add data:" << data;
     }
     QModelIndex midx = indexFromItem(pitm);
     int idx = getMaxIdx();
     beginInsertRows(midx, idx, idx);
     TP *tp = new TP(QString::number(idx), data, datatype, pitm);
-    qDebug() <<"Max idx:" << idx << " tp:" << tp << " add:"<< datatype << " pitm: " << pitm ;//<< " data:" << data;
+    // qDebug() <<"Max idx:" << idx << " tp:" << tp << " add:"<< datatype << " pitm: " << pitm ;//<< " data:" << data;
     pitm->appendChild(tp);
     endInsertRows();
     return tp;
@@ -485,7 +485,7 @@ void TPMgr::reset(){
     }
     rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
     QModelIndex midx = indexFromItem(rootItem);
-    qDebug() << "rootItem:" << rootItem << " midx:" << midx << " valid:" << midx.isValid();
+    // qDebug() << "rootItem:" << rootItem << " midx:" << midx << " valid:" << midx.isValid();
     m_intervals.clear();
     if (m_showgroup){
        if (groupItem!=nullptr){
