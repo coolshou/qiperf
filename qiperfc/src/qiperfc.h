@@ -109,6 +109,7 @@ signals:
     void closeAll(); // send signal to close all dialog
     void setEndTime(double value);
     void updateInterval(int interval);
+    void reportTP(int idx, double tp, double lostrate);
 
 protected:
     void closeEvent(QCloseEvent *event)override;
@@ -167,7 +168,7 @@ private slots:
     void onSSHOpened(QString refrow, QString serveraddress, QString serveraPort);
     void onSSHClosed(QString idx);
     void showView();
-    void onAutoLoadFile(QString idx, QString filename);
+    void onAutoLoadFile(QString idx, QString filename, QString savepath);
 private:
     Ui::MainWindow *ui;
     QList<QPluginLoader*> pluginLoaders;
@@ -241,6 +242,6 @@ private:
     QString m_OpenStreetMapTile;
 
     //automate: simple micro
-    QString m_smicroIdx;
+    int m_smicroIdx;
 };
 #endif // QIPERFC_H

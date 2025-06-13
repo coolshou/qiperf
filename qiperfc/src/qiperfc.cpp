@@ -49,7 +49,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     ui->setupUi(this);
     loadPlugins();
     loadSettings();
-
+    m_smicroIdx = -1;
     m_logpath = logpath + "data";
     QDir logdir(m_logpath);
     if (!logdir.exists()){
@@ -165,30 +165,33 @@ QIperfC::~QIperfC()
 
 bool QIperfC::load(QString filename)
 {    //load test config file
-
     if (m_throughputview->rootChildCount()>0) {
-        QMessageBox msgBox;
-        msgBox.setText("Clear data before load config");
-        msgBox.setInformativeText("Do you want to save your changes?");
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Save);
-        int ret = msgBox.exec();
-        switch (ret) {
-          case QMessageBox::Save:
-              // Save was clicked
-              onSave();
-              break;
-          case QMessageBox::Discard:
-              // Don't Save was clicked
-              on_Clear(false);
-              break;
-          case QMessageBox::Cancel:
-              // Cancel was clicked
-              return false;
-              //break;
-          default:
-              // should never be reached
-              break;
+        if (m_smicroIdx>=0){
+            onClear();
+        }else{
+            QMessageBox msgBox;
+            msgBox.setText("Clear data before load config");
+            msgBox.setInformativeText("Do you want to save your changes?");
+            msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Save);
+            int ret = msgBox.exec();
+            switch (ret) {
+            case QMessageBox::Save:
+                // Save was clicked
+                onSave();
+                break;
+            case QMessageBox::Discard:
+                // Don't Save was clicked
+                on_Clear(false);
+                break;
+            case QMessageBox::Cancel:
+                // Cancel was clicked
+                return false;
+                //break;
+            default:
+                // should never be reached
+                break;
+            }
         }
     }
     onNew();
@@ -365,7 +368,6 @@ void QIperfC::initStart()
     //TODO: clear old test record!!
     m_status_server.clear();
     m_status_client.clear();
-
 }
 void QIperfC::onStart()
 {
@@ -661,6 +663,7 @@ void QIperfC::onStart()
         qDebug() << "iWait:" << QString::number(iWait) << "/" << QString::number(maxtestduration)
                  << " isRunforever:" << isRunforever << " bUserStop:" << bUserStop;
         onStop();
+
         // qDebug() << "iWait:" << QString::number(iWait)
         //          << "maxtestduration: " <<  QString::number(maxtestduration);
         // // if (!isRunforever){
@@ -783,6 +786,7 @@ void QIperfC::onSimpleMicro()
 {
     DlgSimpleMicro *smicro = new DlgSimpleMicro(this);
     connect(smicro, &DlgSimpleMicro::loadfile, this, &QIperfC::onAutoLoadFile);
+    connect(this, &QIperfC::reportTP, smicro, &DlgSimpleMicro::onUpdateTP);
     smicro->show();
 }
 
@@ -1383,12 +1387,22 @@ void QIperfC::showView()
     }
 }
 
-void QIperfC::onAutoLoadFile(QString idx, QString filename)
+void QIperfC::onAutoLoadFile(QString idx, QString filename, QString savepath)
 {
     //load file
     if (load(filename)){
-        //
-        m_smicroIdx = idx;
+        m_smicroIdx = idx.toInt();
+        onStart();
+        qDebug() << "m_smicroIdx:" << QString::number(m_smicroIdx);
+        if (m_smicroIdx>=0) {
+            // m_throughputview->getTP();
+            //TODO actually get TP
+            emit reportTP(m_smicroIdx, 10.0, 20.1);
+        }
+        QFileInfo f(filename);
+        QString target = savepath + QDir::separator() + f.fileName();
+        qDebug() << "save to new file: " << target;
+        // save(target);
     }
 }
 

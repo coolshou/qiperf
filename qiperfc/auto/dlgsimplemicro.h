@@ -6,6 +6,8 @@
 #include <QMenu>
 #include <QAction>
 #include <QPoint>
+#include <QClipboard>
+#include <QTableWidget>
 
 #include "simpleworker.h"
 
@@ -22,10 +24,15 @@ public:
     ~DlgSimpleMicro() override;
 public slots:
     void onStart(bool checked);
-    void onLoadFile(QString idx, QString filename);
+    void onStop(bool checked);
+    void onSelectSavePath(bool checked);
+    void onLoadFile(QString idx, QString filename, QString savepath);
+    void onUpdateTP(int idx, double value, double lostrate);
+    void selectRowBySettingCurrentCell(int rowToSelect);
 
 signals:
-    void loadfile(QString idx, QString filename);
+    void loadfile(QString idx, QString filename, QString savepath);
+    void reportTP(int idx, double tp, double lostrate);
 protected:
     void changeEvent(QEvent *e);
     void initRightMenu();
@@ -35,6 +42,10 @@ private slots:
     void onDelete(bool checked);
     void onCopy(bool checked);
     void onPaste(bool checked);
+    void onProgress(int value);
+    void onStarted();
+    void onStoped();
+
 private:
     Ui::DlgSimpleMicro *ui;
     SimpleWorker *m_sworker;
@@ -44,6 +55,8 @@ private:
     QAction *m_deleteAction;
     QAction *m_copyAction;
     QAction *m_pasteAction;
+    QClipboard *m_clipboard;
+    QString m_oldpath;
 };
 
 #endif // DLGSIMPLEMICRO_H
