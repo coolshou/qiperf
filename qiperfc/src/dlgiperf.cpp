@@ -560,6 +560,11 @@ void DlgIperf::showManagement(bool show)
 
 void DlgIperf::onDurationValueChanged(int value)
 {
-    QString s = MyFunc::secToHumanReadable(value);
+    QString s="";
+    if (value==0){
+        s = "Run Forever";
+    }else {
+        s = MyFunc::secToHumanReadable(value);
+    }
     ui->lbDuration->setText(s);
 }

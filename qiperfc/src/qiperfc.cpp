@@ -26,6 +26,7 @@
 #include "tp.h"
 #include "versions.h"
 #include "views/viewtype.h"
+#include "auto/dlgsimplemicro.h"
 
 #include <QDebug>
 
@@ -310,29 +311,42 @@ void QIperfC::onImportIperf3Log()
     }
     QString fileName = QFileDialog::getOpenFileName(this,
              tr("Open Iperf3 log file"), path , tr(ALL_EXT_FILTER));
-    if(!m_qipconfig->importIperf3Log(fileName)){
-        qDebug() << "Import file: " << fileName << " Fail!!";
+    if (!fileName.isEmpty()){
+        if(!m_qipconfig->importIperf3Log(fileName)){
+            qDebug() << "Import file: " << fileName << " Fail!!";
+        }else{
+            QFileInfo fileInfo(fileName);
+            QString s= fileInfo.absoluteFilePath();
+            qDebug() <<"s:" << s;
+            m_oldsavepath = s;
+        }
     }
 }
 
 void QIperfC::onImportIperf2Log()
 {
-    /*
-    qDebug() << "TODO:  Import Iperf2 Log file to throughput chart";
     QString path;
-    if (!m_oldsavepath.isNull()){
+    if (!m_oldsavepath.isEmpty()){
         path = m_oldsavepath;
     }else {
         path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
     }
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     tr("Open Iperf2 log file"), path , tr(ALL_EXT_FILTER));
-*/
     // QString fileName = "/home/jimmy/work/qiperf/src/iperf2-TCP.txt"; //TCP tmp
-    QString fileName = "/home/jimmy/work/qiperf/src/iperf2-UDP.txt"; //UDP tmp
-    if(!m_qipconfig->importIperf2Log(fileName)){
-        qDebug() << "Import file: " << fileName << " Fail!!";
+    //QString fileName = "/home/jimmy/work/qiperf/src/iperf2-UDP.txt"; //UDP tmp
+    if (!fileName.isEmpty()){
+        if(!m_qipconfig->importIperf2Log(fileName)){
+            QString err("Import file: " + fileName + " Fail!!");
+            onError(err);
+        }else{
+            QFileInfo fileInfo(fileName);
+            QString s= fileInfo.absoluteFilePath();
+            qDebug() <<"s:" << s;
+            m_oldsavepath = s;
+        }
     }
+
 }
 
 bool QIperfC::on_Clear(bool showNotice)
@@ -653,7 +667,7 @@ void QIperfC::onStart()
         // //     emit setEndTime(maxtestduration-iExtraWait);
         // // }
     } else {
-        QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!");
+        QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!", QMessageBox::Ok);
         emit testStoped(-1);
     }
 }
@@ -763,6 +777,13 @@ void QIperfC::onConfig()
         //update setting
         m_WaitServerReady = m_dlgoption->getWaitServerReady();
     }
+}
+
+void QIperfC::onSimpleMicro()
+{
+    DlgSimpleMicro *smicro = new DlgSimpleMicro(this);
+    connect(smicro, &DlgSimpleMicro::loadfile, this, &QIperfC::onAutoLoadFile);
+    smicro->show();
 }
 
 void QIperfC::onAbout()
@@ -1362,6 +1383,15 @@ void QIperfC::showView()
     }
 }
 
+void QIperfC::onAutoLoadFile(QString idx, QString filename)
+{
+    //load file
+    if (load(filename)){
+        //
+        m_smicroIdx = idx;
+    }
+}
+
 void QIperfC::onRPC_result(const QVariant &result)
 {
     qDebug() << "onRPC_result: " << result;
@@ -1623,6 +1653,9 @@ void QIperfC::initActions()
     connect(ui->actionGPScalc, &QAction::triggered, this, &QIperfC::onGPScalc);
     //option
     connect(ui->actionConfig, &QAction::triggered, this, &QIperfC::onConfig);
+    // auto
+    connect(ui->actionSimple, &QAction::triggered, this, &QIperfC::onSimpleMicro);
+    //TODO: actionMacro, more complex with other control
     //help
     connect(ui->actionAbout, &QAction::triggered, this, &QIperfC::onAbout);
     connect(ui->actionShowDebugLog, &QAction::triggered, this, &QIperfC::onShowDebugLog);

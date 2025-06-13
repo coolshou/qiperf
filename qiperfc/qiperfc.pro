@@ -108,6 +108,8 @@ SOURCES += \
     ../src/port/portsetbox.cpp \
     ../src/port/serialport.cpp \
     ../src/port/tcpudpport.cpp \
+    auto/dlgsimplemicro.cpp \
+    auto/simpleworker.cpp \
     lib/axistag.cpp \
     lib/myqcpbars.cpp \
     lib/myqcpgraph.cpp \
@@ -187,6 +189,8 @@ HEADERS += \
     ../src/icmpwrapper.h \
     ../src/myfunc.h \
     ../src/tpmgrdata.h \
+    auto/dlgsimplemicro.h \
+    auto/simpleworker.h \
     lib/axistag.h \
     lib/myqcpbars.h \
     lib/myqcpgraph.h \
@@ -255,6 +259,7 @@ FORMS += \
     ../src/port/portsetbox.ui \
     ../src/port/serialport.ui \
     ../src/port/tcpudpport.ui \
+    auto/dlgsimplemicro.ui \
     src/dlgiperf.ui \
     src/dlgoption.ui \
     src/dlgping.ui \

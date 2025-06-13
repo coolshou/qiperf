@@ -51,6 +51,9 @@
         <file alias="telnet">images/telnet.png</file>
         <file alias="wlan">images/wlan.png</file>
         <file alias="web">images/web.png</file>
+        <file alias="simplemicro">images/simplemicro.png</file>
+        <file alias="insert">images/insert.png</file>
+        <file alias="delete">images/delete.png</file>
     </qresource>
     <qresource prefix="/template">
         <file alias="result.html">qiperfc/template/result.html</file>

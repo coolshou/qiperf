@@ -78,6 +78,7 @@ public slots:
     bool onClear(bool showNotice=true);
     void onShowLog();
     void onConfig();
+    void onSimpleMicro();
     void onAbout();
     void onShowDebugLog();
 
@@ -143,7 +144,6 @@ private slots:
     void onServerDisconnected(QString targetip);
     void onClientDisconnected(QString targetip);
 
-
     void onUpdateDataPath(QString datapath);
 
     void onProgress(QString filename, int currentlineno);
@@ -167,6 +167,7 @@ private slots:
     void onSSHOpened(QString refrow, QString serveraddress, QString serveraPort);
     void onSSHClosed(QString idx);
     void showView();
+    void onAutoLoadFile(QString idx, QString filename);
 private:
     Ui::MainWindow *ui;
     QList<QPluginLoader*> pluginLoaders;
@@ -238,5 +239,8 @@ private:
     QString _logtimestempformat;
     DlgGpsCalc *dlg_gps;
     QString m_OpenStreetMapTile;
+
+    //automate: simple micro
+    QString m_smicroIdx;
 };
 #endif // QIPERFC_H

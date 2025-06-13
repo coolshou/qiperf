@@ -509,8 +509,12 @@
    </property>
   </action>
   <action name="actionSimple">
+   <property name="icon">
+    <iconset resource="../../qiperf.qrc">
+     <normaloff>:/simplemicro</normaloff>:/simplemicro</iconset>
+   </property>
    <property name="text">
-    <string>Simple(TODO)</string>
+    <string>Simple</string>
    </property>
   </action>
   <action name="actionMacro">
