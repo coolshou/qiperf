@@ -1,9 +1,11 @@
-qiperf (0.11.11406.06-1) unstable; urgency=medium
+qiperf (0.12.11406.16-1) unstable; urgency=medium
 
   * Fix memory leak of CodeEditor
   * update iperf3 to 3.19
+  * Fix log to file with timestemp
+  * add simple automate throughput test
 
- -- coolshou <coolshou2060@gmail.com>  Fri, 6 Jun 2025 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Thu, 12 Jun 2025 10:00:00 +0800
 
 qiperf (0.11.11405.29-1) unstable; urgency=medium
 
