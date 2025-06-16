@@ -127,8 +127,8 @@ bool TP::removeChildren(int position, int count)
     if (position < 0 || position + count > m_childItems.size()){
         return false;
     }
-    QList<TP *>::ConstIterator begin = m_childItems.begin()+position;
-    QList<TP *>::ConstIterator end = m_childItems.begin()+position+count;
+    // QList<TP *>::ConstIterator begin = m_childItems.begin()+position;
+    // QList<TP *>::ConstIterator end = m_childItems.begin()+position+count;
     // m_childItems.erase(begin, end);
     //TODO: is ths correct way to remove QList item?
     for (int i = 0; i < count; ++i) {

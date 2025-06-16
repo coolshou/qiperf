@@ -90,7 +90,8 @@ typedef struct cmsghdr cmsghdr_t;
 
 #define ICMP_HEADER_LENGTH 8
 #define MESSAGE_BUFFER_SIZE 1024
-#define ICMP_PAYLOAD_SIZE 32  // Define the size of the ICMP payload buffer
+//#define ICMP_PAYLOAD_SIZE 32  // Define the size of the ICMP payload buffer
+#define ICMP_PAYLOAD_SIZE 20  // Define the size of the ICMP payload buffer
 
 #ifndef ICMP_ECHO
     #define ICMP_ECHO 8

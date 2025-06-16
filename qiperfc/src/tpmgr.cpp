@@ -484,7 +484,7 @@ void TPMgr::reset(){
         }
     }
     rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
-    QModelIndex midx = indexFromItem(rootItem);
+    // QModelIndex midx = indexFromItem(rootItem);
     // qDebug() << "rootItem:" << rootItem << " midx:" << midx << " valid:" << midx.isValid();
     m_intervals.clear();
     if (m_showgroup){

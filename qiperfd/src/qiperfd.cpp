@@ -597,7 +597,7 @@ void QIperfd::readStdOut(int idx, QString text)
 
 void QIperfd::onErrored(int m_idx, int refrow, QString text, QString ipport)
 {
-
+    Q_UNUSED(m_idx)
     QString msg = QString(CMD_IPERF_ERRORED)+":"+QString::number(refrow);
     msg = msg + ":1:"+ text+":"+ipport; // error no, error
     m_wsserver->sendTextResult(msg);
