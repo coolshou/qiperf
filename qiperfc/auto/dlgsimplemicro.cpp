@@ -7,6 +7,15 @@
 #include <QApplication>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QDataStream>
+
+#include "comm.h"
+const QByteArray DlgSimpleMicro::MAGIC_VALUE = ".QIS";
+const qint32 DlgSimpleMicro::VERSION = 1;
 
 DlgSimpleMicro::DlgSimpleMicro(QWidget *parent)
     : QDialog(parent)
@@ -19,6 +28,8 @@ DlgSimpleMicro::DlgSimpleMicro(QWidget *parent)
     connect(ui->pbStart, &QPushButton::clicked, this , &DlgSimpleMicro::onStart);
     connect(ui->pbStop, &QPushButton::clicked, this , &DlgSimpleMicro::onStop);
     connect(ui->pbSelect, &QPushButton::clicked, this , &DlgSimpleMicro::onSelectSavePath);
+    connect(ui->pbLoad, &QPushButton::clicked, this , &DlgSimpleMicro::onLoad);
+    connect(ui->pbSave, &QPushButton::clicked, this , &DlgSimpleMicro::onSave);
     ui->tw->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tw, &QTableWidget::customContextMenuRequested, this, &DlgSimpleMicro::showContextMenu);
     m_clipboard = QApplication::clipboard();
@@ -32,6 +43,7 @@ DlgSimpleMicro::~DlgSimpleMicro()
 void DlgSimpleMicro::onStart(bool checked)
 {
     Q_UNUSED(checked)
+    // check requirement
     QString outpath = ui->leSavePath->text();
     if (outpath.isEmpty()) {
         QMessageBox::information(this, "ERROR", "Please set save path.");
@@ -39,16 +51,24 @@ void DlgSimpleMicro::onStart(bool checked)
         return;
     }
     QStringList sl;
-    // ui->tw->rowCount()
+    QString filePath="";
     int col = 0;
     int rowCount = ui->tw->rowCount();
     ui->progressBar->setMaximum(rowCount);
     for (int row = 0; row < rowCount; ++row) {
         QTableWidgetItem *item = ui->tw->item(row, col);
         if (item) {
-            sl << item->text();
+            filePath = item->text();
+            if (!QFile::exists(filePath)) {
+                QMessageBox::information(this, "ERROR",
+                                         QString("File %1 not exist.").arg(filePath));
+                selectRowBySettingCurrentCell(row);
+                return;
+            }
+            sl << filePath;
         }
     }
+    //
     SimpleWorker *m_sworker = new SimpleWorker(sl, outpath);
     QThread *m_thread = new QThread(this);
     connect(m_sworker, &SimpleWorker::loadfile, this, &DlgSimpleMicro::onLoadFile);
@@ -86,6 +106,134 @@ void DlgSimpleMicro::onSelectSavePath(bool checked)
         ui->leSavePath->setText(dir);
         m_oldpath = dir;
     }
+}
+
+void DlgSimpleMicro::onLoad(bool checked)
+{
+    Q_UNUSED(checked)
+    //TODO load simplemicro config
+    QString path;
+    if (!m_oldpath.isEmpty()){
+        path = m_oldpath;
+    }else{
+        path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    }
+    QString filename = QFileDialog::getOpenFileName(this, "Load simple auto config file", path, QIPERF_AUTOS_EXT_FILTER);
+    if (!filename.isEmpty()){
+        QFile file(filename);
+        if (!file.open(QIODevice::ReadOnly)) {
+            QString err=QString("Could not open file for reading: %1 - %2").arg(filename, file.errorString());
+            QMessageBox::information(this, "ERROR", err);
+            return;
+        }
+        QByteArray m_magic;
+        QByteArray compressedcfg;
+
+        QDataStream in_lff(&file);
+        in_lff >> m_magic;
+        in_lff >> m_version;
+        if (m_magic.startsWith(MAGIC_VALUE)) {
+            in_lff >> compressedcfg;
+            QByteArray data = qUncompress(compressedcfg);
+            QJsonParseError error;
+            QJsonDocument doc=QJsonDocument::fromJson(data, &error);
+            if (error.error == QJsonParseError::NoError){
+                QJsonObject data = doc.object();
+                ui->leSavePath->setText(data.value("Savepath").toString());
+                ui->tw->clearContents();
+                ui->tw->setRowCount(0);
+                QJsonArray arrfiles = data.value("files").toArray();
+                for (QJsonArray::const_iterator it=arrfiles.constBegin(); it!=arrfiles.constEnd(); ++it) {
+                    QJsonObject fsdata= it->toObject();
+                    int newRowIndex = ui->tw->rowCount();
+                    ui->tw->insertRow(newRowIndex);
+                    ui->tw->setItem(newRowIndex, 0, new QTableWidgetItem(fsdata.value("filename").toString()));
+                    ui->tw->setItem(newRowIndex, 1, new QTableWidgetItem(fsdata.value("throughput").toString()));
+                    ui->tw->setItem(newRowIndex, 2, new QTableWidgetItem(fsdata.value("lostrate").toString()));
+                    ui->tw->setItem(newRowIndex, 3, new QTableWidgetItem(fsdata.value("comment").toString()));
+                }
+
+            }else{
+                qDebug() << "Wrong format of data: " << error.errorString();
+            }
+
+        }else{
+            qDebug() << "Wrong format of " << filename;
+            file.close();
+        }
+
+    }
+
+}
+
+void DlgSimpleMicro::onSave(bool checked)
+{
+    Q_UNUSED(checked)
+    //save simplemicro config
+    QString path;
+    if (!m_oldpath.isEmpty()){
+        path = m_oldpath;
+    }else{
+        path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    }
+    QString filename = QFileDialog::getSaveFileName(this, "Save simple auto config file", path, QIPERF_AUTOS_EXT_FILTER);
+    if (!filename.isEmpty()){
+        QString desiredExtension = QString(".%1").arg(QIPERF_AUTOS_EXT);
+        if (!filename.endsWith(desiredExtension, Qt::CaseInsensitive)) {
+            filename += desiredExtension;
+        }
+
+        QFile file(filename);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+            QString err=QString("Could not open file for writing: %1 - %2").arg(filename, file.errorString());
+            QMessageBox::information(this, "ERROR", err);
+            return;
+        }
+
+        QJsonObject data;
+        data["Savepath"] = ui->leSavePath->text();
+        QJsonArray arrfiles;
+        int rowCount = ui->tw->rowCount();
+        for (int row = 0; row < rowCount; ++row) {
+            QTableWidgetItem *item = ui->tw->item(row, 0);
+            if (item) {
+                QJsonObject fsdata;
+                fsdata["filename"] = item->text();
+
+                QTableWidgetItem *item1 = ui->tw->item(row, 1);
+                if (item1){
+                    fsdata["throughput"] = item1->text();
+                }else{
+                    fsdata["throughput"] = "";
+                }
+                QTableWidgetItem *item2 = ui->tw->item(row, 2);
+                if (item2){
+                    fsdata["lostrate"] = item2->text();
+                }else {
+                    fsdata["lostrate"] = "";
+                }
+                QTableWidgetItem *item3 = ui->tw->item(row, 3);
+                if (item3){
+                    fsdata["comment"] = item3->text();
+                }else {
+                    fsdata["comment"] = "";
+                }
+                arrfiles.append(fsdata);
+            }
+        }
+        data["files"] = arrfiles;
+        QJsonDocument doc(data);
+        QByteArray jsonData = doc.toJson(QJsonDocument::Compact);
+
+        QDataStream out(&file);
+        out << static_cast<QByteArray>(MAGIC_VALUE);
+        out << static_cast<qint32>(VERSION);
+        out << static_cast<QByteArray>(qCompress(jsonData, 9));
+
+        file.flush();
+        file.close();
+    }
+
 }
 
 void DlgSimpleMicro::onLoadFile(QString idx, QString filename, QString savepath)
@@ -186,7 +334,22 @@ void DlgSimpleMicro::onPaste(bool checked)
     qDebug() << "TODO onPaste";
     QString d = m_clipboard->text();
     QStringList ds = d.split("\n");
+    int rowidx;
+    foreach (QString d, ds){
+        rowidx = ui->tw->rowCount();
+        ui->tw->insertRow(rowidx);
+        ui->tw->setItem(rowidx, 0, new QTableWidgetItem(d));
+        ui->tw->setItem(rowidx, 1, new QTableWidgetItem(""));
+        ui->tw->setItem(rowidx, 2, new QTableWidgetItem(""));
+        ui->tw->setItem(rowidx, 3, new QTableWidgetItem(""));
+    }
+}
 
+void DlgSimpleMicro::onClear(bool checked)
+{
+    Q_UNUSED(checked)
+    ui->tw->clearContents();
+    ui->tw->setRowCount(0);
 }
 
 void DlgSimpleMicro::onProgress(int value)
@@ -235,11 +398,15 @@ void DlgSimpleMicro::initRightMenu()
     connect(m_copyAction, &QAction::triggered, this, &DlgSimpleMicro::onCopy);
     m_pasteAction = new QAction(QIcon(":/paste"),"Paste", this);
     connect(m_pasteAction, &QAction::triggered, this, &DlgSimpleMicro::onPaste);
+    m_clearAction = new QAction(QIcon(":/clear"),"Clear", this);
+    connect(m_clearAction, &QAction::triggered, this, &DlgSimpleMicro::onClear);
 
     m_rightmenu->addAction(m_insertAction);
     m_rightmenu->addAction(m_copyAction);
     m_rightmenu->addAction(m_pasteAction);
     m_rightmenu->addAction(m_deleteAction);
+    m_rightmenu->addSeparator();
+    m_rightmenu->addAction(m_clearAction);
 
 }
 

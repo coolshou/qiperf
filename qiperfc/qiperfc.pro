@@ -369,7 +369,8 @@ unix:!android {
         "/usr/share/mime/packages/"
 
     ICONS.files += \
-        ../images/qiperfc.png
+        ../images/qiperfc.png \
+        ../images/qiperfcs.png
     ICONS.path += \
         "/usr/share/icons/"
 
@@ -379,7 +380,8 @@ unix:!android {
         "/usr/share/applications/"
 
     IMAGES.files += \
-        ../images/qiperfc.png
+        ../images/qiperfc.png \
+        ../images/qiperfcs.png
     IMAGES.path += \
         "/usr/share/pixmaps/"
 

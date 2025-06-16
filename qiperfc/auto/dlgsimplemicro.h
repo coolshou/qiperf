@@ -26,6 +26,8 @@ public slots:
     void onStart(bool checked);
     void onStop(bool checked);
     void onSelectSavePath(bool checked);
+    void onLoad(bool checked);
+    void onSave(bool checked);
     void onLoadFile(QString idx, QString filename, QString savepath);
     void onUpdateTP(int idx, double value, double lostrate);
     void selectRowBySettingCurrentCell(int rowToSelect);
@@ -42,11 +44,15 @@ private slots:
     void onDelete(bool checked);
     void onCopy(bool checked);
     void onPaste(bool checked);
+    void onClear(bool checked);
     void onProgress(int value);
     void onStarted();
     void onStoped();
 
 private:
+    static const QByteArray MAGIC_VALUE;
+    static const qint32 VERSION;
+    uint32_t m_version;
     Ui::DlgSimpleMicro *ui;
     SimpleWorker *m_sworker;
     QThread *m_thread;
@@ -55,6 +61,7 @@ private:
     QAction *m_deleteAction;
     QAction *m_copyAction;
     QAction *m_pasteAction;
+    QAction *m_clearAction;
     QClipboard *m_clipboard;
     QString m_oldpath;
 };
