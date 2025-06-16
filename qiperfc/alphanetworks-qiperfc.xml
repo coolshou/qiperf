@@ -10,7 +10,7 @@
   </mime-type>
   <mime-type type="application/x-qis">
     <comment xml:lang="en">qiperf simple automate</comment>
-    <generic-icon name="qiperfc"/>
+    <generic-icon name="qiperfcs"/>
     <magic priority="50">
         <match type="string" value="\x00\x00\x00\x04\x2EQIS" offset="0"/>
     </magic>
