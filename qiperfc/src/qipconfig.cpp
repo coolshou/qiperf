@@ -141,20 +141,30 @@ bool QIPConfig::importIperf3Log(QString filename)
         qWarning() << "Can not read file: " << QDir::toNativeSeparators(filename);
         return false;
     }
-    QTextStream in(&inputFile);
-    while (!in.atEnd())
-    {
-        QString line = in.readLine();
-        //TODO: header parser, to get following info
-        // QString version, QString protocal,
-        // int idx, bool servermode, int parallel,
-        // bool bidir, QString bidirtag , QString filename,
+    int port = 5200;
+    int parallel = 1; //depend on log file index number
+    QString protocal = guessIperf3Protocal(filename, port, parallel);
+    qDebug() << "port:" << QString::number(port)
+             << " parallel:" << QString::number(parallel);
+    int idx=0;
+    bool bidir=false; //depend on log
+    QString bidirtag=TPDIRTx; //depend on log
+    int delay=0;
+    uint interval=1; //depend on log
+    bool ignoreWrongInterval=false;
+    IperfFileWorker *ifw = new IperfFileWorker("3", protocal, port,
+                                               idx, true, parallel,
+                                               bidir, bidirtag , filename,
+                                               delay, interval,
+                                               ignoreWrongInterval);
+    // m_fileworkers.append(ifw);
+    // connect(ifw, &IperfFileWorker::onThroughput, this, &QIPConfig::onThroughputData);
+    connect(ifw, &IperfFileWorker::updateTPDatas, this, &QIPConfig::onUpdateTPDatas);
+    connect(ifw, &IperfFileWorker::updateTPAvg, this, &QIPConfig::onUpdateTPAvg);
+    connect(ifw, &IperfFileWorker::progress, this, &QIPConfig::onProgress);
 
-        qDebug() << "importIperf3Log line: " << line;
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
-    }
-    inputFile.close();
-    //TODO: use IperfFileWorker to do parser
+    ifw->start();
+
     return true;
 }
 
@@ -165,15 +175,18 @@ bool QIPConfig::importIperf2Log(QString filename)
         qWarning() << "Can not read file: " << QDir::toNativeSeparators(filename);
         return false;
     }
+    int port = 5000;
+    int parallel = 1; //depend on log file index number
+    QString protocal = guessIperf2Protocal(filename, port, parallel);
+    qDebug() << "port:" << QString::number(port)
+             << " parallel:" << QString::number(parallel);
     int idx=0;
-    int parallel = 3; //depend on log file index number
-    int port = 5001;
     bool bidir=false; //depend on log
     QString bidirtag=TPDIRTx; //depend on log
     int delay=0;
     uint interval=1; //depend on log
     bool ignoreWrongInterval=false;
-    IperfFileWorker *ifw = new IperfFileWorker("2", "TCP", port,
+    IperfFileWorker *ifw = new IperfFileWorker("2", protocal, port,
                                                idx, true, parallel,
                                                bidir, bidirtag , filename,
                                                delay, interval,
@@ -225,6 +238,82 @@ QStringList QIPConfig::getIperfRawFilenames()
 void QIPConfig::setIgnoreWrongInterval(bool bIgnore)
 {
     m_IgnoreWrongInterval = bIgnore;
+}
+
+QString QIPConfig::guessIperf2Protocal(QString filePath, int &port, int &parallel)
+{
+    QFile file(filePath);
+    // Try to open the file in read-only mode
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "Could not open file:" << filePath << "Error:" << file.errorString();
+        return "ERROR: Could not open file";
+    }
+    // Create a QTextStream associated with the file
+    int pnum=0;
+    QString result="TCP";
+    QTextStream in(&file);
+    QStringList ds;
+    // Read the file line by line
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        // qInfo() << "Read line:" << line; // Process the line as needed
+        if (line.contains("Server listening")){
+            ds = line.split(" ");
+            if (ds.length()==6){
+                result=ds.value(3);
+                port =ds.value(5).toInt();
+                // break;
+            }
+        }
+        if (line.contains("Client connecting")){
+            ds = line.split(" ");
+            if (ds.length()==7){
+                result=ds.value(4);
+                port =ds.value(6).toInt();
+                // break;
+            }
+        }
+        if (line.startsWith("[") && line.contains("connected")){
+            pnum++;
+        }
+    }
+    parallel = pnum;
+
+    // Close the file when done
+    file.close();
+    return result;
+}
+
+QString QIPConfig::guessIperf3Protocal(QString filePath, int &port, int &parallel)
+{
+    QFile file(filePath);
+    // Try to open the file in read-only mode
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "Could not open file:" << filePath << "Error:" << file.errorString();
+        return "ERROR: Could not open file";
+    }
+    // Create a QTextStream associated with the file
+    int pnum=0;
+    QString result="TCP";
+    QTextStream in(&file);
+    QStringList ds;
+    // Read the file line by line
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (line.contains("Server listening")){
+            ds = line.split(" ");
+            if (ds.length()==6){
+                port=ds.value(3).toInt();
+            }
+        }
+        if (line.startsWith("[") && line.contains("connected")){
+            pnum++;
+        }
+    }
+    // Close the file when done
+    file.close();
+
+    return result;
 }
 
 void QIPConfig::onProgress(QString filename, int currentlineno)

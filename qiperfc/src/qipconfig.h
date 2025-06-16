@@ -36,6 +36,8 @@ public:
     QString getPCsInfo();
     QStringList getIperfRawFilenames();
     void setIgnoreWrongInterval(bool bIgnore);
+    QString guessIperf2Protocal(QString filePath, int &port, int &parallel);
+    QString guessIperf3Protocal(QString filePath, int &port, int &parallel);
 
 public slots:
     void onProgress(QString filename, int currentlineno);
