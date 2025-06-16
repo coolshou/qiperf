@@ -167,7 +167,7 @@ bool QIperfC::load(QString filename)
 {    //load test config file
     if (m_throughputview->rootChildCount()>0) {
         if (m_smicroIdx>=0){
-            onClear();
+            onClear(false);
         }else{
             QMessageBox msgBox;
             msgBox.setText("Clear data before load config");
@@ -369,9 +369,9 @@ void QIperfC::initStart()
     m_status_server.clear();
     m_status_client.clear();
 }
-void QIperfC::onStart()
+void QIperfC::onStart(bool showNotice)
 {
-    if (!onClear()){
+    if (!onClear(showNotice)){
         return;
     }
     initStart();
@@ -1392,17 +1392,19 @@ void QIperfC::onAutoLoadFile(QString idx, QString filename, QString savepath)
     //load file
     if (load(filename)){
         m_smicroIdx = idx.toInt();
-        onStart();
-        qDebug() << "m_smicroIdx:" << QString::number(m_smicroIdx);
+        onStart(false);
+        // qDebug() << "m_smicroIdx:" << QString::number(m_smicroIdx);
         if (m_smicroIdx>=0) {
-            // m_throughputview->getTP();
-            //TODO actually get TP
-            emit reportTP(m_smicroIdx, 10.0, 20.1);
+            QString tp="";
+            QString lr="";
+            m_throughputview->getTP(tp, lr);
+            // qDebug() << "tp:" << tp << " lr:" << lr;
+            emit reportTP(m_smicroIdx, tp.toDouble(), lr.toDouble());
         }
         QFileInfo f(filename);
         QString target = savepath + QDir::separator() + f.fileName();
         qDebug() << "save to new file: " << target;
-        // save(target);
+        save(target);
     }
 }
 

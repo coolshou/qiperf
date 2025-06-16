@@ -73,7 +73,7 @@ public slots:
     void onImportIperf2Log();
     bool on_Clear(bool showNotice=true);
     void initStart();
-    void onStart();
+    void onStart(bool showNotice=true);
     void onStop();
     bool onClear(bool showNotice=true);
     void onShowLog();

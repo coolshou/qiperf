@@ -49,6 +49,7 @@ public:
     QPixmap toPixmap(int width=0, int height=0, double scale=1.0);
     void addComment(QString midx, QString comment);
     QDateTime getStartTime();
+    bool getTP(QString &tpvalue, QString &lostrate); //get TP value
 
 public slots:
     void onCopy() override;

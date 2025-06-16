@@ -10,6 +10,8 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
+#include <QDebug>
+
 #include "../src/tooltipeventfilter.h"
 #include "comm.h"
 #include "../src/nmessagebox.h"
@@ -96,6 +98,29 @@ void ThroughputView::addComment(QString midx, QString comment)
 QDateTime ThroughputView::getStartTime()
 {
     return m_starttime;
+}
+
+bool ThroughputView::getTP(QString &tpvalue, QString &lostrate)
+{
+    // get throughput
+    if (m_showgroup){
+        TP *tp = m_tpmgr->getRootItem();
+        tpvalue = tp->getThroughput();
+        lostrate = tp->getLostRate();
+    }else{
+        QList<TP*> ds = m_tpmgr->getChilds();
+        double dtp=0.0;
+        double dlr=-1.0;
+        foreach(auto d, ds){
+            if (d->getDataType()==TPMgrData::config){
+                dtp = dtp + d->getThroughput().toDouble();
+                dlr = dlr + d->getLostRate().toDouble();
+            }
+        }
+        tpvalue = QString::number(dtp);
+        lostrate = QString::number(dlr);
+    }
+    return true;
 }
 
 void ThroughputView::onCopy()

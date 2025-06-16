@@ -18,7 +18,7 @@ void SimpleWorker::run()
     emit started();
     int idx=0;
     for (const QString &filename : m_files) {
-        qDebug() << " let qiperfc load file " << filename;
+        // qDebug() << " let qiperfc load file " << filename;
         emit progress(idx+1);
         m_tpdata.insert(idx, -0.1);
         m_lostratedata.insert(idx, 0.0);
@@ -26,12 +26,12 @@ void SimpleWorker::run()
         // wait result
         while (m_tpdata.value(idx)==-0.1)
         {
-            qDebug() << "wait TP value:" << QString::number(m_tpdata.value(idx));
+            // qDebug() << "wait TP value:" << QString::number(m_tpdata.value(idx));
             QThread::sleep(1);
             QApplication::processEvents(QEventLoop::AllEvents);
         }
-        qDebug() << "qiperfc start test";
-        qDebug() << "wait qiperfc info finish and update data";
+        // qDebug() << "qiperfc start test";
+        // qDebug() << "wait qiperfc info finish and update data";
 
         // repeat next file
         QThread::sleep(10);

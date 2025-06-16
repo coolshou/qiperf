@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Simple Auto Run</string>
+   <string>Simple Automate</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../qiperf.qrc">

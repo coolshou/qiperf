@@ -111,7 +111,7 @@ void DlgSimpleMicro::onSelectSavePath(bool checked)
 void DlgSimpleMicro::onLoad(bool checked)
 {
     Q_UNUSED(checked)
-    //TODO load simplemicro config
+    //load simplemicro config
     QString path;
     if (!m_oldpath.isEmpty()){
         path = m_oldpath;
@@ -154,14 +154,16 @@ void DlgSimpleMicro::onLoad(bool checked)
                 }
 
             }else{
-                qDebug() << "Wrong format of data: " << error.errorString();
+                QString err=QString("Wrong format of data: %1").arg(error.errorString());
+                QMessageBox::information(this, "ERROR", err);
             }
 
         }else{
-            qDebug() << "Wrong format of " << filename;
-            file.close();
-        }
+            QString err=QString("Wrong format of %1").arg(filename);
+            QMessageBox::information(this, "ERROR", err);
 
+        }
+        file.close();
     }
 
 }
@@ -243,7 +245,6 @@ void DlgSimpleMicro::onLoadFile(QString idx, QString filename, QString savepath)
 
 void DlgSimpleMicro::onUpdateTP(int idx, double value, double lostrate)
 {
-    qDebug() << "DlgSimpleMicro::onUpdateTP:" << QString::number(value);
     QTableWidgetItem *item= new QTableWidgetItem();
     item->setText(QString::number(value));
     ui->tw->setItem(idx, 1, item);
@@ -350,6 +351,7 @@ void DlgSimpleMicro::onClear(bool checked)
     Q_UNUSED(checked)
     ui->tw->clearContents();
     ui->tw->setRowCount(0);
+    ui->progressBar->setValue(0);
 }
 
 void DlgSimpleMicro::onProgress(int value)
