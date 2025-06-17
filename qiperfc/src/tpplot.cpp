@@ -641,7 +641,7 @@ void TPPlot::clear()
     if (!mTotalLostGraph){
         mTotalLostGraph = getLostRateGraph(GRAPH_TOTAL);
     }
-    //replot();// when no graph, replot will cause plot area shrink
+    replot();// when no graph, replot will cause plot area shrink
 }
 
 void TPPlot::setXRangeUpper(double upper)
