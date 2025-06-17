@@ -887,7 +887,8 @@ QString MyInfo::getCPUModel() {
     ULONG uReturn = 0;
     QString cpuModel;
     while (pEnumerator) {
-        HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pClsObj, &uReturn);
+        // HRESULT hr =
+        pEnumerator->Next(WBEM_INFINITE, 1, &pClsObj, &uReturn);
         if (0 == uReturn) {
             break;
         }
