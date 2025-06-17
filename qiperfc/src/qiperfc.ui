@@ -337,6 +337,9 @@
    <property name="text">
     <string>Copy</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+C</string>
+   </property>
   </action>
   <action name="actionPaste">
    <property name="icon">
