@@ -1465,7 +1465,7 @@ void QIperfC::onServerDisconnected(QString targetip)
 
 void QIperfC::onClientDisconnected(QString targetip)
 {
-    qDebug() << "onClientDisconnected: " << targetip;
+    // qDebug() << "onClientDisconnected: " << targetip;
     if (m_wsc.contains(targetip)){
         m_wsc.remove(targetip);
     }

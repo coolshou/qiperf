@@ -611,23 +611,23 @@ void TPPlot::clear()
     if (mTotalGraph){
         mTotalGraph=nullptr;
     }
-    if (mTotalLegendItem){
-        mTotalLegendItem=nullptr;
-    }
+    // if (mTotalLegendItem){
+    //     mTotalLegendItem=nullptr;
+    // }
     if (mTotalLostGraph){
         mTotalLostGraph=nullptr;
     }
-    if (mTotalLostLegendItem){
-        mTotalLostLegendItem=nullptr;
-    }
+    // if (mTotalLostLegendItem){
+    //     mTotalLostLegendItem=nullptr;
+    // }
     m_graphs.clear();
     for (auto it = m_lostgraphs.begin(); it != m_lostgraphs.end(); ++it) {
         disconnect(static_cast<MyQCPBars*>(it.value()), &MyQCPBars::dataAdded, this, &TPPlot::onLostRateDataAdded);
         removePlottable(it.value());
     }
     m_lostgraphs.clear();
-    m_legends.clear();
-    m_lostratelegends.clear();
+    // m_legends.clear();
+    // m_lostratelegends.clear();
     //axis reset
     xAxis->setRange(0, m_xAxisMaxDefault);
     yAxis->setRange(0, m_yAxisMaxDefault);
@@ -641,7 +641,11 @@ void TPPlot::clear()
     if (!mTotalLostGraph){
         mTotalLostGraph = getLostRateGraph(GRAPH_TOTAL);
     }
-    replot();// when no graph, replot will cause plot area shrink
+    try{
+        replot();// when no graph, replot will cause plot area shrink
+    }catch (...){
+        qDebug() << "TPPlot::clear Unknown ERROR";
+    }
 }
 
 void TPPlot::setXRangeUpper(double upper)
