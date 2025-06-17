@@ -679,7 +679,7 @@ void QIperfd::doRestartQIperfd()
 #endif
 #elif defined(Q_OS_WINDOWS)
     //nssm.exe restart "qiperfd"
-    QString cmd = "\"" + m_nssm + " restart qiperfd\"";
+    QString cmd = "\"" + m_nssm + "\" restart qiperfd ";
     if (createSchedule("startqiperfd", cmd, 5)){
         qApp->quit();
     }else{
