@@ -12,6 +12,7 @@ public:
     void run();
     void setStop();
     void setTP(QString key, double value);
+    bool isRunning();
 public slots:
     void setTPLostRate(int idx, double value, double lostrate);
 signals:
@@ -19,11 +20,15 @@ signals:
     void started();
     void progress(int value);
     void stoped();
-
+private slots:
+    void onStarted();
+    void onStoped();
 private:
     QStringList m_files;
     QString m_savepath;
     bool m_stop;
+    bool m_skip; //skip current
+    bool m_running;
     QMap<int, double> m_tpdata;
     QMap<int, double> m_lostratedata;
 };

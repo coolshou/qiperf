@@ -258,7 +258,7 @@ TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
         pitm = getRootItem();
         // qInfo() << "No parent, add:getRootItem " << pitm;
         // qInfo() << "datatype:" << datatype;
-        qInfo() << "TPMgr::add data:" << data;
+        // qInfo() << "TPMgr::add data:" << data;
     }
     QModelIndex midx = indexFromItem(pitm);
     int idx = getMaxIdx();

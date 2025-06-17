@@ -26,7 +26,6 @@
 #include "tp.h"
 #include "versions.h"
 #include "views/viewtype.h"
-#include "auto/dlgsimplemicro.h"
 
 #include <QDebug>
 
@@ -412,7 +411,7 @@ void QIperfC::onStart(bool showNotice)
                 }
                 //RPC to control all server endpoint (iperf server)
                 isRunforever = isRunforever | tp->getRunforever();
-                qDebug() << "isRunforever: " << isRunforever;
+                // qDebug() << "isRunforever: " << isRunforever;
                 int testduration=0;
                 iwait = tp->getWaitTime();
                 if (iwait> testduration){
@@ -784,7 +783,7 @@ void QIperfC::onConfig()
 
 void QIperfC::onSimpleMicro()
 {
-    DlgSimpleMicro *smicro = new DlgSimpleMicro(this);
+    smicro = new DlgSimpleMicro(this);
     connect(smicro, &DlgSimpleMicro::loadfile, this, &QIperfC::onAutoLoadFile);
     connect(this, &QIperfC::reportTP, smicro, &DlgSimpleMicro::onUpdateTP);
     smicro->show();
@@ -1391,6 +1390,7 @@ void QIperfC::onAutoLoadFile(QString idx, QString filename, QString savepath)
 {
     //load file
     if (load(filename)){
+        QString testtime = getNowString();
         m_smicroIdx = idx.toInt();
         onStart(false);
         // qDebug() << "m_smicroIdx:" << QString::number(m_smicroIdx);
@@ -1402,7 +1402,7 @@ void QIperfC::onAutoLoadFile(QString idx, QString filename, QString savepath)
             emit reportTP(m_smicroIdx, tp.toDouble(), lr.toDouble());
         }
         QFileInfo f(filename);
-        QString target = savepath + QDir::separator() + f.fileName();
+        QString target = savepath + QDir::separator() + testtime + "_"+ f.fileName();
         qDebug() << "save to new file: " << target;
         save(target);
     }

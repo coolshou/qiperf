@@ -18,8 +18,7 @@ const QByteArray DlgSimpleMicro::MAGIC_VALUE = ".QIS";
 const qint32 DlgSimpleMicro::VERSION = 1;
 
 DlgSimpleMicro::DlgSimpleMicro(QWidget *parent)
-    : QDialog(parent)
-    , ui(new Ui::DlgSimpleMicro)
+    : QDialog(parent), ui(new Ui::DlgSimpleMicro)
 {
     ui->setupUi(this);
     initRightMenu();
@@ -88,6 +87,9 @@ void DlgSimpleMicro::onStop(bool checked)
 {
     Q_UNUSED(checked)
     qDebug() << "// TODO onStop, user force stop test";
+    if (m_sworker->isRunning()){
+        m_sworker->setStop();
+    }
 
 }
 
@@ -421,7 +423,7 @@ void DlgSimpleMicro::selectRowBySettingCurrentCell(int rowToSelect)
         // Set the current cell to any cell in the desired row.
         // The column index (0 in this case) doesn't matter if SelectRows is active.
         ui->tw->setCurrentCell(rowToSelect, 0); // row, column
-        qInfo() << "Row" << rowToSelect << "selected by setting current cell.";
+        // qInfo() << "Row" << rowToSelect << "selected by setting current cell.";
     } else {
         qWarning() << "Invalid row index to select:" << rowToSelect;
     }

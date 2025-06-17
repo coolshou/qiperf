@@ -38,6 +38,7 @@
 #include "../views/serialdata.h"
 #include "../views/sshdata.h"
 #include "plugin/plugininterface.h"
+#include "auto/dlgsimplemicro.h"
 
 #if (TEST_ICMP==1)
 #include "../src/icmpping.h"
@@ -243,5 +244,6 @@ private:
 
     //automate: simple micro
     int m_smicroIdx;
+    DlgSimpleMicro *smicro;
 };
 #endif // QIPERFC_H

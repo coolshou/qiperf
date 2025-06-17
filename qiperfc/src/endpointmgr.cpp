@@ -302,7 +302,7 @@ QJsonArray EndPointMgr::getPCsInfos(QStringList pcs)
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
-    qDebug() << "targetpcs:" << targetpcs;
+    // qDebug() << "targetpcs:" << targetpcs;
 
     QStringList targetds;
     foreach(EndPoint *ep, m_endpoints){

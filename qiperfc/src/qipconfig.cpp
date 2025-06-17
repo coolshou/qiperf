@@ -29,7 +29,7 @@ QIPConfig::QIPConfig(QString tmppath, bool IgnoreWrongInterval, QObject *parent)
 }
 
 bool QIPConfig::loadFromFile(const QString &filePath) {
-    qInfo() << "loadFromFile" << filePath;
+    // qInfo() << "loadFromFile" << filePath;
     init();
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -64,7 +64,7 @@ bool QIPConfig::loadFromFile(const QString &filePath) {
                         rc = parserTPCfgLogFiles(outpath);
                     }
                 }else{
-                    qDebug() << "no test record date";
+                    // qDebug() << "no test record date";
                     rc = true;
                 }
             }else {
