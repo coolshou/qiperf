@@ -45,6 +45,7 @@ private slots:
     void onCopy(bool checked);
     void onPaste(bool checked);
     void onClear(bool checked);
+    void onResetData(bool checked);
     void onProgress(int value);
     void onStarted();
     void onStoped();
@@ -62,6 +63,7 @@ private:
     QAction *m_copyAction;
     QAction *m_pasteAction;
     QAction *m_clearAction;
+    QAction *m_resetAction;
     QClipboard *m_clipboard;
     QString m_oldpath;
 };

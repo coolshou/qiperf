@@ -356,10 +356,25 @@ void DlgSimpleMicro::onClear(bool checked)
     ui->progressBar->setValue(0);
 }
 
+void DlgSimpleMicro::onResetData(bool checked)
+{
+    Q_UNUSED(checked)
+    ui->progressBar->setValue(0);
+    int rowCount = ui->tw->rowCount();
+    for (int row = 0; row < rowCount; ++row) {
+        QTableWidgetItem *item = ui->tw->item(row, 1);
+        item->setText("");
+        QTableWidgetItem *item2 = ui->tw->item(row, 2);
+        item2->setText("");
+        QTableWidgetItem *item3 = ui->tw->item(row, 3);
+        item3->setText("");
+    }
+}
+
 void DlgSimpleMicro::onProgress(int value)
 {
     // ui->tw->setRangeSelected();
-    selectRowBySettingCurrentCell(value-1);
+    selectRowBySettingCurrentCell(value);
     ui->progressBar->setValue(value);
 }
 
@@ -404,11 +419,15 @@ void DlgSimpleMicro::initRightMenu()
     connect(m_pasteAction, &QAction::triggered, this, &DlgSimpleMicro::onPaste);
     m_clearAction = new QAction(QIcon(":/clear"),"Clear", this);
     connect(m_clearAction, &QAction::triggered, this, &DlgSimpleMicro::onClear);
+    m_resetAction = new QAction(QIcon(":/reset"),"Reset data", this);
+    connect(m_resetAction, &QAction::triggered, this, &DlgSimpleMicro::onResetData);
 
     m_rightmenu->addAction(m_insertAction);
     m_rightmenu->addAction(m_copyAction);
     m_rightmenu->addAction(m_pasteAction);
     m_rightmenu->addAction(m_deleteAction);
+    m_rightmenu->addSeparator();
+    m_rightmenu->addAction(m_resetAction);
     m_rightmenu->addSeparator();
     m_rightmenu->addAction(m_clearAction);
 
