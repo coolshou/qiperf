@@ -310,6 +310,7 @@ QString QIPConfig::guessIperf3Protocal(QString filePath, int &port, int &paralle
             pnum++;
         }
     }
+    parallel = pnum;
     // Close the file when done
     file.close();
 
