@@ -1022,7 +1022,9 @@ bool QIperfd::deleteScheduledTask(const QString &taskName) {
     ITaskFolder* pRootFolder = nullptr;
 
     try {
-        hr = pService.CreateInstance(CLSID_TaskScheduler);
+        // hr = pService.CreateInstance(CLSID_TaskScheduler);
+        hr = CoCreateInstance(CLSID_TaskScheduler, NULL, CLSCTX_INPROC_SERVER,
+                              IID_ITaskService, (void**)&pService);
         if (FAILED(hr)) _com_issue_error(hr);
 
         hr = pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
