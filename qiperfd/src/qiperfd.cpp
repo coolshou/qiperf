@@ -979,6 +979,7 @@ bool QIperfd::runScheduledTask(const QString &taskName) {
     ITaskService* pService = nullptr;
     ITaskFolder* pRootFolder = nullptr;
     IRegisteredTask* pRegisteredTask = nullptr;
+    IRunningTask* pRunningTask = nullptr;
 
     try {
         // hr = pService.CreateInstance(CLSID_TaskScheduler);
@@ -995,8 +996,8 @@ bool QIperfd::runScheduledTask(const QString &taskName) {
         hr = pRootFolder->GetTask(toBSTR(taskName), &pRegisteredTask);
         if (FAILED(hr)) _com_issue_error(hr);
 
-        _variant_t params = _variant_t(); // No parameters for the run
-        hr = pRegisteredTask->Run(params);
+        _variant_t emptyParams; // Empty parameters
+        hr = pRegisteredTask->Run(emptyParams, &pRunningTask);
         if (FAILED(hr)) _com_issue_error(hr);
 
         return true;
