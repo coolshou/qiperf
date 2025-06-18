@@ -789,16 +789,16 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
     }
 
     // Use _com_ptr_t for automatic reference counting and error checking
-    ITaskServicePtr pService = nullptr;
-    ITaskFolderPtr pRootFolder = nullptr;
-    ITaskDefinitionPtr pTask = nullptr;
-    IRegistrationInfoPtr pRegInfo = nullptr;
-    IActionCollectionPtr pActionCollection = nullptr;
-    IExecActionPtr pExecAction = nullptr;
-    ITriggerCollectionPtr pTriggerCollection = nullptr;
-    ITimeTriggerPtr pTimeTrigger = nullptr;
-    ITaskSettingsPtr pSettings = nullptr;
-    IPrincipalPtr pPrincipal = nullptr;
+    ITaskService* pService = nullptr;
+    ITaskFolder* pRootFolder = nullptr;
+    ITaskDefinition* pTask = nullptr;
+    IRegistrationInfo* pRegInfo = nullptr;
+    IActionCollection* pActionCollection = nullptr;
+    IExecAction* pExecAction = nullptr;
+    ITriggerCollection* pTriggerCollection = nullptr;
+    ITimeTrigger* pTimeTrigger = nullptr;
+    ITaskSettings* pSettings = nullptr;
+    IPrincipal* pPrincipal = nullptr;
 
     try {
         // 2. Create a TaskService instance
@@ -930,9 +930,9 @@ bool QIperfd::runScheduledTask(const QString &taskName) {
         return false;
     }
 
-    ITaskServicePtr pService = nullptr;
-    ITaskFolderPtr pRootFolder = nullptr;
-    IRegisteredTaskPtr pRegisteredTask = nullptr;
+    ITaskService* pService = nullptr;
+    ITaskFolder* pRootFolder = nullptr;
+    IRegisteredTask* pRegisteredTask = nullptr;
 
     try {
         hr = pService.CreateInstance(CLSID_TaskScheduler);
@@ -972,8 +972,8 @@ bool QIperfd::deleteScheduledTask(const QString &taskName) {
         return false;
     }
 
-    ITaskServicePtr pService = nullptr;
-    ITaskFolderPtr pRootFolder = nullptr;
+    ITaskService* pService = nullptr;
+    ITaskFolder* pRootFolder = nullptr;
 
     try {
         hr = pService.CreateInstance(CLSID_TaskScheduler);
