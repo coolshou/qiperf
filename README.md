@@ -23,7 +23,7 @@ sudo apt install libqt6positioning6 libqt6quickwidgets6 libqt6serialport6 \
 ```
 ## Ubuntu 22.04:
 ```
-
+sudo apt install libqt5core5a libqt5network5 libqt5serialport5 libqt5websockets5 libqt5widgets5
 ```
 
 # Build
