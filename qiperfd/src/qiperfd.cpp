@@ -901,7 +901,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
             TASK_CREATE_OR_UPDATE, // Flags: create or update
             _variant_t(),         // User (omit for current user or if set in principal)
             password,             // Password (omit for current user, INTERACTIVE_TOKEN, or SYSTEM)
-            TASK_LOGON_TYPE_INTERACTIVE_TOKEN, // Logon type
+            TASK_LOGON_INTERACTIVE_TOKEN, // Logon type
             _variant_t(),         // SDDL (Security Descriptor Definition Language)
             &pRegisteredTask      // Output: Registered task object
             );
