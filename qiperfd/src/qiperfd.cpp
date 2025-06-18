@@ -839,7 +839,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         hr = pTask->get_Actions(&pActionCollection);
         if (FAILED(hr)) _com_issue_error(hr);
         _variant_t varActionType = TASK_ACTION_EXEC; // 0 for exec action
-        hr = pActionCollection->raw_Create(varActionType, &pActionDisp);
+        hr = pActionCollection->Create(varActionType, &pActionDisp);
         if (FAILED(hr)) _com_issue_error(hr);
         hr = pActionDisp->QueryInterface(IID_IExecAction, (void**)&pExecAction); // Query to specific interface
         if (FAILED(hr)) _com_issue_error(hr);
