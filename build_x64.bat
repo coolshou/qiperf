@@ -37,19 +37,19 @@ if "%BUILDAPP%"=="1" (
       cd build
       cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="/EHsc /wd4819  /wd4456  /wd4244 /WX-"  ..
       msbuild -p:Configuration=Release GeographicLib.sln
-      cd ../../../
+      cd ..\..\..\
     )
-    IF NOT EXIST "lib/qssh/botan/botan.lib" (
-       cd lib/qssh/botan
+    IF NOT EXIST "lib\qssh\botan\botan.lib" (
+       cd lib\qssh\botan
        python configure.py --cc=msvc --os=windows --cpu=x64
        nmake
-       cd ../../../
+       cd ..\..\..\
     )
-    IF NOT EXIST "lib/qssh/lib/libqssh.lib" (
-      cd lib/qssh
+    IF NOT EXIST "lib\qssh\lib\libqssh.lib" (
+      cd lib\qssh
       qmake
       nmake
-      cd ../../
+      cd ..\..\
     )
     echo qmake...
     qmake
