@@ -838,9 +838,10 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         // 7. Define an action (e.g., execute a program)
         hr = pTask->get_Actions(&pActionCollection);
         if (FAILED(hr)) _com_issue_error(hr);
-        hr = pActionCollection->Create(TASK_ACTION_EXEC, &pActionDisp);
+        IAction* pAction = nullptr;
+        hr = pActionCollection->Create(TASK_ACTION_EXEC, &pAction);
         if (FAILED(hr)) _com_issue_error(hr);
-        hr = pActionDisp->QueryInterface(IID_IExecAction, (void**)&pExecAction); // Query to specific interface
+        hr = pAction->QueryInterface(IID_IExecAction, (void**)&pExecAction); // Query to specific interface
         if (FAILED(hr)) _com_issue_error(hr);
         // Note: IID_IExecAction needs to be defined by #import or manually
         // If it's not working, ensure your #import path is correct and taskschd.tlh is generated.
@@ -910,7 +911,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         // Cleanup resources
         if (pRegisteredTask) pRegisteredTask->Release();
         if (pTriggerDisp) pTriggerDisp->Release();
-        if (pActionDisp) pActionDisp->Release();
+        if (pAction) pAction->Release();
         if (pPrincipal) pPrincipal->Release();
         if (pSettings) pSettings->Release();
         if (pTimeTrigger) pTimeTrigger->Release();
