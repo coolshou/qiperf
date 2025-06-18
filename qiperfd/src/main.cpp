@@ -19,11 +19,15 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QMessageLogContext>
+#include <QMessageBox>
 #include <qlogging.h>
 #include <stdio.h>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
+#if defined(Q_OS_WIN32)
+#include <Objbase.h> // For CoInitializeEx and CoUninitialize
+#endif
 
 #if defined(Q_OS_LINUX)
 #include "../QCtrlSignals/src/QCtrlSignals"
@@ -127,7 +131,16 @@ int main(int argc, char *argv[])
         app.setOrganizationName(QIPERF_ORG);
         app.setOrganizationDomain(QIPERF_DOMAIN);
         app.setApplicationName(QIPERFD_NAME);
-
+    #if defined(Q_OS_WIN32)
+        // Initialize COM for the main thread here, once at startup
+        // This is typically called once per thread that uses COM.
+        HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED); // Or COINIT_MULTITHREADED
+        if (FAILED(hr)) {
+            QMessageBox::critical(nullptr, "COM Initialization Error",
+                                  QString("Failed to initialize COM library: 0x%1").arg(hr, 8, 16, QChar('0').toUpper()));
+            return 1;
+        }
+    #endif
         PipeServer *m_pserver = new PipeServer(QIPERFD_NAME, app.applicationPid(), nullptr);
         if (m_pserver->init())
         {
@@ -147,5 +160,9 @@ int main(int argc, char *argv[])
         }
         rc = app.exec();
     }
+#if defined(Q_OS_WIN32)
+    // Uninitialize COM when the application exits
+    CoUninitialize();
+#endif
     return rc;
 }

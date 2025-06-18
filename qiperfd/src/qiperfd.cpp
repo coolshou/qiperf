@@ -678,13 +678,21 @@ void QIperfd::doRestartQIperfd()
     qDebug() << "TODO: restart android qiperfd service"
 #endif
 #elif defined(Q_OS_WINDOWS)
+    QString taskName = "startqiperfd";
+    // Set task to run 1 sec from now
+    QDateTime runTime = QDateTime::currentDateTime().addSecs(1);
     //nssm.exe restart "qiperfd"
-    QString cmd = "\"" + m_nssm + "\" restart qiperfd ";
-    if (createSchedule("startqiperfd", cmd, 5)){
-        qApp->quit();
-    }else{
-        qDebug() << "createSchedule Fail";
+    QString taskCommand = "\"" + m_nssm + "\" restart qiperfd ";
+    if (createScheduledTask(taskName, taskCommand, runTime)) {
+        qDebug() << "Task created successfully.";
+    } else {
+        qDebug() << "Failed to create task.";
     }
+    // if (createSchedule("startqiperfd", cmd, 5)){
+    //     qApp->quit();
+    // }else{
+    //     qDebug() << "createSchedule Fail";
+    // }
 #else
     qDebug() << "do Restart QIperfd for system :" << QSysInfo::productType();
 #endif
@@ -754,6 +762,251 @@ bool QIperfd::createSchedule(QString name, QString cmd, int idelay)
     }
 
 }
+QString QIperfd::comErrorToString(HRESULT hr) {
+    _com_error err(hr);
+    LPCTSTR errMsg = err.ErrorMessage();
+    return QString::fromWCharArray(errMsg);
+}
+// --- COM API Implementations ---
+
+// Helper function to convert QString to BSTR (used by COM)
+// Qt's QString::toStdWString() is good, then convert to BSTR
+_bstr_t toBSTR(const QString& s) {
+    return _bstr_t(s.toStdWString().c_str());
+}
+
+bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCommand, const QDateTime &runTime) {
+    HRESULT hr = S_OK;
+
+    // 1. Initialize COM
+    // CoInitializeEx is safe to call multiple times for the same thread.
+    // It's good practice to balance with CoUninitialize if you manage COM lifespan within a single function.
+    // However, for a GUI app, it's often initialized once at app start.
+    hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED); // Or COINIT_MULTITHREADED
+    if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
+        logMessage(QString("CoInitializeEx failed: %1").arg(comErrorToString(hr)));
+        return false;
+    }
+
+    // Use _com_ptr_t for automatic reference counting and error checking
+    TS::ITaskServicePtr pService = nullptr;
+    TS::ITaskFolderPtr pRootFolder = nullptr;
+    TS::ITaskDefinitionPtr pTask = nullptr;
+    TS::IRegistrationInfoPtr pRegInfo = nullptr;
+    TS::IActionCollectionPtr pActionCollection = nullptr;
+    TS::IExecActionPtr pExecAction = nullptr;
+    TS::ITriggerCollectionPtr pTriggerCollection = nullptr;
+    TS::ITimeTriggerPtr pTimeTrigger = nullptr;
+    TS::ITaskSettingsPtr pSettings = nullptr;
+    TS::IPrincipalPtr pPrincipal = nullptr;
+
+    try {
+        // 2. Create a TaskService instance
+        hr = pService.CreateInstance(TS::CLSID_TaskScheduler);
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        // 3. Connect to the Task Scheduler service
+        hr = pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        // 4. Get the root task folder
+        hr = pService->GetFolder(_bstr_t(L"\\"), &pRootFolder);
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        // Remove the task if it already exists (optional, but good for testing)
+        pRootFolder->DeleteTask(toBSTR(taskName), 0); // Ignore error if task doesn't exist
+
+        // 5. Create a new task definition
+        hr = pService->NewTask(0, &pTask);
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        // 6. Set task registration information
+        hr = pTask->get_RegistrationInfo(&pRegInfo);
+        if (FAILED(hr)) _com_issue_error(hr);
+        hr = pRegInfo->put_Author(toBSTR(QString("QtApp (%1)").arg(QCoreApplication::applicationName())));
+        if (FAILED(hr)) _com_issue_error(hr);
+        hr = pRegInfo->put_Description(toBSTR(QString("Task created by Qt application API for testing '%1'").arg(taskCommand)));
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        // 7. Define an action (e.g., execute a program)
+        hr = pTask->get_Actions(&pActionCollection);
+        if (FAILED(hr)) _com_issue_error(hr);
+        _variant_t varActionType = TS::TASK_ACTION_EXEC; // 0 for exec action
+        IDispatchPtr pActionDisp = nullptr; // Raw IDispatch pointer for Add
+        hr = pActionCollection->Add(varActionType, &pActionDisp);
+        if (FAILED(hr)) _com_issue_error(hr);
+        hr = pActionDisp->QueryInterface(TS::IID_IExecAction, (void**)&pExecAction); // Query to specific interface
+        if (FAILED(hr)) _com_issue_error(hr);
+        // Note: IID_IExecAction needs to be defined by #import or manually
+        // If it's not working, ensure your #import path is correct and taskschd.tlh is generated.
+
+        // Set the path to the executable
+        hr = pExecAction->put_Path(toBSTR(taskCommand));
+        if (FAILED(hr)) _com_issue_error(hr);
+        // If your command needs arguments, use put_Arguments(toBSTR("arg1 arg2"));
+
+        // 8. Define a trigger (e.g., a time trigger)
+        hr = pTask->get_Triggers(&pTriggerCollection);
+        if (FAILED(hr)) _com_issue_error(hr);
+        _variant_t varTriggerType = TS::TASK_TRIGGER_TIME; // 1 for time trigger
+        IDispatchPtr pTriggerDisp = nullptr;
+        hr = pTriggerCollection->Add(varTriggerType, &pTriggerDisp);
+        if (FAILED(hr)) _com_issue_error(hr);
+        hr = pTriggerDisp->QueryInterface(TS::IID_ITimeTrigger, (void**)&pTimeTrigger);
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        // Set the start boundary (when the trigger becomes active)
+        // Format: YYYY-MM-DDTHH:MM:SSTZ (e.g., "2025-06-18T08:30:00")
+        QString startTime = runTime.toString("yyyy-MM-ddThh:mm:ss");
+        hr = pTimeTrigger->put_StartBoundary(toBSTR(startTime));
+        if (FAILED(hr)) _com_issue_error(hr);
+        // For a one-time trigger, usually omit put_EndBoundary or set to start boundary + epsilon.
+
+        // 9. Set task settings (optional but good practice)
+        hr = pTask->get_Settings(&pSettings);
+        if (FAILED(hr)) _com_issue_error(hr);
+        hr = pSettings->put_Enabled(VARIANT_TRUE); // Enable the task
+        if (FAILED(hr)) _com_issue_error(hr);
+        hr = pSettings->put_Hidden(VARIANT_FALSE); // Make it visible in Task Scheduler UI
+        if (FAILED(hr)) _com_issue_error(hr);
+        hr = pSettings->put_StopIfGoingOnBatteries(VARIANT_FALSE); // Don't stop on battery
+        if (FAILED(hr)) _com_issue_error(hr);
+        hr = pSettings->put_WakeToRun(VARIANT_TRUE); // Wake computer to run task
+        if (FAILED(hr)) _com_issue_error(hr);
+
+
+        // 10. Set principal (user context) - REQUIRED for creating tasks
+        hr = pTask->get_Principal(&pPrincipal);
+        if (FAILED(hr)) _com_issue_error(hr);
+        // Set to run as 'SYSTEM' or 'Interactive' for current user, 'Highest Run Level' for admin.
+        // For 'Highest Run Level' it's often best to omit put_UserId and put_LogonType.
+        // If you need a specific user, use put_UserId and put_LogonType(TASK_LOGON_PASSWORD)
+        // and register with a password.
+        hr = pPrincipal->put_LogonType(TS::TASK_LOGON_INTERACTIVE_TOKEN); // or TASK_LOGON_GROUP for System account
+        if (FAILED(hr)) _com_issue_error(hr);
+        hr = pPrincipal->put_RunLevel(TS::TASK_RUNLEVEL_HIGHEST); // This typically requires Admin rights for your app.
+        if (FAILED(hr)) _com_issue_error(hr);
+
+
+        // 11. Register the task
+        // TASK_CREATE_OR_UPDATE flag will overwrite existing task of the same name.
+        _variant_t password = _variant_t(); // No password if using SYSTEM or INTERACTIVE_TOKEN
+        TS::IRegisteredTaskPtr pRegisteredTask = nullptr; // Output registered task
+        hr = pRootFolder->RegisterTaskDefinition(
+            toBSTR(taskName),      // Task Name
+            pTask,                // Task Definition
+            TS::TASK_CREATE_OR_UPDATE, // Flags: create or update
+            _variant_t(),         // User (omit for current user or if set in principal)
+            password,             // Password (omit for current user, INTERACTIVE_TOKEN, or SYSTEM)
+            TS::TASK_LOGON_TYPE_INTERACTIVE_TOKEN, // Logon type
+            _variant_t(),         // SDDL (Security Descriptor Definition Language)
+            &pRegisteredTask      // Output: Registered task object
+            );
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        logMessage(QString("Task '%1' registered successfully.").arg(taskName));
+        return true;
+
+    } catch (const _com_error& error) {
+        logMessage(QString("COM Error during task creation: %1 (HRESULT: 0x%2)")
+                       .arg(comErrorToString(error.Error()))
+                       .arg(error.Error(), 8, 16, QChar('0').toUpper()));
+        return false;
+    } catch (...) {
+        logMessage("An unknown error occurred during task creation.");
+        return false;
+    } finally {
+        // CoUninitialize is generally only called once at app shutdown for main thread.
+        // If COM is initialized/uninitialized per-function, ensure it's balanced.
+        // CoUninitialize();
+    }
+}
+
+bool QIperfd::runScheduledTask(const QString &taskName) {
+    HRESULT hr = S_OK;
+    hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+    if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
+        logMessage(QString("CoInitializeEx failed: %1").arg(comErrorToString(hr)));
+        return false;
+    }
+
+    TS::ITaskServicePtr pService = nullptr;
+    TS::ITaskFolderPtr pRootFolder = nullptr;
+    TS::IRegisteredTaskPtr pRegisteredTask = nullptr;
+
+    try {
+        hr = pService.CreateInstance(TS::CLSID_TaskScheduler);
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        hr = pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        hr = pService->GetFolder(_bstr_t(L"\\"), &pRootFolder);
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        hr = pRootFolder->GetTask(toBSTR(taskName), &pRegisteredTask);
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        _variant_t params = _variant_t(); // No parameters for the run
+        hr = pRegisteredTask->Run(params);
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        return true;
+
+    } catch (const _com_error& error) {
+        logMessage(QString("COM Error during task run: %1 (HRESULT: 0x%2)")
+                       .arg(comErrorToString(error.Error()))
+                       .arg(error.Error(), 8, 16, QChar('0').toUpper()));
+        return false;
+    } catch (...) {
+        logMessage("An unknown error occurred during task run.");
+        return false;
+    }
+}
+
+bool QIperfd::deleteScheduledTask(const QString &taskName) {
+    HRESULT hr = S_OK;
+    hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+    if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
+        logMessage(QString("CoInitializeEx failed: %1").arg(comErrorToString(hr)));
+        return false;
+    }
+
+    TS::ITaskServicePtr pService = nullptr;
+    TS::ITaskFolderPtr pRootFolder = nullptr;
+
+    try {
+        hr = pService.CreateInstance(TS::CLSID_TaskScheduler);
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        hr = pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        hr = pService->GetFolder(_bstr_t(L"\\"), &pRootFolder);
+        if (FAILED(hr)) _com_issue_error(hr);
+
+        // Delete the task. Pass 0 for flags (no special options).
+        hr = pRootFolder->DeleteTask(toBSTR(taskName), 0);
+        if (FAILED(hr)) _com_issue_error(hr); // Will throw if task not found
+
+        return true;
+
+    } catch (const _com_error& error) {
+        // ERROR_FILE_NOT_FOUND (0x80070002) is common if the task doesn't exist
+        if (error.Error() == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
+            logMessage(QString("Task '%1' not found, nothing to delete.").arg(taskName));
+            return true; // Consider it successful deletion if it wasn't there
+        }
+        logMessage(QString("COM Error during task deletion: %1 (HRESULT: 0x%2)")
+                       .arg(comErrorToString(error.Error()))
+                       .arg(error.Error(), 8, 16, QChar('0').toUpper()));
+        return false;
+    } catch (...) {
+        logMessage("An unknown error occurred during task deletion.");
+        return false;
+    }
+}
+
 #endif
 void QIperfd::onWSactMessage(QString msg)
 {
