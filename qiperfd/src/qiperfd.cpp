@@ -855,7 +855,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         hr = pTask->get_Triggers(&pTriggerCollection);
         if (FAILED(hr)) _com_issue_error(hr);
         _variant_t varTriggerType = TASK_TRIGGER_TIME; // 1 for time trigger
-        hr = pTriggerCollection->Add(varTriggerType, &pTriggerDisp);
+        hr = pTriggerCollection->Create(varTriggerType, &pTriggerDisp);
         if (FAILED(hr)) _com_issue_error(hr);
         hr = pTriggerDisp->QueryInterface(IID_ITimeTrigger, (void**)&pTimeTrigger);
         if (FAILED(hr)) _com_issue_error(hr);
