@@ -40,7 +40,7 @@
 #pragma comment(lib, "taskschd.lib")
 //#import <taskschd.dll> // This line makes your compiler generate taskschd.tlh and taskschd.tli
 // Use a namespace alias for clarity
-namespace TS = TaskScheduler;
+//namespace TS = TaskScheduler;
 
 #endif
 

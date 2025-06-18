@@ -789,20 +789,20 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
     }
 
     // Use _com_ptr_t for automatic reference counting and error checking
-    TS::ITaskServicePtr pService = nullptr;
-    TS::ITaskFolderPtr pRootFolder = nullptr;
-    TS::ITaskDefinitionPtr pTask = nullptr;
-    TS::IRegistrationInfoPtr pRegInfo = nullptr;
-    TS::IActionCollectionPtr pActionCollection = nullptr;
-    TS::IExecActionPtr pExecAction = nullptr;
-    TS::ITriggerCollectionPtr pTriggerCollection = nullptr;
-    TS::ITimeTriggerPtr pTimeTrigger = nullptr;
-    TS::ITaskSettingsPtr pSettings = nullptr;
-    TS::IPrincipalPtr pPrincipal = nullptr;
+    ITaskServicePtr pService = nullptr;
+    ITaskFolderPtr pRootFolder = nullptr;
+    ITaskDefinitionPtr pTask = nullptr;
+    IRegistrationInfoPtr pRegInfo = nullptr;
+    IActionCollectionPtr pActionCollection = nullptr;
+    IExecActionPtr pExecAction = nullptr;
+    ITriggerCollectionPtr pTriggerCollection = nullptr;
+    ITimeTriggerPtr pTimeTrigger = nullptr;
+    ITaskSettingsPtr pSettings = nullptr;
+    IPrincipalPtr pPrincipal = nullptr;
 
     try {
         // 2. Create a TaskService instance
-        hr = pService.CreateInstance(TS::CLSID_TaskScheduler);
+        hr = pService.CreateInstance(CLSID_TaskScheduler);
         if (FAILED(hr)) _com_issue_error(hr);
 
         // 3. Connect to the Task Scheduler service
@@ -831,11 +831,11 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         // 7. Define an action (e.g., execute a program)
         hr = pTask->get_Actions(&pActionCollection);
         if (FAILED(hr)) _com_issue_error(hr);
-        _variant_t varActionType = TS::TASK_ACTION_EXEC; // 0 for exec action
+        _variant_t varActionType = TASK_ACTION_EXEC; // 0 for exec action
         IDispatchPtr pActionDisp = nullptr; // Raw IDispatch pointer for Add
         hr = pActionCollection->Add(varActionType, &pActionDisp);
         if (FAILED(hr)) _com_issue_error(hr);
-        hr = pActionDisp->QueryInterface(TS::IID_IExecAction, (void**)&pExecAction); // Query to specific interface
+        hr = pActionDisp->QueryInterface(IID_IExecAction, (void**)&pExecAction); // Query to specific interface
         if (FAILED(hr)) _com_issue_error(hr);
         // Note: IID_IExecAction needs to be defined by #import or manually
         // If it's not working, ensure your #import path is correct and taskschd.tlh is generated.
@@ -848,11 +848,11 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         // 8. Define a trigger (e.g., a time trigger)
         hr = pTask->get_Triggers(&pTriggerCollection);
         if (FAILED(hr)) _com_issue_error(hr);
-        _variant_t varTriggerType = TS::TASK_TRIGGER_TIME; // 1 for time trigger
+        _variant_t varTriggerType = TASK_TRIGGER_TIME; // 1 for time trigger
         IDispatchPtr pTriggerDisp = nullptr;
         hr = pTriggerCollection->Add(varTriggerType, &pTriggerDisp);
         if (FAILED(hr)) _com_issue_error(hr);
-        hr = pTriggerDisp->QueryInterface(TS::IID_ITimeTrigger, (void**)&pTimeTrigger);
+        hr = pTriggerDisp->QueryInterface(IID_ITimeTrigger, (void**)&pTimeTrigger);
         if (FAILED(hr)) _com_issue_error(hr);
 
         // Set the start boundary (when the trigger becomes active)
@@ -882,23 +882,23 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         // For 'Highest Run Level' it's often best to omit put_UserId and put_LogonType.
         // If you need a specific user, use put_UserId and put_LogonType(TASK_LOGON_PASSWORD)
         // and register with a password.
-        hr = pPrincipal->put_LogonType(TS::TASK_LOGON_INTERACTIVE_TOKEN); // or TASK_LOGON_GROUP for System account
+        hr = pPrincipal->put_LogonType(TASK_LOGON_INTERACTIVE_TOKEN); // or TASK_LOGON_GROUP for System account
         if (FAILED(hr)) _com_issue_error(hr);
-        hr = pPrincipal->put_RunLevel(TS::TASK_RUNLEVEL_HIGHEST); // This typically requires Admin rights for your app.
+        hr = pPrincipal->put_RunLevel(TASK_RUNLEVEL_HIGHEST); // This typically requires Admin rights for your app.
         if (FAILED(hr)) _com_issue_error(hr);
 
 
         // 11. Register the task
         // TASK_CREATE_OR_UPDATE flag will overwrite existing task of the same name.
         _variant_t password = _variant_t(); // No password if using SYSTEM or INTERACTIVE_TOKEN
-        TS::IRegisteredTaskPtr pRegisteredTask = nullptr; // Output registered task
+        IRegisteredTaskPtr pRegisteredTask = nullptr; // Output registered task
         hr = pRootFolder->RegisterTaskDefinition(
             toBSTR(taskName),      // Task Name
             pTask,                // Task Definition
-            TS::TASK_CREATE_OR_UPDATE, // Flags: create or update
+            TASK_CREATE_OR_UPDATE, // Flags: create or update
             _variant_t(),         // User (omit for current user or if set in principal)
             password,             // Password (omit for current user, INTERACTIVE_TOKEN, or SYSTEM)
-            TS::TASK_LOGON_TYPE_INTERACTIVE_TOKEN, // Logon type
+            TASK_LOGON_TYPE_INTERACTIVE_TOKEN, // Logon type
             _variant_t(),         // SDDL (Security Descriptor Definition Language)
             &pRegisteredTask      // Output: Registered task object
             );
@@ -930,12 +930,12 @@ bool QIperfd::runScheduledTask(const QString &taskName) {
         return false;
     }
 
-    TS::ITaskServicePtr pService = nullptr;
-    TS::ITaskFolderPtr pRootFolder = nullptr;
-    TS::IRegisteredTaskPtr pRegisteredTask = nullptr;
+    ITaskServicePtr pService = nullptr;
+    ITaskFolderPtr pRootFolder = nullptr;
+    IRegisteredTaskPtr pRegisteredTask = nullptr;
 
     try {
-        hr = pService.CreateInstance(TS::CLSID_TaskScheduler);
+        hr = pService.CreateInstance(CLSID_TaskScheduler);
         if (FAILED(hr)) _com_issue_error(hr);
 
         hr = pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
@@ -972,11 +972,11 @@ bool QIperfd::deleteScheduledTask(const QString &taskName) {
         return false;
     }
 
-    TS::ITaskServicePtr pService = nullptr;
-    TS::ITaskFolderPtr pRootFolder = nullptr;
+    ITaskServicePtr pService = nullptr;
+    ITaskFolderPtr pRootFolder = nullptr;
 
     try {
-        hr = pService.CreateInstance(TS::CLSID_TaskScheduler);
+        hr = pService.CreateInstance(CLSID_TaskScheduler);
         if (FAILED(hr)) _com_issue_error(hr);
 
         hr = pService->Connect(_variant_t(), _variant_t(), _variant_t(), _variant_t());
