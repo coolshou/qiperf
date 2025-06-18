@@ -802,7 +802,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
 
     try {
         // 2. Create a TaskService instance
-        hr = pService.CreateInstance(CLSID_TaskScheduler);
+        hr = pService->CreateInstance(CLSID_TaskScheduler);
         if (FAILED(hr)) _com_issue_error(hr);
 
         // 3. Connect to the Task Scheduler service
