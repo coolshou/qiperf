@@ -789,6 +789,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
     }
 
     // Use _com_ptr_t for automatic reference counting and error checking
+    // Use raw COM interface pointers
     ITaskService* pService = nullptr;
     ITaskFolder* pRootFolder = nullptr;
     ITaskDefinition* pTask = nullptr;
@@ -799,10 +800,16 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
     ITimeTrigger* pTimeTrigger = nullptr;
     ITaskSettings* pSettings = nullptr;
     IPrincipal* pPrincipal = nullptr;
+    IDispatch* pActionDisp = nullptr;        // Fixed: was IDispatchPtr
+    IDispatch* pTriggerDisp = nullptr;       // Fixed: added this
+    IRegisteredTask* pRegisteredTask = nullptr; // Fixed: was IRegisteredTaskPtr
 
     try {
         // 2. Create a TaskService instance
-        hr = pService->CreateInstance(CLSID_TaskScheduler);
+        // hr = pService->CreateInstance(CLSID_TaskScheduler);
+        // Create instance:
+        hr = CoCreateInstance(CLSID_TaskScheduler, NULL, CLSCTX_INPROC_SERVER,
+                              IID_ITaskService, (void**)&pService);
         if (FAILED(hr)) _com_issue_error(hr);
 
         // 3. Connect to the Task Scheduler service
@@ -832,7 +839,6 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         hr = pTask->get_Actions(&pActionCollection);
         if (FAILED(hr)) _com_issue_error(hr);
         _variant_t varActionType = TASK_ACTION_EXEC; // 0 for exec action
-        IDispatchPtr pActionDisp = nullptr; // Raw IDispatch pointer for Add
         hr = pActionCollection->Add(varActionType, &pActionDisp);
         if (FAILED(hr)) _com_issue_error(hr);
         hr = pActionDisp->QueryInterface(IID_IExecAction, (void**)&pExecAction); // Query to specific interface
@@ -849,7 +855,6 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         hr = pTask->get_Triggers(&pTriggerCollection);
         if (FAILED(hr)) _com_issue_error(hr);
         _variant_t varTriggerType = TASK_TRIGGER_TIME; // 1 for time trigger
-        IDispatchPtr pTriggerDisp = nullptr;
         hr = pTriggerCollection->Add(varTriggerType, &pTriggerDisp);
         if (FAILED(hr)) _com_issue_error(hr);
         hr = pTriggerDisp->QueryInterface(IID_ITimeTrigger, (void**)&pTimeTrigger);
@@ -891,7 +896,6 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         // 11. Register the task
         // TASK_CREATE_OR_UPDATE flag will overwrite existing task of the same name.
         _variant_t password = _variant_t(); // No password if using SYSTEM or INTERACTIVE_TOKEN
-        IRegisteredTaskPtr pRegisteredTask = nullptr; // Output registered task
         hr = pRootFolder->RegisterTaskDefinition(
             toBSTR(taskName),      // Task Name
             pTask,                // Task Definition
@@ -905,21 +909,64 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         if (FAILED(hr)) _com_issue_error(hr);
 
         qDebug() << QString("Task '%1' registered successfully.").arg(taskName);
+        // Cleanup resources
+        if (pRegisteredTask) pRegisteredTask->Release();
+        if (pTriggerDisp) pTriggerDisp->Release();
+        if (pActionDisp) pActionDisp->Release();
+        if (pPrincipal) pPrincipal->Release();
+        if (pSettings) pSettings->Release();
+        if (pTimeTrigger) pTimeTrigger->Release();
+        if (pTriggerCollection) pTriggerCollection->Release();
+        if (pExecAction) pExecAction->Release();
+        if (pActionCollection) pActionCollection->Release();
+        if (pRegInfo) pRegInfo->Release();
+        if (pTask) pTask->Release();
+        if (pRootFolder) pRootFolder->Release();
+        if (pService) pService->Release();
         return true;
 
     } catch (const _com_error& error) {
         qDebug() << QString("COM Error during task creation: %1 (HRESULT: 0x%2)")
                        .arg(comErrorToString(error.Error()))
                        .arg(error.Error(), 8, 16, QChar('0').toUpper());
+        // Cleanup on error
+        if (pRegisteredTask) pRegisteredTask->Release();
+        if (pTriggerDisp) pTriggerDisp->Release();
+        if (pActionDisp) pActionDisp->Release();
+        if (pPrincipal) pPrincipal->Release();
+        if (pSettings) pSettings->Release();
+        if (pTimeTrigger) pTimeTrigger->Release();
+        if (pTriggerCollection) pTriggerCollection->Release();
+        if (pExecAction) pExecAction->Release();
+        if (pActionCollection) pActionCollection->Release();
+        if (pRegInfo) pRegInfo->Release();
+        if (pTask) pTask->Release();
+        if (pRootFolder) pRootFolder->Release();
+        if (pService) pService->Release();
         return false;
     } catch (...) {
         qDebug() << "An unknown error occurred during task creation.";
+        // Cleanup on error
+        if (pRegisteredTask) pRegisteredTask->Release();
+        if (pTriggerDisp) pTriggerDisp->Release();
+        if (pActionDisp) pActionDisp->Release();
+        if (pPrincipal) pPrincipal->Release();
+        if (pSettings) pSettings->Release();
+        if (pTimeTrigger) pTimeTrigger->Release();
+        if (pTriggerCollection) pTriggerCollection->Release();
+        if (pExecAction) pExecAction->Release();
+        if (pActionCollection) pActionCollection->Release();
+        if (pRegInfo) pRegInfo->Release();
+        if (pTask) pTask->Release();
+        if (pRootFolder) pRootFolder->Release();
+        if (pService) pService->Release();
         return false;
-    } finally {
-        // CoUninitialize is generally only called once at app shutdown for main thread.
-        // If COM is initialized/uninitialized per-function, ensure it's balanced.
-        // CoUninitialize();
     }
+    //    finally {
+    //     // CoUninitialize is generally only called once at app shutdown for main thread.
+    //     // If COM is initialized/uninitialized per-function, ensure it's balanced.
+    //     // CoUninitialize();
+    // }
 }
 
 bool QIperfd::runScheduledTask(const QString &taskName) {
