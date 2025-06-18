@@ -31,6 +31,16 @@
 #include "wsserver.h"
 #endif
 
+#if defined(Q_OS_WIN32)
+#include <comdef.h> // For _bstr_t, _variant_t, _com_ptr_t
+// Important: Import the Task Scheduler type library
+// This generates C++ classes and smart pointers for the COM interfaces
+#import <taskschd.dll> // This line makes your compiler generate taskschd.tlh and taskschd.tli
+// Use a namespace alias for clarity
+namespace TS = TaskScheduler;
+
+#endif
+
 #include "../lib/ntp/ntpserver.h"
 // #include "../lib/ntp/ntpsync.h"
 
