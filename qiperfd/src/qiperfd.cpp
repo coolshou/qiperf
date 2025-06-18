@@ -886,7 +886,9 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         // For 'Highest Run Level' it's often best to omit put_UserId and put_LogonType.
         // If you need a specific user, use put_UserId and put_LogonType(TASK_LOGON_PASSWORD)
         // and register with a password.
-        hr = pPrincipal->put_LogonType(TASK_LOGON_INTERACTIVE_TOKEN); // or TASK_LOGON_GROUP for System account
+        hr = pPrincipal->put_UserId(_bstr_t(L"SYSTEM"));
+        if (FAILED(hr)) _com_issue_error(hr);
+        hr = pPrincipal->put_LogonType(TASK_LOGON_SERVICE_ACCOUNT);
         if (FAILED(hr)) _com_issue_error(hr);
         hr = pPrincipal->put_RunLevel(TASK_RUNLEVEL_HIGHEST); // This typically requires Admin rights for your app.
         if (FAILED(hr)) _com_issue_error(hr);
@@ -899,10 +901,10 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
             toBSTR(taskName),      // Task Name
             pTask,                // Task Definition
             TASK_CREATE_OR_UPDATE, // Flags: create or update
-            _variant_t(),         // User (omit for current user or if set in principal)
-            password,             // Password (omit for current user, INTERACTIVE_TOKEN, or SYSTEM)
-            TASK_LOGON_INTERACTIVE_TOKEN, // Logon type
-            _variant_t(),         // SDDL (Security Descriptor Definition Language)
+            _variant_t(),           // No user specified
+            _variant_t(),           // No password
+            TASK_LOGON_NONE,        // ✅ Change this to TASK_LOGON_NONE
+            _variant_t(),           // No SDDL
             &pRegisteredTask      // Output: Registered task object
             );
         if (FAILED(hr)) _com_issue_error(hr);
