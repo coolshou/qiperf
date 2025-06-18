@@ -784,7 +784,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
     // However, for a GUI app, it's often initialized once at app start.
     hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED); // Or COINIT_MULTITHREADED
     if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
-        logMessage(QString("CoInitializeEx failed: %1").arg(comErrorToString(hr)));
+        qDebug() << QString("CoInitializeEx failed: %1").arg(comErrorToString(hr));
         return false;
     }
 
@@ -904,16 +904,16 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
             );
         if (FAILED(hr)) _com_issue_error(hr);
 
-        logMessage(QString("Task '%1' registered successfully.").arg(taskName));
+        qDebug() << QString("Task '%1' registered successfully.").arg(taskName);
         return true;
 
     } catch (const _com_error& error) {
-        logMessage(QString("COM Error during task creation: %1 (HRESULT: 0x%2)")
+        qDebug() << QString("COM Error during task creation: %1 (HRESULT: 0x%2)")
                        .arg(comErrorToString(error.Error()))
-                       .arg(error.Error(), 8, 16, QChar('0').toUpper()));
+                       .arg(error.Error(), 8, 16, QChar('0').toUpper());
         return false;
     } catch (...) {
-        logMessage("An unknown error occurred during task creation.");
+        qDebug() << "An unknown error occurred during task creation.";
         return false;
     } finally {
         // CoUninitialize is generally only called once at app shutdown for main thread.
@@ -926,7 +926,7 @@ bool QIperfd::runScheduledTask(const QString &taskName) {
     HRESULT hr = S_OK;
     hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
-        logMessage(QString("CoInitializeEx failed: %1").arg(comErrorToString(hr)));
+        qDebug() << QString("CoInitializeEx failed: %1").arg(comErrorToString(hr));
         return false;
     }
 
@@ -954,12 +954,12 @@ bool QIperfd::runScheduledTask(const QString &taskName) {
         return true;
 
     } catch (const _com_error& error) {
-        logMessage(QString("COM Error during task run: %1 (HRESULT: 0x%2)")
+        qDebug() << QString("COM Error during task run: %1 (HRESULT: 0x%2)")
                        .arg(comErrorToString(error.Error()))
-                       .arg(error.Error(), 8, 16, QChar('0').toUpper()));
+                       .arg(error.Error(), 8, 16, QChar('0').toUpper());
         return false;
     } catch (...) {
-        logMessage("An unknown error occurred during task run.");
+        qDebug() << "An unknown error occurred during task run.";
         return false;
     }
 }
@@ -968,7 +968,7 @@ bool QIperfd::deleteScheduledTask(const QString &taskName) {
     HRESULT hr = S_OK;
     hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
-        logMessage(QString("CoInitializeEx failed: %1").arg(comErrorToString(hr)));
+        qDebug() << QString("CoInitializeEx failed: %1").arg(comErrorToString(hr));
         return false;
     }
 
@@ -994,15 +994,15 @@ bool QIperfd::deleteScheduledTask(const QString &taskName) {
     } catch (const _com_error& error) {
         // ERROR_FILE_NOT_FOUND (0x80070002) is common if the task doesn't exist
         if (error.Error() == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
-            logMessage(QString("Task '%1' not found, nothing to delete.").arg(taskName));
+            qDebug() << QString("Task '%1' not found, nothing to delete.").arg(taskName);
             return true; // Consider it successful deletion if it wasn't there
         }
-        logMessage(QString("COM Error during task deletion: %1 (HRESULT: 0x%2)")
+        qDebug() << QString("COM Error during task deletion: %1 (HRESULT: 0x%2)")
                        .arg(comErrorToString(error.Error()))
-                       .arg(error.Error(), 8, 16, QChar('0').toUpper()));
+                       .arg(error.Error(), 8, 16, QChar('0').toUpper());
         return false;
     } catch (...) {
-        logMessage("An unknown error occurred during task deletion.");
+        qDebug() << "An unknown error occurred during task deletion.";
         return false;
     }
 }
