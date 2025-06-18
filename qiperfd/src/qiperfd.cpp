@@ -800,9 +800,9 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
     ITimeTrigger* pTimeTrigger = nullptr;
     ITaskSettings* pSettings = nullptr;
     IPrincipal* pPrincipal = nullptr;
-    IDispatch* pActionDisp = nullptr;        // Fixed: was IDispatchPtr
-    IDispatch* pTriggerDisp = nullptr;       // Fixed: added this
     IRegisteredTask* pRegisteredTask = nullptr; // Fixed: was IRegisteredTaskPtr
+    IAction* pAction = nullptr;
+    ITrigger* pTrigger = nullptr;
 
     try {
         // 2. Create a TaskService instance
@@ -838,7 +838,6 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         // 7. Define an action (e.g., execute a program)
         hr = pTask->get_Actions(&pActionCollection);
         if (FAILED(hr)) _com_issue_error(hr);
-        IAction* pAction = nullptr;
         hr = pActionCollection->Create(TASK_ACTION_EXEC, &pAction);
         if (FAILED(hr)) _com_issue_error(hr);
         hr = pAction->QueryInterface(IID_IExecAction, (void**)&pExecAction); // Query to specific interface
@@ -854,9 +853,10 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         // 8. Define a trigger (e.g., a time trigger)
         hr = pTask->get_Triggers(&pTriggerCollection);
         if (FAILED(hr)) _com_issue_error(hr);
-        hr = pTriggerCollection->Create(TASK_TRIGGER_TIME, &pTriggerDisp);
+        // Use ITrigger* instead of IDispatch*
+        hr = pTriggerCollection->Create(TASK_TRIGGER_TIME, &pTrigger);
         if (FAILED(hr)) _com_issue_error(hr);
-        hr = pTriggerDisp->QueryInterface(IID_ITimeTrigger, (void**)&pTimeTrigger);
+        hr = pTrigger->QueryInterface(IID_ITimeTrigger, (void**)&pTimeTrigger);
         if (FAILED(hr)) _com_issue_error(hr);
 
         // Set the start boundary (when the trigger becomes active)
@@ -910,7 +910,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         qDebug() << QString("Task '%1' registered successfully.").arg(taskName);
         // Cleanup resources
         if (pRegisteredTask) pRegisteredTask->Release();
-        if (pTriggerDisp) pTriggerDisp->Release();
+        if (pTrigger) pTrigger->Release();
         if (pAction) pAction->Release();
         if (pPrincipal) pPrincipal->Release();
         if (pSettings) pSettings->Release();
@@ -930,8 +930,8 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
                        .arg(error.Error(), 8, 16, QChar('0').toUpper());
         // Cleanup on error
         if (pRegisteredTask) pRegisteredTask->Release();
-        if (pTriggerDisp) pTriggerDisp->Release();
-        if (pActionDisp) pActionDisp->Release();
+        if (pTrigger) pTrigger->Release();
+        if (pAction) pAction->Release();
         if (pPrincipal) pPrincipal->Release();
         if (pSettings) pSettings->Release();
         if (pTimeTrigger) pTimeTrigger->Release();
@@ -947,8 +947,8 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         qDebug() << "An unknown error occurred during task creation.";
         // Cleanup on error
         if (pRegisteredTask) pRegisteredTask->Release();
-        if (pTriggerDisp) pTriggerDisp->Release();
-        if (pActionDisp) pActionDisp->Release();
+        if (pTrigger) pTrigger->Release();
+        if (pAction) pAction->Release();
         if (pPrincipal) pPrincipal->Release();
         if (pSettings) pSettings->Release();
         if (pTimeTrigger) pTimeTrigger->Release();
