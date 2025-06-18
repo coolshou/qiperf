@@ -36,7 +36,9 @@
 // Important: Import the Task Scheduler type library
 // This generates C++ classes and smart pointers for the COM interfaces
 #include <taskschd.h>
-#import <taskschd.dll> // This line makes your compiler generate taskschd.tlh and taskschd.tli
+#include <comdef.h>
+#pragma comment(lib, "taskschd.lib")
+//#import <taskschd.dll> // This line makes your compiler generate taskschd.tlh and taskschd.tli
 // Use a namespace alias for clarity
 namespace TS = TaskScheduler;
 
