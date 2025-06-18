@@ -838,8 +838,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         // 7. Define an action (e.g., execute a program)
         hr = pTask->get_Actions(&pActionCollection);
         if (FAILED(hr)) _com_issue_error(hr);
-        _variant_t varActionType = TASK_ACTION_EXEC; // 0 for exec action
-        hr = pActionCollection->Create(varActionType, &pActionDisp);
+        hr = pActionCollection->Create(TASK_ACTION_EXEC, &pActionDisp);
         if (FAILED(hr)) _com_issue_error(hr);
         hr = pActionDisp->QueryInterface(IID_IExecAction, (void**)&pExecAction); // Query to specific interface
         if (FAILED(hr)) _com_issue_error(hr);
@@ -854,8 +853,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         // 8. Define a trigger (e.g., a time trigger)
         hr = pTask->get_Triggers(&pTriggerCollection);
         if (FAILED(hr)) _com_issue_error(hr);
-        _variant_t varTriggerType = TASK_TRIGGER_TIME; // 1 for time trigger
-        hr = pTriggerCollection->Create(varTriggerType, &pTriggerDisp);
+        hr = pTriggerCollection->Create(TASK_TRIGGER_TIME, &pTriggerDisp);
         if (FAILED(hr)) _com_issue_error(hr);
         hr = pTriggerDisp->QueryInterface(IID_ITimeTrigger, (void**)&pTimeTrigger);
         if (FAILED(hr)) _com_issue_error(hr);
