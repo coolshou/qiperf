@@ -680,19 +680,15 @@ void QIperfd::doRestartQIperfd()
 #elif defined(Q_OS_WINDOWS)
     QString taskName = "startqiperfd";
     // Set task to run 1 sec from now
-    QDateTime runTime = QDateTime::currentDateTime().addSecs(1);
+    QDateTime runTime = QDateTime::currentDateTime().addSecs(3);
     //nssm.exe restart "qiperfd"
-    QString taskCommand = "\"" + m_nssm + "\" restart qiperfd ";
-    if (createScheduledTask(taskName, taskCommand, runTime)) {
+    QString taskCommand = "\"" + m_nssm + "\"";
+    QString taskArgs = "restart qiperfd"
+    if (createScheduledTask(taskName, taskCommand, taskArgs, runTime)) {
         qDebug() << "Task created successfully.";
     } else {
         qDebug() << "Failed to create task.";
     }
-    // if (createSchedule("startqiperfd", cmd, 5)){
-    //     qApp->quit();
-    // }else{
-    //     qDebug() << "createSchedule Fail";
-    // }
 #else
     qDebug() << "do Restart QIperfd for system :" << QSysInfo::productType();
 #endif
@@ -734,34 +730,6 @@ void QIperfd::onSSHTaskError(QString idx, QString errormsg)
 }
 
 #if defined(Q_OS_WINDOWS)
-bool QIperfd::createSchedule(QString name, QString cmd, int idelay)
-{
-    // create a windows Schedule task
-    QString program = "schtasks";
-    // Get the current time and add one second
-    QDateTime currentTime = QDateTime::currentDateTime().addSecs(idelay);
-    QString startTime = currentTime.toString("HH:mm:ss");
-
-    QStringList arguments;
-    arguments << " /Create "
-              << " /SC " << "ONCE"
-              << " /TN " << name
-              << " /TR " << cmd
-              << " /ST " << startTime
-              << " /F ";
-    QProcess process;
-    process.setProcessChannelMode(QProcess::MergedChannels);
-    qDebug() << "createSchedule cmd: " << program << " " << arguments;
-    process.startDetached(program, arguments);
-    if (!process.waitForStarted(5000)){
-        qDebug() << "start schtasks '" << program << " " << arguments.join(" ") << "' Fail or timeout" << Qt::endl
-                 << "(" << process.readAll() << ")";
-        return false;
-    }else{
-        return true;
-    }
-
-}
 QString QIperfd::comErrorToString(HRESULT hr) {
     _com_error err(hr);
     LPCTSTR errMsg = err.ErrorMessage();
@@ -775,7 +743,7 @@ _bstr_t toBSTR(const QString& s) {
     return _bstr_t(s.toStdWString().c_str());
 }
 
-bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCommand, const QDateTime &runTime) {
+bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCommand, const QString &taskArgs, const QDateTime &runTime) {
     HRESULT hr = S_OK;
 
     // 1. Initialize COM
@@ -832,7 +800,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         if (FAILED(hr)) _com_issue_error(hr);
         hr = pRegInfo->put_Author(toBSTR(QString("QtApp (%1)").arg(QCoreApplication::applicationName())));
         if (FAILED(hr)) _com_issue_error(hr);
-        hr = pRegInfo->put_Description(toBSTR(QString("Task created by Qt application API for testing '%1'").arg(taskCommand)));
+        hr = pRegInfo->put_Description(toBSTR(QString("Task created by %1 for testing '%2'").arg(QCoreApplication::applicationName(), taskCommand)));
         if (FAILED(hr)) _com_issue_error(hr);
 
         // 7. Define an action (e.g., execute a program)
@@ -849,6 +817,8 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         hr = pExecAction->put_Path(toBSTR(taskCommand));
         if (FAILED(hr)) _com_issue_error(hr);
         // If your command needs arguments, use put_Arguments(toBSTR("arg1 arg2"));
+        hr = pExecAction->put_Arguments(toBSTR(taskArgs));
+        if (FAILED(hr)) _com_issue_error(hr);
 
         // 8. Define a trigger (e.g., a time trigger)
         hr = pTask->get_Triggers(&pTriggerCollection);

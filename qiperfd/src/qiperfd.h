@@ -123,9 +123,8 @@ private:
     // QString getIperf21ver();
     // void getIperfVersion();
 #if defined(Q_OS_WINDOWS)
-    bool createSchedule(QString name, QString cmd, int idelay);
     // Helper function to create a task using COM API
-    bool createScheduledTask(const QString &taskName, const QString &taskCommand, const QDateTime &runTime);
+    bool createScheduledTask(const QString &taskName, const QString &taskCommand, const QString &taskArgs, const QDateTime &runTime);
     bool runScheduledTask(const QString &taskName);
     bool deleteScheduledTask(const QString &taskName);
 
