@@ -6,7 +6,7 @@ docker build -t ubuntu-qt5:22.04 -f Dockerfile.ubuntu22.04 .
 docker run --name ubuntu2204-qt5  -it \
     --rm \
     --network host \
-    -v /home/jimmy/SOFT/work/qiperf:/media/qiperf \
+    -v /home/jimmy/SOFT/work/qiperf22.04:/media/qiperf \
     ubuntu-qt5:22.04 /bin/bash
 
 
