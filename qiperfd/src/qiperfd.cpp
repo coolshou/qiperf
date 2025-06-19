@@ -683,7 +683,7 @@ void QIperfd::doRestartQIperfd()
     QDateTime runTime = QDateTime::currentDateTime().addSecs(3);
     //nssm.exe restart "qiperfd"
     QString taskCommand = "\"" + m_nssm + "\"";
-    QString taskArgs = "restart qiperfd"
+    QString taskArgs = "restart qiperfd";
     if (createScheduledTask(taskName, taskCommand, taskArgs, runTime)) {
         qDebug() << "Task created successfully.";
     } else {
