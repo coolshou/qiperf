@@ -6,8 +6,10 @@ machine_arch=$(uname -m)
 if [ "$machine_arch" = "x86_64" ]; then
 export QT_SELECT=qt6
 BUILDPACKAGES+=" qiperfc"
+cp -f qiperfc/debian/control.qt6 qiperfc/debian/control
 else
 export QT_SELECT=qt5
+cp -f qiperfc/debian/control.qt5 qiperfc/debian/control
 fi
 
 rm -f *.buildinfo *.changes *.deb
