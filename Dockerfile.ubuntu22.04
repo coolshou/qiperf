@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsystemd-dev \
     freeglut3-dev \
     libopengl-dev \
-    git cmake python3
+    git cmake python3 freeglut3-dev
 
 # 可以根據你的套件需求安裝額外的依賴項
 # 例如：
