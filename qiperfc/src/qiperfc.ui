@@ -460,7 +460,7 @@
      <normaloff>:/iperf3</normaloff>:/iperf3</iconset>
    </property>
    <property name="text">
-    <string>Iperf3 log(TODO)</string>
+    <string>Iperf3 log</string>
    </property>
   </action>
   <action name="actionShowDebugLog">
