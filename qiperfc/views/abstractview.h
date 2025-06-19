@@ -2,6 +2,7 @@
 #define ABSTRACTVIEW_H
 
 #include <QWidget>
+#include <QDebug>
 
 class QSettings;
 
