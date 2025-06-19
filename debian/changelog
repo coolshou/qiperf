@@ -1,3 +1,9 @@
+qiperf (0.12.11406.19-1) unstable; urgency=medium
+
+  * Add: qiperfd support remote restart qiperfd by qiperfc
+
+ -- coolshou <coolshou2060@gmail.com>  Thu, 19 Jun 2025 10:00:00 +0800
+
 qiperf (0.12.11406.17-1) unstable; urgency=medium
 
   * Fix memory leak of CodeEditor
