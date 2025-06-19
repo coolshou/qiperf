@@ -2,6 +2,8 @@
 #define FORMQIPERFDS_H
 
 #include <QWidget>
+#include <QMenu>
+#include <QAction>
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
 
@@ -20,10 +22,16 @@ public:
     void setColumnWidth(int column, int width);
 protected:
     void changeEvent(QEvent *e);
-
+private slots:
+    void onContextMenu(QPoint pos);
+    void onRestart(bool checked);
+    void askRestart(QString target);
 private:
+    void initMenu();
     Ui::FormQIperfds *ui;
     QSortFilterProxyModel *proxyModel;
+    QMenu *m_menu;
+    QAction *m_restartAction;
 };
 
 #endif // FORMQIPERFDS_H

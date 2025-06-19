@@ -1239,6 +1239,8 @@ void QIperfd::onWSactMessage(QString msg)
         }else{
             qDebug() << " Wrong format of delete ssh: " << msg;
         }
+    }else if (act.startsWith(CMD_QIPERFD_RESTART)){
+        restartQIperfd();
     }else {
         qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;
         qDebug() << "\n==========";
