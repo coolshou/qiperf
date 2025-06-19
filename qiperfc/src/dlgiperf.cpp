@@ -46,7 +46,7 @@ DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
 //            this,&DlgIperf::onSelectMServer);
     connect(ui->cb_mserver_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMServer);
     connect(ui->cb_mclient_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMClient);
-    connect(ui->sb_duration, &QSpinBox::valueChanged, this, &DlgIperf::onDurationValueChanged);
+    connect(ui->sb_duration, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &DlgIperf::onDurationValueChanged);
 // lbDuration
     // connect(ui->sb_mss, &QSpinBox::valueChanged, this, &DlgIperf::onMSSvalueChanged); //TODO: Not good for UI interaction
 
