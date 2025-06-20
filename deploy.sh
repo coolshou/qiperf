@@ -20,11 +20,11 @@ WDESTFILES+=(qiperf-setup-${WINVERSION}.exe)
 UPDATE_LINUX=1
 declare -a IPS=()
 #IPS+=("192.168.70.11")
-IPS+=("192.168.70.13")
+#IPS+=("192.168.70.13")
 IPS+=("192.168.70.14")
 #IPS+=("192.168.70.12")
 #IPS+=("192.168.70.23")
-#IPS+=("192.168.70.24")
+IPS+=("192.168.70.24")
 #IPS+=("192.168.70.135")
 #IPS+=("192.168.70.31")
 #IPS+=("192.168.70.32")
@@ -86,8 +86,6 @@ if [ "x$?" == "x0" ]; then
             for DESTFILE in "${DESTFILES[@]}"
             do
                 echo "================================================================================"
-                echo "===== ssh ${USERNAME}@${IP} rm /home/test/${DESTFILE}"
-                ssh ${USERNAME}@${IP} rm /home/test/${DESTFILE} > /dev/null
                 echo "===== scp ${DESTFILE} ${USERNAME}@${IP}:/home/test/${DESTFILE}"
                 scp ${DESTFILE} ${USERNAME}@${IP}:/home/test/${DESTFILE} > /dev/null 2>&1
                 if [ $? == 0 ]; then
