@@ -47,8 +47,8 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
         if (reverse){
             args = args + " -R";
         }
-        uint duration = jsondata["duration"].toUInt();
-        if (duration){
+        int duration = jsondata["duration"].toInt();
+        if (duration>=0){
             args = args + " -t " + QString::number(duration);
         }
         bool zerocopy = jsondata["zerocopy"].toBool();
@@ -147,8 +147,8 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
         if (reverse){
             args = args + " -R ";
         }
-        uint duration = jsondata["duration"].toUInt();
-        if (duration){
+        int duration = jsondata["duration"].toInt();
+        if (duration>=0){
             args = args + " -t " + QString::number(duration);
         }
         // bool zerocopy = jsondata["zerocopy"].toBool();
