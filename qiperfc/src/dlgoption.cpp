@@ -44,6 +44,12 @@ void dlgOption::loadcfg(QSettings *cfg)
     ui->sb_width_tp->setValue(cfg->value("TPExportWidth", 1280).toInt());
     ui->sb_heigth_tp->setValue(cfg->value("TPExportHeigth", 500).toInt());
     ui->cb_TPGroup->setChecked(cfg->value("TPGroup", false).toBool());
+    // ui->gbTPGroup->
+    ui->rbTPGroupAll->setChecked(cfg->value("TPGroupAll", false).toBool());
+    ui->rbTPGroupEach->setChecked(cfg->value("TPGroupEach", false).toBool());
+    ui->rbTPGroupDirection->setChecked(cfg->value("TPGroupDirection", false).toBool());
+    ui->rbTPGroupComment->setChecked(cfg->value("TPGroupComment", false).toBool());
+
     midx = ui->cb_TPUnit->findText(cfg->value("TPUnit", "Mbits/sec").toString());
     if (midx>=0){
         ui->cb_TPUnit->setCurrentIndex(midx);
@@ -91,6 +97,11 @@ void dlgOption::updatecfg()
     m_cfg->setValue("TPExportWidth", ui->sb_width_tp->value());
     m_cfg->setValue("TPExportHeigth", ui->sb_heigth_tp->value());
     m_cfg->setValue("TPGroup", ui->cb_TPGroup->isChecked());
+    m_cfg->setValue("TPGroupAll", ui->rbTPGroupAll->isChecked());
+    m_cfg->setValue("TPGroupEach", ui->rbTPGroupEach->isChecked());
+    m_cfg->setValue("TPGroupDirection", ui->rbTPGroupDirection->isChecked());
+    m_cfg->setValue("TPGroupComment", ui->rbTPGroupComment->isChecked());
+
     m_cfg->setValue("TPUnit", ui->cb_TPUnit->currentText());
     m_cfg->setValue("IgnoreWrongInterval", ui->cb_IgnoreWrongInterval->isChecked());
     m_cfg->endGroup();
