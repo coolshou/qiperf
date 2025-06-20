@@ -77,7 +77,7 @@ void FormQIperfds::onRestart(bool checked)
 
 void FormQIperfds::askRestart(QString target)
 {
-    qDebug() << "askRestart:" << target;
+    qDebug() << "Ask qiperfd Restart:" << target;
     QString url = "ws://"+target+":"+QString::number(QIPERFD_WSPORT);
     WSClient wsc= WSClient(target, QUrl(url), "");
     int timeout=0;
