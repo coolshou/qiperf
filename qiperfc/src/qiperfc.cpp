@@ -477,14 +477,15 @@ void QIperfC::onStart(bool showNotice)
                 }
                 //tell server add iperf server
                 cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
-                qInfo() << "server cmd:" << serverIP << " CMD_IPERF_ADD:" << tp->getServer() << ":" << tp->getPort();
-                // qInfo() << "server cmd: "<< cmd ;
+                qInfo() << "server cmd:" << serverIP << " => " << cmd;
                 rs = m_wss[serverIP]->sendText(cmd);
                 if (rs<=0){
                     emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
                     break;
                 }
-                m_status_server[tp->getBindKey(true)]=TPStatus::init; // init server of BindKey status 0
+                QString skey = tp->getBindKey(true);
+                qDebug() << "skey:" << skey;
+                m_status_server[skey]=TPStatus::init; // init server of BindKey status 0
                 //###### client ######
 
                 //RPC to control all client endpoint (iperf client)
@@ -534,13 +535,15 @@ void QIperfC::onStart(bool showNotice)
                 }
                 //tell client add iperf client
                 cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
-                qInfo() << "client cmd:" << clientIP << " CMD_IPERF_ADD:" << tp->getClient() << ":" << tp->getPort();
+                qInfo() << "client cmd:" << clientIP << " => " << cmd;
                 rs = m_wsc[clientIP]->sendText(cmd);
                 if (rs<=0){
                     emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
                     break;
                 }
-                m_status_client[tp->getBindKey(false)]=TPStatus::init;// init client of BindKey status 0
+                QString ckey =tp->getBindKey(false);
+                qDebug() << "ckey:" << ckey;
+                m_status_client[ckey]=TPStatus::init;// init client of BindKey status 0
             } else {
                 // qInfo() << "Ignore disabled TP test pair: " << tp;
             }

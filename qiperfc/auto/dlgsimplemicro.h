@@ -36,7 +36,7 @@ signals:
     void loadfile(QString idx, QString filename, QString savepath);
     void reportTP(int idx, double tp, double lostrate);
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
     void initRightMenu();
 private slots:
     void showContextMenu(const QPoint &pos);

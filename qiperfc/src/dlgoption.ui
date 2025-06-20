@@ -195,7 +195,7 @@
           <item>
            <widget class="QRadioButton" name="rbTPGroupAll">
             <property name="text">
-             <string>Group All</string>
+             <string>Group Total</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -212,7 +212,7 @@
           <item>
            <widget class="QRadioButton" name="rbTPGroupDirection">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Group by direction</string>
