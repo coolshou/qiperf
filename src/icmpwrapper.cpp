@@ -491,7 +491,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
 #else
                            IPV6_RECVPKTINFO,
 #endif
-                           (char *)&opt_value,
+                           reinterpret_cast<char *>(&opt_value),
                            sizeof(opt_value));
         if (error != 0) {
             psockerror("setsockopt");
@@ -523,8 +523,8 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
      */
     inet_ntop(addr.ss_family,
               addr.ss_family == AF_INET6
-                  ? (void *)&((struct sockaddr_in6 *)&addr)->sin6_addr
-                  : (void *)&((struct sockaddr_in *)&addr)->sin_addr,
+                  ? reinterpret_cast<void *>(&(reinterpret_cast<struct sockaddr_in6 *>(&addr)->sin6_addr))
+                  : reinterpret_cast<void *>(&(reinterpret_cast<struct sockaddr_in *>(&addr)->sin_addr)),
               addr_str,
               sizeof(addr_str));
 
@@ -564,18 +564,18 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
 
             request_packet.ip6_hdr.src = in6addr_loopback;
             request_packet.ip6_hdr.dst =
-                ((struct sockaddr_in6 *)&addr)->sin6_addr;
-            request_packet.ip6_hdr.plen = htons((uint16_t)ICMP_HEADER_LENGTH);
+                (reinterpret_cast<struct sockaddr_in6 *>(&addr)->sin6_addr);
+            request_packet.ip6_hdr.plen = htons(static_cast<uint16_t>(ICMP_HEADER_LENGTH));
             request_packet.ip6_hdr.nxt = IPPROTO_ICMPV6;
             request_packet.icmp = request;
 
-            request.icmp_cksum = compute_checksum((char *)&request_packet,
+            request.icmp_cksum = compute_checksum(reinterpret_cast<char *>(&request_packet),
                                                    sizeof(request_packet));
             // request->checksum = compute_checksum((char *)&request_packet,
             //                                       sizeof(request_packet));
         } else {
-            request.icmp_cksum = compute_checksum((char *)&request,
-                                                  sizeof(request)+ icmp_payload_size);
+            request.icmp_cksum = compute_checksum(reinterpret_cast<char *>(&request),
+                                                  sizeof(request)+ static_cast<ulong>(icmp_payload_size));
             // request->checksum = compute_checksum((char *)&request,
             //                                       sizeof(request)+ icmp_payload_size);
         }
@@ -596,12 +596,12 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
         //     }
         // }
 //        qDebug() << "sendto:" << QString::number(seq);
-        error = (int)sendto(sockfd,
-                            (char *)&request,
-                            sizeof(request)+ icmp_payload_size,
-                            0,
-                            (struct sockaddr *)&addr,
-                            (int)dst_addr_len);
+        error = static_cast<int>(sendto(sockfd,
+                                reinterpret_cast<char *>(&request),
+                                sizeof(request)+ static_cast<ulong>(icmp_payload_size),
+                                0,
+                                reinterpret_cast<struct sockaddr *>(&addr),
+                                static_cast<uint>(dst_addr_len)));
         if (error < 0) {
             psockerror("sendto");
             qDebug() << "sendto error:";
@@ -614,7 +614,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
             char msg_buf[MESSAGE_BUFFER_SIZE];
             char packet_info_buf[MESSAGE_BUFFER_SIZE];
-            struct in6_addr msg_addr = {{0}};
+            struct in6_addr msg_addr{};// = {{0}};
 #ifdef _WIN32
             WSABUF msg_buf_struct = {
                 sizeof(msg_buf),
@@ -656,7 +656,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
 #ifdef _WIN32
             error = WSARecvMsg(sockfd, &msg, &msg_len, NULL, NULL);
 #else
-            error = (int)recvmsg(sockfd, &msg, 0);
+            error = static_cast<int>(recvmsg(sockfd, &msg, 0));
 #endif
 
             delay = utime() - start_time;
@@ -686,7 +686,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
             }
 
 #ifndef _WIN32
-            msg_len = error;
+            msg_len = static_cast<ulong>(error);
 #endif
 
             if (addr.ss_family == AF_INET6) {
@@ -707,7 +707,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
                 {
                     if (cmsg->cmsg_level == IPPROTO_IPV6
                         && cmsg->cmsg_type == IPV6_PKTINFO) {
-                        struct in6_pktinfo *pktinfo = (struct in6_pktinfo *)CMSG_DATA(cmsg);
+                        struct in6_pktinfo *pktinfo = reinterpret_cast<struct in6_pktinfo *>(CMSG_DATA(cmsg));
                         memcpy(&msg_addr,
                                &pktinfo->ipi6_addr,
                                sizeof(struct in6_addr));
@@ -724,7 +724,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
                 ip_hdr_len = ((*(uint8_t *)msg_buf) & 0x0F) * 4;
             }
 
-            reply = (struct icmp *)(msg_buf + ip_hdr_len);
+            reply = reinterpret_cast<struct icmp *>(msg_buf + ip_hdr_len);
             reply_id = ntohs(reply->icmp_id);
             reply_seq = ntohs(reply->icmp_seq);
 
@@ -754,7 +754,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
              */
             if (addr.ss_family == AF_INET6) {
                 size_t size = sizeof(struct ip6_pseudo_hdr) + msg_len;
-                struct icmp6_packet *reply_packet = (struct icmp6_packet *)calloc(1, size);
+                struct icmp6_packet *reply_packet = reinterpret_cast<struct icmp6_packet *>(calloc(1, size));
 
                 if (reply_packet == NULL) {
                     psockerror("malloc");
@@ -763,7 +763,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
                 }
 
                 memcpy(&reply_packet->ip6_hdr.src,
-                       &((struct sockaddr_in6 *)&addr)->sin6_addr,
+                       &(reinterpret_cast<struct sockaddr_in6 *>(&addr)->sin6_addr),
                        sizeof(struct in6_addr));
                 reply_packet->ip6_hdr.dst = msg_addr;
                 reply_packet->ip6_hdr.plen = htons((uint16_t)msg_len);
@@ -831,7 +831,7 @@ if (ip_version == IP_V4){
 
     packet.append(reinterpret_cast<const char*>(&icmp_hdr), sizeof(icmp_hdr));
     if (m_packetsize>0){
-        int appendsize = m_packetsize - 14 - 20 - 8;  // MAC: 14, IP:20, ICMP:8
+        uint appendsize = m_packetsize - 14 - 20 - 8;  // MAC: 14, IP:20, ICMP:8
         if (appendsize>0){
             qDebug() << "TODO: append size:" << appendsize;
             QString str(appendsize, 'A');
@@ -841,7 +841,7 @@ if (ip_version == IP_V4){
     }
 
 
-    icmp_hdr.checksum = calculateChecksum(packet.data(), packet.size());
+    icmp_hdr.checksum = calculateChecksum(packet.data(), static_cast<int>(packet.size()));
 
     memcpy(packet.data(), &icmp_hdr, sizeof(icmp_hdr));  // Update the checksum in the packet
 
@@ -882,7 +882,7 @@ unsigned short IcmpWrapper::calculateChecksum(void *b, int len) {
 
 void IcmpWrapper::current_time(const char *timestempformat) {
     Q_UNUSED(timestempformat) // TODO: custom timestemp format
-    time_t rawtime= time(nullptr);;
+    time_t rawtime= time(nullptr);
     char buffer[80];
 
 #ifdef _WIN32

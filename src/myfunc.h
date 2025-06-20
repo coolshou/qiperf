@@ -22,7 +22,7 @@ public:
     // explicit MyFunc(QObject *parent = nullptr);
     static bool isValidIpAddress(const QString &ip, int &protocal);
     static QString formatUnit(QString val);
-    static QString secToHumanReadable(int seconds);
+    static QString secToHumanReadable(long long seconds);
     static TimeComponents secondsToComponents(int totalSeconds);
 };
 

@@ -63,12 +63,12 @@ public:
     QString getInterfaceAddr(QString ifname);
     QString getManagerInterface();
     QString getIfNameByHumanReadableName(QString name);
-    int add(QString refrow, int version,QString m_cmd,QString args, uint port,
+    qint64 add(QString refrow, int version,QString m_cmd,QString args, uint port,
             QString bndaddr="0.0.0.0", QString target="",
             QString parallel="0", QString protocal="TCP",
             bool bidir=false, bool reverse=false, int interval=1,
             int delaytime=0);
-    int add(QString refrow, QVariantMap jsondata);
+    qint64 add(QString refrow, QVariantMap jsondata);
     void del(int idx);
     int addIperfServer(QString refrow, int version, uint port, QString bindHost="");
     int addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs);
@@ -155,8 +155,8 @@ private:
     QString m_iperfexe22ver; //iperf2.2 version
     QString m_iperfexe3; //iperf3
     QString m_iperfexe3ver; //iperf3 version
-    QMap<int, IperfWorker*> m_iperfworkers;
-    QMap<int, QThread*> m_threads; // iperfworker's thread
+    QMap<qint64, IperfWorker*> m_iperfworkers;
+    QMap<qint64, QThread*> m_threads; // iperfworker's thread
 //    QList<IperfWorker*> m_iperfworkers;
 //    QList<QThread*> m_threads;
     QString mgr_ifname; //manager interface name

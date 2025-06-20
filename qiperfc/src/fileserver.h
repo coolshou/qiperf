@@ -18,7 +18,7 @@ public:
     explicit FileServer(quint16 port, QObject *parent = nullptr);
     void setRootPath(QString pathname);
     void close();
-    int getSockets();
+    qint64 getSockets();
 
 public slots:
     void slotReceive(QTcpSocket *socket);

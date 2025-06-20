@@ -17,7 +17,7 @@
 #include <QDebug>
 #include "../src/comm.h"
 
-IperfWorker::IperfWorker(int idx, int version, QString cmd, QString arg,
+IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
                          uint port, QString bindaddr, QString target,
                          bool bidir, bool reverse, int interval,
                          int delaystart,

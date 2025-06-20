@@ -19,7 +19,7 @@ class IperfWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit IperfWorker(int idx, int version, QString cmd, QString arg="-s",
+    explicit IperfWorker(qint64 idx, int version, QString cmd, QString arg="-s",
                          uint port=5201, QString bindaddr="0.0.0.0", QString target="",
                          bool bidir=false, bool reverse=false, int interval=1,
                          int delaystart=0,
@@ -61,7 +61,7 @@ private:
     int m_selfdestructionTime;
     QTimer *m_selfdestruction;
     int m_refrow;// refrow
-    int m_idx;
+    qint64 m_idx;
     int m_version; // iperf version 2 or 3
     QString m_cmd; //iperf exec full path
     uint m_port;  //iperf port

@@ -474,7 +474,7 @@ void IperfWrapper::parserIperf3(QString linedata)
         }else{
     //        qDebug() << "parserIperf3: " << linedata;
             QString sDir = nullptr;
-            int iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
+            qint64 iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
             QString idx = linedata.mid(1,iS-1).trimmed();  // extract [ idx]
             linedata = linedata.right(linedata.length()-iS-1);
             QString sTag="";
@@ -601,9 +601,9 @@ void IperfWrapper::parserIperf3(QString linedata)
         }
     }catch (const std::exception &e) {
         // Handle the exception and show an error message
-        qDebug() << "IperfWorker::work Exception Caught" << e.what();
+        qDebug() << "IperfWrapper::parserIperf3 Exception Caught" << e.what();
     }catch (...){
-        qDebug() << "IperfWorker::work Unknown ERROR";
+        qDebug() << "IperfWrapper::parserIperf3 Unknown ERROR";
     }
 }
 

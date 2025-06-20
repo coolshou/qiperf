@@ -220,14 +220,14 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
     return ifname;
 }
 
-int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint port,
+qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint port,
                  QString bndaddr, QString target,
                  QString parallel, QString protocal, bool bidir, bool reverse,
                  int interval, int delaytime)
 { // add a IperfWorker to run iperf server/client
     // TODO: check host/port used?
     QThread *iperf_th = new QThread();
-    int idx = m_threads.count();
+    qint64 idx = m_threads.count();
     m_threads.insert(idx, iperf_th);
     //    m_threads.append(iperf_th);
     //    int idx = m_threads.count()-1;
@@ -255,7 +255,7 @@ int QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint 
     return idx;
 }
 
-int QIperfd::add(QString refrow, QVariantMap jsondata)
+qint64 QIperfd::add(QString refrow, QVariantMap jsondata)
 {
     int ver = jsondata["version"].toInt();
     QString cmd;

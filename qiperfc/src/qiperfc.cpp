@@ -55,7 +55,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
         // qDebug() << "create path: " << m_logpath;
         logdir.mkpath(".");
     }
-    connect(this, &QIperfC::testStarted, this, &QIperfC::onTestStarted);
+    // connect(this, &QIperfC::testStarted, this, &QIperfC::onTestStarted);
     connect(this, &QIperfC::testStoped, this, &QIperfC::onTestStoped);
     ui->actionPaste->setShortcutContext(Qt::WidgetShortcut);
     m_throughputview = new ThroughputView(ui->actionCopy, ui->actionPaste,
@@ -86,7 +86,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     initToolbar();
     updateRunStatus(false);
     // initPingChart();
-    connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
+    // connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
 
     iTimeout = 10*1000;//10sec
     //
@@ -357,320 +357,36 @@ bool QIperfC::on_Clear(bool showNotice)
     return onClear(showNotice);
 }
 
-void QIperfC::initStart()
-{
-    bUserStop = false;
-    emit testStarted();
-    ui->actionShowLog->setEnabled(true);
-    ui->actionSave->setEnabled(true);
-    resetError();
-    //TODO: clear old test record!!
-    m_status_server.clear();
-    m_status_client.clear();
-}
 void QIperfC::onStart(bool showNotice)
 {
     if (!onClear(showNotice)){
         return;
     }
-    initStart();
-    m_TestStartTime = QDateTime::currentDateTime();
-    m_throughputview->setStartTime(m_TestStartTime);
-    QString startTime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
-    m_datapath = m_logpath + QDir::separator() + startTime;
-    QDir d(m_datapath);
-    if (!d.exists()){
-        d.mkpath(".");
-    }
-    // qDebug() << "QIperfC::onStart(): m_datapath" << m_datapath;
-    m_fileserver->setRootPath(m_datapath);
-
-    emit updateStarttime(startTime);
     if (m_throughputview->rootChildCount()>0) {
-        updateRunStatus(true);
-        //start test
         // list of throughput test pair
         QList<TP *> tps = m_throughputview->getChilds();
-        QString s; // websocket url
-        QString cmd;
-        QString err;
-        qint64 rs=0;
-        int maxtestduration=0; // max wait test time
-        int maxInterval=0; // max Interval time
-        int iwait=0;
-        int iomit=0;
-        int idelaytime=0;
-        int itimeout;
-        int refrow;
-        bool isRunforever=false;
-        foreach (TP *tp, tps) {
-            // QCoreApplication::processEvents(QEventLoop::AllEvents);
-            if (tp->getEnabled()){
-                if (tp->getInterval()> maxInterval){
-                    maxInterval = tp->getInterval();
-                }
-                //RPC to control all server endpoint (iperf server)
-                isRunforever = isRunforever | tp->getRunforever();
-                // qDebug() << "isRunforever: " << isRunforever;
-                int testduration=0;
-                iwait = tp->getWaitTime();
-                if (iwait> testduration){
-                    testduration = iwait+iExtraWait;
-                }
-                iomit = tp->getOmitTime();
-                testduration = testduration + iomit;
-                idelaytime = tp->getDelaytime();
-                if (idelaytime>0) {
-                    testduration = testduration + idelaytime;
-                }
-                if (testduration> maxtestduration){
-                    maxtestduration = testduration;
-                }
-                refrow = tp->row();
-                qDebug() << tp << "refrow:" << QString::number(refrow) << " maxtestduration:" << QString::number(maxtestduration);
-                QString serverIP = tp->getMgrServer();
-                //TODO: detect manager server is pingable
-                if (!m_wss.contains(serverIP)) {
-                    //TODO: can not work with interface with DHCP under Windows??
-                    s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
-                    qInfo() << "server websocket:" << serverIP << " url: " << s << " m_datapath:" << m_datapath;
-                    m_wss[serverIP]=new WSClient(serverIP, QUrl(s), m_datapath);
-                    connect(m_wss[serverIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
-                    connect(m_wss[serverIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
-                    connect(m_wss[serverIP], &WSClient::disconnected, this, &QIperfC::onServerDisconnected);
-                    connect(m_wss[serverIP], &WSClient::iperfTPdata, m_throughputview, &ThroughputView::onIperfTPdata);
-                }else{
-                    qInfo() << "m_wss exist:" << serverIP;
-                    m_wss[serverIP]->setDatapath(m_datapath);
-                }
-                itimeout = iTimeout;
-                while (itimeout>0 && (bErrorStop==0)&& (bUserStop==false)){
-                    QThread::msleep(10);
-                    QCoreApplication::processEvents(QEventLoop::AllEvents);
-                    //m_wss.contains(serverIP) && ! m_wss[serverIP]->isConnected() &&
-                    if (m_wss.contains(serverIP)){
-                        if (m_wss.value(serverIP)->isConnected()){
-                            break;
-                        }
-                    }else{
-                        bErrorStop = 1;
-                        err = "ERROR: websocket "+serverIP+" not connected";
-                        tp->setComment(err);
-                        emit errorStop(2, err);
-                        break;
-                    }
-                    itimeout--;
-                    emit updateStatus(" wait WSClient connect to server: "+ s +
-                                      " ("+ QString::number(itimeout) +")");
-                }
-                if (itimeout<=0){
-                    emit errorStop(1,"ERROR: Wait connect to websocket " +s+ " timeout");
-                    break;
-                }
-                if(bErrorStop>0){
-                    emit errorStop(3, "Unknown error happen!!("+QString::number(bErrorStop)+")");
-                    return;
-                }
-                if(bUserStop){
-                    qDebug() << "User Stop on wait server websocket connected!!";
-                    return;
-                }
-                //tell server add iperf server
-                cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
-                qInfo() << "server cmd:" << serverIP << " => " << cmd;
-                rs = m_wss[serverIP]->sendText(cmd);
-                if (rs<=0){
-                    emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
-                    break;
-                }
-                QString skey = tp->getBindKey(true);
-                qDebug() << "skey:" << skey;
-                m_status_server[skey]=TPStatus::init; // init server of BindKey status 0
-                //###### client ######
+        qDebug() << "onStart tps:" << tps;
+        m_tpworker = new TpWorker(m_logpath, tps);
+        connect(m_tpworker, &TpWorker::testStarted, this, &QIperfC::onTestStarted);
+        connect(m_tpworker, &TpWorker::testStoped,this,  &QIperfC::onTestStoped);
+        connect(m_tpworker, &TpWorker::updateDatapath, this, &QIperfC::onUpdateDataPath);
+        connect(m_tpworker, &TpWorker::updateStarttime, this, &QIperfC::onUpdateStarttime);
+        connect(m_tpworker, &TpWorker::updateRunStatus, this, &QIperfC::onUpdateRunStatus);
+        connect(m_tpworker, &TpWorker::updateStatus, this,  &QIperfC::onUpdateStatus);
+        connect(m_tpworker, &TpWorker::errorStop, this, &QIperfC::onErrorStop);
+        connect(m_tpworker, &TpWorker::updateComment, m_throughputview, &ThroughputView::addComment);
+        connect(m_tpworker, &TpWorker::iperfTPdata, m_throughputview, &ThroughputView::onIperfTPdata);
+        connect(m_tpworker, &TpWorker::setEndTime, m_throughputview, &ThroughputView::setXRangeUpper);
+        connect(m_tpworker, &TpWorker::debuginfo, this, &QIperfC::onDebuginfo);
+        connect(this, &QIperfC::setTPStop, m_tpworker, &TpWorker::onSetStop);
 
-                //RPC to control all client endpoint (iperf client)
-                QString clientIP = tp->getMgrClient();
-                //TODO: detect manager client is pingable
-                if (!m_wsc.contains(clientIP)) {
-                    s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
-                    qInfo() << "client websocket:" << clientIP << " url: " << s << " m_datapath:" << m_datapath;
-                    m_wsc[clientIP]=new WSClient(clientIP, QUrl(s), m_datapath);
-                    connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &QIperfC::onIperfStarted);
-                    connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &QIperfC::onIperfStoped);
-                    connect(m_wsc[clientIP], &WSClient::disconnected, this, &QIperfC::onClientDisconnected);
-                    connect(m_wsc[clientIP], &WSClient::iperfTPdata, m_throughputview, &ThroughputView::onIperfTPdata);
-                }else{
-                    qInfo() << "m_wsc exist:" << clientIP;
-                    m_wsc[clientIP]->setDatapath(m_datapath);
-                }
-                itimeout = iTimeout;
-                while (! m_wsc[clientIP]->isConnected()&& itimeout>0&& (bErrorStop==0)&& (bUserStop==false)){
-                    QThread::msleep(10);
-                    QCoreApplication::processEvents(QEventLoop::AllEvents);
-                    if (m_wsc.contains(clientIP)){
-                        if (m_wsc.value(clientIP)->isConnected()){
-                            break;
-                        }
-                    }else{
-                        bErrorStop = 1;
-                        err = "ERROR: websocket "+clientIP+" not connected";
-                        tp->setComment(err);
-                        emit errorStop(2, err);
-                        break;
-                    }
-                    itimeout--;
-                    emit updateStatus(" wait WSClient connect to client: "+s);
-                }
-                if (itimeout<=0){
-                    emit errorStop(1,"ERROR: Wait connect to " +s+ "timeout");
-                    break;
-                }
-                if(bErrorStop>0){
-                    emit errorStop(3, "Unknown error happen!!("+QString::number(bErrorStop)+")");
-                    return;
-                }
-                if(bUserStop){
-                    qDebug() << "User Stop on wait client websocket connected!!";
-                    return;
-                }
-                //tell client add iperf client
-                cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
-                qInfo() << "client cmd:" << clientIP << " => " << cmd;
-                rs = m_wsc[clientIP]->sendText(cmd);
-                if (rs<=0){
-                    emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
-                    break;
-                }
-                QString ckey =tp->getBindKey(false);
-                qDebug() << "ckey:" << ckey;
-                m_status_client[ckey]=TPStatus::init;// init client of BindKey status 0
-            } else {
-                // qInfo() << "Ignore disabled TP test pair: " << tp;
-            }
+        m_tpthread = new QThread();
+        connect(m_tpthread, &QThread::started, m_tpworker, &TpWorker::work);
+        connect(m_tpthread, &QThread::finished, m_tpthread, &QThread::deleteLater);
+        connect(m_tpthread, &QThread::finished, m_tpworker, &TpWorker::deleteLater);
+        m_tpworker->moveToThread(m_tpthread);
+        m_tpthread->start();
 
-        }
-        //TODO: record which should report iperf throughput value
-        // TODO: list of ping test
-        // qDebug() << "maxtestduration:" << QString::number(maxtestduration);
-        // qDebug() << "maxInterval:" << QString::number(maxInterval);
-        emit updateInterval(maxInterval);
-        if(bErrorStop>0){
-            emit errorStop(4, "Unknown error happen!!("+QString::number(bErrorStop)+")");
-            return;
-        }
-        //Start server
-        for (auto key: m_wss.keys()){
-            // QCoreApplication::processEvents(QEventLoop::AllEvents);
-            qInfo() << "Let Server " << key << " CMD_IPERF_START " << startTime;
-            rs = m_wss[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
-            if (rs<=0){
-                emit errorStop(3, "Start iperf server fail:" + key);
-                break;
-            }
-        }
-        if(bErrorStop>0){
-            qDebug() << "Start server error happen!!";
-            return;
-        }
-        //###############################
-        QThread::sleep(5); // wait 5 sec
-        //TODO: wait server start up and ready
-        QDateTime oldDT = QDateTime::currentDateTime();
-        QDateTime newDT;
-        qint64 iwaittime;
-        int chk=0;
-        bool bServerReady=false;
-        while (!bServerReady && (bUserStop==false)){ //TODO: timeout!!!
-            QThread::sleep(1);
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
-            chk=0;
-            foreach(auto skey, m_status_server.keys()){
-                // QCoreApplication::processEvents(QEventLoop::AllEvents);
-                if (m_status_server.value(skey, 0)==TPStatus::started){
-                    chk++;
-                }
-            }
-            if (chk>=m_status_server.keys().count()){
-                bServerReady=true;
-            }
-            newDT = QDateTime::currentDateTime();
-            iwaittime = m_WaitServerReady - oldDT.secsTo(newDT);
-            emit updateStatus(" wait server ready: "+ QString::number(chk)+ "/"+
-                              QString::number(m_status_server.keys().length())+
-                              ":"+ QString::number(iwaittime));
-
-            //            if (oldDT.secsTo(newDT)>m_WaitServerReady){
-            if (iwaittime<0){
-                qDebug() << "wait server ready timeout " << QString::number(m_WaitServerReady);
-                // timeout
-                break;
-            }
-        }
-        if(bUserStop){
-            err = "User Stop on wait ServerReady!!";
-            emit updateStatus(err);
-            return;
-        }
-        if (!bServerReady){
-            QStringList ds;
-            foreach (auto key, m_status_server.keys()){
-                if (m_status_server[key]!=TPStatus::started){
-                    ds.append(key);
-                }
-                // QCoreApplication::processEvents(QEventLoop::AllEvents);
-            }
-            qDebug() << "server not readey: " << ds.join(",");
-            emit errorStop(4, "Iperf server not readey:" +  ds.join(","));
-            return;
-        }
-        //Start client
-        for (auto key: m_wsc.keys()){
-            // QCoreApplication::processEvents(QEventLoop::AllEvents);
-            qInfo() << "Let Client " << key << " CMD_IPERF_START " << startTime;
-            rs = m_wsc[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
-            if (rs<=0){
-                emit errorStop(4, "Start iperf client fail:" + key);
-                break;
-            }
-        }
-        if(bErrorStop>0){
-            qDebug() << "Start client error happen!!";
-            return;
-        }
-        QDateTime waitStartTime = QDateTime::currentDateTime();
-        QDateTime waitEndTime = QDateTime::currentDateTime();
-        qint64 iWait = waitStartTime.secsTo(waitEndTime);
-        while (((iWait < maxtestduration) || isRunforever) && (bUserStop==false)){
-            if ((getStatusServers()>m_status_server.keys().length()) ||
-                (getStatusClients()>m_status_client.keys().length())) {
-                qDebug() << "Some problem happen!! abort!! server:" << m_status_server <<
-                    " client:" << m_status_client;
-                break;
-            }else if(getStatusServers()==0 && getStatusClients()==0) {
-                //qDebug() << "All test end, stop early";
-                break;
-            }
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
-            QThread::msleep(100);
-            waitEndTime = QDateTime::currentDateTime();
-            if (isRunforever){
-                emit updateStatus("Runtime "+  QString::number(iWait) + " sec"
-                                  + "("+MyFunc::secToHumanReadable(iWait)+")");
-            }else{
-                emit updateStatus("Remain "+ QString::number(maxtestduration-iWait) + " sec");
-            }
-
-            iWait = waitStartTime.secsTo(waitEndTime);
-        }
-        qDebug() << "iWait:" << QString::number(iWait) << "/" << QString::number(maxtestduration)
-                 << " isRunforever:" << isRunforever << " bUserStop:" << bUserStop;
-        onStop();
-
-        // qDebug() << "iWait:" << QString::number(iWait)
-        //          << "maxtestduration: " <<  QString::number(maxtestduration);
-        // // if (!isRunforever){
-        // //     emit setEndTime(maxtestduration-iExtraWait);
-        // // }
     } else {
         QMessageBox::information(this,"NOTICE", "Plase add iperf test pair first!", QMessageBox::Ok);
         emit testStoped(-1);
@@ -678,42 +394,7 @@ void QIperfC::onStart(bool showNotice)
 }
 
 void QIperfC::onStop(){
-    QString cmd="";
-    // Stop reg iperf client
-    foreach (auto key, m_wsc.keys()){
-        if (m_wsc[key]){
-            cmd = QString(CMD_IPERF_STOP)+":" + key;
-            qInfo() << m_wsc[key] << " m_wsc send cmd: " << cmd;
-            m_wsc[key]->sendText(cmd);
-            m_wsc[key]->close();
-        }
-        // QCoreApplication::processEvents(QEventLoop::AllEvents);
-    }
-    QThread::sleep(1);
-    // Stop reg iperf server
-    foreach (auto key, m_wss.keys()){
-        if (m_wss[key]){
-            cmd = QString(CMD_IPERF_STOP)+":" + key;
-            qInfo() << m_wss[key] <<  "m_wss send cmd: " << cmd;
-            m_wss[key]->sendText(cmd);
-            m_wss[key]->close();
-        }
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
-    }
-    bUserStop=true;
-    if (m_fileserver->getSockets()>0){
-        m_fileserver->close();
-    }
-    // bStartTest = false;
-    // updateRunStatus(false);
-    emit testStoped(0);
-    QString endtime = getNowString();
-    QDateTime enddatetime = QDateTime::fromString(endtime,DATETIME_NOW_FORMAT);
-    //TODO: error end message?
-    qInfo() << "m_status_server:" << m_status_server << " m_status_client:" << m_status_client;
-    double consumetime = m_TestStartTime.secsTo(enddatetime);
-    emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(consumetime)+" sec)");
-    emit setEndTime(consumetime); //update x-axis max value
+    emit setTPStop();
 }
 
 bool QIperfC::onClear(bool showNotice){
@@ -814,10 +495,15 @@ void QIperfC::onErrorStop(int err, QString msg)
     bErrorStop = err;
     m_ErrorMSG = msg;
     qDebug() << "onErrorStop: (" <<bErrorStop <<") " << m_ErrorMSG;
-    emit updateStarttime("");
+    emit updateStarttime(QDateTime());
     emit updateStatus(msg);
     updateRunStatus(false);
     emit testStoped(bErrorStop);
+}
+
+void QIperfC::onDebuginfo(QString msg)
+{
+    qDebug() << msg;
 }
 
 void QIperfC::onNotice(QString send_addr, QString msg)
@@ -877,31 +563,6 @@ void QIperfC::setStartTime(QDateTime startTime)
     m_TestStartTime = startTime;
 }
 
-void QIperfC::onTest()
-{ // test cmd
-    QString strJson;
-#if (TEST_ICMP==1)
-    if (dp->exec()== QDialog::Accepted){
-        strJson = dp->getJsonstr();
-        qDebug() << "strJson:" << strJson;
-        m_icmpping = new IcmpPing("0", strJson, nullptr);
-    } else{
-        m_icmpping = new IcmpPing("0", "192.168.0.1", 10, 3, 1, 64, "192.168.0.47", 64, nullptr);
-    }
-//    connect(m_icmpping, &IcmpPing::icmpResponseTime, this, );
-    m_icmpping->start();
-#endif
-    if (0){
-        // test remote ping
-
-        QString s = "ws://192.168.70.147:"+QString::number(QIPERFD_WSPORT);
-        ws= new WSClient("192.168.70.147", QUrl(s), m_datapath);
-        QString cmd = QString(CMD_PING)+":"+QString::number(0)+":"+strJson;
-        qDebug() << "onTest cmd:" << cmd;
-        ws->sendText(cmd);
-    }
-}
-
 void QIperfC::onTestStarted()
 {
     updateRunStatus(true);
@@ -915,6 +576,11 @@ void QIperfC::onTestStoped(int err)
     }else{
         qDebug() << "onTestStoped: no error";
     }
+
+    qDebug() << "Do we need to close m_fileserver?? m_fileserver sockets:" << QString::number(m_fileserver->getSockets());
+    // if (m_fileserver->getSockets()>0){
+    //     m_fileserver->close();
+    // }
 }
 
 void QIperfC::onCopy()
@@ -1143,7 +809,7 @@ void QIperfC::doClear()
     // m_tpplot->setStartTime(m_TestStartTime);
     m_qipconfig->clear();
     emit updateStatus("");
-    emit updateStarttime("");
+    emit updateStarttime(QDateTime());
     ui->actionShowLog->setEnabled(false);
 }
 
@@ -1421,63 +1087,11 @@ void QIperfC::onRPC_error(int code, const QString &message)
     qDebug() << "onRPC_error: (" << code << ")" << message;
 }
 
-void QIperfC::onIperfStarted(QString smode, QString ipport)
-{
-    qInfo() << "onIperfStarted:" << smode << " : " << ipport;
-    if (smode.contains("S", Qt::CaseSensitive)){
-        m_status_server[ipport]=TPStatus::started;
-    }else{
-        m_status_client[ipport]=TPStatus::started;
-    }
-}
-
-void QIperfC::onIperfStoped(QString refrow, QString err_no, QString err, QString ipport)
-{
-    qDebug() << "onIperfStoped:" << refrow << " bind key: " << ipport <<
-        " err_no:" << err_no << " err:" << err;
-    if (err_no.toInt()>0){
-        m_throughputview->addComment(refrow, "["+ ipport +"]Error:" +err);
-        if (m_status_server.contains(ipport)){
-            m_status_server[ipport]=TPStatus::stoped;
-        }
-        if (m_status_client.contains(ipport)){
-            m_status_client[ipport]=TPStatus::stoped;
-        }
-//        emit errorStop(2, "onIperfStoped: ["+ipport+"]("+err_no+"):"+err);
-    }else{
-
-        // qiperf notify no error end:
-        if (m_status_server.contains(ipport)){
-            // qDebug() << "m_status_server[" << ipport << "]: " << m_status_server[ipport];
-            m_status_server[ipport]=TPStatus::init;
-        }
-        if (m_status_client.contains(ipport)){
-            // qDebug() << "m_status_client[" << ipport << "]: " << m_status_client[ipport];
-            m_status_client[ipport]=TPStatus::init;
-        }
-    }
-}
-
-void QIperfC::onServerDisconnected(QString targetip)
-{
-    qDebug() << "onServerDisconnected: " << targetip;
-    if (m_wss.contains(targetip)){
-        m_wss.remove(targetip);
-    }
-}
-
-void QIperfC::onClientDisconnected(QString targetip)
-{
-    // qDebug() << "onClientDisconnected: " << targetip;
-    if (m_wsc.contains(targetip)){
-        m_wsc.remove(targetip);
-    }
-}
-
 void QIperfC::onUpdateDataPath(QString datapath)
 {
     m_datapath = datapath;
     m_dlgrecord->setRootPath(datapath);
+    m_fileserver->setRootPath(datapath);
     ui->actionShowLog->setEnabled(true);
 }
 
@@ -1488,26 +1102,6 @@ void QIperfC::onProgress(QString filename, int currentlineno)
     }else{
         onUpdateStatus("");
     }
-}
-
-int QIperfC::getStatusServers()
-{
-    int sum = 0;
-    // for (auto value : std::as_const(m_status_server)) {
-    for (auto value : m_status_server) {
-        sum += value;
-    }
-    return sum;
-}
-
-int QIperfC::getStatusClients()
-{
-    int sum = 0;
-    // for (auto value : std::as_const(m_status_client)) {
-    for (auto value : m_status_client) {
-        sum += value;
-    }
-    return sum;
 }
 
 void QIperfC::onAddSerial()
@@ -1679,7 +1273,7 @@ void QIperfC::initActions()
     connect(ui->actionAbout, &QAction::triggered, this, &QIperfC::onAbout);
     connect(ui->actionShowDebugLog, &QAction::triggered, this, &QIperfC::onShowDebugLog);
     //test
-    connect(ui->actionTest, &QAction::triggered, this, &QIperfC::onTest);
+    // connect(ui->actionTest, &QAction::triggered, this, &QIperfC::onTest);
 
 }
 
@@ -1704,7 +1298,7 @@ void QIperfC::initStatusbar()
     m_status_label = new QLabel();
     m_status_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
     ui->statusbar->addWidget(m_status_label, 2);
-    connect(this , &QIperfC::updateStatus, this,  &QIperfC::onUpdateStatus);
+    // connect(this , &QIperfC::updateStatus, this,  &QIperfC::onUpdateStatus);
 
     // statusbar of endpints
     m_label_qiperfd = new QLabel(this);
@@ -1718,14 +1312,20 @@ void QIperfC::initStatusbar()
     connect(this , &QIperfC::updateEndpointNum, this, &QIperfC::on_updateQIperfdNum);
 }
 
-void QIperfC::onUpdateStarttime(QString stime)
+void QIperfC::onUpdateStarttime(QDateTime stime)
 {
-    m_start_label->setText(stime);
+    m_throughputview->setStartTime(stime);
+    m_start_label->setText(stime.toString(DATETIME_NOW_FORMAT));
 }
 
 void QIperfC::onUpdateStatus(QString msg)
 {
     m_status_label->setText(msg);
+}
+
+void QIperfC::onUpdateRunStatus(bool bStart)
+{
+    updateRunStatus(bStart);
 }
 
 void QIperfC::onUpdateActions(bool bStart, bool bStop, bool bClear)

@@ -143,6 +143,7 @@ SOURCES += \
     src/tpmgr.cpp \
     src/tpdirdelegate.cpp \
     src/tpplot.cpp \
+    src/tpworker.cpp \
     src/udpreceiver.cpp \
     src/wsclient.cpp \
     src/tooltipeventfilter.cpp \
@@ -223,6 +224,8 @@ HEADERS += \
     src/tpmgr.h \
     src/tpdirdelegate.h \
     src/tpplot.h \
+    src/tpstatus.h \
+    src/tpworker.h \
     src/udpreceiver.h \
     src/wsclient.h \
     src/tooltipeventfilter.h \

@@ -53,7 +53,7 @@ void FileServer::close()
     m_filesocks.clear();
 }
 
-int FileServer::getSockets()
+qint64 FileServer::getSockets()
 {
     return m_filesocks.length();
 }

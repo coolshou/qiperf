@@ -61,7 +61,7 @@ QString MyFunc::formatUnit(QString val)
     return rs;
 }
 
-QString MyFunc::secToHumanReadable(int seconds)
+QString MyFunc::secToHumanReadable(long long seconds)
 {
     // Handle negative numbers
     if (seconds < 0) {
@@ -72,7 +72,7 @@ QString MyFunc::secToHumanReadable(int seconds)
     if (seconds == 0) {
         return "0 seconds";
     }
-    TimeComponents tcompon = secondsToComponents(seconds);
+    TimeComponents tcompon = secondsToComponents((int)seconds);
     QString result= QString("%1 day, %2 hour, %3 min, %4 sec")
                          .arg(QString::number(tcompon.days),
                               QString::number(tcompon.hours),

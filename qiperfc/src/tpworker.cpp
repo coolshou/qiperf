@@ -1,0 +1,463 @@
+#include "tpworker.h"
+
+#include "comm.h"
+#include <QDir>
+#include <QThread>
+#include <QCoreApplication>
+#include <QEventLoop>
+
+#include "tpstatus.h"
+#include "myfunc.h"
+
+TpWorker::TpWorker(QString logpath, QList<TP *> &tps, int wstimeout,
+                   int extrawait, int waitserverready,
+                   QObject *parent)
+    : QObject{parent}, m_logpath(logpath), m_tps(tps), iWSTimeout(wstimeout),
+    iExtraWait(extrawait), m_WaitServerReady(waitserverready)
+{}
+
+TpWorker::~TpWorker()
+{
+
+}
+
+void TpWorker::work()
+{
+    initStart();
+    m_TestStartTime = QDateTime::currentDateTime();
+    // m_throughputview->setStartTime(m_TestStartTime);
+    QString startTime = m_TestStartTime.toString(DATETIME_NOW_FORMAT);
+    m_datapath = m_logpath + QDir::separator() + startTime;
+    QDir d(m_datapath);
+    if (!d.exists()){
+        d.mkpath(".");
+    }
+    QString err="";
+    emit updateDatapath(m_datapath);
+    emit updateStarttime(m_TestStartTime);
+    emit updateRunStatus(true);
+    //start test
+    // list of throughput test pair
+    // QList<TP *> tps = m_throughputview->getChilds();
+    QString s; // websocket url
+    QString cmd;
+    qint64 rs=0;
+    int maxtestduration=0; // max wait test time
+    int maxInterval=0; // max Interval time
+    int iwait=0;
+    int iomit=0;
+    int idelaytime=0;
+    int itimeout;
+    int refrow;
+    bool isRunforever=false;
+    foreach (TP *tp, m_tps) {
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
+        if (tp->getEnabled()){
+            if (tp->getInterval()> maxInterval){
+                maxInterval = tp->getInterval();
+            }
+            //RPC to control all server endpoint (iperf server)
+            isRunforever = isRunforever | tp->getRunforever();
+            int testduration=0;
+            iwait = tp->getWaitTime();
+            if (iwait> testduration){
+                testduration = iwait+iExtraWait;
+            }
+            iomit = tp->getOmitTime();
+            testduration = testduration + iomit;
+            idelaytime = tp->getDelaytime();
+            if (idelaytime>0) {
+                testduration = testduration + idelaytime;
+            }
+            if (testduration> maxtestduration){
+                maxtestduration = testduration;
+            }
+            refrow = tp->row();
+            err = "=====refrow:" + QString::number(refrow) + " maxtestduration:" + QString::number(maxtestduration);
+            emit debuginfo(err);
+            QString serverIP = tp->getMgrServer();
+            //TODO: detect manager server is pingable
+            if (!m_wss.contains(serverIP)) {
+                //TODO: can not work with interface with DHCP under Windows??
+                s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
+                err =  "server websocket:" + serverIP + " url: " + s + " m_datapath:" + m_datapath;
+                emit debuginfo(err);
+                m_wss[serverIP]=new WSClient(serverIP, QUrl(s), m_datapath);
+                connect(m_wss[serverIP], &WSClient::iperfStarted, this, &TpWorker::onIperfStarted);
+                connect(m_wss[serverIP], &WSClient::iperfStoped, this, &TpWorker::onIperfStoped);
+                connect(m_wss[serverIP], &WSClient::disconnected, this, &TpWorker::onServerDisconnected);
+                connect(m_wss[serverIP], &WSClient::iperfTPdata, this, &TpWorker::onIperfTPdata);
+            }else{
+                err =  "m_wss exist:" + serverIP;
+                emit debuginfo(err);
+                m_wss[serverIP]->setDatapath(m_datapath);
+            }
+            itimeout = iWSTimeout;
+            while (itimeout>0 && (bErrorStop==0)&& (bUserStop==false)){
+                QThread::msleep(1000);
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
+                //m_wss.contains(serverIP) && ! m_wss[serverIP]->isConnected() &&
+                if (m_wss.contains(serverIP)){
+                    if (m_wss.value(serverIP)->isConnected()){
+                        break;
+                    }
+                }else{
+                    bErrorStop = 1;
+                    err = "ERROR: websocket "+serverIP+" not connected";
+                    tp->setComment(err);
+                    emit errorStop(2, err);
+                    break;
+                }
+                itimeout--;
+                emit updateStatus(" wait WSClient connect to server: "+ s +
+                                  " ("+ QString::number(itimeout) +")");
+            }
+            if (itimeout<=0){
+                emit errorStop(1,"ERROR: Wait connect to websocket " +s+ " timeout");
+                break;
+            }
+            if(bErrorStop>0){
+                emit errorStop(3, "Unknown error happen!!("+QString::number(bErrorStop)+")");
+                return;
+            }
+            if(bUserStop){
+                err = "User Stop on wait server websocket connected!!";
+                emit debuginfo(err);
+                return;
+            }
+            //tell server add iperf server
+            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
+            emit debuginfo("server cmd:" + serverIP + " => " + cmd);
+            rs = m_wss[serverIP]->sendText(cmd);
+            if (rs<=0){
+                emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
+                break;
+            }
+            QString skey = tp->getBindKey(true);
+            emit debuginfo("skey:" + skey);
+            m_status_server[skey]=TPStatus::init; // init server of BindKey status 0
+            //###### client ######
+
+            //RPC to control all client endpoint (iperf client)
+            QString clientIP = tp->getMgrClient();
+            //TODO: detect manager client is pingable
+            if (!m_wsc.contains(clientIP)) {
+                s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
+                emit debuginfo("client websocket:" + clientIP + " url: " + s + " m_datapath:" + m_datapath);
+                m_wsc[clientIP]=new WSClient(clientIP, QUrl(s), m_datapath);
+                connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &TpWorker::onIperfStarted);
+                connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &TpWorker::onIperfStoped);
+                connect(m_wsc[clientIP], &WSClient::disconnected, this, &TpWorker::onClientDisconnected);
+                connect(m_wsc[clientIP], &WSClient::iperfTPdata, this, &TpWorker::onIperfTPdata);
+            }else{
+                emit debuginfo("m_wsc exist:" + clientIP);
+                m_wsc[clientIP]->setDatapath(m_datapath);
+            }
+            itimeout = iWSTimeout;
+            while (! m_wsc[clientIP]->isConnected()&& itimeout>0&& (bErrorStop==0)&& (bUserStop==false)){
+                QThread::msleep(1000);
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
+                if (m_wsc.contains(clientIP)){
+                    if (m_wsc.value(clientIP)->isConnected()){
+                        break;
+                    }
+                }else{
+                    bErrorStop = 1;
+                    err = "ERROR: websocket "+clientIP+" not connected";
+                    tp->setComment(err);
+                    emit errorStop(2, err);
+                    break;
+                }
+                itimeout--;
+                emit updateStatus(" wait WSClient connect to client: "+s);
+            }
+            if (itimeout<=0){
+                emit errorStop(1,"ERROR: Wait connect to " +s+ "timeout");
+                break;
+            }
+            if(bErrorStop>0){
+                emit errorStop(3, "Unknown error happen!!("+QString::number(bErrorStop)+")");
+                return;
+            }
+            if(bUserStop){
+                emit debuginfo("User Stop on wait client websocket connected!!");
+                return;
+            }
+            //tell client add iperf client
+            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
+            emit debuginfo("client cmd:" + clientIP + " => " + cmd);
+            rs = m_wsc[clientIP]->sendText(cmd);
+            if (rs<=0){
+                emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
+                break;
+            }
+            QString ckey =tp->getBindKey(false);
+            emit debuginfo("ckey:" + ckey);
+            m_status_client[ckey]=TPStatus::init;// init client of BindKey status 0
+        } else {
+            // qInfo() << "Ignore disabled TP test pair: " << tp;
+        }
+
+    }
+    emit updateInterval(maxInterval);
+    if(bErrorStop>0){
+        emit errorStop(4, "Unknown error happen!!("+QString::number(bErrorStop)+")");
+        return;
+    }
+    //Start server
+    err = "server keys:" + m_wss.keys().join(" ");
+    emit debuginfo(err);
+    for (auto key: m_wss.keys()){
+        // QThread::msleep(100);
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
+        emit debuginfo("Let Server " + key + " CMD_IPERF_START "+ startTime);
+        rs = m_wss[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
+        if (rs<=0){
+            emit errorStop(3, "Start iperf server fail:" + key);
+            break;
+        }
+    }
+    if(bErrorStop>0){
+        emit debuginfo("Start server error happen!!");
+        return;
+    }
+    //###############################
+    QThread::sleep(5); // wait 5 sec
+    //TODO: wait server start up and ready
+    QDateTime sTime = QDateTime::currentDateTime();
+    // QDateTime newDT;
+    // qint64 iwaittime;
+    // int chk=0;
+    bool bServerReady=false;
+    // int waitedSecs = 0;
+
+    while (!bServerReady && !bUserStop) {
+        QThread::msleep(200);  // check 5 times per second
+        QCoreApplication::processEvents();
+
+        int readyCount = 0;
+        for (const auto &skey : m_status_server.keys()) {
+            if (m_status_server.value(skey) == TPStatus::started) {
+                readyCount++;
+            }
+        }
+
+        if (readyCount >= m_status_server.size()) {
+            bServerReady = true;
+            break;  // all servers ready!
+        }
+
+        qint64 elapsed = sTime.secsTo(QDateTime::currentDateTime());
+        qint64 remaining = m_WaitServerReady - elapsed;
+
+        emit updateStatus(QString("Wait server ready: %1/%2 (%3s left)")
+                              .arg(readyCount)
+                              .arg(m_status_server.size())
+                              .arg(remaining));
+
+        if (remaining <= 0) {
+            emit debuginfo("Server ready TIMEOUT");
+            break;
+        }
+    }
+
+    if(bUserStop){
+        err = "User Stop on wait ServerReady!!";
+        emit updateStatus(err);
+        return;
+    }
+    if (!bServerReady){
+        QStringList ds;
+        foreach (auto key, m_status_server.keys()){
+            if (m_status_server[key]!=TPStatus::started){
+                ds.append(key);
+            }
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
+        }
+        emit debuginfo("server not readey: " + ds.join(","));
+        emit errorStop(4, "Iperf server not readey:" +  ds.join(","));
+        return;
+    }
+    //Start client
+    for (auto key: m_wsc.keys()){
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
+        emit debuginfo("Let Client " + key + " CMD_IPERF_START " + startTime);
+        rs = m_wsc[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
+        if (rs<=0){
+            emit errorStop(4, "Start iperf client fail:" + key);
+            break;
+        }
+    }
+    if(bErrorStop>0){
+        emit debuginfo("Start client error happen!!");
+        return;
+    }
+    QDateTime waitStartTime = QDateTime::currentDateTime();
+    QDateTime waitEndTime = QDateTime::currentDateTime();
+    qint64 iWait = waitStartTime.secsTo(waitEndTime);
+    while (((iWait < maxtestduration) || isRunforever) && (bUserStop==false)){
+        if ((getStatusServers()>m_status_server.keys().length()) ||
+            (getStatusClients()>m_status_client.keys().length())) {
+            err = "Some problem happen!! abort!! ";
+            emit debuginfo(err);
+            break;
+        }else if(getStatusServers()==0 && getStatusClients()==0) {
+            emit debuginfo("All test end, stop early");
+            break;
+        }
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
+        QThread::msleep(100);
+        waitEndTime = QDateTime::currentDateTime();
+        if (isRunforever){
+            emit updateStatus("Runtime "+  QString::number(iWait) + " sec"
+                              + "("+MyFunc::secToHumanReadable(iWait)+")");
+        }else{
+            emit updateStatus("Remain "+ QString::number(maxtestduration-iWait) + " sec");
+        }
+
+        iWait = waitStartTime.secsTo(waitEndTime);
+    }
+    err = "iWait:" + QString::number(iWait) + "/" + QString::number(maxtestduration)
+          + " isRunforever:" + QChar('0' + isRunforever) + " bUserStop:" + QChar('0' +bUserStop);
+    emit debuginfo(err);
+    onStop();
+}
+
+void TpWorker::initStart()
+{
+    bUserStop = false;
+    emit testStarted();
+    // ui->actionShowLog->setEnabled(true);
+    // ui->actionSave->setEnabled(true);
+    resetError();
+    //TODO: clear old test record!!
+    m_status_server.clear();
+    m_status_client.clear();
+}
+
+void TpWorker::resetError()
+{
+    bErrorStop = 0;
+    m_ErrorMSG = "";
+}
+
+void TpWorker::onIperfStarted(QString smode, QString ipport)
+{
+    emit debuginfo("onIperfStarted:" + smode + " : " + ipport);
+    if (smode.contains("S", Qt::CaseSensitive)){
+        m_status_server[ipport]=TPStatus::started;
+    }else{
+        m_status_client[ipport]=TPStatus::started;
+    }
+}
+
+void TpWorker::onIperfStoped(QString refrow, QString err_no, QString err, QString ipport)
+{
+    emit debuginfo("onIperfStoped:" + refrow + " bind key: " + ipport +
+                       " err_no:" + err_no + " err:" + err);
+    if (err_no.toInt()>0){
+        emit updateComment(refrow, "["+ ipport +"]Error:" +err);
+        if (m_status_server.contains(ipport)){
+            m_status_server[ipport]=TPStatus::stoped;
+        }
+        if (m_status_client.contains(ipport)){
+            m_status_client[ipport]=TPStatus::stoped;
+        }
+        //        emit errorStop(2, "onIperfStoped: ["+ipport+"]("+err_no+"):"+err);
+    }else{
+
+        // qiperf notify no error end:
+        if (m_status_server.contains(ipport)){
+            // qDebug() << "m_status_server[" << ipport << "]: " << m_status_server[ipport];
+            m_status_server[ipport]=TPStatus::init;
+        }
+        if (m_status_client.contains(ipport)){
+            // qDebug() << "m_status_client[" << ipport << "]: " << m_status_client[ipport];
+            m_status_client[ipport]=TPStatus::init;
+        }
+    }
+}
+void TpWorker::onServerDisconnected(QString targetip)
+{
+    emit debuginfo("onServerDisconnected: " + targetip);
+    if (m_wss.contains(targetip)){
+        m_wss.remove(targetip);
+    }
+}
+
+void TpWorker::onClientDisconnected(QString targetip)
+{
+    // qDebug() << "onClientDisconnected: " << targetip;
+    if (m_wsc.contains(targetip)){
+        m_wsc.remove(targetip);
+    }
+}
+
+void TpWorker::onIperfTPdata(QString refrow, QString sInterval, QString datas)
+{
+    emit iperfTPdata(refrow, sInterval, datas);
+}
+int TpWorker::getStatusServers()
+{
+    int sum = 0;
+    // for (auto value : std::as_const(m_status_server)) {
+    for (auto value : m_status_server) {
+        sum += value;
+    }
+    return sum;
+}
+
+int TpWorker::getStatusClients()
+{
+    int sum = 0;
+    // for (auto value : std::as_const(m_status_client)) {
+    for (auto value : m_status_client) {
+        sum += value;
+    }
+    return sum;
+}
+
+void TpWorker::onStop(){
+    QString cmd="";
+    // Stop reg iperf client
+    foreach (auto key, m_wsc.keys()){
+        if (m_wsc[key]){
+            cmd = QString(CMD_IPERF_STOP)+":" + key;
+            emit debuginfo(key + " m_wsc send cmd: " + cmd);
+            m_wsc[key]->sendText(cmd);
+            m_wsc[key]->close();
+        }
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    QThread::sleep(1);
+    // Stop reg iperf server
+    foreach (auto key, m_wss.keys()){
+        if (m_wss[key]){
+            cmd = QString(CMD_IPERF_STOP)+":" + key;
+            emit debuginfo(key + "m_wss send cmd: " + cmd);
+            m_wss[key]->sendText(cmd);
+            m_wss[key]->close();
+        }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+    bUserStop=true;
+
+    // bStartTest = false;
+    // updateRunStatus(false);
+    emit testStoped(0);
+    // QString endtime = QDateTime::currentDateTime().toString(DATETIME_NOW_FORMAT);
+    // QDateTime enddatetime = QDateTime::fromString(endtime,DATETIME_NOW_FORMAT);
+    QDateTime enddatetime = QDateTime::currentDateTime();
+    QString endtime = enddatetime.toString(DATETIME_NOW_FORMAT);
+    //TODO: error end message?
+
+    // emit debuginfo("m_status_server:" + m_status_server + " m_status_client:" + m_status_client);
+    qint64 consumetime = m_TestStartTime.secsTo(enddatetime);
+    emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(consumetime)+" sec)");
+    emit setEndTime(static_cast<double>(consumetime)); //update x-axis max value
+}
+
+void TpWorker::onSetStop()
+{
+    bUserStop = true;
+}

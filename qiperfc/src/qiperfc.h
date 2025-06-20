@@ -13,6 +13,7 @@
 #include <QClipboard>
 #include <QMenu>
 #include <QDialog>
+#include <QThread>
 
 #include "comm.h"
 #include "udpreceiver.h"
@@ -46,6 +47,7 @@
 #if (TEST_WS==1)
 #include "wsclient.h"
 #endif
+#include "tpworker.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -73,7 +75,7 @@ public slots:
     void onImportIperf3Log();
     void onImportIperf2Log();
     bool on_Clear(bool showNotice=true);
-    void initStart();
+    // void initStart();
     void onStart(bool showNotice=true);
     void onStop();
     bool onClear(bool showNotice=true);
@@ -84,6 +86,7 @@ public slots:
     void onShowDebugLog();
 
     void onErrorStop(int err, QString msg);
+    void onDebuginfo(QString msg);
     void onNotice(QString send_addr, QString msg);
     void onQuit();
     void notificationReceived(const QString key, const QVariant value);
@@ -91,7 +94,6 @@ public slots:
     void setShowGroup(bool bShow);
     void onUpdateTPUnit(QString sunit);
     //test
-    void onTest();
     void onTestStarted();
     void onTestStoped(int err);
 
@@ -102,15 +104,16 @@ public slots:
 
 signals:
     void updateEndpointNum(int n);
-    void updateStarttime(QString stime);
+    void updateStarttime(QDateTime stime);
     void updateStatus(QString msg);
-    void errorStop(int err, QString msg); // signal when test error
+    // void errorStop(int err, QString msg); // signal when test error
     void testStarted(); // signal when test started
     void testStoped(int err); // signal when test stoped, 0: no error
     void closeAll(); // send signal to close all dialog
     void setEndTime(double value);
     void updateInterval(int interval);
     void reportTP(int idx, double tp, double lostrate);
+    void setTPStop();
 
 protected:
     void closeEvent(QCloseEvent *event)override;
@@ -132,25 +135,18 @@ private slots:
     void initActions();
     void initToolbar();
     void initStatusbar();
-    void onUpdateStarttime(QString stime);
+    void onUpdateStarttime(QDateTime stime);
     void onUpdateStatus(QString msg);
+    void onUpdateRunStatus(bool bStart);
     void onUpdateActions(bool bStart, bool bStop, bool bClear);
     void onUpdateActionsSave(bool bSave);
     void onUpdateActionsEdit(bool bDel, bool bEdit, bool bSwap, bool bSwapIP);
     void on_updateQIperfdNum(int n);
-
     void onRPC_result(const QVariant& result);
     void onRPC_error(int code, const QString& message);
-    void onIperfStarted(QString smode, QString ipport);
-    void onIperfStoped(QString refrow, QString err_no, QString err, QString ipport);
-    void onServerDisconnected(QString targetip);
-    void onClientDisconnected(QString targetip);
-
     void onUpdateDataPath(QString datapath);
-
     void onProgress(QString filename, int currentlineno);
-    int getStatusServers();
-    int getStatusClients();
+
     void onAddSerial();
     void onAddSSH();
     void onGPScalc();
@@ -190,10 +186,6 @@ private:
     int iExtraWait = 5;
 //    PipeClient *pclient;
 #if (TEST_WS==1)
-    QMap<QString, WSClient *> m_wss; // websocket client list for manager iperf server
-    QMap<QString, WSClient *> m_wsc; // websocket client list for manager iperf client
-    QMap<QString, int> m_status_server; // store server status, 0: init, 1: running, 2: error?
-    QMap<QString, int> m_status_client; // store client status, 0: init, 1: running, 2: error?
     WSClient *ws;
 #endif
     UdpReceiver *m_receiver;
@@ -242,6 +234,9 @@ private:
     DlgGpsCalc *dlg_gps;
     QString m_OpenStreetMapTile;
 
+    // throughput worker
+    TpWorker *m_tpworker;
+    QThread *m_tpthread;
     //automate: simple micro
     int m_smicroIdx;
     DlgSimpleMicro *smicro;
