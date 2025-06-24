@@ -8,6 +8,8 @@
 #include <QJsonDocument>
 #include <QFile>
 #include <QThread>
+#include <QRegularExpression>
+
 #include "../src/tpmgrdata.h"
 
 #include <QDebug>
@@ -111,6 +113,12 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
     QString fmtreport = jsondata["fmtreport"].toString();
     if (!fmtreport.isEmpty()){
         args = args + " -f " + fmtreport;
+    }
+    if (jsondata.contains("timestamps")){
+        bWithtimestamp = true;
+        iTimestampLength = getTimeStempLength(jsondata["timestamps"].toString().toStdString());
+        qDebug()<< "iTimestampLength:" << QString::number(iTimestampLength) << " timestamps:" << jsondata["timestamps"].toString();
+        args = args + " --timestamps=" + jsondata["timestamps"].toString();
     }
     args = args + " --forceflush ";
     return args;
@@ -452,6 +460,11 @@ void IperfWrapper::parserIperf2(QString linedata)
 void IperfWrapper::parserIperf3(QString linedata)
 {
     try{
+        QString idx = "";
+        if (bWithtimestamp){
+            linedata = linedata.mid(iTimestampLength);
+            qDebug() << "after trim time stamp:" << linedata;
+        }
         if (linedata.contains("Server listening")||
             linedata.contains("Accepted connection")||
             linedata.contains("Connecting")||
@@ -474,9 +487,10 @@ void IperfWrapper::parserIperf3(QString linedata)
         }else{
     //        qDebug() << "parserIperf3: " << linedata;
             QString sDir = nullptr;
-            qint64 iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
-            QString idx = linedata.mid(1,iS-1).trimmed();  // extract [ idx]
-            linedata = linedata.right(linedata.length()-iS-1);
+            linedata = getIdx(linedata, idx);
+            // qint64 iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
+            // QString idx = linedata.mid(1,iS-1).trimmed();  // extract [ idx]
+            // linedata = linedata.right(linedata.length()-iS-1);
             QString sTag="";
             if (m_servermode){
                 sTag="s";
@@ -488,7 +502,7 @@ void IperfWrapper::parserIperf3(QString linedata)
             if (m_bidir){
                 //bidir mode
                 // in bidir only get [Rx*]
-                iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
+                int iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
                 sDir = linedata.mid(1,iS-1).trimmed();// server:[TX-S][RX-S], client:[TX-C][RX-C]
                 linedata = linedata.right(linedata.length()-iS-1);
                 if (sDir.contains(TPDIRRx, Qt::CaseSensitivity::CaseInsensitive)){
@@ -594,6 +608,8 @@ void IperfWrapper::parserIperf3(QString linedata)
                     emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
                     //clear record
                     m_tpdatas.remove(sInterval);
+                }else{
+                    qDebug() << "m_tpdatas:" << m_tpdatas;
                 }
             } else {
                 qDebug() << "parserIperf3: unknown format of line: " << linedata;
@@ -609,10 +625,11 @@ void IperfWrapper::parserIperf3(QString linedata)
 
 QString IperfWrapper::getIdx(QString linedata, QString &idx)
 {
-    int iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
-    idx = linedata.mid(1,iS-1).trimmed();  // extract [ idx]
-    QString r = linedata.right(linedata.length()-iS-1).trimmed();
-    // qDebug() << "idx: " << idx <<  "getIdx - r: " << r;
+    int iS = linedata.indexOf("[",0, Qt::CaseInsensitive);
+    int iE = linedata.indexOf("]",0, Qt::CaseInsensitive);
+    idx = linedata.mid(iS+1,iE-iS-1).trimmed();  // extract [ idx]
+    QString r = linedata.right(linedata.length()-iE-1).trimmed();
+    qDebug() << "getIdx idx: " << idx <<  "  right(" << r << ")";
     return r;
 }
 
@@ -646,6 +663,27 @@ void IperfWrapper::setInterval(uint interval)
 {
     // qDebug() << " setInterval:" << interval;
     m_interval = interval;
+}
+
+void IperfWrapper::setArgs(QString arg)
+{
+#if QT_VERSION < 0x050E00 // < 5.14.0
+    m_arguments = arg.split(" ", QString::SkipEmptyParts);
+#else
+    m_arguments = arg.split(" ", Qt::SkipEmptyParts);
+#endif
+    qDebug() << "m_arguments:" << m_arguments;
+    if (m_arguments.contains("timestamps")){
+        bWithtimestamp = true;
+        QRegularExpression regex("^" + QRegularExpression::escape("--timestamps"),
+                                 QRegularExpression::CaseInsensitiveOption); // Case-insensitive search
+
+        QStringList filteredList = m_arguments.filter(regex);
+        qDebug() << "filteredList:" << filteredList;
+        // int idx = m_arguments.indexOf("--timestamps");
+        // qDebug() << "timestamps idx = " << QString::number(idx);
+        //iTimestampLength = getTimeStempLength(jsondata["timestamps"].toString().toStdString());
+    }
 }
 
 void IperfWrapper::setOmit(int omit)
@@ -689,4 +727,50 @@ void IperfWrapper::work()
         qDebug() << "file not exist: " << m_filename;
     }
     emit workFinished();
+}
+
+// int IperfWrapper::getTimeStempLength(QString timestempformat)
+int IperfWrapper::getTimeStempLength(const std::string& format_string)
+{
+    //timestemp in %Y = 2025 %m = Month (01-12) %d = Day of the month as a decimal number (01-31)
+    // %H = Hour (24-hour clock) as a decimal number (00-23)
+    // %M = Minute as a decimal number (00-59)
+    // %S = Second as a decimal number (00-60)
+    // %F: Equivalent to %Y-%m-%d
+    // %T: Equivalent to %H:%M:%S
+    // For production, you might pass a specific std::tm or std::time_t.
+    std::time_t now = std::time(nullptr);
+    std::tm* local_tm = std::localtime(&now);
+
+    if (local_tm == nullptr) {
+        qDebug() << "Error: Could not get local time.";
+        return 0; // Or throw an exception
+    }
+
+    std::ostringstream oss;
+    oss << std::put_time(local_tm, format_string.c_str());
+
+    // Check for errors during formatting (e.g., invalid format string)
+    if (oss.fail()) {
+        qDebug() <<  "Error: Failed to format time with format string: \"" << QString::fromStdString(format_string) << "\"";
+        return 0; // Or throw an exception
+    }
+
+    return oss.str().length();
+
+
+    /*
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+
+    // Format the QDateTime into a QString using the provided formatString
+    QString formattedTime = currentDateTime.toString(timestempformat);
+
+    // Check if the formatting was successful (though toString rarely fails for valid formats)
+    if (formattedTime.isEmpty() && !timestempformat.isEmpty()) {
+        qWarning() << "Warning: Formatting resulted in an empty string for format:" << timestempformat;
+        return 0; // Or handle error appropriately
+    }
+
+    return formattedTime.length();
+*/
 }

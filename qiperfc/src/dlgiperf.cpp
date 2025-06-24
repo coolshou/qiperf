@@ -34,9 +34,11 @@ DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
     //stateChanged (until 6.9)
     connect(ui->chk_bidir, &QCheckBox::stateChanged, this, &DlgIperf::onChkBidirStatech);
     connect(ui->chk_reverse, &QCheckBox::stateChanged, this, &DlgIperf::onChkReverseStatech);
+    connect(ui->cbTimeStamp, &QCheckBox::stateChanged, this, &DlgIperf::onTimeStampstateChanged);
 #else
     connect(ui->chk_bidir, &QCheckBox::checkStateChanged, this, &DlgIperf::onChkBidirStatech);
     connect(ui->chk_reverse, &QCheckBox::checkStateChanged, this, &DlgIperf::onChkReverseStatech);
+    connect(ui->cbTimeStamp, &QCheckBox::checkStateChanged, this, &DlgIperf::onTimeStampstateChanged);
 #endif
 //    connect(ui, &QDialog::accepted, this, &QDialog::onAccepted);
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DlgIperf::onAccepted);
@@ -46,7 +48,10 @@ DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
 //            this,&DlgIperf::onSelectMServer);
     connect(ui->cb_mserver_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMServer);
     connect(ui->cb_mclient_ip, &QComboBox::currentTextChanged, this,&DlgIperf::onSelectMClient);
-    connect(ui->sb_duration, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &DlgIperf::onDurationValueChanged);
+    connect(ui->sb_duration, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+            &DlgIperf::onDurationValueChanged);
+
+    connect(ui->cb_fmtreport, &QComboBox::currentTextChanged, this, &DlgIperf::onFmtreportChanged);
 // lbDuration
     // connect(ui->sb_mss, &QSpinBox::valueChanged, this, &DlgIperf::onMSSvalueChanged); //TODO: Not good for UI interaction
 
@@ -95,6 +100,9 @@ QString DlgIperf::getJsonCfg()
 
         serverObj.insert("delaytime", ui->sb_delaytime->value());
         serverObj.insert("restartonerror", ui->cbRestartOnError->isChecked()); // TODO how to restart iperf pair on detect iperf running error?
+        if (ui->cbTimeStamp->isChecked()){
+            serverObj.insert("timestamps", ui->leTimeStamp->text().trimmed());
+        }
         mainObj.insert("server", serverObj);
 
     }
@@ -134,6 +142,9 @@ QString DlgIperf::getJsonCfg()
 
     clientObj.insert("delaytime", ui->sb_delaytime->value());
     clientObj.insert("restartonerror", ui->cbRestartOnError->isChecked());
+    if (ui->cbTimeStamp->isChecked()){
+        clientObj.insert("timestamps", ui->leTimeStamp->text().trimmed());
+    }
     mainObj.insert("client", clientObj);
     QJsonDocument doc(mainObj);
     QString strJson(doc.toJson(QJsonDocument::Compact));
@@ -166,6 +177,13 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
 
         ui->sb_delaytime->setValue(serverObj["delaytime"].toInt());
         ui->cbRestartOnError->setChecked(serverObj["restartonerror"].toBool());
+        if (serverObj.contains("timestamps")){
+            ui->cbTimeStamp->setChecked(true);
+            ui->leTimeStamp->setText(serverObj["timestamps"].toString());
+        }else{
+            ui->cbTimeStamp->setChecked(false);
+            ui->leTimeStamp->setText("");
+        }
         // client
         if ((!clientObj["manager"].toString().isEmpty()) &&
             (clientObj["manager"].toString() != clientObj["bind"].toString())) {
@@ -457,6 +475,13 @@ void DlgIperf::ChangeVersion(const QString ver)
         // numeric value
         // ui->sb_tos
     }
+    //timestemp
+    if (ver.indexOf("2")==0){
+        ui->wTimeStamp->setEnabled(false);
+        ui->cbTimeStamp->setChecked(false);
+    }else{
+        ui->wTimeStamp->setEnabled(true);
+    }
 }
 
 void DlgIperf::onAccepted()
@@ -481,6 +506,14 @@ void DlgIperf::onChkReverseStatech(int state)
         ui->chk_bidir->setCheckState(Qt::Unchecked);
     }
 }
+void DlgIperf::onTimeStampstateChanged(int state)
+{
+    if (state==Qt::Checked){
+        ui->leTimeStamp->setEnabled(true);
+    }else{
+        ui->leTimeStamp->setEnabled(false);
+    }
+}
 #else
 void DlgIperf::onChkBidirStatech(Qt::CheckState state)
 {
@@ -493,6 +526,14 @@ void DlgIperf::onChkReverseStatech(Qt::CheckState state)
 {
     if (state==Qt::Checked){
         ui->chk_bidir->setCheckState(Qt::Unchecked);
+    }
+}
+void DlgIperf::onTimeStampstateChanged(Qt::CheckState state)
+{
+    if (state==Qt::Checked){
+        ui->leTimeStamp->setEnabled(true);
+    }else{
+        ui->leTimeStamp->setEnabled(false);
     }
 }
 #endif
@@ -567,4 +608,10 @@ void DlgIperf::onDurationValueChanged(int value)
         s = MyFunc::secToHumanReadable(value);
     }
     ui->lbDuration->setText(s);
+}
+
+void DlgIperf::onFmtreportChanged(QString text)
+{
+    qDebug() << "onFmtreportChanged: " << text;
+    // "k" << "m" << "g" << "t" << "K" << "M" << "G" << "T";
 }

@@ -23,6 +23,7 @@ public:
     void setIperf(QString version, QString protocal, uint port);
     void setDelaytime(int delaytime);
     void setInterval(uint interval);
+    void setArgs(QString arg);
     void setOmit(int omit);
 
 public slots:
@@ -32,6 +33,8 @@ signals:
     void workFinished();
     void progress(QString filename, int currentlineno);
 private:
+    // int getTimeStempLength(QString timestempformat);
+    int getTimeStempLength(const std::string& format_string);
 
 private:
     int m_idx;  // ref row
@@ -49,6 +52,9 @@ private:
     uint m_interval;
     int m_omit=0;
     bool m_ignorewronginterval;
+    bool bWithtimestamp=false;
+    int iTimestampLength=0;
+    QStringList m_arguments;  //iperf args
 };
 
 #endif // IPERFWRAPPER_H

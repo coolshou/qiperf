@@ -36,15 +36,18 @@ public slots:
 #if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
     void onChkBidirStatech(int state);
     void onChkReverseStatech(int state);
+    void onTimeStampstateChanged(int state);
 #else
     void onChkBidirStatech(Qt::CheckState state);
     void onChkReverseStatech(Qt::CheckState state);
+    void onTimeStampstateChanged(Qt::CheckState state);
 #endif
     void onSelectMServer(QString text);
     void onSelectMClient(QString text);
     void onMSSvalueChanged(int value);
     void showManagement(bool show);
     void onDurationValueChanged(int value);
+    void onFmtreportChanged(QString text);
 
 protected:
     void changeEvent(QEvent *e) override;

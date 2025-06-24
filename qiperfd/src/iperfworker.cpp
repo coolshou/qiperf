@@ -32,6 +32,7 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     m_iperfwrapper = new IperfWrapper();
     m_iperfwrapper->setDelaytime(delaystart);
     m_iperfwrapper->setInterval(interval);
+    m_iperfwrapper->setArgs(arg);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfWorker::onThroughputData);
 //    this->deleteLater(); //this will cause stdout not flush??
 //    m_cmd = cmd; //iperf exec fullpath
@@ -115,6 +116,9 @@ void IperfWorker::work()
 
         m_iperf->start();
         if (m_iperf->waitForStarted()){
+            if (m_selfdestruction->isActive()){
+                emit stopSelfDestructor();
+            }
             emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
             emit log(m_idx, "iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "));
             while (!m_stop){
@@ -242,10 +246,10 @@ void IperfWorker::onStarted()
 
 void IperfWorker::readyReadStdOut()
 {
-    if (m_selfdestruction->isActive()){
-        // qInfo() << "readyReadStdOut: stop m_selfdestructor";
-        emit stopSelfDestructor();
-    }
+    // if (m_selfdestruction->isActive()){
+    //     // qInfo() << "readyReadStdOut: stop m_selfdestructor";
+    //     emit stopSelfDestructor();
+    // }
     QByteArray processOutput;
     processOutput = m_iperf->readAllStandardOutput();
 
@@ -264,10 +268,10 @@ void IperfWorker::readyReadStdOut()
 
 void IperfWorker::readyReadStdErr()
 {
-    if (m_selfdestruction->isActive()){
-        qInfo() << "readyReadStdErr: stop m_selfdestructor";
-        emit stopSelfDestructor();
-    }
+    // if (m_selfdestruction->isActive()){
+    //     qInfo() << "readyReadStdErr: stop m_selfdestructor";
+    //     emit stopSelfDestructor();
+    // }
     QByteArray processOutput;
     processOutput = m_iperf->readAllStandardError();
     QString err = QString(processOutput);
