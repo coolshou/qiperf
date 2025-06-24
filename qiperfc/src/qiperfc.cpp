@@ -111,7 +111,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_endpointmgr = new EndPointMgr(this);
     m_frm_qiperfds = new FormQIperfds();
     m_frm_qiperfds->setModel(m_endpointmgr);
-
+    connect(m_frm_qiperfds, &FormQIperfds::clearNtpStatus, this, &QIperfC::onClearNtpStatus);
     //
     m_receiver = new UdpReceiver(QIPERFD_BPORT, this);
     connect(m_receiver, &UdpReceiver::notice, this, &QIperfC::onNotice);
@@ -1126,6 +1126,16 @@ void QIperfC::onNtpsynced(bool bOK, QString target)
             m_ntps.append(target);
         }
 
+    }
+}
+
+void QIperfC::onClearNtpStatus(QString target)
+{
+    if(m_ntpfail.contains(target)){
+        qDebug() << "remove " << target << " from m_ntpfail";
+        m_ntpfail.remove(target);
+    }else{
+        qDebug() << "onClearNtpStatus:" << m_ntpfail << " DO not have:" << target;
     }
 }
 

@@ -68,16 +68,27 @@ void FormQIperfds::onRestart(bool checked)
     Q_UNUSED(checked)
     QModelIndexList idxs = ui->treeView->selectionModel()->selectedRows();
     foreach (auto midx, idxs) {
-        qDebug()<< "onRestart midx:" << midx;
         QString target=ui->treeView->model()->data(midx).toString();
-        qDebug()<< "data:" <<target;
+        qInfo()<< "onRestart target:" <<target;
         askRestart(target);
     };
 }
 
+void FormQIperfds::onResetNtp(bool checked)
+{
+    Q_UNUSED(checked)
+    QModelIndexList idxs = ui->treeView->selectionModel()->selectedRows();
+    foreach (auto midx, idxs) {
+        QString target=ui->treeView->model()->data(midx).toString();
+        qInfo()<< "onResetNtp target:" <<target;
+        emit clearNtpStatus(target);
+    };
+
+}
+
 void FormQIperfds::askRestart(QString target)
 {
-    qDebug() << "Ask qiperfd Restart:" << target;
+    qInfo() << "Ask qiperfd Restart:" << target;
     QString url = "ws://"+target+":"+QString::number(QIPERFD_WSPORT);
     WSClient wsc= WSClient(target, QUrl(url), "");
     int timeout=0;
@@ -100,6 +111,9 @@ void FormQIperfds::initMenu()
     m_menu=new QMenu();
     m_restartAction = new QAction("Restart qiperfd");
     connect(m_restartAction, &QAction::triggered, this, &FormQIperfds::onRestart);
+    m_resetNtpAction = new QAction("Reset NTP");
+    connect(m_resetNtpAction, &QAction::triggered, this, &FormQIperfds::onResetNtp);
 
     m_menu->addAction(m_restartAction);
+    m_menu->addAction(m_resetNtpAction);
 }

@@ -20,11 +20,15 @@ public:
     ~FormQIperfds();
     void setModel(QAbstractItemModel *model);
     void setColumnWidth(int column, int width);
+signals:
+    void clearNtpStatus(QString target);
+
 protected:
     void changeEvent(QEvent *e);
 private slots:
     void onContextMenu(QPoint pos);
     void onRestart(bool checked);
+    void onResetNtp(bool checked);
     void askRestart(QString target);
 private:
     void initMenu();
@@ -32,6 +36,7 @@ private:
     QSortFilterProxyModel *proxyModel;
     QMenu *m_menu;
     QAction *m_restartAction;
+    QAction *m_resetNtpAction;
 };
 
 #endif // FORMQIPERFDS_H

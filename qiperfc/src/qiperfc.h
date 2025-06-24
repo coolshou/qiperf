@@ -169,6 +169,7 @@ private slots:
     void onAutoLoadFile(QString idx, QString filename, QString savepath);
     void onDoNtpSync(QString target);
     void onNtpsynced(bool bOK, QString target);
+    void onClearNtpStatus(QString target);
 private:
     Ui::MainWindow *ui;
     QList<QPluginLoader*> pluginLoaders;
