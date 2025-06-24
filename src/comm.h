@@ -68,6 +68,8 @@
 // NTP server
 #define CMD_NTP_START "NTP_START"  // enable/disable NTP server NTP_START:1 => enable, NTP_START:0 => disable
 #define CMD_NTP_SYNC "NTP_SYNC" // request do NTP time sync with server NTP_SYNC:ServerIP
+#define CMD_NTP_SYNC_OK "NTP_SYNC_OK"
+#define CMD_NTP_SYNC_FAIL "NTP_SYNC_FAIL"
 
 // serial
 #define CMD_SERIAL_ADD    "SERIAL_ADD"   // add SERIAL setting for rs232, comport:BaudRate:DataBits:Parity:StopBits:FlowControl

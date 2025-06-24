@@ -57,6 +57,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     }
     // connect(this, &QIperfC::testStarted, this, &QIperfC::onTestStarted);
     connect(this, &QIperfC::testStoped, this, &QIperfC::onTestStoped);
+    connect(this, &QIperfC::doNtpSync, this, &QIperfC::onDoNtpSync);
     ui->actionPaste->setShortcutContext(Qt::WidgetShortcut);
     m_throughputview = new ThroughputView(ui->actionCopy, ui->actionPaste,
                                           ui->actionDelete, ui->actionCopyText,
@@ -522,6 +523,17 @@ void QIperfC::onNotice(QString send_addr, QString msg)
                 if (m_endpointmgr->add(send_addr, msg)){
                     m_throughputview->addEndpoint(send_addr, msg);
                     emit updateEndpointNum(m_endpointmgr->getTotalEndpoints());
+                }
+                if (!m_ntps.contains(send_addr)){
+                    int itry=0;
+                    if (m_ntpfail.contains(send_addr)){
+                        itry=m_ntpfail[send_addr];
+                        if (itry>5){
+                            return;
+                        }
+                    }
+                    qDebug() << "ask NTP sync:" << send_addr << "(try:"<<QString::number(itry)<<")";
+                    emit doNtpSync(send_addr);
                 }
                 break;
             case EndPointAct::Update:
@@ -1074,6 +1086,46 @@ void QIperfC::onAutoLoadFile(QString idx, QString filename, QString savepath)
         QString target = savepath + QDir::separator() + testtime + "_"+ f.fileName();
         qDebug() << "save to new file: " << target;
         save(target);
+    }
+}
+
+void QIperfC::onDoNtpSync(QString target)
+{
+    QString s = "ws://"+target+":"+QString::number(QIPERFD_WSPORT);
+    WSClient *ws = new WSClient(target, QUrl(s), "");
+    connect(ws, &WSClient::ntpsynced, this, &QIperfC::onNtpsynced);
+    int itimeout=20;
+    bool bConnected=false;
+    while (!bConnected && (itimeout>0)){
+        bConnected = ws->isConnected();
+        QThread::msleep(200);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        itimeout--;
+    }
+    if (bConnected){
+        QString cmd=QString("%1:%2").arg(CMD_NTP_SYNC, getNowString());
+        qint64 rc = ws->sendText(cmd);
+        if (rc<=0){
+            qDebug() << "send cmd Fail:" << cmd;
+        }
+        if (!m_ntpfail.contains(target)){
+            m_ntpfail[target]=1;
+        }else{
+            m_ntpfail[target]=m_ntpfail[target]+1;
+        }
+    }else{
+        qDebug() << "connect to ws: " + s + " Fail";
+    }
+}
+
+void QIperfC::onNtpsynced(bool bOK, QString target)
+{
+    if (bOK){
+        if (!m_ntps.contains(target)){
+            qDebug() << "onNtpsynced:" << target;
+            m_ntps.append(target);
+        }
+
     }
 }
 

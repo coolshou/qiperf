@@ -89,7 +89,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 #endif
 
     startNtpServer();
-    // m_ntpsync = new NtpSync(this);
+    m_ntpsync = new NtpSync(this);
     // m_ntpsync->sync("192.168.70.147");
 
     // system service manager
@@ -1031,7 +1031,7 @@ bool QIperfd::deleteScheduledTask(const QString &taskName) {
 }
 
 #endif
-void QIperfd::onWSactMessage(QString msg)
+void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPort)
 {
     //handle act message from websocket
     long long cut = msg.indexOf(':', 0);
@@ -1084,10 +1084,25 @@ void QIperfd::onWSactMessage(QString msg)
         msg = msg.right(msg.length()-cut-1);
         m_icmpping = new IcmpPing(refrow, msg, nullptr);
     }else if (act.startsWith(CMD_NTP_SYNC)){
-        qDebug()<< "CMD_NTP_SYNC";
         cut = msg.indexOf(':', 0);
         msg = msg.right(msg.length()-cut-1);
-        //TODO: do ntp sync, m_ntpsync->sync(msg);
+        QDateTime stime = QDateTime::fromString(msg, DATETIME_NOW_FORMAT);
+        QDateTime curtime = QDateTime::currentDateTime();
+        qint64 diffSeconds = curtime.secsTo(stime);
+        if (abs(diffSeconds)>1){
+            qDebug()<< "===== Do ntp time sync";
+            m_ntpsync->sync(fromAddr);
+        }else{
+            //No need to do NTP sync
+#if (TEST_WS==1)
+            QString target = QString("%1:%2").arg(fromAddr.toString(), QString::number(fromPort));
+            qDebug()<< "===== Info NTP time is OK: " << target;
+            int rc = m_wsserver->sendTextMessage(QString("%1").arg(CMD_NTP_SYNC_OK), target);
+            if (rc<=0){
+                qDebug() << " Info " << fromAddr.toString() << " Fail!!";
+            }
+#endif
+        }
     }else if (act.startsWith(CMD_SERIAL_ADD)){
         // TODO: create serial and bind to TCP server
         // idx:comport:BaudRate:DataBits:Parity:StopBits:FlowControl

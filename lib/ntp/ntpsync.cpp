@@ -62,31 +62,29 @@ void NtpSync::sync(QString server)
     QHostAddress address;// = QHostAddress(server);
     if (address.setAddress(server)){
         //server: ip address
-        if (!m_ntpclient->sendRequest(address, 123)) {
-            qDebug() << "Failed to send NTP request: " << m_ntpclient->socket()->errorString();
-        }
+        sync(address);
+        // if (!m_ntpclient->sendRequest(address, 123)) {
+        //     qDebug() << "Failed to send NTP request: " << m_ntpclient->socket()->errorString();
+        // }
     }else {
         qDebug() << "Fail to set QHostAddress with " << server ;
     }
 }
 
+void NtpSync::sync(QHostAddress server)
+{
+    if (!m_ntpclient->sendRequest(server, 123)) {
+        qDebug() << "Failed to send NTP request: " << m_ntpclient->socket()->errorString();
+    }
+}
+
 void NtpSync::onReplyReceived(const QHostAddress &address, quint16 port, const NtpReply &reply)
 {
-    qDebug() << "onReplyReceived:" << address.toString() << " port:" << QString::number(port);
-    // qDebug() << "Reply received from " << address.toString() << ":" << QString::number(port) << ": {\n"
-    //        << "    leapIndicator    = " << QString::number(reply.leapIndicator()) << "\n"
-    //        << "    versionNumber    = " << QString::number(reply.versionNumber()) << "\n"
-    //        << "    mode             = " << QString::number(reply.mode()) << "\n"
-    //        << "    stratum          = " << QString::number(reply.stratum()) << "\n"
-    //        << "    pollInterval     = " << QString::number(reply.pollInterval()) << "s\n"
-    //        << "    precision        = " << QString::number(reply.precision(), 10, 15) << "s\n"
-    //        << "    referenceTime    = " << reply.referenceTime().toString(Qt::ISODateWithMs) << "\n"
-    //        << "    originTime       = " << reply.originTime().toString(Qt::ISODateWithMs) << "\n"
-    //        << "    receiveTime      = " << reply.receiveTime().toString(Qt::ISODateWithMs) << "\n"
-    //        << "    transmitTime     = " << reply.transmitTime().toString(Qt::ISODateWithMs) << "\n"
-    //        << "    destinationTime  = " << reply.destinationTime().toString(Qt::ISODateWithMs) << "\n"
-    //        << "    roundTripDelay   = " << QString::number(reply.roundTripDelay()) << "ms\n"
-    //        << "    localClockOffset = " << QString::number(reply.localClockOffset()) << "ms\n"
-    //        << "}\n";
-    setSystemTime(reply.destinationTime());
+    qDebug() << "NtpSync onReplyReceived:" << address.toString() << " port:" << QString::number(port);
+    //qDebug() << "originTime:" << reply.originTime();
+    qDebug() << "receiveTime:" << reply.receiveTime();
+    //qDebug() << "transmitTime:" << reply.transmitTime();
+    //qDebug() << "destinationTime:" << reply.destinationTime();
+
+    setSystemTime(reply.receiveTime());
 }

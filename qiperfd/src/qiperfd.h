@@ -45,7 +45,7 @@
 #endif
 
 #include "../lib/ntp/ntpserver.h"
-// #include "../lib/ntp/ntpsync.h"
+#include "../lib/ntp/ntpsync.h"
 
 class QIperfd : public QObject
 {
@@ -110,7 +110,7 @@ signals:
 protected:
 //    void closeEvent(QCloseEvent *event);
 private slots:
-    void onWSactMessage(QString msg); //procress websocket action message
+    void onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPort); //procress websocket action message
     void onNewClient(QHostAddress addr); //
 
 private:
@@ -171,7 +171,7 @@ private:
     IcmpPing *m_icmpping;
     bool bNtpserver; // enable NTP server
     NtpServer *m_ntpserver;
-    // NtpSync *m_ntpsync;
+    NtpSync *m_ntpsync;
     void initiperf2(QString tmp, QString tmp_path, QString arch);
     void initiperf21(QString tmp, QString tmp_path, QString arch);
     void initiperf22(QString tmp, QString tmp_path, QString arch);

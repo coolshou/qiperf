@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QDateTime>
+#include <QHostAddress>
+
 #if defined(Q_OS_WIN32)
 #include <windows.h>
 #endif
@@ -19,6 +21,7 @@ public:
     explicit NtpSync(QObject *parent = nullptr);
     void setSystemTime(const QDateTime &dateTime);
     void sync(QString server);
+    void sync(QHostAddress server);
 public slots:
     void onReplyReceived(const QHostAddress &address, quint16 port, const NtpReply &reply);
 signals:

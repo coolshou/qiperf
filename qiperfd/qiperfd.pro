@@ -13,10 +13,11 @@ CONFIG -= app_bundle
 
 #include(../jcon-cpp.pri)
 include(../qiperf.pri)
+include(../lib/qntp/qntp.pri)
 unix {
 include(../QCtrlSignals/qctrlsignals.pri)
 #include(../sigwatch.pri)
-#include(../lib/qntp/qntp.pri)
+
 }
 unix:!android {
     #LIBS += -lsystemd
@@ -53,6 +54,7 @@ LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
 
 SOURCES += \
     ../lib/ntp/ntpserver.cpp \
+    ../lib/ntp/ntpsync.cpp \
     ../src/endpointtype.cpp \
     ../src/myfunc.cpp \
     ../src/icmpping.cpp \
@@ -74,7 +76,7 @@ SOURCES += \
     src/ssh/sshtask.cpp \
     src/udpsrv.cpp \
     src/wsserver.cpp
-# ../lib/ntp/ntpsync.cpp \
+
 #$$PWD/../src/sighandler.cpp
 
 # Default rules for deployment.
@@ -84,6 +86,7 @@ else: unix:!android: target.path = /opt/qiperf/bin
 
 HEADERS += \
     ../lib/ntp/ntpserver.h \
+    ../lib/ntp/ntpsync.h \
     ../src/endpointtype.h \
     ../src/myfunc.h \
     ../src/icmpping.h \
@@ -108,7 +111,7 @@ HEADERS += \
     src/udpsrv.h \
     src/version.h \
     src/wsserver.h
-    # ../lib/ntp/ntpsync.h \
+    #
     #$$PWD/../src/sighandler.h
 
 android {

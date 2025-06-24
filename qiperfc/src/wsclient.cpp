@@ -97,6 +97,8 @@ qint64 WSClient::sendText(QString message)
         if (rc <=0){
             qDebug() << "error sendText size=" << rc << ", " << message;
         }
+    }else{
+        qDebug() << "m_webSocket not isValid";
     }
     return rc;
 }
@@ -119,10 +121,12 @@ bool WSClient::isConnected()
 
 void WSClient::setDatapath(QString datapath)
 {
-    if (!datapath.endsWith(QDir::separator())) {
+    if (!datapath.isEmpty()){
+        if (!datapath.endsWith(QDir::separator())) {
             datapath.append(QDir::separator());
+        }
+        m_datapath = QDir::toNativeSeparators(datapath);
     }
-    m_datapath = QDir::toNativeSeparators(datapath);
 }
 
 void WSClient::close()
@@ -140,7 +144,7 @@ void WSClient::onConnected()
 //!
 void WSClient::onDisconnected()
 {
-//    qDebug() << "WebSocket Disconnected: " << m_url;
+    qDebug() << "WebSocket Disconnected: " << m_serverip;
     emit disconnected(m_serverip);
 }
 
@@ -187,6 +191,7 @@ void WSClient::onTextMessageReceived(QString message)
             cut2 = message.indexOf(':', 0);
             QString smode = message.left(cut2); // S: server/ C: client mode
             message = message.right(message.length()-cut2-1); // key
+            qDebug() << "CMD_IPERF_STARTED:" << smode << " msg:" << message;
             emit iperfStarted(smode, message);
         } else if (act.startsWith(CMD_IPERF_STOPED)){
             cut2 = message.indexOf(':', 0);  //
@@ -225,6 +230,9 @@ void WSClient::onTextMessageReceived(QString message)
             emit serialopened(m_idx, from, message);
         } else if (act.startsWith(CMD_SSH_OPENED)){
             emit sshopened(m_idx, from, message);
+        } else if (act.startsWith(CMD_NTP_SYNC_OK)){
+            qDebug() << "CMD_NTP_SYNC_OK:" << message << " == from:" << from;
+            emit ntpsynced(true, from);
         } else {
             qDebug() << "Message received: act:" << act <<" refrow:" << m_idx <<
                 " :"<< message << ": "<< from;

@@ -120,13 +120,13 @@ qint64 WSServer::sendTextMessage(QString msg, QString target)
     qint64 rc=0;
     for(auto &t: as_const(ts)) {
         if (m_clients.contains(t)) {
-//            onLog("TODO: send:" + msg + " back to " + t);
             m_sendtype=WSServer::sendtype::text;
-//            qDebug() << "[sendTextMessage]TO: " << t <<" : " << msg;
             rc= m_clients.value(t)->sendTextMessage(msg);
             if (rc<=0){
                 qDebug() << "ERROR sendText to " << t << " size=" << rc << " : " << msg;
             }
+        }else{
+            qDebug() << "m_clients do not have:" << t;
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
@@ -219,7 +219,8 @@ void WSServer::onClosed()
 //! [processTextMessage]
 void WSServer::processTextMessage(QString message)
 {
-    emit actMessage(message);
+    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    emit actMessage(message, pClient->peerAddress(), pClient->peerPort());
 }
 //! [processTextMessage]
 
@@ -237,15 +238,15 @@ void WSServer::processBinaryMessage(QByteArray message)
 //! [socketDisconnected]
 void WSServer::socketDisconnected()
 {
-    onLog("Client disconnected");
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient)
     {
         QString sfrom = pClient->peerAddress().toString();
         QString sfromPort = QString::number(pClient->peerPort());
         QString speer= QString("%1:%2").arg(sfrom, sfromPort);
+        onLog("Client disconnected:"+speer);
         if (m_clients.contains(speer)) {
-            // qDebug() << "socketDisconnected: remove " << speer;
+            qDebug() << "m_clients: remove: " << speer;
             m_clients.remove(speer);
         }else{
             qDebug() << "m_clients does not have " << speer;

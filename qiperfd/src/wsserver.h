@@ -97,7 +97,7 @@ public slots:
     void sendTextResult(QString msg);
     bool setIfname(QString mgr_ifname);
 signals:
-    void actMessage(QString msg);
+    void actMessage(QString msg , QHostAddress fromAddr, quint16 fromPort);
     void newClient(QHostAddress addr);
     void onUpdateInterface();
 

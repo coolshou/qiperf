@@ -114,6 +114,7 @@ signals:
     void updateInterval(int interval);
     void reportTP(int idx, double tp, double lostrate);
     void setTPStop();
+    void doNtpSync(QString target);
 
 protected:
     void closeEvent(QCloseEvent *event)override;
@@ -166,6 +167,8 @@ private slots:
     void onSSHClosed(QString idx);
     void showView();
     void onAutoLoadFile(QString idx, QString filename, QString savepath);
+    void onDoNtpSync(QString target);
+    void onNtpsynced(bool bOK, QString target);
 private:
     Ui::MainWindow *ui;
     QList<QPluginLoader*> pluginLoaders;
@@ -186,7 +189,11 @@ private:
     int iExtraWait = 5;
 //    PipeClient *pclient;
 #if (TEST_WS==1)
-    WSClient *ws;
+    // WSClient *m_ws;
+    QMap<QString, WSClient*> m_ws;
+    QList<QString> m_ntps; // collect of synced ntp clients
+    int m_maxntpsync=5;
+    QMap<QString, int> m_ntpfail; // collesct of sync fail client, try times
 #endif
     UdpReceiver *m_receiver;
     EndPointMgr *m_endpointmgr;
