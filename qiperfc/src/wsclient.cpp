@@ -144,7 +144,7 @@ void WSClient::onConnected()
 //!
 void WSClient::onDisconnected()
 {
-    qDebug() << "WebSocket Disconnected: " << m_serverip;
+    // qDebug() << "WebSocket Disconnected: " << m_serverip;
     emit disconnected(m_serverip);
 }
 
@@ -171,7 +171,6 @@ void WSClient::onTextMessageReceived(QString message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     QString from = pClient->peerAddress().toString();
-    // pClient->localAddress().toString();
 
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8(), &error);
@@ -231,7 +230,6 @@ void WSClient::onTextMessageReceived(QString message)
         } else if (act.startsWith(CMD_SSH_OPENED)){
             emit sshopened(m_idx, from, message);
         } else if (act.startsWith(CMD_NTP_SYNC_OK)){
-            qDebug() << "CMD_NTP_SYNC_OK:" << message << " == from:" << from;
             emit ntpsynced(true, from);
         } else {
             qDebug() << "Message received: act:" << act <<" refrow:" << m_idx <<

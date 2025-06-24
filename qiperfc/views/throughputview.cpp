@@ -275,6 +275,7 @@ void ThroughputView::onUpdateTPCfg(QByteArray tpcfg)
 
 void ThroughputView::onUpdateTPUnit(QString suint)
 {
+    //this update by options/iperf/throughput unit
     m_tpmgr->setTPUint(suint);
     m_tpplot->setTPUint(suint);
 }
