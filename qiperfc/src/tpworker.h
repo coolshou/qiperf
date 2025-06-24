@@ -67,6 +67,8 @@ private:
     QMap<QString, int> m_status_server; // store server status, 0: init, 1: running, 2: error?
     QMap<QString, int> m_status_client; // store client status, 0: init, 1: running, 2: error?
 
+    bool waitServerReady();
+    bool waitClientReady();
 };
 
 #endif // TPWORKER_H
