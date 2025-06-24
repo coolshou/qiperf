@@ -10,6 +10,10 @@
 #include <QThread>
 #include <QRegularExpression>
 
+#include <ctime>      // For std::time_t, std::tm, std::time, std::localtime
+#include <iomanip>    // For std::put_time
+#include <sstream>    // For std::ostringstream
+
 #include "../src/tpmgrdata.h"
 
 #include <QDebug>
