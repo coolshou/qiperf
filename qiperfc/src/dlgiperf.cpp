@@ -591,12 +591,12 @@ void DlgIperf::onMSSvalueChanged(int value)
 void DlgIperf::showManagement(bool show)
 {
     if (show){
-        setMinimumSize(465,540);
+        setMinimumSize(465,664);
     }
     ui->wManagement->setVisible(show);
     if (!show){
-        setMinimumSize(465,462);
-        resize(465, 462);
+        setMinimumSize(465,586);
+        resize(465, 586);
     }
 }
 
