@@ -57,7 +57,7 @@ void UdpSrv::onTimeout()
                                        QHostAddress::Broadcast, m_port);
                                        //m_baddr, m_port);
         if (length<0){
-            qInfo() << "ERROR writeDatagram ("<< QString::number(socket->error()) <<"):" << socket->errorString();
+            qInfo() << "ERROR writeDatagram ("<< QString::number(socket->error()) <<"):" << socket->errorString() << " Broadcast on port " << QString::number(m_port) << " msg:" << tmp;
             return;
         }
         // }else if (length != tmp.toUtf8().length()){
