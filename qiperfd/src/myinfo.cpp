@@ -593,13 +593,13 @@ QString MyInfo::getAdapterName(const QString &description) {
     HRESULT hres;
     hres = CoInitializeEx(0, COINIT_MULTITHREADED);
     if (FAILED(hres)) {
-        qWarning() << "Failed to initialize COM library";
+        qWarning() << "[getAdapterName]Failed to initialize COM library";
         return QString();
     }
 
     hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
     if (FAILED(hres)) {
-        qWarning() << "Failed to initialize security";
+        qWarning() << "[getAdapterName]Failed to initialize security";
         CoUninitialize();
         return QString();
     }
@@ -607,7 +607,7 @@ QString MyInfo::getAdapterName(const QString &description) {
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
     if (FAILED(hres)) {
-        qWarning() << "Failed to create IWbemLocator object";
+        qWarning() << "[getAdapterName]Failed to create IWbemLocator object";
         CoUninitialize();
         return QString();
     }
@@ -616,7 +616,7 @@ QString MyInfo::getAdapterName(const QString &description) {
 //    hres = pLoc->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
     hres = pLoc->ConnectServer(SysAllocString(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
     if (FAILED(hres)) {
-        qWarning() << "Could not connect to WMI";
+        qWarning() << "[getAdapterName]Could not connect to WMI";
         pLoc->Release();
         CoUninitialize();
         return QString();
@@ -624,7 +624,7 @@ QString MyInfo::getAdapterName(const QString &description) {
 
     hres = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
     if (FAILED(hres)) {
-        qWarning() << "Could not set proxy blanket";
+        qWarning() << "[getAdapterName]Could not set proxy blanket";
         pSvc->Release();
         pLoc->Release();
         CoUninitialize();
@@ -636,7 +636,7 @@ QString MyInfo::getAdapterName(const QString &description) {
     hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT * FROM Win32_NetworkAdapter"), WBEM_FLAG_FORWARD_ONLY |
                            WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
-        qWarning() << "Query for network adapters failed";
+        qWarning() << "[getAdapterName]Query for network adapters failed";
         pSvc->Release();
         pLoc->Release();
         CoUninitialize();
@@ -733,13 +733,13 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     HRESULT hres;
     hres = CoInitializeEx(0, COINIT_MULTITHREADED);
     if (FAILED(hres)) {
-        qWarning() << "Failed to initialize COM library:" << getLastErrorAsString();
+        qWarning() << "[getMotherboardInfo]Failed to initialize COM library:" << getLastErrorAsString();
         return;
     }
 
     hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
     if (FAILED(hres)) {
-        qWarning() << "Failed to initialize security:" << getLastErrorAsString();
+        qWarning() << "[getMotherboardInfo]Failed to initialize security:" << getLastErrorAsString();
         CoUninitialize();
         return;
     }
@@ -747,7 +747,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
     if (FAILED(hres)) {
-        qWarning() << "Failed to create IWbemLocator object:" << getLastErrorAsString();
+        qWarning() << "[getMotherboardInfo]Failed to create IWbemLocator object:" << getLastErrorAsString();
         CoUninitialize();
         return;
     }
@@ -755,7 +755,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     IWbemServices *pSvc = NULL;
     hres = pLoc->ConnectServer(SysAllocString(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
     if (FAILED(hres)) {
-        qWarning() << "Could not connect to WMI:" << getLastErrorAsString();
+        qWarning() << "[getMotherboardInfo]Could not connect to WMI:" << getLastErrorAsString();
         pLoc->Release();
         CoUninitialize();
         return;
@@ -763,7 +763,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
 
     hres = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
     if (FAILED(hres)) {
-        qWarning() << "Could not set proxy blanket:" << getLastErrorAsString();
+        qWarning() << "[getMotherboardInfo]Could not set proxy blanket:" << getLastErrorAsString();
         pSvc->Release();
         pLoc->Release();
         CoUninitialize();
@@ -773,7 +773,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     IEnumWbemClassObject* pEnumerator = NULL;
     hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT * FROM Win32_BaseBoard"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
-        qWarning() << "Query for Win32_BaseBoard failed:" << getLastErrorAsString();
+        qWarning() << "[getMotherboardInfo]Query for Win32_BaseBoard failed:" << getLastErrorAsString();
         pSvc->Release();
         pLoc->Release();
         CoUninitialize();
@@ -836,13 +836,13 @@ QString MyInfo::getCPUModel() {
     HRESULT hres;
     hres = CoInitializeEx(0, COINIT_MULTITHREADED);
     if (FAILED(hres)) {
-        qWarning() << "Failed to initialize COM library:" << getLastErrorAsString();
+        qWarning() << "[getCPUModel]Failed to initialize COM library:" << getLastErrorAsString();
         return QString();
     }
 
     hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
     if (FAILED(hres)) {
-        qWarning() << "Failed to initialize security:" << getLastErrorAsString();
+        qWarning() << "[getCPUModel]Failed to initialize security:" << getLastErrorAsString();
         CoUninitialize();
         return QString();
     }
@@ -850,7 +850,7 @@ QString MyInfo::getCPUModel() {
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
     if (FAILED(hres)) {
-        qWarning() << "Failed to create IWbemLocator object:" << getLastErrorAsString();
+        qWarning() << "[getCPUModel]Failed to create IWbemLocator object:" << getLastErrorAsString();
         CoUninitialize();
         return QString();
     }
@@ -858,7 +858,7 @@ QString MyInfo::getCPUModel() {
     IWbemServices *pSvc = NULL;
     hres = pLoc->ConnectServer(SysAllocString(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
     if (FAILED(hres)) {
-        qWarning() << "Could not connect to WMI:" << getLastErrorAsString();
+        qWarning() << "[getCPUModel]Could not connect to WMI:" << getLastErrorAsString();
         pLoc->Release();
         CoUninitialize();
         return QString();
@@ -866,7 +866,7 @@ QString MyInfo::getCPUModel() {
 
     hres = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
     if (FAILED(hres)) {
-        qWarning() << "Could not set proxy blanket:" << getLastErrorAsString();
+        qWarning() << "[getCPUModel]Could not set proxy blanket:" << getLastErrorAsString();
         pSvc->Release();
         pLoc->Release();
         CoUninitialize();
@@ -876,7 +876,7 @@ QString MyInfo::getCPUModel() {
     IEnumWbemClassObject* pEnumerator = NULL;
     hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT * FROM Win32_Processor"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
-        qWarning() << "Query for Win32_Processor failed:" << getLastErrorAsString();
+        qWarning() << "[getCPUModel]Query for Win32_Processor failed:" << getLastErrorAsString();
         pSvc->Release();
         pLoc->Release();
         CoUninitialize();
@@ -909,13 +909,13 @@ QString MyInfo::getTotalMemory() {
     HRESULT hres;
     hres = CoInitializeEx(0, COINIT_MULTITHREADED);
     if (FAILED(hres)) {
-        qWarning() << "Failed to initialize COM library:" << getLastErrorAsString();
+        qWarning() << "[getTotalMemory]Failed to initialize COM library:" << getLastErrorAsString();
         return QString();
     }
 
     hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
     if (FAILED(hres)) {
-        qWarning() << "Failed to initialize security:" << getLastErrorAsString();
+        qWarning() << "[getTotalMemory]Failed to initialize security:" << getLastErrorAsString();
         CoUninitialize();
         return QString();
     }
@@ -923,7 +923,7 @@ QString MyInfo::getTotalMemory() {
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
     if (FAILED(hres)) {
-        qWarning() << "Failed to create IWbemLocator object:" << getLastErrorAsString();
+        qWarning() << "[getTotalMemory]Failed to create IWbemLocator object:" << getLastErrorAsString();
         CoUninitialize();
         return QString();
     }
@@ -931,7 +931,7 @@ QString MyInfo::getTotalMemory() {
     IWbemServices *pSvc = NULL;
     hres = pLoc->ConnectServer(SysAllocString(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
     if (FAILED(hres)) {
-        qWarning() << "Could not connect to WMI:" << getLastErrorAsString();
+        qWarning() << "[getTotalMemory]Could not connect to WMI:" << getLastErrorAsString();
         pLoc->Release();
         CoUninitialize();
         return QString();
@@ -939,7 +939,7 @@ QString MyInfo::getTotalMemory() {
 
     hres = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
     if (FAILED(hres)) {
-        qWarning() << "Could not set proxy blanket:" << getLastErrorAsString();
+        qWarning() << "[getTotalMemory]Could not set proxy blanket:" << getLastErrorAsString();
         pSvc->Release();
         pLoc->Release();
         CoUninitialize();
@@ -949,7 +949,7 @@ QString MyInfo::getTotalMemory() {
     IEnumWbemClassObject* pEnumerator = NULL;
     hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT * FROM Win32_OperatingSystem"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
-        qWarning() << "Query for Win32_OperatingSystem failed:" << getLastErrorAsString();
+        qWarning() << "[getTotalMemory]Query for Win32_OperatingSystem failed:" << getLastErrorAsString();
         pSvc->Release();
         pLoc->Release();
         CoUninitialize();
