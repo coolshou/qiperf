@@ -56,6 +56,7 @@ public slots:
     void onPaste() override;
     void onDelete() override;
     void onCopyText() override;
+
     void onAddIperf();
     void onPairEdit();
     void onPairDelete();
@@ -73,6 +74,7 @@ public slots:
     void setShowGroupTotal(bool bShow);
     void setShowGroupPair(bool bShow);
     void setShowGroupDir(bool bShow);
+    void setShowGroupComment(bool bShow);
     void getRawData(bool checked);
     void onSaveImg(bool checked);
     void setXRangeUpper(double upper);
@@ -115,17 +117,24 @@ private:
     QAction *m_actionCopyText;
     QAction *m_actionClientArgs;
     QAction *m_actionServerArgs;
+    QMenu *m_rightmenu;
+    QMenu *m_menuGroup;
     QAction *m_actionGroupTotal; // group all
     QAction *m_actionGroupPair; // group by iperf test pair
     QAction *m_actionGroupDir; // group by direction
+    QAction *m_actionGroupComment; // group by comment
     QAction *m_actionSaveImg;
     QAction *m_actionRawData;
+    QAction *m_actionAbout;
     DlgIperf * dlgiperf;  // dialog of iperf config
     TPDirDelegate *tpdirdelegate;
     TPFoldingDelegate *tpfoldingdelegate;
     NoWrapDelegate *nowrapdelegate;
     QDateTime m_starttime;
-    bool m_showgrouptotal;
+    bool m_showgroupTotal=false;
+    bool m_showgroupPair=false;
+    bool m_showgroupDir=false;
+    bool m_showgroupComment=false;
     QString m_tpunit;
     IperfWrapper *m_iperfwrapper;
     QScrollBar *m_vLegendScrollBar;

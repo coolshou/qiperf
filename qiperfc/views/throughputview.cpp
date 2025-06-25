@@ -21,7 +21,7 @@ ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete
                                QAction *aCopyText,  bool showgroup, QString sunit,
                                QWidget *parent) : AbstractView(parent)
     , ui(new Ui::ThroughputView), m_actionCopy(aCopy),m_actionPaste(aPaste),
-    m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_showgrouptotal(showgroup),
+    m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_showgroupTotal(showgroup),
     m_tpunit(sunit)
 //, m_main(main)
 {
@@ -103,7 +103,7 @@ QDateTime ThroughputView::getStartTime()
 bool ThroughputView::getTP(QString &tpvalue, QString &lostrate)
 {
     // get throughput
-    if (m_showgrouptotal){
+    if (m_showgroupTotal){
         TP *tp = m_tpmgr->getRootItem();
         tpvalue = tp->getThroughput();
         lostrate = tp->getLostRate();
@@ -283,25 +283,45 @@ void ThroughputView::onUpdateTPUnit(QString suint)
 void ThroughputView::setShowGroupTotal(bool bShow)
 {
     //set show group Total
-    m_showgrouptotal = bShow;
-    m_tpmgr->setShowGroup(m_showgrouptotal);
+    m_showgroupTotal = bShow;
+    m_showgroupPair = false;
+    m_showgroupDir = false;
+    m_showgroupComment = false;
+    m_tpmgr->setShowGroup(m_showgroupTotal);
     // TODO: m_tpplot
-    m_tpplot->setShowGroup(m_showgrouptotal);
-    emit showGroup(m_showgrouptotal);
+    m_tpplot->setShowGroup(m_showgroupTotal);
+    emit showGroup(m_showgroupTotal);
 }
 
 void ThroughputView::setShowGroupPair(bool bShow)
 {
-    Q_UNUSED(bShow)
+    m_showgroupTotal = false;
+    m_showgroupPair = bShow;
+    m_showgroupDir = false;
+    m_showgroupComment = false;
     //TODO: set show group iperf test pair
     qDebug() << "//TODO: set show group iperf test pair";
 }
 
 void ThroughputView::setShowGroupDir(bool bShow)
 {
-    Q_UNUSED(bShow)
+    m_showgroupTotal = false;
+    m_showgroupPair = false;
+    m_showgroupDir = bShow;
+    m_showgroupComment = false;
     //TODO: set show group direction
     qDebug() << "//TODO: set show group direction";
+
+}
+
+void ThroughputView::setShowGroupComment(bool bShow)
+{
+    m_showgroupTotal = false;
+    m_showgroupPair = false;
+    m_showgroupDir = false;
+    m_showgroupComment = bShow;
+    //TODO: set show group Comment
+    qDebug() << "//TODO: set show group Comment";
 
 }
 
@@ -380,6 +400,11 @@ void ThroughputView::initMenus()
     m_tpmenu->addAction(m_actionClientArgs);
     m_tpmenu->addAction(m_actionServerArgs);
 
+    //right menu
+    m_rightmenu = new QMenu(this);
+    m_menuGroup = new QMenu("Group", this);
+    m_rightmenu->addMenu(m_menuGroup);
+
     m_actionGroupTotal = new QAction("Total");
     m_actionGroupTotal->setCheckable(true);
     connect(m_actionGroupTotal, &QAction::triggered, this, &ThroughputView::setShowGroupTotal);
@@ -389,30 +414,38 @@ void ThroughputView::initMenus()
     m_actionGroupDir = new QAction("Direction(TODO)");
     m_actionGroupDir->setCheckable(true);
     connect(m_actionGroupDir, &QAction::triggered, this, &ThroughputView::setShowGroupDir);
+    m_actionGroupComment = new QAction("Comment(TODO)");
+    m_actionGroupComment->setCheckable(true);
+    connect(m_actionGroupComment, &QAction::triggered, this, &ThroughputView::setShowGroupComment);
 
     m_actionRawData = new QAction("Copy plotchart Raw Data");
     connect(m_actionRawData, &QAction::triggered, this, &ThroughputView::getRawData);
     m_actionSaveImg = new QAction("Save to Image");
     connect(m_actionSaveImg, &QAction::triggered, this, &ThroughputView::onSaveImg);
+    m_actionAbout = new QAction("About");
+    connect(m_actionAbout, &QAction::triggered, this, &ThroughputView::aboutQCustomPlot);
+
+    m_menuGroup->addAction(m_actionGroupTotal);
+    m_menuGroup->addAction(m_actionGroupPair);
+    m_menuGroup->addAction(m_actionGroupDir);
+    m_menuGroup->addAction(m_actionGroupComment);
+    m_rightmenu->addSeparator();
+    m_rightmenu->addAction(m_actionSaveImg);
+    m_rightmenu->addAction(m_actionAbout);
 }
 
 void ThroughputView::onPlotContextMenuRequest(QPoint pos)
 {
-    QMenu *menu = new QMenu(this);
-    menu->setAttribute(Qt::WA_DeleteOnClose);
-    QMenu *menuGroup = new QMenu("Group", this);
-    menuGroup->setAttribute(Qt::WA_DeleteOnClose);
-    menu->addMenu(menuGroup);
-    m_actionGroupTotal->setChecked(m_showgrouptotal);
-    menuGroup->addAction(m_actionGroupTotal);
-    menu->addSeparator();
-    menu->addAction(m_actionSaveImg);
+    m_actionGroupTotal->setChecked(m_showgroupTotal);
+    m_actionGroupPair->setChecked(m_showgroupPair);
+    m_actionGroupDir->setChecked(m_showgroupDir);
+    m_actionGroupComment->setChecked(m_showgroupComment);
+
     if (m_tpplot->selectedGraphs().count()>0){
-        menu->addAction(m_actionRawData);
+        m_rightmenu->insertAction(m_actionAbout, m_actionRawData);
     }
-    menu->addSeparator();
-    menu->addAction("About", this, &ThroughputView::aboutQCustomPlot);
-    menu->popup(m_tpplot->mapToGlobal(pos));
+    m_rightmenu->insertSeparator(m_actionAbout);
+    m_rightmenu->popup(m_tpplot->mapToGlobal(pos));
 }
 
 void ThroughputView::onSelectedTPitem(QString idx)
@@ -629,7 +662,7 @@ void ThroughputView::initThroughputChart()
 {
     // throughput chart
     m_vLegendScrollBar = new QScrollBar(Qt::Vertical, this);
-    m_tpplot=new TPPlot(m_showgrouptotal, m_tpunit, ui->widget_console);
+    m_tpplot=new TPPlot(m_showgroupTotal, m_tpunit, ui->widget_console);
     // m_tpplot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     qDebug() << "enable openGl:" << m_tpplot->openGl();
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -643,7 +676,7 @@ void ThroughputView::initThroughputChart()
     // m_vLegendScrollBar->setRange(0, m_tpplot->legend->itemCount() - 10);
     onVLegendScrollBarRange(m_tpplot->legend->itemCount());
 
-    m_tpmgr = new TPMgr(m_showgrouptotal, ui->tv_throughput, m_tpunit);
+    m_tpmgr = new TPMgr(m_showgroupTotal, ui->tv_throughput, m_tpunit);
     // connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     // connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
