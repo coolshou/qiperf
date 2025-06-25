@@ -22,10 +22,14 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &dlgOption::onReject);
     connect(ui->sb_width_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onWidthChange);
     connect(ui->sb_heigth_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onHeigthChange);
-#if QT_VERSION < QT_VERSION_CHECK(6,9,0)  // < 6.9
+#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
     connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
-#endif
     connect(ui->cb_IgnoreWrongInterval, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onIgnoreWrongIntervalChanged);
+#else
+    connect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
+    connect(ui->cb_IgnoreWrongInterval, &QCheckBox::checkStateChanged, this, &dlgOption::onIgnoreWrongIntervalChanged);
+#endif
+
     connect(ui->cb_TPUnit, &QComboBox::currentTextChanged, this, &dlgOption::onTPUnitChanged);
     ui->tabWidget->setCurrentIndex(0);
 }
@@ -186,12 +190,17 @@ QStringList dlgOption::getFontStyles(QString fontfamily)
 
 void dlgOption::setShowGroup(bool bShow)
 {
-// #if QT_VERSION < QT_VERSION_CHECK(6,9,0)  // < 6.9
+#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
     disconnect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
+#else
+    disconnect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
+#endif
 // #endif
     ui->cb_TPGroup->setChecked(bShow);
-#if QT_VERSION < QT_VERSION_CHECK(6,9,0)  // < 6.9
+#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
     connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
+#else
+    connect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
 #endif
 }
 
