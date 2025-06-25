@@ -247,7 +247,8 @@ void TpWorker::work()
                     break;
                 }
                 itimeout--;
-                emit updateStatus(" wait WSClient connect to client: "+s);
+                emit updateStatus(" wait WSClient connect to client: "+s +
+                                  " ("+ QString::number(itimeout) +")");
             }
             if (itimeout<=0){
                 emit errorStop(1,"ERROR: Wait connect to " +s+ "timeout");
