@@ -386,7 +386,7 @@ void QIperfd::startAll()
     for (auto it = m_threads.begin(); it != m_threads.end(); ++it)
     {
         start(it.key());
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
 void QIperfd::stop(int idx)
