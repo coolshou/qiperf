@@ -1,9 +1,17 @@
+qiperf (0.12.11406.25-1) unstable; urgency=medium
+
+  * Update throughput test to TpWorker use in QThread
+  * Add NTP time sync between console & qiperfd
+  * iperf3 add --timestamps arg
+
+ -- coolshou <coolshou2060@gmail.com>  Wed, 25 Jun 2025 10:00:00 +0800
+
 qiperf (0.12.11406.20-1) unstable; urgency=medium
 
   * Add: qiperfd support remote restart qiperfd by qiperfc
   * fix set Test Duration = 0 did not set -t 0
 
- -- coolshou <coolshou2060@gmail.com>  Thu, 19 Jun 2025 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Fri, 20 Jun 2025 10:00:00 +0800
 
 qiperf (0.12.11406.17-1) unstable; urgency=medium
 
