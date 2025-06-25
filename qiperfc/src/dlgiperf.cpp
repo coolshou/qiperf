@@ -182,7 +182,7 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
             ui->leTimeStamp->setText(serverObj["timestamps"].toString());
         }else{
             ui->cbTimeStamp->setChecked(false);
-            ui->leTimeStamp->setText("");
+            ui->leTimeStamp->setText("%m%d%H%M%S");
         }
         // client
         if ((!clientObj["manager"].toString().isEmpty()) &&
@@ -481,6 +481,7 @@ void DlgIperf::ChangeVersion(const QString ver)
         ui->cbTimeStamp->setChecked(false);
     }else{
         ui->wTimeStamp->setEnabled(true);
+        ui->leTimeStamp->setText("%m%d%H%M%S");
     }
 }
 

@@ -736,7 +736,11 @@ void IperfWrapper::work()
 // int IperfWrapper::getTimeStempLength(QString timestempformat)
 int IperfWrapper::getTimeStempLength(const std::string& format_string)
 {
-    //timestemp in %Y = 2025 %m = Month (01-12) %d = Day of the month as a decimal number (01-31)
+    //timestemp in
+    // %Y = Year (2025)
+    // %y = Year in 2 decimal number (2025 = 25)
+    // %m = Month (01-12)
+    // %d = Day of the month as a decimal number (01-31)
     // %H = Hour (24-hour clock) as a decimal number (00-23)
     // %M = Minute as a decimal number (00-59)
     // %S = Second as a decimal number (00-60)

@@ -887,6 +887,9 @@
          </item>
          <item>
           <widget class="QLineEdit" name="leTimeStamp">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;%Y = Year (2025)&lt;/p&gt;&lt;p&gt;%y = Year in 2 decimal number (2025 = 25)&lt;/p&gt;&lt;p&gt;%m = Month (01-12)&lt;/p&gt;&lt;p&gt;%d = Day of the month as a decimal number (01-31)&lt;/p&gt;&lt;p&gt;%H = Hour (24-hour clock) as a decimal number (00-23)&lt;/p&gt;&lt;p&gt;%M = Minute as a decimal number (00-59)&lt;/p&gt;&lt;p&gt;%S = Second as a decimal number (00-60)&lt;/p&gt;&lt;p&gt;%F: Equivalent to %Y-%m-%d&lt;/p&gt;&lt;p&gt;%T: Equivalent to %H:%M:%S&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
            <property name="text">
             <string>%m%d%H%M%S</string>
            </property>
