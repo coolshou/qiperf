@@ -21,7 +21,7 @@ ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete
                                QAction *aCopyText,  bool showgroup, QString sunit,
                                QWidget *parent) : AbstractView(parent)
     , ui(new Ui::ThroughputView), m_actionCopy(aCopy),m_actionPaste(aPaste),
-    m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_showgroup(showgroup),
+    m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_showgrouptotal(showgroup),
     m_tpunit(sunit)
 //, m_main(main)
 {
@@ -103,7 +103,7 @@ QDateTime ThroughputView::getStartTime()
 bool ThroughputView::getTP(QString &tpvalue, QString &lostrate)
 {
     // get throughput
-    if (m_showgroup){
+    if (m_showgrouptotal){
         TP *tp = m_tpmgr->getRootItem();
         tpvalue = tp->getThroughput();
         lostrate = tp->getLostRate();
@@ -280,14 +280,29 @@ void ThroughputView::onUpdateTPUnit(QString suint)
     m_tpplot->setTPUint(suint);
 }
 
-void ThroughputView::setShowGroup(bool bShow)
+void ThroughputView::setShowGroupTotal(bool bShow)
 {
-    //set show group
-    m_showgroup = bShow;
-    m_tpmgr->setShowGroup(m_showgroup);
+    //set show group Total
+    m_showgrouptotal = bShow;
+    m_tpmgr->setShowGroup(m_showgrouptotal);
     // TODO: m_tpplot
-    m_tpplot->setShowGroup(m_showgroup);
-    emit showGroup(m_showgroup);
+    m_tpplot->setShowGroup(m_showgrouptotal);
+    emit showGroup(m_showgrouptotal);
+}
+
+void ThroughputView::setShowGroupPair(bool bShow)
+{
+    Q_UNUSED(bShow)
+    //TODO: set show group iperf test pair
+    qDebug() << "//TODO: set show group iperf test pair";
+}
+
+void ThroughputView::setShowGroupDir(bool bShow)
+{
+    Q_UNUSED(bShow)
+    //TODO: set show group direction
+    qDebug() << "//TODO: set show group direction";
+
 }
 
 void ThroughputView::getRawData(bool checked)
@@ -365,9 +380,16 @@ void ThroughputView::initMenus()
     m_tpmenu->addAction(m_actionClientArgs);
     m_tpmenu->addAction(m_actionServerArgs);
 
-    m_actionGroup = new QAction("Group");
-    m_actionGroup->setCheckable(true);
-    connect(m_actionGroup, &QAction::triggered, this, &ThroughputView::setShowGroup);
+    m_actionGroupTotal = new QAction("Total");
+    m_actionGroupTotal->setCheckable(true);
+    connect(m_actionGroupTotal, &QAction::triggered, this, &ThroughputView::setShowGroupTotal);
+    m_actionGroupPair = new QAction("Iperf Pair(TODO)");
+    m_actionGroupPair->setCheckable(true);
+    connect(m_actionGroupPair, &QAction::triggered, this, &ThroughputView::setShowGroupPair);
+    m_actionGroupDir = new QAction("Direction(TODO)");
+    m_actionGroupDir->setCheckable(true);
+    connect(m_actionGroupDir, &QAction::triggered, this, &ThroughputView::setShowGroupDir);
+
     m_actionRawData = new QAction("Copy plotchart Raw Data");
     connect(m_actionRawData, &QAction::triggered, this, &ThroughputView::getRawData);
     m_actionSaveImg = new QAction("Save to Image");
@@ -378,8 +400,11 @@ void ThroughputView::onPlotContextMenuRequest(QPoint pos)
 {
     QMenu *menu = new QMenu(this);
     menu->setAttribute(Qt::WA_DeleteOnClose);
-    m_actionGroup->setChecked(m_showgroup);
-    menu->addAction(m_actionGroup);
+    QMenu *menuGroup = new QMenu("Group", this);
+    menuGroup->setAttribute(Qt::WA_DeleteOnClose);
+    menu->addMenu(menuGroup);
+    m_actionGroupTotal->setChecked(m_showgrouptotal);
+    menuGroup->addAction(m_actionGroupTotal);
     menu->addSeparator();
     menu->addAction(m_actionSaveImg);
     if (m_tpplot->selectedGraphs().count()>0){
@@ -604,7 +629,7 @@ void ThroughputView::initThroughputChart()
 {
     // throughput chart
     m_vLegendScrollBar = new QScrollBar(Qt::Vertical, this);
-    m_tpplot=new TPPlot(m_showgroup, m_tpunit, ui->widget_console);
+    m_tpplot=new TPPlot(m_showgrouptotal, m_tpunit, ui->widget_console);
     // m_tpplot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     qDebug() << "enable openGl:" << m_tpplot->openGl();
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -618,7 +643,7 @@ void ThroughputView::initThroughputChart()
     // m_vLegendScrollBar->setRange(0, m_tpplot->legend->itemCount() - 10);
     onVLegendScrollBarRange(m_tpplot->legend->itemCount());
 
-    m_tpmgr = new TPMgr(m_showgroup, ui->tv_throughput, m_tpunit);
+    m_tpmgr = new TPMgr(m_showgrouptotal, ui->tv_throughput, m_tpunit);
     // connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     // connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);

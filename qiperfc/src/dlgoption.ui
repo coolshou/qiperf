@@ -205,7 +205,7 @@
           <item>
            <widget class="QRadioButton" name="rbTPGroupEach">
             <property name="text">
-             <string>Group each pair</string>
+             <string>Group Iperf Test Pair</string>
             </property>
            </widget>
           </item>
@@ -215,7 +215,7 @@
              <bool>true</bool>
             </property>
             <property name="text">
-             <string>Group by direction</string>
+             <string>Group by Direction</string>
             </property>
            </widget>
           </item>

@@ -921,7 +921,7 @@ void QIperfC::onHeigthChanged(int heigth)
 
 void QIperfC::onShowGroup(bool bShow)
 {
-    m_throughputview->setShowGroup(bShow);
+    m_throughputview->setShowGroupTotal(bShow);
 }
 
 void QIperfC::setShowGroup(bool bShow)

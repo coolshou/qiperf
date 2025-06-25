@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>536</width>
-    <height>575</height>
+    <width>550</width>
+    <height>663</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,7 +29,7 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QWidget" name="widget_5" native="true">
-     <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0">
+     <layout class="QGridLayout" name="gridLayout_2">
       <property name="leftMargin">
        <number>2</number>
       </property>
@@ -42,10 +42,437 @@
       <property name="bottomMargin">
        <number>2</number>
       </property>
-      <property name="spacing">
+      <property name="horizontalSpacing">
        <number>2</number>
       </property>
-      <item row="15" column="3">
+      <item row="4" column="1">
+       <widget class="QLabel" name="label_22">
+        <property name="text">
+         <string>Test Duration(-t, sec):</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QSpinBox" name="sb_duration">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;0: run forever&lt;/p&gt;&lt;p&gt;default: 10 sec&lt;/p&gt;&lt;p&gt;Max: 864000 sec&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>864000</number>
+        </property>
+        <property name="value">
+         <number>30</number>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QLabel" name="lbDuration">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLabel" name="label_27">
+        <property name="text">
+         <string>Parallel(-P):</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QSpinBox" name="sb_parallel">
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>128</number>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="3">
+       <widget class="QLabel" name="lbOmit">
+        <property name="text">
+         <string>omit(-O, sec):</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="4">
+       <widget class="QSpinBox" name="sb_omit">
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="value">
+         <number>2</number>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1" colspan="2">
+       <widget class="QWidget" name="widget_3" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <property name="spacing">
+          <number>1</number>
+         </property>
+         <property name="leftMargin">
+          <number>1</number>
+         </property>
+         <property name="topMargin">
+          <number>1</number>
+         </property>
+         <property name="rightMargin">
+          <number>1</number>
+         </property>
+         <property name="bottomMargin">
+          <number>1</number>
+         </property>
+         <item>
+          <widget class="QCheckBox" name="chk_reverse">
+           <property name="toolTip">
+            <string>Server send data to client</string>
+           </property>
+           <property name="text">
+            <string>reverse(-R)</string>
+           </property>
+           <property name="tristate">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="chk_bidir">
+           <property name="text">
+            <string>bidirectional(--bidir)</string>
+           </property>
+           <property name="tristate">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLabel" name="label_20">
+        <property name="text">
+         <string>bitrate(-b):</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="2">
+       <widget class="QSpinBox" name="sb_bitrate">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(0 for unlimited)&lt;/p&gt;&lt;p&gt; (default 1 Mbit/sec for UDP, unlimited for TCP)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="maximum">
+         <number>9999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="3">
+       <widget class="QLabel" name="label_33">
+        <property name="text">
+         <string>bitrate unit:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="4">
+       <widget class="QComboBox" name="cb_unit_bitrate">
+        <property name="currentText">
+         <string>K</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>K</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>M</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>G</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QLabel" name="label_21">
+        <property name="text">
+         <string>window size(-w):</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
+       <widget class="QSpinBox" name="sb_windowsize">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;0: use system's setting&lt;/p&gt;&lt;p&gt;Linux:&lt;br/&gt;cat /proc/sys/net/core/rmem_default&lt;/p&gt;&lt;p&gt;cat /proc/sys/net/core/wmem_default&lt;/p&gt;&lt;p&gt;Windows:&lt;/p&gt;&lt;ol style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The first connection request sent to a remote host advertises a receive window size of 16K (16,384 bytes).&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;When the connection is established, the receive window size is rounded up to an even increment of the MSS.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The window size is adjusted to four times the MSS, to a maximum size of 64 K, unless the window scaling option (RFC 1323) is used.&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="maximum">
+         <number>999</number>
+        </property>
+        <property name="value">
+         <number>256</number>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="3">
+       <widget class="QLabel" name="label_29">
+        <property name="text">
+         <string>window size unit:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="4">
+       <widget class="QComboBox" name="cb_unit_windowsize">
+        <property name="currentText">
+         <string>K</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>K</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>M</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>G</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Buffer Length(-l):</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="2">
+       <widget class="QSpinBox" name="sb_buffer">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Windows Max: 1048576 bytes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="maximum">
+         <number>9999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="3">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Buffer Length unit:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="4">
+       <widget class="QComboBox" name="cb_unit_buffer">
+        <item>
+         <property name="text">
+          <string/>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>K</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>M</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>G</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>k</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>m</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="10" column="1">
+       <widget class="QLabel" name="label_28">
+        <property name="text">
+         <string>IP DSCP bits(--dscp):</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="2">
+       <widget class="QSpinBox" name="sb_dscp">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;-1: default value&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="minimum">
+         <number>-1</number>
+        </property>
+        <property name="maximum">
+         <number>63</number>
+        </property>
+        <property name="value">
+         <number>-1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="3">
+       <widget class="QLabel" name="lb_tos">
+        <property name="text">
+         <string>Type Of Service(-S, --tos N)</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="4">
+       <widget class="QSpinBox" name="sb_tos">
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="minimum">
+         <number>-1</number>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="value">
+         <number>-1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="1">
+       <widget class="QLabel" name="label_25">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;IPv4: 536 octets (= 576 - 20 - 20) &lt;/p&gt;&lt;p&gt;IPv6: 1220 octets (= 1280 - 40 - 20). &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Max segment size(-M,--set-mss):</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="2">
+       <widget class="QSpinBox" name="sb_mss">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;0: default value&lt;br/&gt;Min: 88&lt;br/&gt;Max: 9216 (will limit by MTU)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>9216</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="3">
+       <widget class="QCheckBox" name="cb_zerocopy">
+        <property name="text">
+         <string>zerocopy(-Z)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="1">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Reports interval(-i, Sec)</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="2">
+       <widget class="QSpinBox" name="sb_interval">
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="3">
+       <widget class="QLabel" name="label_26">
+        <property name="text">
+         <string>format to report(-f):</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="4">
        <widget class="QComboBox" name="cb_fmtreport">
         <property name="currentIndex">
          <number>1</number>
@@ -92,210 +519,104 @@
         </item>
        </widget>
       </item>
-      <item row="8" column="1">
-       <widget class="QSpinBox" name="sb_windowsize">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;0: use system's setting&lt;/p&gt;&lt;p&gt;Linux:&lt;br/&gt;cat /proc/sys/net/core/rmem_default&lt;/p&gt;&lt;p&gt;cat /proc/sys/net/core/wmem_default&lt;/p&gt;&lt;p&gt;Windows:&lt;/p&gt;&lt;ol style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The first connection request sent to a remote host advertises a receive window size of 16K (16,384 bytes).&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;When the connection is established, the receive window size is rounded up to an even increment of the MSS.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The window size is adjusted to four times the MSS, to a maximum size of 64 K, unless the window scaling option (RFC 1323) is used.&lt;/li&gt;&lt;/ol&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="maximum">
-         <number>999</number>
-        </property>
-        <property name="value">
-         <number>256</number>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="3">
-       <widget class="QComboBox" name="cb_unit_bitrate">
-        <property name="currentText">
-         <string>K</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>K</string>
+      <item row="13" column="1" colspan="3">
+       <widget class="QWidget" name="wTimeStamp" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="spacing">
+          <number>1</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>M</string>
+         <property name="leftMargin">
+          <number>1</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>G</string>
+         <property name="topMargin">
+          <number>1</number>
          </property>
-        </item>
-       </widget>
-      </item>
-      <item row="15" column="1">
-       <widget class="QSpinBox" name="sb_interval">
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_27">
-        <property name="text">
-         <string>Parallel(-P):</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="label_28">
-        <property name="text">
-         <string>IP DSCP bits(--dscp):</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <widget class="QSpinBox" name="sb_buffer">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Windows Max: 1048576 bytes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="maximum">
-         <number>9999</number>
-        </property>
-       </widget>
-      </item>
-      <item row="15" column="2">
-       <widget class="QLabel" name="label_26">
-        <property name="text">
-         <string>format to report(-f):</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="label_21">
-        <property name="text">
-         <string>window size(-w):</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="3">
-       <widget class="QSpinBox" name="sb_omit">
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="value">
-         <number>2</number>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="1">
-       <widget class="QSpinBox" name="sb_mss">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;0: default value&lt;br/&gt;Min: 88&lt;br/&gt;Max: 9216 (will limit by MTU)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="minimum">
-         <number>0</number>
-        </property>
-        <property name="maximum">
-         <number>9216</number>
-        </property>
-        <property name="value">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="3">
-       <widget class="QComboBox" name="cb_unit_buffer">
-        <item>
-         <property name="text">
-          <string/>
+         <property name="rightMargin">
+          <number>1</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>K</string>
+         <property name="bottomMargin">
+          <number>1</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>M</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>G</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>k</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>m</string>
-         </property>
-        </item>
+         <item>
+          <widget class="QCheckBox" name="cbTimeStamp">
+           <property name="text">
+            <string>Add timestamp (--timestamps)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="leTimeStamp">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;%Y = Year (2025)&lt;/p&gt;&lt;p&gt;%y = Year in 2 decimal number (2025 = 25)&lt;/p&gt;&lt;p&gt;%m = Month (01-12)&lt;/p&gt;&lt;p&gt;%d = Day of the month as a decimal number (01-31)&lt;/p&gt;&lt;p&gt;%H = Hour (24-hour clock) as a decimal number (00-23)&lt;/p&gt;&lt;p&gt;%M = Minute as a decimal number (00-59)&lt;/p&gt;&lt;p&gt;%S = Second as a decimal number (00-60)&lt;/p&gt;&lt;p&gt;%F: Equivalent to %Y-%m-%d&lt;/p&gt;&lt;p&gt;%T: Equivalent to %H:%M:%S&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>%m%d%H%M%S</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="8" column="3">
-       <widget class="QComboBox" name="cb_unit_windowsize">
-        <property name="currentText">
-         <string>K</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>K</string>
+      <item row="1" column="1" colspan="4">
+       <widget class="QWidget" name="widget_7" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0,0,0">
+         <property name="spacing">
+          <number>2</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>M</string>
+         <property name="leftMargin">
+          <number>0</number>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>G</string>
+         <property name="topMargin">
+          <number>0</number>
          </property>
-        </item>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Delay Start in </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sb_delaytime">
+           <property name="maximum">
+            <number>999999</number>
+           </property>
+           <property name="singleStep">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lb_delaytime">
+           <property name="text">
+            <string>sec</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="cbRestartOnError">
+           <property name="text">
+            <string>Restart On Iperf Error</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbRestartRule">
+           <property name="text">
+            <string>Rule(TODO)</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="7" column="2">
-       <widget class="QLabel" name="label_33">
-        <property name="text">
-         <string>bitrate unit:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="2" colspan="2">
-       <widget class="QCheckBox" name="cb_zerocopy">
-        <property name="text">
-         <string>zerocopy(-Z)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="4">
+      <item row="2" column="1" colspan="4">
        <widget class="QWidget" name="widget_6" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <property name="spacing">
@@ -396,290 +717,7 @@
         </layout>
        </widget>
       </item>
-      <item row="9" column="2">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Buffer Length unit:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2">
-       <widget class="QLabel" name="lbOmit">
-        <property name="text">
-         <string>omit(-O, sec):</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="15" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Reports interval(-i, Sec)</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Buffer Length(-l):</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="QSpinBox" name="sb_bitrate">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;(0 for unlimited)&lt;/p&gt;&lt;p&gt; (default 1 Mbit/sec for UDP, unlimited for TCP)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="maximum">
-         <number>9999</number>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="3">
-       <widget class="QSpinBox" name="sb_tos">
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="minimum">
-         <number>-1</number>
-        </property>
-        <property name="maximum">
-         <number>255</number>
-        </property>
-        <property name="value">
-         <number>-1</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2" colspan="2">
-       <widget class="QLabel" name="lbDuration">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="1">
-       <widget class="QSpinBox" name="sb_dscp">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;-1: default value&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="minimum">
-         <number>-1</number>
-        </property>
-        <property name="maximum">
-         <number>63</number>
-        </property>
-        <property name="value">
-         <number>-1</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_22">
-        <property name="text">
-         <string>Test Duration(-t, sec):</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QSpinBox" name="sb_duration">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;0: run forever&lt;/p&gt;&lt;p&gt;default: 10 sec&lt;/p&gt;&lt;p&gt;Max: 864000 sec&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="minimum">
-         <number>0</number>
-        </property>
-        <property name="maximum">
-         <number>864000</number>
-        </property>
-        <property name="value">
-         <number>30</number>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0" colspan="4">
-       <widget class="QWidget" name="widget_3" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <property name="spacing">
-          <number>1</number>
-         </property>
-         <property name="leftMargin">
-          <number>1</number>
-         </property>
-         <property name="topMargin">
-          <number>1</number>
-         </property>
-         <property name="rightMargin">
-          <number>1</number>
-         </property>
-         <property name="bottomMargin">
-          <number>1</number>
-         </property>
-         <item>
-          <widget class="QCheckBox" name="chk_reverse">
-           <property name="toolTip">
-            <string>Server send data to client</string>
-           </property>
-           <property name="text">
-            <string>reverse(-R)</string>
-           </property>
-           <property name="tristate">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="chk_bidir">
-           <property name="text">
-            <string>bidirectional(--bidir)</string>
-           </property>
-           <property name="tristate">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="label_20">
-        <property name="text">
-         <string>bitrate(-b):</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="2">
-       <widget class="QLabel" name="label_29">
-        <property name="text">
-         <string>window size unit:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="2">
-       <widget class="QLabel" name="lb_tos">
-        <property name="text">
-         <string>Type Of Service(-S, --tos N)</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="4">
-       <widget class="QWidget" name="widget_7" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0,0,0">
-         <property name="spacing">
-          <number>2</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Delay Start in </string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="sb_delaytime">
-           <property name="maximum">
-            <number>999999</number>
-           </property>
-           <property name="singleStep">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lb_delaytime">
-           <property name="text">
-            <string>sec</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="cbRestartOnError">
-           <property name="text">
-            <string>Restart On Iperf Error</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbRestartRule">
-           <property name="text">
-            <string>Rule(TODO)</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QSpinBox" name="sb_parallel">
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>128</number>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="0">
-       <widget class="QLabel" name="label_25">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;IPv4: 536 octets (= 576 - 20 - 20) &lt;/p&gt;&lt;p&gt;IPv6: 1220 octets (= 1280 - 40 - 20). &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string>Max segment size(-M,--set-mss):</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="4">
+      <item row="3" column="1" colspan="4">
        <widget class="QWidget" name="widget" native="true">
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <property name="spacing">
@@ -860,43 +898,33 @@
         </layout>
        </widget>
       </item>
-      <item row="16" column="0" colspan="4">
-       <widget class="QWidget" name="wTimeStamp" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="spacing">
-          <number>1</number>
-         </property>
-         <property name="leftMargin">
-          <number>1</number>
-         </property>
-         <property name="topMargin">
-          <number>1</number>
-         </property>
-         <property name="rightMargin">
-          <number>1</number>
-         </property>
-         <property name="bottomMargin">
-          <number>1</number>
-         </property>
-         <item>
-          <widget class="QCheckBox" name="cbTimeStamp">
-           <property name="text">
-            <string>Add timestamp (--timestamps)</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="leTimeStamp">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;%Y = Year (2025)&lt;/p&gt;&lt;p&gt;%y = Year in 2 decimal number (2025 = 25)&lt;/p&gt;&lt;p&gt;%m = Month (01-12)&lt;/p&gt;&lt;p&gt;%d = Day of the month as a decimal number (01-31)&lt;/p&gt;&lt;p&gt;%H = Hour (24-hour clock) as a decimal number (00-23)&lt;/p&gt;&lt;p&gt;%M = Minute as a decimal number (00-59)&lt;/p&gt;&lt;p&gt;%S = Second as a decimal number (00-60)&lt;/p&gt;&lt;p&gt;%F: Equivalent to %Y-%m-%d&lt;/p&gt;&lt;p&gt;%T: Equivalent to %H:%M:%S&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="text">
-            <string>%m%d%H%M%S</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="wComment" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <property name="spacing">
+       <number>6</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="lbComment">
+        <property name="text">
+         <string>Comment(TODO):</string>
+        </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="leComment"/>
       </item>
      </layout>
     </widget>

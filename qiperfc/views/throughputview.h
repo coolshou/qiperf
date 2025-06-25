@@ -70,7 +70,9 @@ public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
     void onUpdateTPCfg(QByteArray tpcfg);
     void onUpdateTPUnit(QString suint);
-    void setShowGroup(bool bShow);
+    void setShowGroupTotal(bool bShow);
+    void setShowGroupPair(bool bShow);
+    void setShowGroupDir(bool bShow);
     void getRawData(bool checked);
     void onSaveImg(bool checked);
     void setXRangeUpper(double upper);
@@ -113,7 +115,9 @@ private:
     QAction *m_actionCopyText;
     QAction *m_actionClientArgs;
     QAction *m_actionServerArgs;
-    QAction *m_actionGroup;
+    QAction *m_actionGroupTotal; // group all
+    QAction *m_actionGroupPair; // group by iperf test pair
+    QAction *m_actionGroupDir; // group by direction
     QAction *m_actionSaveImg;
     QAction *m_actionRawData;
     DlgIperf * dlgiperf;  // dialog of iperf config
@@ -121,7 +125,7 @@ private:
     TPFoldingDelegate *tpfoldingdelegate;
     NoWrapDelegate *nowrapdelegate;
     QDateTime m_starttime;
-    bool m_showgroup;
+    bool m_showgrouptotal;
     QString m_tpunit;
     IperfWrapper *m_iperfwrapper;
     QScrollBar *m_vLegendScrollBar;
