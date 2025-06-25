@@ -55,6 +55,9 @@ void NtpSync::setSystemTime(const QDateTime &dateTime)
         perror("settimeofday");
     }
 #endif
+    QDateTime n = QDateTime::currentDateTime();
+    qint64 difftime = n.msecsTo(dateTime);
+    qDebug() << "After set system time, time diff: " << QString::number(difftime) << " ms";
 }
 
 void NtpSync::sync(QString server)
