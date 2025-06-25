@@ -90,6 +90,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 
     startNtpServer();
     m_ntpsync = new NtpSync(this);
+    connect(m_ntpsync, &NtpSync::timesynced, this, &QIperfd::onTimeSynced);
     // m_ntpsync->sync("192.168.70.147");
 
     // system service manager
@@ -727,6 +728,23 @@ void QIperfd::onSSHTaskError(QString idx, QString errormsg)
 {
     qDebug() << idx <<" onSSHTaskError:" << errormsg;
     informMessage(QString("%1:%2:%3").arg(CMD_SSH_FAIL, idx, errormsg));
+}
+
+void QIperfd::onTimeSynced(QString target, bool synced)
+{
+    Q_UNUSED(target)
+    QString cmd="";
+    int rc;
+    if (synced){
+        cmd = QString("%1").arg(CMD_NTP_SYNC_OK);
+    }else{
+        cmd = QString("%1").arg(CMD_NTP_SYNC_FAIL);
+    }
+    rc = m_wsserver->sendTextMessage(cmd);
+    if (rc<=0){
+        qDebug() << "error onTimeSynced " << synced << " send cmd fail: " << cmd;
+    }
+    //
 }
 
 #if defined(Q_OS_WINDOWS)

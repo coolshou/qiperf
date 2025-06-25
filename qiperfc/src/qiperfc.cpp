@@ -1125,7 +1125,10 @@ void QIperfC::onNtpsynced(bool bOK, QString target)
             qDebug() << "onNtpsynced:" << target;
             m_ntps.append(target);
         }
-
+    }else {
+        QMessageBox::information(this, "NOTICE",
+                                 QString("%1 NTP time sync fail !").arg(target),
+                                 QMessageBox::Ok);
     }
 }
 
@@ -1360,7 +1363,7 @@ void QIperfC::initStatusbar()
     m_status_label = new QLabel();
     m_status_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
     ui->statusbar->addWidget(m_status_label, 2);
-    // connect(this , &QIperfC::updateStatus, this,  &QIperfC::onUpdateStatus);
+    connect(this , &QIperfC::updateStatus, this,  &QIperfC::onUpdateStatus);
 
     // statusbar of endpints
     m_label_qiperfd = new QLabel(this);

@@ -231,6 +231,8 @@ void WSClient::onTextMessageReceived(QString message)
             emit sshopened(m_idx, from, message);
         } else if (act.startsWith(CMD_NTP_SYNC_OK)){
             emit ntpsynced(true, from);
+        } else if (act.startsWith(CMD_NTP_SYNC_FAIL)){
+            emit ntpsynced(false, from);
         } else {
             qDebug() << "Message received: act:" << act <<" refrow:" << m_idx <<
                 " :"<< message << ": "<< from;

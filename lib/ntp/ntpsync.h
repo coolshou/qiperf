@@ -19,12 +19,14 @@ class NtpSync : public QObject
     Q_OBJECT
 public:
     explicit NtpSync(QObject *parent = nullptr);
-    void setSystemTime(const QDateTime &dateTime);
+    bool setSystemTime(const QDateTime &dateTime);
     void sync(QString server);
     void sync(QHostAddress server);
 public slots:
     void onReplyReceived(const QHostAddress &address, quint16 port, const NtpReply &reply);
 signals:
+    void timesynced(QString target, bool synced);
+
 private:
     NtpClient *m_ntpclient;
 

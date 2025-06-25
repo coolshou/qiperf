@@ -13,7 +13,7 @@ NtpSync::NtpSync(QObject *parent)
     connect(m_ntpclient, &NtpClient::replyReceived, this, &NtpSync::onReplyReceived);
 }
 
-void NtpSync::setSystemTime(const QDateTime &dateTime)
+bool NtpSync::setSystemTime(const QDateTime &dateTime)
 {
     qDebug() << "Set system time to: " << dateTime.toString(Qt::ISODateWithMs);
 #if defined(Q_OS_WIN32)
@@ -58,6 +58,11 @@ void NtpSync::setSystemTime(const QDateTime &dateTime)
     QDateTime n = QDateTime::currentDateTime();
     qint64 difftime = n.msecsTo(dateTime);
     qDebug() << "After set system time, time diff: " << QString::number(difftime) << " ms";
+    if (abs(difftime/1000)>2){
+        return false;
+    }else{
+        return true;
+    }
 }
 
 void NtpSync::sync(QString server)
@@ -89,5 +94,6 @@ void NtpSync::onReplyReceived(const QHostAddress &address, quint16 port, const N
     //qDebug() << "transmitTime:" << reply.transmitTime();
     //qDebug() << "destinationTime:" << reply.destinationTime();
 
-    setSystemTime(reply.receiveTime());
+    bool rc= setSystemTime(reply.receiveTime());
+    emit timesynced(address.toString(), rc);
 }
