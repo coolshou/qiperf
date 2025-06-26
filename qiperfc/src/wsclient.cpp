@@ -57,9 +57,11 @@
 QT_USE_NAMESPACE
 
 //! [constructor]
-WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject *parent) :
+WSClient::WSClient(QString serverip, const QUrl &url, QString datapath,
+                   bool keepalive,
+                   QObject *parent) :
     QObject(parent), m_serverip(serverip), m_url(url),
-    m_webSocket(nullptr)
+    m_webSocket(nullptr), m_keepalive(keepalive)
 {
     idleTimer = new QTimer(this);
     idleTimer->setInterval(30000); //30 sec
@@ -142,9 +144,11 @@ void WSClient::close()
 //! [onConnected]
 void WSClient::onConnected()
 {
-    if (idleTimer){
-        qInfo() << "WebSocket connected : " << m_url << " ,start idleTimer";
-        idleTimer->start();
+    if (m_keepalive){
+        if (idleTimer){
+            qInfo() << "WebSocket connected : " << m_url << " ,start idleTimer";
+            idleTimer->start();
+        }
     }
 }
 //! [onConnected]

@@ -68,7 +68,9 @@ class WSClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit WSClient(QString serverip, const QUrl &url, QString datapath, QObject *parent = nullptr);
+    explicit WSClient(QString serverip, const QUrl &url, QString datapath,
+                      bool keepalive=true,
+                      QObject *parent = nullptr);
     qint64 sendText(QString message);
     bool isConnected();
     void setDatapath(QString datapath);
@@ -105,6 +107,7 @@ private:
     QMap<QString, QFile *> m_files; // accept file from different source
     qint64 m_chunkSize = 64 * 1024;
     QTimer *idleTimer;
+    bool m_keepalive;
 };
 
 #endif // WSCLIENT_H

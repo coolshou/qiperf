@@ -1091,7 +1091,7 @@ void QIperfC::onAutoLoadFile(QString idx, QString filename, QString savepath)
 void QIperfC::onDoNtpSync(QString target)
 {
     QString s = "ws://"+target+":"+QString::number(QIPERFD_WSPORT);
-    WSClient *ws = new WSClient(target, QUrl(s), "");
+    WSClient *ws = new WSClient(target, QUrl(s), "", false);
     connect(ws, &WSClient::ntpsynced, this, &QIperfC::onNtpsynced);
     int itimeout=20;
     bool bConnected=false;
@@ -1198,7 +1198,6 @@ void QIperfC::onAddSerial()
             //wait connect
             int timeout=0;
             while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
-                // qDebug() << " wait WSClient connected";
                 QThread::msleep(100);
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
                 timeout++;
