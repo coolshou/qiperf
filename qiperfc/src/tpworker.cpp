@@ -301,7 +301,7 @@ void TpWorker::work()
         return;
     }
     //###############################
-    QThread::sleep(5); // wait 5 sec
+    // QThread::sleep(5); // wait 5 sec
     //TODO: wait server start up and ready
     bool bServerReady = waitServerReady();
 
@@ -510,7 +510,8 @@ void TpWorker::onStop(){
 
     // emit debuginfo("m_status_server:" + m_status_server + " m_status_client:" + m_status_client);
     qint64 consumetime = m_TestStartTime.secsTo(enddatetime);
-    emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(consumetime)+" sec)");
+    emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(consumetime)+" sec"+
+                      "("+MyFunc::secToHumanReadable(consumetime)+"))");
     emit setEndTime(static_cast<double>(consumetime)); //update x-axis max value
 }
 
