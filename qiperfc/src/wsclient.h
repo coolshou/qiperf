@@ -58,6 +58,7 @@
 #include <QtCore/QString>
 #include <QtCore/QUrl>
 #include <QFile>
+#include <QTimer>
 
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 
@@ -85,7 +86,7 @@ signals:
     void sshopened(QString refrow, QString serveraddress, QString serveraPort);
     void ntpsynced(bool bOK, QString target);
 
-private Q_SLOTS:
+private slots:
     void onConnected();
     void onDisconnected();
     void onErrorOccurred(QAbstractSocket::SocketError socketError);
@@ -94,6 +95,7 @@ private Q_SLOTS:
     void onTextMessageReceived(QString message);
     void onSslErrors(const QList<QSslError> &errors);
     void onBinaryMessageReceived(const QByteArray &message);
+    void onIdleTimerTimeout();
 
 private:
     QString m_serverip;
@@ -102,6 +104,7 @@ private:
     QWebSocket *m_webSocket;
     QMap<QString, QFile *> m_files; // accept file from different source
     qint64 m_chunkSize = 64 * 1024;
+    QTimer *idleTimer;
 };
 
 #endif // WSCLIENT_H

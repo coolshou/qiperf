@@ -61,7 +61,12 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath, QObject 
     QObject(parent), m_serverip(serverip), m_url(url),
     m_webSocket(nullptr)
 {
+    idleTimer = new QTimer(this);
+    idleTimer->setInterval(30000); //30 sec
+    connect(idleTimer,&QTimer::timeout, this, &WSClient::onIdleTimerTimeout);
+
     m_webSocket = new QWebSocket();
+
     m_webSocket->setProxy(QNetworkProxy::NoProxy); // avoid to use proxy
     // QNetworkProxy qnp = m_webSocket->proxy();
     // qDebug() << "proxy hostName: " << qnp.hostName() << " capabilities(): " << qnp.capabilities();
@@ -134,11 +139,13 @@ void WSClient::close()
     m_webSocket->close();
 }
 
-
 //! [onConnected]
 void WSClient::onConnected()
 {
-    // qInfo() << "WebSocket connected: " << m_url;
+    if (idleTimer){
+        qInfo() << "WebSocket connected : " << m_url << " ,start idleTimer";
+        idleTimer->start();
+    }
 }
 //! [onConnected]
 //!
@@ -277,6 +284,13 @@ void WSClient::onBinaryMessageReceived(const QByteArray &message) {
         m_files[from] = nullptr;
     }
 
+}
+
+void WSClient::onIdleTimerTimeout()
+{
+    if (m_webSocket->isValid()){
+        m_webSocket->ping();
+    }
 }
 
 void WSClient::onSslErrors(const QList<QSslError> &errors)
