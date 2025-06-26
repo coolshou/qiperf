@@ -42,7 +42,7 @@ signals:
     void onStderr(int idx, int refrow, QString text, QString ipport); // idx, refrow, msg, ipport
     void onThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
     void stopSelfDestructor();
-
+    void debuginfo(Qstring msg);
 public slots:
     void work();
     bool isRunning();
@@ -55,6 +55,7 @@ private slots:
     void onFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void parserStdOut(QString msg);
     void onThroughputData(int idx, QString sInterval,  QString data);
+    void onDebuginfo(QString msg);
 //    void parserIperf3(QString msg);
 
 private:

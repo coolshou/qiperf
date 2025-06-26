@@ -16,12 +16,10 @@
 
 #include "../src/tpmgrdata.h"
 
-#include <QDebug>
-
 IperfWrapper::IperfWrapper(bool ignorewronginterval, QObject *parent)
     : QObject{parent}, m_ignorewronginterval(ignorewronginterval)
 {
-
+    m_debuglv=1;
 }
 QString IperfWrapper::toIperf3args(QVariantMap jsondata)
 {
@@ -121,7 +119,8 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
     if (jsondata.contains("timestamps")){
         bWithtimestamp = true;
         iTimestampLength = getTimeStempLength(jsondata["timestamps"].toString().toStdString());
-        qDebug()<< "iTimestampLength:" << QString::number(iTimestampLength) << " timestamps:" << jsondata["timestamps"].toString();
+        debug("iTimestampLength:" + QString::number(iTimestampLength) + " timestamps:"
+              + jsondata["timestamps"].toString());
         args = args + " --timestamps=" + jsondata["timestamps"].toString();
     }
     args = args + " --forceflush ";
@@ -245,16 +244,16 @@ void IperfWrapper::parserIperf2(QString linedata)
             linedata.contains("Client connecting")){
             if (linedata.contains("TCP")){
                 if(!m_protocal.contains("TCP")){
-                    qDebug() << "wrong protocal setting:" << m_protocal << " actually:" << linedata;
+                    debug("wrong protocal setting:" + m_protocal + " actually:" + linedata);
                 }
                 m_protocal = "TCP";
             }else if (linedata.contains("UDP")){
                 if(!m_protocal.contains("UDP")){
-                    qDebug() << "wrong protocal setting:" << m_protocal << " actually:" << linedata;
+                    debug("wrong protocal setting:" + m_protocal + " actually:" + linedata);
                 }
                 m_protocal = "UDP";
             }else{
-                qDebug() << "unknown protocal??" << linedata;
+                debug("unknown protocal??" + linedata);
                 return;
             }
         }else if (linedata.contains("--")||
@@ -276,7 +275,7 @@ void IperfWrapper::parserIperf2(QString linedata)
 #else
             ds = linedata.split(" ", Qt::SkipEmptyParts); // qt 5.14
 #endif
-            qDebug() << "ds:" << ds << " length:" << ds.length();
+            debug("ds:" + ds + " length:" + ds.length());
             if(ds.length()>=9){
                 if (linedata.contains("reverse")){
                     if (ds.last().contains(QString::number(m_port))){
@@ -293,10 +292,10 @@ void IperfWrapper::parserIperf2(QString linedata)
                 }
             }
             if (!m_idxdir.contains(idx)){
-                qDebug() << "Record : " << idx << " = " << sDir;
+                debug("Record : " + idx + " = " + sDir);
                 m_idxdir.insert(idx, sDir);
             }else{
-                qDebug() << "THIS should not Happen!! update idx:" << idx << " dir to :" << sDir;
+                debug("THIS should not Happen!! update idx:" + idx + " dir to :" + sDir);
             }
         }else if(linedata.contains("TCP window size")){
             // TODO : TCP window size?
@@ -306,41 +305,18 @@ void IperfWrapper::parserIperf2(QString linedata)
             // ignore sender
         }else if(linedata.contains("error")){
             // ignore error line
-            qDebug() << "TODO: error message: " << linedata;
+            debug("TODO: error message: " + linedata);
         }else if(linedata.contains("warning:")){
             // ignore warning: line
         }else{
             linedata = getIdx(linedata, idx);
-            // qDebug() << "parserIperf2 after idx: " << idx << " linedata: " << linedata;
             QString sTag="";
             if (m_servermode){
                 sTag="s";
             }else{
                 sTag="c";
             }
-            // qDebug() << "m_idxdir:" << QString::number(m_idxdir.keys().length());
             int iparallel = m_parallel.toInt();
-            //        qDebug() << "iparallel: " << QString::number(iparallel);
-            // if (m_bidir){
-            //     //bidir mode
-            //     // in bidir only get [Rx*]
-            //     iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
-            //     sDir = linedata.mid(1,iS-1).trimmed();// server:[TX-S][RX-S], client:[TX-C][RX-C]
-            //     linedata = linedata.right(linedata.length()-iS-1);
-            //     if (sDir.contains(TPDIRRx, Qt::CaseSensitivity::CaseInsensitive)){
-            //         if (m_servermode){
-            //             sDir = TPDIRRx;
-            //         }else{
-            //             sDir = TPDIRTx;
-            //         }
-            //         linedata = linedata.trimmed();
-            //     }else {
-            //         // qInfo() << "ignore m_bidir part data: " << sDir;
-            //         return;
-            //     }
-            // }else{
-            //     sDir = m_bidirtag;
-            // }
             // TCP:
             //"0.0000-1.0000 sec  4595 MBytes  38548 Mbits/sec"
             // UDP:
@@ -357,23 +333,23 @@ void IperfWrapper::parserIperf2(QString linedata)
                     QStringList ds = sInterval.split("-");
                     if (ds.length()==2){
                         interval = ds[1].toDouble() - ds[0].toDouble();
-                        // qDebug() << "ds[1]:" << ds[1] << " ds[0]:" << ds[0] << "====interval:" << QString::number(interval);
                     }
                 }
                 if (m_ignorewronginterval){
                     if (!linedata.contains("receiver")){
                         // check report interval value is correct (smallest value 1 sec)
                         if (qAbs(m_interval-interval)>0.5){
-                            qInfo() << linedata << "=>>>> ignorewronginterval value:" << QString::number(interval) << " expect:" << QString::number(m_interval);
+                            debug(linedata + "=>>>> ignorewronginterval value:" +
+                                  QString::number(interval) + " expect:" + QString::number(m_interval));
                             return;
                         }
                     }
                 }
                 if (m_omit>0){
-                    qInfo() << "iperf2 precess m_omit:" << QString::number(m_omit);
+                    debug("iperf2 precess m_omit:" + QString::number(m_omit));
                     int dInterval = sInterval.toInt() - m_omit;
                     if (dInterval<=0){
-                        qInfo() << "iperf2 ignore omit time";
+                        debug("iperf2 ignore omit time");
                         return;
                     }
                     sInterval = QString::number(dInterval);
@@ -382,13 +358,9 @@ void IperfWrapper::parserIperf2(QString linedata)
                     QJsonArray lst =QJsonArray();
                     m_tpdatas.insert(sInterval, lst);
                 }
-                // qDebug() << "sInterval: " << sInterval << " m_tpdatas[sInterval].count(): " << m_tpdatas[sInterval].count();
                 if (m_tpdatas[sInterval].count()<iparallel){
-                    // qDebug() << "m_interval: " << QString::number(m_interval)
-                    //          << " interval:" << QString::number(interval);
-
                     if (qAbs(m_interval-interval)>0.5){
-                        qDebug() << " skip this interval:" << QString::number(interval);
+                        debug(" skip this interval:" << QString::number(interval));
                     }else{
                         QJsonObject irec = QJsonObject();
                         irec.insert("idx", QString("%1%2").arg(idx,sTag));  // parallel num
@@ -401,14 +373,13 @@ void IperfWrapper::parserIperf2(QString linedata)
                                 irec.insert("jitter_unit", data[7]);
                                 QStringList pkts = data[8].split("/");
                                 if (pkts.count()==2){
-                                    //                        qInfo() << "packet_lost/packet_total = " << pkts[0] << " / " << pkts[1];
                                     irec.insert("packet_lost", pkts[0]);
                                     irec.insert("packet_total", pkts[1]);
                                 }else{
-                                    qDebug() << "Unknown data format of packet lost: " << data[8];
+                                    debug("Unknown data format of packet lost: " + data[8]);
                                 }
                             }else{
-                                //qDebug() << "Unknown data format: " << data;
+                                //debug("Unknown data format: " + data);
                             }
                         }
                         if (!sDir.isNull()){
@@ -416,13 +387,11 @@ void IperfWrapper::parserIperf2(QString linedata)
                         }
                         if (idx.contains("SUM", Qt::CaseInsensitive)){
                             // ignore [SUM] line
-                            qInfo() << "==linedata==SUM==  " << linedata;
+                            debug( "==linedata==SUM==  " + linedata);
                         }else{
-                            //                qDebug() << "m_parallel: " << QString::number(iparallel) << "m_tpdatas length: " << m_tpdatas[sInterval].count();
                             if (linedata.contains("receiver")){
                                 irec.insert("AVG", true); //final data is the average of throughput
                             }
-                            // qDebug() << "sInterval: " << sInterval << " append:" << irec;
                             m_tpdatas[sInterval].append(irec);
                         }
                     }
@@ -437,27 +406,25 @@ void IperfWrapper::parserIperf2(QString linedata)
                         if (ls_int.length()==2){
                             sInterval = ls_int[1];
                         }else{
-                            qDebug() << "unknown format of sInterval: " << sInterval;
+                            debug("unknown format of sInterval: " + sInterval);
                         }
                     }
-                    //                qDebug() << "sInterval:" << sInterval << " doc:" ;
                     if (m_delaytime>0){
                         sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
                     }
-                    // qInfo() << "sendThroughput sInterval-key:" << sInterval << " data: " << doc.toJson(QJsonDocument::Compact);
                     emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
                     //clear record
                     m_tpdatas.remove(sInterval);
                 }
             } else {
-                qDebug() << "parserIperf2: unknown format of line: " << linedata;
+                debug("parserIperf2: unknown format of line: " + linedata);
             }
         }
     }catch (const std::exception &e) {
         // Handle the exception and show an error message
-        qDebug() << "parserIperf2::work Exception Caught" << e.what();
+        debug("parserIperf2::work Exception Caught" + e.what());
     }catch (...){
-        qDebug() << "parserIperf2::work Unknown ERROR";
+        debug("parserIperf2::work Unknown ERROR");
     }
 }
 
@@ -467,7 +434,7 @@ void IperfWrapper::parserIperf3(QString linedata)
         QString idx = "";
         if (bWithtimestamp){
             linedata = linedata.mid(iTimestampLength);
-            qDebug() << "after trim time stamp:" << linedata;
+            debug("after trim time stamp:" + linedata);
         }
         if (linedata.contains("Server listening")||
             linedata.contains("Accepted connection")||
@@ -485,16 +452,12 @@ void IperfWrapper::parserIperf3(QString linedata)
             // ignore sender
         }else if(linedata.contains("error")){
             // ignore error line
-            qDebug() << "TODO: error message: " << linedata;
+            debug("TODO: error message: " + linedata);
         }else if(linedata.contains("warning:")){
             // ignore warning: line
         }else{
-    //        qDebug() << "parserIperf3: " << linedata;
             QString sDir = nullptr;
             linedata = getIdx(linedata, idx);
-            // qint64 iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
-            // QString idx = linedata.mid(1,iS-1).trimmed();  // extract [ idx]
-            // linedata = linedata.right(linedata.length()-iS-1);
             QString sTag="";
             if (m_servermode){
                 sTag="s";
@@ -502,7 +465,6 @@ void IperfWrapper::parserIperf3(QString linedata)
                 sTag="c";
             }
             int iparallel = m_parallel.toInt();
-    //        qDebug() << "iparallel: " << QString::number(iparallel);
             if (m_bidir){
                 //bidir mode
                 // in bidir only get [Rx*]
@@ -517,7 +479,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                     }
                     linedata = linedata.trimmed();
                 }else {
-                    // qInfo() << "ignore m_bidir part data: " << sDir;
+                    // debug("ignore m_bidir part data: " + sDir);
                     return;
                 }
             }else{
@@ -539,14 +501,14 @@ void IperfWrapper::parserIperf3(QString linedata)
                     QStringList ds = sInterval.split("-");
                     if (ds.length()==2){
                         interval = ds[1].toDouble() - ds[0].toDouble();
-                        // qDebug() << "ds[1]:" << ds[1] << " ds[0]:" << ds[0] << "====interval:" << QString::number(interval);
                     }
                 }
                 if (m_ignorewronginterval){
                     if (!linedata.contains("receiver")){
                         // check report interval value is correct (smallest value 1 sec)
                         if (qAbs(m_interval-interval)>0.5){
-                            qInfo() << linedata << "=>>>> ignorewronginterval value:" << QString::number(interval) << " expect:" << QString::number(m_interval);
+                            debug(linedata + "=>>>> ignorewronginterval value:" +
+                                  QString::number(interval) + " expect:" + QString::number(m_interval));
                             return;
                         }
                     }
@@ -568,14 +530,13 @@ void IperfWrapper::parserIperf3(QString linedata)
                             irec.insert("jitter_unit", data[7]);
                             QStringList pkts = data[8].split("/");
                             if (pkts.count()==2){
-        //                        qInfo() << "packet_lost/packet_total = " << pkts[0] << " / " << pkts[1];
                                 irec.insert("packet_lost", pkts[0]);
                                 irec.insert("packet_total", pkts[1]);
                             }else{
-                                qDebug() << "Unknown data format of packet lost: " << data[8];
+                                debug("Unknown data format of packet lost: " + data[8]);
                             }
                         }else{
-                            //qDebug() << "Unknown data format: " << data;
+                            debug("Unknown data format: " + data);
                         }
                     }
                     if (!sDir.isNull()){
@@ -583,9 +544,8 @@ void IperfWrapper::parserIperf3(QString linedata)
                     }
                     if (idx.contains("SUM", Qt::CaseInsensitive)){
                         // ignore [SUM] line
-                        qInfo() << "==linedata==SUM==  " << linedata;
+                        debug("==linedata==SUM==  " + linedata);
                     }else{
-        //                qDebug() << "m_parallel: " << QString::number(iparallel) << "m_tpdatas length: " << m_tpdatas[sInterval].count();
                         if (linedata.contains("receiver")){
                             irec.insert("AVG", true); //final data is the average of throughput
                         }
@@ -602,10 +562,9 @@ void IperfWrapper::parserIperf3(QString linedata)
                         if (ls_int.length()==2){
                             sInterval = ls_int[1];
                         }else{
-                            qDebug() << "unknown format of sInterval: " << sInterval;
+                            debug("unknown format of sInterval: " + sInterval);
                         }
                     }
-    //                qDebug() << "sInterval:" << sInterval << " doc:" ;
                     if (m_delaytime>0){
                         sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
                     }
@@ -613,17 +572,17 @@ void IperfWrapper::parserIperf3(QString linedata)
                     //clear record
                     m_tpdatas.remove(sInterval);
                 }else{
-                    qDebug() << "m_tpdatas:" << m_tpdatas;
+                    // debug("m_tpdatas:" + m_tpdatas);//when many data, this cause crash?
                 }
             } else {
-                qDebug() << "parserIperf3: unknown format of line: " << linedata;
+                debug("parserIperf3: unknown format of line: " + linedata);
             }
         }
     }catch (const std::exception &e) {
         // Handle the exception and show an error message
-        qDebug() << "IperfWrapper::parserIperf3 Exception Caught" << e.what();
+        debug("IperfWrapper::parserIperf3 Exception Caught" + e.what());
     }catch (...){
-        qDebug() << "IperfWrapper::parserIperf3 Unknown ERROR";
+        debug("IperfWrapper::parserIperf3 Unknown ERROR");
     }
 }
 
@@ -633,7 +592,7 @@ QString IperfWrapper::getIdx(QString linedata, QString &idx)
     int iE = linedata.indexOf("]",0, Qt::CaseInsensitive);
     idx = linedata.mid(iS+1,iE-iS-1).trimmed();  // extract [ idx]
     QString r = linedata.right(linedata.length()-iE-1).trimmed();
-    qDebug() << "getIdx idx: " << idx <<  "  right(" << r << ")";
+    debug("getIdx idx: " + idx +  "  right(" + r + ")");
     return r;
 }
 
@@ -665,7 +624,6 @@ void IperfWrapper::setDelaytime(int delaytime)
 
 void IperfWrapper::setInterval(uint interval)
 {
-    // qDebug() << " setInterval:" << interval;
     m_interval = interval;
 }
 
@@ -676,14 +634,14 @@ void IperfWrapper::setArgs(QString arg)
 #else
     m_arguments = arg.split(" ", Qt::SkipEmptyParts);
 #endif
-    qDebug() << "m_arguments:" << m_arguments;
+    debug("m_arguments:" + m_arguments);
     if (m_arguments.contains("timestamps")){
         bWithtimestamp = true;
         QRegularExpression regex("^" + QRegularExpression::escape("--timestamps"),
                                  QRegularExpression::CaseInsensitiveOption); // Case-insensitive search
 
         QStringList filteredList = m_arguments.filter(regex);
-        qDebug() << "filteredList:" << filteredList;
+        debug("filteredList:" + filteredList);
         // int idx = m_arguments.indexOf("--timestamps");
         // qDebug() << "timestamps idx = " << QString::number(idx);
         //iTimestampLength = getTimeStempLength(jsondata["timestamps"].toString().toStdString());
@@ -695,12 +653,23 @@ void IperfWrapper::setOmit(int omit)
     m_omit = omit;
 }
 
+void IperfWrapper::debug(QString msg, int debuglv)
+{
+    if (debuglv>m_debuglv){
+        emit debuginfo(msg);
+    }
+}
+
+void IperfWrapper::setDebugLevel(int level)
+{
+    m_debuglv = level;
+}
+
 void IperfWrapper::work()
 {
     //log run
     QFile file(m_filename);
     if(file.exists()){
-//        qDebug() <<"start IperfWrapper::work: " << m_filename ;
         if (file.open(QIODevice::ReadOnly)){
             QTextStream in(&file);
             int lineNumber = 0;
@@ -718,17 +687,17 @@ void IperfWrapper::work()
                         parserIperf2(line);
                     }
                 }else {
-                    qDebug() << "[IperfWrapper::work]: Not support iperf version:" <<m_version;
+                    debug("[IperfWrapper::work]: Not support iperf version:" +m_version);
                     break;
                 }
             }
             file.close();
             emit progress(m_filename, -1);
         }else{
-            qDebug() << "open file " << m_filename << " Fail!!";
+            debug("open file " + m_filename + " Fail!!");
         }
     }else{
-        qDebug() << "file not exist: " << m_filename;
+        debug("file not exist: " + m_filename);
     }
     emit workFinished();
 }
@@ -751,7 +720,7 @@ int IperfWrapper::getTimeStempLength(const std::string& format_string)
     std::tm* local_tm = std::localtime(&now);
 
     if (local_tm == nullptr) {
-        qDebug() << "Error: Could not get local time.";
+        debug("Error: Could not get local time.");
         return 0; // Or throw an exception
     }
 
@@ -760,7 +729,7 @@ int IperfWrapper::getTimeStempLength(const std::string& format_string)
 
     // Check for errors during formatting (e.g., invalid format string)
     if (oss.fail()) {
-        qDebug() <<  "Error: Failed to format time with format string: \"" << QString::fromStdString(format_string) << "\"";
+        debug("Error: Failed to format time with format string: \"" + QString::fromStdString(format_string) + "\"");
         return 0; // Or throw an exception
     }
 

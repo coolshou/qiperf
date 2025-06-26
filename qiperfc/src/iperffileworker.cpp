@@ -26,6 +26,7 @@ IperfFileWorker::IperfFileWorker(QString version, QString protocal, uint port,
     m_iperfwrapper->setInterval(interval);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfFileWorker::onThroughputData);
     connect(m_iperfwrapper, &IperfWrapper::progress, this, &IperfFileWorker::onProgress);
+    connect(m_iperfwrapper, &IperfWrapper::debuginfo, this, &IperfFileWorker::onDebuginfo);
     connect(m_thread, &QThread::started, m_iperfwrapper, &IperfWrapper::work);
     m_iperfwrapper->moveToThread(m_thread);
     connect(m_iperfwrapper, &IperfWrapper::workFinished, this, &IperfFileWorker::onWorkFinished);
@@ -136,4 +137,9 @@ void IperfFileWorker::onWorkFinished()
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     emit workFinished();
+}
+
+void IperfFileWorker::onDebuginfo(QString msg)
+{
+    qDebug() << "IperfFileWorker[IperfWrapper]" << msg;
 }

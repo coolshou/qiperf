@@ -102,6 +102,7 @@ private slots:
     void onTPselectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onVLegendScrollBarRange(int count);
     QString getGraphDataToJsonStr(QCPGraph *graph);
+    void onDebuginfo(QString msg);
 private:
     Ui::ThroughputView *ui;
     // QIperfC *m_main;

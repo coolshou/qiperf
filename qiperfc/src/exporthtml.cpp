@@ -25,6 +25,7 @@ ExportHtml::ExportHtml(QString templatefile, QString savefile,int width, int hei
 {
     m_iperf_raw_filenames.clear();
     m_iperfwrapper = new IperfWrapper();
+    connect(m_iperfwrapper, &IperfWrapper::debuginfo, this, &ExportHtml::onDebuginfo);
     // m_ok = false;
     connect(this, &ExportHtml::ready, this, &ExportHtml::procressData);
     QNetworkProxyFactory::setUseSystemConfiguration(false); // not use system proxy
@@ -399,6 +400,11 @@ void ExportHtml::procressData()
         qDebug() << "Does not have data in m_iperf_raw_filenames";
     }
     save(m_savefile);
+}
+
+void ExportHtml::onDebuginfo(QString msg)
+{
+    qDebug() << "ExportHtml[IperfWrapper]" << msg;
 }
 
 void ExportHtml::keyPressEvent(QKeyEvent *event)

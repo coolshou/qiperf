@@ -36,6 +36,7 @@ public slots:
     void onAddTag();
     void onLoadFinished(bool isOk);
     void procressData();
+    void onDebuginfo(QString msg);
 
 protected:
     // Reimplement the keyPressEvent to listen for F12 key

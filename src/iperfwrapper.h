@@ -25,6 +25,8 @@ public:
     void setInterval(uint interval);
     void setArgs(QString arg);
     void setOmit(int omit);
+    void debug(QString msg, int debuglv=1);
+    void setDebugLevel(int level);
 
 public slots:
     void work();
@@ -32,6 +34,7 @@ signals:
     void sendThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
     void workFinished();
     void progress(QString filename, int currentlineno);
+    void debuginfo(QString msg);
 private:
     // int getTimeStempLength(QString timestempformat);
     int getTimeStempLength(const std::string& format_string);
@@ -55,6 +58,7 @@ private:
     bool bWithtimestamp=false;
     int iTimestampLength=0;
     QStringList m_arguments;  //iperf args
+    int m_debuglv=1;
 };
 
 #endif // IPERFWRAPPER_H

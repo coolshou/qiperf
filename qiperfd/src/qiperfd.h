@@ -112,6 +112,7 @@ protected:
 private slots:
     void onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPort); //procress websocket action message
     void onNewClient(QHostAddress addr); //
+    void onDebuginfo(QString msg);
 
 private:
     int checkFirewallStatus();

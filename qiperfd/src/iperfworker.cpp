@@ -34,6 +34,7 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     m_iperfwrapper->setInterval(interval);
     m_iperfwrapper->setArgs(arg);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfWorker::onThroughputData);
+    connect(m_iperfwrapper, &IperfWrapper::debuginfo, this, &IperfWorker::onDebuginfo);
 //    this->deleteLater(); //this will cause stdout not flush??
 //    m_cmd = cmd; //iperf exec fullpath
 #if QT_VERSION < 0x050E00 // < 5.14.0
@@ -338,4 +339,9 @@ void IperfWorker::onThroughputData(int idx, QString sInterval, QString data)
         qInfo() << QString::number(idx) << " sInterval:" << sInterval << " data:" << data;
         emit onThroughput(idx, sInterval, data);
     }
+}
+
+void IperfWorker::onDebuginfo(QString msg)
+{
+    emit debuginfo("[IperfWrapper]"+msg);
 }

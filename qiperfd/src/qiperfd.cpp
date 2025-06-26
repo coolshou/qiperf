@@ -230,8 +230,6 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     QThread *iperf_th = new QThread();
     qint64 idx = m_threads.count();
     m_threads.insert(idx, iperf_th);
-    //    m_threads.append(iperf_th);
-    //    int idx = m_threads.count()-1;
     IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port,
                                            bndaddr, target, bidir, reverse,
                                            interval, delaytime);
@@ -244,6 +242,7 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     connect(iperfer, &IperfWorker::finished, this, &QIperfd::onFinished);
     // connect(iperfer, &IperfWorker::finished, iperfer, &IperfWorker::deleteLater);
     connect(iperfer, &IperfWorker::onThroughput, this, &QIperfd::onThroughput);
+    connect(iperfer, &IperfWorker::debuginfo, this, &QIperfd::onDebuginfo);
 
     connect(iperf_th, &QThread::started, iperfer, &IperfWorker::work);
     connect(iperf_th, &QThread::finished, iperf_th, &QThread::deleteLater);
@@ -386,7 +385,7 @@ void QIperfd::startAll()
     for (auto it = m_threads.begin(); it != m_threads.end(); ++it)
     {
         start(it.key());
-        // QCoreApplication::processEvents(QEventLoop::AllEvents);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
 void QIperfd::stop(int idx)
@@ -1289,6 +1288,11 @@ void QIperfd::onNewClient(QHostAddress addr)
     }
     //TODO: multi file client
     m_fileclient = new FileClient(QIPERF_FILEPORT, addr.toString());
+}
+
+void QIperfd::onDebuginfo(QString msg)
+{
+    qDebug() << "[IperfWorker]" << msg;
 }
 
 int QIperfd::checkFirewallStatus()

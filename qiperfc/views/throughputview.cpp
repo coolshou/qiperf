@@ -26,6 +26,7 @@ ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete
 //, m_main(main)
 {
     m_iperfwrapper = new IperfWrapper();
+    connect(m_iperfwrapper, &IperfWrapper::debuginfo, this, &ThroughputView::onDebuginfo);
     ui->setupUi(this);
     initThroughputChart();
     m_clipboard = QApplication::clipboard();
@@ -656,6 +657,11 @@ QString ThroughputView::getGraphDataToJsonStr(QCPGraph *graph)
 
     QJsonDocument doc(dataArray);
     return doc.toJson(QJsonDocument::Compact);
+}
+
+void ThroughputView::onDebuginfo(QString msg)
+{
+    qDebug() << "ThroughputView[m_iperfwrapper]" << msg;
 }
 
 void ThroughputView::initThroughputChart()

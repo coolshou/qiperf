@@ -115,8 +115,7 @@ void TpWorker::work()
     emit updateStarttime(m_TestStartTime);
     emit updateRunStatus(true);
     //start test
-    // list of throughput test pair
-    // QList<TP *> tps = m_throughputview->getChilds();
+
     QString s; // websocket url
     QString cmd;
     qint64 rs=0;
@@ -128,6 +127,7 @@ void TpWorker::work()
     int itimeout;
     int refrow;
     bool isRunforever=false;
+    // list of throughput test pair
     foreach (TP *tp, m_tps) {
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
         if (tp->getEnabled()){
@@ -151,10 +151,12 @@ void TpWorker::work()
                 maxtestduration = testduration;
             }
             refrow = tp->row();
-            err = "=====[TpWorker]refrow:" + QString::number(refrow) + " maxtestduration:" + QString::number(maxtestduration);
-            emit debuginfo(err);
+            // err = "=====[TpWorker]refrow:" + QString::number(refrow) + " maxtestduration:" + QString::number(maxtestduration);
+
             QString serverIP = tp->getMgrServer();
             //TODO: detect manager server is pingable
+            err = "=====[TpWorker] server:" + serverIP;
+            emit debuginfo(err);
             if (!m_wss.contains(serverIP)) {
                 //TODO: can not work with interface with DHCP under Windows??
                 s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
@@ -218,6 +220,8 @@ void TpWorker::work()
 
             //RPC to control all client endpoint (iperf client)
             QString clientIP = tp->getMgrClient();
+            err = "=====[TpWorker] client:" + clientIP;
+            emit debuginfo(err);
             //TODO: detect manager client is pingable
             if (!m_wsc.contains(clientIP)) {
                 s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);

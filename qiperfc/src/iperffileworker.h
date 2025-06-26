@@ -44,6 +44,7 @@ signals:
 private slots:
     void onThroughputData(int midx, QString sInterval,  QString data);
     void onWorkFinished();
+    void onDebuginfo(QString msg);
 private:
     QThread *m_thread;
     IperfWrapper *m_iperfwrapper;
