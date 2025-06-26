@@ -2,6 +2,7 @@
 #include "ui_dlgrecord.h"
 
 #include <QProcess>
+#include <QKeySequence>
 
 #include <QDebug>
 
@@ -15,11 +16,16 @@ DlgRecord::DlgRecord(QWidget *parent) :
 
     m_fileModel = new QFileSystemModel(this);
     m_fileModel->setFilter(QDir::NoDotAndDotDot | QDir::Files);
+    m_fileModel->setOptions(QFileSystemModel::DontResolveSymlinks|
+                            QFileSystemModel::DontUseCustomDirectoryIcons);
+    // connect(m_fileModel, &QFileSystemModel::);
     ui->tvLogFiles->setModel(m_fileModel);
     connect(ui->tvLogFiles, &QTreeView::doubleClicked, this, &DlgRecord::onItemDClicked); //edit item on double click
     // TooltipEventFilter *m_filter = new TooltipEventFilter(ui->tvLogFiles);
     // connect(m_filter, &TooltipEventFilter::doRefresh, this, &DlgRecord::onRefresh);
     // ui->tvLogFiles->viewport()->installEventFilter(m_filter);
+    refreshShortcut=new QShortcut(QKeySequence(Qt::Key_F5), ui->tvLogFiles);
+    connect(refreshShortcut, &QShortcut::activated,this,&DlgRecord::onRefresh);
 }
 
 DlgRecord::~DlgRecord()
@@ -99,7 +105,10 @@ void DlgRecord::onItemDClicked(QModelIndex idx)
 void DlgRecord::onRefresh()
 {
     qDebug() << "onRefresh";
-    m_fileModel->setRootPath(m_rootpath);
+    // m_fileModel->setRootPath(m_rootpath);
+    QModelIndex currentIndex = ui->tvLogFiles->rootIndex();
+    ui->tvLogFiles->setRootIndex(m_fileModel->index(m_fileModel->filePath(currentIndex)));
+
 }
 
 void DlgRecord::onBrowser(bool checked)

@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QFileSystemModel>
+#include <QShortcut>
 
 #include "codeeditor.h"
 #include "tooltipeventfilter.h"
@@ -37,6 +38,7 @@ private:
     QFileSystemModel *m_fileModel;
     QString m_rootpath;
     QMap<QString, CodeEditor*> m_logfiles;
+    QShortcut *refreshShortcut;
     // TooltipEventFilter *m_filter;
 };
 
