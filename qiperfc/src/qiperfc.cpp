@@ -495,7 +495,7 @@ void QIperfC::onErrorStop(int err, QString msg)
     bErrorStop = err;
     m_ErrorMSG = msg;
     qDebug() << "onErrorStop: (" <<bErrorStop <<") " << m_ErrorMSG;
-    emit updateStarttime(QDateTime());
+    // emit updateStarttime(QDateTime());
     emit updateStatus(msg);
     updateRunStatus(false);
     emit testStoped(bErrorStop);
@@ -816,7 +816,7 @@ void QIperfC::doClear()
 {
     //clear all test date, config setting remain unchanged
     m_throughputview->doClear();
-    m_TestStartTime = QDateTime();
+    setStartTime(QDateTime());
     // m_tpplot->setStartTime(m_TestStartTime);
     m_qipconfig->clear();
     emit updateStatus("");
@@ -1377,6 +1377,7 @@ void QIperfC::initStatusbar()
 
 void QIperfC::onUpdateStarttime(QDateTime stime)
 {
+    setStartTime(stime);
     m_throughputview->setStartTime(stime);
     m_start_label->setText(stime.toString(DATETIME_NOW_FORMAT));
 }
