@@ -65,8 +65,8 @@ private:
     int bErrorStop;
     QString m_ErrorMSG;
     QMap<QString, WSClient *> m_ws; // websocket list for manager qiperfd's iperf
-    QMap<QString, WSClient *> m_wss; // websocket client list for manager iperf server
-    QMap<QString, WSClient *> m_wsc; // websocket client list for manager iperf client
+    // QMap<QString, WSClient *> m_wss; // websocket client list for manager iperf server
+    // QMap<QString, WSClient *> m_wsc; // websocket client list for manager iperf client
     QMap<QString, int> m_status_server; // store server status, 0: init, 1: running, 2: error?
     QMap<QString, int> m_status_client; // store client status, 0: init, 1: running, 2: error?
 

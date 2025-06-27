@@ -434,11 +434,9 @@ void TpWorker::onIperfStoped(QString refrow, QString err_no, QString err, QStrin
 
         // qiperf notify no error end:
         if (m_status_server.contains(ipport)){
-            // qDebug() << "m_status_server[" << ipport << "]: " << m_status_server[ipport];
             m_status_server[ipport]=TPStatus::init;
         }
         if (m_status_client.contains(ipport)){
-            // qDebug() << "m_status_client[" << ipport << "]: " << m_status_client[ipport];
             m_status_client[ipport]=TPStatus::init;
         }
     }
@@ -446,22 +444,22 @@ void TpWorker::onIperfStoped(QString refrow, QString err_no, QString err, QStrin
 void TpWorker::onServerDisconnected(QString targetip)
 {
     emit debuginfo("[TpWorker]onServerDisconnected: " + targetip);
-    if (m_wss.contains(targetip)){
-        m_wss.remove(targetip);
-    }
+    // if (m_wss.contains(targetip)){
+    //     m_wss.remove(targetip);
+    // }
 }
 
 void TpWorker::onClientDisconnected(QString targetip)
 {
-    // qDebug() << "onClientDisconnected: " << targetip;
-    if (m_wsc.contains(targetip)){
-        m_wsc.remove(targetip);
-    }
+    emit debuginfo("[TpWorker]onClientDisconnected: " + targetip);
+    // if (m_wsc.contains(targetip)){
+    //     m_wsc.remove(targetip);
+    // }
 }
 
 void TpWorker::onDisconnected(QString targetip)
 {
-    qDebug() << "onDisconnected: " << targetip;
+    emit debuginfo("[TpWorker]onDisconnected: " + targetip);
     if (m_ws.contains(targetip)){
         m_ws.remove(targetip);
     }
@@ -501,9 +499,12 @@ void TpWorker::onStop(){
     foreach (auto key, m_ws.keys()){
         if (m_ws[key]){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
-            emit debuginfo("[TpWorker]"+key + " m_wsc send cmd: " + cmd);
+            emit debuginfo("[TpWorker]"+ key + " m_ws send cmd: " + cmd);
             m_ws[key]->sendText(cmd);
             // m_wsc[key]->close();
+            QThread::sleep(1);
+            emit debuginfo("[TpWorker]"+ key + " CMD_IPERF_CLEAR ");
+            m_ws[key]->sendText(CMD_IPERF_CLEAR);
         }
     }
 
