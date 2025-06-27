@@ -889,7 +889,7 @@ QString MyInfo::getCPUModel(int& corenum) {
     //powershell: Get-WmiObject -query "SELECT * FROM Win32_Processor"
     //            Get-WmiObject -query "SELECT Name,NumberOfLogicalProcessors FROM Win32_Processor"
     IEnumWbemClassObject* pEnumerator = NULL;
-    hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT * FROM Win32_Processor"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
+    hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT Name, NumberOfLogicalProcessors FROM Win32_Processor"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
         qWarning() << "[getCPUModel]Query for Win32_Processor failed:" << getLastErrorAsString();
         pSvc->Release();
@@ -909,6 +909,9 @@ QString MyInfo::getCPUModel(int& corenum) {
         }
 
         cpuModel = getWMIProperty(pClsObj, SysAllocString(L"Name"));
+        // MODIFICATION HERE: Get NumberOfLogicalProcessors
+        QString logicalProcessorsStr = getWMIProperty(pClsObj, SysAllocString(L"NumberOfLogicalProcessors"));
+        corenum = logicalProcessorsStr.toInt();
         pClsObj->Release();
     }
 
