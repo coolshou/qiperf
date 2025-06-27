@@ -104,11 +104,10 @@ void DlgRecord::onItemDClicked(QModelIndex idx)
 
 void DlgRecord::onRefresh()
 {
-    qDebug() << "onRefresh";
+    qDebug() << "onRefresh(TODO, following did not update file size?why)";
     // m_fileModel->setRootPath(m_rootpath);
     QModelIndex currentIndex = ui->tvLogFiles->rootIndex();
     ui->tvLogFiles->setRootIndex(m_fileModel->index(m_fileModel->filePath(currentIndex)));
-
 }
 
 void DlgRecord::onBrowser(bool checked)
