@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QThread>
 #include <QRegularExpression>
+#include <QTextStream>
 
 #include <ctime>      // For std::time_t, std::tm, std::time, std::localtime
 #include <iomanip>    // For std::put_time
@@ -714,7 +715,7 @@ void IperfWrapper::work()
 }
 
 // int IperfWrapper::getTimeStempLength(QString timestempformat)
-int IperfWrapper::getTimeStempLength(const std::string& format_string)
+qint64 IperfWrapper::getTimeStempLength(const std::string& format_string)
 {
     //timestemp in
     // %Y = Year (2025)
@@ -727,23 +728,35 @@ int IperfWrapper::getTimeStempLength(const std::string& format_string)
     // %F: Equivalent to %Y-%m-%d
     // %T: Equivalent to %H:%M:%S
     // For production, you might pass a specific std::tm or std::time_t.
-    std::time_t now = std::time(nullptr);
-    std::tm* local_tm = std::localtime(&now);
+    std::ostringstream oss;
 
+    std::time_t now = std::time(nullptr);
+#if defined(Q_OS_LINUX)
+    std::tm* local_tm = std::localtime(&now);
     if (local_tm == nullptr) {
         debug("Error: Could not get local time.", 3);
         return 0; // Or throw an exception
     }
-
-    std::ostringstream oss;
     oss << std::put_time(local_tm, format_string.c_str());
 
-    // Check for errors during formatting (e.g., invalid format string)
-    if (oss.fail()) {
-        debug("Error: Failed to format time with format string: \"" + QString::fromStdString(format_string) + "\"", 3);
-        return 0; // Or throw an exception
-    }
+#endif
+#if defined(Q_OS_WIN)
+    // Declare a std::tm object that localtime_s will populate
+    std::tm local_tm;
+    errno_t err = localtime_s(&local_tm, &now);
 
+    if (err == 0) {
+        // Successfully converted the time
+        oss << std::put_time(&local_tm, format_string.c_str());
+#endif
+        // Check for errors during formatting (e.g., invalid format string)
+        if (oss.fail()) {
+            debug("Error: Failed to format time with format string: \"" + QString::fromStdString(format_string) + "\"", 3);
+            return 0; // Or throw an exception
+        }
+#if defined(Q_OS_WIN)
+    }
+#endif
     return oss.str().length();
 
 

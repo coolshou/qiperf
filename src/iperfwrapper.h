@@ -37,7 +37,7 @@ signals:
     void debuginfo(QString msg);
 private:
     // int getTimeStempLength(QString timestempformat);
-    int getTimeStempLength(const std::string& format_string);
+    qint64 getTimeStempLength(const std::string& format_string);
 
 private:
     int m_idx;  // ref row
@@ -56,7 +56,7 @@ private:
     int m_omit=0;
     bool m_ignorewronginterval;
     bool bWithtimestamp=false;
-    int iTimestampLength=0;
+    qint64 iTimestampLength=0;
     QStringList m_arguments;  //iperf args
     int m_debuglv;
 };
