@@ -240,7 +240,12 @@ void IperfWrapper::parserIperf2(QString linedata)
     try{
         QString idx = "";
         QString sDir = TPDIRNO;
-        if (linedata.contains("Server listening")||
+        if (linedata.startsWith("###")){
+            //TODO: handle custom value
+/*
+
+*/
+        }else if (linedata.contains("Server listening")||
             linedata.contains("Client connecting")){
             if (linedata.contains("TCP")){
                 if(!m_protocal.contains("TCP")){
@@ -436,7 +441,13 @@ void IperfWrapper::parserIperf3(QString linedata)
             linedata = linedata.mid(iTimestampLength);
             debug("after trim time stamp:" + linedata, 3);
         }
-        if (linedata.contains("Server listening")||
+        if (linedata.startsWith("###")){
+            //TODO: handle custom value
+/*
+### /tmp/qiperf/iperf3 -s -p 5201 --bind 127.0.0.1 -i 1 --one-off -f m --forceflush
+### 2025-06-27_133520.434
+*/
+        }else if (linedata.contains("Server listening")||
             linedata.contains("Accepted connection")||
             linedata.contains("Connecting")||
             linedata.contains("local") ||
