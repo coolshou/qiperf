@@ -98,7 +98,7 @@ QVariant EndPointMgr::headerData(int section, Qt::Orientation orientation,
             case EndPointMgr::cpu:
                 return QString("CPU");
             case EndPointMgr::cpucores:
-                return QString("Cores");
+                return QString("Thread");
             case EndPointMgr::status:
                 return QString("Last seen");
             case EndPointMgr::version:

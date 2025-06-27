@@ -25,8 +25,8 @@ public:
         os=3,
         osver=4,
         cpu=5,
-        cpucores=6,
-        status=7,
+        cpucores=6, //hyper thread number
+        status=7,  //last seen
         version=8,
         buildver=9
     };
