@@ -535,7 +535,7 @@ void TP::setThroughput(QString value)
         m_itemDatas[int(TP::throughput)] = "";
     }else{
         //min value
-        if ((m_itemDatas[int(TP::mintp)].toDouble()<=0 && (value.toDouble()>0))||
+        if ((m_itemDatas[int(TP::mintp)].toDouble()<=0 && (value.toDouble()>=0))||
             (value.toFloat() < m_itemDatas[int(TP::mintp)].toDouble())){
             m_itemDatas[int(TP::mintp)] = value;
         }
