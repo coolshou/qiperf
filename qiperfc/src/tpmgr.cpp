@@ -311,6 +311,7 @@ QList<TP *> TPMgr::getChilds(bool showAll)
     QList<TP *> tps;
     // m_tps.clear();
     TP *itm = getRootItem();
+    // tps.append(itm);
     // qDebug() << "root child:" << itm->childCount() << " cuilds: " << itm->getChilds()  ;
     for(int i = 0; i<itm->childCount();i++){
         TP *chitm = itm->child(i);
@@ -504,10 +505,8 @@ void TPMgr::clear(){
             itm->clearThroughput();
             // itm->resetData();
             foreach(auto tp, itm->getChilds()){
-                // qDebug() << "tp:" << tp->getID() <<" type:"<< tp->getDataType();
                 if (tp->haveChilds()){
                     // foreach(auto p, tp->getChilds()){ // parallel
-                    // qDebug() << "p:" << tp->getID() <<" type:"<< tp->getDataType();
                     beginRemoveRows(indexFromItem(tp), 0 , tp->childCount()-1);
                     tp->removeChildren(0, tp->childCount());
                     // m_treeview->collapse(indexFromItem(tp));
@@ -680,6 +679,7 @@ TP *TPMgr::getItemByIdx(QString midx, TP *item)
     if(lst.count()>0){
         foreach (auto tp, lst){
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // qDebug() << "tp->getID():" << tp->getID();
             if (tp->getID() == midx){
                 return tp;
             }
