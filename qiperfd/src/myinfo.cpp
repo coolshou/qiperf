@@ -757,6 +757,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
     if (FAILED(hres)) {
         qWarning() << "[getMotherboardInfo]Failed to initialize security:" << getLastErrorAsString();
+        qWarning() << "HRESULT:" << QString::number(hres, 16);
         CoUninitialize();
         return;
     }
