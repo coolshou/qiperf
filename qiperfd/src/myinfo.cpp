@@ -440,7 +440,11 @@ QString MyInfo::getCPUModel(int& corenum) {
     QString modelname="Unknown CPU";
     int iCPUCores=0;
     QString cpuInfo = readFileContent("/proc/cpuinfo");
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QStringList lines = cpuInfo.split('\n', Qt::SkipEmptyParts);
+#else
+    QStringList lines = cpuInfo.split('\n', QString::SkipEmptyParts);
+#endif
     for (const QString &line : lines) {
         if (line.startsWith("processor")) {
             iCPUCores++;
