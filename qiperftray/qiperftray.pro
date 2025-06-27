@@ -111,11 +111,11 @@ CONFIG(release, debug|release) {
         $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Debug/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
 }
 
-    first.depends = $(first) iperfbin
+    first.depends = $(first) iperfdata iperfbin
     export(first.depends)
     export(iperfdata.commands)
     export(iperfbin.commands)
-    QMAKE_EXTRA_TARGETS += first iperfbin
+    QMAKE_EXTRA_TARGETS += first iperfdata iperfbin
 
 }
 unix:!android {
