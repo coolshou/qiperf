@@ -89,12 +89,16 @@ QVariant EndPointMgr::headerData(int section, Qt::Orientation orientation,
                 return QString("Manager Interface");
             case EndPointMgr::hostname:
                 return QString("Hostname");
-            case EndPointMgr::type:
-                return QString("Type");
+            // case EndPointMgr::type:
+            //     return QString("Type");
             case EndPointMgr::os:
                 return QString("OS");
             case EndPointMgr::osver:
                 return QString("OS Ver");
+            case EndPointMgr::cpu:
+                return QString("CPU");
+            case EndPointMgr::cpucores:
+                return QString("Cores");
             case EndPointMgr::status:
                 return QString("Last seen");
             case EndPointMgr::version:

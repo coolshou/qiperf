@@ -109,8 +109,10 @@ QString MyInfo::collectInfo()
     //TODO: CPU/MEM
     QString cpu="";
     QString mem="";
-    getCpuMemInfo(cpu, mem);
+    int cpucores=0;
+    getCpuMemInfo(cpu, mem, cpucores);
     mainObject.insert("CPU", cpu);
+    mainObject.insert("CPUCores", cpucores);
     mainObject.insert("MEM", mem);
 
     mainObject.insert("Manager", m_ifname);
@@ -432,12 +434,16 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     qInfo() << "Motherboard Model:" << model;
     qInfo() << "Motherboard Serial Number:" << serial;
 }
-QString MyInfo::getCPUModel() {
+QString MyInfo::getCPUModel(int& corenum) {
     QString hardware=nullptr;
     QString revision=nullptr;
+    int iCPUCores=0;
     QString cpuInfo = readFileContent("/proc/cpuinfo");
     QStringList lines = cpuInfo.split('\n');
     for (const QString &line : lines) {
+        if (line.startsWith("processor")) {
+            iCPUCores++;
+        }
         if (line.startsWith("model name")) {
             return line.split(':').last().trimmed();
         }
@@ -450,6 +456,7 @@ QString MyInfo::getCPUModel() {
     if (!hardware.isNull()){
         return hardware + " " + revision;
     }
+    corenum = iCPUCores;
     return QString("Unknown CPU model");
 }
 
@@ -507,11 +514,11 @@ void MyInfo::setSysBufferSize(quint64 buff)
 
 #endif
 }
-void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory) {
-    cpuModel = getCPUModel();
+void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory, int& cpucorenum) {
+    cpuModel = getCPUModel(cpucorenum);
     totalMemory = getTotalMemory();
 
-    qInfo() << "CPU Model:" << cpuModel;
+    qInfo() << "CPU Model:" << cpuModel << " core num:" << QString::number(cpucorenum);
     qInfo() << "Total Memory:" << totalMemory;
 }
 
@@ -832,7 +839,7 @@ QString MyInfo::getWMIProperty(IWbemClassObject* pClsObj, const BSTR property) {
     return result;
 }
 
-QString MyInfo::getCPUModel() {
+QString MyInfo::getCPUModel(int& corenum) {
     HRESULT hres;
     hres = CoInitializeEx(0, COINIT_MULTITHREADED);
     if (FAILED(hres)) {
@@ -873,6 +880,8 @@ QString MyInfo::getCPUModel() {
         return QString();
     }
 
+    //powershell: Get-WmiObject -query "SELECT * FROM Win32_Processor"
+    //            Get-WmiObject -query "SELECT Name,NumberOfLogicalProcessors FROM Win32_Processor"
     IEnumWbemClassObject* pEnumerator = NULL;
     hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT * FROM Win32_Processor"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
@@ -982,6 +991,7 @@ QString MyInfo::getTotalMemory() {
 
     return totalMemory;
 }
+#else
 
 #endif
 void MyInfo::setIfname(QString mgr_ifname)

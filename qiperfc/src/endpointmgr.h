@@ -21,12 +21,14 @@ public:
         name=0,
         ifname=1,
         hostname=2,
-        type=3,
-        os=4,
-        osver=5,
-        status=6,
-        version=7,
-        buildver=8
+        //type=3,
+        os=3,
+        osver=4,
+        cpu=5,
+        cpucores=6,
+        status=7,
+        version=8,
+        buildver=9
     };
     Q_ENUM(cols)
 

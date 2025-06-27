@@ -27,7 +27,7 @@ public:
     int getEndpointType();
     void setIperfVer(QString v2,QString v21, QString v22, QString v3);
     QJsonObject getIperfVer();
-    void getCpuMemInfo(QString &cpuModel, QString &totalMemory);
+    void getCpuMemInfo(QString &cpuModel, QString &totalMemory, int& cpucorenum);
     void getMotherboardInfo(QString &vendor, QString &model, QString &serial);
     QString getDriverVersion(const QString &interfaceName, QString &drivername);
     quint64 getSysBufferSize();
@@ -51,7 +51,7 @@ signals:
 
 private:
     QString getTotalMemory();
-    QString getCPUModel();
+    QString getCPUModel(int& corenum);
 #if defined(Q_OS_LINUX)
     QString readSysFile(const QString &path);
     void writeSysFile(const QString &path, QString value);

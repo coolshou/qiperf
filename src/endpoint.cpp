@@ -83,21 +83,26 @@ void EndPoint::loadData(QString data)
     {
         m_type = static_cast<EndPointType::Type>(jsonRoot.value("Type").toInt());
         EndPointType *ept = new EndPointType();
-        QString sType = ept->getTypeString(m_type);
+        // QString sType = ept->getTypeString(m_type);
         m_Manager = jsonRoot.value("Manager").toString(); // manager interface
         m_HostName = jsonRoot.value("HostName").toString();
+        m_cpu = jsonRoot.value("CPU").toString();
+        m_cpucores = jsonRoot.value("CPUCores").toInt();
         m_enabled = true;
     //    bool update = jsonRoot.value("update").toBool();
         OS_name = jsonRoot.value("OS").toString();
         OS_version = jsonRoot.value("OSVer").toString();
         qiperfd_ver = jsonRoot.value("qiperfd").toString();
         build_ver = jsonRoot.value("buildver").toString();
+
         m_itemDatas.insert(EndPointMgr::cols::name,  m_id);
         m_itemDatas.insert(EndPointMgr::cols::ifname, m_Manager);
         m_itemDatas.insert(EndPointMgr::cols::hostname, m_HostName);
-        m_itemDatas.insert(EndPointMgr::cols::type, sType);
+        // m_itemDatas.insert(EndPointMgr::cols::type, sType);
         m_itemDatas.insert(EndPointMgr::cols::os, OS_name);
         m_itemDatas.insert(EndPointMgr::cols::osver, OS_version);
+        m_itemDatas.insert(EndPointMgr::cols::cpu, m_cpu);
+        m_itemDatas.insert(EndPointMgr::cols::cpucores, m_cpucores);
         m_itemDatas.insert(EndPointMgr::cols::status, "");
         m_itemDatas.insert(EndPointMgr::cols::version, qiperfd_ver);
         m_itemDatas.insert(EndPointMgr::cols::buildver, build_ver);

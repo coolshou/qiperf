@@ -53,6 +53,8 @@ private:
     QString build_ver; // git ver
     QString m_Manager; // manager interface
     QString m_HostName;
+    QString m_cpu;
+    int m_cpucores;
     // net (eth/wifi) inerfaces:
     // (TODO)mobile interfaces
     QString m_lastnoticetime; // last get notice time string, eq: 2023.17.06.12:22:07.905
