@@ -534,6 +534,41 @@ void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory, int& cpucoren
 
 
 #if defined(Q_OS_WIN32)
+QString MyInfo::getHResultErrorString(HRESULT hr) {
+    LPWSTR messageBuffer = nullptr;
+    DWORD size = FormatMessageW(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_HMODULE,
+        GetModuleHandleW(L"oleaut32.dll"), // Try to get messages from oleaut32.dll for COM errors
+        hr,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPWSTR)&messageBuffer,
+        0,
+        NULL
+        );
+
+    if (size == 0) {
+        // Fallback for non-system/COM errors or if GetModuleHandleW fails
+        size = FormatMessageW(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL,
+            hr,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPWSTR)&messageBuffer,
+            0,
+            NULL
+            );
+    }
+
+    QString message;
+    if (size > 0 && messageBuffer) {
+        message = QString::fromWCharArray(messageBuffer).trimmed();
+        LocalFree(messageBuffer);
+    } else {
+        message = QString("Unknown HRESULT error 0x%1").arg(static_cast<unsigned int>(hr), 8, 16, QChar('0'));
+    }
+    return message;
+}
+
 QString MyInfo::getLastErrorAsString() {
     DWORD errorMessageID = ::GetLastError();
     if (errorMessageID == 0) {
@@ -756,8 +791,8 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
 
     hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
     if (FAILED(hres)) {
-        qWarning() << "[getMotherboardInfo]Failed to initialize security:" << getLastErrorAsString();
-        qWarning() << "HRESULT:" << QString::number(hres, 16);
+        qWarning() << "[getMotherboardInfo]Failed to initialize security:" << getHResultErrorString(hres);
+        qWarning() << "HRESULT:" << QString("0x%1").arg(static_cast<unsigned int>(hres), 8, 16, QChar('0'));
         CoUninitialize();
         return;
     }
