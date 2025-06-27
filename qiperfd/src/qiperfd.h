@@ -67,13 +67,14 @@ public:
             QString bndaddr="0.0.0.0", QString target="",
             QString parallel="0", QString protocal="TCP",
             bool bidir=false, bool reverse=false, int interval=1,
-            int delaytime=0);
+            int delaytime=0, bool bServer=false);
     qint64 add(QString refrow, QVariantMap jsondata);
     void del(int idx);
     int addIperfServer(QString refrow, int version, uint port, QString bindHost="");
     int addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs);
+    void startServer(int idx); // start idx of iperf server
     void start(int idx); // start idx of iperf
-    void startAll(); // start all of iperfs
+    void startAll(bool bServer=false); // start all of iperfs
     void stop(int idx);  // stop idx of iperfs
     void stopAll();  // stop all iperfs
     void clear(); //clear all iperf setting
@@ -156,6 +157,8 @@ private:
     QString m_iperfexe22ver; //iperf2.2 version
     QString m_iperfexe3; //iperf3
     QString m_iperfexe3ver; //iperf3 version
+    QMap<qint64, IperfWorker*> m_iperfwserver; // iperfworker in server mode
+    QMap<qint64, QThread*> m_thserver; //iperfworker in server mode's thread
     QMap<qint64, IperfWorker*> m_iperfworkers;
     QMap<qint64, QThread*> m_threads; // iperfworker's thread
 //    QList<IperfWorker*> m_iperfworkers;

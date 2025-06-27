@@ -34,6 +34,8 @@ public:
     void toLogFile(QString msg);
     bool getServerMode();
     int getRefRow();
+    void debug(QString msg, int debuglv=1);
+
 signals:
     void started(int idx, bool smode, QString ipport); // refrow, S/C, IPPort
     void finished(int idx, int exitCode, int exitStatus, QString ipport, QString filename); // refrow, exitcode, exitStatus, , IPPort
@@ -42,7 +44,8 @@ signals:
     void onStderr(int idx, int refrow, QString text, QString ipport); // idx, refrow, msg, ipport
     void onThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
     void stopSelfDestructor();
-    void debuginfo(Qstring msg);
+    void debuginfo(QString msg);
+
 public slots:
     void work();
     bool isRunning();
@@ -90,6 +93,7 @@ private:
     int m_omit=0;
     QProcess *m_iperf; // iperf procress
     QMap<QString, QJsonArray> m_tpdatas;
+    int m_debuglv;
 
 };
 

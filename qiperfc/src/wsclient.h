@@ -75,6 +75,7 @@ public:
     bool isConnected();
     void setDatapath(QString datapath);
     void close();
+    void debug(QString msg, int debuglv=1);
 
 public slots:
     void onError(QAbstractSocket::SocketError error);
@@ -87,6 +88,7 @@ signals:
     void serialopened(QString refrow, QString serveraddress, QString serveraPort);
     void sshopened(QString refrow, QString serveraddress, QString serveraPort);
     void ntpsynced(bool bOK, QString target);
+    void debuginfo(QString msg);
 
 private slots:
     void onConnected();
@@ -108,6 +110,7 @@ private:
     qint64 m_chunkSize = 64 * 1024;
     QTimer *idleTimer;
     bool m_keepalive;
+    int m_debuglv;
 };
 
 #endif // WSCLIENT_H

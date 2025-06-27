@@ -58,7 +58,7 @@ private:
     bool bWithtimestamp=false;
     int iTimestampLength=0;
     QStringList m_arguments;  //iperf args
-    int m_debuglv=1;
+    int m_debuglv;
 };
 
 #endif // IPERFWRAPPER_H

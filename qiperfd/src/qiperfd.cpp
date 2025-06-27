@@ -224,12 +224,18 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
 qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint port,
                  QString bndaddr, QString target,
                  QString parallel, QString protocal, bool bidir, bool reverse,
-                 int interval, int delaytime)
+                 int interval, int delaytime, bool bServer)
 { // add a IperfWorker to run iperf server/client
     // TODO: check host/port used?
     QThread *iperf_th = new QThread();
-    qint64 idx = m_threads.count();
-    m_threads.insert(idx, iperf_th);
+    qint64 idx =0;
+    if (bServer){
+        idx = m_thserver.count();
+        m_thserver.insert(idx, iperf_th);
+    }else{
+        idx = m_threads.count();
+        m_threads.insert(idx, iperf_th);
+    }
     IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port,
                                            bndaddr, target, bidir, reverse,
                                            interval, delaytime);
@@ -243,15 +249,19 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     // connect(iperfer, &IperfWorker::finished, iperfer, &IperfWorker::deleteLater);
     connect(iperfer, &IperfWorker::onThroughput, this, &QIperfd::onThroughput);
     connect(iperfer, &IperfWorker::debuginfo, this, &QIperfd::onDebuginfo);
+    connect(this, &QIperfd::setStop, iperfer, &IperfWorker::setStop);
 
     connect(iperf_th, &QThread::started, iperfer, &IperfWorker::work);
     connect(iperf_th, &QThread::finished, iperf_th, &QThread::deleteLater);
     connect(iperf_th, &QThread::finished, iperfer, &IperfWorker::deleteLater);
     iperfer->moveToThread(iperf_th);
-    connect(this, &QIperfd::setStop, iperfer, &IperfWorker::setStop);
 
     //    m_iperfworkers.append(iperfer);
-    m_iperfworkers.insert(idx, iperfer);
+    if (bServer){
+        m_iperfwserver.insert(idx, iperfer);
+    }else{
+        m_iperfworkers.insert(idx, iperfer);
+    }
     return idx;
 }
 
@@ -271,6 +281,10 @@ qint64 QIperfd::add(QString refrow, QVariantMap jsondata)
         return -1;
     }
     uint port = jsondata["port"].toUInt();
+    bool isServer=false;
+    if (jsondata.contains("server")){
+        isServer=true;
+    }
     QString binaddr = jsondata["bind"].toString();
     QString target = jsondata["target"].toString();
     QString parallel = jsondata["parallel"].toString(); // for server mode use
@@ -294,7 +308,8 @@ qint64 QIperfd::add(QString refrow, QVariantMap jsondata)
         return -1;
     }
     return add(refrow, ver, cmd, args, port, binaddr,
-               target, parallel, protocal, bidir, reverse, interval, delaytime);
+               target, parallel, protocal, bidir, reverse, interval, delaytime,
+               isServer);
 }
 
 void QIperfd::del(int idx)
@@ -363,6 +378,18 @@ int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host
     return add(refrow, version, cmd, args, port);
 }
 
+void QIperfd::startServer(int idx)
+{
+    try{
+        QThread *th = m_thserver.value(idx);
+        m_iperfwserver.value(idx)->setIperfLogPath(tmpfilepath+QDir::separator()+s_starttime);
+        th->start();
+    }catch (const std::exception &e) {
+        // Handle the exception and show an error message
+        qDebug() << "Exception Caught" << e.what();
+    }
+}
+
 void QIperfd::start(int idx)
 {
     try{
@@ -374,7 +401,7 @@ void QIperfd::start(int idx)
         qDebug() << "Exception Caught" << e.what();
     }
 }
-void QIperfd::startAll()
+void QIperfd::startAll(bool bServer)
 {
     QString tmp = tmpfilepath+QDir::separator()+s_starttime;
     QDir d(tmp);
@@ -382,10 +409,20 @@ void QIperfd::startAll()
         d.mkpath(tmp);
     }
     // start all thread
-    for (auto it = m_threads.begin(); it != m_threads.end(); ++it)
-    {
-        start(it.key());
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    if (bServer){
+        for (auto it = m_thserver.begin(); it != m_thserver.end(); ++it)
+        {
+            qDebug() << " start iperfworkers server:" << it.key();
+            startServer(it.key());
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);// do not add this ?
+        }
+    }else{
+        for (auto it = m_threads.begin(); it != m_threads.end(); ++it)
+        {
+            qDebug() << " start iperfworkers client:" << it.key();
+            start(it.key());
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);// do not add this ?
+        }
     }
 }
 void QIperfd::stop(int idx)
@@ -1052,18 +1089,18 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
 {
     //handle act message from websocket
     long long cut = msg.indexOf(':', 0);
-    QString act = msg.left(cut);
+    QString act = msg.left(cut); //action
     qDebug()<< "onWSactMessage: " << act;
     msg = msg.right(msg.length()-cut-1);
     // expect in json format
     if (act.startsWith(CMD_IPERF_ADD)){
         QJsonParseError error;
         cut = msg.indexOf(':', 0);
-        QString refrow = msg.left(cut);
+        QString refrow = msg.left(cut); //refrow number
         msg = msg.right(msg.length()-cut-1);
-        qDebug()<< "CMD_IPERF_ADD: " << msg;
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
+            qDebug()<< "CMD_IPERF_ADD: " << refrow << " msg:" << msg;
             add(refrow, doc.toVariant().toMap());
         }else{
             onLog("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + msg.toUtf8());
@@ -1088,10 +1125,19 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
     }else if (act.startsWith(CMD_IPERF_CLEAR)){
         clear();
     }else if (act.startsWith(CMD_IPERF_START)){
-        s_starttime = msg;
+        //TODO: server/client mode
+        cut = msg.indexOf(':', 0);
+        s_starttime = msg.left(cut); //server/client mode
         m_starttime =QDateTime::fromString(s_starttime, DATETIME_NOW_FORMAT);
-        qInfo() << "s_starttime: " << s_starttime;
-        startAll();
+
+        QString smode = msg.right(msg.length()-cut-1);
+        bool bserver=false;
+        // s_starttime = msg;
+        if (smode.contains("S")){
+            bserver=true;
+        }
+        qInfo() << "s_starttime: " << s_starttime << " server:" << bserver;
+        startAll(bserver);
     }else if (act.startsWith(CMD_IPERF_STOP)){
         stopAll();
     }else if (act.startsWith(CMD_PING)){

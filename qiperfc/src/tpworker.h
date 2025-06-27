@@ -44,9 +44,11 @@ private slots:
     void onIperfStoped(QString refrow, QString err_no, QString err, QString ipport);
     void onServerDisconnected(QString targetip);
     void onClientDisconnected(QString targetip);
+    void onDisconnected(QString targetip);
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
     int getStatusServers();
     int getStatusClients();
+    void onDebuginfo(QString msg);
 
 private:
     void initStart();
@@ -62,6 +64,7 @@ private:
     bool bUserStop;
     int bErrorStop;
     QString m_ErrorMSG;
+    QMap<QString, WSClient *> m_ws; // websocket list for manager qiperfd's iperf
     QMap<QString, WSClient *> m_wss; // websocket client list for manager iperf server
     QMap<QString, WSClient *> m_wsc; // websocket client list for manager iperf client
     QMap<QString, int> m_status_server; // store server status, 0: init, 1: running, 2: error?

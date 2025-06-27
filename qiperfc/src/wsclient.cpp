@@ -48,7 +48,7 @@
 **
 ****************************************************************************/
 #include "wsclient.h"
-#include <QtCore/QDebug>
+
 #include <QtWebSockets/QWebSocket>
 #include "comm.h"
 #include <QJsonParseError>
@@ -63,6 +63,7 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath,
     QObject(parent), m_serverip(serverip), m_url(url),
     m_webSocket(nullptr), m_keepalive(keepalive)
 {
+    m_debuglv = 3;
     idleTimer = new QTimer(this);
     idleTimer->setInterval(30000); //30 sec
     connect(idleTimer,&QTimer::timeout, this, &WSClient::onIdleTimerTimeout);
@@ -71,7 +72,6 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath,
 
     m_webSocket->setProxy(QNetworkProxy::NoProxy); // avoid to use proxy
     // QNetworkProxy qnp = m_webSocket->proxy();
-    // qDebug() << "proxy hostName: " << qnp.hostName() << " capabilities(): " << qnp.capabilities();
 
     connect(m_webSocket, &QWebSocket::connected, this, &WSClient::onConnected);
     connect(m_webSocket, &QWebSocket::disconnected, this, &WSClient::onDisconnected);
@@ -90,7 +90,7 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath,
     // m_serverip = serverip;
     // m_url = url;
     setDatapath(datapath);
-    // qDebug() << "m_webSocket->open(m_url): " << m_url;
+
     m_webSocket->open(m_url);
 }
 //! [constructor]
@@ -102,10 +102,10 @@ qint64 WSClient::sendText(QString message)
 
         rc = m_webSocket->sendTextMessage(message);
         if (rc <=0){
-            qDebug() << "error sendText size=" << rc << ", " << message;
+            debug("error sendText size=" + QString::number(rc) + ", " + message);
         }
     }else{
-        qDebug() << "m_webSocket not isValid";
+        debug("m_webSocket not isValid");
     }
     return rc;
 }
@@ -121,7 +121,7 @@ bool WSClient::isConnected()
         // TODO: is isValid() ok for check the websocket connected!!??
         // return m_webSocket->isValid(); // qwebsocket is ready to read/write
     }else {
-        qDebug() << "ERROR: m_webSocket not exist";
+        debug("ERROR: m_webSocket not exist");
         return false;
     }
 }
@@ -141,6 +141,13 @@ void WSClient::close()
     m_webSocket->close();
 }
 
+void WSClient::debug(QString msg, int debuglv)
+{
+    if (debuglv <= m_debuglv){
+        emit debuginfo("[WSClient]"+msg);
+    }
+}
+
 //! [onConnected]
 void WSClient::onConnected()
 {
@@ -155,24 +162,23 @@ void WSClient::onConnected()
 //!
 void WSClient::onDisconnected()
 {
-    // qDebug() << "WebSocket Disconnected: " << m_serverip;
     emit disconnected(m_serverip);
 }
 
 void WSClient::onErrorOccurred(QAbstractSocket::SocketError socketError)
 {
-    qDebug() << "WebSocket onErrorOccurred: " << m_url << " : " << socketError;
+    Q_UNUSED(socketError)
+    // debug("WebSocket onErrorOccurred: " + m_url.toString() + " : " << socketError);
 }
 
 void WSClient::onAboutToClose()
 {
-//    qDebug() << "WebSocket onAboutToClose";
-
+    //    debug("WebSocket onAboutToClose");
 }
 
 void WSClient::onStateChanged(QAbstractSocket::SocketState state)
 {
-    // qDebug() << "WebSocket onStateChanged: "  << m_url << " : " << state;
+    // debug("WebSocket onStateChanged: "  + m_url + " : " << state);
    Q_UNUSED(state)
 }
 
@@ -186,7 +192,7 @@ void WSClient::onTextMessageReceived(QString message)
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError) {
-        // qDebug() << "(TODO)from: " << from << " :json: " << message;
+
     }else{
         int cut2;
 
@@ -201,7 +207,7 @@ void WSClient::onTextMessageReceived(QString message)
             cut2 = message.indexOf(':', 0);
             QString smode = message.left(cut2); // S: server/ C: client mode
             message = message.right(message.length()-cut2-1); // key
-            qDebug() << "CMD_IPERF_STARTED:" << smode << " msg:" << message;
+            debug("CMD_IPERF_STARTED:" + smode + " msg:" + message);
             emit iperfStarted(smode, message);
         } else if (act.startsWith(CMD_IPERF_STOPED)){
             cut2 = message.indexOf(':', 0);  //
@@ -210,8 +216,6 @@ void WSClient::onTextMessageReceived(QString message)
             cut2 = message.indexOf(':', 0);  //
             QString error = message.left(cut2); // error status
             QString bindkey = message.right(message.length()-cut2-1); // bindkey
-
-            //        qDebug()<< "CMD_IPERF_STOPED:" << err_no << " bindkey:" << bindkey << " error:" << error;
             emit iperfStoped(m_idx, err_no, error, bindkey);
         } else if (act.startsWith(CMD_IPERF_ERRORED)){
             cut2 = message.indexOf(':', 0);  //
@@ -220,9 +224,7 @@ void WSClient::onTextMessageReceived(QString message)
             cut2 = message.lastIndexOf(':');  //
             QString error = message.left(cut2); // key
             QString bindkey = message.right(message.length()-cut2-1); // error message
-            //        qDebug()<< "CMD_IPERF_ERRORED:" << err_no << " bindkey:" << bindkey << " message:" << error;
             emit iperfStoped(m_idx, err_no, error, bindkey);
-
         } else if (act.startsWith(CMD_IPERF_TP_DATA)){
             // QJsonParseError error;
             int cut3 = message.indexOf(':', 0);
@@ -233,7 +235,7 @@ void WSClient::onTextMessageReceived(QString message)
             if (error.error == QJsonParseError::NoError){
                 emit iperfTPdata(m_idx, sInterval, message);
             }else{
-                qDebug() << "onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + message.toUtf8();
+                debug("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + message.toUtf8());
             }
             //        emit iperfStarted();
         } else if (act.startsWith(CMD_SERIAL_OPENED)){
@@ -245,8 +247,8 @@ void WSClient::onTextMessageReceived(QString message)
         } else if (act.startsWith(CMD_NTP_SYNC_FAIL)){
             emit ntpsynced(false, from);
         } else {
-            qDebug() << "Message received: act:" << act <<" refrow:" << m_idx <<
-                " :"<< message << ": "<< from;
+            debug("Message received: act:" + act +" refrow:" + m_idx +
+                      " :" + message + ": " + from);
         }
     }
 }
@@ -299,8 +301,8 @@ void WSClient::onIdleTimerTimeout()
 
 void WSClient::onSslErrors(const QList<QSslError> &errors)
 {
-//    Q_UNUSED(errors)
-    qDebug() << "onSslErrors:" << errors;
+   Q_UNUSED(errors)
+    // debug("onSslErrors:" + errors.join(" "));
     // WARNING: Never ignore SSL errors in production code.
     // The proper way to handle self-signed certificates is to add a custom root
     // to the CA store.
@@ -310,10 +312,10 @@ void WSClient::onSslErrors(const QList<QSslError> &errors)
 void WSClient::onError(QAbstractSocket::SocketError error)
 {
     if (error != QAbstractSocket::RemoteHostClosedError){
-        qDebug() << "[" <<m_webSocket->peerAddress().toString() << "]WSClient::onError:" << error ;
+        debug("[" +m_webSocket->peerAddress().toString() + "]WSClient::onError:" + m_webSocket->errorString());
     }else{
         // TODO : handle RemoteHostClosedError
-
+        debug("WSClient::onError:"+ m_webSocket->errorString());
     }
     //TODO: handle websocket not connect issue
 }

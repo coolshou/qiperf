@@ -157,28 +157,31 @@ void TpWorker::work()
             //TODO: detect manager server is pingable
             err = "=====[TpWorker] server:" + serverIP;
             emit debuginfo(err);
-            if (!m_wss.contains(serverIP)) {
+            //if (!m_wss.contains(serverIP)) {
+            if (!m_ws.contains(serverIP)) {
                 //TODO: can not work with interface with DHCP under Windows??
                 s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
                 err =  "[TpWorker]server websocket:" + serverIP + " url: " + s + " m_datapath:" + m_datapath;
                 emit debuginfo(err);
-                m_wss[serverIP]=new WSClient(serverIP, QUrl(s), m_datapath);
-                connect(m_wss[serverIP], &WSClient::iperfStarted, this, &TpWorker::onIperfStarted);
-                connect(m_wss[serverIP], &WSClient::iperfStoped, this, &TpWorker::onIperfStoped);
-                connect(m_wss[serverIP], &WSClient::disconnected, this, &TpWorker::onServerDisconnected);
-                connect(m_wss[serverIP], &WSClient::iperfTPdata, this, &TpWorker::onIperfTPdata);
+                m_ws[serverIP]=new WSClient(serverIP, QUrl(s), m_datapath);
+                connect(m_ws[serverIP], &WSClient::iperfStarted, this, &TpWorker::onIperfStarted);
+                connect(m_ws[serverIP], &WSClient::iperfStoped, this, &TpWorker::onIperfStoped);
+                // connect(m_ws[serverIP], &WSClient::disconnected, this, &TpWorker::onServerDisconnected);
+                connect(m_ws[serverIP], &WSClient::disconnected, this, &TpWorker::onDisconnected);
+                connect(m_ws[serverIP], &WSClient::iperfTPdata, this, &TpWorker::onIperfTPdata);
+                connect(m_ws[serverIP], &WSClient::debuginfo, this, &TpWorker::onDebuginfo);
             }else{
                 err =  "[TpWorker]m_wss exist:" + serverIP;
                 emit debuginfo(err);
-                m_wss[serverIP]->setDatapath(m_datapath);
+                m_ws[serverIP]->setDatapath(m_datapath);
             }
             itimeout = iWSTimeout;
             while (itimeout>0 && (bErrorStop==0)&& (bUserStop==false)){
                 QThread::msleep(1000);
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
                 //m_wss.contains(serverIP) && ! m_wss[serverIP]->isConnected() &&
-                if (m_wss.contains(serverIP)){
-                    if (m_wss.value(serverIP)->isConnected()){
+                if (m_ws.contains(serverIP)){
+                    if (m_ws.value(serverIP)->isConnected()){
                         break;
                     }
                 }else{
@@ -208,7 +211,7 @@ void TpWorker::work()
             //tell server add iperf server
             cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
             emit debuginfo("[TpWorker]server cmd:" + serverIP + " => " + cmd);
-            rs = m_wss[serverIP]->sendText(cmd);
+            rs = m_ws[serverIP]->sendText(cmd);
             if (rs<=0){
                 emit errorStop(1, "Setup server iperf config fail: "+ tp->getServerArgs());
                 break;
@@ -223,24 +226,26 @@ void TpWorker::work()
             err = "=====[TpWorker] client:" + clientIP;
             emit debuginfo(err);
             //TODO: detect manager client is pingable
-            if (!m_wsc.contains(clientIP)) {
+            if (!m_ws.contains(clientIP)) {
                 s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
                 emit debuginfo("[TpWorker]client websocket:" + clientIP + " url: " + s + " m_datapath:" + m_datapath);
-                m_wsc[clientIP]=new WSClient(clientIP, QUrl(s), m_datapath);
-                connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &TpWorker::onIperfStarted);
-                connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &TpWorker::onIperfStoped);
-                connect(m_wsc[clientIP], &WSClient::disconnected, this, &TpWorker::onClientDisconnected);
-                connect(m_wsc[clientIP], &WSClient::iperfTPdata, this, &TpWorker::onIperfTPdata);
+                m_ws[clientIP]=new WSClient(clientIP, QUrl(s), m_datapath);
+                connect(m_ws[clientIP], &WSClient::iperfStarted, this, &TpWorker::onIperfStarted);
+                connect(m_ws[clientIP], &WSClient::iperfStoped, this, &TpWorker::onIperfStoped);
+                // connect(m_ws[clientIP], &WSClient::disconnected, this, &TpWorker::onClientDisconnected);
+                connect(m_ws[clientIP], &WSClient::disconnected, this, &TpWorker::onDisconnected);
+                connect(m_ws[clientIP], &WSClient::iperfTPdata, this, &TpWorker::onIperfTPdata);
+                connect(m_ws[serverIP], &WSClient::debuginfo, this, &TpWorker::onDebuginfo);
             }else{
                 emit debuginfo("[TpWorker]m_wsc exist:" + clientIP);
-                m_wsc[clientIP]->setDatapath(m_datapath);
+                m_ws[clientIP]->setDatapath(m_datapath);
             }
             itimeout = iWSTimeout;
-            while (! m_wsc[clientIP]->isConnected()&& itimeout>0&& (bErrorStop==0)&& (bUserStop==false)){
+            while (itimeout>0 && (bErrorStop==0) && (bUserStop==false)){
                 QThread::msleep(1000);
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
-                if (m_wsc.contains(clientIP)){
-                    if (m_wsc.value(clientIP)->isConnected()){
+                if (m_ws.contains(clientIP)){
+                    if (m_ws.value(clientIP)->isConnected()){
                         break;
                     }
                 }else{
@@ -269,7 +274,7 @@ void TpWorker::work()
             //tell client add iperf client
             cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
             emit debuginfo("[TpWorker]client cmd:" + clientIP + " => " + cmd);
-            rs = m_wsc[clientIP]->sendText(cmd);
+            rs = m_ws[clientIP]->sendText(cmd);
             if (rs<=0){
                 emit errorStop(2, "Setup client iperf config fail: "+ tp->getClientArgs());
                 break;
@@ -288,13 +293,13 @@ void TpWorker::work()
         return;
     }
     //Start server
-    err = "[TpWorker]server keys:" + m_wss.keys().join(" ");
+    err = "[TpWorker]server keys:" + m_ws.keys().join(" ");
     emit debuginfo(err);
-    for (auto key: m_wss.keys()){
+    for (auto key: m_ws.keys()){
         // QThread::msleep(100);
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
         emit debuginfo("[TpWorker]Let Server " + key + " CMD_IPERF_START "+ startTime);
-        rs = m_wss[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
+        rs = m_ws[key]->sendText(QString(CMD_IPERF_START)+":"+startTime+":S");
         if (rs<=0){
             emit errorStop(3, "Start iperf server fail:" + key);
             break;
@@ -327,10 +332,10 @@ void TpWorker::work()
         return;
     }
     //Start client
-    for (auto key: m_wsc.keys()){
+    for (auto key: m_ws.keys()){
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
         emit debuginfo("[TpWorker]Let Client " + key + " CMD_IPERF_START " + startTime);
-        rs = m_wsc[key]->sendText(QString(CMD_IPERF_START)+":"+startTime);
+        rs = m_ws[key]->sendText(QString(CMD_IPERF_START)+":"+startTime+":C");
         if (rs<=0){
             emit errorStop(4, "Start iperf client fail:" + key);
             break;
@@ -454,6 +459,14 @@ void TpWorker::onClientDisconnected(QString targetip)
     }
 }
 
+void TpWorker::onDisconnected(QString targetip)
+{
+    qDebug() << "onDisconnected: " << targetip;
+    if (m_ws.contains(targetip)){
+        m_ws.remove(targetip);
+    }
+}
+
 void TpWorker::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
     emit iperfTPdata(refrow, sInterval, datas);
@@ -478,29 +491,43 @@ int TpWorker::getStatusClients()
     return sum;
 }
 
+void TpWorker::onDebuginfo(QString msg)
+{
+    emit debuginfo(msg);
+}
+
 void TpWorker::onStop(){
     QString cmd="";
-    // Stop reg iperf client
-    foreach (auto key, m_wsc.keys()){
-        if (m_wsc[key]){
+    foreach (auto key, m_ws.keys()){
+        if (m_ws[key]){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
             emit debuginfo("[TpWorker]"+key + " m_wsc send cmd: " + cmd);
-            m_wsc[key]->sendText(cmd);
-            m_wsc[key]->close();
+            m_ws[key]->sendText(cmd);
+            // m_wsc[key]->close();
         }
-        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
-    QThread::sleep(1);
-    // Stop reg iperf server
-    foreach (auto key, m_wss.keys()){
-        if (m_wss[key]){
-            cmd = QString(CMD_IPERF_STOP)+":" + key;
-            emit debuginfo("[TpWorker]"+key + "m_wss send cmd: " + cmd);
-            m_wss[key]->sendText(cmd);
-            m_wss[key]->close();
-        }
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
-    }
+
+    // Stop reg iperf client
+    // foreach (auto key, m_wsc.keys()){
+    //     if (m_wsc[key]){
+    //         cmd = QString(CMD_IPERF_STOP)+":" + key;
+    //         emit debuginfo("[TpWorker]"+key + " m_wsc send cmd: " + cmd);
+    //         m_wsc[key]->sendText(cmd);
+    //         m_wsc[key]->close();
+    //     }
+    //     // QCoreApplication::processEvents(QEventLoop::AllEvents);
+    // }
+    // // QThread::sleep(1);
+    // // Stop reg iperf server
+    // foreach (auto key, m_wss.keys()){
+    //     if (m_wss[key]){
+    //         cmd = QString(CMD_IPERF_STOP)+":" + key;
+    //         emit debuginfo("[TpWorker]"+key + "m_wss send cmd: " + cmd);
+    //         m_wss[key]->sendText(cmd);
+    //         m_wss[key]->close();
+    //     }
+    //     // QCoreApplication::processEvents(QEventLoop::AllEvents);
+    // }
     bUserStop=true;
 
     // bStartTest = false;
