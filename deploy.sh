@@ -6,8 +6,10 @@
 DOBUILD=0
 CODENAME=`grep '^VERSION_CODENAME' /etc/os-release | cut -d= -f2`
 WINVERSION=`grep '#define QIPERFD_VERSION' src/versions.h | cut -d\"  -f2`
-VERSION=${WINVERSION}-1
+LINUXVERSION=`head -n 1 debian/changelog | awk -F'-' '{print $NF}' | cut -d')' -f1`
 
+VERSION=${WINVERSION}-${LINUXVERSION}
+# ================================================
 
 declare -a DESTFILES=()
 DESTFILES+=(qiperfd_${VERSION}${CODENAME}_amd64.deb)
@@ -21,7 +23,7 @@ UPDATE_LINUX=1
 declare -a IPS=()
 #IPS+=("192.168.70.11")
 #IPS+=("192.168.70.13")
-IPS+=("192.168.70.14")
+#IPS+=("192.168.70.14")
 #IPS+=("192.168.70.12")
 #IPS+=("192.168.70.23")
 IPS+=("192.168.70.24")
