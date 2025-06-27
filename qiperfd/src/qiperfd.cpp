@@ -458,6 +458,8 @@ void QIperfd::clear()
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }
+    qDebug() << "m_iperfworkers:" << QString::number(m_iperfworkers.count())
+             << " m_threads:" << QString::number(m_threads.count());
 }
 
 bool QIperfd::isRunning(int idx)
