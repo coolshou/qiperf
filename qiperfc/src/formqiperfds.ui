@@ -19,6 +19,11 @@
     <height>400</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>8</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>QIperfd List</string>
   </property>

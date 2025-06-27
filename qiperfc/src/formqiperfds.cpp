@@ -7,6 +7,7 @@
 
 #include "comm.h"
 #include "wsclient.h"
+#include "endpointmgr.h"
 
 FormQIperfds::FormQIperfds(QWidget *parent) :
     QWidget(parent),
@@ -39,6 +40,12 @@ void FormQIperfds::setModel(QAbstractItemModel *model)
     // Optionally, initially sort by the first column
     ui->treeView->sortByColumn(0, Qt::AscendingOrder);
 //    ui->treeView->setModel(model);
+    ui->treeView->setColumnWidth(EndPointMgr::ifname, 105);
+    ui->treeView->setColumnWidth(EndPointMgr::type, 70);
+    ui->treeView->setColumnWidth(EndPointMgr::hostname, 100);
+    ui->treeView->setColumnWidth(EndPointMgr::osver, 100);
+    ui->treeView->setColumnWidth(EndPointMgr::version, 90);
+    ui->treeView->setColumnWidth(EndPointMgr::buildver, 90);
 }
 
 void FormQIperfds::setColumnWidth(int column, int width)
