@@ -249,7 +249,7 @@ QList<QHostAddress> MyInfo::getIPfromIfname(QString ifname)
             QList<QNetworkAddressEntry> addresses = niface.addressEntries();
             foreach (QNetworkAddressEntry address, addresses) {
                 ipAddress = address.ip();
-                qDebug() << "ipAddress:" <<ipAddress << " protocol:" << ipAddress.protocol();
+                // qDebug() << "ipAddress:" <<ipAddress << " protocol:" << ipAddress.protocol();
                 if (ipAddress.protocol() == QAbstractSocket::IPv4Protocol) {
                     addrs.append(ipAddress);
                     bAddress = address.broadcast();
@@ -437,15 +437,16 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
 QString MyInfo::getCPUModel(int& corenum) {
     QString hardware=nullptr;
     QString revision=nullptr;
+    QString modelname="Unknown CPU";
     int iCPUCores=0;
     QString cpuInfo = readFileContent("/proc/cpuinfo");
-    QStringList lines = cpuInfo.split('\n');
+    QStringList lines = cpuInfo.split('\n', Qt::SkipEmptyParts);
     for (const QString &line : lines) {
         if (line.startsWith("processor")) {
             iCPUCores++;
         }
         if (line.startsWith("model name")) {
-            return line.split(':').last().trimmed();
+            modelname = line.split(':').last().trimmed();
         }
         if (line.startsWith("Hardware")) {
             hardware = line.split(':').last().trimmed();
@@ -453,11 +454,14 @@ QString MyInfo::getCPUModel(int& corenum) {
             revision = line.split(":").at(1).trimmed();
         }
     }
+    corenum = iCPUCores;
+
     if (!hardware.isNull()){
         return hardware + " " + revision;
+    }else{
+        return modelname;
     }
-    corenum = iCPUCores;
-    return QString("Unknown CPU model");
+    // return QString("Unknown CPU model");
 }
 
 QString MyInfo::getTotalMemory() {
@@ -515,10 +519,12 @@ void MyInfo::setSysBufferSize(quint64 buff)
 #endif
 }
 void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory, int& cpucorenum) {
-    cpuModel = getCPUModel(cpucorenum);
+    int cpucore=0;
+    cpuModel = getCPUModel(cpucore);
+    cpucorenum = cpucore;
     totalMemory = getTotalMemory();
 
-    qInfo() << "CPU Model:" << cpuModel << " core num:" << QString::number(cpucorenum);
+    qInfo() << "CPU Model:" << cpuModel << " core num:" << QString::number(cpucore);
     qInfo() << "Total Memory:" << totalMemory;
 }
 
