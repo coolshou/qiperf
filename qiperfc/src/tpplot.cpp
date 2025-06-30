@@ -103,15 +103,15 @@ void TPPlot::setShowGroup(bool bShow)
     //for m_legends
     QMap<QString, QCPAbstractLegendItem*>::const_iterator legenditerator = m_legends.constBegin();
     while (legenditerator != m_legends.constEnd()) {
-        qDebug() << "legenditerator:" << legenditerator.key() << " - " << legenditerator.value() << " - " << mTotalLegendItem;
+        // qDebug() << "legenditerator:" << legenditerator.key() << " - " << legenditerator.value() << " - " << mTotalLegendItem; // Why this line cuase app crash??
         if (legenditerator.value() != mTotalLegendItem) {
             //normal Legend
             legenditerator.value()->setVisible(!m_showgroup);
             if (m_showgroup){
                 if(legend->hasItem(legenditerator.value())){
-                    qDebug() << "remove legend " << legenditerator.value();
+                    // qDebug() << "remove legend " << legenditerator.value();
                     if(!legend->take(legenditerator.value())){
-                        qDebug() << "remove legend " << legenditerator.value() << " fail";
+                        // qDebug() << "remove legend " << legenditerator.value() << " fail";
                     }else{
                         legend->simplify();
                     }
@@ -245,13 +245,22 @@ void TPPlot::onVLegendScrollChanged(int value)
 
 void TPPlot::onDataAdded(double key, double value)
 {
+    // Use QMutexLocker for automatic locking and unlocking
+    // The mutex will be locked when the QMutexLocker object is created,
+    // and unlocked when it goes out of scope (e.g., function exit, return, exception).
+    QMutexLocker locker(&m_mutex); // Locks m_mutex
     if (m_showgroup){
+        //try calc Total Graph value form each Graphs
         if (mTotalGraph){
             //add all value to Total graph's value
             double orgvalue=0;
             // TODO : last record will be wrong!!??
             int rc=mTotalGraph->getValue(key, orgvalue);
             if (rc>-1){
+                //sum up orgvalue & new value
+                qDebug() << "TPPlot::onDataAdded:" << key
+                         << " orgvalue:" << orgvalue
+                         << " value:" << value;
                 double sumvalue = orgvalue + value;
                 updateYAxisRange(0, sumvalue);
                 mTotalGraph->updateValue(key,sumvalue);
@@ -264,10 +273,12 @@ void TPPlot::onDataAdded(double key, double value)
             qDebug() << "onDataAdded: ERROR does not have mTotalGraph" ;
         }
     }
+    // m_mutex is automatically unlocked when 'locker' goes out of scope here
 }
 
 void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data)
 {
+    QMutexLocker locker(&m_mutex); // Locks m_mutex
     //combine two data in to Total graph
     if(mTotalGraph){
         QSharedPointer<QCPGraphDataContainer> data1 = mTotalGraph->data();
@@ -288,6 +299,7 @@ void TPPlot::onLostRateDataAdded(double key, double value)
 {
     //LostRate is calc with lost/total packet
     //
+    QMutexLocker locker(&m_mutex); // Locks m_mutex
     if (m_showgroup){
         if(mTotalLostGraph){
             //add all value to Total graph's value
@@ -310,6 +322,7 @@ void TPPlot::onLostRateDataAdded(double key, double value)
 
 void TPPlot::onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data)
 {
+    QMutexLocker locker(&m_mutex); // Locks m_mutex
     if(mTotalLostGraph){
         QSharedPointer<QCPBarsDataContainer> data1 = mTotalLostGraph->data();
         QSharedPointer<QCPBarsDataContainer> data2 = data;
@@ -864,6 +877,7 @@ void TPPlot::calculateLegendItems()
     if(m_showgroup){
         emit sigLegendCount(1);
     }else{
+        qDebug() << "sigLegendCount:" << itemsFit;
         emit sigLegendCount(itemsFit);
     }
 }

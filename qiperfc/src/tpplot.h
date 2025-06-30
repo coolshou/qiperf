@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QTimer>
 #include <QMap>
+#include <QMutex> // Required for QMutex
+#include <QMutexLocker> // Recommended for scoped locking
 
 #include "../lib/qcustomplot.h"
 #include "comm.h"
@@ -72,6 +74,8 @@ private:
     QCPAbstractLegendItem *mTotalLostLegendItem; //store total lost rate graph legend
 
     QMap<double, double> mTotalData;
+    // Add a mutex as a member variable
+    QMutex m_mutex; // Protects access to mTotalGraph and related plot state
 };
 
 #endif // TPPLOT_H
