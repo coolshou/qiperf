@@ -247,7 +247,7 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     connect(iperfer, &IperfWorker::started, this, &QIperfd::onStarted);
     connect(iperfer, &IperfWorker::finished, this, &QIperfd::onFinished);
     // connect(iperfer, &IperfWorker::finished, iperfer, &IperfWorker::deleteLater);
-    connect(iperfer, &IperfWorker::onThroughput, this, &QIperfd::onThroughput);
+    connect(iperfer, &IperfWorker::iperfTPdata, this, &QIperfd::onThroughput);
     connect(iperfer, &IperfWorker::debuginfo, this, &QIperfd::onDebuginfo);
     connect(this, &QIperfd::setStop, iperfer, &IperfWorker::setStop);
 
@@ -449,13 +449,13 @@ void QIperfd::clear()
     if (!m_iperfworkers.isEmpty()){
         for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end();) {
             it = m_iperfworkers.erase(it);
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }
     if (!m_threads.isEmpty()){
         for (auto it = m_threads.begin(); it != m_threads.end();) {
             it = m_threads.erase(it);
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }
     qDebug() << "m_iperfworkers:" << QString::number(m_iperfworkers.count())

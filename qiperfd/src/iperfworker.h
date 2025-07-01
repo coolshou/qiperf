@@ -42,7 +42,7 @@ signals:
     void log(int idx, QString msg); // refrow
     void onStdout(int idx, QString text); // refrow
     void onStderr(int idx, int refrow, QString text, QString ipport); // idx, refrow, msg, ipport
-    void onThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
+    void iperfTPdata(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
     void stopSelfDestructor();
     void debuginfo(QString msg);
 
@@ -59,7 +59,6 @@ private slots:
     void parserStdOut(QString msg);
     void onThroughputData(int idx, QString sInterval,  QString data);
     void onDebuginfo(QString msg);
-//    void parserIperf3(QString msg);
 
 private:
     int m_selfdestructionTime;

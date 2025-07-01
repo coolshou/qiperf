@@ -266,7 +266,7 @@ void IperfWorker::readyReadStdOut()
             if (line.length()>0){
                 parserStdOut(line);
             }
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
 
     }
@@ -338,7 +338,7 @@ void IperfWorker::onThroughputData(int idx, QString sInterval, QString data)
         //debug("No m_bidirtag, not reprort ThroughputData: ("+sInterval+")" + data);
     }else{
         debug(QString::number(idx) + " sInterval:" + sInterval + " data:" + data, 4);
-        emit onThroughput(idx, sInterval, data);
+        emit iperfTPdata(idx, sInterval, data);
     }
 }
 
