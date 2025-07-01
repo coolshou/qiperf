@@ -24,16 +24,6 @@
 QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     : QObject{parent}, m_pserver(pserver), m_fileclient(nullptr)
 {
-// #if defined(Q_OS_WIN32)
-//     // Initialize COM for the main thread here, once at startup
-//     // This is typically called once per thread that uses COM.
-//     HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED); // Or COINIT_MULTITHREADED
-//     if (FAILED(hr)) {
-//         QMessageBox::critical(nullptr, "COM Initialization Error",
-//                               QString("Failed to initialize COM library: 0x%1").arg(hr, 8, 16, QChar('0').toUpper()));
-//         return;
-//     }
-// #endif
     // pserver : interact with systemtray GUI (qiperftray)
     // bReportTPData = false;
     m_ntpserver = nullptr;
@@ -118,10 +108,6 @@ QIperfd::~QIperfd()
     infoQIperfdStopped();
     informMessage(INFO_QIPERFD_STOPED, true);
     savecfg();
-// #if defined(Q_OS_WIN32)
-//     // Uninitialize COM when the application exits
-//     CoUninitialize();
-// #endif
 }
 
 
@@ -816,16 +802,6 @@ _bstr_t toBSTR(const QString& s) {
 bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCommand, const QString &taskArgs, const QDateTime &runTime) {
     HRESULT hr = S_OK;
 
-    // 1. Initialize COM
-    // CoInitializeEx is safe to call multiple times for the same thread.
-    // It's good practice to balance with CoUninitialize if you manage COM lifespan within a single function.
-    // However, for a GUI app, it's often initialized once at app start.
-    hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED); // Or COINIT_MULTITHREADED
-    if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
-        qDebug() << QString("CoInitializeEx failed: %1").arg(comErrorToString(hr));
-        return false;
-    }
-
     // Use _com_ptr_t for automatic reference counting and error checking
     // Use raw COM interface pointers
     ITaskService* pService = nullptr;
@@ -1003,20 +979,10 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         if (pService) pService->Release();
         return false;
     }
-    //    finally {
-    //     // CoUninitialize is generally only called once at app shutdown for main thread.
-    //     // If COM is initialized/uninitialized per-function, ensure it's balanced.
-    //     // CoUninitialize();
-    // }
 }
 
 bool QIperfd::runScheduledTask(const QString &taskName) {
     HRESULT hr = S_OK;
-    hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
-        qDebug() << QString("CoInitializeEx failed: %1").arg(comErrorToString(hr));
-        return false;
-    }
 
     ITaskService* pService = nullptr;
     ITaskFolder* pRootFolder = nullptr;
@@ -1057,12 +1023,6 @@ bool QIperfd::runScheduledTask(const QString &taskName) {
 
 bool QIperfd::deleteScheduledTask(const QString &taskName) {
     HRESULT hr = S_OK;
-    hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
-        qDebug() << QString("CoInitializeEx failed: %1").arg(comErrorToString(hr));
-        return false;
-    }
-
     ITaskService* pService = nullptr;
     ITaskFolder* pRootFolder = nullptr;
 
@@ -1372,36 +1332,6 @@ int QIperfd::checkFirewallStatus()
 #if defined(Q_OS_WIN32)
     HRESULT hres;
     QString err ="";
-    // Initialize COM
-    // hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-    // if (FAILED(hres)) {
-    //     // QMessageBox::critical(this, "Error", "Failed to initialize COM library.");
-    //     err = "Error: Failed to initialize COM library.";
-    //     informMessage(err, true);
-    //     return -1;
-    // }
-
-    // // Initialize security
-    // hres = CoInitializeSecurity(
-    //     NULL,
-    //     -1,                          // COM authentication
-    //     NULL,                        // Authentication services
-    //     NULL,                        // Reserved
-    //     RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
-    //     RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
-    //     NULL,                        // Authentication info
-    //     EOAC_NONE,                   // Additional capabilities
-    //     NULL                         // Reserved
-    //     );
-
-    // if (FAILED(hres)) {
-    //     // QMessageBox::critical(this, "Error", "Failed to initialize security.");
-    //     err = "Error: Failed to initialize security.";
-    //     informMessage(err, true);
-    //     // CoUninitialize();
-    //     return -1;
-    // }
-
     // Obtain the initial locator to WMI
     IWbemLocator *pLoc = NULL;
 
@@ -1415,7 +1345,6 @@ int QIperfd::checkFirewallStatus()
         // QMessageBox::critical(this, "Error", "Failed to create IWbemLocator object.");
         err = "Error: Failed to create IWbemLocator object.";
         informMessage(err, true);
-        // CoUninitialize();
         return -1;
     }
 
@@ -1438,7 +1367,6 @@ int QIperfd::checkFirewallStatus()
         err = "Error: Could not connect to WMI namespace. ROOT\\CIMV2";
         informMessage(err, true);
         pLoc->Release();
-        // CoUninitialize();
         return -1;
     }
 
@@ -1460,7 +1388,6 @@ int QIperfd::checkFirewallStatus()
         informMessage(err, true);
         pSvc->Release();
         pLoc->Release();
-        // CoUninitialize();
         return -1;
     }
 
@@ -1479,7 +1406,6 @@ int QIperfd::checkFirewallStatus()
         informMessage(err, true);
         pSvc->Release();
         pLoc->Release();
-        // CoUninitialize();
         return -1;
     }
 
@@ -1512,7 +1438,6 @@ int QIperfd::checkFirewallStatus()
     pSvc->Release();
     pLoc->Release();
     pEnumerator->Release();
-    // CoUninitialize();
     return uReturn;
 #else
     QProcess process;
