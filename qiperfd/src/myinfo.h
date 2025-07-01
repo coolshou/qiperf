@@ -56,7 +56,7 @@ private:
     QString readFileContent(const QString &filePath);
 #endif
 #if defined(Q_OS_WIN32)
-    QString getWMIProperty(IWbemClassObject* pClsObj, const BSTR property);
+    QString getWMIProperty(IWbemClassObject* pClsObj, const WCHAR* propertyName);
 #endif
     QString m_ifname;
     int update=0;

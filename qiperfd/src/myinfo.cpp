@@ -842,13 +842,28 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     pLoc->Release();
 }
 
-QString MyInfo::getWMIProperty(IWbemClassObject* pClsObj, const BSTR property) {
-    VARIANT vtProp;
-    QString result;
-    HRESULT hr = pClsObj->Get(property, 0, &vtProp, 0, 0);
-    if (SUCCEEDED(hr) && vtProp.vt == VT_BSTR) {
-        result = QString::fromWCharArray(vtProp.bstrVal);
+QString MyInfo::getWMIProperty(IWbemClassObject* pClsObj, const WCHAR* propertyName) {
+    if (!pClsObj || !propertyName) {
+        return QString();
     }
+
+    VARIANT vtProp;
+    VariantInit(&vtProp);
+
+    // Call Get with the propertyName (WCHAR*)
+    HRESULT hr = pClsObj->Get(propertyName, 0, &vtProp, NULL, NULL);
+
+    QString result;
+    if (SUCCEEDED(hr) && (vtProp.vt == VT_BSTR || (vtProp.vt == (VT_BSTR | VT_NULL)))) {
+        if (vtProp.bstrVal != NULL) {
+            result = QString::fromWCharArray(vtProp.bstrVal);
+        }
+    } else {
+        qWarning() << "Failed to get property" << QString::fromWCharArray(propertyName)
+                   << "or it's not a BSTR. HRESULT:" << QString("0x%1").arg(static_cast<unsigned int>(hr), 8, 16, QChar('0').toUpper())
+                   << "VT type:" << vtProp.vt;
+    }
+
     VariantClear(&vtProp);
     return result;
 }
