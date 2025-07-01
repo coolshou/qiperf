@@ -201,7 +201,7 @@ QJsonArray MyInfo::collectSerial()
             serials.append(com);
         }
     }
-    qDebug() << "collectSerial:" << serials;
+    qInfo() << "collectSerial:" << serials.join(",");
 
     QJsonArray arr= QJsonArray::fromStringList(serials);
     return arr;
@@ -858,6 +858,10 @@ QString MyInfo::getCPUModel(int& corenum) {
 Name
 Intel(R) Core(TM) i5-6500 CPU @ 3.20GHz
      */
+    /* wmic cpu get NumberOfLogicalProcessors
+NumberOfLogicalProcessors
+6
+*/
     HRESULT hres;
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
@@ -895,20 +899,33 @@ Intel(R) Core(TM) i5-6500 CPU @ 3.20GHz
 
     IWbemClassObject *pClsObj = NULL;
     ULONG uReturn = 0;
+    HRESULT hr_next = S_OK; // Initialize HRESULT for the Next call
     QString cpuModel;
-    while (pEnumerator) {
-        // HRESULT hr =
-        pEnumerator->Next(WBEM_INFINITE, 1, &pClsObj, &uReturn);
-        if (0 == uReturn) {
-            break;
-        }
+    int totalLogicalProcessors = 0; // To sum up logical processors if multiple CPUs
 
-        cpuModel = getWMIProperty(pClsObj, SysAllocString(L"Name"));
+    while (hr_next = pEnumerator->Next(WBEM_INFINITE, 1, &pClsObj, &uReturn), SUCCEEDED(hr_next) && uReturn == 1) {
+        // If SUCCEEDED(hr_next) is true, then uReturn will be 1 if an object was returned,
+        // or WBEM_S_FALSE (0x00040005) or WBEM_S_NO_MORE_DATA (0x40005) if no more objects.
+        // We specifically check uReturn == 1 to confirm an object was retrieved.
+
+        cpuModel = getWMIProperty(pClsObj, L"Name");
         // MODIFICATION HERE: Get NumberOfLogicalProcessors
-        QString logicalProcessorsStr = getWMIProperty(pClsObj, SysAllocString(L"NumberOfLogicalProcessors"));
-        corenum = logicalProcessorsStr.toInt();
-        pClsObj->Release();
+        QString logicalProcessorsStr = getWMIProperty(pClsObj, L"NumberOfLogicalProcessors");
+        int currentCpuLogicalProcessors = logicalProcessorsStr.toInt();
+        // Accumulate total logical processors if needed (for all CPUs)
+        totalLogicalProcessors += currentCpuLogicalProcessors;
+        if (pClsObj) {
+            pClsObj->Release();
+            pClsObj = NULL; // Best practice to nullify pointer after release
+        }
     }
+    if (FAILED(hr_next) && hr_next != WBEM_S_NO_MORE_DATA) {
+        qWarning() << "Error during WMI enumeration of Win32_Processor. HRESULT:"
+                   << QString("0x%1").arg(static_cast<unsigned int>(hr_next), 8, 16, QChar('0').toUpper());
+    }
+
+    // Set the final corenum (e.g., total logical processors)
+    corenum = totalLogicalProcessors;
 
     pEnumerator->Release();
     pSvc->Release();
