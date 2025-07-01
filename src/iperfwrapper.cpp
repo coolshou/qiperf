@@ -540,10 +540,10 @@ void IperfWrapper::parserIperf3(QString linedata)
                     irec.insert("idx", QString("%1%2").arg(idx,sTag));  // parallel num
                     irec.insert("interval", interval);  // interval
 
-                    debug("("+sInterval + ") " + idx + sTag +
-                          " interval:" + QString::number(interval) +
-                          " value:" + data[4] +
-                          " sDIR:" +  sDir);
+                    // debug("("+sInterval + ") " + idx + sTag +
+                    //       " interval:" + QString::number(interval) +
+                    //       " value:" + data[4] +
+                    //       " sDIR:" +  sDir);
 
                     irec.insert("value", data[4]);  // Bitrate
                     irec.insert("unit", data[5]);  // Bitrate unit
