@@ -10,7 +10,6 @@
 #include <QDateTime>
 #include <QSysInfo>
 #include <QMetaEnum>
-#include <QMessageBox>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
