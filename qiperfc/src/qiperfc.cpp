@@ -1155,7 +1155,8 @@ void QIperfC::onNtpsynced(bool bOK, QString target)
         }
     }else {
         QMessageBox::information(this, "NOTICE",
-                                 QString("%1 NTP time sync fail !").arg(target),
+                                 QString("%1 NTP time sync fail (%2)!").arg(target,
+                                                                            QString::number(m_ntpfail[target])),
                                  QMessageBox::Ok);
     }
 }
