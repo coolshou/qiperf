@@ -885,7 +885,7 @@ Intel(R) Core(TM) i5-6500 CPU @ 3.20GHz
     //powershell: Get-WmiObject -query "SELECT * FROM Win32_Processor"
     //            Get-WmiObject -query "SELECT Name,NumberOfLogicalProcessors FROM Win32_Processor"
     IEnumWbemClassObject* pEnumerator = NULL;
-    hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT Name, NumberOfLogicalProcessors FROM Win32_Processor"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
+    hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT Name,NumberOfLogicalProcessors FROM Win32_Processor"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
         qWarning() << "[getCPUModel]Query for Win32_Processor failed:" << getHResultErrorString(hres);
         pSvc->Release();
