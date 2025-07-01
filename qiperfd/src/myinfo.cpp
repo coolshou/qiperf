@@ -660,7 +660,7 @@ QString MyInfo::getAdapterName(const QString &description) {
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
     if (FAILED(hres)) {
         qWarning() << "[getAdapterName]Failed to create IWbemLocator object";
-        CoUninitialize();
+        // CoUninitialize();
         return QString();
     }
 
@@ -670,7 +670,7 @@ QString MyInfo::getAdapterName(const QString &description) {
     if (FAILED(hres)) {
         qWarning() << "[getAdapterName]Could not connect to WMI";
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return QString();
     }
 
@@ -679,7 +679,7 @@ QString MyInfo::getAdapterName(const QString &description) {
         qWarning() << "[getAdapterName]Could not set proxy blanket";
         pSvc->Release();
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return QString();
     }
 
@@ -691,7 +691,7 @@ QString MyInfo::getAdapterName(const QString &description) {
         qWarning() << "[getAdapterName]Query for network adapters failed";
         pSvc->Release();
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return QString();
     }
 
@@ -712,7 +712,7 @@ QString MyInfo::getAdapterName(const QString &description) {
                 pEnumerator->Release();
                 pSvc->Release();
                 pLoc->Release();
-                CoUninitialize();
+                // CoUninitialize();
                 return hardwareID;
             }
         }
@@ -723,7 +723,7 @@ QString MyInfo::getAdapterName(const QString &description) {
     pEnumerator->Release();
     pSvc->Release();
     pLoc->Release();
-    CoUninitialize();
+    // CoUninitialize();
     return QString();
 }
 void MyInfo::getNetworkAdapterInfo() {
@@ -800,36 +800,36 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
     if (FAILED(hres)) {
-        qWarning() << "[getMotherboardInfo]Failed to create IWbemLocator object:" << getLastErrorAsString();
-        CoUninitialize();
+        qWarning() << "[getMotherboardInfo]Failed to create IWbemLocator object:" << getHResultErrorString(hres);
+        // CoUninitialize();
         return;
     }
 
     IWbemServices *pSvc = NULL;
     hres = pLoc->ConnectServer(SysAllocString(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
     if (FAILED(hres)) {
-        qWarning() << "[getMotherboardInfo]Could not connect to WMI:" << getLastErrorAsString();
+        qWarning() << "[getMotherboardInfo]Could not connect to WMI:" << getHResultErrorString(hres);
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return;
     }
 
     hres = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
     if (FAILED(hres)) {
-        qWarning() << "[getMotherboardInfo]Could not set proxy blanket:" << getLastErrorAsString();
+        qWarning() << "[getMotherboardInfo]Could not set proxy blanket:" << getHResultErrorString(hres);
         pSvc->Release();
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return;
     }
 
     IEnumWbemClassObject* pEnumerator = NULL;
     hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT * FROM Win32_BaseBoard"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
-        qWarning() << "[getMotherboardInfo]Query for Win32_BaseBoard failed:" << getLastErrorAsString();
+        qWarning() << "[getMotherboardInfo]Query for Win32_BaseBoard failed:" << getHResultErrorString(hres);
         pSvc->Release();
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return;
     }
 
@@ -903,26 +903,26 @@ QString MyInfo::getCPUModel(int& corenum) {
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
     if (FAILED(hres)) {
-        qWarning() << "[getCPUModel]Failed to create IWbemLocator object:" << getLastErrorAsString();
-        CoUninitialize();
+        qWarning() << "[getCPUModel]Failed to create IWbemLocator object:" << getHResultErrorString(hres);
+        // CoUninitialize();
         return QString();
     }
 
     IWbemServices *pSvc = NULL;
     hres = pLoc->ConnectServer(SysAllocString(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
     if (FAILED(hres)) {
-        qWarning() << "[getCPUModel]Could not connect to WMI:" << getLastErrorAsString();
+        qWarning() << "[getCPUModel]Could not connect to WMI:" << getHResultErrorString(hres);
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return QString();
     }
 
     hres = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
     if (FAILED(hres)) {
-        qWarning() << "[getCPUModel]Could not set proxy blanket:" << getLastErrorAsString();
+        qWarning() << "[getCPUModel]Could not set proxy blanket:" << getHResultErrorString(hres);
         pSvc->Release();
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return QString();
     }
 
@@ -931,10 +931,10 @@ QString MyInfo::getCPUModel(int& corenum) {
     IEnumWbemClassObject* pEnumerator = NULL;
     hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT Name, NumberOfLogicalProcessors FROM Win32_Processor"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
-        qWarning() << "[getCPUModel]Query for Win32_Processor failed:" << getLastErrorAsString();
+        qWarning() << "[getCPUModel]Query for Win32_Processor failed:" << getHResultErrorString(hres);
         pSvc->Release();
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return QString();
     }
 
@@ -981,36 +981,36 @@ QString MyInfo::getTotalMemory() {
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
     if (FAILED(hres)) {
-        qWarning() << "[getTotalMemory]Failed to create IWbemLocator object:" << getLastErrorAsString();
-        CoUninitialize();
+        qWarning() << "[getTotalMemory]Failed to create IWbemLocator object:" << getHResultErrorString(hres);
+        // CoUninitialize();
         return QString();
     }
 
     IWbemServices *pSvc = NULL;
     hres = pLoc->ConnectServer(SysAllocString(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
     if (FAILED(hres)) {
-        qWarning() << "[getTotalMemory]Could not connect to WMI:" << getLastErrorAsString();
+        qWarning() << "[getTotalMemory]Could not connect to WMI:" << getHResultErrorString(hres);
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return QString();
     }
 
     hres = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE);
     if (FAILED(hres)) {
-        qWarning() << "[getTotalMemory]Could not set proxy blanket:" << getLastErrorAsString();
+        qWarning() << "[getTotalMemory]Could not set proxy blanket:" << getHResultErrorString(hres);
         pSvc->Release();
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return QString();
     }
 
     IEnumWbemClassObject* pEnumerator = NULL;
     hres = pSvc->ExecQuery(SysAllocString(L"WQL"), SysAllocString(L"SELECT * FROM Win32_OperatingSystem"), WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, NULL, &pEnumerator);
     if (FAILED(hres)) {
-        qWarning() << "[getTotalMemory]Query for Win32_OperatingSystem failed:" << getLastErrorAsString();
+        qWarning() << "[getTotalMemory]Query for Win32_OperatingSystem failed:" << getHResultErrorString(hres);
         pSvc->Release();
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return QString();
     }
 

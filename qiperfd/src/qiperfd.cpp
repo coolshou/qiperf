@@ -1373,34 +1373,34 @@ int QIperfd::checkFirewallStatus()
     HRESULT hres;
     QString err ="";
     // Initialize COM
-    hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-    if (FAILED(hres)) {
-        // QMessageBox::critical(this, "Error", "Failed to initialize COM library.");
-        err = "Error: Failed to initialize COM library.";
-        informMessage(err, true);
-        return -1;
-    }
+    // hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+    // if (FAILED(hres)) {
+    //     // QMessageBox::critical(this, "Error", "Failed to initialize COM library.");
+    //     err = "Error: Failed to initialize COM library.";
+    //     informMessage(err, true);
+    //     return -1;
+    // }
 
-    // Initialize security
-    hres = CoInitializeSecurity(
-        NULL,
-        -1,                          // COM authentication
-        NULL,                        // Authentication services
-        NULL,                        // Reserved
-        RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
-        RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
-        NULL,                        // Authentication info
-        EOAC_NONE,                   // Additional capabilities
-        NULL                         // Reserved
-        );
+    // // Initialize security
+    // hres = CoInitializeSecurity(
+    //     NULL,
+    //     -1,                          // COM authentication
+    //     NULL,                        // Authentication services
+    //     NULL,                        // Reserved
+    //     RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
+    //     RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
+    //     NULL,                        // Authentication info
+    //     EOAC_NONE,                   // Additional capabilities
+    //     NULL                         // Reserved
+    //     );
 
-    if (FAILED(hres)) {
-        // QMessageBox::critical(this, "Error", "Failed to initialize security.");
-        err = "Error: Failed to initialize security.";
-        informMessage(err, true);
-        CoUninitialize();
-        return -1;
-    }
+    // if (FAILED(hres)) {
+    //     // QMessageBox::critical(this, "Error", "Failed to initialize security.");
+    //     err = "Error: Failed to initialize security.";
+    //     informMessage(err, true);
+    //     // CoUninitialize();
+    //     return -1;
+    // }
 
     // Obtain the initial locator to WMI
     IWbemLocator *pLoc = NULL;
@@ -1415,7 +1415,7 @@ int QIperfd::checkFirewallStatus()
         // QMessageBox::critical(this, "Error", "Failed to create IWbemLocator object.");
         err = "Error: Failed to create IWbemLocator object.";
         informMessage(err, true);
-        CoUninitialize();
+        // CoUninitialize();
         return -1;
     }
 
@@ -1438,7 +1438,7 @@ int QIperfd::checkFirewallStatus()
         err = "Error: Could not connect to WMI namespace. ROOT\\CIMV2";
         informMessage(err, true);
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return -1;
     }
 
@@ -1460,7 +1460,7 @@ int QIperfd::checkFirewallStatus()
         informMessage(err, true);
         pSvc->Release();
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return -1;
     }
 
@@ -1479,7 +1479,7 @@ int QIperfd::checkFirewallStatus()
         informMessage(err, true);
         pSvc->Release();
         pLoc->Release();
-        CoUninitialize();
+        // CoUninitialize();
         return -1;
     }
 
@@ -1512,7 +1512,7 @@ int QIperfd::checkFirewallStatus()
     pSvc->Release();
     pLoc->Release();
     pEnumerator->Release();
-    CoUninitialize();
+    // CoUninitialize();
     return uReturn;
 #else
     QProcess process;
