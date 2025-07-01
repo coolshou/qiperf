@@ -88,6 +88,10 @@
 #define CMD_PING        "PING"
 // plot
 #define GRAPH_TOTAL      "TOTAL"
+#define GRAPH_PAIR      "PAIR"
+#define GRAPH_DIR      "DIRECTION"
+#define GRAPH_COMM      "COMMENT"
+
 #define LAYER_TOTAL      "Total"
 #define LAYER_TOTALOSTRATE      "TotalLostRate"
 
