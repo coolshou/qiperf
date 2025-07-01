@@ -643,11 +643,11 @@ QString MyInfo::getDriverVersion(const QString &hardwareID) {
 QString MyInfo::getAdapterName(const QString &description) {
     // WMI initialization
     HRESULT hres;
-    hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-    if (FAILED(hres)) {
-        qWarning() << "[getAdapterName]Failed to initialize COM library";
-        return QString();
-    }
+    // hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+    // if (FAILED(hres)) {
+    //     qWarning() << "[getAdapterName]Failed to initialize COM library";
+    //     return QString();
+    // }
 
     hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
     if (FAILED(hres)) {
@@ -783,11 +783,11 @@ QString MyInfo::getWindowsPatchNumber(){
 }
 void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial) {
     HRESULT hres;
-    hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-    if (FAILED(hres)) {
-        qWarning() << "[getMotherboardInfo]Failed to initialize COM library:" << getLastErrorAsString();
-        return;
-    }
+    // hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+    // if (FAILED(hres)) {
+    //     qWarning() << "[getMotherboardInfo]Failed to initialize COM library:" << getLastErrorAsString();
+    //     return;
+    // }
 
     hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
     if (FAILED(hres)) {
@@ -887,11 +887,11 @@ QString MyInfo::getWMIProperty(IWbemClassObject* pClsObj, const BSTR property) {
 
 QString MyInfo::getCPUModel(int& corenum) {
     HRESULT hres;
-    hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-    if (FAILED(hres)) {
-        qWarning() << "[getCPUModel]Failed to initialize COM library:" << getLastErrorAsString();
-        return QString();
-    }
+    // hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+    // if (FAILED(hres)) {
+    //     qWarning() << "[getCPUModel]Failed to initialize COM library:" << getLastErrorAsString();
+    //     return QString();
+    // }
 
     hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
     if (FAILED(hres)) {
@@ -965,11 +965,11 @@ QString MyInfo::getCPUModel(int& corenum) {
 
 QString MyInfo::getTotalMemory() {
     HRESULT hres;
-    hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-    if (FAILED(hres)) {
-        qWarning() << "[getTotalMemory]Failed to initialize COM library:" << getLastErrorAsString();
-        return QString();
-    }
+    // hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+    // if (FAILED(hres)) {
+    //     qWarning() << "[getTotalMemory]Failed to initialize COM library:" << getLastErrorAsString();
+    //     return QString();
+    // }
 
     hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
     if (FAILED(hres)) {
