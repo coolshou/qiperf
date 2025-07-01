@@ -70,8 +70,10 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     connect(this, &QIperfd::setMgrIfname, m_myinfo, &MyInfo::setIfname);
     QString info = m_myinfo->collectInfo();
     quint64 buffsize = m_myinfo->getSysBufferSize();
-    qDebug() << "Max socket buffer sizes: " << buffsize << " K";
-    qDebug() << "TODO: set Max socket buffer sizes to ?";
+    if (buffsize>0){
+        qDebug() << "Max socket buffer sizes: " << buffsize << " K";
+        qDebug() << "TODO: set Max socket buffer sizes to ?";
+    }
     // m_myinfo->setSysBufferSize(4*static_cast<uint>(BUFFER_SIZES::MB));
     // notice qiperfc info
     m_udpsrv = new UdpSrv(QIPERFD_BPORT, getManagerInterface(), m_myinfo);
@@ -1140,7 +1142,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
             //No need to do NTP sync
 #if (TEST_WS==1)
             QString target = QString("%1:%2").arg(fromAddr.toString(), QString::number(fromPort));
-            qDebug()<< "===== Info NTP time is OK: " << target;
+            qInfo()<< "===== Info NTP time is OK: " << target;
             int rc = m_wsserver->sendTextMessage(QString("%1").arg(CMD_NTP_SYNC_OK), target);
             if (rc<=0){
                 qDebug() << " Info " << fromAddr.toString() << " Fail!!";
