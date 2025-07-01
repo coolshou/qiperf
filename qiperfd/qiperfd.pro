@@ -32,7 +32,7 @@ win32:{
     LIBS += -lsetupapi
     LIBS += -lole32 -loleaut32
     LIBS += -ladvapi32
-    LIBS += -lwbemidl
+    LIBS += -L$$(WindowsSdkDir)Include\$$(WindowsSDKLibVersion)\um -lwbemidl
     # -lcomsuppw //mingw not support
 }
 
