@@ -249,7 +249,9 @@ void IperfWorker::onStarted()
     if (m_delaystart==0){
         emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
     }
+    // add iperf args
     toLogFile(QString("### %1 %2 \n").arg(m_cmd, m_arguments.join(" ")));
+    // add start time
     QString stime = QDateTime::currentDateTime().toString(DATETIME_NOW_FORMAT);
     toLogFile(QString("### %1 \n").arg(stime));
 }
