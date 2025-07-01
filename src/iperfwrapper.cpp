@@ -345,7 +345,7 @@ void IperfWrapper::parserIperf2(QString linedata)
                     if (!linedata.contains("receiver")){
                         // check report interval value is correct (smallest value 1 sec)
                         if (qAbs(m_interval-interval)>0.5){
-                            debug(linedata + "=>>>> ignorewronginterval value:" +
+                            debug(linedata + "=>>>>parserIperf2 ignorewronginterval value:" +
                                   QString::number(interval) + " expect:" + QString::number(m_interval), 4);
                             return;
                         }
@@ -418,6 +418,7 @@ void IperfWrapper::parserIperf2(QString linedata)
                     if (m_delaytime>0){
                         sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
                     }
+                    //iperf2 throughput data
                     emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
                     //clear record
                     m_tpdatas.remove(sInterval);
@@ -468,7 +469,7 @@ void IperfWrapper::parserIperf3(QString linedata)
         }else if(linedata.contains("warning:")){
             // ignore warning: line
         }else{
-            QString sDir = nullptr;
+            QString sDir = "";
             linedata = getIdx(linedata, idx);
             QString sTag="";
             if (m_servermode){
@@ -497,6 +498,10 @@ void IperfWrapper::parserIperf3(QString linedata)
             }else{
                 sDir = m_bidirtag;
             }
+            if (sDir.isEmpty()){
+                // debug("Ignore No sDir line data:" + linedata);
+                return;
+            }
             // TCP:
             //"0.00-1.00   sec   111 MBytes   931 Mbits/sec"
             // UDP:
@@ -519,8 +524,8 @@ void IperfWrapper::parserIperf3(QString linedata)
                     if (!linedata.contains("receiver")){
                         // check report interval value is correct (smallest value 1 sec)
                         if (qAbs(m_interval-interval)>0.5){
-                            debug(linedata + "=>>>> ignorewronginterval value:" +
-                                  QString::number(interval) + " expect:" + QString::number(m_interval), 3);
+                            debug(linedata + "=>>>>parserIperf3 ignorewronginterval value:" +
+                                  QString::number(interval) + " expect:" + QString::number(m_interval), 4);
                             return;
                         }
                     }
@@ -534,6 +539,12 @@ void IperfWrapper::parserIperf3(QString linedata)
                     QJsonObject irec = QJsonObject();
                     irec.insert("idx", QString("%1%2").arg(idx,sTag));  // parallel num
                     irec.insert("interval", interval);  // interval
+
+                    debug("("+sInterval + ") " + idx + sTag +
+                          " interval:" + QString::number(interval) +
+                          " value:" + data[4] +
+                          " sDIR:" +  sDir);
+
                     irec.insert("value", data[4]);  // Bitrate
                     irec.insert("unit", data[5]);  // Bitrate unit
                     if (m_protocal.contains("UDP")){
@@ -564,9 +575,13 @@ void IperfWrapper::parserIperf3(QString linedata)
                         m_tpdatas[sInterval].append(irec);
                     }
                 }
+                //else {
+                //     m_tpdatas[sInterval].count();
+                // }
                 if ((m_tpdatas[sInterval].count()>=iparallel)&&
                      !idx.contains("SUM", Qt::CaseInsensitive)){
                     QJsonArray arr = m_tpdatas[sInterval];
+                    debug("sInterval:" + sInterval + " m_tpdatas:" + QString::number(arr.size()));
                     QJsonDocument doc;
                     doc.setArray(arr);
                     if (sInterval.contains("-")){
@@ -580,6 +595,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                     if (m_delaytime>0){
                         sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
                     }
+                    //iperf3 throughput data
                     emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
                     //clear record
                     m_tpdatas.remove(sInterval);

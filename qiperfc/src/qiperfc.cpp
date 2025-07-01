@@ -530,7 +530,9 @@ void QIperfC::onNotice(QString send_addr, QString msg)
                             return;
                         }
                     }
-                    qDebug() << "ask NTP sync:" << send_addr << "(try:"<<QString::number(itry)<<")";
+                    if (itry>1){
+                        qDebug() << "Ask NTP sync:" << send_addr << "(try:"<<QString::number(itry)<<")";
+                    }
                     emit doNtpSync(send_addr);
                 }
                 break;
@@ -1120,7 +1122,7 @@ void QIperfC::onNtpsynced(bool bOK, QString target)
 {
     if (bOK){
         if (!m_ntps.contains(target)){
-            qDebug() << "onNtpsynced OK:" << target;
+            // qInfo() << "onNtpsynced OK:" << target;
             m_ntps.append(target);
         }
     }else {

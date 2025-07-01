@@ -872,6 +872,8 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
     QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError) {
         QJsonArray jArr = doc.array();//.object();
+        qDebug() << "(" << refrow << ") sInterval:" << sInterval
+                 << " TPMgr::onIperfTPdata: QJsonArray size:" << jArr.size();
         //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
         QString dir=nullptr;
         QString idx;
@@ -910,11 +912,15 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             }
             if (!isAvg) {
                 // chart data ( with out Average data)
-    //            qDebug() << sInterval <<" lost_rate: " << lost_rate;
-                emit IperfTPdata(sInterval, refrow + "_" + jObj.value("idx").toString(),
-                        jObj.value("value").toString(), QString::number(lost_rate, 'f', 4));
+                qDebug() << refrow + "_" + idx << " sInterval:" << sInterval
+                         << " value:" << value
+                         <<" lost_rate: " << lost_rate;
+                emit IperfTPdata(sInterval, refrow + "_" + idx, value,
+                                 QString::number(lost_rate, 'f', 4));
+                // emit IperfTPdata(sInterval, refrow + "_" + jObj.value("idx").toString(),
+                //         jObj.value("value").toString(), QString::number(lost_rate, 'f', 4));
             }
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
         // update  test pair config row's sum value
         TP *tp = getItemByIdx(refrow);
