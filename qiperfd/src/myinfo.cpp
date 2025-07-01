@@ -871,7 +871,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     pEnumerator->Release();
     pSvc->Release();
     pLoc->Release();
-    CoUninitialize();
+    // CoUninitialize();
 }
 
 QString MyInfo::getWMIProperty(IWbemClassObject* pClsObj, const BSTR property) {
@@ -958,7 +958,7 @@ QString MyInfo::getCPUModel(int& corenum) {
     pEnumerator->Release();
     pSvc->Release();
     pLoc->Release();
-    CoUninitialize();
+    // CoUninitialize();
 
     return cpuModel;
 }
@@ -1036,7 +1036,7 @@ QString MyInfo::getTotalMemory() {
     pEnumerator->Release();
     pSvc->Release();
     pLoc->Release();
-    CoUninitialize();
+    // CoUninitialize();
 
     return totalMemory;
 }
