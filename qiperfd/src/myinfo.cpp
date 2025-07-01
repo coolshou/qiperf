@@ -850,21 +850,43 @@ QString MyInfo::getWMIProperty(IWbemClassObject* pClsObj, const WCHAR* propertyN
     VARIANT vtProp;
     VariantInit(&vtProp);
 
-    // Call Get with the propertyName (WCHAR*)
     HRESULT hr = pClsObj->Get(propertyName, 0, &vtProp, NULL, NULL);
 
     QString result;
-    if (SUCCEEDED(hr) && (vtProp.vt == VT_BSTR || (vtProp.vt == (VT_BSTR | VT_NULL)))) {
-        if (vtProp.bstrVal != NULL) {
-            result = QString::fromWCharArray(vtProp.bstrVal);
+    if (SUCCEEDED(hr)) {
+        switch (vtProp.vt) {
+        case VT_BSTR:
+        case (VT_BSTR | VT_NULL): // Handle BSTR (string) properties
+            if (vtProp.bstrVal != NULL) {
+                result = QString::fromWCharArray(vtProp.bstrVal);
+            } else {
+                result = QString(); // Empty string for NULL BSTR
+            }
+            break;
+        case VT_I4: // Handle 32-bit signed integer properties (like NumberOfLogicalProcessors)
+            result = QString::number(vtProp.lVal);
+            break;
+        case VT_UI4: // Handle 32-bit unsigned integer properties
+            result = QString::number(vtProp.ulVal);
+            break;
+        case VT_BOOL: // Handle boolean properties
+            result = vtProp.boolVal == VARIANT_TRUE ? "true" : "false";
+            break;
+        // Add more cases as needed for other VARIANT types (VT_BSTR | VT_ARRAY for arrays, etc.)
+        default:
+            qWarning() << "getWMIProperty: Unhandled VARIANT type for property"
+                       << QString::fromWCharArray(propertyName)
+                       << "VT type:" << vtProp.vt;
+            result = QString(); // Return empty string for unhandled types
+            break;
         }
     } else {
-        qWarning() << "Failed to get property" << QString::fromWCharArray(propertyName)
-                   << "or it's not a BSTR. HRESULT:" << QString("0x%1").arg(static_cast<unsigned int>(hr), 8, 16, QChar('0').toUpper())
-                   << "VT type:" << vtProp.vt;
+        qWarning() << "Failed to retrieve property" << QString::fromWCharArray(propertyName)
+                   << "HRESULT:" << QString("0x%1").arg(static_cast<unsigned int>(hr), 8, 16, QChar('0').toUpper());
+        result = QString(); // Return empty string on retrieval failure
     }
 
-    VariantClear(&vtProp);
+    VariantClear(&vtProp); // Always clear the VARIANT
     return result;
 }
 
