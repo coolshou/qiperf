@@ -1148,6 +1148,11 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         QString refrow = msg.left(cut);
         msg = msg.right(msg.length()-cut-1);
         m_icmpping = new IcmpPing(refrow, msg, nullptr);
+    }else if (act.startsWith(CMD_NTP_START, Qt::CaseInsensitive)){
+        long long cut = msg.indexOf(':');
+        QString ntpmode = msg.right(msg.length()-cut-1);
+        qDebug() << "CMD_NTP_START:" << ntpmode;
+        setNtpServer(ntpmode);
     }else if (act.startsWith(CMD_NTP_SYNC)){
         cut = msg.indexOf(':', 0);
         msg = msg.right(msg.length()-cut-1);
