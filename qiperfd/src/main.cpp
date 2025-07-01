@@ -90,6 +90,10 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 }
 
 #if defined(Q_OS_WIN32)
+QString getHResultErrorString(HRESULT hr) {
+    return QString("HRESULT 0x%1").arg(static_cast<unsigned int>(hr), 8, 16, QChar('0').toUpper());
+}
+
 // --- BEGIN: Helper RAII Class (Highly Recommended) ---
 // This class ensures CoInitializeEx/CoUninitialize are paired correctly per thread.
 // Place this in its own header (e.g., "cominitializer.h")
