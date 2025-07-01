@@ -36,10 +36,10 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
                              QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates)
 {
     // qDebug() << "onUpdateTPDatas:" << refrow << " times:" << timedatas << " values: " << valuedatas;
-    QCPGraph *graph = getGraph(refrow);
-    MyQCPGraph *myGraph = static_cast<MyQCPGraph*>(graph);
+    MyQCPGraph *myGraph = getGraph(refrow);
     connect(myGraph, &MyQCPGraph::datasSetted, this ,&TPPlot::onDatasSetted);
 
+    // QMutexLocker locker(&m_mutex); // Locks m_mutex
     double minT = *std::min_element(timedatas.begin(), timedatas.end());// x: min time
     double maxT = *std::max_element(timedatas.begin(), timedatas.end());// x: max time
     updateXAxisRange(minT, maxT);
@@ -248,27 +248,28 @@ void TPPlot::onDataAdded(double key, double value)
     // Use QMutexLocker for automatic locking and unlocking
     // The mutex will be locked when the QMutexLocker object is created,
     // and unlocked when it goes out of scope (e.g., function exit, return, exception).
-    QMutexLocker locker(&m_mutex); // Locks m_mutex
     if (m_showgroup){
         //try calc Total Graph value form each Graphs
         if (mTotalGraph){
             //add all value to Total graph's value
             double orgvalue=0;
             // TODO : last record will be wrong!!??
+            QMutexLocker locker(&m_mutex); // Locks m_mutex
             int rc=mTotalGraph->getValue(key, orgvalue);
             if (rc>-1){
                 //sum up orgvalue & new value
-                qDebug() << "TPPlot::onDataAdded:" << key
-                         << " orgvalue:" << orgvalue
-                         << " value:" << value;
+                // qDebug() << "TPPlot::onDataAdded:" << key
+                //          << " orgvalue:" << orgvalue
+                //          << " value:" << value;
                 double sumvalue = orgvalue + value;
                 updateYAxisRange(0, sumvalue);
                 mTotalGraph->updateValue(key,sumvalue);
                 mTotalGraph->rescaleAxes(true);
             }else{
-                // qDebug() << ((MyQCPGraph*)sender())->name() << " (" << key << ") Key not found";
+                qDebug() << ((MyQCPGraph*)sender())->name() << " (" << key << ")mTotalGraph Key not found";
                 mTotalGraph->addData(key,value);
             }
+            locker.unlock();
         }else {
             qDebug() << "onDataAdded: ERROR does not have mTotalGraph" ;
         }
@@ -278,9 +279,9 @@ void TPPlot::onDataAdded(double key, double value)
 
 void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data)
 {
-    QMutexLocker locker(&m_mutex); // Locks m_mutex
     //combine two data in to Total graph
     if(mTotalGraph){
+        QMutexLocker locker(&m_mutex); // Locks m_mutex
         QSharedPointer<QCPGraphDataContainer> data1 = mTotalGraph->data();
         QSharedPointer<QCPGraphDataContainer> data2 = data;
         QSharedPointer<QCPGraphDataContainer> sumdata;
@@ -290,6 +291,7 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data)
         if (mTotalLegendItem){
             mTotalLegendItem->setVisible(true);
         }
+        locker.unlock();
     }else{
         qDebug() << "onDatasSetted: ERROR does not have mTotalGraph" ;
     }
@@ -299,11 +301,11 @@ void TPPlot::onLostRateDataAdded(double key, double value)
 {
     //LostRate is calc with lost/total packet
     //
-    QMutexLocker locker(&m_mutex); // Locks m_mutex
     if (m_showgroup){
         if(mTotalLostGraph){
             //add all value to Total graph's value
             double orgvalue=-1;
+            QMutexLocker locker(&m_mutex); // Locks m_mutex
             int rc=mTotalLostGraph->getValue(key, orgvalue);
             if (rc>-1){
                 double sumvalue = orgvalue + value;
@@ -311,9 +313,10 @@ void TPPlot::onLostRateDataAdded(double key, double value)
                 mTotalLostGraph->updateValue(key,sumvalue);
                 mTotalLostGraph->rescaleAxes(true);
             }else{
-                qDebug() << ((MyQCPBars*)sender())->name() << " (" << key << ") Key not found";
+                qDebug() << ((MyQCPBars*)sender())->name() << " (" << key << ") mTotalLostGraph Key not found";
                 mTotalLostGraph->addData(key,value);
             }
+            locker.unlock();
         }else {
             qDebug() << "onLostRateDataAdded: ERROR does not have mTotalLostGraph" ;
         }
@@ -370,13 +373,11 @@ void TPPlot::onIperfTPdata(QString sInterval, QString idx, QString data, QString
 
 void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
 {
-//    qDebug() << "addTPData: idx: " << idx;
-    // QCPGraph *graph = getGraph(idx);
+    // follow line will cause plot chart fail!!why??
+    // QMutexLocker locker(&m_mutex); // Locks m_mutex
     MyQCPGraph *myGraph = getGraph(idx);
-    // MyQCPGraph *myGraph = static_cast<MyQCPGraph*>(graph);
     if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
         //throughput graph
-
         myGraph->addData(xdata, ydata);
         if (!m_showgroup){
             if (m_legends.contains(idx)){
@@ -439,7 +440,7 @@ void TPPlot::del(QString idx)
     replot();
 }
 
-// QCPGraph *TPPlot::getGraph(QString idx, int width)
+
 MyQCPGraph *TPPlot::getGraph(QString idx, int width)
 {
     QPen graphPen;
@@ -649,7 +650,7 @@ void TPPlot::clear()
 
     //re-create Total Graph/Total Lost Graph and it's legend
     if (!mTotalGraph){
-        mTotalGraph = getGraph(GRAPH_TOTAL, 2);
+        mTotalGraph = getGraph(GRAPH_TOTAL, GWidth::Total);
     }
     if (!mTotalLostGraph){
         mTotalLostGraph = getLostRateGraph(GRAPH_TOTAL);

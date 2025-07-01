@@ -16,11 +16,21 @@ class TPPlot : public QCustomPlot
 {
     Q_OBJECT
 public:
+    enum GWidth{
+        Total=3,
+        Pair=2,
+        Direction=2,
+        Comment=2,
+        Iperf=1,
+    };
+    Q_ENUM(GWidth)
+
+public:
     explicit TPPlot(bool showgroup, QString sunit, QWidget *parent = nullptr);
     void addTPData(QString idx, double xdata, double ydata, double lostrate);  //
     void del(QString idx);
     // QCPGraph *getGraph(QString idx, int width=1); // get QCPGraph by index
-    MyQCPGraph *getGraph(QString idx, int width=1); // get QCPGraph by index
+    MyQCPGraph *getGraph(QString idx, int width=GWidth::Iperf); // get QCPGraph by index
     MyQCPBars *getLostRateGraph(QString idx);
     void clear();
     void setXRangeUpper(double upper);
