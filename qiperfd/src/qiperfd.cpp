@@ -10,6 +10,7 @@
 #include <QDateTime>
 #include <QSysInfo>
 #include <QMetaEnum>
+#include <QMessageBox>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
@@ -31,7 +32,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     if (FAILED(hr)) {
         QMessageBox::critical(nullptr, "COM Initialization Error",
                               QString("Failed to initialize COM library: 0x%1").arg(hr, 8, 16, QChar('0').toUpper()));
-        return 1;
+        return;
     }
 #endif
     // pserver : interact with systemtray GUI (qiperftray)

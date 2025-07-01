@@ -19,7 +19,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QMessageLogContext>
-#include <QMessageBox>
+
 #include <qlogging.h>
 #include <stdio.h>
 
