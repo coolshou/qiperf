@@ -16,8 +16,6 @@
 #include "serial/serialtask.h"
 #include "ssh/sshtask.h"
 
-//#include <QCloseEvent> # require gui
-
 #if defined(Q_OS_LINUX)
 //#include <QSocketNotifier>
 #endif
@@ -108,8 +106,6 @@ signals:
     void iperfStarted(QString bindkey); // iperf thrad started
     void setStop();
 
-protected:
-//    void closeEvent(QCloseEvent *event);
 private slots:
     void onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPort); //procress websocket action message
     void onNewClient(QHostAddress addr); //

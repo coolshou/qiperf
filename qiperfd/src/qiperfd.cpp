@@ -24,6 +24,16 @@
 QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     : QObject{parent}, m_pserver(pserver), m_fileclient(nullptr)
 {
+#if defined(Q_OS_WIN32)
+    // Initialize COM for the main thread here, once at startup
+    // This is typically called once per thread that uses COM.
+    HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED); // Or COINIT_MULTITHREADED
+    if (FAILED(hr)) {
+        QMessageBox::critical(nullptr, "COM Initialization Error",
+                              QString("Failed to initialize COM library: 0x%1").arg(hr, 8, 16, QChar('0').toUpper()));
+        return 1;
+    }
+#endif
     // pserver : interact with systemtray GUI (qiperftray)
     // bReportTPData = false;
     m_ntpserver = nullptr;
@@ -108,6 +118,10 @@ QIperfd::~QIperfd()
     infoQIperfdStopped();
     informMessage(INFO_QIPERFD_STOPED, true);
     savecfg();
+#if defined(Q_OS_WIN32)
+    // Uninitialize COM when the application exits
+    CoUninitialize();
+#endif
 }
 
 
