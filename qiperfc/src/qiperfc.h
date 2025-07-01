@@ -170,6 +170,8 @@ private slots:
     void onDoNtpSync(QString target);
     void onNtpsynced(bool bOK, QString target);
     void onClearNtpStatus(QString target);
+    void setNtpServer(int enable=1);
+    void onNtpstarted(bool started, QString fromAddress);
 private:
     Ui::MainWindow *ui;
     QList<QPluginLoader*> pluginLoaders;

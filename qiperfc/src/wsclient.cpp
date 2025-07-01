@@ -246,6 +246,10 @@ void WSClient::onTextMessageReceived(QString message)
             emit ntpsynced(true, from);
         } else if (act.startsWith(CMD_NTP_SYNC_FAIL)){
             emit ntpsynced(false, from);
+        } else if (act.startsWith(CMD_NTP_STARTED)){
+            emit ntpstarted(true, from);
+        } else if (act.startsWith(CMD_NTP_START_FAIL)){
+            emit ntpstarted(false, from);
         } else {
             debug("Message received: act:" + act +" refrow:" + m_idx +
                       " :" + message + ": " + from);

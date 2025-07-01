@@ -58,6 +58,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     // connect(this, &QIperfC::testStarted, this, &QIperfC::onTestStarted);
     connect(this, &QIperfC::testStoped, this, &QIperfC::onTestStoped);
     connect(this, &QIperfC::doNtpSync, this, &QIperfC::onDoNtpSync);
+    setNtpServer(1);
     ui->actionPaste->setShortcutContext(Qt::WidgetShortcut);
     m_throughputview = new ThroughputView(ui->actionCopy, ui->actionPaste,
                                           ui->actionDelete, ui->actionCopyText,
@@ -848,6 +849,33 @@ void QIperfC::AddSSHView(QString mkey, SSHView *sshview, WSClient *wsc)
     m_views->addView(sshview, true);
     m_sshviews->insert(mkey, {sshview, wsc});
 
+}
+
+void QIperfC::setNtpServer(int enable)
+{
+    QString s = "ws://127.0.0.1:"+QString::number(QIPERFD_WSPORT);
+    WSClient *ws = new WSClient("127.0.0.1", QUrl(s), "", false);
+    connect(ws, &WSClient::ntpstarted, this, &QIperfC::onNtpstarted);
+    int itimeout=20;
+    bool bConnected=false;
+    while (!bConnected && (itimeout>0)){
+        bConnected = ws->isConnected();
+        QThread::msleep(200);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        itimeout--;
+    }
+    if (bConnected){
+        QString cmd=QString("%1:%2").arg(CMD_NTP_START, QString::number(enable));
+        qint64 rc = ws->sendText(cmd);
+        if (rc<=0){
+            qDebug() << "send cmd Fail:" << cmd;
+        }
+    }
+}
+
+void QIperfC::onNtpstarted(bool started, QString fromAddress)
+{
+    qDebug() << fromAddress << " NTP started:" << started;
 }
 
 void QIperfC::onExport()

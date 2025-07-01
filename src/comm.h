@@ -67,6 +67,8 @@
 #define CMD_IPERF_GET_TP_FILE  "IPERF_GET_TP_FILE"  // get iperf throughput data file
 // NTP server
 #define CMD_NTP_START "NTP_START"  // enable/disable NTP server NTP_START:1 => enable, NTP_START:0 => disable
+#define CMD_NTP_STARTED "NTP_STARTED"
+#define CMD_NTP_START_FAIL "NTP_START_FAIL"
 #define CMD_NTP_SYNC "NTP_SYNC" // request do NTP time sync with server NTP_SYNC:ServerIP
 #define CMD_NTP_SYNC_OK "NTP_SYNC_OK"
 #define CMD_NTP_SYNC_FAIL "NTP_SYNC_FAIL"

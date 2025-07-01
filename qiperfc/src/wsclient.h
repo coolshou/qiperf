@@ -88,6 +88,7 @@ signals:
     void serialopened(QString refrow, QString serveraddress, QString serveraPort);
     void sshopened(QString refrow, QString serveraddress, QString serveraPort);
     void ntpsynced(bool bOK, QString target);
+    void ntpstarted(bool started, QString fromAddress);
     void debuginfo(QString msg);
 
 private slots:
