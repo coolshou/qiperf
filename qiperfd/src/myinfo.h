@@ -34,9 +34,6 @@ public:
     void setSysBufferSize(quint64 buff);
     void getTTL();
 
-#if defined(Q_OS_LINUX)
-
-#endif
 #if defined(Q_OS_WIN32)
     QString getHResultErrorString(HRESULT hr);
     QString getLastErrorAsString();

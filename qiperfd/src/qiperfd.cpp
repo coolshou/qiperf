@@ -25,16 +25,16 @@
 QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     : QObject{parent}, m_pserver(pserver), m_fileclient(nullptr)
 {
-#if defined(Q_OS_WIN32)
-    // Initialize COM for the main thread here, once at startup
-    // This is typically called once per thread that uses COM.
-    HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED); // Or COINIT_MULTITHREADED
-    if (FAILED(hr)) {
-        QMessageBox::critical(nullptr, "COM Initialization Error",
-                              QString("Failed to initialize COM library: 0x%1").arg(hr, 8, 16, QChar('0').toUpper()));
-        return;
-    }
-#endif
+// #if defined(Q_OS_WIN32)
+//     // Initialize COM for the main thread here, once at startup
+//     // This is typically called once per thread that uses COM.
+//     HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED); // Or COINIT_MULTITHREADED
+//     if (FAILED(hr)) {
+//         QMessageBox::critical(nullptr, "COM Initialization Error",
+//                               QString("Failed to initialize COM library: 0x%1").arg(hr, 8, 16, QChar('0').toUpper()));
+//         return;
+//     }
+// #endif
     // pserver : interact with systemtray GUI (qiperftray)
     // bReportTPData = false;
     m_ntpserver = nullptr;
@@ -119,10 +119,10 @@ QIperfd::~QIperfd()
     infoQIperfdStopped();
     informMessage(INFO_QIPERFD_STOPED, true);
     savecfg();
-#if defined(Q_OS_WIN32)
-    // Uninitialize COM when the application exits
-    CoUninitialize();
-#endif
+// #if defined(Q_OS_WIN32)
+//     // Uninitialize COM when the application exits
+//     CoUninitialize();
+// #endif
 }
 
 
@@ -1779,12 +1779,8 @@ void QIperfd::getIperfVer(QString cmd, double ver)
 #else
     QString c = cmd + " -v";
 #endif
-    qDebug() << "Qt6 getIperfVer: " << c << " arg:" << args;
-
+    // qDebug() << "getIperfVer: " << c << " arg:" << args;
     process.startCommand(c); //Qt6.0
-    // process.setProgram(cmd);
-    // process.setArguments(args);
-    // process.start();
 #endif
     if (!process.waitForFinished(5000)){//wait 5 sec
         qDebug() << "Error run cmd: " << cmd << " " << args.join(" ") << " Fail";

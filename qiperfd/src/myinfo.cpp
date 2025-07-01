@@ -649,12 +649,12 @@ QString MyInfo::getAdapterName(const QString &description) {
     //     return QString();
     // }
 
-    hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
-    if (FAILED(hres)) {
-        qWarning() << "[getAdapterName]Failed to initialize security";
-        CoUninitialize();
-        return QString();
-    }
+    // hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
+    // if (FAILED(hres)) {
+    //     qWarning() << "[getAdapterName]Failed to initialize security";
+    //     CoUninitialize();
+    //     return QString();
+    // }
 
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
@@ -789,13 +789,13 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     //     return;
     // }
 
-    hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
-    if (FAILED(hres)) {
-        qWarning() << "[getMotherboardInfo]Failed to initialize security:" << getHResultErrorString(hres);
-        qWarning() << "HRESULT:" << QString("0x%1").arg(static_cast<unsigned int>(hres), 8, 16, QChar('0'));
-        CoUninitialize();
-        return;
-    }
+    // hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
+    // if (FAILED(hres)) {
+    //     qWarning() << "[getMotherboardInfo]Failed to initialize security:" << getHResultErrorString(hres);
+    //     qWarning() << "HRESULT:" << QString("0x%1").arg(static_cast<unsigned int>(hres), 8, 16, QChar('0'));
+    //     CoUninitialize();
+    //     return;
+    // }
 
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
@@ -893,12 +893,12 @@ QString MyInfo::getCPUModel(int& corenum) {
     //     return QString();
     // }
 
-    hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
-    if (FAILED(hres)) {
-        qWarning() << "[getCPUModel]Failed to initialize security:" << getLastErrorAsString();
-        CoUninitialize();
-        return QString();
-    }
+    // hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
+    // if (FAILED(hres)) {
+    //     qWarning() << "[getCPUModel]Failed to initialize security:" << getLastErrorAsString();
+    //     CoUninitialize();
+    //     return QString();
+    // }
 
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);
@@ -971,12 +971,12 @@ QString MyInfo::getTotalMemory() {
     //     return QString();
     // }
 
-    hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
-    if (FAILED(hres)) {
-        qWarning() << "[getTotalMemory]Failed to initialize security:" << getLastErrorAsString();
-        CoUninitialize();
-        return QString();
-    }
+    // hres = CoInitializeSecurity(NULL, -1, NULL, NULL, RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE, NULL);
+    // if (FAILED(hres)) {
+    //     qWarning() << "[getTotalMemory]Failed to initialize security:" << getLastErrorAsString();
+    //     CoUninitialize();
+    //     return QString();
+    // }
 
     IWbemLocator *pLoc = NULL;
     hres = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID *)&pLoc);

@@ -87,11 +87,97 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     output_ts.flush(); //empty all data from its write buffer into the device
 }
 
+#if defined(Q_OS_WIN32)
+// --- BEGIN: Helper RAII Class (Highly Recommended) ---
+// This class ensures CoInitializeEx/CoUninitialize are paired correctly per thread.
+// Place this in its own header (e.g., "cominitializer.h")
+class ComInitializer {
+public:
+    explicit ComInitializer(DWORD dwCoInit = COINIT_MULTITHREADED) : m_initialized(false) {
+        HRESULT hres = CoInitializeEx(nullptr, dwCoInit);
+        if (SUCCEEDED(hres)) {
+            if (hres == S_OK) { // S_OK means COM was initialized by this call
+                m_initialized = true;
+            }
+            // S_FALSE means COM was already initialized on this thread with the same model.
+            // We don't need to uninitialize it later if this call returned S_FALSE.
+        } else {
+            // Only log if it's a true failure, not RPC_E_CHANGED_MODE
+            if (hres != RPC_E_CHANGED_MODE) {
+                qCritical() << "Failed to initialize COM for this thread. HRESULT:"
+                            << QString("0x%1").arg(static_cast<unsigned int>(hres), 8, 16, QChar('0').toUpper());
+            } else {
+                qWarning() << "COM already initialized on this thread with a different apartment model (RPC_E_CHANGED_MODE). HRESULT:"
+                           << QString("0x%1").arg(static_cast<unsigned int>(hres), 8, 16, QChar('0').toUpper());
+                // Depending on your needs, you might want to consider this a fatal error
+                // if the desired MTA is strictly required and cannot be met.
+            }
+        }
+    }
+
+    ~ComInitializer() {
+        if (m_initialized) {
+            CoUninitialize();
+            qDebug() << "COM uninitialized for this thread.";
+        }
+    }
+
+    bool isInitialized() const { return m_initialized; }
+
+private:
+    bool m_initialized;
+    ComInitializer(const ComInitializer&) = delete;
+    ComInitializer& operator=(const ComInitializer&) = delete;
+};
+// --- END: Helper RAII Class ---
+#endif
+
 int main(int argc, char *argv[])
 {
     int rc;
     rc = isNotRoot();
     if (rc == 0){
+#ifdef Q_OS_WIN32
+        // Use the RAII helper for COM initialization
+        // It handles CoInitializeEx return values (S_OK, S_FALSE, FAILED) correctly
+        ComInitializer com_init(COINIT_MULTITHREADED);
+
+        if (!com_init.isInitialized()) {
+            // If com_init.isInitialized() is false AND the HRESULT from CoInitializeEx
+            // was a true FAILED (not S_FALSE or RPC_E_CHANGED_MODE),
+            // then critical error.
+            // The ComInitializer constructor already logged the error for us.
+            QMessageBox::critical(nullptr, "COM Initialization Error",
+                                  "Failed to initialize COM for the application.");
+            return 1; // Exit if COM cannot be set up
+        }
+
+        // Initialize COM security for the process/thread after CoInitializeEx.
+        // Do this only ONCE per application lifecycle (or once per thread if different contexts).
+        // The MyInfo class should NOT call CoInitializeSecurity again.
+        HRESULT hr_sec = CoInitializeSecurity(
+            NULL,                          // Security descriptor
+            -1,                            // Use default authentication service
+            NULL,                          // Authentication services list
+            NULL,                          // Reserved
+            RPC_C_AUTHN_LEVEL_DEFAULT,     // Default authentication level for proxies
+            RPC_C_IMP_LEVEL_IMPERSONATE,   // Default impersonation level for proxies
+            NULL,                          // Authentication info
+            EOAC_NONE,                     // Additional capabilities
+            NULL                           // Reserved
+            );
+
+        if (FAILED(hr_sec) && hr_sec != S_FALSE) { // S_FALSE means it was already initialized
+            qWarning() << "Failed to initialize COM security:" << getHResultErrorString(hr_sec);
+            // Depending on the severity, you might want to return here.
+            // WMI calls might fail if security isn't set up correctly.
+        } else if (hr_sec == S_FALSE) {
+            qDebug() << "COM security already initialized (S_FALSE).";
+        } else {
+            qDebug() << "COM security initialized successfully.";
+        }
+#endif // Q_OS_WIN32
+
         //log file
         QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 
