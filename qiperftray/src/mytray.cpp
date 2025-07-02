@@ -11,7 +11,7 @@
 
 MyTray::MyTray(QObject *parent):QObject(parent)
 {
-    QIcon icon(":/qiperf");
+    QIcon icon(":/qiperfd");
     QMenu *trayIconMenu = new QMenu();
     QAction *viewWindow = new QAction("Show", this);
     connect(viewWindow, &QAction::triggered, this, &MyTray::sigShow);
