@@ -419,7 +419,7 @@ void IperfWrapper::parserIperf2(QString linedata)
                         sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
                     }
                     //iperf2 throughput data
-                    emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
+                    emit sendThroughput(m_refrow, sInterval, doc.toJson(QJsonDocument::Compact));
                     //clear record
                     m_tpdatas.remove(sInterval);
                 }
@@ -581,7 +581,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                 if ((m_tpdatas[sInterval].count()>=iparallel)&&
                      !idx.contains("SUM", Qt::CaseInsensitive)){
                     QJsonArray arr = m_tpdatas[sInterval];
-                    debug("sInterval:" + sInterval + " m_tpdatas:" + QString::number(arr.size()));
+                    debug("sInterval:" + sInterval + " m_tpdatas:" + QString::number(arr.size()), 4);
                     QJsonDocument doc;
                     doc.setArray(arr);
                     if (sInterval.contains("-")){
@@ -596,7 +596,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                         sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
                     }
                     //iperf3 throughput data
-                    emit sendThroughput(m_idx, sInterval, doc.toJson(QJsonDocument::Compact));
+                    emit sendThroughput(m_refrow, sInterval, doc.toJson(QJsonDocument::Compact));
                     //clear record
                     m_tpdatas.remove(sInterval);
                 }else{
@@ -624,9 +624,9 @@ QString IperfWrapper::getIdx(QString linedata, QString &idx)
     return r;
 }
 
-void IperfWrapper::setSetting(int idx, bool servermode, QString parallel, bool bidir, QString bidirtag)
+void IperfWrapper::setSetting(int refrow, bool servermode, QString parallel, bool bidir, QString bidirtag)
 {
-    m_idx = idx;
+    m_refrow = refrow;
     m_servermode = servermode;
     m_parallel = parallel;
     m_bidir = bidir;

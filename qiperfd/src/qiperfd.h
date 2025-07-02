@@ -8,6 +8,8 @@
 #include <QList>
 #include <QString>
 #include <QDateTime>
+#include <QMutex>
+
 #include "iperfwrapper.h"
 #include "fileclient.h"
 
@@ -67,7 +69,7 @@ public:
             bool bidir=false, bool reverse=false, int interval=1,
             int delaytime=0, bool bServer=false);
     qint64 add(QString refrow, QVariantMap jsondata);
-    void del(int idx);
+    void del(int idx, bool servermode);
     int addIperfServer(QString refrow, int version, uint port, QString bindHost="");
     int addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs);
     void startServer(int idx); // start idx of iperf server
@@ -89,7 +91,7 @@ public slots:
     void onErrored(int m_idx, int refrow, QString text, QString ipport);
     void onIperfLog(int idx, QString text);
     void onStarted(int m_idx, bool smode, QString ipport);
-    void onFinished(int idx, int exitCode, int exitStatus, QString ipport, QString filename);
+    void onFinished(int refrow, int exitCode, int exitStatus, QString ipport, QString filename, bool servermode);
     void onThroughput(int idx, QString sInterval, QString data); // idx, refrow, throughput data
     void onQuit();
     void onNewLine(QString line);
@@ -110,6 +112,7 @@ private slots:
     void onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPort); //procress websocket action message
     void onNewClient(QHostAddress addr); //
     void onDebuginfo(QString msg);
+    void handleWorkerFinished(qint64 id, bool servermode); // Slot to react when a worker finishes its cleanup
 
 private:
     int checkFirewallStatus();
@@ -156,7 +159,7 @@ private:
     QMap<qint64, IperfWorker*> m_iperfwserver; // iperfworker in server mode
     QMap<qint64, QThread*> m_thserver; //iperfworker in server mode's thread
     QMap<qint64, IperfWorker*> m_iperfworkers;
-    QMap<qint64, QThread*> m_threads; // iperfworker's thread
+    QMap<qint64, QThread*> m_threads; // iperfworkerin client mode's thread
 //    QList<IperfWorker*> m_iperfworkers;
 //    QList<QThread*> m_threads;
     QString mgr_ifname; //manager interface name
@@ -179,6 +182,7 @@ private:
     // serial
     QMap<QString, SerialTask*> m_serialtasks;
     QMap<QString, SSHTask*> m_sshtasks;
+    QMutex m_mutex;
 };
 
 #endif // QIPERFD_H

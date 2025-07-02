@@ -153,22 +153,28 @@ void IperfWorker::onSelfDestructor()
 void IperfWorker::setStop()
 {
     m_stop = true;
-    if (m_iperf->waitForFinished(3000)){
-        emit log(m_idx, "iperf killed");
-    }else{
-        int pid = m_iperf->processId();
-        if (pid >0){
-            debug("force terminate iperf id: " + QString::number(pid));
-#if defined(Q_OS_WIN32)
-            m_iperf->kill();
-#else
-            m_iperf->terminate();
-#endif
+    if (m_iperf && m_iperf->state() == QProcess::Running) {
+        m_iperf->terminate(); // Attempt graceful termination
+        if (m_iperf->waitForFinished(3000)){
+            emit log(m_idx, "iperf killed");
         }else{
-            debug("NOT Running m_iperf: " + m_iperf->program() + m_iperf->arguments().join(" "));
+            if (m_iperf->state() == QProcess::Running) {
+                int pid = m_iperf->processId();
+                if (pid >0){
+                    debug("force terminate iperf id: " + QString::number(pid));
+        #if defined(Q_OS_WIN32)
+                    m_iperf->kill();
+        #else
+                    m_iperf->terminate();
+        #endif
+                }else{
+                    debug("NOT Running m_iperf: " + m_iperf->program() + m_iperf->arguments().join(" "));
+                }
+            }
         }
     }
-//    emit finished(m_refrow, 0, 2, getBindKey());
+    emit workerFinished(m_idx, m_servermode); // Notify manager that this worker is logically done
+    this->deleteLater(); // Schedule deletion on this thread's event loop
 }
 
 QString IperfWorker::getBindKey()
@@ -320,7 +326,7 @@ void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 
     m_running = false;
     m_stop = true;
-    emit finished(m_refrow, exitCode, int(exitStatus), getBindKey(), filename);
+    emit finished(m_refrow, exitCode, int(exitStatus), getBindKey(), filename, m_servermode);
 }
 
 void IperfWorker::parserStdOut(QString msg)
@@ -334,13 +340,13 @@ void IperfWorker::parserStdOut(QString msg)
     }
 }
 
-void IperfWorker::onThroughputData(int idx, QString sInterval, QString data)
+void IperfWorker::onThroughputData(int refrow, QString sInterval, QString data)
 {
     if(m_bidirtag.isEmpty()){
         //debug("No m_bidirtag, not reprort ThroughputData: ("+sInterval+")" + data);
     }else{
-        debug(QString::number(idx) + " sInterval:" + sInterval + " data:" + data, 4);
-        emit iperfTPdata(idx, sInterval, data);
+        debug(QString::number(refrow) + " sInterval:" + sInterval + " data:" + data, 4);
+        emit iperfTPdata(refrow, sInterval, data);
     }
 }
 

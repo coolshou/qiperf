@@ -10,6 +10,7 @@
 #include <QDateTime>
 #include <QSysInfo>
 #include <QMetaEnum>
+#include <QMutexLocker>
 
 #include "qiperfd.h"
 #include "../src/comm.h"
@@ -248,17 +249,15 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     connect(iperfer, &IperfWorker::log, this, &QIperfd::onIperfLog);
     connect(iperfer, &IperfWorker::started, this, &QIperfd::onStarted);
     connect(iperfer, &IperfWorker::finished, this, &QIperfd::onFinished);
-    // connect(iperfer, &IperfWorker::finished, iperfer, &IperfWorker::deleteLater);
     connect(iperfer, &IperfWorker::iperfTPdata, this, &QIperfd::onThroughput);
     connect(iperfer, &IperfWorker::debuginfo, this, &QIperfd::onDebuginfo);
+    connect(iperfer, &IperfWorker::workerFinished, this, &QIperfd::handleWorkerFinished);
     connect(this, &QIperfd::setStop, iperfer, &IperfWorker::setStop);
 
     connect(iperf_th, &QThread::started, iperfer, &IperfWorker::work);
     connect(iperf_th, &QThread::finished, iperf_th, &QThread::deleteLater);
-    connect(iperf_th, &QThread::finished, iperfer, &IperfWorker::deleteLater);
     iperfer->moveToThread(iperf_th);
 
-    //    m_iperfworkers.append(iperfer);
     if (bServer){
         m_iperfwserver.insert(idx, iperfer);
     }else{
@@ -314,22 +313,27 @@ qint64 QIperfd::add(QString refrow, QVariantMap jsondata)
                isServer);
 }
 
-void QIperfd::del(int idx)
+void QIperfd::del(int idx, bool servermode)
 {
     //delete specify m_iperfworkers & m_threads
     //
-    if (m_threads.contains(idx))
-    {
-        // qDebug() << "QIperfd::del m_threads:" << idx;
-        m_threads.remove(idx);
-    }
-    if (m_iperfworkers.contains(idx))
-    {
-        // qDebug() << "remove m_iperfworkers:" << idx;
-        m_iperfworkers.remove(idx);
-    }
+    if (servermode){
+        if (m_thserver.contains(idx)){
+            m_thserver.remove(idx);
+        }
+        if (m_iperfwserver.contains(idx)){
+            m_iperfwserver.remove(idx);
+        }
+    }else{
+        if (m_threads.contains(idx)){
+            m_threads.remove(idx);
+        }
+        if (m_iperfworkers.contains(idx)){
+            m_iperfworkers.remove(idx);
+        }
 
-    m_runstatus[idx]=0;
+        m_runstatus[idx]=0;
+    }
 }
 
 int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bindHost)
@@ -437,31 +441,36 @@ void QIperfd::stop(int idx)
 
 void QIperfd::stopAll()
 {
-    // stop all iperfworker
-    // for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end(); ++it)
-    // {
-    //     it.value()->setStop();
-    // }
     emit setStop();
 }
 
 void QIperfd::clear()
 {
-    //clear all m_iperfworkers & m_threads
+    //clear all m_iperfwserver/m_iperfworkers & m_threads
+    if (!m_iperfwserver.isEmpty()){
+        for (auto it = m_iperfwserver.begin(); it != m_iperfwserver.end();) {
+            it = m_iperfwserver.erase(it);
+        }
+    }
+    if (!m_thserver.isEmpty()){
+        for (auto it = m_thserver.begin(); it != m_thserver.end();) {
+            it = m_thserver.erase(it);
+        }
+    }
     if (!m_iperfworkers.isEmpty()){
         for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end();) {
             it = m_iperfworkers.erase(it);
-            // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }
     if (!m_threads.isEmpty()){
         for (auto it = m_threads.begin(); it != m_threads.end();) {
             it = m_threads.erase(it);
-            // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }
-    qDebug() << "m_iperfworkers:" << QString::number(m_iperfworkers.count())
-             << " m_threads:" << QString::number(m_threads.count());
+    qDebug() << "iperfserver:" << QString::number(m_iperfwserver.count())
+             << " threads:" << QString::number(m_thserver.count())
+             << " iperfclient:" << QString::number(m_iperfworkers.count())
+             << " thread:" << QString::number(m_threads.count());
 }
 
 bool QIperfd::isRunning(int idx)
@@ -668,9 +677,9 @@ void QIperfd::onStarted(int m_idx, bool smode, QString ipport)
     m_runstatus[m_idx]=1;
 }
 
-void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport, QString filename)
+void QIperfd::onFinished(int refrow, int exitCode, int exitStatus, QString ipport, QString filename, bool servermode)
 {
-    QString msg = QString(CMD_IPERF_STOPED)+":"+ QString::number(idx);
+    QString msg = QString(CMD_IPERF_STOPED)+":"+ QString::number(refrow);
     msg = msg + ":" + QString::number(exitCode)+  ":" + QString::number(exitStatus);
     msg = msg + ":" + ipport;
     onLog("onFinished: " + msg);
@@ -683,7 +692,7 @@ void QIperfd::onFinished(int idx, int exitCode, int exitStatus, QString ipport, 
             onLog("file to send not Exist: " + filename);
         }
     }
-    del(idx);
+    del(refrow, servermode);
 
 }
 
@@ -1322,6 +1331,26 @@ void QIperfd::onNewClient(QHostAddress addr)
 void QIperfd::onDebuginfo(QString msg)
 {
     qDebug() << "[IperfWorker]" << msg;
+}
+
+void QIperfd::handleWorkerFinished(qint64 id, bool servermode)
+{
+    QMutexLocker locker(&m_mutex);
+    if (servermode){
+        if (m_iperfwserver.contains(id)) {
+            IperfWorker* sworker = m_iperfwserver.take(id); // Remove from map
+            // The worker should have called deleteLater() itself, so no direct delete here.
+            Q_UNUSED(sworker)
+            qDebug() << "Worker ID" << id << "marked as finished and removed from map.";
+        }
+    }else{
+        if (m_iperfworkers.contains(id)) {
+            IperfWorker* worker = m_iperfworkers.take(id); // Remove from map
+            // The worker should have called deleteLater() itself, so no direct delete here.
+            Q_UNUSED(worker)
+            qDebug() << "Worker ID" << id << "marked as finished and removed from map.";
+        }
+    }
 }
 
 int QIperfd::checkFirewallStatus()

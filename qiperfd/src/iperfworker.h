@@ -37,12 +37,13 @@ public:
     void debug(QString msg, int debuglv=1);
 
 signals:
-    void started(int idx, bool smode, QString ipport); // refrow, S/C, IPPort
-    void finished(int idx, int exitCode, int exitStatus, QString ipport, QString filename); // refrow, exitcode, exitStatus, , IPPort
+    void workerFinished(qint64 idx, bool servermode); // Signal to notify manager that this worker is done
+    void started(int refrow, bool smode, QString ipport); // refrow, S/C, IPPort
+    void finished(int refrow, int exitCode, int exitStatus, QString ipport, QString filename, bool servermode); // refrow, exitcode, exitStatus, , IPPort
     void log(int idx, QString msg); // refrow
-    void onStdout(int idx, QString text); // refrow
+    // void onStdout(int idx, QString text); // refrow
     void onStderr(int idx, int refrow, QString text, QString ipport); // idx, refrow, msg, ipport
-    void iperfTPdata(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
+    void iperfTPdata(int refrow, QString sInterval,  QString data); // refrow, sInterval, throughput data
     void stopSelfDestructor();
     void debuginfo(QString msg);
 
@@ -57,7 +58,7 @@ private slots:
     void readyReadStdErr();
     void onFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void parserStdOut(QString msg);
-    void onThroughputData(int idx, QString sInterval,  QString data);
+    void onThroughputData(int refrow, QString sInterval,  QString data);
     void onDebuginfo(QString msg);
 
 private:

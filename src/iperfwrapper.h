@@ -18,7 +18,7 @@ public:
     void parserIperf2(QString linedata); // parser Iperf2 output line log
     void parserIperf3(QString linedata); // parser Iperf3 output line log
     QString getIdx(QString linedata, QString &idx);
-    void setSetting(int idx, bool servermode, QString parallel, bool bidir, QString bidirtag);
+    void setSetting(int refrow, bool servermode, QString parallel, bool bidir, QString bidirtag);
     void setFile(QString filename);
     void setIperf(QString version, QString protocal, uint port);
     void setDelaytime(int delaytime);
@@ -40,7 +40,7 @@ private:
     qint64 getTimeStempLength(const std::string& format_string);
 
 private:
-    int m_idx;  // ref row
+    int m_refrow;  // ref row
     bool m_servermode=false;
     QString m_parallel="0";
     bool m_bidir=false;
