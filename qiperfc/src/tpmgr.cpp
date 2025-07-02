@@ -872,8 +872,8 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
     QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError) {
         QJsonArray jArr = doc.array();//.object();
-        qDebug() << "(" << refrow << ") sInterval:" << sInterval
-                 << " TPMgr::onIperfTPdata: QJsonArray size:" << jArr.size();
+        qDebug() << "[TPMgr::onIperfTPdata]refrow(" << refrow << ") sInterval:" << sInterval
+                 << " QJsonArray size:" << jArr.size();
         //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
         QString dir=nullptr;
         QString idx;
@@ -904,6 +904,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             sum = sum + value.toDouble();
             sum_lost = sum_lost + pkt_lost.toDouble();
             sum_total = sum_total + pkt_total.toDouble();
+
             if (fInterval >= m_intervals.value(idx, 0.0)){
                // qDebug() << "addTPdata fInterval:" << fInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
                 addTPdata(refrow, sInterval, idx, value,
@@ -912,9 +913,9 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             }
             if (!isAvg) {
                 // chart data ( with out Average data)
-                qDebug() << refrow + "_" + idx << " sInterval:" << sInterval
-                         << " value:" << value
-                         <<" lost_rate: " << lost_rate;
+                // qDebug() << refrow + "_" + idx << " sInterval:" << sInterval
+                //          << " value:" << value
+                //          <<" lost_rate: " << lost_rate;
                 emit IperfTPdata(sInterval, refrow + "_" + idx, value,
                                  QString::number(lost_rate, 'f', 4));
                 // emit IperfTPdata(sInterval, refrow + "_" + jObj.value("idx").toString(),

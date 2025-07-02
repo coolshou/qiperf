@@ -53,6 +53,8 @@ private slots:
 private:
     void initStart();
     void resetError();
+    void debug(QString msg, int debuglv=3);
+    int m_debuglv;
     QString m_logpath;
     QList<TP *> m_tps;
     int iWSTimeout; // default wait websocket timeout 10
