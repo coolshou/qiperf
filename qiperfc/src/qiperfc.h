@@ -122,6 +122,9 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 private:
     void createTrayIcon();
+    void createTrayMenu();
+    void showTrayMessage(QString title, QString msg,
+                         QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::Information, int msecs = 10000);
     void loadPlugins();
     void unloadPlugins();
     void updateRunStatus(bool bStart);
@@ -174,9 +177,19 @@ private slots:
     void onClearNtpStatus(QString target);
     void setNtpServer(int enable=1);
     void onNtpstarted(bool started, QString fromAddress);
+    // Slot to handle system tray icon activation (e.g., clicks)
+    void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
+    // Slots for menu actions
+    void showWindow();
+    void hideWindow();
+    void quitApplication();
 private:
     Ui::MainWindow *ui;
     QSystemTrayIcon *trayIcon;
+    QMenu *trayMenu;
+    QAction *showAction;
+    QAction *hideAction;
+    QAction *quitAction;
     QList<QPluginLoader*> pluginLoaders;
     QList<PluginInterface*> plugins;
     // CustomHeaderView *header;

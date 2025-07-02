@@ -535,7 +535,7 @@ void QIperfC::onNotice(QString send_addr, QString msg)
                         }
                     }
                     if (itry>1){
-                        qDebug() << "Ask NTP sync:" << send_addr << "(try:"<<QString::number(itry)<<")";
+                        qInfo() << "Ask NTP sync:" << send_addr << "(try:"<<QString::number(itry)<<")";
                     }
                     emit doNtpSync(send_addr);
                 }
@@ -634,11 +634,16 @@ void QIperfC::onCopyText()
 
 void QIperfC::closeEvent(QCloseEvent *event)
 {
-    //TODO: check config edit.
-    Q_UNUSED(event)
-
-    saveSettings();
-    emit closeAll();
+    if (trayIcon->isVisible()) {
+        hide(); // Hide the main window
+        event->ignore(); // Don't let the application quit
+        showTrayMessage("Application Minimized",
+                        "The application is still running in the background. Click the tray icon to restore.");
+    } else {
+        //TODO: check config edit.
+        saveSettings();
+        emit closeAll();
+    }
 }
 
 bool QIperfC::eventFilter(QObject *obj, QEvent *event)
@@ -668,9 +673,43 @@ void QIperfC::createTrayIcon()
 {
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setIcon(QIcon(":/qiperf"));
-    //TODO: menu
+    //TODO: Tray menu
+    createTrayMenu(); // Create the context menu for the tray icon
+    trayIcon->setContextMenu(trayMenu);
+    // Connect the activated signal to our slot
+    connect(trayIcon, &QSystemTrayIcon::activated, this, &QIperfC::onTrayIconActivated);
 
     trayIcon->show();
+}
+void QIperfC::createTrayMenu(){
+    trayMenu = new QMenu(this);
+    //TODO: action enable/disable
+    // bool show=true;
+    // if (this->isVisible()){
+    //     show=false;
+    // }
+    showAction = new QAction("Show Window", this);
+    connect(showAction, &QAction::triggered, this, &QIperfC::showWindow);
+    trayMenu->addAction(showAction);
+    // showAction->setEnabled(show);
+
+    hideAction = new QAction("Hide Window", this);
+    connect(hideAction, &QAction::triggered, this, &QIperfC::hideWindow);
+    trayMenu->addAction(hideAction);
+    // hideAction->setEnabled(!show);
+
+    trayMenu->addSeparator();
+
+    quitAction = new QAction("Exit", this);
+    connect(quitAction, &QAction::triggered, this, &QIperfC::quitApplication);
+    trayMenu->addAction(quitAction);
+}
+void QIperfC::showTrayMessage(QString title, QString msg,
+                              QSystemTrayIcon::MessageIcon icon, int msecs)
+{
+    if (trayIcon){
+        trayIcon->showMessage(title, msg, icon, msecs);
+    }
 }
 
 void QIperfC::loadPlugins()
@@ -888,6 +927,56 @@ void QIperfC::setNtpServer(int enable)
 void QIperfC::onNtpstarted(bool started, QString fromAddress)
 {
     qDebug() << fromAddress << " NTP started:" << started;
+}
+
+void QIperfC::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason) {
+    case QSystemTrayIcon::Trigger: // Usually a left-click
+        if (isVisible()) {
+            hide();
+        } else {
+            showNormal(); // Restore to normal state (not minimized)
+            activateWindow(); // Bring to front
+            raise();
+        }
+        break;
+    case QSystemTrayIcon::DoubleClick: // Optional: handle double-click
+        if (isVisible()) {
+            hide();
+        } else {
+            showNormal();
+            activateWindow();
+            raise();
+        }
+        break;
+    case QSystemTrayIcon::Context: // Right-click (handled by setContextMenu)
+        break;
+    default:
+        break;
+    }
+}
+
+void QIperfC::showWindow()
+{
+    showNormal(); // Restore to normal state
+    activateWindow();
+    raise();
+    showAction->setEnabled(false);
+    hideAction->setEnabled(true);
+}
+
+void QIperfC::hideWindow()
+{
+    hide();
+    showAction->setEnabled(true);
+    hideAction->setEnabled(false);
+}
+
+void QIperfC::quitApplication()
+{
+    trayIcon->hide(); // Hide the tray icon before quitting
+    QApplication::quit(); // Properly quit the application
 }
 
 void QIperfC::onExport()
@@ -1166,10 +1255,13 @@ void QIperfC::onNtpsynced(bool bOK, QString target)
             m_ntps.append(target);
         }
     }else {
-        QMessageBox::information(this, "NOTICE",
-                                 QString("%1 NTP time sync fail (%2)!").arg(target,
-                                                                            QString::number(m_ntpfail[target])),
-                                 QMessageBox::Ok);
+        QString msg = QString("%1 NTP time sync fail (%2)!").arg(target,
+                                                                 QString::number(m_ntpfail[target]));
+        showTrayMessage("NOTICE", msg);
+        // QMessageBox::information(this, "NOTICE",
+        //                          QString("%1 NTP time sync fail (%2)!").arg(target,
+        //                                                                     QString::number(m_ntpfail[target])),
+        //                          QMessageBox::Ok);
     }
 }
 

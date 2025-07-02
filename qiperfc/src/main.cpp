@@ -14,6 +14,8 @@
 #include <QStandardPaths>
 #include <QMessageLogContext>
 #include <QMessageBox>
+#include <QStyleFactory>
+
 #include <qlogging.h>
 
 static QTextStream output_ts;
@@ -93,6 +95,9 @@ int main(int argc, char *argv[])
     app.setOrganizationName(QIPERF_ORG);
     app.setOrganizationDomain(QIPERF_DOMAIN);
     app.setApplicationName(QIPERFC_NAME);
+    QStringList styles = QStyleFactory::keys();
+    qInfo() << "Available styles:" << styles.join(",");
+    app.setStyle(QStyleFactory::create("Fusion"));
     QIperfC main(logfilePath);
 #if defined(Q_OS_LINUX) && TEST_SIGWATCH
     QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &main, SLOT(onQuit()));
