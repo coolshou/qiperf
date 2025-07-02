@@ -1,0 +1,3 @@
+QMenu::item:disabled {
+    color: gray; /* Or #A0A0A0 for a specific shade of gray */
+}
