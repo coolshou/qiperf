@@ -269,7 +269,7 @@ void TPPlot::onDataAdded(double key, double value)
                 qDebug() << ((MyQCPGraph*)sender())->name() << " (" << key << ")mTotalGraph Key not found";
                 mTotalGraph->addData(key,value);
             }
-            locker.unlock();
+
         }else {
             qDebug() << "onDataAdded: ERROR does not have mTotalGraph" ;
         }
@@ -291,7 +291,6 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data)
         if (mTotalLegendItem){
             mTotalLegendItem->setVisible(true);
         }
-        locker.unlock();
     }else{
         qDebug() << "onDatasSetted: ERROR does not have mTotalGraph" ;
     }
@@ -316,7 +315,6 @@ void TPPlot::onLostRateDataAdded(double key, double value)
                 qDebug() << ((MyQCPBars*)sender())->name() << " (" << key << ") mTotalLostGraph Key not found";
                 mTotalLostGraph->addData(key,value);
             }
-            locker.unlock();
         }else {
             qDebug() << "onLostRateDataAdded: ERROR does not have mTotalLostGraph" ;
         }
@@ -623,12 +621,14 @@ void TPPlot::clear()
     }
     // clearGraphs(); // this will clean all graphs
     if (mTotalGraph){
+        qDebug() << "Reset mTotalGraph";
         mTotalGraph=nullptr;
     }
     // if (mTotalLegendItem){
     //     mTotalLegendItem=nullptr;
     // }
     if (mTotalLostGraph){
+        qDebug() << "Reset mTotalLostGraph";
         mTotalLostGraph=nullptr;
     }
     // if (mTotalLostLegendItem){
