@@ -14,6 +14,7 @@
 #include <QMenu>
 #include <QDialog>
 #include <QThread>
+#include <QSystemTrayIcon>
 
 #include "comm.h"
 #include "udpreceiver.h"
@@ -120,6 +121,7 @@ protected:
     void closeEvent(QCloseEvent *event)override;
     bool eventFilter(QObject *obj, QEvent *event) override;
 private:
+    void createTrayIcon();
     void loadPlugins();
     void unloadPlugins();
     void updateRunStatus(bool bStart);
@@ -174,6 +176,7 @@ private slots:
     void onNtpstarted(bool started, QString fromAddress);
 private:
     Ui::MainWindow *ui;
+    QSystemTrayIcon *trayIcon;
     QList<QPluginLoader*> pluginLoaders;
     QList<PluginInterface*> plugins;
     // CustomHeaderView *header;
@@ -250,5 +253,6 @@ private:
     //automate: simple micro
     int m_smicroIdx;
     DlgSimpleMicro *smicro;
+
 };
 #endif // QIPERFC_H

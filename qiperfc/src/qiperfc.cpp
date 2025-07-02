@@ -42,6 +42,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     }
     QString settingfilename = settingfilepath + QDir::separator() + QIPERFC_NAME + ".ini";
     qInfo() << "settingfilename:" << settingfilename;
+
     m_TestStartTime = QDateTime();
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     m_clipboard = QApplication::clipboard();
@@ -148,6 +149,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 
     m_serialviews = new QMap<QString, SerialData>();
     m_sshviews = new QMap<QString, SSHData>();
+
+    createTrayIcon();
 }
 
 QIperfC::~QIperfC()
@@ -659,6 +662,15 @@ bool QIperfC::eventFilter(QObject *obj, QEvent *event)
 //    }
 
     return QObject::eventFilter(obj,event);
+}
+
+void QIperfC::createTrayIcon()
+{
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setIcon(QIcon(":/qiperf"));
+    //TODO: menu
+
+    trayIcon->show();
 }
 
 void QIperfC::loadPlugins()
