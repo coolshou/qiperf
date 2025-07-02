@@ -98,6 +98,12 @@ int main(int argc, char *argv[])
     QStringList styles = QStyleFactory::keys();
     qInfo() << "Available styles:" << styles.join(",");
     app.setStyle(QStyleFactory::create("Fusion"));
+    // not work
+    // QFile styleFile(":/qiperf.qss"); // If embedded in resources
+    // if (styleFile.open(QFile::ReadOnly | QFile::Text)) {
+    //     QString styleSheet = styleFile.readAll();
+    //     qApp->setStyleSheet(styleSheet); // Apply to the whole application
+    // }
     QIperfC main(logfilePath);
 #if defined(Q_OS_LINUX) && TEST_SIGWATCH
     QObject::connect(&sigwatch, SIGNAL(unixSignal(int)), &main, SLOT(onQuit()));
