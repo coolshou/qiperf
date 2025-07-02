@@ -60,7 +60,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
 
     const char *file = context.file ? context.file : "";
     QString line ="";
-    if (file){
+    if (strcmp(file, "") != 0) {
         line = QString("(%1:%2)").arg(file, QString::number(context.line));
     }
     //    const char *function = context.function ? context.function : "";
