@@ -17,6 +17,7 @@ public:
     int getValue(double key, double &value);
     void updateValue(double keyToUpdate, double newvalue);
     double sumValue(double keyToUpdate, double newvalue);
+    void clear();
 signals:
     // void dataAdded(double key, double value);
     void datasSetted(QSharedPointer<QCPGraphDataContainer> data);

@@ -52,6 +52,36 @@ void MyQCPBars::updateValue(double keyToUpdate, double newvalue)
     }
 }
 
+double MyQCPBars::sumValue(double keyToUpdate, double newvalue)
+{
+    qDebug() << "TODO sumValue";
+    QSharedPointer<QCPBarsDataContainer> dataContainer = data();
+    // Iterate over the data points to find the specific key
+    if (!dataContainer->isEmpty()) {
+        // for (auto it = dataContainer->begin(); it != dataContainer->end(); ++it) {
+        for (auto it = dataContainer->end(); it != dataContainer->begin();) {
+            --it; // Decrement first to get to a valid element
+            if (qFuzzyCompare(it->key, keyToUpdate)) { // Check if the key matches
+                // qDebug() << "[MyQCPBars::sumValue]key:" << QString::number(keyToUpdate)
+                //          << " it->value:" << QString::number(it->value)
+                //          << " newvalue:" << QString::number(newvalue);
+                it->value = it->value + newvalue; // Update the value
+                return it->value;
+            }
+        }
+    }
+    // Not find org key's value, just addd
+    addData(keyToUpdate, newvalue);
+    return newvalue;
+}
+
+void MyQCPBars::clear()
+{
+    // if (data()){
+    //     data()->clear();
+    // }
+}
+
 QVector<double> MyQCPBars::elementWiseDivision(const QVector<int> &vector1, const QVector<int> &vector2)
 {
     QVector<double> result;

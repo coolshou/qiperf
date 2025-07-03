@@ -17,7 +17,8 @@ public:
     void addData(double key, double value);
     int getValue(double key, double &value);
     void updateValue(double keyToUpdate, double newvalue);
-
+    double sumValue(double keyToUpdate, double newvalue);
+    void clear();
 signals:
     // void dataAdded(double key, double value);
     void datasSetted(QSharedPointer<QCPBarsDataContainer> data);

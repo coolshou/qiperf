@@ -61,16 +61,16 @@ void MyQCPGraph::updateValue(double keyToUpdate, double newvalue)
 
 double MyQCPGraph::sumValue(double keyToUpdate, double newvalue)
 {
-    QSharedPointer<QCPGraphDataContainer> dataContainer = QCPGraph::data();
+    QSharedPointer<QCPGraphDataContainer> dataContainer = data();
     // Iterate over the data points to find the specific key
     if (!dataContainer->isEmpty()) {
         // for (auto it = dataContainer->begin(); it != dataContainer->end(); ++it) {
         for (auto it = dataContainer->end(); it != dataContainer->begin();) {
             --it; // Decrement first to get to a valid element
             if (qFuzzyCompare(it->key, keyToUpdate)) { // Check if the key matches
-                qDebug() << "key:" << QString::number(keyToUpdate)
-                         << " it->value:" << QString::number(it->value)
-                         << " newvalue:" << QString::number(newvalue);
+                // qDebug() << "[MyQCPGraph::sumValue]key:" << QString::number(keyToUpdate)
+                //          << " it->value:" << QString::number(it->value)
+                //          << " newvalue:" << QString::number(newvalue);
                 it->value = it->value + newvalue; // Update the value
                 return it->value;
             }
@@ -80,4 +80,11 @@ double MyQCPGraph::sumValue(double keyToUpdate, double newvalue)
     addData(keyToUpdate, newvalue);
     return newvalue;
 
+}
+
+void MyQCPGraph::clear()
+{
+    // if (dataCount()) {
+    //     data()->clear();
+    // }
 }
