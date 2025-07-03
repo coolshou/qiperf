@@ -88,10 +88,15 @@
 
 // ping
 #define CMD_PING        "PING"
+
+#define CMD_NOT_SUPPORT  "CMD_NOT_SUPPORT"
+
 // plot
 #define GRAPH_TOTAL      "TOTAL"
 #define GRAPH_PAIR      "PAIR"
 #define GRAPH_DIR      "DIRECTION"
+#define GRAPH_TX      "TX"
+#define GRAPH_RX      "RX"
 #define GRAPH_COMM      "COMMENT"
 
 #define LAYER_TOTAL      "Total"
