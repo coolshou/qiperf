@@ -15,7 +15,8 @@ class TpWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit TpWorker(QString logpath, QList<TP *> &tps, int wstimeout=10,
+    explicit TpWorker(QString logpath, QList<TP *> &tps, bool ignoreWrongInterval,
+                      int wstimeout=10,
                       int extrawait = 5, int waitserverready = 10,
                       QObject *parent = nullptr);
     ~TpWorker() override;
@@ -57,6 +58,7 @@ private:
     int m_debuglv;
     QString m_logpath;
     QList<TP *> m_tps;
+    bool m_ignoreWrongInterval;
     int iWSTimeout; // default wait websocket timeout 10
     int iExtraWait = 5;
     int m_WaitServerReady;

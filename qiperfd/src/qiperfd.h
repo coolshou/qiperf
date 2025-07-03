@@ -67,8 +67,8 @@ public:
             QString bndaddr="0.0.0.0", QString target="",
             QString parallel="0", QString protocal="TCP",
             bool bidir=false, bool reverse=false, int interval=1,
-            int delaytime=0, bool bServer=false);
-    qint64 add(QString refrow, QVariantMap jsondata);
+            int delaytime=0, bool bServer=false, bool ignoreWrongInterval=false);
+    qint64 add(QString refrow, QString sIgnoreWrongInterval, QVariantMap jsondata);
     void del(int idx, bool servermode);
     int addIperfServer(QString refrow, int version, uint port, QString bindHost="");
     int addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs);
@@ -183,6 +183,7 @@ private:
     QMap<QString, SerialTask*> m_serialtasks;
     QMap<QString, SSHTask*> m_sshtasks;
     QMutex m_mutex;
+    QString longLongListToString(const QList<long long> &list, const QString &separator = ", ");
 };
 
 #endif // QIPERFD_H

@@ -19,17 +19,18 @@
 IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
                          uint port, QString bindaddr, QString target,
                          bool bidir, bool reverse, int interval,
-                         int delaystart,
+                         int delaystart, bool ignoreWrongInterval,
                          QObject *parent)
     : QObject{parent}, m_idx(idx), m_version(version), m_cmd(cmd), m_port(port),
       m_bindaddr(bindaddr), m_target(target), m_bidir(bidir), m_reverse(reverse),
-      m_interval(interval), m_delaystart(delaystart), m_parent(parent)
+    m_interval(interval), m_delaystart(delaystart),
+    m_ignoreWrongInterval(ignoreWrongInterval), m_parent(parent)
 {
     m_debuglv = 3;
     m_logfile = nullptr;
     m_logtextstream = nullptr;
     m_iperflogpath = "";
-    m_iperfwrapper = new IperfWrapper();
+    m_iperfwrapper = new IperfWrapper(m_ignoreWrongInterval);
     m_iperfwrapper->setDelaytime(delaystart);
     m_iperfwrapper->setInterval(interval);
     m_iperfwrapper->setArgs(arg);
@@ -67,8 +68,8 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
             setBidirTag(TPDIRNO);
         }
     }
-    m_interval = interval;
-    debug("init[" + getBindKey() + "] reg m_bidirtag:" + m_bidirtag + " interval:" + QString::number(m_interval));
+    // m_interval = interval;
+    // debug("init[" + getBindKey() + "] reg m_bidirtag:" + m_bidirtag + " interval:" + QString::number(m_interval));
     m_selfdestructionTime = (10+m_interval+m_delaystart) * 1000; //10 sec + report interval
     m_selfdestruction = new QTimer(this);
     m_selfdestruction->setInterval(m_selfdestructionTime);
@@ -345,7 +346,8 @@ void IperfWorker::onThroughputData(int refrow, QString sInterval, QString data)
     if(m_bidirtag.isEmpty()){
         //debug("No m_bidirtag, not reprort ThroughputData: ("+sInterval+")" + data);
     }else{
-        debug(QString::number(refrow) + " sInterval:" + sInterval + " data:" + data, 4);
+        debug("[IperfWorker::onThroughputData]refrow:" + QString::number(refrow) + " sInterval:" + sInterval);
+        //+ " data:" + data, 3);
         emit iperfTPdata(refrow, sInterval, data);
     }
 }

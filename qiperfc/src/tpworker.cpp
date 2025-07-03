@@ -9,10 +9,13 @@
 #include "tpstatus.h"
 #include "myfunc.h"
 
-TpWorker::TpWorker(QString logpath, QList<TP *> &tps, int wstimeout,
+TpWorker::TpWorker(QString logpath, QList<TP *> &tps, bool ignoreWrongInterval,
+                   int wstimeout,
                    int extrawait, int waitserverready,
                    QObject *parent)
-    : QObject{parent}, m_logpath(logpath), m_tps(tps), iWSTimeout(wstimeout),
+    : QObject{parent}, m_logpath(logpath), m_tps(tps),
+    m_ignoreWrongInterval(ignoreWrongInterval),
+    iWSTimeout(wstimeout),
     iExtraWait(extrawait), m_WaitServerReady(waitserverready)
 {
     m_debuglv = 3;
@@ -211,7 +214,9 @@ void TpWorker::work()
                 return;
             }
             //tell server add iperf server
-            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getServerArgs();
+            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow);
+            cmd = cmd + (m_ignoreWrongInterval?"1":"0");
+            cmd = cmd +":"+tp->getServerArgs();
             debug("[TpWorker]server cmd:" + serverIP + " => " + cmd);
             rs = m_ws[serverIP]->sendText(cmd);
             if (rs<=0){
@@ -274,7 +279,9 @@ void TpWorker::work()
                 return;
             }
             //tell client add iperf client
-            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow)+":"+tp->getClientArgs();
+            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow);
+            cmd = cmd + (m_ignoreWrongInterval?"1":"0");
+            cmd = cmd +":"+tp->getClientArgs();
             debug("[TpWorker]client cmd:" + clientIP + " => " + cmd);
             rs = m_ws[clientIP]->sendText(cmd);
             if (rs<=0){
@@ -474,6 +481,7 @@ void TpWorker::onDisconnected(QString targetip)
 
 void TpWorker::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
+    debug("[TpWorker]onIperfTPdata: " + refrow+ " sInterval:"+ sInterval + " datas:" + datas);
     emit iperfTPdata(refrow, sInterval, datas);
 }
 int TpWorker::getStatusServers()

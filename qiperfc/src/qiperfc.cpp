@@ -369,7 +369,7 @@ void QIperfC::onStart(bool showNotice)
         // list of throughput test pair
         QList<TP *> tps = m_throughputview->getChilds();
         qDebug() << "onStart tps:" << tps;
-        m_tpworker = new TpWorker(m_logpath, tps);
+        m_tpworker = new TpWorker(m_logpath, tps, m_IgnoreWrongInterval);
         connect(m_tpworker, &TpWorker::testStarted, this, &QIperfC::onTestStarted);
         connect(m_tpworker, &TpWorker::testStoped, this, &QIperfC::onTestStoped);
         connect(m_tpworker, &TpWorker::updateDatapath, this, &QIperfC::onUpdateDataPath);

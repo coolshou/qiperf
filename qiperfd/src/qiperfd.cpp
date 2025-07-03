@@ -227,7 +227,7 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
 qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint port,
                  QString bndaddr, QString target,
                  QString parallel, QString protocal, bool bidir, bool reverse,
-                 int interval, int delaytime, bool bServer)
+                 int interval, int delaytime, bool bServer, bool ignoreWrongInterval)
 { // add a IperfWorker to run iperf server/client
     // TODO: check host/port used?
     QThread *iperf_th = new QThread();
@@ -241,7 +241,8 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     }
     IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port,
                                            bndaddr, target, bidir, reverse,
-                                           interval, delaytime);
+                                           interval, delaytime,
+                                           ignoreWrongInterval);
     iperfer->setRefRow(refrow);
     iperfer->setExtra(parallel, protocal, port);
 //    connect(iperfer, &IperfWorker::onStdout, this, &QIperfd::readStdOut);
@@ -266,7 +267,7 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     return idx;
 }
 
-qint64 QIperfd::add(QString refrow, QVariantMap jsondata)
+qint64 QIperfd::add(QString refrow, QString sIgnoreWrongInterval, QVariantMap jsondata)
 {
     int ver = jsondata["version"].toInt();
     QString cmd;
@@ -294,6 +295,10 @@ qint64 QIperfd::add(QString refrow, QVariantMap jsondata)
     bool reverse = jsondata["reverse"].toBool(); // for server mode use
     int interval = jsondata["interval"].toInt();
     int delaytime = jsondata["delaytime"].toInt();
+    bool ignoreWrongInterval = false;
+    if (sIgnoreWrongInterval.startsWith("1")){
+        ignoreWrongInterval = true;
+    }
 
     //conver json data format to iperf args
     QString args;
@@ -310,7 +315,7 @@ qint64 QIperfd::add(QString refrow, QVariantMap jsondata)
     }
     return add(refrow, ver, cmd, args, port, binaddr,
                target, parallel, protocal, bidir, reverse, interval, delaytime,
-               isServer);
+               isServer, ignoreWrongInterval);
 }
 
 void QIperfd::del(int idx, bool servermode)
@@ -407,6 +412,14 @@ void QIperfd::start(int idx)
         qDebug() << "Exception Caught" << e.what();
     }
 }
+QString QIperfd::longLongListToString(const QList<long long int>& list, const QString& separator) {
+    QStringList stringList;
+    for (long long int value : list) {
+        stringList.append(QString::number(value)); // Convert each long long int to QString
+    }
+    return stringList.join(separator); // Join all QStrings with the specified separator
+}
+
 void QIperfd::startAll(bool bServer)
 {
     QString tmp = tmpfilepath+QDir::separator()+s_starttime;
@@ -712,6 +725,7 @@ void QIperfd::onQuit()
 
 void QIperfd::onNewLine(QString line)
 {
+    //pipe server sendMessage
     m_pserver->sendMessage(QIPERFDLOG+QString("：")+line);
 }
 
@@ -1074,6 +1088,7 @@ bool QIperfd::deleteScheduledTask(const QString &taskName) {
 #endif
 void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPort)
 {
+    QString target = QString("%1:%2").arg(fromAddr.toString(), QString::number(fromPort));
     //handle act message from websocket
     long long cut = msg.indexOf(':', 0);
     QString act = msg.left(cut); //action
@@ -1085,10 +1100,13 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         cut = msg.indexOf(':', 0);
         QString refrow = msg.left(cut); //refrow number
         msg = msg.right(msg.length()-cut-1);
+        cut = msg.indexOf(':', 0);
+        QString ignoreWrongInterval = msg.left(cut); //ignoreWrongInterval
+        msg = msg.right(msg.length()-cut-1);
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
             qDebug()<< "CMD_IPERF_ADD: " << refrow << " msg:" << msg;
-            add(refrow, doc.toVariant().toMap());
+            add(refrow, ignoreWrongInterval, doc.toVariant().toMap());
         }else{
             onLog("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + msg.toUtf8());
         }
@@ -1150,11 +1168,10 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         }else{
             //No need to do NTP sync
 #if (TEST_WS==1)
-            QString target = QString("%1:%2").arg(fromAddr.toString(), QString::number(fromPort));
             qInfo()<< "===== Info NTP time is OK: " << target;
             int rc = m_wsserver->sendTextMessage(QString("%1").arg(CMD_NTP_SYNC_OK), target);
             if (rc<=0){
-                qDebug() << " Info " << fromAddr.toString() << " Fail!!";
+                qDebug() << " Info " << target << " Fail!!";
             }
 #endif
         }
@@ -1312,8 +1329,14 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
     }else if (act.startsWith(CMD_QIPERFD_RESTART)){
         restartQIperfd();
     }else {
-        qDebug() << " Unknown action:" << act  << " \n==========\n" << msg;
-        qDebug() << "\n==========";
+#if (TEST_WS==1)
+        QString cmd = QString("%1:%2:%3").arg(CMD_NOT_SUPPORT, act, msg);
+        qDebug() << cmd;
+        int rc = m_wsserver->sendTextMessage(cmd, target);
+        if (rc<=0){
+            qDebug() << " Info " << target << " Fail!!";
+        }
+#endif
     }
 }
 

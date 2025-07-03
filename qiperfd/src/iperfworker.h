@@ -22,7 +22,7 @@ public:
     explicit IperfWorker(qint64 idx, int version, QString cmd, QString arg="-s",
                          uint port=5201, QString bindaddr="0.0.0.0", QString target="",
                          bool bidir=false, bool reverse=false, int interval=1,
-                         int delaystart=0,
+                         int delaystart=0, bool ignoreWrongInterval=false,
                          QObject *parent = nullptr);
     ~IperfWorker() override;
     void setStop();
@@ -75,6 +75,7 @@ private:
     bool m_reverse=false;
     int m_interval=1;  // report interval
     int m_delaystart;
+    bool m_ignoreWrongInterval;
     QObject *m_parent;
     IperfWrapper *m_iperfwrapper;
     bool m_stop;  //user stop;
