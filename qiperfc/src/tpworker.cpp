@@ -508,36 +508,14 @@ void TpWorker::onStop(){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
             debug("[TpWorker]"+ key + " m_ws send cmd: " + cmd);
             m_ws[key]->sendText(cmd);
-            // m_wsc[key]->close();
             QThread::sleep(1);
             debug("[TpWorker]"+ key + " CMD_IPERF_CLEAR ",4);
             m_ws[key]->sendText(CMD_IPERF_CLEAR);
+            m_ws[key]->close(); //close websocket
         }
     }
 
-    // Stop reg iperf client
-    // foreach (auto key, m_wsc.keys()){
-    //     if (m_wsc[key]){
-    //         cmd = QString(CMD_IPERF_STOP)+":" + key;
-    //         emit debuginfo("[TpWorker]"+key + " m_wsc send cmd: " + cmd);
-    //         m_wsc[key]->sendText(cmd);
-    //         m_wsc[key]->close();
-    //     }
-    //     // QCoreApplication::processEvents(QEventLoop::AllEvents);
-    // }
-    // // QThread::sleep(1);
-    // // Stop reg iperf server
-    // foreach (auto key, m_wss.keys()){
-    //     if (m_wss[key]){
-    //         cmd = QString(CMD_IPERF_STOP)+":" + key;
-    //         emit debuginfo("[TpWorker]"+key + "m_wss send cmd: " + cmd);
-    //         m_wss[key]->sendText(cmd);
-    //         m_wss[key]->close();
-    //     }
-    //     // QCoreApplication::processEvents(QEventLoop::AllEvents);
-    // }
     bUserStop=true;
-
     // bStartTest = false;
     // updateRunStatus(false);
     emit testStoped(0);
