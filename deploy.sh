@@ -13,7 +13,7 @@ VERSION=${WINVERSION}-${LINUXVERSION}
 
 declare -a DESTFILES=()
 DESTFILES+=(qiperfd_${VERSION}${CODENAME}_amd64.deb)
-#DESTFILES+=(qiperftray_${VERSION}${CODENAME}_amd64.deb)
+DESTFILES+=(qiperftray_${VERSION}${CODENAME}_amd64.deb)
 
 declare -a WDESTFILES=()
 WDESTFILES+=(qiperf-setup-${WINVERSION}.exe)
@@ -22,9 +22,10 @@ WDESTFILES+=(qiperf-setup-${WINVERSION}.exe)
 UPDATE_LINUX=1
 declare -a IPS=()
 #IPS+=("192.168.70.11")
-#IPS+=("192.168.70.13")
-IPS+=("192.168.70.14")
 #IPS+=("192.168.70.12")
+IPS+=("192.168.70.13")
+IPS+=("192.168.70.14")
+#IPS+=("192.168.70.21")
 #IPS+=("192.168.70.23")
 IPS+=("192.168.70.24")
 #IPS+=("192.168.70.135")
@@ -89,15 +90,21 @@ if [ "x$?" == "x0" ]; then
             do
                 echo "================================================================================"
                 echo "===== scp ${DESTFILE} ${USERNAME}@${IP}:/home/test/${DESTFILE}"
-                scp ${DESTFILE} ${USERNAME}@${IP}:/home/test/${DESTFILE} > /dev/null 2>&1
-                if [ $? == 0 ]; then
+                ERROR_OUTPUT=$(scp ${DESTFILE} ${USERNAME}@${IP}:/home/test/${DESTFILE} > /dev/null 2>&1)
+                INSTALL_STATUS=$?
+                if [ "$INSTALL_STATUS" -ne 0 ]; then
                     echo "===== ssh ${USERNAME}@${IP} sshpass -p '123456' sudo dpkg -i /home/test/${DESTFILE}"
-                    ssh ${USERNAME}@${IP} sshpass -p '123456' sudo dpkg -i /home/test/${DESTFILE} > /dev/null 2>&1
-                    if [ $? != 0 ]; then
+                    ERROR_OUTPUT=$(ssh "${USERNAME}@${IP}" "sshpass -p '123456' sudo dpkg -i /home/test/${DESTFILE}" 2>&1 >/dev/null)
+                    INSTALL_STATUS=$?
+                    if [ "$INSTALL_STATUS" -ne 0 ]; then
                        echo "***** Fail install /home/test/${DESTFILE} on ${USERNAME}@${IP} *****"
+                       echo "Error Details:"
+                       echo "$ERROR_OUTPUT"
                     fi
                 else
                     echo "**** upload ${DESTFILE} Fail"
+                    echo "Error Details:"
+                    echo "$ERROR_OUTPUT"
                 fi
             done
         done
@@ -110,12 +117,21 @@ if [ "x$?" == "x0" ]; then
             for DESTFILE in "${DESTFILES[@]}"
             do
                 echo "===== scp -P $PORT ${DESTFILE}  ${TARGET}/home/test/${DESTFILE}"
-                scp -P $PORT ${DESTFILE} ${TARGET}/home/test/${DESTFILE}
-                if [ $? == 0 ]; then
+                ERROR_OUTPUT=$(scp -P $PORT ${DESTFILE} ${TARGET}/home/test/${DESTFILE} 2>&1 >/dev/null)
+                INSTALL_STATUS=$?
+                if [ "$INSTALL_STATUS" -eq 0 ]; then
                     echo "===== ssh -p $PORT ${USERNAME}@${DOREMOTEIP} ${INSTCMD}"
-                    ssh -p $PORT ${USERNAME}@${DOREMOTEIP} ${INSTCMD}
+                    ERROR_OUTPUT=$(ssh -p $PORT ${USERNAME}@${DOREMOTEIP} ${INSTCMD} 2>&1 >/dev/null)
+                    INSTALL_STATUS=$?
+                    if [ "$INSTALL_STATUS" -ne 0 ]; then
+                       echo "***** Fail exec ${INSTCMD} at ${USERNAME}@${DOREMOTEIP}:$PORT *****"
+                       echo "Error Details:"
+                       echo "$ERROR_OUTPUT"
+                    fi
                 else
                     echo "upload ${DESTFILE} Fail"
+                    echo "Error Details:"
+                    echo "$ERROR_OUTPUT"
                 fi
             done
         done
@@ -126,12 +142,21 @@ if [ "x$?" == "x0" ]; then
         for WINSETUP in "${WDESTFILES[@]}"
         do
             echo "===== scp ${WINSETUP} ${USERNAME}@${IP}:D:\\${WINSETUP}"
-            scp ${WINSETUP} ${USERNAME}@${IP}:D:\\${WINSETUP}
-            if [ $? == 0 ]; then
+            ERROR_OUTPUT=$(scp ${WINSETUP} ${USERNAME}@${IP}:D:\\${WINSETUP})
+            INSTALL_STATUS=$?
+            if [ "$INSTALL_STATUS" -eq 0 ]; then
                 echo "===== ssh ${USERNAME}@${IP} D:\\${WINSETUP} /S"
-                ssh ${USERNAME}@${IP} D:\\${WINSETUP} /S
+                ERROR_OUTPUT=$(ssh ${USERNAME}@${IP} D:\\${WINSETUP} /S)
+                INSTALL_STATUS=$?
+                if [ "$INSTALL_STATUS" -ne 0 ]; then
+                    echo "***** Fail exec D:\\${WINSETUP} at ${USERNAME}@${IP} *****"
+                    echo "Error Details:"
+                    echo "$ERROR_OUTPUT"
+                fi
             else
                 echo "upload ${WINSETUP} Fail"
+                echo "Error Details:"
+                echo "$ERROR_OUTPUT"
             fi
         done
     done
@@ -141,12 +166,21 @@ if [ "x$?" == "x0" ]; then
             for WINSETUP in "${WDESTFILES[@]}"
             do
                 echo "===== scp -P ${PORT} ${WINSETUP} ${USERNAME}@${RVRIP}:D:\\${WINSETUP}"
-                scp -P ${PORT} ${WINSETUP} ${USERNAME}@${RVRIP}:D:\\${WINSETUP}
-                if [ $? == 0 ]; then
+                ERROR_OUTPUT=$(scp -P ${PORT} ${WINSETUP} ${USERNAME}@${RVRIP}:D:\\${WINSETUP})
+                INSTALL_STATUS=$?
+                if [ "$INSTALL_STATUS" -eq 0 ]; then
                     echo "===== ssh -P ${PORT} ${USERNAME}@${RVRIP} D:\\${WINSETUP} /S"
-                    ssh -P ${PORT} ${USERNAME}@${RVRIP} D:\\${WINSETUP} /S
+                    ERROR_OUTPUT=$(ssh -P ${PORT} ${USERNAME}@${RVRIP} D:\\${WINSETUP} /S)
+                    INSTALL_STATUS=$?
+                    if [ "$INSTALL_STATUS" -ne 0 ]; then
+                        echo "***** Fail exec D:\\${WINSETUP} /S at ${USERNAME}@${IP} *****"
+                        echo "Error Details:"
+                        echo "$ERROR_OUTPUT"
+                    fi
                 else
                     echo "upload ${WINSETUP} Fail"
+                    echo "Error Details:"
+                    echo "$ERROR_OUTPUT"
                 fi
             done
         done
