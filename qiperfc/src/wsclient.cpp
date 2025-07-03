@@ -199,6 +199,7 @@ void WSClient::onTextMessageReceived(QString message)
         int cut = message.indexOf(':', 0);
         QString act = message.left(cut); //action : CMD_IPERF_STARTED/CMD_IPERF_STOPED...
         message = message.right(message.length()-cut-1);
+
         cut2 = message.indexOf(':', 0);
         QString m_idx = message.left(cut2); // refrow
         message = message.right(message.length()-cut2-1);

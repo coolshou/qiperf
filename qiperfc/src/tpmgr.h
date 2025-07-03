@@ -72,7 +72,6 @@ public:
     void onPaste(QString data);
     void startUpdater();
     void stopUpdater();
-    void setTestData();
     QModelIndex setSelectItem(QString idx);
 
 public slots:
@@ -103,7 +102,7 @@ private:
     TP *groupItem; //hold group item
     // QList<TP*> m_tps; //QList of tp, data
     QFileIconProvider iconProvider;
-    QMap<QString, double> m_intervals;
+    QMap<QString, double> m_intervals; // idx,
     QColor m_disabledTextColor;
     QTimer *m_updater;
 };

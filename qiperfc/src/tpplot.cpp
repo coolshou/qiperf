@@ -637,9 +637,7 @@ void TPPlot::clear()
 
     // clearGraphs(); // this will clean all graphs
     if (mTotalGraph){
-        // if (mTotalGraph->data()){ // this will cause APP crash
-        //     mTotalGraph->data()->clear();
-        // }
+        mTotalGraph->clear();
         qDebug() << "Reset mTotalGraph";
         mTotalGraph=nullptr;
     }
@@ -648,9 +646,7 @@ void TPPlot::clear()
     // }
     if (mTotalLostGraph){
         qDebug() << "Reset mTotalLostGraph";
-        // if (mTotalLostGraph->data()){
-        //     mTotalLostGraph->data()->clear();
-        // }
+        mTotalLostGraph->clear();
         mTotalLostGraph=nullptr;
     }
     // if (mTotalLostLegendItem){

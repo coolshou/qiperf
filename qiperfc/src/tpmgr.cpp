@@ -35,7 +35,6 @@ TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QString tpunit, QObject *paren
     connect(m_updater, &QTimer::timeout, this, &TPMgr::onUpdater);
     startUpdater();
 
-    // setTestData();
 }
 TPMgr::~TPMgr()
 {
@@ -815,43 +814,6 @@ void TPMgr::stopUpdater()
     }
 }
 
-void TPMgr::setTestData()
-{
-    // add test data to show tree
-    TP *parentItm = getRootItem();
-    // rootItem->appendChild(groupItem);
-    QList<TP*> cfgs;
-
-    QString cfg1="{\"Action\":\"IPERF_ADD\",\"client\":{\"bidir\":false,\"bind\":\"172.17.0.1\",\"bitrate\":0,\"buffer\":0,\"delaytime\":0,\"dscp\":-1,\"duration\":30,\"fmtreport\":\"m\",\"interval\":1,\"ipv6\":false,\"manager\":\"192.168.70.147\",\"mss\":0,\"omit\":2,\"parallel\":1,\"port\":5201,\"protocal\":\"TCP\",\"reverse\":false,\"target\":\"169.254.11.54\",\"tos\":-1,\"unit_bitrate\":\"K\",\"unit_buffer\":\"K\",\"unit_windowsize\":\"K\",\"version\":\"3\",\"windowsize\":256,\"zerocopy\":false},\"enabled\":true,\"server\":{\"bidir\":false,\"bind\":\"169.254.11.54\",\"delaytime\":0,\"fmtreport\":\"m\",\"interval\":1,\"manager\":\"192.168.70.11\",\"parallel\":1,\"port\":5201,\"protocal\":\"TCP\",\"reverse\":false,\"version\":\"3\"}}";
-    QString cfg2="{\"Action\":\"IPERF_ADD\",\"client\":{\"bidir\":false,\"bind\":\"192.168.0.22\",\"bitrate\":0,\"buffer\":0,\"delaytime\":0,\"dscp\":-1,\"duration\":30,\"fmtreport\":\"m\",\"interval\":1,\"ipv6\":false,\"manager\":\"192.168.70.147\",\"mss\":0,\"omit\":2,\"parallel\":1,\"port\":5201,\"protocal\":\"TCP\",\"reverse\":false,\"target\":\"192.168.0.100\",\"tos\":-1,\"unit_bitrate\":\"K\",\"unit_buffer\":\"K\",\"unit_windowsize\":\"K\",\"version\":\"3\",\"windowsize\":256,\"zerocopy\":false},\"enabled\":true,\"server\":{\"bidir\":false,\"bind\":\"169.254.11.54\",\"delaytime\":0,\"fmtreport\":\"m\",\"interval\":1,\"manager\":\"192.168.70.11\",\"parallel\":1,\"port\":5201,\"protocal\":\"TCP\",\"reverse\":false,\"version\":\"3\"}}";
-
-    TP *tpcfg = add(cfg1, TPMgrData::config, parentItm);
-    cfgs << tpcfg;
-    TP *tpcfg2 = add(cfg2, TPMgrData::config, parentItm);
-    cfgs << tpcfg2;
-    // TP *cfg = new TP("cfg1", "", TPMgrData::config, groupItem);
-    // groupItem->appendChild(cfg);
-    // qDebug() << "cfg:" << cfg;
-    // cfgs << cfg;
-    // TP *cfg2 = new TP("cfg2", "", TPMgrData::config, groupItem);
-    // groupItem->appendChild(cfg2);
-    // qDebug() << "cfg2:" << cfg2;
-    // cfgs << cfg2;
-    // foreach(TP *c, cfgs){
-    //     qDebug() << "c:" << c;
-    //     for (int i = 0; i < 3; ++i) {
-    //         TP *child = new TP("f:"+QString::number(i), QString::number(i), TPMgrData::TP,  c);
-    //         c->appendChild(child);
-    //         for (int j = 0; j < 2; ++j) {
-    //             TP *gchild = new TP("s:"+QString::number(j), QString::number(j), TPMgrData::TP, child);
-    //             child->appendChild(gchild);
-
-    //         }
-    //     }
-    // }
-
-}
-
 TP *TPMgr::newGroupItem()
 {   // create new Total/Group item under rootItem
     QModelIndex midx = indexFromItem(rootItem);
@@ -872,8 +834,8 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
     QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError) {
         QJsonArray jArr = doc.array();//.object();
-        qDebug() << "[TPMgr::onIperfTPdata]refrow(" << refrow << ") sInterval:" << sInterval
-                 << " QJsonArray size:" << jArr.size();
+        // qDebug() << "[TPMgr::onIperfTPdata]refrow(" << refrow << ") sInterval:" << sInterval
+        //          << " QJsonArray size:" << jArr.size();
         //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
         QString dir=nullptr;
         QString idx;
@@ -890,37 +852,38 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             QJsonObject jObj= it->toObject();
             idx = jObj.value("idx").toString();
             isAvg = jObj.value("AVG").toBool();
-            QString value="";
-            if (!jObj.value("dir").isUndefined()){
-                dir=jObj.value("dir").toString();
-            }
-            value = jObj.value("value").toString();
-            unit = jObj.value("unit").toString();
-            if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) !=0){
-                qDebug() << "//TODO: base on unit, convert the value to correct value"
-                         << " display unit:" << m_TPUint << " tp data unit:" << unit;
-            }
-            // packet lost rate
-            QString pkt_lost = jObj.value("packet_lost").toString();
-            QString pkt_total = jObj.value("packet_total").toString();
-
-            if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
-                lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
-                qDebug() << "TPMgr::onIperfTPdata: lost_rate:" << lost_rate;
-                slost_rate = QString::number(lost_rate, 'f', 4);
-            }
-    //        qDebug() << "pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
-            sum = sum + value.toDouble();
-            sum_lost = sum_lost + pkt_lost.toDouble();
-            sum_total = sum_total + pkt_total.toDouble();
-
-            if (fInterval >= m_intervals.value(idx, 0.0)){
-               // qDebug() << "addTPdata fInterval:" << fInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
-                addTPdata(refrow, sInterval, idx, value, unit, dir,
-                          pkt_lost, pkt_total);
-                m_intervals[idx] = fInterval;
-            }
             if (!isAvg) {
+                QString value="";
+                if (!jObj.value("dir").isUndefined()){
+                    dir=jObj.value("dir").toString();
+                }
+                value = jObj.value("value").toString();
+                unit = jObj.value("unit").toString();
+                if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) !=0){
+                    qDebug() << "//TODO: base on unit, convert the value to correct value"
+                             << " display unit:" << m_TPUint << " tp data unit:" << unit;
+                }
+                // packet lost rate
+                QString pkt_lost = jObj.value("packet_lost").toString();
+                QString pkt_total = jObj.value("packet_total").toString();
+
+                if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
+                    lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
+                    qDebug() << "TPMgr::onIperfTPdata: lost_rate:" << lost_rate;
+                    slost_rate = QString::number(lost_rate, 'f', 4);
+                }
+        //        qDebug() << "pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
+                sum = sum + value.toDouble();
+                sum_lost = sum_lost + pkt_lost.toDouble();
+                sum_total = sum_total + pkt_total.toDouble();
+
+                if (fInterval >= m_intervals.value(idx, 0.0)){
+                   // qDebug() << "addTPdata fInterval:" << fInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
+                    addTPdata(refrow, sInterval, idx, value, unit, dir,
+                              pkt_lost, pkt_total);
+                    m_intervals[idx] = fInterval;
+                }
+
                 // signal data to tpplot to add plot data on each -P
                 emit IperfTPdata(sInterval, refrow + "_" + idx, value,
                                  slost_rate, dir);

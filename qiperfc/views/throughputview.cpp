@@ -266,6 +266,7 @@ void ThroughputView::onUpdateTPDatas(QString refrow, QVector<double> timedatas, 
 void ThroughputView::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
     //update iperf throughput from websocket client
+    qDebug() << "ThroughputView::onIperfTPdata:" << refrow << " sInterval:" << sInterval;
     m_tpmgr->onIperfTPdata(refrow, sInterval, datas);
 }
 

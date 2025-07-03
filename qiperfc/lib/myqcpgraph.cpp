@@ -84,7 +84,7 @@ double MyQCPGraph::sumValue(double keyToUpdate, double newvalue)
 
 void MyQCPGraph::clear()
 {
-    // if (dataCount()) {
+    // if (dataCount()) { //cause app crash!!
     //     data()->clear();
     // }
 }
