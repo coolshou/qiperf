@@ -221,6 +221,7 @@ HEADERS += \
     src/qiperfc.h \
     src/tp.h \
     src/tpfoldingdelegate.h \
+    src/tpgroup.h \
     src/tpmgr.h \
     src/tpdirdelegate.h \
     src/tpplot.h \
