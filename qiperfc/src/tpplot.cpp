@@ -252,10 +252,14 @@ void TPPlot::onDataAdded(double key, double value)
         //try calc Total Graph value form each Graphs
         if (mTotalGraph){
             //add all value to Total graph's value
+
             double orgvalue=0;
             // TODO : last record will be wrong!!??
-            QMutexLocker locker(&m_mutex); // Locks m_mutex
+            QMutexLocker locker(&m_mutex); // Locks m_mutex, not work
             int rc=mTotalGraph->getValue(key, orgvalue);
+            qDebug() << "key:" << QString::number(key)
+                     << " orgvalue:" << QString::number(orgvalue)
+                     << " new value:" << QString::number(value);
             if (rc>-1){
                 //sum up orgvalue & new value
                 // qDebug() << "TPPlot::onDataAdded:" << key
@@ -263,6 +267,8 @@ void TPPlot::onDataAdded(double key, double value)
                 //          << " value:" << value;
                 double sumvalue = orgvalue + value;
                 updateYAxisRange(0, sumvalue);
+                qDebug() << "key:" << QString::number(key)
+                         << " sumvalue:" << QString::number(sumvalue);
                 mTotalGraph->updateValue(key,sumvalue);
                 mTotalGraph->rescaleAxes(true);
             }else{
@@ -361,25 +367,36 @@ void TPPlot::selectionChanged()
     }
 }
 
-void TPPlot::onIperfTPdata(QString sInterval, QString idx, QString data, QString lostrate)
+void TPPlot::onIperfTPdata(QString sInterval,
+                           QString refrowidx, QString data, QString lostrate,
+                           QString grouptag)
 {
     // double x = sInterval.toDouble();
     int x = (int)sInterval.toDouble(); //ignore .0x Difference of xdata
     double y = data.toDouble();
-    addTPData(idx, x, y, lostrate.toDouble());
+    Q_UNUSED(grouptag) //TODO grouptag?
+    // qDebug() << "[TPPlot::onIperfTPdata]sInterval:" << sInterval << " x:" << QString::number(x)
+    //          << " y:" << QString::number(y)
+    //          << " grouptag:" << grouptag;
+    addTPData(refrowidx, x, y, lostrate.toDouble());
 }
 
-void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
+void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double lostrate)
 {
-    // follow line will cause plot chart fail!!why??
-    // QMutexLocker locker(&m_mutex); // Locks m_mutex
-    MyQCPGraph *myGraph = getGraph(idx);
-    if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+    QMutexLocker locker(&m_mutex); // Locks m_mutex,
+    // do not double lock in following functions!!, it will cause app hang!!
+    MyQCPGraph *myGraph = getGraph(refrowidx);
+    // if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
+    {
         //throughput graph
-        myGraph->addData(xdata, ydata);
+        if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+            myGraph->addData(xdata, ydata);
+        }else{
+            ydata = myGraph->sumValue(xdata, ydata);
+        }
         if (!m_showgroup){
-            if (m_legends.contains(idx)){
-                QCPAbstractLegendItem *itm = m_legends.value(idx);
+            if (m_legends.contains(refrowidx)){
+                QCPAbstractLegendItem *itm = m_legends.value(refrowidx);
                 if (itm){
                     itm->setVisible(true);
                 }
@@ -394,8 +411,8 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
 
     //lost rate
     if (lostrate>0){
-        MyQCPBars *g_lostrate = getLostRateGraph(idx);
-        if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+        MyQCPBars *g_lostrate = getLostRateGraph(refrowidx);
+        if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             // normal lostrate legends
             g_lostrate->setVisible(!m_showgroup);
         }else{
@@ -410,6 +427,7 @@ void TPPlot::addTPData(QString idx, double xdata, double ydata, double lostrate)
         qDebug() << "addTPData, x:" << xdata << " lostrate:" << lostrate;
         g_lostrate->addData(xdata, lostrate);
     }
+    locker.unlock();
     replot();
 }
 
@@ -439,12 +457,13 @@ void TPPlot::del(QString idx)
 }
 
 
-MyQCPGraph *TPPlot::getGraph(QString idx, int width)
+MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width)
 {
     QPen graphPen;
     QCPGraph *g;
     MyQCPGraph *myGraph;
-    if (!m_graphs.contains(idx)){  // new graphs when not exist
+    // QMutexLocker locker(&m_mutex); // Locks m_mutex
+    if (!m_graphs.contains(refrowidx)){  // new graphs when not exist
         g = addGraph(xAxis, yAxis);
         // qDebug() << "=====idx:" << idx << " legend->itemCount: " << legend->itemCount();
         // qDebug() << legend->elements(false);
@@ -456,14 +475,14 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
         myGraph->setPen(graphPen);
         myGraph->setLineStyle(QCPGraph::lsLine);
 
-        if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+        if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             //normal graph
             myGraph->setLayer(LAYER_MAIN);
             if (m_showgroup){
                 myGraph->setVisible(false);
             }
             //each throughput graph need to info when data add => to calc total throughput
-            connect(myGraph, &MyQCPGraph::dataAdded, this ,&TPPlot::onDataAdded);
+            // connect(myGraph, &MyQCPGraph::dataAdded, this ,&TPPlot::onDataAdded);
         }else {
             //total graph
             myGraph->setLayer(LAYER_TOTAL);
@@ -475,11 +494,11 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
         // qDebug() << "afer addGraph legend Count:" << QString::number(legend->itemCount());
         // legends item
         QCPAbstractLegendItem *litm = legend->item(legend->itemCount()-1);
-        if (!m_legends.contains(idx)) {
+        if (!m_legends.contains(refrowidx)) {
             // qDebug() << "DO not have m_legend:" << litm << " ADD to m_legends" ;
-            m_legends.insert(idx, litm);
+            m_legends.insert(refrowidx, litm);
         }
-        if (idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){// Total legend
+        if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){// Total legend
             // qDebug() << "============setup Total legend, m_showgroup:" << m_showgroup;
             // litm->setLayer(LAYER_TOTAL); // DO NOT place Legend in other Layer, it will be Not visible
             mTotalLegendItem = litm;
@@ -510,34 +529,34 @@ MyQCPGraph *TPPlot::getGraph(QString idx, int width)
             // myGraph->setVisible(!m_showgroup); // graph
         }
     }else{
-        myGraph = m_graphs.value(idx);
-        if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+        myGraph = m_graphs.value(refrowidx);
+        if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             myGraph->setVisible(!m_showgroup);
         }else{
             myGraph->setVisible(m_showgroup);
-            mTotalLegendItem = m_legends.value(idx);
+            mTotalLegendItem = m_legends.value(refrowidx);
         }
     }
-    myGraph->setName(idx);
-    if ((!m_graphs.contains(idx))){
+    myGraph->setName(refrowidx);
+    if ((!m_graphs.contains(refrowidx))){
         // m_graphs.insert(idx,g);
-        m_graphs.insert(idx,myGraph);
+        m_graphs.insert(refrowidx,myGraph);
         calculateLegendItems();
     }
 
     return myGraph;
 }
 
-MyQCPBars *TPPlot::getLostRateGraph(QString idx)
+MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx)
 {
     QPen graphPen;
     QCPGraph *g;
     MyQCPBars *g_lostrate;
-    if (!m_lostgraphs.contains(idx)){
+    if (!m_lostgraphs.contains(refrowidx)){
         //get main graph's color
-        if (m_graphs.contains(idx)){
+        if (m_graphs.contains(refrowidx)){
             // use same color as throughput chart
-            g = m_graphs.value(idx);
+            g = m_graphs.value(refrowidx);
             graphPen = g->pen();
         } else {
             int R = rand()%245+10;
@@ -547,11 +566,11 @@ MyQCPBars *TPPlot::getLostRateGraph(QString idx)
         }
         QPen redPen = newColorPen(255, 0, 0, 2);
         g_lostrate = new MyQCPBars(xAxis, yAxis2);
-        g_lostrate->setName(idx+ " Lost Rate");
-        if (!idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+        g_lostrate->setName(refrowidx+ " Lost Rate");
+        if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             //normal lost rate graph
             g_lostrate->setLayer(LAYER_LOSTRATE);
-            connect(g_lostrate, &MyQCPBars::dataAdded, this ,&TPPlot::onLostRateDataAdded);
+            // connect(g_lostrate, &MyQCPBars::dataAdded, this ,&TPPlot::onLostRateDataAdded);
             if (m_showgroup){
                 g_lostrate->setVisible(false);
             }
@@ -571,10 +590,10 @@ MyQCPBars *TPPlot::getLostRateGraph(QString idx)
 
         // qDebug() << "legend->itemCount:" << legend->itemCount();
         QCPAbstractLegendItem *litm = legend->item(legend->itemCount()-1);
-        if (!m_lostratelegends.contains(idx)) {
-                m_lostratelegends.insert(idx, litm);
+        if (!m_lostratelegends.contains(refrowidx)) {
+                m_lostratelegends.insert(refrowidx, litm);
         }
-        if (idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){// Total legend
+        if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){// Total legend
             mTotalLostLegendItem = litm;
             // litm->setLayer(LAYER_TOTALOSTRATE);// DO NOT place Legend in other Layer, it will be Not visible
             // qDebug() << "mTotalLostLegendItem:" << mTotalLostLegendItem;
@@ -599,15 +618,15 @@ MyQCPBars *TPPlot::getLostRateGraph(QString idx)
             // }
         }
     }else{
-        g_lostrate = m_lostgraphs.value(idx);
-        if (idx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){// Total legend
-            mTotalLostLegendItem = m_lostratelegends.value(idx);
+        g_lostrate = m_lostgraphs.value(refrowidx);
+        if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){// Total legend
+            mTotalLostLegendItem = m_lostratelegends.value(refrowidx);
         }
     }
 
-    if (!m_lostgraphs.contains(idx)){
+    if (!m_lostgraphs.contains(refrowidx)){
         // qDebug() << "m_lostgraphs does not have " << idx << " add lostrate:" << g_lostrate;
-        m_lostgraphs.insert(idx,g_lostrate);
+        m_lostgraphs.insert(refrowidx,g_lostrate);
         calculateLegendItems();
     }
     return g_lostrate;
@@ -615,12 +634,12 @@ MyQCPBars *TPPlot::getLostRateGraph(QString idx)
 
 void TPPlot::clear()
 {
-    for (auto it = m_graphs.begin(); it != m_graphs.end(); ++it) {
-        disconnect(static_cast<MyQCPGraph*>(it.value()), &MyQCPGraph::dataAdded, this, &TPPlot::onDataAdded);
-        removePlottable(it.value());
-    }
+
     // clearGraphs(); // this will clean all graphs
     if (mTotalGraph){
+        // if (mTotalGraph->data()){ // this will cause APP crash
+        //     mTotalGraph->data()->clear();
+        // }
         qDebug() << "Reset mTotalGraph";
         mTotalGraph=nullptr;
     }
@@ -629,14 +648,21 @@ void TPPlot::clear()
     // }
     if (mTotalLostGraph){
         qDebug() << "Reset mTotalLostGraph";
+        // if (mTotalLostGraph->data()){
+        //     mTotalLostGraph->data()->clear();
+        // }
         mTotalLostGraph=nullptr;
     }
     // if (mTotalLostLegendItem){
     //     mTotalLostLegendItem=nullptr;
     // }
+    for (auto it = m_graphs.begin(); it != m_graphs.end(); ++it) {
+        // disconnect(static_cast<MyQCPGraph*>(it.value()), &MyQCPGraph::dataAdded, this, &TPPlot::onDataAdded);
+        removePlottable(it.value());
+    }
     m_graphs.clear();
     for (auto it = m_lostgraphs.begin(); it != m_lostgraphs.end(); ++it) {
-        disconnect(static_cast<MyQCPBars*>(it.value()), &MyQCPBars::dataAdded, this, &TPPlot::onLostRateDataAdded);
+        // disconnect(static_cast<MyQCPBars*>(it.value()), &MyQCPBars::dataAdded, this, &TPPlot::onLostRateDataAdded);
         removePlottable(it.value());
     }
     m_lostgraphs.clear();
@@ -650,7 +676,7 @@ void TPPlot::clear()
 
     //re-create Total Graph/Total Lost Graph and it's legend
     if (!mTotalGraph){
-        mTotalGraph = getGraph(GRAPH_TOTAL, GWidth::Total);
+        mTotalGraph = getGraph(GRAPH_TOTAL, GroupWidth::Total);
     }
     if (!mTotalLostGraph){
         mTotalLostGraph = getLostRateGraph(GRAPH_TOTAL);

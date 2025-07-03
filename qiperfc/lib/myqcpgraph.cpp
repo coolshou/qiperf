@@ -20,7 +20,7 @@ void MyQCPGraph::setData(const QVector<double> &keys, const QVector<double> &val
 void MyQCPGraph::addData(double key, double value)
 {
     QCPGraph::addData(key, value);
-    emit dataAdded(key, value);
+    // emit dataAdded(key, value);
 }
 
 int MyQCPGraph::getValueIdx(double key)
@@ -57,4 +57,27 @@ void MyQCPGraph::updateValue(double keyToUpdate, double newvalue)
         }
     }
     // parentPlot()->replot();
+}
+
+double MyQCPGraph::sumValue(double keyToUpdate, double newvalue)
+{
+    QSharedPointer<QCPGraphDataContainer> dataContainer = QCPGraph::data();
+    // Iterate over the data points to find the specific key
+    if (!dataContainer->isEmpty()) {
+        // for (auto it = dataContainer->begin(); it != dataContainer->end(); ++it) {
+        for (auto it = dataContainer->end(); it != dataContainer->begin();) {
+            --it; // Decrement first to get to a valid element
+            if (qFuzzyCompare(it->key, keyToUpdate)) { // Check if the key matches
+                qDebug() << "key:" << QString::number(keyToUpdate)
+                         << " it->value:" << QString::number(it->value)
+                         << " newvalue:" << QString::number(newvalue);
+                it->value = it->value + newvalue; // Update the value
+                return it->value;
+            }
+        }
+    }
+    // Not find org key's value, just addd
+    addData(keyToUpdate, newvalue);
+    return newvalue;
+
 }

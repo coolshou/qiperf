@@ -877,12 +877,14 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
         QString dir=nullptr;
         QString idx;
-
+        QString unit="";
+        QString ssum="";
         double sum=0;
         quint64 sum_lost=0;
         quint64 sum_total=0;
         double lost_rate=0;
         bool isAvg=false;
+        QString slost_rate = "0";
 //        foreach (QJsonObject jObj, jArr){
         for (QJsonArray::const_iterator it=jArr.constBegin(); it!=jArr.constEnd(); ++it) {
             QJsonObject jObj= it->toObject();
@@ -893,12 +895,19 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                 dir=jObj.value("dir").toString();
             }
             value = jObj.value("value").toString();
+            unit = jObj.value("unit").toString();
+            if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) !=0){
+                qDebug() << "//TODO: base on unit, convert the value to correct value"
+                         << " display unit:" << m_TPUint << " tp data unit:" << unit;
+            }
             // packet lost rate
             QString pkt_lost = jObj.value("packet_lost").toString();
             QString pkt_total = jObj.value("packet_total").toString();
+
             if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
                 lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
                 qDebug() << "TPMgr::onIperfTPdata: lost_rate:" << lost_rate;
+                slost_rate = QString::number(lost_rate, 'f', 4);
             }
     //        qDebug() << "pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
             sum = sum + value.toDouble();
@@ -907,23 +916,35 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 
             if (fInterval >= m_intervals.value(idx, 0.0)){
                // qDebug() << "addTPdata fInterval:" << fInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
-                addTPdata(refrow, sInterval, idx, value,
-                    jObj.value("unit").toString(), dir, pkt_lost, pkt_total);
+                addTPdata(refrow, sInterval, idx, value, unit, dir,
+                          pkt_lost, pkt_total);
                 m_intervals[idx] = fInterval;
             }
             if (!isAvg) {
-                // chart data ( with out Average data)
-                // qDebug() << refrow + "_" + idx << " sInterval:" << sInterval
-                //          << " value:" << value
-                //          <<" lost_rate: " << lost_rate;
+                // signal data to tpplot to add plot data on each -P
                 emit IperfTPdata(sInterval, refrow + "_" + idx, value,
-                                 QString::number(lost_rate, 'f', 4));
-                // emit IperfTPdata(sInterval, refrow + "_" + jObj.value("idx").toString(),
-                //         jObj.value("value").toString(), QString::number(lost_rate, 'f', 4));
+                                 slost_rate, dir);
+            }else {
+                // TODO: this part TP data seems strange??
+                // qDebug() << "refrow:" << refrow << " idx:" << idx <<" Avg:" << value
+                         // << " pkt_lost:" << pkt_lost << " pkt_total:" << pkt_total;
+                // TODO : each iperf test pair
             }
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
+        // signal data to tpplot for Group Total
+        if (sum_total>0){
+            slost_rate = QString::number((sum_lost/sum_total)*100, 'f', 4);
+        }
+        ssum = QString::number(sum, 'f', 3);
+        // qDebug() << " Total graph:" << sInterval << " sum:" << ssum
+        //          << " lost_rate:" << slost_rate << " dir:" << dir;
+        emit IperfTPdata(sInterval, GRAPH_TOTAL, ssum, slost_rate, dir);
+        // TODO: signal data to tpplot for group Direction
+        // TODO: signal data to tpplot for group comment
         // update  test pair config row's sum value
+
+        // iperf test pair
         TP *tp = getItemByIdx(refrow);
         if (!(tp==nullptr)){
             if (fInterval >= m_intervals.value(refrow, 0.0)){
@@ -934,6 +955,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                 m_intervals[refrow] = fInterval;
             }
         }
+        //
         // signal dataChanged when all throughput data update!!
         emit dataChanged(QModelIndex(),QModelIndex());
     }else {

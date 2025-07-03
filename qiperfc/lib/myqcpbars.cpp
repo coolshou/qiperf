@@ -26,7 +26,7 @@ void MyQCPBars::setData(const QVector<double> &keys, const QVector<int> &lostval
 void MyQCPBars::addData(double key, double value)
 {
     QCPBars::addData(key, value);
-    emit dataAdded(key, value);
+    // emit dataAdded(key, value);
 }
 
 int MyQCPBars::getValue(double key, double &value)

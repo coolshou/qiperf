@@ -14,6 +14,7 @@
 #include <QTreeView>
 
 #include "tp.h"
+#include "tpgroup.h"
 #include "../src/tpmgrdata.h"
 
 //class to manager all Throughput data
@@ -84,13 +85,16 @@ public slots:
     void setTPUint(QString tpunit);
 
 signals:
-    void IperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);//Notice iperf throughput value:  time, idx, throughput value, lost rate
+    void IperfTPdata(QString sInterval,
+                     QString refrowidx, QString data, QString lostrate,
+                     QString grouptag);//Notice iperf throughput value:  time, idx, throughput value, lost rate
 
 private slots:
     void onUpdater();
 
 private:
     bool m_showgroup;
+    TPGroup::GroupMode m_groupmode;
     QTreeView *m_treeview; //relative treeview
     QString m_TPUint;
     QList<QString> m_unit_bits;

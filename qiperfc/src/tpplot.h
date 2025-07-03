@@ -16,7 +16,7 @@ class TPPlot : public QCustomPlot
 {
     Q_OBJECT
 public:
-    enum GWidth{
+    enum GroupWidth{
         Total=3,
         Pair=2,
         Direction=2,
@@ -27,16 +27,18 @@ public:
 
 public:
     explicit TPPlot(bool showgroup, QString sunit, QWidget *parent = nullptr);
-    void addTPData(QString idx, double xdata, double ydata, double lostrate);  //
+    void addTPData(QString refrowidx, double xdata, double ydata, double lostrate);  //
     void del(QString idx);
     // QCPGraph *getGraph(QString idx, int width=1); // get QCPGraph by index
-    MyQCPGraph *getGraph(QString idx, int width=GWidth::Iperf); // get QCPGraph by index
-    MyQCPBars *getLostRateGraph(QString idx);
+    MyQCPGraph *getGraph(QString refrowidx, int width=GroupWidth::Iperf); // get QCPGraph by index
+    MyQCPBars *getLostRateGraph(QString refrowidx);
     void clear();
     void setXRangeUpper(double upper);
 
 public slots:
-    void onIperfTPdata(QString sInterval, QString idx, QString data, QString lostrate);  //
+    void onIperfTPdata(QString sInterval,
+                       QString refrowidx, QString data, QString lostrate,
+                       QString grouptag);  //
     void setStartTime(QDateTime startTime);
     void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
                          QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates);
