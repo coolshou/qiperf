@@ -1,5 +1,14 @@
 #!/bin/bash
 
+
+if [ "$1" -eq "" ]; then
+  echo "##### Do not pre clean source tree #####"
+  NOTCLEAN="-nc"
+else
+  echo "##### Do Full compile #####"
+  NOTCLEAN=""
+fi
+
 BUILDPACKAGES="qiperfd qiperftray"
 # Get the machine hardware name
 machine_arch=$(uname -m)
@@ -40,6 +49,6 @@ for package in ${BUILDPACKAGES[@]} ; do
     fi
     cd $package
     #debuild -b -uc -us
-    dpkg-buildpackage -b --no-sign -nc
+    dpkg-buildpackage -b --no-sign ${NOTCLEAN}
     cd ..
 done
