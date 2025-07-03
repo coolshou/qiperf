@@ -23,7 +23,7 @@ public:
         Comment=2,
         Iperf=1,
     };
-    Q_ENUM(GWidth)
+    Q_ENUM(GroupWidth)
 
 public:
     explicit TPPlot(bool showgroup, QString sunit, QWidget *parent = nullptr);

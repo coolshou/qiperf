@@ -371,7 +371,7 @@ void QIperfC::onStart(bool showNotice)
         qDebug() << "onStart tps:" << tps;
         m_tpworker = new TpWorker(m_logpath, tps);
         connect(m_tpworker, &TpWorker::testStarted, this, &QIperfC::onTestStarted);
-        connect(m_tpworker, &TpWorker::testStoped,this,  &QIperfC::onTestStoped);
+        connect(m_tpworker, &TpWorker::testStoped, this, &QIperfC::onTestStoped);
         connect(m_tpworker, &TpWorker::updateDatapath, this, &QIperfC::onUpdateDataPath);
         connect(m_tpworker, &TpWorker::updateStarttime, this, &QIperfC::onUpdateStarttime);
         connect(m_tpworker, &TpWorker::updateRunStatus, this, &QIperfC::onUpdateRunStatus);
