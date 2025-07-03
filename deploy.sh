@@ -90,13 +90,13 @@ if [ "x$?" == "x0" ]; then
             do
                 echo "================================================================================"
                 echo "===== scp ${DESTFILE} ${USERNAME}@${IP}:/home/test/${DESTFILE}"
-                ERROR_OUTPUT=$(scp ${DESTFILE} ${USERNAME}@${IP}:/home/test/${DESTFILE} > /dev/null 2>&1)
+                ERROR_OUTPUT=$(scp ${DESTFILE} ${USERNAME}@${IP}:/home/test/${DESTFILE} 2>&1 >/dev/null)
                 INSTALL_STATUS=$?
-                if [ "$INSTALL_STATUS" -ne 0 ]; then
+                if [ $INSTALL_STATUS -eq 0 ]; then
                     echo "===== ssh ${USERNAME}@${IP} sshpass -p '123456' sudo dpkg -i /home/test/${DESTFILE}"
                     ERROR_OUTPUT=$(ssh "${USERNAME}@${IP}" "sshpass -p '123456' sudo dpkg -i /home/test/${DESTFILE}" 2>&1 >/dev/null)
                     INSTALL_STATUS=$?
-                    if [ "$INSTALL_STATUS" -ne 0 ]; then
+                    if [ $INSTALL_STATUS -ne 0 ]; then
                        echo "***** Fail install /home/test/${DESTFILE} on ${USERNAME}@${IP} *****"
                        echo "Error Details:"
                        echo "$ERROR_OUTPUT"
@@ -119,11 +119,11 @@ if [ "x$?" == "x0" ]; then
                 echo "===== scp -P $PORT ${DESTFILE}  ${TARGET}/home/test/${DESTFILE}"
                 ERROR_OUTPUT=$(scp -P $PORT ${DESTFILE} ${TARGET}/home/test/${DESTFILE} 2>&1 >/dev/null)
                 INSTALL_STATUS=$?
-                if [ "$INSTALL_STATUS" -eq 0 ]; then
+                if [ $INSTALL_STATUS -eq 0 ]; then
                     echo "===== ssh -p $PORT ${USERNAME}@${DOREMOTEIP} ${INSTCMD}"
                     ERROR_OUTPUT=$(ssh -p $PORT ${USERNAME}@${DOREMOTEIP} ${INSTCMD} 2>&1 >/dev/null)
                     INSTALL_STATUS=$?
-                    if [ "$INSTALL_STATUS" -ne 0 ]; then
+                    if [ $INSTALL_STATUS -ne 0 ]; then
                        echo "***** Fail exec ${INSTCMD} at ${USERNAME}@${DOREMOTEIP}:$PORT *****"
                        echo "Error Details:"
                        echo "$ERROR_OUTPUT"
@@ -144,11 +144,11 @@ if [ "x$?" == "x0" ]; then
             echo "===== scp ${WINSETUP} ${USERNAME}@${IP}:D:\\${WINSETUP}"
             ERROR_OUTPUT=$(scp ${WINSETUP} ${USERNAME}@${IP}:D:\\${WINSETUP})
             INSTALL_STATUS=$?
-            if [ "$INSTALL_STATUS" -eq 0 ]; then
+            if [ $INSTALL_STATUS -eq 0 ]; then
                 echo "===== ssh ${USERNAME}@${IP} D:\\${WINSETUP} /S"
                 ERROR_OUTPUT=$(ssh ${USERNAME}@${IP} D:\\${WINSETUP} /S)
                 INSTALL_STATUS=$?
-                if [ "$INSTALL_STATUS" -ne 0 ]; then
+                if [ $INSTALL_STATUS -ne 0 ]; then
                     echo "***** Fail exec D:\\${WINSETUP} at ${USERNAME}@${IP} *****"
                     echo "Error Details:"
                     echo "$ERROR_OUTPUT"
@@ -168,11 +168,11 @@ if [ "x$?" == "x0" ]; then
                 echo "===== scp -P ${PORT} ${WINSETUP} ${USERNAME}@${RVRIP}:D:\\${WINSETUP}"
                 ERROR_OUTPUT=$(scp -P ${PORT} ${WINSETUP} ${USERNAME}@${RVRIP}:D:\\${WINSETUP})
                 INSTALL_STATUS=$?
-                if [ "$INSTALL_STATUS" -eq 0 ]; then
+                if [ $INSTALL_STATUS -eq 0 ]; then
                     echo "===== ssh -P ${PORT} ${USERNAME}@${RVRIP} D:\\${WINSETUP} /S"
                     ERROR_OUTPUT=$(ssh -P ${PORT} ${USERNAME}@${RVRIP} D:\\${WINSETUP} /S)
                     INSTALL_STATUS=$?
-                    if [ "$INSTALL_STATUS" -ne 0 ]; then
+                    if [ $INSTALL_STATUS -ne 0 ]; then
                         echo "***** Fail exec D:\\${WINSETUP} /S at ${USERNAME}@${IP} *****"
                         echo "Error Details:"
                         echo "$ERROR_OUTPUT"
