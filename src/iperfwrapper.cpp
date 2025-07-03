@@ -517,15 +517,22 @@ void IperfWrapper::parserIperf3(QString linedata)
                 if (sInterval.contains("-")){
                     QStringList ds = sInterval.split("-");
                     if (ds.length()==2){
+                        // expect as(--interval) -i <num>
                         interval = ds[1].toDouble() - ds[0].toDouble();
                     }
                 }
                 if (m_ignorewronginterval){
-                    if (!linedata.contains("receiver")){
+                    //if (!linedata.contains("receiver")) // very last recored may be not correct data
+                    {
+                        double diffint = qAbs(m_interval-interval);
+                        QString msg = m_ignorewronginterval?"true":"false";
+                        debug("m_ignorewronginterval:" + msg+
+                              " diffint:" + QString::number(diffint));
                         // check report interval value is correct (smallest value 1 sec)
-                        if (qAbs(m_interval-interval)>0.5){
+                        if (diffint>0.0){
+                            //interval value not match value of -i (--interval)
                             debug(linedata + "=>>>>parserIperf3 ignorewronginterval value:" +
-                                  QString::number(interval) + " expect:" + QString::number(m_interval), 4);
+                                  QString::number(interval) + " expect:" + QString::number(m_interval), 3);
                             return;
                         }
                     }
@@ -570,7 +577,8 @@ void IperfWrapper::parserIperf3(QString linedata)
                         debug("==linedata==SUM==  " + linedata, 5);
                     }else{
                         if (linedata.contains("receiver")){
-                            irec.insert("AVG", true); //final data is the average of throughput
+                            //final data is the average of throughput
+                            irec.insert("AVG", true);
                         }
                         m_tpdatas[sInterval].append(irec);
                     }
