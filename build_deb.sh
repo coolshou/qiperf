@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-if [ "$1" -eq "" ]; then
+if [ "$1" == "" ]; then
   echo "##### Do not pre clean source tree #####"
   NOTCLEAN="-nc"
 else
