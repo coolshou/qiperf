@@ -527,12 +527,12 @@ void IperfWrapper::parserIperf3(QString linedata)
                         double diffint = qAbs(m_interval-interval);
                         QString msg = m_ignorewronginterval?"true":"false";
                         debug("m_ignorewronginterval:" + msg+
-                              " diffint:" + QString::number(diffint));
+                              " diffint:" + QString::number(diffint), 5);
                         // check report interval value is correct (smallest value 1 sec)
                         if (diffint>0.0){
                             //interval value not match value of -i (--interval)
-                            debug(linedata + "=>>>>parserIperf3 ignorewronginterval value:" +
-                                  QString::number(interval) + " expect:" + QString::number(m_interval), 3);
+                            debug(linedata + " =>>>>parserIperf3 ignorewronginterval value:" +
+                                  QString::number(interval) + " expect:" + QString::number(m_interval), 4);
                             return;
                         }
                     }

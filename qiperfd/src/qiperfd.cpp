@@ -1102,10 +1102,12 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         msg = msg.right(msg.length()-cut-1);
         cut = msg.indexOf(':', 0);
         QString ignoreWrongInterval = msg.left(cut); //ignoreWrongInterval
+        qDebug()<< "CMD_IPERF_ADD: " << refrow << " ignoreWrongInterval:" << ignoreWrongInterval;
         msg = msg.right(msg.length()-cut-1);
+        qDebug()<< "msg: " << msg;
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
-            qDebug()<< "CMD_IPERF_ADD: " << refrow << " msg:" << msg;
+            // " msg:" << msg;
             add(refrow, ignoreWrongInterval, doc.toVariant().toMap());
         }else{
             onLog("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + msg.toUtf8());

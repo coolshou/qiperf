@@ -215,8 +215,8 @@ void TpWorker::work()
             }
             //tell server add iperf server
             cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow);
-            cmd = cmd + (m_ignoreWrongInterval?"1":"0");
-            cmd = cmd +":"+tp->getServerArgs();
+            cmd = cmd + ":"+ (m_ignoreWrongInterval?"1":"0");
+            cmd = cmd + ":"+ tp->getServerArgs();
             debug("[TpWorker]server cmd:" + serverIP + " => " + cmd);
             rs = m_ws[serverIP]->sendText(cmd);
             if (rs<=0){
@@ -280,8 +280,8 @@ void TpWorker::work()
             }
             //tell client add iperf client
             cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow);
-            cmd = cmd + (m_ignoreWrongInterval?"1":"0");
-            cmd = cmd +":"+tp->getClientArgs();
+            cmd = cmd + ":" + (m_ignoreWrongInterval?"1":"0");
+            cmd = cmd + ":" +tp->getClientArgs();
             debug("[TpWorker]client cmd:" + clientIP + " => " + cmd);
             rs = m_ws[clientIP]->sendText(cmd);
             if (rs<=0){

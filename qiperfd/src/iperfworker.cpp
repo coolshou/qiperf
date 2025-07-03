@@ -344,10 +344,9 @@ void IperfWorker::parserStdOut(QString msg)
 void IperfWorker::onThroughputData(int refrow, QString sInterval, QString data)
 {
     if(m_bidirtag.isEmpty()){
-        //debug("No m_bidirtag, not reprort ThroughputData: ("+sInterval+")" + data);
+        debug("No m_bidirtag, not reprort ThroughputData: ("+sInterval+")" + data, 6);
     }else{
-        debug("[IperfWorker::onThroughputData]refrow:" + QString::number(refrow) + " sInterval:" + sInterval);
-        //+ " data:" + data, 3);
+        debug("[IperfWorker::onThroughputData]refrow:" + QString::number(refrow) + " sInterval:" + sInterval, 5);
         emit iperfTPdata(refrow, sInterval, data);
     }
 }

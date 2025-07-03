@@ -89,7 +89,6 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     initToolbar();
     updateRunStatus(false);
     // initPingChart();
-    // connect(this, &QIperfC::errorStop, this, &QIperfC::onErrorStop);
 
     iTimeout = 10*1000;//10sec
     //
@@ -497,8 +496,11 @@ void QIperfC::onErrorStop(int err, QString msg)
 {
     bErrorStop = err;
     m_ErrorMSG = msg;
-    qDebug() << "onErrorStop: (" <<bErrorStop <<") " << m_ErrorMSG;
-    // emit updateStarttime(QDateTime());
+    if (err){
+        qDebug() << "onErrorStop: (" <<bErrorStop <<") " << m_ErrorMSG;
+        // emit updateStarttime(QDateTime());
+        showTrayMessage("ERROR", m_ErrorMSG, QSystemTrayIcon::Critical);
+    }
     emit updateStatus(msg);
     updateRunStatus(false);
     emit testStoped(bErrorStop);
