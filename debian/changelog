@@ -1,4 +1,4 @@
-qiperf (0.13.11407.02-1) unstable; urgency=medium
+qiperf (0.13.11407.03-1) unstable; urgency=medium
 
   * Update throughput test to TpWorker class(run in QThread)
   * Adjust control of throughput test flow
@@ -6,8 +6,10 @@ qiperf (0.13.11407.02-1) unstable; urgency=medium
   * iperf3 add --timestamps arg
   * Add iperf args & start time at begin of iperf logfile
   * Add get CPU info/thread number in qiperfd
+  * Fix plot chart with wrong value at begin/end of plot
+  * Fix second test run have wrong plot value
 
- -- coolshou <coolshou2060@gmail.com>  Wed, 02 Jul 2025 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Thu, 03 Jul 2025 10:00:00 +0800
 
 qiperf (0.12.11406.20-1) unstable; urgency=medium
 
