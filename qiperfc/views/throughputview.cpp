@@ -18,7 +18,8 @@
 
 // ThroughputView::ThroughputView(QIperfC *main, QWidget *parent) : AbstractView(parent)
 ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
-                               QAction *aCopyText,  bool showgroup, QString sunit,
+                               QAction *aCopyText, QSettings *cfg,
+                               bool showgroup, QString sunit,
                                QWidget *parent) : AbstractView(parent)
     , ui(new Ui::ThroughputView), m_actionCopy(aCopy),m_actionPaste(aPaste),
     m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_showgroupTotal(showgroup),
@@ -31,7 +32,7 @@ ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete
     initThroughputChart();
     m_clipboard = QApplication::clipboard();
 
-    dlgiperf = new DlgIperf(m_tpmgr, this); //add/edit iperf config dialog
+    dlgiperf = new DlgIperf(m_tpmgr, cfg, this); //add/edit iperf config dialog
     initMenus();
 }
 

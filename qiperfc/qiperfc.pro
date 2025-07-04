@@ -118,6 +118,7 @@ SOURCES += \
     src/codeeditor.cpp \
     src/customheaderview.cpp \
     src/dlgiperf.cpp \
+    src/dlgiperfrestartrule.cpp \
     src/dlgoption.cpp \
     src/dlgping.cpp \
     src/dlgrecord.cpp \
@@ -200,6 +201,7 @@ HEADERS += \
     src/codeeditor.h \
     src/customheaderview.h \
     src/dlgiperf.h \
+    src/dlgiperfrestartrule.h \
     src/dlgoption.h \
     src/dlgping.h \
     src/dlgrecord.h \
@@ -266,6 +268,7 @@ FORMS += \
     ../src/port/tcpudpport.ui \
     auto/dlgsimplemicro.ui \
     src/dlgiperf.ui \
+    src/dlgiperfrestartrule.ui \
     src/dlgoption.ui \
     src/dlgping.ui \
     src/dlgrecord.ui \

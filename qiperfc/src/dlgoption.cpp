@@ -246,7 +246,7 @@ void dlgOption::hidetab(QString tabname)
             break;
         }
     }
-    qDebug() << "hidetab : " << tabname << " idx:" << QString::number(i);
+    // qDebug() << "hidetab : " << tabname << " idx:" << QString::number(i);
     ui->tabWidget->removeTab(i);
 }
 

@@ -17,11 +17,12 @@
 
 #include "../src/showcustomtooltip.h"
 
-DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
+DlgIperf::DlgIperf(TPMgr *tpmgr, QSettings *cfg, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DlgIperf)
 {
     ui->setupUi(this);
+    m_dlgrule = new DlgIperfRestartRule(cfg);
     ui->wManagement->setVisible(false);
     adjustSize();
     connect(ui->pbManagement, &QPushButton::clicked, this, &DlgIperf::showManagement);
@@ -52,6 +53,12 @@ DlgIperf::DlgIperf(TPMgr *tpmgr, QWidget *parent) :
             &DlgIperf::onDurationValueChanged);
 
     connect(ui->cb_fmtreport, &QComboBox::currentTextChanged, this, &DlgIperf::onFmtreportChanged);
+#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
+    connect(ui->cbRestartOnError, &QCheckBox::stateChanged, this, &DlgIperf::onChkRestartOnError);
+#else
+    connect(ui->cbRestartOnError, &QCheckBox::checkStateChanged, this, &DlgIperf::onChkRestartOnError);
+#endif
+    connect(ui->pbRestartRule, &QPushButton::clicked, this, &DlgIperf::onShowIperfRestartRule);
 // lbDuration
     // connect(ui->sb_mss, &QSpinBox::valueChanged, this, &DlgIperf::onMSSvalueChanged); //TODO: Not good for UI interaction
 
@@ -75,37 +82,33 @@ QString DlgIperf::getJsonCfg()
     QJsonObject mainObj;
     mainObj.insert("Action", CMD_IPERF_ADD);
     mainObj.insert("enabled", m_enabled);
-    {
-        //server
-        QJsonObject serverObj;
-        serverObj.insert("version", ui->cb_version->currentText());
-        serverObj.insert("port", ui->sb_port->value());
-        if (ui->cb_mserver_ip->currentText().isEmpty()){
-            serverObj.insert("manager", ui->cb_target_ip->currentText().trimmed());
-        }else{
-            serverObj.insert("manager", ui->cb_mserver_ip->currentText().trimmed());
-        }
-        serverObj.insert("protocal", ui->cb_protocal->currentText());
-        serverObj.insert("parallel", ui->sb_parallel->value());
-        serverObj.insert("windowsize", ui->sb_windowsize->value());
-        serverObj.insert("unit_windowsize", ui->cb_unit_windowsize->currentText());
-        serverObj.insert("reverse", ui->chk_reverse->isChecked());
-        serverObj.insert("bidir", ui->chk_bidir->isChecked());
-        serverObj.insert("interval", ui->sb_interval->value());
-//        serverObj.insert("ipv6", b_ipv6);
-        if (ui->chk_server_bind_ip->isChecked()){
-            serverObj.insert("bind", ui->cb_target_ip->currentText().trimmed());
-        }
-        serverObj.insert("fmtreport", ui->cb_fmtreport->currentText().trimmed());
 
-        serverObj.insert("delaytime", ui->sb_delaytime->value());
-        serverObj.insert("restartonerror", ui->cbRestartOnError->isChecked()); // TODO how to restart iperf pair on detect iperf running error?
-        if (ui->cbTimeStamp->isChecked()){
-            serverObj.insert("timestamps", ui->leTimeStamp->text().trimmed());
-        }
-        mainObj.insert("server", serverObj);
-
+    //server
+    QJsonObject serverObj;
+    serverObj.insert("version", ui->cb_version->currentText());
+    serverObj.insert("port", ui->sb_port->value());
+    if (ui->cb_mserver_ip->currentText().isEmpty()){
+        serverObj.insert("manager", ui->cb_target_ip->currentText().trimmed());
+    }else{
+        serverObj.insert("manager", ui->cb_mserver_ip->currentText().trimmed());
     }
+    serverObj.insert("protocal", ui->cb_protocal->currentText());
+    serverObj.insert("parallel", ui->sb_parallel->value());
+    serverObj.insert("windowsize", ui->sb_windowsize->value());
+    serverObj.insert("unit_windowsize", ui->cb_unit_windowsize->currentText());
+    serverObj.insert("reverse", ui->chk_reverse->isChecked());
+    serverObj.insert("bidir", ui->chk_bidir->isChecked());
+    serverObj.insert("interval", ui->sb_interval->value());
+    //        serverObj.insert("ipv6", b_ipv6);
+    if (ui->chk_server_bind_ip->isChecked()){
+        serverObj.insert("bind", ui->cb_target_ip->currentText().trimmed());
+    }
+    serverObj.insert("fmtreport", ui->cb_fmtreport->currentText().trimmed());
+    serverObj.insert("delaytime", ui->sb_delaytime->value());
+    if (ui->cbTimeStamp->isChecked()){
+        serverObj.insert("timestamps", ui->leTimeStamp->text().trimmed());
+    }
+
     //client
     QJsonObject clientObj;
     clientObj.insert("version", ui->cb_version->currentText());
@@ -139,12 +142,20 @@ QString DlgIperf::getJsonCfg()
     clientObj.insert("reverse", ui->chk_reverse->isChecked());
     clientObj.insert("bidir", ui->chk_bidir->isChecked());
     clientObj.insert("zerocopy", ui->cb_zerocopy->isChecked());
-
     clientObj.insert("delaytime", ui->sb_delaytime->value());
-    clientObj.insert("restartonerror", ui->cbRestartOnError->isChecked());
     if (ui->cbTimeStamp->isChecked()){
         clientObj.insert("timestamps", ui->leTimeStamp->text().trimmed());
     }
+
+    //restart rule
+    serverObj.insert("restartonerror", ui->cbRestartOnError->isChecked());
+    clientObj.insert("restartonerror", ui->cbRestartOnError->isChecked());
+    if (ui->cbRestartOnError->isChecked()){
+        QJsonObject rule = m_dlgrule->getJsonCfgObj();
+        serverObj.insert("restartrules", rule);
+        clientObj.insert("restartrules", rule);
+    }
+    mainObj.insert("server", serverObj);
     mainObj.insert("client", clientObj);
     QJsonDocument doc(mainObj);
     QString strJson(doc.toJson(QJsonDocument::Compact));
@@ -160,6 +171,14 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
         m_enabled = mainObj["enabled"].toBool(true);
         QJsonObject serverObj = mainObj["server"].toObject();
         QJsonObject clientObj = mainObj["client"].toObject();
+        bool bRestartonerror = serverObj["restartonerror"].toBool();
+        ui->cbRestartOnError->setChecked(bRestartonerror);
+        ui->pbRestartRule->setEnabled(bRestartonerror);
+        if (bRestartonerror){
+            QJsonObject rulesObj = serverObj["restartrules"].toObject();
+            m_dlgrule->setJsonRules(rulesObj);
+        }
+
 
         ui->cb_version->setCurrentText(serverObj["version"].toString());
         ui->sb_port->setValue(serverObj["port"].toInt());
@@ -205,6 +224,7 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
         ui->cb_fmtreport->setCurrentText(clientObj["fmtreport"].toString());
         ui->chk_reverse->setChecked(clientObj["reverse"].toBool());
         ui->cb_zerocopy->setChecked(clientObj["zerocopy"].toBool());
+
     }else{
         qDebug() << "Wrong format of loadJsonCfg:(" << error.errorString() << ")\n" << jsoncfg;
     }
@@ -495,41 +515,31 @@ void DlgIperf::onAccepted()
 }
 #if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
 void DlgIperf::onChkBidirStatech(int state)
-{
-    if (state==Qt::Checked){
-        ui->chk_reverse->setCheckState(Qt::Unchecked);
-    }
-}
-
-void DlgIperf::onChkReverseStatech(int state)
-{
-    if (state==Qt::Checked){
-        ui->chk_bidir->setCheckState(Qt::Unchecked);
-    }
-}
-void DlgIperf::onTimeStampstateChanged(int state)
-{
-    if (state==Qt::Checked){
-        ui->leTimeStamp->setEnabled(true);
-    }else{
-        ui->leTimeStamp->setEnabled(false);
-    }
-}
 #else
 void DlgIperf::onChkBidirStatech(Qt::CheckState state)
+#endif
 {
     if (state==Qt::Checked){
         ui->chk_reverse->setCheckState(Qt::Unchecked);
     }
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
+void DlgIperf::onChkReverseStatech(int state)
+#else
 void DlgIperf::onChkReverseStatech(Qt::CheckState state)
+#endif
 {
     if (state==Qt::Checked){
         ui->chk_bidir->setCheckState(Qt::Unchecked);
     }
 }
+
+#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
+void DlgIperf::onTimeStampstateChanged(int state)
+#else
 void DlgIperf::onTimeStampstateChanged(Qt::CheckState state)
+#endif
 {
     if (state==Qt::Checked){
         ui->leTimeStamp->setEnabled(true);
@@ -537,7 +547,41 @@ void DlgIperf::onTimeStampstateChanged(Qt::CheckState state)
         ui->leTimeStamp->setEnabled(false);
     }
 }
+#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
+void DlgIperf::onChkRestartOnError(int state)
+#else
+void DlgIperf::onChkRestartOnError(Qt::CheckState state)
 #endif
+{
+    if (state==Qt::Checked){
+        ui->pbRestartRule->setEnabled(true);
+    }else{
+        ui->pbRestartRule->setEnabled(false);
+    }
+}
+// #else
+// void DlgIperf::onChkBidirStatech(Qt::CheckState state)
+// {
+//     if (state==Qt::Checked){
+//         ui->chk_reverse->setCheckState(Qt::Unchecked);
+//     }
+// }
+
+// void DlgIperf::onChkReverseStatech(Qt::CheckState state)
+// {
+//     if (state==Qt::Checked){
+//         ui->chk_bidir->setCheckState(Qt::Unchecked);
+//     }
+// }
+// void DlgIperf::onTimeStampstateChanged(Qt::CheckState state)
+// {
+//     if (state==Qt::Checked){
+//         ui->leTimeStamp->setEnabled(true);
+//     }else{
+//         ui->leTimeStamp->setEnabled(false);
+//     }
+// }
+// #endif
 
 void DlgIperf::onSelectMServer(QString text)
 {
@@ -615,4 +659,10 @@ void DlgIperf::onFmtreportChanged(QString text)
 {
     qDebug() << "onFmtreportChanged: " << text;
     // "k" << "m" << "g" << "t" << "K" << "M" << "G" << "T";
+}
+
+void DlgIperf::onShowIperfRestartRule(bool checked)
+{
+    Q_UNUSED(checked)
+    m_dlgrule->exec();
 }

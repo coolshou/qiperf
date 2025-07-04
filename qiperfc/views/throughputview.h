@@ -10,6 +10,7 @@
 #include <QList>
 #include <QMainWindow>
 #include <QItemSelection>
+#include <QSettings>
 
 #include "../src/tpplot.h"
 #include "../src/tpmgr.h"
@@ -33,7 +34,8 @@ public:
     // explicit ThroughputView(QIperfC *main, QWidget *parent = nullptr);
     //explicit ThroughputView(QWidget *parent = nullptr);
     explicit ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
-                            QAction *aCopyText, bool showgroup=false, QString sunit="Mbps",
+                            QAction *aCopyText, QSettings *cfg,
+                            bool showgroup=false, QString sunit="Mbps",
                             QWidget *parent = nullptr);
     ~ThroughputView() override;
 

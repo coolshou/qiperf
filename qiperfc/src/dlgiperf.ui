@@ -78,8 +78,11 @@
       </item>
       <item>
        <widget class="QPushButton" name="pbRestartRule">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
-         <string>Rule(TODO)</string>
+         <string>Rule</string>
         </property>
        </widget>
       </item>

@@ -55,6 +55,7 @@
         <file alias="insert">images/insert.png</file>
         <file alias="delete">images/delete.png</file>
         <file alias="qiperf.qss">qiperf.qss</file>
+        <file alias="iperfrule">images/iperfrule.png</file>
     </qresource>
     <qresource prefix="/template">
         <file alias="result.html">qiperfc/template/result.html</file>
