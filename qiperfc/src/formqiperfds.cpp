@@ -101,6 +101,7 @@ void FormQIperfds::onSetDebug(bool checked)
     int debuglv=0;
     //TODO: debug lv
     DlgIntBox inbox = DlgIntBox(this);
+    inbox.setWindowTitle("Set Debug Level");
     int rc = inbox.exec();
     if (rc == QDialog::Accepted){
         debuglv = inbox.getValue();
