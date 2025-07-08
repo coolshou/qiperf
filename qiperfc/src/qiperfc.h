@@ -41,6 +41,7 @@
 #include "../views/sshdata.h"
 #include "plugin/plugininterface.h"
 #include "auto/dlgsimplemicro.h"
+#include "cpumonitor.h"
 
 #if (TEST_ICMP==1)
 #include "../src/icmpping.h"
@@ -220,6 +221,8 @@ private:
     EndPointMgr *m_endpointmgr;
     QLabel *m_start_label;
     QLabel *m_status_label;
+    QLabel *m_cpu_label;
+    CpuMonitor *m_cpumonitor;
     QLabel *m_label_qiperfd;
 
     QDateTime m_TestStartTime;

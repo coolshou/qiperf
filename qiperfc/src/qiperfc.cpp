@@ -1521,17 +1521,26 @@ void QIperfC::initToolbar()
 
 void QIperfC::initStatusbar()
 {
+    // start time
     m_start_label = new QLabel();
     m_start_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
     ui->statusbar->addWidget(m_start_label, 1);
     connect(this , &QIperfC::updateStarttime, this,  &QIperfC::onUpdateStarttime);
-
+    // status
     m_status_label = new QLabel();
     m_status_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
     ui->statusbar->addWidget(m_status_label, 2);
     connect(this , &QIperfC::updateStatus, this,  &QIperfC::onUpdateStatus);
-
-    // statusbar of endpints
+    // CPU usage
+    m_cpumonitor = new CpuMonitor();
+    m_cpu_label = new QLabel();
+    m_cpu_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
+    ui->statusbar->addWidget(m_cpu_label, 0);
+    connect(m_cpumonitor, &CpuMonitor::cpuUsageChanged,
+            m_cpu_label, [&](double percentage) {
+        m_cpu_label->setText(QString("CPU Usage: %1%").arg(percentage, 0, 'f', 2));
+    });
+    // statusbar of endpints (qiperfd list)
     m_label_qiperfd = new QLabel(this);
     m_label_qiperfd->installEventFilter(this);
 //TODO: double click
