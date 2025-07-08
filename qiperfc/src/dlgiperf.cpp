@@ -152,8 +152,8 @@ QString DlgIperf::getJsonCfg()
     clientObj.insert("restartonerror", ui->cbRestartOnError->isChecked());
     if (ui->cbRestartOnError->isChecked()){
         QJsonObject rule = m_dlgrule->getJsonCfgObj();
-        serverObj.insert("restartrules", rule);
-        clientObj.insert("restartrules", rule);
+        serverObj.insert("restartrule", rule);
+        clientObj.insert("restartrule", rule);
     }
     mainObj.insert("server", serverObj);
     mainObj.insert("client", clientObj);
@@ -175,7 +175,7 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
         ui->cbRestartOnError->setChecked(bRestartonerror);
         ui->pbRestartRule->setEnabled(bRestartonerror);
         if (bRestartonerror){
-            QJsonObject rulesObj = serverObj["restartrules"].toObject();
+            QJsonObject rulesObj = serverObj["restartrule"].toObject();
             m_dlgrule->setJsonRules(rulesObj);
         }
 

@@ -28,7 +28,7 @@ public:
     ~DlgIperfRestartRule();
     QJsonObject getJsonCfgObj();
     void loadcfg(QSettings *cfg);
-    void setJsonRules(QJsonObject rules);
+    void setJsonRules(QJsonObject rule);
 protected:
     void changeEvent(QEvent *e)override;
 private slots:
@@ -45,6 +45,7 @@ private:
     QAction *m_DelAction;
     void initMenu();
     void addRowData(bool enable, const QString &detect, int count, const QString &comment);
+    void jsonToRowData(QJsonObject obj);
 };
 
 #endif // DLGIPERFRESTARTRULE_H

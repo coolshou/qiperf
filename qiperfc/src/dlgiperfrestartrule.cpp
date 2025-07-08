@@ -40,9 +40,22 @@ QJsonObject DlgIperfRestartRule::getJsonCfgObj()
     obj.insert("normalStop", ui->cbIperfNormalStop->isChecked());
     obj.insert("errorStop", ui->cbIperfErrorStop->isChecked());
 
-    QJsonArray rules;
+    // QJsonArray rules;
     QJsonArray arrRule;
-
+    for (int i=0; i<ui->twIperfRule->rowCount(); i++){
+        //string
+        QJsonObject ruleobj;
+        QString chk="1";
+        if (ui->twIperfRule->item(i, cols::Enable)->checkState()== Qt::Unchecked){
+            chk="0";
+        }
+        ruleobj.insert("enable", chk);
+        ruleobj.insert("keyword", ui->twIperfRule->item(i, cols::Keyword)->text());
+        ruleobj.insert("count", ui->twIperfRule->item(i, cols::Count)->text().toInt());
+        ruleobj.insert("comment", ui->twIperfRule->item(i, cols::Comment)->text());
+        arrRule.append(ruleobj);
+    }
+    obj.insert("iperfRestartRules", arrRule);
 
     return obj;
 }
@@ -60,20 +73,12 @@ void DlgIperfRestartRule::loadcfg(QSettings *cfg)
         QString rule;
         for(const QString& key: rulekeys){
             rule = cfg->value(key).toString();
-            qDebug() << "key:" << key << " rule:" << rule;
+            // qDebug() << "key:" << key << " rule:" << rule;
             QJsonParseError error;
             QJsonDocument doc = QJsonDocument::fromJson(rule.toUtf8(), &error);
             if (error.error == QJsonParseError::NoError){
                 QJsonObject data = doc.object();
-                QString enable = data.value("enable").toString();
-                bool bEnable = false;
-                QString keyword = data.value("keyword").toString();
-                int count = data.value("count").toInt();
-                QString comment = data.value("comment").toString();
-                if (enable.startsWith("1")){
-                    bEnable = true;
-                }
-                addRowData(bEnable, keyword, count, comment);
+                jsonToRowData(data);
             }else{
                 QString err=QString("Wrong format of data: %1").arg(error.errorString());
                 QMessageBox::information(this, "ERROR", err);
@@ -83,9 +88,17 @@ void DlgIperfRestartRule::loadcfg(QSettings *cfg)
     cfg->endGroup();
 }
 
-void DlgIperfRestartRule::setJsonRules(QJsonObject rules)
+void DlgIperfRestartRule::setJsonRules(QJsonObject rule)
 {
-    qDebug() << "setJsonRules:" << rules;
+    ui->cbIperfNormalStop->setChecked(rule.value("normalStop").toBool());
+    ui->cbIperfErrorStop->setChecked(rule.value("errorStop").toBool());
+    ui->twIperfRule->clearContents();
+    ui->twIperfRule->setRowCount(0);
+    QJsonArray rules = rule.value("iperfRestartRules").toArray();
+    for (QJsonArray::const_iterator it=rules.constBegin(); it!=rules.constEnd(); ++it) {
+        QJsonObject data= it->toObject();
+        jsonToRowData(data);
+    }
 }
 
 void DlgIperfRestartRule::changeEvent(QEvent *e)
@@ -139,6 +152,19 @@ void DlgIperfRestartRule::addRowData(bool enable, const QString& detect, int cou
     // tableWidget->resizeColumnsToContents(); // This can be expensive for many rows
     // It's often better to do this once after all initial data is loaded,
     // or rely on stretching headers.
+}
+
+void DlgIperfRestartRule::jsonToRowData(QJsonObject obj)
+{
+    QString enable = obj.value("enable").toString();
+    bool bEnable = false;
+    QString keyword = obj.value("keyword").toString();
+    int count = obj.value("count").toInt();
+    QString comment = obj.value("comment").toString();
+    if (enable.startsWith("1")){
+        bEnable = true;
+    }
+    addRowData(bEnable, keyword, count, comment);
 }
 void DlgIperfRestartRule::onDelRule(bool checked)
 {
