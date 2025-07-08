@@ -100,9 +100,9 @@ void FormQIperfds::onSetDebug(bool checked)
     Q_UNUSED(checked)
     int debuglv=0;
     //TODO: debug lv
-    DlgIntBox inbox = DlgIntBox(self);
+    DlgIntBox inbox = DlgIntBox(this);
     int rc = inbox.exec();
-    if (rc == QDialog::accept()){
+    if (rc == QDialog::Accepted){
         debuglv = inbox.getValue();
     }
     QModelIndexList idxs = ui->treeView->selectionModel()->selectedRows();
