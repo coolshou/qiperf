@@ -1330,6 +1330,8 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         }
     }else if (act.startsWith(CMD_QIPERFD_RESTART)){
         restartQIperfd();
+    }else if (act.startsWith(CMD_DEBUG_LV)){
+        emit setDebugLv(QString::number(msg));
     }else {
 #if (TEST_WS==1)
         QString cmd = QString("%1:%2:%3").arg(CMD_NOT_SUPPORT, act, msg);

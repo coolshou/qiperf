@@ -36,6 +36,7 @@
 #define CMD_FAIL   "FAIL"
 #define CMD_ARGS   "ARGS"   // send args: eq: -k: kill qiperfd
 #define CMD_STATUS "STATUS"
+#define CMD_DEBUG_LV   "DEBUG"
 
 #define CMD_QIPERFD_START "QIPERFD_START" // ASK qiperfd start
 #define INFO_QIPERFD_STARTED "QIPERFD_STARTED"  // inform qiperfd started

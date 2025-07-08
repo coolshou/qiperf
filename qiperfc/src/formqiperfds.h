@@ -22,6 +22,7 @@ public:
     void setColumnWidth(int column, int width);
 signals:
     void clearNtpStatus(QString target);
+    void setDebugLv(QString target, int lv);
 
 protected:
     void changeEvent(QEvent *e);
@@ -29,6 +30,7 @@ private slots:
     void onContextMenu(QPoint pos);
     void onRestart(bool checked);
     void onResetNtp(bool checked);
+    void onSetDebug(bool checked);
     void askRestart(QString target);
 private:
     void initMenu();
@@ -37,6 +39,7 @@ private:
     QMenu *m_menu;
     QAction *m_restartAction;
     QAction *m_resetNtpAction;
+    QAction *m_debugAction;
 };
 
 #endif // FORMQIPERFDS_H

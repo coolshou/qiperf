@@ -112,6 +112,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_frm_qiperfds = new FormQIperfds();
     m_frm_qiperfds->setModel(m_endpointmgr);
     connect(m_frm_qiperfds, &FormQIperfds::clearNtpStatus, this, &QIperfC::onClearNtpStatus);
+    connect(m_frm_qiperfds, &FormQIperfds::setDebugLv, this, &QIperfC::onSetDebugLv);
     //
     m_receiver = new UdpReceiver(QIPERFD_BPORT, this);
     connect(m_receiver, &UdpReceiver::notice, this, &QIperfC::onNotice);
@@ -238,6 +239,29 @@ bool QIperfC::save(QString filename)
 QString QIperfC::getNowString()
 {
     return QDateTime::currentDateTime().toString(DATETIME_NOW_FORMAT);
+}
+
+void QIperfC::infoWSServer(QString target, QString cmd)
+{
+    QString s = QString("ws://%1:%2").arg(target,
+                                          QString::number(QIPERFD_WSPORT));
+    WSClient *ws = new WSClient(target, QUrl(s), "", false);
+    // connect(ws, &WSClient::ntpstarted, this, &QIperfC::onNtpstarted);
+    int itimeout=20;
+    bool bConnected=false;
+    while (!bConnected && (itimeout>0)){
+        bConnected = ws->isConnected();
+        QThread::msleep(200);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        itimeout--;
+    }
+    if (bConnected){
+        qint64 rc = ws->sendText(cmd);
+        if (rc<=0){
+            qDebug() << "send cmd Fail:" << cmd;
+        }
+        ws->close();
+    }
 }
 
 void QIperfC::onNewMessage(const QString msg)
@@ -924,6 +948,7 @@ void QIperfC::setNtpServer(int enable)
         if (rc<=0){
             qDebug() << "send cmd Fail:" << cmd;
         }
+        ws->close();
     }
 }
 
@@ -1276,6 +1301,12 @@ void QIperfC::onClearNtpStatus(QString target)
     }else{
         qDebug() << "onClearNtpStatus:" << m_ntpfail << " DO not have:" << target;
     }
+}
+
+void QIperfC::onSetDebugLv(QString target, int lv)
+{
+    QString cmd=QString("%1:%2").arg(CMD_DEBUG_LV,lv);
+    infoWSServer(target, cmd);
 }
 
 void QIperfC::onRPC_result(const QVariant &result)

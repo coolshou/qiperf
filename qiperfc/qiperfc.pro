@@ -117,6 +117,7 @@ SOURCES += \
     lib/qcustomplot.cpp \
     src/codeeditor.cpp \
     src/customheaderview.cpp \
+    src/dlgintbox.cpp \
     src/dlgiperf.cpp \
     src/dlgiperfrestartrule.cpp \
     src/dlgoption.cpp \
@@ -200,6 +201,7 @@ HEADERS += \
     lib/qcustomplot.h \
     src/codeeditor.h \
     src/customheaderview.h \
+    src/dlgintbox.h \
     src/dlgiperf.h \
     src/dlgiperfrestartrule.h \
     src/dlgoption.h \
@@ -267,6 +269,7 @@ FORMS += \
     ../src/port/serialport.ui \
     ../src/port/tcpudpport.ui \
     auto/dlgsimplemicro.ui \
+    src/dlgintbox.ui \
     src/dlgiperf.ui \
     src/dlgiperfrestartrule.ui \
     src/dlgoption.ui \

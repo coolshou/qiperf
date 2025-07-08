@@ -8,6 +8,7 @@
 #include "comm.h"
 #include "wsclient.h"
 #include "endpointmgr.h"
+#include "dlgintbox.h"
 
 FormQIperfds::FormQIperfds(QWidget *parent) :
     QWidget(parent),
@@ -94,6 +95,25 @@ void FormQIperfds::onResetNtp(bool checked)
 
 }
 
+void FormQIperfds::onSetDebug(bool checked)
+{
+    Q_UNUSED(checked)
+    int debuglv=0;
+    //TODO: debug lv
+    DlgIntBox inbox = DlgIntBox(self);
+    int rc = inbox.exec();
+    if (rc == QDialog::accept()){
+        debuglv = inbox.getValue();
+    }
+    QModelIndexList idxs = ui->treeView->selectionModel()->selectedRows();
+    foreach (auto midx, idxs) {
+        QString target=ui->treeView->model()->data(midx).toString();
+        qInfo()<< "onResetNtp target:" <<target;
+        // emit clearNtpStatus(target);
+        emit setDebugLv(target, debuglv);
+    };
+}
+
 void FormQIperfds::askRestart(QString target)
 {
     qInfo() << "Ask qiperfd Restart:" << target;
@@ -121,7 +141,11 @@ void FormQIperfds::initMenu()
     connect(m_restartAction, &QAction::triggered, this, &FormQIperfds::onRestart);
     m_resetNtpAction = new QAction("Reset NTP");
     connect(m_resetNtpAction, &QAction::triggered, this, &FormQIperfds::onResetNtp);
+    m_debugAction = new QAction("Set Debug");
+    connect(m_debugAction, &QAction::triggered, this, &FormQIperfds::onSetDebug);
 
     m_menu->addAction(m_restartAction);
     m_menu->addAction(m_resetNtpAction);
+    m_menu->addSeparator();
+    m_menu->addAction(m_debugAction);
 }

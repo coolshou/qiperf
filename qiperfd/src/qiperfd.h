@@ -107,6 +107,7 @@ signals:
     void setMgrIfname(QString ifname);
     void iperfStarted(QString bindkey); // iperf thrad started
     void setStop();
+    void setDebugLv(int lv);
 
 private slots:
     void onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPort); //procress websocket action message

@@ -67,6 +67,7 @@ public:
     bool load(QString filename); // load tp config
     bool save(QString filename); // save tp config
     QString getNowString();
+    void infoWSServer(QString target, QString cmd);
 
 public slots:
     void onNewMessage(const QString msg);
@@ -175,6 +176,7 @@ private slots:
     void onDoNtpSync(QString target);
     void onNtpsynced(bool bOK, QString target);
     void onClearNtpStatus(QString target);
+    void onSetDebugLv(QString target, int lv);
     void setNtpServer(int enable=1);
     void onNtpstarted(bool started, QString fromAddress);
     // Slot to handle system tray icon activation (e.g., clicks)
