@@ -1305,7 +1305,7 @@ void QIperfC::onClearNtpStatus(QString target)
 
 void QIperfC::onSetDebugLv(QString target, int lv)
 {
-    QString cmd=QString("%1:%2").arg(CMD_DEBUG_LV,lv);
+    QString cmd=QString("%1:%2").arg(CMD_DEBUG_LV, QString::number(lv));
     infoWSServer(target, cmd);
 }
 
