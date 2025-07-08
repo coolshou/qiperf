@@ -25,6 +25,7 @@
 QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     : QObject{parent}, m_pserver(pserver), m_fileclient(nullptr)
 {
+    m_debuglv = 3;
     // pserver : interact with systemtray GUI (qiperftray)
     // bReportTPData = false;
     m_ntpserver = nullptr;
@@ -254,6 +255,7 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     connect(iperfer, &IperfWorker::debuginfo, this, &QIperfd::onDebuginfo);
     connect(iperfer, &IperfWorker::workerFinished, this, &QIperfd::handleWorkerFinished);
     connect(this, &QIperfd::setStop, iperfer, &IperfWorker::setStop);
+    connect(this, &QIperfd::setDebugLv, iperfer, &IperfWorker::onSetDebugLv);
 
     connect(iperf_th, &QThread::started, iperfer, &IperfWorker::work);
     connect(iperf_th, &QThread::finished, iperf_th, &QThread::deleteLater);

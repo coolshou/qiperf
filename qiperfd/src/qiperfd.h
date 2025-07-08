@@ -139,6 +139,7 @@ private:
     QString qiperfdlog;
     QString tmpfilepath;
     QString m_nssm;
+    int m_debuglv;
     IperfWrapper *m_iperfwrapper;
     QSettings *cfg;
     UdpSrv *m_udpsrv;

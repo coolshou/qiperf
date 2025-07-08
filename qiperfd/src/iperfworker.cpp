@@ -151,6 +151,11 @@ void IperfWorker::onSelfDestructor()
     setStop();
 }
 
+void IperfWorker::onSetDebugLv(int lv)
+{
+    m_debuglv = lv;
+}
+
 void IperfWorker::setStop()
 {
     m_stop = true;

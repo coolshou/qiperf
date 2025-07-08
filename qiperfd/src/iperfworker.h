@@ -35,7 +35,6 @@ public:
     bool getServerMode();
     int getRefRow();
     void debug(QString msg, int debuglv=1);
-
 signals:
     void workerFinished(qint64 idx, bool servermode); // Signal to notify manager that this worker is done
     void started(int refrow, bool smode, QString ipport); // refrow, S/C, IPPort
@@ -51,7 +50,7 @@ public slots:
     void work();
     bool isRunning();
     void onSelfDestructor();
-
+    void onSetDebugLv(int lv);
 private slots:
     void onStarted();
     void readyReadStdOut();
