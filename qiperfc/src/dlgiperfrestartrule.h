@@ -18,7 +18,7 @@ class DlgIperfRestartRule : public QDialog
 public:
     enum cols{
         Enable=0,
-        Detect,
+        Keyword,
         Count,
         Comment
     };

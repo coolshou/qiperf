@@ -57,14 +57,14 @@
       <item>
        <widget class="QCheckBox" name="cbIperfNormalStop">
         <property name="text">
-         <string>Restart Iperf on Iperf Exit with no Error</string>
+         <string>Restart Iperf when Iperf Exit without an error </string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="cbIperfErrorStop">
         <property name="text">
-         <string>Restart Iperf on Iperf Exit with Error</string>
+         <string>Restart Iperf when Iperf Exit with an error</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -81,7 +81,7 @@
         </attribute>
         <column>
          <property name="text">
-          <string>Enable</string>
+          <string>Chk</string>
          </property>
         </column>
         <column>

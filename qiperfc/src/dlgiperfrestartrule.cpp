@@ -2,6 +2,8 @@
 #include "ui_dlgiperfrestartrule.h"
 
 #include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonParseError>
 #include <QMessageBox>
 
 #include <QDebug>
@@ -12,7 +14,7 @@ DlgIperfRestartRule::DlgIperfRestartRule(QSettings *cfg, QWidget *parent)
 {
     ui->setupUi(this);
     initMenu();
-    ui->twIperfRule->setColumnWidth(cols::Enable, 24);
+    ui->twIperfRule->setColumnWidth(cols::Enable, 15);
     ui->twIperfRule->setColumnWidth(cols::Count, 20);
     connect(ui->twIperfRule, &QTableWidget::customContextMenuRequested, this, &DlgIperfRestartRule::showContextMenu);
     // Connect the itemChanged signal to our slot (this is always needed for item-based checkboxes)
@@ -56,11 +58,25 @@ void DlgIperfRestartRule::loadcfg(QSettings *cfg)
     QStringList rulekeys = cfg->childKeys();
     if (rulekeys.count()>0){
         QString rule;
-        for(QString key: rulekeys){
+        for(const QString& key: rulekeys){
             rule = cfg->value(key).toString();
-            QStringList rs = rule.split("：");
-            for(QString r: rs){
-                qDebug() << r;
+            qDebug() << "key:" << key << " rule:" << rule;
+            QJsonParseError error;
+            QJsonDocument doc = QJsonDocument::fromJson(rule.toUtf8(), &error);
+            if (error.error == QJsonParseError::NoError){
+                QJsonObject data = doc.object();
+                QString enable = data.value("enable").toString();
+                bool bEnable = false;
+                QString keyword = data.value("keyword").toString();
+                int count = data.value("count").toInt();
+                QString comment = data.value("comment").toString();
+                if (enable.startsWith("1")){
+                    bEnable = true;
+                }
+                addRowData(bEnable, keyword, count, comment);
+            }else{
+                QString err=QString("Wrong format of data: %1").arg(error.errorString());
+                QMessageBox::information(this, "ERROR", err);
             }
         }
     }
@@ -109,7 +125,7 @@ void DlgIperfRestartRule::addRowData(bool enable, const QString& detect, int cou
 
     // Column 1: Detect
     QTableWidgetItem *detectItem = new QTableWidgetItem(detect);
-    ui->twIperfRule->setItem(newRow, cols::Detect, detectItem);
+    ui->twIperfRule->setItem(newRow, cols::Keyword, detectItem);
 
     // Column 2: Count
     QTableWidgetItem *countItem = new QTableWidgetItem(QString::number(count));
@@ -160,11 +176,11 @@ void DlgIperfRestartRule::handleItemChanged(QTableWidgetItem *item)
     if (item->column() == 0) {
         int row = item->row();
         if (item->checkState() == Qt::Checked) {
-            qDebug() << "Row" << row << "checkbox checked!";
+            qInfo() << "Row" << row << "checkbox checked!";
             // QString name = tableWidget->item(row, 1)->text();
             // qDebug() << "Name for checked item:" << name;
         } else {
-            qDebug() << "Row" << row << "checkbox unchecked.";
+            qInfo() << "Row" << row << "checkbox unchecked.";
         }
     }
 }
@@ -210,23 +226,18 @@ void DlgIperfRestartRule::onSaveDefault(bool checked)
     m_cfg->endGroup();
     m_cfg->beginGroup("IperfRestartRules");
     for (int i=0; i<ui->twIperfRule->rowCount(); i++){
-        QString rule="";
-        for (int j=0; j<ui->twIperfRule->columnCount();j++){
-            if (j==0){
-                QString chk="1";
-                if (ui->twIperfRule->item(i,j)->checkState()== Qt::Unchecked){
-                    chk="0";
-                }
-                rule.append(chk);
-            }else{
-                rule.append(ui->twIperfRule->item(i,j)->text());
-            }
-            if (j<(ui->twIperfRule->columnCount()-1)){
-                rule.append("：");
-            }
+        //string
+        QJsonObject ruleobj;
+        QString chk="1";
+        if (ui->twIperfRule->item(i, cols::Enable)->checkState()== Qt::Unchecked){
+            chk="0";
         }
-        qDebug() << "key:" << QString::number(i) << " rule:" << rule;
-        // m_cfg->setValue(QString::number(i), rule);
+        ruleobj.insert("enable", chk);
+        ruleobj.insert("keyword", ui->twIperfRule->item(i, cols::Keyword)->text());
+        ruleobj.insert("count", ui->twIperfRule->item(i, cols::Count)->text().toInt());
+        ruleobj.insert("comment", ui->twIperfRule->item(i, cols::Comment)->text());
+        QJsonDocument doc(ruleobj);
+        m_cfg->setValue(QString::number(i), doc.toJson(QJsonDocument::Compact));
     }
     m_cfg->endGroup();
 }
