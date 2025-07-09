@@ -48,6 +48,7 @@ public slots:
 signals:
 
 private:
+    void debug(QString msg, int lv=3);
     QString getTotalMemory();
     QString getCPUModel(int& corenum);
 #if defined(Q_OS_LINUX)
@@ -60,6 +61,7 @@ private:
 #endif
     QString m_ifname;
     int update=0;
+    int m_debuglv;
 #if defined(Q_OS_WIN32)
     QMap<QString, QStringList> drivers;
 #endif

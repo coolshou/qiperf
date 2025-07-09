@@ -114,8 +114,10 @@ private slots:
     void onNewClient(QHostAddress addr); //
     void onDebuginfo(QString msg);
     void handleWorkerFinished(qint64 id, bool servermode); // Slot to react when a worker finishes its cleanup
+    void onSetDebugLv(int lv);
 
 private:
+    void debug(QString msg, int lv=3);
     int checkFirewallStatus();
     void setNtpServer(QString mode);
     void startNtpServer();

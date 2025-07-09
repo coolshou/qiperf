@@ -26,6 +26,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     : QObject{parent}, m_pserver(pserver), m_fileclient(nullptr)
 {
     m_debuglv = 3;
+    connect(this, &QIperfd::setDebugLv, this, &QIperfd::onSetDebugLv);
     // pserver : interact with systemtray GUI (qiperftray)
     // bReportTPData = false;
     m_ntpserver = nullptr;
@@ -73,14 +74,13 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     QString info = m_myinfo->collectInfo();
     quint64 buffsize = m_myinfo->getSysBufferSize();
     if (buffsize>0){
-        qDebug() << "Max socket buffer sizes: " << buffsize << " K";
-        qDebug() << "TODO: set Max socket buffer sizes to ?";
+        debug("Max socket buffer sizes: " + QString::number(buffsize) + " K", 4);
+        debug("TODO: set Max socket buffer sizes to ?", 4);
     }
     // m_myinfo->setSysBufferSize(4*static_cast<uint>(BUFFER_SIZES::MB));
     // notice qiperfc info
     m_udpsrv = new UdpSrv(QIPERFD_BPORT, getManagerInterface(), m_myinfo);
     connect(this, &QIperfd::setMgrIfname, m_udpsrv, &UdpSrv::setIfname);
-    // qDebug() << "INFO: " << info;
     m_udpsrv->setSendMsg(info); // broadcast
 
 #if (TEST_WS==1)
@@ -281,7 +281,7 @@ qint64 QIperfd::add(QString refrow, QString sIgnoreWrongInterval, QVariantMap js
                ){
         cmd = m_iperfexe2;
     }else{
-        qDebug() << "Not support Iperf version:" << ver;
+        debug("Not support Iperf version:" + QString::number(ver));
         return -1;
     }
     uint port = jsondata["port"].toUInt();
@@ -301,6 +301,14 @@ qint64 QIperfd::add(QString refrow, QString sIgnoreWrongInterval, QVariantMap js
     if (sIgnoreWrongInterval.startsWith("1")){
         ignoreWrongInterval = true;
     }
+    bool restartonerror = jsondata["restartonerror"].toBool();
+    debug(QString("restartonerror:%!").arg(restartonerror?"true":"false"), 4);
+    if (restartonerror){
+        QVariantMap restartrule = jsondata["restartrule"].toMap();
+        debug(QString("errorStop: %1").arg(restartrule["errorStop"].toBool()?"true":"false"), 4);
+        debug(QString("normalStop: %1").arg(restartrule["normalStop"].toBool()?"true":"false"), 4);
+        debug("iperfRestartRules:" + restartrule["iperfRestartRules"].toString(), 4);
+    }
 
     //conver json data format to iperf args
     QString args;
@@ -312,7 +320,7 @@ qint64 QIperfd::add(QString refrow, QString sIgnoreWrongInterval, QVariantMap js
                ){
         args = m_iperfwrapper->toIperf2args(jsondata);
     }else {
-        qDebug() << "Not support Iperf version:" << ver;
+        debug("Not support Iperf version:" + QString::number(ver), 4);
         return -1;
     }
     return add(refrow, ver, cmd, args, port, binaddr,
@@ -345,7 +353,7 @@ void QIperfd::del(int idx, bool servermode)
 
 int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bindHost)
 {
-    qDebug() << "addIperfServer:" << bindHost << ":" << port ;
+    debug("addIperfServer:" + bindHost + ":" + QString::number(port), 4);
 
     QString cmd;
     QString argbind;
@@ -360,7 +368,7 @@ int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bind
         cmd = m_iperfexe2;
         argbind = " -B ";
     }else{
-        qDebug() << "Not support Iperf version:" << version ;
+        debug("Not support Iperf version:" + QString::number(version), 4);
         return -1;
     }
     QString args=" -s ";
@@ -373,7 +381,7 @@ int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bind
 
 int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs)
 {
-    qDebug() << "addIperfClient:" << Host << ":" << port ;
+    debug("addIperfClient:" + Host + ":" + QString::number(port));
     QString cmd;
     // add a iperf server
     if (version==static_cast<int>(IPERF_VER::V3)){
@@ -384,7 +392,7 @@ int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host
                ){
         cmd = m_iperfexe2;
     }else{
-        qDebug() << "Not support Iperf version:" << version ;
+        debug("Not support Iperf version:" + QString::number(version), 4);
         return -1;
     }
     QString args = iperfargs;
@@ -399,7 +407,7 @@ void QIperfd::startServer(int idx)
         th->start();
     }catch (const std::exception &e) {
         // Handle the exception and show an error message
-        qDebug() << "Exception Caught" << e.what();
+        debug(QString("startServer Exception Caught:%1").arg(e.what()));
     }
 }
 
@@ -411,7 +419,7 @@ void QIperfd::start(int idx)
         th->start();
     }catch (const std::exception &e) {
         // Handle the exception and show an error message
-        qDebug() << "Exception Caught" << e.what();
+        debug(QString("start client Exception Caught: %1").arg(e.what()));
     }
 }
 QString QIperfd::longLongListToString(const QList<long long int>& list, const QString& separator) {
@@ -433,14 +441,14 @@ void QIperfd::startAll(bool bServer)
     if (bServer){
         for (auto it = m_thserver.begin(); it != m_thserver.end(); ++it)
         {
-            qDebug() << " start iperfworkers server:" << it.key();
+            debug(" start iperfworkers server:" + it.key(), 3);
             startServer(it.key());
             // QCoreApplication::processEvents(QEventLoop::AllEvents);// do not add this ?
         }
     }else{
         for (auto it = m_threads.begin(); it != m_threads.end(); ++it)
         {
-            qDebug() << " start iperfworkers client:" << it.key();
+            debug(" start iperfworkers client:" + it.key(), 3);
             start(it.key());
             // QCoreApplication::processEvents(QEventLoop::AllEvents);// do not add this ?
         }
@@ -463,29 +471,33 @@ void QIperfd::clear()
 {
     //clear all m_iperfwserver/m_iperfworkers & m_threads
     if (!m_iperfwserver.isEmpty()){
-        for (auto it = m_iperfwserver.begin(); it != m_iperfwserver.end();) {
+        for (QMap<qint64, IperfWorker*>::iterator it = m_iperfwserver.begin(); it != m_iperfwserver.end();) {
+            delete it.value();
             it = m_iperfwserver.erase(it);
         }
     }
     if (!m_thserver.isEmpty()){
-        for (auto it = m_thserver.begin(); it != m_thserver.end();) {
+        for (QMap<qint64, QThread*>::iterator it = m_thserver.begin(); it != m_thserver.end();) {
+            delete it.value();
             it = m_thserver.erase(it);
         }
     }
     if (!m_iperfworkers.isEmpty()){
-        for (auto it = m_iperfworkers.begin(); it != m_iperfworkers.end();) {
+        for (QMap<qint64, IperfWorker*>::iterator it = m_iperfworkers.begin(); it != m_iperfworkers.end();) {
+            delete it.value();
             it = m_iperfworkers.erase(it);
         }
     }
     if (!m_threads.isEmpty()){
-        for (auto it = m_threads.begin(); it != m_threads.end();) {
+        for (QMap<qint64, QThread*>::iterator it = m_threads.begin(); it != m_threads.end();) {
+            delete it.value();
             it = m_threads.erase(it);
         }
     }
-    qDebug() << "iperfserver:" << QString::number(m_iperfwserver.count())
-             << " threads:" << QString::number(m_thserver.count())
-             << " iperfclient:" << QString::number(m_iperfworkers.count())
-             << " thread:" << QString::number(m_threads.count());
+    debug("iperfserver:" + QString::number(m_iperfwserver.count())
+          + " threads:" + QString::number(m_thserver.count())
+          + " iperfclient:" + QString::number(m_iperfworkers.count())
+          + " thread:" + QString::number(m_threads.count()));
 }
 
 bool QIperfd::isRunning(int idx)
@@ -562,7 +574,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
         QVariantMap status;
         QVariantMap ifnames;
         ifnames.insert("ifnames", netObjs.keys());
-        qDebug() << "CMD_IFNAMES:" << netObjs;
+        debug("CMD_IFNAMES:" + QString(QJsonDocument(netObjs).toJson()), 4);
         status.insert("CMD", CMD_IFNAMES);
         status.insert(CMD_IFNAMES, ifnames);
         status.insert("ifname", mgr_ifname); // current manager ifname
@@ -573,7 +585,7 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
     }
     else if (QString::compare(msg, CMD_QIPERFD_RESTART, Qt::CaseInsensitive) == 0)
     {
-        qDebug() << "CMD_QIPERFD_RESTART: " << msg;
+        debug("CMD_QIPERFD_RESTART: " + msg, 4);
         restartQIperfd();
     }
     else if (QString::compare(msg, CMD_GET_LOGFILENAME, Qt::CaseInsensitive) == 0)
@@ -590,12 +602,12 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
     {
         long long cut = msg.indexOf(':');
         QString ntpmode = msg.right(msg.length()-cut-1);
-        qDebug() << "CMD_NTP_START:ntpmode:" << ntpmode;
+        debug("CMD_NTP_START:ntpmode:" + ntpmode, 4);
         setNtpServer(ntpmode);
     }
     else
     {
-        qDebug() << "handle json: " << msg ;
+        debug("handle json: " + msg, 2);
         // json format message
         QJsonParseError error;
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
@@ -687,7 +699,7 @@ void QIperfd::onStarted(int m_idx, bool smode, QString ipport)
         msg = msg + ":C";
     }
     msg = msg + ":"+ ipport;
-    qDebug() << "onStarted: " << msg;
+    debug("onStarted: " + msg, 4);
     m_wsserver->sendTextResult(msg);
     m_runstatus[m_idx]=1;
 }
@@ -701,7 +713,6 @@ void QIperfd::onFinished(int refrow, int exitCode, int exitStatus, QString ippor
     m_wsserver->sendTextResult(msg);
     if (!filename.isEmpty()){
         if(QFileInfo::exists(filename)){
-            // qDebug() << "enqueueFile: " << filename;
             m_fileclient->enqueueFile(filename);
         }else{
             onLog("file to send not Exist: " + filename);
@@ -733,7 +744,7 @@ void QIperfd::onNewLine(QString line)
 
 void QIperfd::doRestartQIperfd()
 {
-    qDebug() << "doRestartQIperfd";
+    debug("doRestartQIperfd", 4);
 #if defined(Q_OS_LINUX)
 #if !defined(Q_OS_ANDROID)
     // cmd = "systemctl restart qiperfd";
@@ -741,7 +752,7 @@ void QIperfd::doRestartQIperfd()
     qApp->quit();
     QProcess::startDetached("systemctl", arguments);
 #else
-    qDebug() << "TODO: restart android qiperfd service"
+    debug("TODO: restart android qiperfd service", 2)
 #endif
 #elif defined(Q_OS_WINDOWS)
     QString taskName = "startqiperfd";
@@ -751,12 +762,12 @@ void QIperfd::doRestartQIperfd()
     QString taskCommand = "\"" + m_nssm + "\"";
     QString taskArgs = "restart qiperfd";
     if (createScheduledTask(taskName, taskCommand, taskArgs, runTime)) {
-        qDebug() << "Task created successfully.";
+        debug("Task created successfully.", 4);
     } else {
-        qDebug() << "Failed to create task.";
+        debug("Failed to create task.", 2);
     }
 #else
-    qDebug() << "do Restart QIperfd for system :" << QSysInfo::productType();
+    debug("do Restart QIperfd for system :" + QSysInfo::productType(), 2);
 #endif
 }
 
@@ -785,13 +796,12 @@ void QIperfd::onSSHTaskFinished(QString target)
 
 void QIperfd::onSSHTaskStarted(QString idx, quint16 port)
 {
-    // qDebug() << "onSSHTaskStarted:" << QString::number(port);
     informMessage(QString("%1:%2:%3").arg(CMD_SSH_OPENED, idx, QString::number(port)));
 }
 
 void QIperfd::onSSHTaskError(QString idx, QString errormsg)
 {
-    qDebug() << idx <<" onSSHTaskError:" << errormsg;
+    debug(idx + " onSSHTaskError:" + errormsg, 3);
     informMessage(QString("%1:%2:%3").arg(CMD_SSH_FAIL, idx, errormsg));
 }
 
@@ -807,9 +817,8 @@ void QIperfd::onTimeSynced(QString target, bool synced)
     }
     rc = m_wsserver->sendTextMessage(cmd);
     if (rc<=0){
-        qDebug() << "error onTimeSynced " << synced << " send cmd fail: " << cmd;
+        debug(QString("error onTimeSynced synced:%1 send cmd fail: %2").arg(synced?"true":"false", cmd) , 2);
     }
-    //
 }
 
 #if defined(Q_OS_WINDOWS)
@@ -952,7 +961,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
             );
         if (FAILED(hr)) _com_issue_error(hr);
 
-        qDebug() << QString("Task '%1' registered successfully.").arg(taskName);
+        debug(QString("Task '%1' registered successfully.").arg(taskName), 4);
         // Cleanup resources
         if (pRegisteredTask) pRegisteredTask->Release();
         if (pTrigger) pTrigger->Release();
@@ -970,9 +979,9 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         return true;
 
     } catch (const _com_error& error) {
-        qDebug() << QString("COM Error during task creation: %1 (HRESULT: 0x%2)")
-                       .arg(comErrorToString(error.Error()))
-                       .arg(error.Error(), 8, 16, QChar('0').toUpper());
+        debug(QString("COM Error during task creation: %1 (HRESULT: 0x%2)")
+                  .arg(comErrorToString(error.Error()))
+                  .arg(error.Error(), 8, 16, QChar('0').toUpper()), 2);
         // Cleanup on error
         if (pRegisteredTask) pRegisteredTask->Release();
         if (pTrigger) pTrigger->Release();
@@ -989,7 +998,7 @@ bool QIperfd::createScheduledTask(const QString &taskName, const QString &taskCo
         if (pService) pService->Release();
         return false;
     } catch (...) {
-        qDebug() << "An unknown error occurred during task creation.";
+        debug("An unknown error occurred during task creation.", 2);
         // Cleanup on error
         if (pRegisteredTask) pRegisteredTask->Release();
         if (pTrigger) pTrigger->Release();
@@ -1038,12 +1047,12 @@ bool QIperfd::runScheduledTask(const QString &taskName) {
         return true;
 
     } catch (const _com_error& error) {
-        qDebug() << QString("COM Error during task run: %1 (HRESULT: 0x%2)")
+        debug(QString("COM Error during task run: %1 (HRESULT: 0x%2)")
                        .arg(comErrorToString(error.Error()))
-                       .arg(error.Error(), 8, 16, QChar('0').toUpper());
+                  .arg(error.Error(), 8, 16, QChar('0').toUpper()), 4);
         return false;
     } catch (...) {
-        qDebug() << "An unknown error occurred during task run.";
+        debug("An unknown error occurred during task run.", 4);
         return false;
     }
 }
@@ -1074,15 +1083,15 @@ bool QIperfd::deleteScheduledTask(const QString &taskName) {
     } catch (const _com_error& error) {
         // ERROR_FILE_NOT_FOUND (0x80070002) is common if the task doesn't exist
         if (error.Error() == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
-            qDebug() << QString("Task '%1' not found, nothing to delete.").arg(taskName);
+            debug(QString("Task '%1' not found, nothing to delete.").arg(taskName), 2);
             return true; // Consider it successful deletion if it wasn't there
         }
-        qDebug() << QString("COM Error during task deletion: %1 (HRESULT: 0x%2)")
+        debug(QString("COM Error during task deletion: %1 (HRESULT: 0x%2)")
                        .arg(comErrorToString(error.Error()))
-                       .arg(error.Error(), 8, 16, QChar('0').toUpper());
+                  .arg(error.Error(), 8, 16, QChar('0').toUpper()), 2);
         return false;
     } catch (...) {
-        qDebug() << "An unknown error occurred during task deletion.";
+        debug("An unknown error occurred during task deletion.", 2);
         return false;
     }
 }
@@ -1094,7 +1103,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
     //handle act message from websocket
     long long cut = msg.indexOf(':', 0);
     QString act = msg.left(cut); //action
-    qDebug()<< "onWSactMessage: " << act;
+    debug("onWSactMessage: " + act, 3);
     msg = msg.right(msg.length()-cut-1);
     // expect in json format
     if (act.startsWith(CMD_IPERF_ADD)){
@@ -1104,12 +1113,11 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         msg = msg.right(msg.length()-cut-1);
         cut = msg.indexOf(':', 0);
         QString ignoreWrongInterval = msg.left(cut); //ignoreWrongInterval
-        qDebug()<< "CMD_IPERF_ADD: " << refrow << " ignoreWrongInterval:" << ignoreWrongInterval;
+        debug("CMD_IPERF_ADD: " + refrow + " ignoreWrongInterval:" + ignoreWrongInterval, 4);
         msg = msg.right(msg.length()-cut-1);
-        qDebug()<< "msg: " << msg;
+        debug(" msg: " + msg, 4);
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
-            // " msg:" << msg;
             add(refrow, ignoreWrongInterval, doc.toVariant().toMap());
         }else{
             onLog("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + msg.toUtf8());
@@ -1150,7 +1158,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
     }else if (act.startsWith(CMD_IPERF_STOP)){
         stopAll();
     }else if (act.startsWith(CMD_PING)){
-        qDebug()<< "CMD_PING";
+        debug("CMD_PING", 3);
         cut = msg.indexOf(':', 0);
         QString refrow = msg.left(cut);
         msg = msg.right(msg.length()-cut-1);
@@ -1158,7 +1166,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
     }else if (act.startsWith(CMD_NTP_START, Qt::CaseInsensitive)){
         long long cut = msg.indexOf(':');
         QString ntpmode = msg.right(msg.length()-cut-1);
-        qDebug() << "CMD_NTP_START:" << ntpmode;
+        debug("CMD_NTP_START:" + ntpmode, 4);
         setNtpServer(ntpmode);
     }else if (act.startsWith(CMD_NTP_SYNC)){
         cut = msg.indexOf(':', 0);
@@ -1167,7 +1175,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         QDateTime curtime = QDateTime::currentDateTime();
         qint64 diffSeconds = curtime.secsTo(stime);
         if (abs(diffSeconds)>1){
-            qDebug()<< "===== Do ntp time sync";
+            debug("===== Do ntp time sync", 4);
             m_ntpsync->sync(fromAddr);
         }else{
             //No need to do NTP sync
@@ -1175,7 +1183,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
             qInfo()<< "===== Info NTP time is OK: " << target;
             int rc = m_wsserver->sendTextMessage(QString("%1").arg(CMD_NTP_SYNC_OK), target);
             if (rc<=0){
-                qDebug() << " Info " << target << " Fail!!";
+                debug(" Info " + target + " Fail!!", 2);
             }
 #endif
         }
@@ -1190,7 +1198,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
             QString idx = d[0];
             QString comport = d[1];
             QString baudrate = d[2];
-            // qDebug() << "m_serialtasks: " << m_serialtasks << "  comport: " << comport;
+
             QSerialPort::DataBits databits = static_cast<QSerialPort::DataBits>(d[3].toInt());
             QSerialPort::Parity parity = static_cast<QSerialPort::Parity>(d[4].toInt());
             QSerialPort::StopBits stopbits = static_cast<QSerialPort::StopBits>(d[5].toInt());
@@ -1210,7 +1218,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
                 task = m_serialtasks.value(comport);
                 quint16 localport = task->getLocalPort();
                 if (task->isRunning()){
-                    qDebug() << comport << " exist!! Using port:" << QString::number(localport);
+                    debug(comport + " exist!! Using port:" + QString::number(localport), 4);
                     // TODO: update setting?
                     task->setConfig(QString::number(localport), baudrate,
                                     databits, parity, stopbits, flowcontrol);
@@ -1219,12 +1227,12 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
                     onSerialTaskStarted(idx, localport);
                 }else{
                     QString emsg = task->getLastError();
-                    qDebug() << "SerialTask is not running: " << emsg;
+                    debug("SerialTask is not running: " + emsg, 3);
                     onSerialTaskError(idx, emsg);
                 }
             }
         }else{
-            qDebug() << " Wrong format of create serial: " << msg;
+            debug(" Wrong format of create serial: " + msg, 2);
         }
     }else if (act.startsWith(CMD_SERIAL_DEL)){
         //
@@ -1242,11 +1250,11 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
                     informMessage(QString("%1:%2:%3 %4").arg(CMD_SERIAL_FAIL, idx, comport ,"DEL Fail"));
                 }
             }else{
-                qDebug() << comport << " does not in m_serialtasks!! \n" << m_serialtasks;
+                debug(QString("%1 does not in m_serialtasks!! \n").arg(comport), 4);
                 informMessage(QString("%1:%2 %3").arg(CMD_SERIAL_FAIL, comport, "Not Exist"));
             }
         }else{
-            qDebug() << " Wrong format of delete serial: " << msg;
+            debug(" Wrong format of delete serial: " + msg, 2);
         }
     }else if (act.startsWith(CMD_SSH_ADD)){
         // qInfo() << "CMD_SSH_ADD: " << msg;
@@ -1263,12 +1271,12 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
                 QString password = d[4];
                 QString privateKeyFile = d[5];
                 int timeout = d[6].toInt();
-                // qDebug() << "idx:" << idx << " sshTarget:" << sshTarget
-                //          << " sshPort:" << sshPort
-                //          << " username:" << username
-                //          << " password:" << password
-                //          << " privateKeyFile:" <<  privateKeyFile
-                //          << " timeout:" <<  QString::number(timeout);
+                debug("idx:" + idx + " sshTarget:" + sshTarget
+                      + " sshPort:" + sshPort
+                      + " username:" + username
+                      + " password:" + password
+                      + " privateKeyFile:" + privateKeyFile
+                      + " timeout:" + QString::number(timeout), 5);
                 //TODO: m_sshtasks's key format?
                 if (!m_sshtasks.contains(key)){ // not exist
                     port =  QIPERF_SSHPORT + m_sshtasks.count();
@@ -1284,26 +1292,24 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
                     task = m_sshtasks.value(key);
                     quint16 localport = task->getLocalPort();
                     if (task->isRunning()){
-                        qDebug() << sshTarget << " exist!! Using port:" << QString::number(localport);
+                        debug(sshTarget + " exist!! Using port:" + QString::number(localport), 4);
                         // TODO: update setting?
                         // task->setConfig(QString::number(localport), baudrate,
                         //                 databits, parity, stopbits, flowcontrol);
-                        // qDebug() << "SSHTask close";
                         task->close();
-                        // qDebug() << "reinit SSHTask";
                         QTimer::singleShot(0, task, SLOT(init())); // start it
                         onSSHTaskStarted(idx, localport);
                     }else{
                         QString emsg = "SSHTask is not running: " + task->getLastError();
-                        qDebug() << emsg;
+                        debug(emsg, 2);
                         onSSHTaskError(idx, emsg);
                     }
                 }
             } catch (const std::exception &e) {
-                qDebug() << "SSHTask error: " << e.what();
+                debug(QString("SSHTask error: %1").arg(e.what()), 2);
             }
         }else{
-            qDebug() << " Wrong format of create ssh: " << msg;
+            debug(" Wrong format of create ssh: " + msg, 2);
             // onSSHTaskError(idx, QString("Wrong format of create ssh: %1").arg(msg));
         }
     }else if (act.startsWith(CMD_SSH_DEL)){
@@ -1349,12 +1355,13 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
 void QIperfd::onNewClient(QHostAddress addr)
 {
     onNewLine("onNewClient: " +addr.toString());
-    qDebug() << "onNewClient: "  << addr.toString();
+    debug("onNewClient: " + addr.toString(), 4);
     if (m_fileclient){
-        qDebug() << "m_fileclient exist: " << m_fileclient->getTargetAddress() << " new: " << addr.toString();
+        debug("m_fileclient exist: " + m_fileclient->getTargetAddress() + " new: " + addr.toString(), 4);
     }
     //TODO: multi file client
     m_fileclient = new FileClient(QIPERF_FILEPORT, addr.toString());
+    connect(this, &QIperfd::setDebugLv, m_fileclient, &FileClient::onSetDebugLv);
 }
 
 void QIperfd::onDebuginfo(QString msg)
@@ -1379,6 +1386,18 @@ void QIperfd::handleWorkerFinished(qint64 id, bool servermode)
             Q_UNUSED(worker)
             qDebug() << "Worker ID" << id << "marked as finished and removed from map.";
         }
+    }
+}
+
+void QIperfd::onSetDebugLv(int lv)
+{
+    m_debuglv = lv;
+}
+
+void QIperfd::debug(QString msg, int lv)
+{
+    if (lv <= m_debuglv){
+        qDebug() << msg;
     }
 }
 

@@ -38,7 +38,7 @@ MyInfo::MyInfo(QString mgr_ifname, QObject *parent)
     : QObject{parent}
 {
     m_ifname = mgr_ifname;
-
+    m_debuglv = 3;
 }
 
 QString MyInfo::collectInfo()
@@ -188,7 +188,7 @@ QJsonArray MyInfo::collectSerial()
 #endif
         {
             QString com="";
-#if defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
             com="/dev/";
 #endif
             com = com + q.portName();
@@ -201,7 +201,7 @@ QJsonArray MyInfo::collectSerial()
             serials.append(com);
         }
     }
-    qInfo() << "collectSerial:" << serials.join(",");
+    debug("collectSerial:" + serials.join(","), 4);
 
     QJsonArray arr= QJsonArray::fromStringList(serials);
     return arr;
@@ -245,7 +245,7 @@ QList<QHostAddress> MyInfo::getIPfromIfname(QString ifname)
 
     foreach (QNetworkInterface niface, interfaces) {
         if (niface.name() == ifname) {
-            qDebug() << "found: interfaces: " << ifname;
+            debug("found: interfaces: " + ifname, 4);
             QList<QNetworkAddressEntry> addresses = niface.addressEntries();
             foreach (QNetworkAddressEntry address, addresses) {
                 ipAddress = address.ip();
@@ -430,9 +430,9 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
         serial = readSysFile("/sys/class/dmi/id/board_serial");
     }
 
-    qInfo() << "Motherboard Vendor:" << vendor;
-    qInfo() << "Motherboard Model:" << model;
-    qInfo() << "Motherboard Serial Number:" << serial;
+    debug("Motherboard Vendor:" + vendor, 4);
+    debug("Motherboard Model:" + model, 4);
+    debug("Motherboard Serial Number:" + serial, 4);
 }
 QString MyInfo::getCPUModel(int& corenum) {
     QString hardware=nullptr;
@@ -491,7 +491,7 @@ quint64 MyInfo::getSysBufferSize()
     // -w 4M
     QString rbuf = readSysFile(READ_BUFFER_SIZE_PATH);
     QString wbuf = readSysFile(WRITE_BUFFER_SIZE_PATH);
-    qDebug() << "rbuf: " << rbuf << " wbuf: " << wbuf;
+    debug("rbuf: " + rbuf + " wbuf: " + wbuf, 4);
     quint64 irbuf = static_cast<quint64>((rbuf.toInt()/static_cast<int>(BUFFER_SIZES::KB))*2);
     quint64 iwbuf = static_cast<quint64>((wbuf.toInt()/static_cast<int>(BUFFER_SIZES::KB))*2);
     if (irbuf > iwbuf) {
@@ -500,7 +500,7 @@ quint64 MyInfo::getSysBufferSize()
         return irbuf;
     }
 #else
-    qDebug() << "getSysBufferSize: Not support platform: " << QSysInfo::productType();
+    debug( "getSysBufferSize: Not support platform: " + QSysInfo::productType(), 4);
     return 0;
 #endif
 }
@@ -518,7 +518,7 @@ void MyInfo::setSysBufferSize(quint64 buff)
     writeSysFile(WRITE_BUFFER_SIZE_PATH, QString::number(buff/2));
 #else
     Q_UNUSED(buff)
-    qDebug() << "TODO setSysBufferSize: Not support platform: " << QSysInfo::productType();
+    debug("TODO setSysBufferSize: Not support platform: " + QSysInfo::productType(), 4);
 
 #endif
 }
@@ -528,8 +528,8 @@ void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory, int& cpucoren
     cpucorenum = cpucore;
     totalMemory = getTotalMemory();
 
-    qInfo() << "CPU Model:" << cpuModel << " core num:" << QString::number(cpucore);
-    qInfo() << "Total Memory:" << totalMemory;
+    debug("CPU Model:" + cpuModel + " core num:" + QString::number(cpucore), 4);
+    debug("Total Memory:" + totalMemory, 4);
 }
 
 
@@ -727,17 +727,17 @@ void MyInfo::getNetworkAdapterInfo() {
                 if (!driverVersion.isEmpty()) {
                     drivers[pAdapter->AdapterName].append(driverVersion);
                     drivers[pAdapter->AdapterName].append(QString(pAdapter->Description).trimmed());
-                    qInfo() << "\"" << drivers[pAdapter->AdapterName][1] << "\" Driver Version: " << driverVersion;
+                    debug("\"" + drivers[pAdapter->AdapterName][1] + "\" Driver Version: " + driverVersion, 4);
                 } else {
-                    // qDebug() << "Driver version not found for adapter\"" << pAdapter->Description << "\"";
+                    debug("Driver version not found for adapter\"" + pAdapter->Description + "\"", 4);
                 }
             } else {
-                // qDebug() << "Hardware ID not found for adapter" << pAdapter->Description;
+                debug("Hardware ID not found for adapter" + pAdapter->Description, 4);
             }
             pAdapter = pAdapter->Next;
         }
     } else {
-        qWarning() << "GetAdaptersInfo failed";
+        debug("GetAdaptersInfo failed", 4);
     }
 
     if (pAdapterInfo) {
@@ -814,7 +814,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
         hr = pClsObj->Get(L"Manufacturer", 0, &vtProp, 0, 0);
         if (SUCCEEDED(hr) && vtProp.vt == VT_BSTR) {
             vendor = QString::fromWCharArray(vtProp.bstrVal);
-            qInfo() << "Motherboard Manufacturer:" << vendor;
+            debug("Motherboard Manufacturer:" + vendor, 4);
         }
         VariantClear(&vtProp);
 
@@ -822,7 +822,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
         hr = pClsObj->Get(L"Product", 0, &vtProp, 0, 0);
         if (SUCCEEDED(hr) && vtProp.vt == VT_BSTR) {
             model = QString::fromWCharArray(vtProp.bstrVal);
-            qInfo() << "Motherboard Model:" << model;
+            debug("Motherboard Model:" + model, 4);
         }
         VariantClear(&vtProp);
 
@@ -830,7 +830,7 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
         hr = pClsObj->Get(L"SerialNumber", 0, &vtProp, 0, 0);
         if (SUCCEEDED(hr) && vtProp.vt == VT_BSTR) {
             serial = QString::fromWCharArray(vtProp.bstrVal);
-            qInfo() << "Motherboard Serial Number:" << serial;
+            debug("Motherboard Serial Number:" + serial);
         }
         VariantClear(&vtProp);
 
@@ -1049,4 +1049,11 @@ void MyInfo::setIfname(QString mgr_ifname)
         m_new_manager_ip = new_addrs[0].toString();
     }
     update = 1;
+}
+
+void MyInfo::debug(QString msg, int lv)
+{
+    if (lv <= m_debuglv){
+        qDebug() << msg;
+    }
 }
