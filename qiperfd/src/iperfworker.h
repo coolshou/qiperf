@@ -34,7 +34,9 @@ public:
     void toLogFile(QString msg);
     bool getServerMode();
     int getRefRow();
-    void debug(QString msg, int debuglv=1);
+    void debug(QString msg, int debuglv=3);
+    QString getThreadID();
+
 signals:
     void workerFinished(qint64 idx, bool servermode); // Signal to notify manager that this worker is done
     void started(int refrow, bool smode, QString ipport); // refrow, S/C, IPPort
@@ -45,6 +47,7 @@ signals:
     void iperfTPdata(int refrow, QString sInterval,  QString data); // refrow, sInterval, throughput data
     void stopSelfDestructor();
     void debuginfo(QString msg);
+
 
 public slots:
     void work();
@@ -61,6 +64,7 @@ private slots:
     void onDebuginfo(QString msg);
 
 private:
+    QString m_threadid; // real thread id
     int m_selfdestructionTime;
     QTimer *m_selfdestruction;
     int m_refrow;// refrow

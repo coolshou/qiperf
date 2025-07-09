@@ -10,6 +10,12 @@
 #include <QJsonObject>
 #include <QDir>
 #include <QDateTime>
+// Platform-specific includes for native thread IDs
+#ifdef Q_OS_WIN
+#include <Windows.h>
+#else
+#include <pthread.h>
+#endif
 
 #include "../src/tpmgrdata.h"
 // #include <QOverload>
@@ -81,13 +87,15 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
 IperfWorker::~IperfWorker()
 {
     if (!m_iperf->atEnd()){
-        emit log(m_idx, "force kill iperf procress");
+        // emit log(m_idx, "force kill iperf procress");
+        debug("force kill iperf procress");
         m_iperf->kill();
     }
 }
 
 void IperfWorker::work()
 {   //this code run in another thread
+    m_threadid = getThreadID();
     try{
         m_stop = false;
         //create iperf procress
@@ -120,16 +128,22 @@ void IperfWorker::work()
             if (m_selfdestruction->isActive()){
                 emit stopSelfDestructor();
             }
-            emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
-            emit log(m_idx, "iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "));
+            // emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
+            QString msg = QString("start iperf %1(pid:%2)").arg(m_servermode?"server":"client",
+                                                              QString::number(m_iperf->processId()));
+            debug(msg, 3);
+            // emit log(m_idx, "iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "));
+            debug("iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "), 3);
             while (!m_stop){
                 //procress iperf output
                 QThread::msleep(500);
                 QCoreApplication::processEvents(QEventLoop::AllEvents); // must have
             }
         }else{
-            emit log(m_idx, "iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "));
-            emit log(m_idx, m_iperf->readAllStandardError());
+            // emit log(m_idx, "iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "));
+            debug("iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "), 4);
+            // emit log(m_idx, m_iperf->readAllStandardError());
+            debug(m_iperf->readAllStandardError(), 4);
         }
     }catch (const std::exception &e) {
         // Handle the exception and show an error message
@@ -153,6 +167,7 @@ void IperfWorker::onSelfDestructor()
 
 void IperfWorker::onSetDebugLv(int lv)
 {
+
     m_debuglv = lv;
 }
 
@@ -162,7 +177,8 @@ void IperfWorker::setStop()
     if (m_iperf && m_iperf->state() == QProcess::Running) {
         m_iperf->terminate(); // Attempt graceful termination
         if (m_iperf->waitForFinished(3000)){
-            emit log(m_idx, "iperf killed");
+            // emit log(m_idx, "iperf killed");
+            debug("iperf killed", 4);
         }else{
             if (m_iperf->state() == QProcess::Running) {
                 int pid = m_iperf->processId();
@@ -240,12 +256,34 @@ int IperfWorker::getRefRow()
 void IperfWorker::debug(QString msg, int debuglv)
 {
     if (debuglv<=m_debuglv){
-        emit debuginfo(msg);
+        emit debuginfo("("+m_threadid+")"+"-"+QString::number(m_idx)+"-"+msg);
     }
+}
+
+QString IperfWorker::getThreadID()
+{
+    QString id="N/A";
+#ifdef Q_OS_WIN
+    DWORD nativeThreadId = GetCurrentThreadId();
+    id = QString::number(nativeThreadId);
+#else
+    #ifdef Q_OS_LINUX
+        pthread_t nativeThreadId = pthread_self();
+        // 1. Convert pthread_t (long unsigned int) to std::string
+        //    std::to_string has overloads for various integer types, including unsigned long.
+        std::string std_str_pth_id = std::to_string(nativeThreadId);
+        // 2. Convert std::string to QString
+        id = QString::fromStdString(std_str_pth_id);
+    #else
+        debug("Not support platform to get real thread id", 10);
+    #endif
+#endif
+    return id;
 }
 
 void IperfWorker::onStarted()
 {
+    // TODO: restart should not use new log file?
     QString tmp = m_iperflogpath+QDir::separator()+getBindKey()+".log";
     m_logfile=new QFile(tmp);
     debug("m_logfile: " + QDir::toNativeSeparators(m_logfile->fileName()));
@@ -255,6 +293,7 @@ void IperfWorker::onStarted()
     }else{
         emit onStderr(m_idx, m_refrow, "ERROR: open file '"+ tmp +"' Fail", getBindKey());
     }
+
     m_running = true;
     m_iperfwrapper->setSetting(m_refrow, m_servermode, m_parallel, m_bidir, m_bidirtag);
     m_selfdestruction->start();
@@ -358,5 +397,6 @@ void IperfWorker::onThroughputData(int refrow, QString sInterval, QString data)
 
 void IperfWorker::onDebuginfo(QString msg)
 {
-    emit debuginfo("[IperfWrapper]"+msg);
+    debug("IperfWorker::onDebuginfo:" + msg, 4);
+    emit debuginfo("[IperfWrapper]" + msg);
 }
