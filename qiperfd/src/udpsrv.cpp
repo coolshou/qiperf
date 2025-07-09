@@ -6,34 +6,35 @@
 UdpSrv::UdpSrv(quint16 port, QString mgr_ifname, MyInfo *myinfo, QObject *parent)
     : QObject{parent}
 {
+    m_debuglv = 3;
     m_port = port;
     m_ifname = mgr_ifname;
     m_myinfo = myinfo;
-
     socket = new QUdpSocket(this);
-
-    update_addr();
-
     //We need to bind the UDP socket to an address and a port
-//    socket->bind(m_addr);
-    //sendMsg = "Test";
-
-//    connect(socket,SIGNAL(readyRead()),this,SLOT(readyRead()));
+    update_addr();
     infomer=new QTimer(this);
     connect(infomer, SIGNAL(timeout()), this, SLOT(onTimeout()));
     infomer->start(5*1000); // 5 sec
 }
 
-void UdpSrv::onLog(QString text)
+void UdpSrv::debug(QString text, int lv)
 {
-    qInfo() << "UdpSrv:" << text;
+    if (lv <m_debuglv){
+        qInfo() << "[UdpSrv]" << text;
+    }
 }
 
 void UdpSrv::setIfname(QString mgr_ifname)
 {
     m_ifname = mgr_ifname;
     update_addr();
-    qInfo() << "UdpSrv::setIfname:" << mgr_ifname;
+    debug("UdpSrv::setIfname:" + mgr_ifname);
+}
+
+void UdpSrv::onSetDebugLv(int lv)
+{
+    m_debuglv = lv;
 }
 
 void UdpSrv::readyRead()
@@ -45,7 +46,7 @@ void UdpSrv::readyRead()
     quint16 senderPort;
     socket->readDatagram(Buffer.data(),Buffer.size(),&sender,&senderPort);
 
-    qDebug() << "UdpSrv::readyRead:" << Buffer;
+    debug(QString("UdpSrv::readyRead:%1").arg(Buffer));
 }
 
 void UdpSrv::onTimeout()
@@ -57,7 +58,10 @@ void UdpSrv::onTimeout()
                                        QHostAddress::Broadcast, m_port);
                                        //m_baddr, m_port);
         if (length<0){
-            qInfo() << "ERROR writeDatagram ("<< QString::number(socket->error()) <<"):" << socket->errorString() << " Broadcast on port " << QString::number(m_port) << " msg:" << tmp;
+            debug("ERROR writeDatagram ("+ QString::number(socket->error()) + "):"
+                  + socket->errorString()
+                  + " Broadcast on port " + QString::number(m_port)
+                  + " msg:" + tmp);
             return;
         }
         // }else if (length != tmp.toUtf8().length()){
@@ -66,7 +70,7 @@ void UdpSrv::onTimeout()
         // don't clear m_sendMsg, let it keeps sending
         // m_sendMsg ="";
     } else {
-        qInfo() <<"("<< QString::number(m_sendMsg.length()) <<")" "wait new m_sendMsg";
+        debug("("+ QString::number(m_sendMsg.length()) +")" "wait new m_sendMsg");
     }
 }
 
@@ -79,7 +83,7 @@ void UdpSrv::update_addr()
         m_addr = addrs[0]; // ip address
         m_baddr = addrs[1]; // broadcast address
         if (!(socket->ConnectedState == QAbstractSocket::UnconnectedState)) {
-            onLog("update_addr: m_addr:" + m_addr.toString());
+            debug("update_addr: m_addr:" + m_addr.toString());
             socket->bind(m_addr, QUdpSocket::ShareAddress); // now interface
         }
     }else{

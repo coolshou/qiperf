@@ -81,6 +81,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     // notice qiperfc info
     m_udpsrv = new UdpSrv(QIPERFD_BPORT, getManagerInterface(), m_myinfo);
     connect(this, &QIperfd::setMgrIfname, m_udpsrv, &UdpSrv::setIfname);
+    connect(this, &QIperfd::setDebugLv, m_udpsrv, &UdpSrv::onSetDebugLv);
     m_udpsrv->setSendMsg(info); // broadcast
 
 #if (TEST_WS==1)
@@ -99,7 +100,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
 
     // system service manager
     qiperfdlog = tmppath+QIPERFD_NAME+".log";
-    qInfo() << "FileWatcher: " << QDir::toNativeSeparators(qiperfdlog);
+    onLog("FileWatcher: " + QDir::toNativeSeparators(qiperfdlog));
     m_filewatcher = new FileWatcher(qiperfdlog);
     connect(m_filewatcher, &FileWatcher::onNewLine, this, &QIperfd::onNewLine);
 
@@ -117,7 +118,8 @@ QIperfd::~QIperfd()
 
 void QIperfd::onLog(QString text)
 {
-    qInfo() << qApp->applicationPid() <<"," << text;
+    //qApp->applicationPid() is app's PID
+    qInfo() << "(" << qApp->applicationPid() <<")" << text;
 }
 
 void QIperfd::loadcfg(QString apppath)
@@ -1131,14 +1133,14 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         QString bindkey = d[2];
         m_directions[starttime][bindkey] = tag; // tag for bidir
         // bReportTPData = true;
-        qInfo() << "SET to Report throughput data: " << msg;
+        onLog("SET to Report throughput data: " + msg);
     }else if (act.startsWith(CMD_IPERF_UNREG)){
         QStringList d = msg.split(":");
         QString starttime = d[0];
         QString bindkey = d[1];
         // bReportTPData = false;
         m_directions[starttime][bindkey].clear();
-        qInfo() << "SET to NOT Report throughput data: " << msg;
+        onLog("SET to NOT Report throughput data: " + msg);
     }else if (act.startsWith(CMD_IPERF_CLEAR)){
         clear();
     }else if (act.startsWith(CMD_IPERF_START)){
@@ -1153,7 +1155,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         if (smode.contains("S")){
             bserver=true;
         }
-        qInfo() << "s_starttime: " << s_starttime << " server:" << bserver;
+        onLog(QString("s_starttime: %1 server: %2").arg(s_starttime, bserver?"true":"false"));
         startAll(bserver);
     }else if (act.startsWith(CMD_IPERF_STOP)){
         stopAll();
@@ -1180,7 +1182,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         }else{
             //No need to do NTP sync
 #if (TEST_WS==1)
-            qInfo()<< "===== Info NTP time is OK: " << target;
+            onLog("===== Info NTP time is OK: " + target);
             int rc = m_wsserver->sendTextMessage(QString("%1").arg(CMD_NTP_SYNC_OK), target);
             if (rc<=0){
                 debug(" Info " + target + " Fail!!", 2);
@@ -1190,7 +1192,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
     }else if (act.startsWith(CMD_SERIAL_ADD)){
         // TODO: create serial and bind to TCP server
         // idx:comport:BaudRate:DataBits:Parity:StopBits:FlowControl
-        qInfo() << "CMD_SERIAL_ADD: " << msg;
+        onLog("CMD_SERIAL_ADD: " + msg);
         QStringList d = msg.split(":");
         if (d.length()==7){
             long long port = 0;
@@ -1235,8 +1237,6 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
             debug(" Wrong format of create serial: " + msg, 2);
         }
     }else if (act.startsWith(CMD_SERIAL_DEL)){
-        //
-        // qInfo() << "CMD_SERIAL_DEL: " << msg;
         QStringList d = msg.split(":");
         if (d.length()==2){
             QString comport = d[1];
@@ -1257,7 +1257,6 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
             debug(" Wrong format of delete serial: " + msg, 2);
         }
     }else if (act.startsWith(CMD_SSH_ADD)){
-        // qInfo() << "CMD_SSH_ADD: " << msg;
         QStringList d = msg.split(":");
         if (d.length()==7){
             long long port = 0;
@@ -1314,7 +1313,6 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         }
     }else if (act.startsWith(CMD_SSH_DEL)){
         // msg format: "127.0.0.1:192.168.0.90:22"
-        qInfo() << "CMD_SSH_DEL: " << msg;
         QStringList d = msg.split(":");
         if (d.length()==3){
             QString target = d[1];
@@ -1330,11 +1328,11 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
                     onSSHTaskError(idx, QString("%1:%2").arg(key ,"DEL Fail"));
                 }
             }else{
-                qDebug() << key << " does not in m_sshtasks!! \n" << m_sshtasks;
+                debug(key + " does not in m_sshtasks!! \n", 4);
                 // onSSHTaskError(idx, QString("%1:%2").arg(target, "Not Exist"))
             }
         }else{
-            qDebug() << " Wrong format of delete ssh: " << msg;
+            debug(" Wrong format of delete ssh: " + msg, 5);
         }
     }else if (act.startsWith(CMD_QIPERFD_RESTART)){
         restartQIperfd();
@@ -1343,10 +1341,10 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
     }else {
 #if (TEST_WS==1)
         QString cmd = QString("%1:%2:%3").arg(CMD_NOT_SUPPORT, act, msg);
-        qDebug() << cmd;
+        debug(cmd);
         int rc = m_wsserver->sendTextMessage(cmd, target);
         if (rc<=0){
-            qDebug() << " Info " << target << " Fail!!";
+            debug(" Info " + target + " Fail!!");
         }
 #endif
     }
@@ -1377,14 +1375,14 @@ void QIperfd::handleWorkerFinished(qint64 id, bool servermode)
             IperfWorker* sworker = m_iperfwserver.take(id); // Remove from map
             // The worker should have called deleteLater() itself, so no direct delete here.
             Q_UNUSED(sworker)
-            qDebug() << "Worker ID" << id << "marked as finished and removed from map.";
+            debug("Worker ID " + QString::number(id) + " marked as finished and removed from map.");
         }
     }else{
         if (m_iperfworkers.contains(id)) {
             IperfWorker* worker = m_iperfworkers.take(id); // Remove from map
             // The worker should have called deleteLater() itself, so no direct delete here.
             Q_UNUSED(worker)
-            qDebug() << "Worker ID" << id << "marked as finished and removed from map.";
+            debug("Worker ID " + QString::number(id) + " marked as finished and removed from map.");
         }
     }
 }
@@ -1534,8 +1532,8 @@ int QIperfd::checkFirewallStatus()
     process.startCommand(command);
 #endif
     if (!process.waitForFinished(5000)){
-        qDebug() << "Error run cmd: " << command << " Fail";
-        qDebug() << "(" << process.readAll() << ")";
+        debug("Error run cmd: " + command + " Fail");
+        debug(QString("(%1)").arg(process.readAll()));
         return -1;
     }
 
@@ -1543,7 +1541,7 @@ int QIperfd::checkFirewallStatus()
     QByteArray output = process.readAllStandardOutput();
     QByteArray errorOutput = process.readAllStandardError();
     if (!errorOutput.isEmpty()) {
-        qDebug() << "checkFirewallStatus Error:\n" << errorOutput << "\n\n CMD:" << command << "\n";
+        debug("checkFirewallStatus Error:\n" + errorOutput + "\n\n CMD:" + command + "\n");
         return -1;
     } else{
         QString lines = QString::fromUtf8(output);
@@ -1577,16 +1575,16 @@ void QIperfd::startNtpServer()
 {
     if (bNtpserver){
         if (m_ntpserver){
-            qInfo() << "stop old Ntp Server";
+            onLog("stop old Ntp Server");
             m_ntpserver->disconnect();
             delete(m_ntpserver);
         }
-        qInfo() << "start Ntp Server";
+        onLog("start Ntp Server");
         m_ntpserver = new NtpServer(this);
     }else{
-        qInfo() << "Ntp Server not enable!!";
+        onLog("Ntp Server not enable!!");
         if (m_ntpserver){
-            qInfo() << "stop Ntp Server";
+            onLog("stop Ntp Server");
             m_ntpserver->disconnect();
             delete(m_ntpserver);
         }
@@ -1620,10 +1618,10 @@ void QIperfd::initiperf2(QString tmp, QString tmp_path, QString arch)
                                           QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
                                           QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
             }else{
-                qDebug() << "copy file " << " to " << m_iperfexe20 << " fail";
+                debug("copy file to " + m_iperfexe20 + " fail", 5);
             }
         }else{
-            qDebug() << i2File.fileName() << " NOT EXIST!!";
+            debug(i2File.fileName() + " NOT EXIST!!", 5);
         }
     #endif
 #endif
@@ -1655,10 +1653,10 @@ void QIperfd::initiperf21(QString tmp, QString tmp_path, QString arch)
                                            QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
                                            QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
             }else{
-                qDebug() << "copy file " << " to " << m_iperfexe21 << " fail";
+                debug("copy file to " + m_iperfexe21 + " fail", 5);
             }
         }else{
-            qDebug() << i21File.fileName() << " NOT EXIST!!";
+            debug(i21File.fileName() + " NOT EXIST!!", 5);
         }
     #endif
 #endif
@@ -1689,10 +1687,10 @@ void QIperfd::initiperf22(QString tmp, QString tmp_path, QString arch)
                                            QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
                                            QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
             }else{
-                qDebug() << "copy file " << " to " << m_iperfexe22 << " fail";
+                debug("copy file to " + m_iperfexe22 + " fail", 5);
             }
         }else{
-            qDebug() << i22File.fileName() << " NOT EXIST!!";
+            debug(i22File.fileName() + " NOT EXIST!!", 5);
         }
     #endif
 #endif
@@ -1722,10 +1720,10 @@ void QIperfd::initiperf3(QString tmp, QString tmp_path, QString arch)
                                           QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup |
                                           QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther);
             }else{
-                qDebug() << "copy file " << " to " << m_iperfexe3 << " fail";
+                debug("copy file to " + m_iperfexe3 + " fail");
             }
         }else{
-            qDebug() << i3File.fileName() << " NOT EXIST!!";
+            debug(i3File.fileName() + " NOT EXIST!!");
         }
     #endif
 #endif
@@ -1755,7 +1753,7 @@ void QIperfd::initIperf(QString apppath)
     #endif
 
 #else
-    qDebug() << " Not Support platform!!";
+    debug(" Not Support platform!!", 5);
 
 #endif \
     //TODO: check we have newer version of iperf, remove old !!
@@ -1782,12 +1780,11 @@ void QIperfd::getIperfVer(QString cmd, double ver)
 #else
     QString c = cmd + " -v";
 #endif
-    // qDebug() << "getIperfVer: " << c << " arg:" << args;
     process.startCommand(c); //Qt6.0
 #endif
     if (!process.waitForFinished(5000)){//wait 5 sec
-        qDebug() << "Error run cmd: " << cmd << " " << args.join(" ") << " Fail";
-        qDebug() << "(" << process.readAll() << ")";
+        debug("Error run cmd: " + cmd + " " + args.join(" ") + " Fail");
+        debug(QString("(%1)").arg(process.readAll()));
     }
 
     QString out;

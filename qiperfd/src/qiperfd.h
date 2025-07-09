@@ -117,7 +117,7 @@ private slots:
     void onSetDebugLv(int lv);
 
 private:
-    void debug(QString msg, int lv=3);
+    void debug(QString msg, int lv=4);
     int checkFirewallStatus();
     void setNtpServer(QString mode);
     void startNtpServer();

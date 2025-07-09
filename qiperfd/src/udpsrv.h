@@ -12,7 +12,7 @@ class UdpSrv : public QObject
     Q_OBJECT
 public:
     explicit UdpSrv(quint16 port, QString mgr_ifname, MyInfo *myinfo,  QObject *parent = nullptr);
-    void onLog(QString text);
+    void debug(QString text, int lv=3);
 
 public slots:
     void readyRead();
@@ -20,9 +20,10 @@ public slots:
     void update_addr();
     void setSendMsg(QString msg);
     void setIfname(QString mgr_ifname);
-
+    void onSetDebugLv(int lv);
 signals:
 private:
+    int m_debuglv;
     quint16 m_port;
     QUdpSocket *socket;
     QTimer *infomer;
