@@ -99,7 +99,6 @@ void FormQIperfds::onSetDebug(bool checked)
 {
     Q_UNUSED(checked)
     int debuglv=0;
-    //TODO: debug lv
     DlgIntBox inbox = DlgIntBox(this);
     inbox.setWindowTitle("Set Debug Level");
     int rc = inbox.exec();
@@ -109,8 +108,8 @@ void FormQIperfds::onSetDebug(bool checked)
     QModelIndexList idxs = ui->treeView->selectionModel()->selectedRows();
     foreach (auto midx, idxs) {
         QString target=ui->treeView->model()->data(midx).toString();
-        qInfo()<< "onResetNtp target:" <<target;
-        // emit clearNtpStatus(target);
+        qInfo() << "onSetDebug target:" <<target
+                << " debug level:" << QString::number(debuglv);
         emit setDebugLv(target, debuglv);
     };
 }
