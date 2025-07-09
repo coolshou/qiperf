@@ -15,6 +15,9 @@ public:
     void initTCP(quint16 port, QString targetaddress);
     void enqueueFile(QString filename);
     QString getTargetAddress();
+    void debug(QString msg, int lv=3);
+public slots:
+    void onSetDebugLv(int lv);
 
 signals:
 private slots:
@@ -24,6 +27,7 @@ private slots:
 
 private:
     void sendNextFile();
+    int m_debuglv;
     QTcpSocket *fileSocket;  //for file transfer
     QQueue<QString> m_fileQueue;
     QFile *m_currentFile;

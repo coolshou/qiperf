@@ -10,6 +10,7 @@ FileClient::FileClient(quint16 port, QString targetaddress, QObject *parent)
     : QObject{parent}, m_currentFile(nullptr), m_chunkSize(64 * 1024)
     , m_port(port), m_targetaddress(targetaddress)
 {
+    m_debuglv =3;
     initTCP(m_port, m_targetaddress);
 
     totalBytes = 0;
@@ -39,13 +40,13 @@ void FileClient::initTCP(quint16 port, QString targetaddress)
     connect(fileSocket, &QTcpSocket::disconnected, this, &FileClient::onDisconnected);
     connect(fileSocket, &QTcpSocket::bytesWritten, this, &FileClient::onBytesWritten);
 
-    qDebug() << "FileClient connect to " << targetaddress << " port: " << port;
+    debug("FileClient connect to " + targetaddress + " port: " + QString::number(port));
     fileSocket->connectToHost(targetaddress, port);
 }
 
 void FileClient::enqueueFile(QString filename)
 {
-    qInfo()<< "file to send(enqueueFile): " << filename;
+    debug("file to send(enqueueFile): " + filename);
     m_fileQueue.append(filename);
     if (fileSocket->state() == QTcpSocket::UnconnectedState){
         fileSocket->connectToHost(m_targetaddress, m_port);
@@ -54,9 +55,10 @@ void FileClient::enqueueFile(QString filename)
         //If the client is connected and not currently transferring a file, it will start sending the next file in the queue
         sendNextFile();
     }else {
-        qInfo() << "fileSocket->state(): " << (int)fileSocket->state() << "  (2=ConnectingState,3=ConnectedState)" ;
+        debug("fileSocket->state(): " + QString::number((int)fileSocket->state())
+              + "  (2=ConnectingState,3=ConnectedState)");
         if (m_currentFile){
-            qDebug() << "enqueueFile m_currentFile: " << m_currentFile->fileName();
+            debug("enqueueFile m_currentFile: " + m_currentFile->fileName());
         }
     }
 }
@@ -64,6 +66,18 @@ void FileClient::enqueueFile(QString filename)
 QString FileClient::getTargetAddress()
 {
     return m_targetaddress;
+}
+
+void FileClient::debug(QString msg, int lv)
+{
+    if (lv <=m_debuglv){
+        qDebug() << "[FileClient]" << msg;
+    }
+}
+
+void FileClient::onSetDebugLv(int lv)
+{
+    m_debuglv = lv;
 }
 
 void FileClient::onConnected()
@@ -85,7 +99,7 @@ void FileClient::onBytesWritten(qint64 bytes)
             m_currentFile->close();
             delete m_currentFile;
             m_currentFile = nullptr;
-            qInfo() << "[onBytesWritten]File transfer completed: " << filename;
+            debug("[onBytesWritten]File transfer completed: " + filename);
             sendNextFile(); // Proceed to the next file in the queue
         } else {
             fileSocket->write(buffer);
@@ -95,7 +109,7 @@ void FileClient::onBytesWritten(qint64 bytes)
 
 void FileClient::onDisconnected()
 {
-    // qInfo() << "FileClient Disconnected from server";
+    debug("FileClient Disconnected from server", 5);
     if (m_currentFile) {
         m_currentFile->close();
         delete m_currentFile;
@@ -106,23 +120,19 @@ void FileClient::onDisconnected()
 void FileClient::sendNextFile()
 {
     if (m_fileQueue.isEmpty()) {
-        qInfo() << "No Queue file";
-        // qInfo() << "No Queue file, fileSocket->close()";
-        // fileSocket->close();//this may cause qiperfc crash?
+        debug("No Queue file");
         return;
     }
     QString filePath = m_fileQueue.dequeue();
     m_currentFile = new QFile(filePath);
     if (!m_currentFile->open(QIODevice::ReadOnly)) {
-        qWarning() << "Cannot open file" << filePath << ":" << m_currentFile->errorString();
+        debug("Cannot open file" + filePath + ":" + m_currentFile->errorString());
         delete m_currentFile;
         m_currentFile = nullptr;
         sendNextFile(); // Try to send the next file
         return;
     }
     QFileInfo fileInfo(*m_currentFile);
-    // QList ls = fileInfo.absolutePath().split(QDir::separator());
-    // qDebug() <<"path: " << ls.value(ls.count()-1);
     QString header = QString("FILE:%1:%2\n").arg(fileInfo.fileName()).arg(fileInfo.size());
     fileSocket->write(header.toUtf8());
 }
