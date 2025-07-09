@@ -81,7 +81,7 @@
         </attribute>
         <column>
          <property name="text">
-          <string>Chk</string>
+          <string>Use</string>
          </property>
         </column>
         <column>
