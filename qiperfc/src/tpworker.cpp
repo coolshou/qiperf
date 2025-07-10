@@ -416,7 +416,7 @@ void TpWorker::resetError()
 
 void TpWorker::debug(QString msg, int debuglv)
 {
-    if (debuglv>m_debuglv){
+    if (debuglv<=m_debuglv){
         emit debuginfo(msg);
     }
 }
