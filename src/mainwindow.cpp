@@ -14,7 +14,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 #ifdef Q_OS_ANDROID
-    QString tmp = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    // QString tmp = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString tmp = "/data/data/tw.idv.coolshou.qiperf/files";
 #else
     QString tmp = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 #endif
@@ -38,6 +39,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 #if defined (Q_OS_ANDROID)
     // android path
+    // if (1){
+    //     m_iperfexe2 = ":/"+arch+"/iperf2"; //can not exec with qprocess
+    //     m_iperfexe3 = ":/"+arch+"/iperf3"; //can not exec with qprocess
+    // }else
+    {
 //    m_path = "/data/local/tmp";
     m_iperfexe2 = tmp +"/iperf2";
     if (QFileInfo::exists(m_iperfexe2)){
@@ -58,10 +64,12 @@ MainWindow::MainWindow(QWidget *parent)
         } else {
             // make file execuable
             QFile iperf2File(m_iperfexe2);
-            iperf2File.setPermissions(QFileDevice::ExeUser | QFileDevice::ReadUser | QFileDevice::WriteUser|
+            if (!iperf2File.setPermissions(QFileDevice::ExeUser | QFileDevice::ReadUser | QFileDevice::WriteUser|
                                       QFileDevice::ReadOwner | QFileDevice::WriteOwner| QFileDevice::ExeOwner|
                                       QFileDevice::ReadGroup | QFileDevice::WriteGroup| QFileDevice::ExeGroup|
-                                      QFileDevice::ReadOther | QFileDevice::WriteOther| QFileDevice::ExeOther);
+                                          QFileDevice::ReadOther | QFileDevice::WriteOther| QFileDevice::ExeOther)){
+                onLog("setPermissions iperf2 "+ m_iperfexe2 + " fail");
+            }
         }
     }
     //iperf3
@@ -75,11 +83,14 @@ MainWindow::MainWindow(QWidget *parent)
         } else {
             // make file execuable
             QFile iperf3File(m_iperfexe3);
-            iperf3File.setPermissions(QFileDevice::ExeUser | QFileDevice::ReadUser | QFileDevice::WriteUser|
+            if (!iperf3File.setPermissions(QFileDevice::ExeUser | QFileDevice::ReadUser | QFileDevice::WriteUser|
                                       QFileDevice::ReadOwner | QFileDevice::WriteOwner| QFileDevice::ExeOwner|
                                       QFileDevice::ReadGroup | QFileDevice::WriteGroup| QFileDevice::ExeGroup|
-                                      QFileDevice::ReadOther | QFileDevice::WriteOther| QFileDevice::ExeOther);
+                                          QFileDevice::ReadOther | QFileDevice::WriteOther| QFileDevice::ExeOther)){
+                onLog("setPermissions iperf3 "+ m_iperfexe2 + " fail");
+            }
         }
+    }
     }
 
 #endif
