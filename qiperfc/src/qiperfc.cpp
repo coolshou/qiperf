@@ -1264,11 +1264,13 @@ void QIperfC::onDoNtpSync(QString target)
         qint64 rc = ws->sendText(cmd);
         if (rc<=0){
             qDebug() << "send cmd Fail:" << cmd;
-        }
-        if (!m_ntpfail.contains(target)){
-            m_ntpfail[target]=1;
+            if (m_ntpfail.contains(target)){
+                m_ntpfail[target]=m_ntpfail[target]+1;
+            }
         }else{
-            m_ntpfail[target]=m_ntpfail[target]+1;
+            if (!m_ntpfail.contains(target)){
+                m_ntpfail[target]=1;
+            }
         }
     }else{
         qDebug() << "connect to ws: " + s + " Fail";
