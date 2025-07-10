@@ -37,8 +37,8 @@ DlgIperfRestartRule::~DlgIperfRestartRule()
 QJsonObject DlgIperfRestartRule::getJsonCfgObj()
 {
     QJsonObject obj;
-    obj.insert("normalStop", ui->cbIperfNormalStop->isChecked());
-    obj.insert("errorStop", ui->cbIperfErrorStop->isChecked());
+    obj.insert("restartonNormalStop", ui->cbIperfNormalStop->isChecked());
+    obj.insert("restartonErrorStop", ui->cbIperfErrorStop->isChecked());
 
     // QJsonArray rules;
     QJsonArray arrRule;
@@ -64,8 +64,8 @@ void DlgIperfRestartRule::loadcfg(QSettings *cfg)
 {
     //Load config to UI:
     cfg->beginGroup("IperfRestartOnError");
-    ui->cbIperfNormalStop->setChecked(cfg->value("normalStop", false).toBool());
-    ui->cbIperfErrorStop->setChecked(cfg->value("errorStop", true).toBool());
+    ui->cbIperfNormalStop->setChecked(cfg->value("restartonNormalStop", false).toBool());
+    ui->cbIperfErrorStop->setChecked(cfg->value("restartonErrorStop", true).toBool());
     cfg->endGroup();
     cfg->beginGroup("IperfRestartRules");
     QStringList rulekeys = cfg->childKeys();
@@ -90,8 +90,8 @@ void DlgIperfRestartRule::loadcfg(QSettings *cfg)
 
 void DlgIperfRestartRule::setJsonRules(QJsonObject rule)
 {
-    ui->cbIperfNormalStop->setChecked(rule.value("normalStop").toBool());
-    ui->cbIperfErrorStop->setChecked(rule.value("errorStop").toBool());
+    ui->cbIperfNormalStop->setChecked(rule.value("restartonNormalStop").toBool());
+    ui->cbIperfErrorStop->setChecked(rule.value("restartonErrorStop").toBool());
     ui->twIperfRule->clearContents();
     ui->twIperfRule->setRowCount(0);
     QJsonArray rules = rule.value("iperfRestartRules").toArray();
@@ -247,8 +247,8 @@ void DlgIperfRestartRule::onSaveDefault(bool checked)
     //save ui's setting to global config
     Q_UNUSED(checked)
     m_cfg->beginGroup("IperfRestartOnError");
-    m_cfg->setValue("normalStop", ui->cbIperfNormalStop->isChecked());
-    m_cfg->setValue("errorStop", ui->cbIperfErrorStop->isChecked());
+    m_cfg->setValue("restartonNormalStop", ui->cbIperfNormalStop->isChecked());
+    m_cfg->setValue("restartonErrorStop", ui->cbIperfErrorStop->isChecked());
     m_cfg->endGroup();
     m_cfg->beginGroup("IperfRestartRules");
     for (int i=0; i<ui->twIperfRule->rowCount(); i++){

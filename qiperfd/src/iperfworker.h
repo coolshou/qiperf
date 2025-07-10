@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMap>
+#include <QJsonObject>
 #include <QJsonArray>
 #include <QTimer>
 
@@ -23,6 +24,7 @@ public:
                          uint port=5201, QString bindaddr="0.0.0.0", QString target="",
                          bool bidir=false, bool reverse=false, int interval=1,
                          int delaystart=0, bool ignoreWrongInterval=false,
+                         bool restartonerror=false, const QJsonObject &restartrule = QJsonObject(),
                          QObject *parent = nullptr);
     ~IperfWorker() override;
     void setStop();
@@ -79,6 +81,11 @@ private:
     int m_interval=1;  // report interval
     int m_delaystart;
     bool m_ignoreWrongInterval;
+    bool m_restartonerror;
+    bool m_restartonErrorStop;
+    bool m_restartonNormalStop;
+    QJsonObject m_restartrule;
+    QJsonArray m_restartrules; // array of rule
     QObject *m_parent;
     IperfWrapper *m_iperfwrapper;
     bool m_stop;  //user stop;

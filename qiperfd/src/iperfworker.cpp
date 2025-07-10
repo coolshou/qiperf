@@ -8,6 +8,8 @@
 #include <QFileInfo>
 #include <QJsonValue>
 #include <QJsonObject>
+#include <QJsonDocument>
+
 #include <QDir>
 #include <QDateTime>
 // Platform-specific includes for native thread IDs
@@ -26,16 +28,26 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
                          uint port, QString bindaddr, QString target,
                          bool bidir, bool reverse, int interval,
                          int delaystart, bool ignoreWrongInterval,
+                         bool restartonerror, const QJsonObject &restartrule,
                          QObject *parent)
     : QObject{parent}, m_idx(idx), m_version(version), m_cmd(cmd), m_port(port),
       m_bindaddr(bindaddr), m_target(target), m_bidir(bidir), m_reverse(reverse),
     m_interval(interval), m_delaystart(delaystart),
-    m_ignoreWrongInterval(ignoreWrongInterval), m_parent(parent)
+    m_ignoreWrongInterval(ignoreWrongInterval),
+    m_restartonerror(restartonerror), m_restartrule(restartrule),
+    m_parent(parent)
 {
     m_debuglv = 3;
     m_logfile = nullptr;
     m_logtextstream = nullptr;
+    m_restartonErrorStop = false;
+    m_restartonNormalStop = false;
     m_iperflogpath = "";
+    if (m_restartonerror){
+        m_restartonErrorStop = restartrule["restartonErrorStop"].toBool();
+        m_restartonNormalStop = restartrule["restartonNormalStop"].toBool();
+        m_restartrules = restartrule["iperfRestartRules"].toArray();
+    }
     m_iperfwrapper = new IperfWrapper(m_ignoreWrongInterval);
     m_iperfwrapper->setDelaytime(delaystart);
     m_iperfwrapper->setInterval(interval);
@@ -96,6 +108,21 @@ IperfWorker::~IperfWorker()
 void IperfWorker::work()
 {   //this code run in another thread
     m_threadid = getThreadID();
+
+    debug(QString("restartonErrorStop:%1").arg(m_restartonErrorStop?"true":"false"));
+    debug(QString("restartonNormalStop:%1").arg(m_restartonNormalStop?"true":"false"));
+    // m_restartrule.to;
+    // 1. Convert QVariantMap to QJsonObject
+    // QJsonObject jsonObject = QJsonObject::fromVariantMap(m_restartrule);
+    // // // 2. Create a QJsonDocument from the QJsonObject
+    // QJsonDocument doc(jsonObject);
+    // // // 3. Convert the QJsonDocument to a QString
+    // // //    QJsonDocument::toJson() returns a QByteArray, so convert it to QString.
+    // // //    QJsonDocument::Indented for pretty-printing, QJsonDocument::Compact for minimal.
+    // QString jsonString = doc.toJson(QJsonDocument::Indented);
+    // debug("restartrule: "+jsonString);
+
+
     try{
         m_stop = false;
         //create iperf procress
