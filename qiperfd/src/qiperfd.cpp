@@ -304,7 +304,7 @@ qint64 QIperfd::add(QString refrow, QString sIgnoreWrongInterval, QVariantMap js
         ignoreWrongInterval = true;
     }
     bool restartonerror = jsondata["restartonerror"].toBool();
-    debug(QString("restartonerror:%!").arg(restartonerror?"true":"false"), 4);
+    debug(QString("restartonerror:%1").arg(restartonerror?"true":"false"), 4);
     if (restartonerror){
         QVariantMap restartrule = jsondata["restartrule"].toMap();
         debug(QString("errorStop: %1").arg(restartrule["errorStop"].toBool()?"true":"false"), 4);
