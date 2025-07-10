@@ -109,7 +109,6 @@ signals:
     void updateEndpointNum(int n);
     void updateStarttime(QDateTime stime);
     void updateStatus(QString msg);
-    // void errorStop(int err, QString msg); // signal when test error
     void testStarted(); // signal when test started
     void testStoped(int err); // signal when test stoped, 0: no error
     void closeAll(); // send signal to close all dialog
