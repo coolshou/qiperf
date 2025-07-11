@@ -73,11 +73,33 @@ QString MyFunc::secToHumanReadable(long long seconds)
         return "0 seconds";
     }
     TimeComponents tcompon = secondsToComponents((int)seconds);
-    QString result= QString("%1 day, %2 hour, %3 min, %4 sec")
-                         .arg(QString::number(tcompon.days),
-                              QString::number(tcompon.hours),
-                              QString::number(tcompon.minutes),
-                              QString::number(tcompon.seconds));
+    QString result="";
+    if (tcompon.days>0){
+        result = QString("%1 days").arg(QString::number(tcompon.days));
+    }
+    if (tcompon.hours>0){
+        if (!result.isEmpty()){
+            result = result + ", ";
+        }
+        result = result + QString("%1 hours").arg(QString::number(tcompon.hours));
+    }
+    if (tcompon.minutes>0){
+        if (!result.isEmpty()){
+            result = result + ", ";
+        }
+        result = result + QString("%1 mins").arg(QString::number(tcompon.minutes));
+    }
+    if (tcompon.seconds>0){
+        if (!result.isEmpty()){
+            result = result + ", ";
+        }
+        result = result + QString("%1 sec").arg(QString::number(tcompon.seconds));
+    }
+    // QString result = QString("%1 day, %2 hour, %3 min, %4 sec")
+    //                      .arg(QString::number(tcompon.days),
+    //                           QString::number(tcompon.hours),
+    //                           QString::number(tcompon.minutes),
+    //                           QString::number(tcompon.seconds));
     return result;
 }
 
