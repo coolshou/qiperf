@@ -47,6 +47,7 @@ private slots:
     void onClientDisconnected(QString targetip);
     void onDisconnected(QString targetip);
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
+    void onIperfExtendWait(QString refrow, qint64 iwait);
     int getStatusServers();
     int getStatusClients();
     void onDebuginfo(QString msg);
@@ -62,7 +63,7 @@ private:
     int iWSTimeout; // default wait websocket timeout 10
     int iExtraWait = 5;
     int m_WaitServerReady;
-
+    qint64 m_extendwaittime;
     QString m_datapath;
     QDateTime m_TestStartTime;
     bool bUserStop;
