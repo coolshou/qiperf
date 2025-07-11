@@ -24,7 +24,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab_iperf">
       <attribute name="title">
@@ -287,7 +287,7 @@
        </item>
        <item>
         <widget class="QWidget" name="widget_8" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,1">
+         <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="">
           <property name="spacing">
            <number>2</number>
           </property>
@@ -303,24 +303,14 @@
           <property name="bottomMargin">
            <number>2</number>
           </property>
-          <item>
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Port:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="sb_port">
-            <property name="maximum">
-             <number>65535</number>
-            </property>
-            <property name="value">
-             <number>45454</number>
-            </property>
-           </widget>
-          </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cbCloseToSysTray">
+         <property name="text">
+          <string>Close To SystemTray</string>
+         </property>
         </widget>
        </item>
        <item>

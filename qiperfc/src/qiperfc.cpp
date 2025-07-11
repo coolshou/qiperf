@@ -661,7 +661,7 @@ void QIperfC::onCopyText()
 
 void QIperfC::closeEvent(QCloseEvent *event)
 {
-    if (trayIcon->isVisible()) {
+    if (trayIcon->isVisible() && m_closetosystray) {
         hide(); // Hide the main window
         event->ignore(); // Don't let the application quit
         showTrayMessage("Application Minimized",
@@ -868,6 +868,10 @@ void QIperfC::loadSettings()
     restoreState(m_settings->value("windowState").toByteArray());
     m_oldsavepath = m_settings->value("oldsavepath",
                                       QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
+    m_settings->endGroup();
+
+    m_settings->beginGroup("agent");
+    m_closetosystray = m_settings->value("closetosystray", false).toBool();
     m_settings->endGroup();
 
     m_settings->beginGroup("Iperf");

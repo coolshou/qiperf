@@ -66,7 +66,8 @@ void dlgOption::loadcfg(QSettings *cfg)
     if (midx>=0){
         ui->cb_minterfaces->setCurrentIndex(midx);
     }
-    ui->sb_port->setValue(cfg->value("managerport", 45454).toInt());
+    // ui->sb_port->setValue(cfg->value("managerport", 45454).toInt());
+    ui->cbCloseToSysTray->setChecked(cfg->value("closetosystray", false).toBool());
     cfg->endGroup();
 
     cfg->beginGroup("notice");
@@ -118,7 +119,8 @@ void dlgOption::updatecfg()
     if (qs.length()>=2){
         emit ipaddressUpdated(qs[1], port);
     }
-    m_cfg->setValue("managerport", port);
+    // m_cfg->setValue("managerport", port);
+    m_cfg->setValue("closetosystray", ui->cbCloseToSysTray->isChecked());
     m_cfg->endGroup();
 
     m_cfg->beginGroup("notice");

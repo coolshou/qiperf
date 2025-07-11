@@ -241,7 +241,7 @@ private:
 
     FileServer *m_fileserver;
     QString m_oldsavepath=nullptr;
-
+    bool m_closetosystray=false;
     DlgShowLog *m_dlgshowlog;
 #if (TEST_ICMP==1)
     //TEST icmp
