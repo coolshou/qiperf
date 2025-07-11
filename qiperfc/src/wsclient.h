@@ -85,7 +85,7 @@ signals:
     void iperfStoped(QString refrow, QString err_no, QString err, QString ipport);  //refrow, error no (0: no error), error message
     void disconnected(QString serverip);
     void iperfTPdata(QString refrow, QString sInterval, QString data); // refrow, throughput data
-    void iperfExtendWait(int refrow, qint64 iwait);
+    void iperfExtendWait(QString refrow, qint64 iwait);
     void serialopened(QString refrow, QString serveraddress, QString serveraPort);
     void sshopened(QString refrow, QString serveraddress, QString serveraPort);
     void ntpsynced(bool bOK, QString target);

@@ -242,7 +242,8 @@ void WSClient::onTextMessageReceived(QString message)
         } else if (act.startsWith(CMD_IPERF_EXTEND_WAIT)){
             int cut3 = message.indexOf(':', 0);
             QString sWait = message.left(cut3);
-            emit iperfExtendWait(m_idx.toInt(), sWait.toLongLong());
+            debug("CMD_IPERF_EXTEND_WAIT: add wait time: " + sWait);
+            emit iperfExtendWait(m_idx, sWait.toLongLong());
         } else if (act.startsWith(CMD_SERIAL_OPENED)){
             emit serialopened(m_idx, from, message);
         } else if (act.startsWith(CMD_SSH_OPENED)){
