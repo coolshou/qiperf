@@ -488,6 +488,8 @@ void QIperfd::clear()
     }
     if (!m_thserver.isEmpty()){
         for (QMap<qint64, QThread*>::iterator it = m_thserver.begin(); it != m_thserver.end();) {
+            it.value()->quit();
+            it.value()->wait();
             delete it.value();
             it = m_thserver.erase(it);
         }
@@ -500,6 +502,8 @@ void QIperfd::clear()
     }
     if (!m_threads.isEmpty()){
         for (QMap<qint64, QThread*>::iterator it = m_threads.begin(); it != m_threads.end();) {
+            it.value()->quit();
+            it.value()->wait();
             delete it.value();
             it = m_threads.erase(it);
         }
@@ -743,6 +747,7 @@ void QIperfd::onIperfExtendWait(int refrow, qint64 iwait)
 {
     QString s = QString(CMD_IPERF_EXTEND_WAIT) + ":" + QString::number(refrow)
                 + ":" + QString::number(iwait);
+    onLog("onIperfExtendWait: " + s);
     m_wsserver->sendTextResult(s);
 }
 
