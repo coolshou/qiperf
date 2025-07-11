@@ -37,15 +37,22 @@ void CpuMonitor::updateCpuUsage()
     long long currentTotalTime = 0;
     long long currentIdleTime = 0;
     bool success = false;
+#ifdef Q_OS_WIN
+    // Declare Windows-specific variables at a wider scope
+    // so they can be used when updating prev values.
+    unsigned __int64 currentIdleULL = 0;
+    unsigned __int64 currentKernelULL = 0;
+    unsigned __int64 currentUserULL = 0;
+#endif
 
 #ifdef Q_OS_LINUX
     success = readCpuTimes(currentTotalTime, currentIdleTime);
 #elif defined(Q_OS_WIN)
     FILETIME idleTime, kernelTime, userTime;
     if (GetSystemTimes(&idleTime, &kernelTime, &userTime)) {
-        unsigned __int64 currentIdleULL = toULL(idleTime);
-        unsigned __int64 currentKernelULL = toULL(kernelTime);
-        unsigned __int64 currentUserULL = toULL(userTime);
+        currentIdleULL = toULL(idleTime);
+        currentKernelULL = toULL(kernelTime);
+        currentUserULL = toULL(userTime);
 
         // Windows values are in 100-nanosecond units.
         // We'll treat them as "ticks" for consistency in calculation logic.
