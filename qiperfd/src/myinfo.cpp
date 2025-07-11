@@ -729,10 +729,10 @@ void MyInfo::getNetworkAdapterInfo() {
                     drivers[pAdapter->AdapterName].append(QString(pAdapter->Description).trimmed());
                     debug("\"" + drivers[pAdapter->AdapterName][1] + "\" Driver Version: " + driverVersion, 4);
                 } else {
-                    debug("Driver version not found for adapter\"" + pAdapter->Description + "\"", 4);
+                    debug(QString("Driver version not found for adapter\"%1\"").arg(pAdapter->Description), 4);
                 }
             } else {
-                debug("Hardware ID not found for adapter" + pAdapter->Description, 4);
+                debug(QString("Hardware ID not found for adapter %1").arg(pAdapter->Description), 4);
             }
             pAdapter = pAdapter->Next;
         }
