@@ -201,7 +201,7 @@ void ThroughputView::onCopyText()
 
 void ThroughputView::onAddIperf()
 {
-    // on_pair_add
+    // add iperf test pair
     dlgiperf->updateUI();
     dlgiperf->setExcIdx(QModelIndex());//new
     int rc = dlgiperf->exec();// show dlgiperf

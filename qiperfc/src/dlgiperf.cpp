@@ -147,7 +147,7 @@ QString DlgIperf::getJsonCfg()
         clientObj.insert("timestamps", ui->leTimeStamp->text().trimmed());
     }
 
-    //restart rule
+    //restart rule for both seerver/client
     serverObj.insert("restartonerror", ui->cbRestartOnError->isChecked());
     clientObj.insert("restartonerror", ui->cbRestartOnError->isChecked());
     if (ui->cbRestartOnError->isChecked()){
