@@ -54,7 +54,8 @@ QJsonObject DlgIperfRestartRule::getJsonCfgObj()
             chk="0";
         }
         if (chk.startsWith("1")){
-            ruleobj.insert("enable", chk);
+            //only include enabled rule, (enable, comment column are not require)
+            // ruleobj.insert("enable", chk);
             ruleobj.insert("keyword", ui->twIperfRule->item(i, cols::Keyword)->text());
             ruleobj.insert("count", ui->twIperfRule->item(i, cols::Count)->text().toInt());
             // ruleobj.insert("comment", ui->twIperfRule->item(i, cols::Comment)->text());
