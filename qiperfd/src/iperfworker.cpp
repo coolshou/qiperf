@@ -388,22 +388,24 @@ void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
     if (exitCode==0){
         //normal stop
         if (m_restartonNormalStop){
-            debug("TODO: restartonNormalStop");
+            debug("TODO: restartonNormalStop", 3);
             if (!m_servermode){
                 //client mode have duration, info qiperf console to extend wait time
                 emit iperfExtendWait(m_idx, m_duration);
             }
             // TODO setup restart?
+            return;
         }
     }else{
         //error stop
         if (m_restartonErrorStop) {
-            debug("TODO: restartonErrorStop");
+            debug("TODO: restartonErrorStop", 3);
             if (!m_servermode){
                 //client mode have duration, info qiperf console to extend wait time
                 emit iperfExtendWait(m_idx, m_duration);
             }
             // TODO setup restart?
+            return;
         }
     }
     if (m_selfdestruction->isActive()){
