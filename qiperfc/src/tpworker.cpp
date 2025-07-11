@@ -19,6 +19,7 @@ TpWorker::TpWorker(QString logpath, QList<TP *> &tps, bool ignoreWrongInterval,
     iExtraWait(extrawait), m_WaitServerReady(waitserverready)
 {
     m_debuglv = 3;
+    m_extendwaittime = 0;
 }
 
 TpWorker::~TpWorker()
@@ -174,6 +175,7 @@ void TpWorker::work()
                 // connect(m_ws[serverIP], &WSClient::disconnected, this, &TpWorker::onServerDisconnected);
                 connect(m_ws[serverIP], &WSClient::disconnected, this, &TpWorker::onDisconnected);
                 connect(m_ws[serverIP], &WSClient::iperfTPdata, this, &TpWorker::onIperfTPdata);
+                connect(m_ws[serverIP], &WSClient::iperfExtendWait, this, &TpWorker::onIperfExtendWait);
                 connect(m_ws[serverIP], &WSClient::debuginfo, this, &TpWorker::onDebuginfo);
             }else{
                 err =  "[TpWorker]m_wss exist:" + serverIP;
@@ -242,7 +244,8 @@ void TpWorker::work()
                 // connect(m_ws[clientIP], &WSClient::disconnected, this, &TpWorker::onClientDisconnected);
                 connect(m_ws[clientIP], &WSClient::disconnected, this, &TpWorker::onDisconnected);
                 connect(m_ws[clientIP], &WSClient::iperfTPdata, this, &TpWorker::onIperfTPdata);
-                connect(m_ws[serverIP], &WSClient::debuginfo, this, &TpWorker::onDebuginfo);
+                connect(m_ws[clientIP], &WSClient::iperfExtendWait, this, &TpWorker::onIperfExtendWait);
+                connect(m_ws[clientIP], &WSClient::debuginfo, this, &TpWorker::onDebuginfo);
             }else{
                 debug("[TpWorker]m_wsc exist:" + clientIP);
                 m_ws[clientIP]->setDatapath(m_datapath);
@@ -368,7 +371,8 @@ void TpWorker::work()
     QDateTime waitStartTime = QDateTime::currentDateTime();
     QDateTime waitEndTime = QDateTime::currentDateTime();
     qint64 iWait = waitStartTime.secsTo(waitEndTime);
-    while (((iWait < maxtestduration) || isRunforever) && (bUserStop==false)){
+    while (((iWait < (maxtestduration + m_extendwaittime)) || isRunforever) &&
+           (bUserStop==false)){
         if ((getStatusServers()>m_status_server.keys().length()) ||
             (getStatusClients()>m_status_client.keys().length())) {
             err = "Some problem happen!! abort!! ";
@@ -381,16 +385,24 @@ void TpWorker::work()
         QCoreApplication::processEvents(QEventLoop::AllEvents);
         QThread::msleep(100);
         waitEndTime = QDateTime::currentDateTime();
+        QString msg = "";
         if (isRunforever){
-            emit updateStatus("Runtime "+  QString::number(iWait) + " sec"
-                              + "("+MyFunc::secToHumanReadable(iWait)+")");
+            msg = QString("Runtime %1 sec").arg(QString::number(iWait));
+            if (iWait>60){
+                msg = msg + "("+MyFunc::secToHumanReadable(iWait)+")";
+            }
         }else{
-            emit updateStatus("Remain "+ QString::number(maxtestduration-iWait) + " sec");
+            qint64 iRemain = (maxtestduration + m_extendwaittime)-iWait;
+            msg = QString("Remain %1 sec").arg(QString::number(iRemain));
+            if (iRemain>60){
+                msg = msg + "("+MyFunc::secToHumanReadable(iRemain)+")";
+            }
         }
-
+        emit updateStatus(msg);
         iWait = waitStartTime.secsTo(waitEndTime);
     }
-    err = "[TpWorker]iWait:" + QString::number(iWait) + "/" + QString::number(maxtestduration)
+    err = "[TpWorker]iWait:" + QString::number(iWait) + "/" +
+          QString::number(maxtestduration + m_extendwaittime)
           + " isRunforever:" + QChar('0' + isRunforever) + " bUserStop:" + QChar('0' +bUserStop);
     debug(err,4);
     onStop();
@@ -481,8 +493,17 @@ void TpWorker::onDisconnected(QString targetip)
 
 void TpWorker::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
-    debug("[TpWorker]onIperfTPdata: " + refrow+ " sInterval:"+ sInterval + " datas:" + datas);
+    debug("[TpWorker]onIperfTPdata: " + refrow+ " sInterval:"+ sInterval + " datas:" + datas, 5);
     emit iperfTPdata(refrow, sInterval, datas);
+}
+
+void TpWorker::onIperfExtendWait(QString refrow, qint64 iwait)
+{
+    m_extendwaittime = m_extendwaittime + iwait;
+    debug("onIperfExtendWait:" + refrow +
+          " extend time:" + QString::number(iwait) +
+          " m_extendwaittime:" + QString::number(m_extendwaittime), 3);
+
 }
 int TpWorker::getStatusServers()
 {
@@ -535,8 +556,12 @@ void TpWorker::onStop(){
 
     // emit debuginfo("m_status_server:" + m_status_server + " m_status_client:" + m_status_client);
     qint64 consumetime = m_TestStartTime.secsTo(enddatetime);
-    emit updateStatus("Finish at  "+ endtime +" (Runtime: "+QString::number(consumetime)+" sec"+
-                      "("+MyFunc::secToHumanReadable(consumetime)+"))");
+    QString msg = "Finish at "+ endtime +" (Runtime: "+QString::number(consumetime)+" sec";
+    if (consumetime>60){
+        msg = msg +" ("+MyFunc::secToHumanReadable(consumetime)+")";
+    }
+    msg = msg + ")";
+    emit updateStatus(msg);
     emit setEndTime(static_cast<double>(consumetime)); //update x-axis max value
 }
 
