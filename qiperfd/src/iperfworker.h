@@ -24,7 +24,7 @@ public:
                          uint port=5201, QString bindaddr="0.0.0.0", QString target="",
                          bool bidir=false, bool reverse=false, int interval=1,
                          int delaystart=0, bool ignoreWrongInterval=false,
-                         bool restartonerror=false, const QJsonObject &restartrule = QJsonObject(),
+                         bool restartonerror=false, QJsonObject restartrule = QJsonObject(),
                          QObject *parent = nullptr);
     ~IperfWorker() override;
     void setStop();
@@ -47,6 +47,7 @@ signals:
     // void onStdout(int idx, QString text); // refrow
     void onStderr(int idx, int refrow, QString text, QString ipport); // idx, refrow, msg, ipport
     void iperfTPdata(int refrow, QString sInterval,  QString data); // refrow, sInterval, throughput data
+    void iperfExtendWait(int refrow, qint64 iwait); // refrow
     void stopSelfDestructor();
     void debuginfo(QString msg);
 
@@ -102,6 +103,7 @@ private:
 
     QStringList m_arguments;  //iperf args
     int m_omit=0;
+    int m_duration;
     QProcess *m_iperf; // iperf procress
     QMap<QString, QJsonArray> m_tpdatas;
     int m_debuglv;

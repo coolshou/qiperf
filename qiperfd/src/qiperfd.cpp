@@ -231,7 +231,7 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
                  QString bndaddr, QString target,
                  QString parallel, QString protocal, bool bidir, bool reverse,
                  int interval, int delaytime, bool bServer, bool ignoreWrongInterval,
-                 bool restartonerror, const QJsonObject &restartrule)
+                 bool restartonerror, QJsonObject restartrule)
 { // add a IperfWorker to run iperf server/client
     // TODO: check host/port used?
     QThread *iperf_th = new QThread();
@@ -256,6 +256,7 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     connect(iperfer, &IperfWorker::started, this, &QIperfd::onStarted);
     connect(iperfer, &IperfWorker::finished, this, &QIperfd::onFinished);
     connect(iperfer, &IperfWorker::iperfTPdata, this, &QIperfd::onThroughput);
+    connect(iperfer, &IperfWorker::iperfExtendWait, this, &QIperfd::onIperfExtendWait);
     connect(iperfer, &IperfWorker::debuginfo, this, &QIperfd::onDebuginfo);
     connect(iperfer, &IperfWorker::workerFinished, this, &QIperfd::handleWorkerFinished);
     connect(this, &QIperfd::setStop, iperfer, &IperfWorker::setStop);
@@ -306,23 +307,16 @@ qint64 QIperfd::add(QString refrow, QString sIgnoreWrongInterval, QVariantMap js
         ignoreWrongInterval = true;
     }
     bool restartonerror = jsondata["restartonerror"].toBool();
-    debug(QString("restartonerror:%1").arg(restartonerror?"true":"false"), 3);
-    QJsonObject jsonObject = QJsonObject();
+    debug(QString("restartonerror:%1").arg(restartonerror?"true":"false"), 5);
+    QJsonObject restartruleObject = QJsonObject();
     if (restartonerror){
-        QVariantMap restartrule = QVariantMap();
+        QVariantMap restartrule;// = QVariantMap();
         restartrule = jsondata["restartrule"].toMap();
-        // QJsonObject rules = restartrule["iperfRestartRules"].toMap()
-        // debug("iperfRestartRules:" + restartrule["iperfRestartRules"].toString(), 2);
-        QJsonObject jsonObject = QJsonObject::fromVariantMap(restartrule);
-        // debug(QString("restartonErrorStop: %1").arg(jsonObject["restartonErrorStop"].toBool()?"true":"false"), 2);
-        // debug(QString("restartonNormalStop: %1").arg(jsonObject["restartonNormalStop"].toBool()?"true":"false"), 2);
-        // // 2. Create a QJsonDocument from the QJsonObject
-        QJsonDocument doc(jsonObject);
-        // // 3. Convert the QJsonDocument to a QString
-        // //    QJsonDocument::toJson() returns a QByteArray, so convert it to QString.
-        // //    QJsonDocument::Indented for pretty-printing, QJsonDocument::Compact for minimal.
-        QString jsonString = doc.toJson(QJsonDocument::Indented);
-        debug("restartrule: "+jsonString);
+        restartruleObject = QJsonObject::fromVariantMap(restartrule);
+        // debug use
+        // QJsonDocument doc(restartruleObject);
+        // QString jsonString = doc.toJson(QJsonDocument::Indented);
+        // debug("restartrule: "+jsonString, 5);
     }
 
     //conver json data format to iperf args
@@ -341,7 +335,7 @@ qint64 QIperfd::add(QString refrow, QString sIgnoreWrongInterval, QVariantMap js
     return add(refrow, ver, cmd, args, port, binaddr,
                target, parallel, protocal, bidir, reverse, interval, delaytime,
                isServer, ignoreWrongInterval,
-               restartonerror, jsonObject);
+               restartonerror, restartruleObject);
 }
 
 void QIperfd::del(int idx, bool servermode)
@@ -457,14 +451,14 @@ void QIperfd::startAll(bool bServer)
     if (bServer){
         for (auto it = m_thserver.begin(); it != m_thserver.end(); ++it)
         {
-            debug(" start iperfworkers server:" + it.key(), 3);
+            debug(" start iperfworkers server:" + QString::number(it.key()), 5);
             startServer(it.key());
             // QCoreApplication::processEvents(QEventLoop::AllEvents);// do not add this ?
         }
     }else{
         for (auto it = m_threads.begin(); it != m_threads.end(); ++it)
         {
-            debug(" start iperfworkers client:" + it.key(), 3);
+            debug(" start iperfworkers client:" + QString::number(it.key()), 5);
             start(it.key());
             // QCoreApplication::processEvents(QEventLoop::AllEvents);// do not add this ?
         }
@@ -740,8 +734,15 @@ void QIperfd::onFinished(int refrow, int exitCode, int exitStatus, QString ippor
 
 void QIperfd::onThroughput(int idx, QString sInterval, QString data)
 {
-    QString s = QString(CMD_IPERF_TP_DATA)+":"+ QString::number(idx)+":"+
-                sInterval+":"+ data;
+    QString s = QString(CMD_IPERF_TP_DATA) + ":" + QString::number(idx)
+                + ":" + sInterval + ":" + data;
+    m_wsserver->sendTextResult(s);
+}
+
+void QIperfd::onIperfExtendWait(int refrow, qint64 iwait)
+{
+    QString s = QString(CMD_IPERF_EXTEND_WAIT) + ":" + QString::number(refrow)
+                + ":" + QString::number(iwait);
     m_wsserver->sendTextResult(s);
 }
 

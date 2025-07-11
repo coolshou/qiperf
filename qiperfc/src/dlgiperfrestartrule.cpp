@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QMessageBox>
+#include <QMetaEnum>
 
 #include <QDebug>
 
@@ -46,14 +47,19 @@ QJsonObject DlgIperfRestartRule::getJsonCfgObj()
         //string
         QJsonObject ruleobj;
         QString chk="1";
+        QMetaEnum metaEnum = QMetaEnum::fromType<Qt::CheckState>();
+        QString checkedString = metaEnum.valueToKey(ui->twIperfRule->item(i, cols::Enable)->checkState());
+        qDebug() << "checkState:" << checkedString;
         if (ui->twIperfRule->item(i, cols::Enable)->checkState()== Qt::Unchecked){
             chk="0";
         }
-        ruleobj.insert("enable", chk);
-        ruleobj.insert("keyword", ui->twIperfRule->item(i, cols::Keyword)->text());
-        ruleobj.insert("count", ui->twIperfRule->item(i, cols::Count)->text().toInt());
-        ruleobj.insert("comment", ui->twIperfRule->item(i, cols::Comment)->text());
-        arrRule.append(ruleobj);
+        if (chk.startsWith("1")){
+            ruleobj.insert("enable", chk);
+            ruleobj.insert("keyword", ui->twIperfRule->item(i, cols::Keyword)->text());
+            ruleobj.insert("count", ui->twIperfRule->item(i, cols::Count)->text().toInt());
+            // ruleobj.insert("comment", ui->twIperfRule->item(i, cols::Comment)->text());
+            arrRule.append(ruleobj);
+        }
     }
     obj.insert("iperfRestartRules", arrRule);
 
@@ -200,13 +206,13 @@ void DlgIperfRestartRule::onDelRule(bool checked)
 void DlgIperfRestartRule::handleItemChanged(QTableWidgetItem *item)
 {
     if (item->column() == 0) {
-        int row = item->row();
+        // int row = item->row();
         if (item->checkState() == Qt::Checked) {
-            qInfo() << "Row" << row << "checkbox checked!";
+            // qInfo() << "Row" << row << "checkbox checked!";
             // QString name = tableWidget->item(row, 1)->text();
             // qDebug() << "Name for checked item:" << name;
         } else {
-            qInfo() << "Row" << row << "checkbox unchecked.";
+            // qInfo() << "Row" << row << "checkbox unchecked.";
         }
     }
 }

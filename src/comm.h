@@ -66,6 +66,7 @@
 #define CMD_IPERF_TP_DATA  "IPERF_TP_DATA"  // report iperf throughput data
 #define CMD_IPERF_TP_FILE  "IPERF_TP_FILE"  // iperf throughput data filename with full path
 #define CMD_IPERF_GET_TP_FILE  "IPERF_GET_TP_FILE"  // get iperf throughput data file
+#define CMD_IPERF_EXTEND_WAIT "IPERF_EXTEND_WAIT"  // info to extend wait time in sec
 // NTP server
 #define CMD_NTP_START "NTP_START"  // enable/disable NTP server NTP_START:1 => enable, NTP_START:0 => disable
 #define CMD_NTP_STARTED "NTP_STARTED"

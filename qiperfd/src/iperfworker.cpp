@@ -28,7 +28,7 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
                          uint port, QString bindaddr, QString target,
                          bool bidir, bool reverse, int interval,
                          int delaystart, bool ignoreWrongInterval,
-                         bool restartonerror, const QJsonObject &restartrule,
+                         bool restartonerror, QJsonObject restartrule,
                          QObject *parent)
     : QObject{parent}, m_idx(idx), m_version(version), m_cmd(cmd), m_port(port),
       m_bindaddr(bindaddr), m_target(target), m_bidir(bidir), m_reverse(reverse),
@@ -44,9 +44,9 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     m_restartonNormalStop = false;
     m_iperflogpath = "";
     if (m_restartonerror){
-        m_restartonErrorStop = restartrule["restartonErrorStop"].toBool();
-        m_restartonNormalStop = restartrule["restartonNormalStop"].toBool();
-        m_restartrules = restartrule["iperfRestartRules"].toArray();
+        m_restartonErrorStop = m_restartrule["restartonErrorStop"].toBool();
+        m_restartonNormalStop = m_restartrule["restartonNormalStop"].toBool();
+        m_restartrules = m_restartrule["iperfRestartRules"].toArray();
     }
     m_iperfwrapper = new IperfWrapper(m_ignoreWrongInterval);
     m_iperfwrapper->setDelaytime(delaystart);
@@ -66,6 +66,9 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     }
     int omitidx = m_arguments.indexOf("--omit");
     m_omit = m_arguments.value(omitidx+1, 0).toInt();
+    int durationidx = m_arguments.indexOf("-t");
+    m_duration = m_arguments.value(durationidx+1, 0).toInt();
+
 //    m_port = port;
 //    m_bindaddr = bindaddr;
 //    m_target = target;
@@ -109,8 +112,11 @@ void IperfWorker::work()
 {   //this code run in another thread
     m_threadid = getThreadID();
 
+    debug(QString("restartonerror:%1").arg(m_restartonerror?"true":"false"));
     debug(QString("restartonErrorStop:%1").arg(m_restartonErrorStop?"true":"false"));
     debug(QString("restartonNormalStop:%1").arg(m_restartonNormalStop?"true":"false"));
+
+    QJsonDocument doc(m_restartrules);
     // m_restartrule.to;
     // 1. Convert QVariantMap to QJsonObject
     // QJsonObject jsonObject = QJsonObject::fromVariantMap(m_restartrule);
@@ -119,8 +125,8 @@ void IperfWorker::work()
     // // // 3. Convert the QJsonDocument to a QString
     // // //    QJsonDocument::toJson() returns a QByteArray, so convert it to QString.
     // // //    QJsonDocument::Indented for pretty-printing, QJsonDocument::Compact for minimal.
-    // QString jsonString = doc.toJson(QJsonDocument::Indented);
-    // debug("restartrule: "+jsonString);
+    QString jsonString = doc.toJson(QJsonDocument::Indented);
+    debug("restartrule: "+jsonString, 3);
 
 
     try{
@@ -379,6 +385,27 @@ void IperfWorker::readyReadStdErr()
 
 void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    if (exitCode==0){
+        //normal stop
+        if (m_restartonNormalStop){
+            debug("TODO: restartonNormalStop");
+            if (!m_servermode){
+                //client mode have duration, info qiperf console to extend wait time
+                emit iperfExtendWait(m_idx, m_duration);
+            }
+            // TODO setup restart?
+        }
+    }else{
+        //error stop
+        if (m_restartonErrorStop) {
+            debug("TODO: restartonErrorStop");
+            if (!m_servermode){
+                //client mode have duration, info qiperf console to extend wait time
+                emit iperfExtendWait(m_idx, m_duration);
+            }
+            // TODO setup restart?
+        }
+    }
     if (m_selfdestruction->isActive()){
         debug("onFinished: stop m_selfdestructor");
         emit stopSelfDestructor();

@@ -68,7 +68,7 @@ public:
             QString parallel="0", QString protocal="TCP",
             bool bidir=false, bool reverse=false, int interval=1,
             int delaytime=0, bool bServer=false, bool ignoreWrongInterval=false,
-            bool restartonerror=false, const QJsonObject &restartrule = QJsonObject());
+            bool restartonerror=false, QJsonObject restartrule = QJsonObject());
     qint64 add(QString refrow, QString sIgnoreWrongInterval, QVariantMap jsondata);
     void del(int idx, bool servermode);
     int addIperfServer(QString refrow, int version, uint port, QString bindHost="");
@@ -94,6 +94,7 @@ public slots:
     void onStarted(int m_idx, bool smode, QString ipport);
     void onFinished(int refrow, int exitCode, int exitStatus, QString ipport, QString filename, bool servermode);
     void onThroughput(int idx, QString sInterval, QString data); // idx, refrow, throughput data
+    void onIperfExtendWait(int refrow, qint64 iwait);
     void onQuit();
     void onNewLine(QString line);
     void doRestartQIperfd();
