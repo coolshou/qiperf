@@ -112,13 +112,13 @@ void dlgOption::updatecfg()
     m_cfg->endGroup();
 
     m_cfg->beginGroup("agent");
-    QString ifname = ui->cb_minterfaces->currentText();
-    m_cfg->setValue("managerifname", ifname);
-    QStringList qs = ifname.split(": ");
-    int port = ui->sb_port->value();
-    if (qs.length()>=2){
-        emit ipaddressUpdated(qs[1], port);
-    }
+    // QString ifname = ui->cb_minterfaces->currentText();
+    // m_cfg->setValue("managerifname", ifname);
+    // QStringList qs = ifname.split(": ");
+    // int port = ui->sb_port->value();
+    // if (qs.length()>=2){
+    //     emit ipaddressUpdated(qs[1], port);
+    // }
     // m_cfg->setValue("managerport", port);
     m_cfg->setValue("closetosystray", ui->cbCloseToSysTray->isChecked());
     m_cfg->endGroup();

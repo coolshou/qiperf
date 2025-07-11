@@ -32,7 +32,7 @@ public slots:
     void onTPUnitChanged(QString sunit);
     void updateFontStyle(QString fontfamily);
 signals:
-    void ipaddressUpdated(QString ipaddress, int port);
+    // void ipaddressUpdated(QString ipaddress, int port);
     void widthChanged(int width);
     void heigthChanged(int heigth);
     void showGroup(bool bShow);
