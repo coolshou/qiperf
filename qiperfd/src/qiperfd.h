@@ -64,7 +64,7 @@ public:
     QString getManagerInterface();
     QString getIfNameByHumanReadableName(QString name);
     qint64 add(QString refrow, int version,QString m_cmd,QString args, uint port,
-            QString bndaddr="0.0.0.0", QString target="",
+            QString bindaddr="0.0.0.0", QString target="",
             QString parallel="0", QString protocal="TCP",
             bool bidir=false, bool reverse=false, int interval=1,
             int delaytime=0, bool bServer=false, bool ignoreWrongInterval=false,

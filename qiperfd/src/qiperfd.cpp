@@ -228,7 +228,7 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
 }
 
 qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint port,
-                 QString bndaddr, QString target,
+                 QString bindaddr, QString target,
                  QString parallel, QString protocal, bool bidir, bool reverse,
                  int interval, int delaytime, bool bServer, bool ignoreWrongInterval,
                  bool restartonerror, QJsonObject restartrule)
@@ -244,7 +244,7 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
         m_threads.insert(idx, iperf_th);
     }
     IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port,
-                                           bndaddr, target, bidir, reverse,
+                                           bindaddr, target, bidir, reverse,
                                            interval, delaytime,
                                            ignoreWrongInterval, restartonerror,
                                            restartrule);
