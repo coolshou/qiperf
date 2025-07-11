@@ -105,7 +105,7 @@ qint64 WSClient::sendText(QString message)
             debug("error sendText size=" + QString::number(rc) + ", " + message);
         }
     }else{
-        debug("m_webSocket not isValid");
+        debug("m_webSocket not isValid (going to send: "+ message +")" );
     }
     return rc;
 }
