@@ -162,7 +162,7 @@ void TpWorker::work()
             QString serverIP = tp->getMgrServer();
             //TODO: detect manager server is pingable
             err = "=====[TpWorker] server:" + serverIP;
-            debug(err);
+            debug(err, 5);
             //if (!m_wss.contains(serverIP)) {
             if (!m_ws.contains(serverIP)) {
                 //TODO: can not work with interface with DHCP under Windows??
@@ -178,8 +178,8 @@ void TpWorker::work()
                 connect(m_ws[serverIP], &WSClient::iperfExtendWait, this, &TpWorker::onIperfExtendWait);
                 connect(m_ws[serverIP], &WSClient::debuginfo, this, &TpWorker::onDebuginfo);
             }else{
-                err =  "[TpWorker]m_wss exist:" + serverIP;
-                debug(err);
+                err =  "[TpWorker]m_ws exist:serverIP:" + serverIP;
+                debug(err, 5);
                 m_ws[serverIP]->setDatapath(m_datapath);
             }
             itimeout = iWSTimeout;
@@ -233,7 +233,7 @@ void TpWorker::work()
             //RPC to control all client endpoint (iperf client)
             QString clientIP = tp->getMgrClient();
             err = "=====[TpWorker] client:" + clientIP;
-            debug(err);
+            debug(err, 5);
             //TODO: detect manager client is pingable
             if (!m_ws.contains(clientIP)) {
                 s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
@@ -247,7 +247,8 @@ void TpWorker::work()
                 connect(m_ws[clientIP], &WSClient::iperfExtendWait, this, &TpWorker::onIperfExtendWait);
                 connect(m_ws[clientIP], &WSClient::debuginfo, this, &TpWorker::onDebuginfo);
             }else{
-                debug("[TpWorker]m_wsc exist:" + clientIP);
+                err =  "[TpWorker]m_ws exist:clientIP:" + clientIP;
+                debug(err, 5);
                 m_ws[clientIP]->setDatapath(m_datapath);
             }
             itimeout = iWSTimeout;

@@ -208,7 +208,7 @@ void WSClient::onTextMessageReceived(QString message)
             cut2 = message.indexOf(':', 0);
             QString smode = message.left(cut2); // S: server/ C: client mode
             message = message.right(message.length()-cut2-1); // key
-            debug("CMD_IPERF_STARTED:" + smode + " msg:" + message);
+            debug("CMD_IPERF_STARTED:" + smode + " msg:" + message, 5);
             emit iperfStarted(smode, message);
         } else if (act.startsWith(CMD_IPERF_STOPED)){
             cut2 = message.indexOf(':', 0);  //
@@ -243,7 +243,7 @@ void WSClient::onTextMessageReceived(QString message)
             // TODO: multi m_idx request to extent wait time, how to calc the time
             int cut3 = message.indexOf(':', 0);
             QString sWait = message.left(cut3);
-            debug("CMD_IPERF_EXTEND_WAIT: add wait time: " + sWait);
+            debug("CMD_IPERF_EXTEND_WAIT: add wait time: " + sWait, 6);
             emit iperfExtendWait(m_idx, sWait.toLongLong());
         } else if (act.startsWith(CMD_SERIAL_OPENED)){
             emit serialopened(m_idx, from, message);
