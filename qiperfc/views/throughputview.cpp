@@ -9,6 +9,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QDir>
 
 #include <QDebug>
 
@@ -173,8 +174,8 @@ void ThroughputView::onDelete()
             // TODO: should/how we modify remain item's idx??
             // signal remove files
             QStringList fs;
-            fs.append(d+QDir::separator()+client+".log");
-            fs.append(d+QDir::separator()+server+".log");
+            fs.append(d + QDir::separator() + client + ".log");
+            fs.append(d + QDir::separator() + server + ".log");
             emit deleteFiles(fs);
         }
     }
@@ -360,7 +361,7 @@ void ThroughputView::onSaveImg(bool checked)
         QFileInfo fi(fileName);
         QString ext = fi.suffix();
         if (ext.compare(QIPERF_EXT_PNG)!=0){
-            fileName = fi.path()+ "/" + fi.baseName() + "."+ QIPERF_EXT_PNG;
+            fileName = fi.path()+ QDir::separator() + fi.baseName() + "."+ QIPERF_EXT_PNG;
         }
         m_tpplot->savePng(fileName);
     }

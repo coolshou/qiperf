@@ -19,7 +19,7 @@
 #include <QToolTip>
 #include <QAction>
 #include <QCursor>
-
+#include <QDir>
 #include <QVBoxLayout>
 
 #include "endpointact.h"
@@ -321,7 +321,7 @@ void QIperfC::onSave()
         QFileInfo fi(fileName);
         QString ext = fi.suffix();
         if (ext.compare(QIPERF_EXT)!=0){
-            fileName = fi.path()+ "/" + fi.baseName() + "."+ QIPERF_EXT;
+            fileName = fi.path()+ QDir::separator() + fi.baseName() + "."+ QIPERF_EXT;
         }
         //    qInfo() << "save file: " << fileName ;
         if (save(fileName)){
@@ -1034,7 +1034,7 @@ void QIperfC::onExport()
             // QString img = fi.path() +QDir::separator()+ fi.baseName()+".png";
             QString ext = fi.suffix();
             if (ext.compare(HTML_EXT)!=0){
-                fileName = fi.path() +QDir::separator()+ fi.baseName() + "."+ HTML_EXT;
+                fileName = fi.path() + QDir::separator()+ fi.baseName() + "."+ HTML_EXT;
             }
             QStringList pcs = m_throughputview->getPCs();
             // qDebug() << "pcs:" << pcs;
