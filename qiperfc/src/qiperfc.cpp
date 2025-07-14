@@ -317,14 +317,16 @@ void QIperfC::onSave()
     }
     QString fileName = QFileDialog::getSaveFileName(this,
              tr("Save QIperf "), path, tr(QIPERF_EXT_FILTER));
-    QFileInfo fi(fileName);
-    QString ext = fi.suffix();
-    if (ext.compare(QIPERF_EXT)!=0){
-        fileName = fi.path()+ "/" + fi.baseName() + "."+ QIPERF_EXT;
-    }
-//    qInfo() << "save file: " << fileName ;
-    if (save(fileName)){
-        m_oldsavepath = fi.path();
+    if (!fileName.isEmpty()){
+        QFileInfo fi(fileName);
+        QString ext = fi.suffix();
+        if (ext.compare(QIPERF_EXT)!=0){
+            fileName = fi.path()+ "/" + fi.baseName() + "."+ QIPERF_EXT;
+        }
+        //    qInfo() << "save file: " << fileName ;
+        if (save(fileName)){
+            m_oldsavepath = fi.path();
+        }
     }
 
 }
@@ -1027,43 +1029,45 @@ void QIperfC::onExport()
         }
         QString fileName = QFileDialog::getSaveFileName(this,
                                                         tr("Export Result to html"), path, tr(HTML_EXT_FILTER));
-        QFileInfo fi(fileName);
-        // QString img = fi.path() +QDir::separator()+ fi.baseName()+".png";
-        QString ext = fi.suffix();
-        if (ext.compare(HTML_EXT)!=0){
-            fileName = fi.path() +QDir::separator()+ fi.baseName() + "."+ HTML_EXT;
-        }
-        QStringList pcs = m_throughputview->getPCs();
-        // qDebug() << "pcs:" << pcs;
+        if (!fileName.isEmpty()){
+            QFileInfo fi(fileName);
+            // QString img = fi.path() +QDir::separator()+ fi.baseName()+".png";
+            QString ext = fi.suffix();
+            if (ext.compare(HTML_EXT)!=0){
+                fileName = fi.path() +QDir::separator()+ fi.baseName() + "."+ HTML_EXT;
+            }
+            QStringList pcs = m_throughputview->getPCs();
+            // qDebug() << "pcs:" << pcs;
 #if (DEBUG_EXPORT_HTML==1)
-        eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth, m_debugdlg);
+            eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth, m_debugdlg);
 #else
-        eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth);
+            eh = new ExportHtml(templatefile, fileName, m_TPExportWidth, m_TPExportHeigth);
 #endif
 
-        //debug ========================
+//debug ========================
 #if (DEBUG_EXPORT_HTML==1)
-        // Create the dialog
-        m_debugdlg->setWindowTitle("Export to HTML");
-        // Create a layout and add the widget to it
-        QVBoxLayout *layout = new QVBoxLayout;
-        layout->addWidget(eh);
-        // Set the layout on the QDialog
-        m_debugdlg->setLayout(layout);
-        // Show the dialog
-        m_debugdlg->show();
-        //end debug ========================
+            // Create the dialog
+            m_debugdlg->setWindowTitle("Export to HTML");
+            // Create a layout and add the widget to it
+            QVBoxLayout *layout = new QVBoxLayout;
+            layout->addWidget(eh);
+            // Set the layout on the QDialog
+            m_debugdlg->setLayout(layout);
+            // Show the dialog
+            m_debugdlg->show();
+            //end debug ========================
 #endif
-        QString pcsinfo = m_qipconfig->getPCsInfo();
-        if (pcsinfo.isEmpty()){
-            pcsinfo = m_endpointmgr->getPCsInfo(pcs);
+            QString pcsinfo = m_qipconfig->getPCsInfo();
+            if (pcsinfo.isEmpty()){
+                pcsinfo = m_endpointmgr->getPCsInfo(pcs);
+            }
+            eh->setData(m_throughputview->getChilds(false), m_throughputview->toPixmap(m_TPExportWidth, m_TPExportHeigth), pcsinfo);
+            eh->setTestTime(m_TestStartTime.toString(DATETIME_NOW_FORMAT));
+            eh->setRawFilenames(m_qipconfig->getIperfRawFilenames());
+            // TODO: DUT info. model, firmware ver, HW ver...
+            // eh->procressData();
+            eh->exporthtml();
         }
-        eh->setData(m_throughputview->getChilds(false), m_throughputview->toPixmap(m_TPExportWidth, m_TPExportHeigth), pcsinfo);
-        eh->setTestTime(m_TestStartTime.toString(DATETIME_NOW_FORMAT));
-        eh->setRawFilenames(m_qipconfig->getIperfRawFilenames());
-        // TODO: DUT info. model, firmware ver, HW ver...
-        // eh->procressData();
-        eh->exporthtml();
 
     }else {
         qDebug() << "NO throughput record to Export : TestStartTime: " << m_TestStartTime.toString(DATETIME_NOW_FORMAT);

@@ -356,12 +356,14 @@ void ThroughputView::onSaveImg(bool checked)
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     tr("Save throughput plotchart to png"),
                                                     path, tr(QIPERF_EXT_FILTER_PNG));
-    QFileInfo fi(fileName);
-    QString ext = fi.suffix();
-    if (ext.compare(QIPERF_EXT_PNG)!=0){
-        fileName = fi.path()+ "/" + fi.baseName() + "."+ QIPERF_EXT_PNG;
+    if (!fileName.isEmpty()) {
+        QFileInfo fi(fileName);
+        QString ext = fi.suffix();
+        if (ext.compare(QIPERF_EXT_PNG)!=0){
+            fileName = fi.path()+ "/" + fi.baseName() + "."+ QIPERF_EXT_PNG;
+        }
+        m_tpplot->savePng(fileName);
     }
-    m_tpplot->savePng(fileName);
 }
 
 void ThroughputView::setXRangeUpper(double upper)
