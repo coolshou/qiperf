@@ -44,7 +44,7 @@ private:
     QString m_source; // TODO
     uint m_ttl;
     QMap<int, IcmpWrapper*> m_pingworkers;
-    QMap<int, QThread*> m_threads; // iperfworker's thread
+    QMap<int, QThread*> m_threads; // pingworker's thread
 };
 
 #endif // ICMPPING_H
