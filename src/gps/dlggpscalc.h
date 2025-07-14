@@ -53,7 +53,10 @@ private slots:
     void initAction();
     void onInsert(bool checked);
     void onDelete(bool checked);
+    void onAddRow(QString name, double latitude, double longitude, double altitude);
     void onClear(bool checked);
+    void onLoadCliecked(bool checked);
+    void onSaveCliecked(bool checked);
     void onCalcCliecked(bool checked);
     void onShowMap(bool checked);
     void onShow3D(bool checked);
@@ -65,6 +68,8 @@ private slots:
     void onCheckTileFinished();
     void onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode);
 private:
+    void onLoad(QString filename);
+    bool onSave(QString filename);
     Ui::DlgGpsCalc *ui;
     QSettings *m_cfg;
     QMenu *m_contextMenu;
@@ -74,6 +79,7 @@ private:
     DlgOpenStreetMap *m_dlgOSM;
     QNetworkReply *reply = nullptr;
     bool showline=false;
+    QString m_oldsavepath;
 };
 
 #endif // DLGGPSCALC_H

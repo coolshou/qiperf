@@ -17,6 +17,9 @@
 #define QIPERF_AUTOS_EXT_FILTER "qiperf simple automate (*.qis)"
 #define QIPERF_EXT_PNG "png"
 #define QIPERF_EXT_FILTER_PNG "png (*.png)"
+#define QIPERF_EXT_JSON "json"
+#define QIPERF_EXT_FILTER_JSON "json (*.json)"
+
 
 #define ALL_EXT_FILTER "All (*.*)"
 #define HTML_EXT "html"

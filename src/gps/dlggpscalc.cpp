@@ -7,7 +7,15 @@
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+
 #include "geotranslate.h"
+#include "comm.h"
 
 #include <QDebug>
 
@@ -32,6 +40,8 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
     initAction();
     m_dlgOSM = new DlgOpenStreetMap();
     connect(this, &DlgGpsCalc::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
+    connect(ui->pbLoad, &QPushButton::clicked, this, &DlgGpsCalc::onLoadCliecked);
+    connect(ui->pbSave, &QPushButton::clicked, this, &DlgGpsCalc::onSaveCliecked);
     connect(ui->pbCalc, &QPushButton::clicked, this, &DlgGpsCalc::onCalcCliecked);
     connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgGpsCalc::onShowMap);
     connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgGpsCalc::onShow3D);
@@ -128,7 +138,23 @@ void DlgGpsCalc::onDelete(bool checked)
     Q_UNUSED(checked)
     int iRow = ui->tableWidget->currentRow();//->selectRow();
     qDebug() << "onDelete:" <<  QString::number(iRow);
-     ui->tableWidget->removeRow(iRow);
+    ui->tableWidget->removeRow(iRow);
+}
+
+void DlgGpsCalc::onAddRow(QString name, double latitude, double longitude, double altitude)
+{
+    int iRow = ui->tableWidget->rowCount();
+    // ui->tableWidget->setRowCount(iRow);
+    ui->tableWidget->insertRow(iRow);
+    qDebug() << "name:" << name << " ,latitude:" << QString::number(latitude)
+             << " ,longitude:" << QString::number(longitude)
+             << " ,altitude:" <<  QString::number(altitude);
+    ui->tableWidget->setSortingEnabled(false);
+    ui->tableWidget->setItem(iRow, GPScols::PositionName, new QTableWidgetItem(name));
+    ui->tableWidget->setItem(iRow, GPScols::Latitude, new QTableWidgetItem(QString::number(latitude)));
+    ui->tableWidget->setItem(iRow, GPScols::Longitude, new QTableWidgetItem(QString::number(longitude)));
+    ui->tableWidget->setItem(iRow, GPScols::Altitude, new QTableWidgetItem(QString::number(altitude)));
+    ui->tableWidget->setSortingEnabled(true);
 }
 
 void DlgGpsCalc::onClear(bool checked)
@@ -138,6 +164,49 @@ void DlgGpsCalc::onClear(bool checked)
     if (ui->tableWidget->rowCount()>0){
         ui->tableWidget->clearContents();
         ui->tableWidget->setRowCount(0);
+    }
+}
+
+void DlgGpsCalc::onLoadCliecked(bool checked)
+{
+    Q_UNUSED(checked)
+    QString path;
+    if (!m_oldsavepath.isNull()){
+        path = m_oldsavepath;
+    }else {
+        path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    }
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    tr("Load Position config from file"),
+                                                    path ,
+                                                    tr(QIPERF_EXT_FILTER_JSON));
+    if (!fileName.isEmpty()){
+        onLoad(fileName);
+    }
+}
+
+void DlgGpsCalc::onSaveCliecked(bool checked)
+{
+    Q_UNUSED(checked)
+    QString path;
+    if (!m_oldsavepath.isNull()){
+        path = m_oldsavepath;
+    }else {
+        path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    }
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Save Position config to file "),
+                                                    path,
+                                                    tr(QIPERF_EXT_FILTER_JSON));
+    if (!fileName.isEmpty()){
+        QFileInfo fi(fileName);
+        QString ext = fi.suffix();
+        if (ext.compare(QIPERF_EXT_JSON)!=0){
+            fileName = fi.path()+ QDir::separator() + fi.baseName() + "."+ QIPERF_EXT_JSON;
+        }
+        if (onSave(fileName)){
+            m_oldsavepath = fi.path();
+        }
     }
 }
 
@@ -376,4 +445,90 @@ void DlgGpsCalc::onCheckTileFinished()
 void DlgGpsCalc::onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode)
 {
     qDebug() << errorcode << " onCheckTileErrorOccurred: " << reply->errorString();
+}
+
+void DlgGpsCalc::onLoad(QString filename)
+{
+    // qDebug() << "onLoad file:" << filename;
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "Failed to open file:" << file.errorString();
+        return; // Or handle the error appropriately
+    }
+
+    QByteArray jsonData = file.readAll();
+    file.close();
+
+    QJsonParseError parseError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        qDebug() << "Failed to parse JSON:" << parseError.errorString();
+        return; // Or handle the error appropriately
+    }
+    if (jsonDoc.isNull()) {
+        qDebug() << "QJsonDocument is null after parsing.";
+        return; // Or handle the error appropriately
+    }
+
+    // Now jsonDoc contains the loaded JSON data, and you can access its content
+    // For example, if it's an object:
+    if (jsonDoc.isObject()) {
+        ui->twResult->clearContents();
+        ui->twResult->setRowCount(0);
+        ui->tableWidget->clearContents();
+        ui->tableWidget->setRowCount(0);
+        QJsonObject rootObject = jsonDoc.object();
+        // Process the QJsonObject
+        QJsonArray addPos = rootObject["positions"].toArray();
+        for (QJsonArray::const_iterator it=addPos.constBegin(); it!=addPos.constEnd(); ++it) {
+            QJsonObject posdata= it->toObject();
+            onAddRow(posdata["name"].toString(), posdata["latitude"].toDouble(),
+                     posdata["longitude"].toDouble(), posdata["altitude"].toDouble());
+        }
+    }
+}
+
+bool DlgGpsCalc::onSave(QString filename)
+{
+    qDebug() << "onSave file:" << filename;
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "Failed to open file:" << file.errorString();
+        return false; // Or handle the error appropriately
+    }
+    QJsonDocument jsonDoc ;
+    QJsonObject rootObject;
+    QJsonArray pos;
+    QTableWidgetItem *item;
+    if (ui->tableWidget->rowCount()>0){
+        for(int i=0; i< ui->tableWidget->rowCount(); i++){
+            QJsonObject posdata;
+            item = ui->tableWidget->item(i, GPScols::PositionName);
+            if (item) {
+                posdata["name"] = item->text();
+            }
+            item = ui->tableWidget->item(i, GPScols::Latitude);
+            if (item) {
+                posdata["latitude"] = item->text();
+            }
+            item = ui->tableWidget->item(i, GPScols::Longitude);
+            if (item) {
+                posdata["longitude"] = item->text();
+            }
+            item = ui->tableWidget->item(i, GPScols::Altitude);
+            if (item) {
+                posdata["altitude"] = item->text();
+            }
+            pos.append(posdata);
+        }
+        rootObject["positions"] = pos;
+        jsonDoc.setObject(rootObject);
+        QString strJson(jsonDoc.toJson(QJsonDocument::Indented));
+
+        QTextStream out(&file);
+        out << strJson;
+        out.flush();
+    }
+    file.close();
+    return true;
 }
