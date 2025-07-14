@@ -664,5 +664,7 @@ void DlgIperf::onFmtreportChanged(QString text)
 void DlgIperf::onShowIperfRestartRule(bool checked)
 {
     Q_UNUSED(checked)
-    m_dlgrule->exec();
+    //load setting into dlgrule
+    // m_dlgrule->exec();
+    m_dlgrule->show();
 }
