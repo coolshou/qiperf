@@ -240,6 +240,7 @@ void WSClient::onTextMessageReceived(QString message)
             }
             //        emit iperfStarted();
         } else if (act.startsWith(CMD_IPERF_EXTEND_WAIT)){
+            // TODO: multi m_idx request to extent wait time, how to calc the time
             int cut3 = message.indexOf(':', 0);
             QString sWait = message.left(cut3);
             debug("CMD_IPERF_EXTEND_WAIT: add wait time: " + sWait);
