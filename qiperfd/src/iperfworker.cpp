@@ -29,12 +29,14 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
                          bool bidir, bool reverse, int interval,
                          int delaystart, bool ignoreWrongInterval,
                          bool restartonerror, QJsonObject restartrule,
+                         QString tmplogpath,
                          QObject *parent)
     : QObject{parent}, m_idx(idx), m_version(version), m_cmd(cmd), m_port(port),
       m_bindaddr(bindaddr), m_target(target), m_bidir(bidir), m_reverse(reverse),
     m_interval(interval), m_delaystart(delaystart),
     m_ignoreWrongInterval(ignoreWrongInterval),
     m_restartonerror(restartonerror), m_restartrule(restartrule),
+    m_tmplogpath(tmplogpath),
     m_parent(parent)
 {
     m_debuglv = 3;
@@ -66,9 +68,12 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     }
     int omitidx = m_arguments.indexOf("--omit");
     m_omit = m_arguments.value(omitidx+1, 0).toInt();
+    m_iperfwrapper->setOmit(m_omit);
     int durationidx = m_arguments.indexOf("-t");
     m_duration = m_arguments.value(durationidx+1, 0).toInt();
-
+    if (m_omit>0){
+        m_duration = m_duration + m_omit;
+    }
 //    m_port = port;
 //    m_bindaddr = bindaddr;
 //    m_target = target;
@@ -96,7 +101,11 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     m_selfdestruction->setInterval(m_selfdestructionTime);
     connect(m_selfdestruction, &QTimer::timeout, this, &IperfWorker::onSelfDestructor);
     connect(this, &IperfWorker::stopSelfDestructor, m_selfdestruction, &QTimer::stop);
-
+    connect(this, &IperfWorker::workerRestart, this, &IperfWorker::onWorkerRestart);
+    m_restarter = new QTimer(this);
+    // Set it to be a single-shot timer
+    m_restarter->setSingleShot(true);
+    connect(m_restarter, &QTimer::timeout, this, &IperfWorker::onRestart);
 }
 
 IperfWorker::~IperfWorker()
@@ -112,22 +121,13 @@ void IperfWorker::work()
 {   //this code run in another thread
     m_threadid = getThreadID();
 
-    debug(QString("restartonerror:%1").arg(m_restartonerror?"true":"false"));
-    debug(QString("restartonErrorStop:%1").arg(m_restartonErrorStop?"true":"false"));
-    debug(QString("restartonNormalStop:%1").arg(m_restartonNormalStop?"true":"false"));
+    debug(QString("restartonerror:%1").arg(m_restartonerror?"true":"false"), 5);
+    debug(QString("restartonErrorStop:%1").arg(m_restartonErrorStop?"true":"false"), 5);
+    debug(QString("restartonNormalStop:%1").arg(m_restartonNormalStop?"true":"false"), 5);
 
     QJsonDocument doc(m_restartrules);
-    // m_restartrule.to;
-    // 1. Convert QVariantMap to QJsonObject
-    // QJsonObject jsonObject = QJsonObject::fromVariantMap(m_restartrule);
-    // // // 2. Create a QJsonDocument from the QJsonObject
-    // QJsonDocument doc(jsonObject);
-    // // // 3. Convert the QJsonDocument to a QString
-    // // //    QJsonDocument::toJson() returns a QByteArray, so convert it to QString.
-    // // //    QJsonDocument::Indented for pretty-printing, QJsonDocument::Compact for minimal.
     QString jsonString = doc.toJson(QJsonDocument::Indented);
-    debug("restartrule: "+jsonString, 3);
-
+    debug("restartrule: " + jsonString, 5);
 
     try{
         m_stop = false;
@@ -186,6 +186,12 @@ void IperfWorker::work()
     }
 }
 
+void IperfWorker::onWorkerRestart()
+{
+    //use timer to start work()
+    m_restarter->start(0);
+}
+
 bool IperfWorker::isRunning()
 {
     return m_running;
@@ -202,6 +208,24 @@ void IperfWorker::onSetDebugLv(int lv)
 {
 
     m_debuglv = lv;
+}
+
+void IperfWorker::onSetStartTime(QString stime)
+{
+    setIperfLogPath(m_tmplogpath + stime);
+    m_starttime =QDateTime::fromString(stime, DATETIME_NOW_FORMAT);
+}
+
+void IperfWorker::onSetReStartTime(int idx, QDateTime restime)
+{
+    m_restarttimemap.value(idx, restime); // record restart time
+    qint64 restartoffset = m_starttime.secsTo(restime) + m_omit + 1;
+    debug("onSetReStartTime:restartoffset:" + QString::number(restartoffset)+
+          " start-time:" + m_starttime.toString(DATETIME_NOW_FORMAT)+
+          " restart-time:" + restime.toString(DATETIME_NOW_FORMAT));
+    if (m_iperfwrapper && restartoffset>0){
+        m_iperfwrapper->setRestarttimeoffset(restartoffset);
+    }
 }
 
 void IperfWorker::setStop()
@@ -243,6 +267,7 @@ QString IperfWorker::getBindKey()
 
 void IperfWorker::setIperfLogPath(QString filepath)
 {
+    debug("IperfWorker::setIperfLogPath:" + filepath,2);
     m_iperflogpath = filepath;
 }
 
@@ -340,6 +365,16 @@ void IperfWorker::onStarted()
     toLogFile(QString("### %1 \n").arg(stime));
 }
 
+void IperfWorker::onRestart()
+{
+    // restart work()
+    // TODO: any pre setting value?
+    m_restarttimes = m_restarttimes + 1;
+    onSetReStartTime(m_restarttimes, QDateTime::currentDateTime());
+    work();
+
+}
+
 void IperfWorker::readyReadStdOut()
 {
     QByteArray processOutput;
@@ -388,23 +423,25 @@ void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
     if (exitCode==0){
         //normal stop
         if (m_restartonNormalStop){
-            debug("TODO: restartonNormalStop", 3);
+            debug(QString("TODO: restartonNormalStop: %1").arg(m_servermode?"server":"client"), 3);
             if (!m_servermode){
                 //client mode have duration, info qiperf console to extend wait time
                 emit iperfExtendWait(m_idx, m_duration);
+                QThread::msleep(300); // client should be delay to start
             }
-            // TODO setup restart?
+            emit workerRestart();
             return;
         }
     }else{
         //error stop
         if (m_restartonErrorStop) {
-            debug("TODO: restartonErrorStop", 3);
+            debug(QString("TODO: restartonErrorStop: %1").arg(m_servermode?"server":"client"), 3);
             if (!m_servermode){
                 //client mode have duration, info qiperf console to extend wait time
                 emit iperfExtendWait(m_idx, m_duration);
+                QThread::msleep(200); // client should be delay to start
             }
-            // TODO setup restart?
+            emit workerRestart();
             return;
         }
     }

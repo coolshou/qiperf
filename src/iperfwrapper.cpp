@@ -21,6 +21,7 @@ IperfWrapper::IperfWrapper(bool ignorewronginterval, QObject *parent)
     : QObject{parent}, m_ignorewronginterval(ignorewronginterval)
 {
     m_debuglv=3;
+    m_restarttimeoffset = 0;
 }
 QString IperfWrapper::toIperf3args(QVariantMap jsondata)
 {
@@ -418,6 +419,9 @@ void IperfWrapper::parserIperf2(QString linedata)
                     if (m_delaytime>0){
                         sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
                     }
+                    if (m_restarttimeoffset>0){
+                        sInterval = QString::number(sInterval.toDouble()+ m_restarttimeoffset);
+                    }
                     //iperf2 throughput data
                     emit sendThroughput(m_refrow, sInterval, doc.toJson(QJsonDocument::Compact));
                     //clear record
@@ -603,6 +607,9 @@ void IperfWrapper::parserIperf3(QString linedata)
                     if (m_delaytime>0){
                         sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
                     }
+                    if (m_restarttimeoffset>0){
+                        sInterval = QString::number(sInterval.toDouble()+ m_restarttimeoffset);
+                    }
                     //iperf3 throughput data
                     emit sendThroughput(m_refrow, sInterval, doc.toJson(QJsonDocument::Compact));
                     //clear record
@@ -656,6 +663,11 @@ void IperfWrapper::setIperf(QString version, QString protocal, uint port)
 void IperfWrapper::setDelaytime(int delaytime)
 {
     m_delaytime = delaytime;
+}
+
+void IperfWrapper::setRestarttimeoffset(qint64 restarttimeoffset)
+{
+    m_restarttimeoffset = restarttimeoffset;
 }
 
 void IperfWrapper::setInterval(uint interval)

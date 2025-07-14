@@ -25,11 +25,10 @@ public:
                          bool bidir=false, bool reverse=false, int interval=1,
                          int delaystart=0, bool ignoreWrongInterval=false,
                          bool restartonerror=false, QJsonObject restartrule = QJsonObject(),
+                         QString tmplogpath = "/tmp",
                          QObject *parent = nullptr);
     ~IperfWorker() override;
-    void setStop();
     QString getBindKey(); // return  bind_addr:port
-    void setIperfLogPath(QString filepath); //full path of iperf log filename
     void setBidirTag(QString bidir);
     void setRefRow(QString refrow);
     void setExtra(QString parallel, QString protocal, uint port);
@@ -43,6 +42,7 @@ signals:
     void workerFinished(qint64 idx, bool servermode); // Signal to notify manager that this worker is done
     void started(int refrow, bool smode, QString ipport); // refrow, S/C, IPPort
     void finished(int refrow, int exitCode, int exitStatus, QString ipport, QString filename, bool servermode); // refrow, exitcode, exitStatus, , IPPort
+    void workerRestart();
     void log(int idx, QString msg); // refrow
     // void onStdout(int idx, QString text); // refrow
     void onStderr(int idx, int refrow, QString text, QString ipport); // idx, refrow, msg, ipport
@@ -54,22 +54,29 @@ signals:
 
 public slots:
     void work();
+    void setStop();
+    void onWorkerRestart();
     bool isRunning();
     void onSelfDestructor();
     void onSetDebugLv(int lv);
+    void onSetStartTime(QString stime);
+    void onSetReStartTime(int idx, QDateTime restime);
 private slots:
     void onStarted();
+    void onRestart();
     void readyReadStdOut();
     void readyReadStdErr();
     void onFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void parserStdOut(QString msg);
     void onThroughputData(int refrow, QString sInterval,  QString data);
     void onDebuginfo(QString msg);
+    void setIperfLogPath(QString filepath); //full path of iperf log filename
 
 private:
     QString m_threadid; // real thread id
     int m_selfdestructionTime;
     QTimer *m_selfdestruction;
+    QTimer *m_restarter; // timer to do restart;
     int m_refrow;// refrow
     qint64 m_idx;
     int m_version; // iperf version 2 or 3
@@ -87,6 +94,7 @@ private:
     bool m_restartonNormalStop;
     QJsonObject m_restartrule;
     QJsonArray m_restartrules; // array of rule
+    QString m_tmplogpath;
     QObject *m_parent;
     IperfWrapper *m_iperfwrapper;
     bool m_stop;  //user stop;
@@ -108,6 +116,9 @@ private:
     QMap<QString, QJsonArray> m_tpdatas;
     int m_debuglv;
 
+    bool m_restarttimes;  //count how many times it do restart
+    QDateTime m_starttime; // test start time
+    QMap<int, QDateTime> m_restarttimemap; //record each restart time stemp
 };
 
 #endif // IPERFWORKER_H

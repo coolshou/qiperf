@@ -22,6 +22,7 @@ public:
     void setFile(QString filename);
     void setIperf(QString version, QString protocal, uint port);
     void setDelaytime(int delaytime);
+    void setRestarttimeoffset(qint64 restarttimeoffset); //
     void setInterval(uint interval);
     void setArgs(QString arg);
     void setOmit(int omit);
@@ -52,6 +53,7 @@ private:
     QString m_protocal;
     uint m_port; //use port number;
     int m_delaytime;
+    qint64 m_restarttimeoffset; // store restart time and init start time diff in sec
     uint m_interval;
     int m_omit=0;
     bool m_ignorewronginterval;

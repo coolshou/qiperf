@@ -109,7 +109,10 @@ signals:
     void setMgrIfname(QString ifname);
     void iperfStarted(QString bindkey); // iperf thrad started
     void setStop();
+    void StopServer(); // emit to tell iperf server stop
+    void StopClient(); // emit to tell iperf client stop
     void setDebugLv(int lv);
+    void setStartTime(QString stime);
 
 private slots:
     void onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPort); //procress websocket action message
