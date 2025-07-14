@@ -11,7 +11,7 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     ui(new Ui::DlgOption)
 {
     ui->setupUi(this);
-    hidetab("main");
+    // hidetab("main");
     // font init
     initFonts();
 
@@ -62,10 +62,10 @@ void dlgOption::loadcfg(QSettings *cfg)
     cfg->endGroup();
 
     cfg->beginGroup("agent");
-    midx = ui->cb_minterfaces->findText(cfg->value("managerifname", "").toString());
-    if (midx>=0){
-        ui->cb_minterfaces->setCurrentIndex(midx);
-    }
+    // midx = ui->cb_minterfaces->findText(cfg->value("managerifname", "").toString());
+    // if (midx>=0){
+    //     ui->cb_minterfaces->setCurrentIndex(midx);
+    // }
     // ui->sb_port->setValue(cfg->value("managerport", 45454).toInt());
     ui->cbCloseToSysTray->setChecked(cfg->value("closetosystray", false).toBool());
     cfg->endGroup();

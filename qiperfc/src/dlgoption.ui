@@ -24,7 +24,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_iperf">
       <attribute name="title">
@@ -44,7 +44,10 @@
           <item>
            <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>width:</string>
+             <string>Width:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -59,9 +62,19 @@
            </widget>
           </item>
           <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>X</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="label_5">
             <property name="text">
              <string>Heigth:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -74,6 +87,19 @@
              <number>500</number>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
@@ -256,7 +282,7 @@
        </property>
        <item>
         <widget class="QWidget" name="widget_7" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,1">
+         <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="">
           <property name="spacing">
            <number>4</number>
           </property>
@@ -272,22 +298,12 @@
           <property name="bottomMargin">
            <number>2</number>
           </property>
-          <item>
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Manager:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="cb_minterfaces"/>
-          </item>
          </layout>
         </widget>
        </item>
        <item>
         <widget class="QWidget" name="widget_8" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="">
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
           <property name="spacing">
            <number>2</number>
           </property>
