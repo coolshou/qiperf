@@ -31,12 +31,14 @@ public:
     void setJsonRules(QJsonObject rule);
 protected:
     void changeEvent(QEvent *e)override;
+
 private slots:
     void onAddRule(bool checked);
     void onDelRule(bool checked);
     void handleItemChanged(QTableWidgetItem *item);
     void showContextMenu(const QPoint &pos);
     void onSaveDefault(bool checked);
+    void onOKClick();
 private:
     Ui::DlgIperfRestartRule *ui;
     QSettings *m_cfg;

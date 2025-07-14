@@ -6,6 +6,9 @@
 #include <QJsonParseError>
 #include <QMessageBox>
 #include <QMetaEnum>
+#include <QRegularExpression>
+
+#include "numberdelegate.h"
 
 #include <QDebug>
 
@@ -13,15 +16,20 @@ DlgIperfRestartRule::DlgIperfRestartRule(QSettings *cfg, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::DlgIperfRestartRule), m_cfg(cfg)
 {
+    // cfg: default setting from QSettings
     ui->setupUi(this);
     initMenu();
     ui->twIperfRule->setColumnWidth(cols::Enable, 15);
     ui->twIperfRule->setColumnWidth(cols::Count, 20);
+    // Column Count: Only accept integers
+    NumberDelegate *intDelegate = new NumberDelegate(NumberDelegate::Integer, ui->twIperfRule);
+    ui->twIperfRule->setItemDelegateForColumn(cols::Count, intDelegate);
+
     connect(ui->twIperfRule, &QTableWidget::customContextMenuRequested, this, &DlgIperfRestartRule::showContextMenu);
     // Connect the itemChanged signal to our slot (this is always needed for item-based checkboxes)
     connect(ui->twIperfRule, &QTableWidget::itemChanged, this, &DlgIperfRestartRule::handleItemChanged);
     //button
-    connect(ui->pbOK, &QPushButton::clicked, this, &DlgIperfRestartRule::accept);
+    connect(ui->pbOK, &QPushButton::clicked, this, &DlgIperfRestartRule::onOKClick);
     connect(ui->pbCancel, &QPushButton::clicked, this, &DlgIperfRestartRule::reject);
     connect(ui->pbSaveDefault, &QPushButton::clicked, this, &DlgIperfRestartRule::onSaveDefault);
     // load config
@@ -273,4 +281,26 @@ void DlgIperfRestartRule::onSaveDefault(bool checked)
         m_cfg->setValue(QString::number(i), doc.toJson(QJsonDocument::Compact));
     }
     m_cfg->endGroup();
+}
+
+void DlgIperfRestartRule::onOKClick()
+{
+    bool isOK=true;
+    // check rule value is ok
+    for (int i=0; i<ui->twIperfRule->rowCount(); i++){
+        if (ui->twIperfRule->item(i, cols::Enable)->checkState()== Qt::Checked){
+            QString keyword = ui->twIperfRule->item(i, cols::Keyword)->text();
+            QRegularExpression regex1(keyword);
+            if (!regex1.isValid()) {
+                QMessageBox::information(this, "ERROR", "Wrong format of Detect string, it can be a Keyword or Regular expression");
+                isOK= false;
+                ui->twIperfRule->setCurrentCell(i, cols::Keyword);
+                ui->twIperfRule->setFocus();
+                break;
+            }
+        }
+    }
+    if (isOK){
+        QDialog::accept();
+    }
 }

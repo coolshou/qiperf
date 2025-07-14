@@ -136,6 +136,7 @@ SOURCES += \
     src/main.cpp \
     src/nmessagebox.cpp \
     src/nowrapdelegate.cpp \
+    src/numberdelegate.cpp \
     src/pingitem.cpp \
     src/pingmgr.cpp \
     src/pingplot.cpp \
@@ -220,6 +221,7 @@ HEADERS += \
     src/iperffileworker.h \
     src/nmessagebox.h \
     src/nowrapdelegate.h \
+    src/numberdelegate.h \
     src/pingitem.h \
     src/pingmgr.h \
     src/pingplot.h \
