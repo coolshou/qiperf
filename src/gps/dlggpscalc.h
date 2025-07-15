@@ -70,6 +70,7 @@ private slots:
 private:
     void onLoad(QString filename);
     bool onSave(QString filename);
+    void debug(QString msg, int lv=3);
     Ui::DlgGpsCalc *ui;
     QSettings *m_cfg;
     QMenu *m_contextMenu;
@@ -80,6 +81,7 @@ private:
     QNetworkReply *reply = nullptr;
     bool showline=false;
     QString m_oldsavepath;
+    int m_debuglv;
 };
 
 #endif // DLGGPSCALC_H

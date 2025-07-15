@@ -24,6 +24,7 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DlgGpsCalc), m_cfg(cfg)
 {
+    m_debuglv=3;
     ui->setupUi(this);
 
     ui->pbShow3D->setVisible(false);
@@ -146,9 +147,11 @@ void DlgGpsCalc::onAddRow(QString name, double latitude, double longitude, doubl
     int iRow = ui->tableWidget->rowCount();
     // ui->tableWidget->setRowCount(iRow);
     ui->tableWidget->insertRow(iRow);
-    qDebug() << "name:" << name << " ,latitude:" << QString::number(latitude)
-             << " ,longitude:" << QString::number(longitude)
-             << " ,altitude:" <<  QString::number(altitude);
+    QString err = QString("name: %1 ,latitude: %2 ,longitude: %3 ,altitude: %4").arg(name,
+                           QString::number(latitude),
+                           QString::number(longitude),
+                           QString::number(altitude));
+    debug(err, 5);
     ui->tableWidget->setSortingEnabled(false);
     ui->tableWidget->setItem(iRow, GPScols::PositionName, new QTableWidgetItem(name));
     ui->tableWidget->setItem(iRow, GPScols::Latitude, new QTableWidgetItem(QString::number(latitude)));
@@ -490,10 +493,10 @@ void DlgGpsCalc::onLoad(QString filename)
 
 bool DlgGpsCalc::onSave(QString filename)
 {
-    qDebug() << "onSave file:" << filename;
+    debug("onSave file:" + filename, 6);
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "Failed to open file:" << file.errorString();
+        debug("Failed to open file:" + file.errorString(),3);
         return false; // Or handle the error appropriately
     }
     QJsonDocument jsonDoc ;
@@ -531,4 +534,11 @@ bool DlgGpsCalc::onSave(QString filename)
     }
     file.close();
     return true;
+}
+
+void DlgGpsCalc::debug(QString msg, int lv)
+{
+    if (lv<=m_debuglv){
+        qDebug() << "[DlgGpsCalc]" << msg;
+    }
 }
