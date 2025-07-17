@@ -16,6 +16,7 @@
 
 #include "geotranslate.h"
 #include "comm.h"
+#include "../src/numberdelegate.h"
 
 #include <QDebug>
 
@@ -27,11 +28,17 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
     m_debuglv=3;
     ui->setupUi(this);
 
-    ui->pbShow3D->setVisible(false);
+    // ui->pbShow3D->setVisible(false);
 
     ui->tableWidget->setColumnWidth(GPScols::Latitude, 100);
     ui->tableWidget->setColumnWidth(GPScols::Longitude, 100);
     ui->tableWidget->setColumnWidth(GPScols::Altitude, 80);
+    // Column Count: Only accept Double
+    NumberDelegate *dDelegate = new NumberDelegate(NumberDelegate::Double, ui->tableWidget);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Latitude, dDelegate);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Longitude, dDelegate);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Altitude, dDelegate);
+
     ui->twResult->setColumnWidth(AZEIcols::Distance, 90);
     ui->twResult->setColumnWidth(AZEIcols::Azimuth1, 90);
     ui->twResult->setColumnWidth(AZEIcols::Azimuth2, 90);
