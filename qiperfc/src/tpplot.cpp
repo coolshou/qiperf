@@ -388,6 +388,8 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
     MyQCPGraph *myGraph = getGraph(refrowidx);
     // if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
     {
+        //TODO: when xdata is not continious, should we fill up with 0?
+        myGraph->getMaxXValue();
         //throughput graph
         if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             myGraph->addData(xdata, ydata);
