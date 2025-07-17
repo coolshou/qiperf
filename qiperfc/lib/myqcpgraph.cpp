@@ -3,7 +3,7 @@
 MyQCPGraph::MyQCPGraph(QCPAxis *keyAxis, QCPAxis *valueAxis)
     :QCPGraph(keyAxis, valueAxis)
 {
-
+    m_interval = 1;
 }
 
 void MyQCPGraph::setData(QSharedPointer<QCPGraphDataContainer> data)
@@ -76,7 +76,7 @@ double MyQCPGraph::sumValue(double keyToUpdate, double newvalue)
             }
         }
     }
-    // Not find org key's value, just addd
+    // Not find org key's value, just add it
     addData(keyToUpdate, newvalue);
     return newvalue;
 
@@ -87,4 +87,45 @@ void MyQCPGraph::clear()
     // if (dataCount()) { //cause app crash!!
     //     data()->clear();
     // }
+}
+
+void MyQCPGraph::setInterval(int interval)
+{
+    m_interval = interval;
+}
+
+int MyQCPGraph::getInterval()
+{
+    return m_interval;
+}
+
+double MyQCPGraph::getMaxXValue()
+{
+    if (!data().data() || data()->isEmpty()) {
+        qDebug() << "[getMaxXValue]Graph has no data.";
+        return 0;
+    }
+    double maxX = -std::numeric_limits<double>::infinity(); // Initialize with negative infinity
+    // Iterate through the data points (when many data, this is not good!!)
+    // graph->data() returns a QSharedPointer to QCPGraphDataContainer
+    // .data() on the QSharedPointer gets the raw pointer
+    // *it dereferences the iterator to a QCPGraphData object
+    // for (QCPGraphDataContainer::const_iterator it = data()->constBegin(); it != data()->constEnd(); ++it) {
+    //     if (it->key > maxX) { // QCPGraph uses 'key' for x-value
+    //         maxX = it->key;
+    //     }
+    // }
+
+    // You can also get the first/last elements if sorted (QCPGraphDataContainer is sorted by key)
+    if (!data()->isEmpty()) {
+        // qDebug() << "Last (max) X-value from sorted data:" << data()->constEnd().key();
+        // Note: constEnd() gives an iterator to one past the last element,
+        // so .key() on it should technically be valid for the last element's key.
+        // However, it's safer to use the last element directly if you need it.
+        // Accessing the last element:
+        maxX = (data()->constEnd() - 1)->key;
+        // qDebug() << "Last (max) X-value from sorted data directly:" << maxX;
+    }
+    qDebug() << "Maximum X-value of the graph:" << maxX;
+    return maxX;
 }

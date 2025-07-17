@@ -18,9 +18,14 @@ public:
     void updateValue(double keyToUpdate, double newvalue);
     double sumValue(double keyToUpdate, double newvalue);
     void clear();
+    void setInterval(int interval);
+    int getInterval();
+    double getMaxXValue();
 signals:
     // void dataAdded(double key, double value);
     void datasSetted(QSharedPointer<QCPGraphDataContainer> data);
+private:
+    int m_interval;
 };
 
 #endif // MYQCPGRAPH_H
