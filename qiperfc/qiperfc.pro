@@ -143,6 +143,7 @@ SOURCES += \
     src/qipconfig.cpp \
     src/qiperfc.cpp \
     src/tp.cpp \
+    src/tpflowmanager.cpp \
     src/tpfoldingdelegate.cpp \
     src/tpmgr.cpp \
     src/tpdirdelegate.cpp \
@@ -163,7 +164,7 @@ SOURCES += \
     views/viewmanager.cpp \
     views/serialview.cpp \
     views/throughputview.cpp
-
+#    src/tpstatuschecker.cpp
 SOURCES += \
     ../JIO/aip.cpp \
     ../JIO/cyntec.cpp \
@@ -228,6 +229,7 @@ HEADERS += \
     src/qipconfig.h \
     src/qiperfc.h \
     src/tp.h \
+    src/tpflowmanager.h \
     src/tpfoldingdelegate.h \
     src/tpgroup.h \
     src/tpmgr.h \
@@ -255,6 +257,8 @@ HEADERS += \
     views/throughputview.h \
     views/viewtype.h \
     plugin/plugininterface.h
+
+#    src/tpstatuschecker.h
 
 HEADERS += \
     ../JIO/aip.h \
