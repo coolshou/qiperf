@@ -92,9 +92,10 @@ public slots:
     void onErrored(int m_idx, int refrow, QString text, QString ipport);
     void onIperfLog(int idx, QString text);
     void onStarted(int m_idx, bool smode, QString ipport);
+    void onReStarted(int m_idx, bool smode, QString ipport);
     void onFinished(int refrow, int exitCode, int exitStatus, QString ipport, QString filename, bool servermode);
     void onThroughput(int idx, QString sInterval, QString data); // idx, refrow, throughput data
-    void onIperfExtendWait(int refrow, qint64 iwait);
+    void onIperfExtendWait(int refrow, qint64 iwait, int exitCode, int restarttimes);
     void onQuit();
     void onNewLine(QString line);
     void doRestartQIperfd();
@@ -113,6 +114,7 @@ signals:
     void StopClient(); // emit to tell iperf client stop
     void setDebugLv(int lv);
     void setStartTime(QString stime);
+    void setReStart(bool isServer);
 
 private slots:
     void onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPort); //procress websocket action message

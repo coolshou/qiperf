@@ -40,6 +40,7 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     m_parent(parent)
 {
     m_debuglv = 3;
+    m_restarttimes = 0;
     m_logfile = nullptr;
     m_logtextstream = nullptr;
     m_restartonErrorStop = false;
@@ -69,10 +70,12 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     int omitidx = m_arguments.indexOf("--omit");
     m_omit = m_arguments.value(omitidx+1, 0).toInt();
     m_iperfwrapper->setOmit(m_omit);
-    int durationidx = m_arguments.indexOf("-t");
-    m_duration = m_arguments.value(durationidx+1, 0).toInt();
+    int durationidx = m_arguments.indexOf("-t")+1; // index of duration value in m_arguments
+    // int extrawait = 3; //extra 3 sec, not good?
+    int extrawait = 0; //
+    m_duration = m_arguments.value(durationidx, 0).toInt()+ extrawait;
     if (m_omit>0){
-        m_duration = m_duration + m_omit;
+        m_duration = m_duration + m_omit ;
     }
 //    m_port = port;
 //    m_bindaddr = bindaddr;
@@ -101,7 +104,8 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     m_selfdestruction->setInterval(m_selfdestructionTime);
     connect(m_selfdestruction, &QTimer::timeout, this, &IperfWorker::onSelfDestructor);
     connect(this, &IperfWorker::stopSelfDestructor, m_selfdestruction, &QTimer::stop);
-    connect(this, &IperfWorker::workerRestart, this, &IperfWorker::onWorkerRestart);
+
+    // timer to do restart iperf
     m_restarter = new QTimer(this);
     // Set it to be a single-shot timer
     m_restarter->setSingleShot(true);
@@ -134,7 +138,7 @@ void IperfWorker::work()
         //create iperf procress
         m_iperf =  new QProcess(m_parent);
         m_iperf->setProgram(m_cmd);
-        debug("IperfWorker::work: " + m_cmd + " args:" + m_arguments.join(" "));
+        debug("IperfWorker::work: " + m_cmd + " args:" + m_arguments.join(" "), 5);
         m_iperf->setArguments(m_arguments);
         connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
         connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
@@ -144,7 +148,7 @@ void IperfWorker::work()
 
         if (m_delaystart>0){
             debug("m_delaystart: " + QString::number(m_delaystart));
-            emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
+            // emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
             QDateTime waitStartTime = QDateTime::currentDateTime();
             QDateTime waitEndTime = QDateTime::currentDateTime();
             int iWait = waitStartTime.secsTo(waitEndTime);
@@ -161,12 +165,13 @@ void IperfWorker::work()
             if (m_selfdestruction->isActive()){
                 emit stopSelfDestructor();
             }
+            emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
             // emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
             QString msg = QString("start iperf %1(pid:%2)").arg(m_servermode?"server":"client",
                                                               QString::number(m_iperf->processId()));
-            debug(msg, 3);
+            debug(msg, 4);
             // emit log(m_idx, "iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "));
-            debug("iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "), 3);
+            debug("iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "), 4);
             while (!m_stop){
                 //procress iperf output
                 QThread::msleep(500);
@@ -212,19 +217,27 @@ void IperfWorker::onSetDebugLv(int lv)
 
 void IperfWorker::onSetStartTime(QString stime)
 {
-    setIperfLogPath(m_tmplogpath + stime);
+    // setIperfLogPath(m_tmplogpath + stime);
     m_starttime =QDateTime::fromString(stime, DATETIME_NOW_FORMAT);
 }
 
 void IperfWorker::onSetReStartTime(int idx, QDateTime restime)
 {
     m_restarttimemap.value(idx, restime); // record restart time
-    qint64 restartoffset = m_starttime.secsTo(restime) + m_omit + 1;
+    qint64 restartoffset = m_starttime.secsTo(restime) + m_omit;
     debug("onSetReStartTime:restartoffset:" + QString::number(restartoffset)+
           " start-time:" + m_starttime.toString(DATETIME_NOW_FORMAT)+
           " restart-time:" + restime.toString(DATETIME_NOW_FORMAT));
     if (m_iperfwrapper && restartoffset>0){
         m_iperfwrapper->setRestarttimeoffset(restartoffset);
+    }
+}
+
+void IperfWorker::onSetReStart(bool isServer)
+{
+    if (isServer ==m_servermode){
+        debug(QString("[IperfWorker::onSetReStart]:%1").arg(isServer?"server":"client"), 3);
+        onWorkerRestart();
     }
 }
 
@@ -267,7 +280,7 @@ QString IperfWorker::getBindKey()
 
 void IperfWorker::setIperfLogPath(QString filepath)
 {
-    debug("IperfWorker::setIperfLogPath:" + filepath,2);
+    debug("IperfWorker::setIperfLogPath:" + filepath, 5);
     m_iperflogpath = filepath;
 }
 
@@ -355,14 +368,22 @@ void IperfWorker::onStarted()
     m_running = true;
     m_iperfwrapper->setSetting(m_refrow, m_servermode, m_parallel, m_bidir, m_bidirtag);
     m_selfdestruction->start();
-    if (m_delaystart==0){
+    // if (m_delaystart==0){
+    if (m_restarttimes){ // restart
+        emit restarted(m_refrow, m_servermode, getBindKey());
+    }else{
         emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
     }
+    // }
     // add iperf args
     toLogFile(QString("### %1 %2 \n").arg(m_cmd, m_arguments.join(" ")));
     // add start time
+    QString tag="START";
+    if (m_restarttimes){
+        tag="RESTART";
+    }
     QString stime = QDateTime::currentDateTime().toString(DATETIME_NOW_FORMAT);
-    toLogFile(QString("### %1 \n").arg(stime));
+    toLogFile(QString("### %1 %2\n").arg(tag, stime));
 }
 
 void IperfWorker::onRestart()
@@ -423,13 +444,12 @@ void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
     if (exitCode==0){
         //normal stop
         if (m_restartonNormalStop){
-            debug(QString("TODO: restartonNormalStop: %1").arg(m_servermode?"server":"client"), 3);
             if (!m_servermode){
+                debug(QString("restartonNormalStop: %1").arg(m_servermode?"server":"client"), 4);
                 //client mode have duration, info qiperf console to extend wait time
-                emit iperfExtendWait(m_idx, m_duration);
-                QThread::msleep(300); // client should be delay to start
+                emit iperfExtendWait(m_refrow, m_duration, exitCode, m_restarttimes);
+                // QThread::msleep(300); // client should be delay to start
             }
-            emit workerRestart();
             return;
         }
     }else{
@@ -438,10 +458,9 @@ void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
             debug(QString("TODO: restartonErrorStop: %1").arg(m_servermode?"server":"client"), 3);
             if (!m_servermode){
                 //client mode have duration, info qiperf console to extend wait time
-                emit iperfExtendWait(m_idx, m_duration);
-                QThread::msleep(200); // client should be delay to start
+                emit iperfExtendWait(m_idx, m_duration, exitCode, m_restarttimes);
+                // QThread::msleep(200); // client should be delay to start
             }
-            emit workerRestart();
             return;
         }
     }

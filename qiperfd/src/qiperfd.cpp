@@ -254,6 +254,7 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     connect(iperfer, &IperfWorker::onStderr, this, &QIperfd::onErrored);
     connect(iperfer, &IperfWorker::log, this, &QIperfd::onIperfLog);
     connect(iperfer, &IperfWorker::started, this, &QIperfd::onStarted);
+    connect(iperfer, &IperfWorker::restarted, this, &QIperfd::onReStarted);
     connect(iperfer, &IperfWorker::finished, this, &QIperfd::onFinished);
     connect(iperfer, &IperfWorker::iperfTPdata, this, &QIperfd::onThroughput);
     connect(iperfer, &IperfWorker::iperfExtendWait, this, &QIperfd::onIperfExtendWait);
@@ -267,6 +268,7 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     }
     connect(this, &QIperfd::setDebugLv, iperfer, &IperfWorker::onSetDebugLv);
     connect(this, &QIperfd::setStartTime, iperfer, &IperfWorker::onSetStartTime);
+    connect(this, &QIperfd::setReStart, iperfer, &IperfWorker::onSetReStart);
 
     connect(iperf_th, &QThread::started, iperfer, &IperfWorker::work);
     connect(iperf_th, &QThread::finished, iperf_th, &QThread::deleteLater);
@@ -417,9 +419,12 @@ int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host
 
 void QIperfd::startServer(int idx)
 {
+    //start iperf server
     try{
         QThread *th = m_thserver.value(idx);
-        // m_iperfwserver.value(idx)->setIperfLogPath(tmpfilepath+QDir::separator()+s_starttime);
+        m_iperfwserver.value(idx)->setIperfLogPath(tmpfilepath +
+                                                   QDir::separator() +
+                                                   s_starttime);
         th->start();
     }catch (const std::exception &e) {
         // Handle the exception and show an error message
@@ -429,9 +434,12 @@ void QIperfd::startServer(int idx)
 
 void QIperfd::start(int idx)
 {
+    //start iperf client
     try{
         QThread *th = m_threads.value(idx);
-        // m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath+QDir::separator()+s_starttime);
+        m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath +
+                                                   QDir::separator() +
+                                                   s_starttime);
         th->start();
     }catch (const std::exception &e) {
         // Handle the exception and show an error message
@@ -453,6 +461,7 @@ void QIperfd::startAll(bool bServer)
     if (!d.exists()){
         d.mkpath(tmp);
     }
+    //TODO: this will not set logpath at right time
     emit setStartTime(s_starttime);
     // start all thread
     if (bServer){
@@ -489,45 +498,63 @@ void QIperfd::stopAll()
 void QIperfd::clear()
 {
     //clear all m_iperfwserver/m_iperfworkers & m_threads
-    if (!m_iperfwserver.isEmpty()){
-        emit StopServer();
-        for (QMap<qint64, IperfWorker*>::iterator it = m_iperfwserver.begin(); it != m_iperfwserver.end();) {
-            // if (it.value()->isRunning()){
-            //     it.value()->setStop(); // WARN: QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
-            // }
-            delete it.value();
-            it = m_iperfwserver.erase(it);
+    try{
+        if (!m_iperfwserver.isEmpty()){
+            emit StopServer();
+            for (QMap<qint64, IperfWorker*>::iterator it = m_iperfwserver.begin(); it != m_iperfwserver.end();) {
+                // if (it.value()->isRunning()){
+                //     it.value()->setStop(); // WARN: QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
+                // }
+                debug("delete iperf server worker", 3);
+                delete it.value();
+                it = m_iperfwserver.erase(it);
+            }
         }
+    } catch (const std::exception &e) {
+        debug(QString("iperf server worker error: %1").arg(e.what()), 2);
     }
-    if (!m_thserver.isEmpty()){
-        for (QMap<qint64, QThread*>::iterator it = m_thserver.begin(); it != m_thserver.end();) {
-            it.value()->quit();
-            debug("wait server thread stop", 3);
-            it.value()->wait(5000);
-            debug("wait server thread stoped", 3);
-            // delete it.value();
-            it = m_thserver.erase(it);
+    try{
+        if (!m_thserver.isEmpty()){
+            for (QMap<qint64, QThread*>::iterator it = m_thserver.begin(); it != m_thserver.end();) {
+                it.value()->quit();
+                debug("wait server thread stop", 3);
+                it.value()->wait(5000);
+                debug("wait server thread stoped", 3);
+                // delete it.value();
+                it = m_thserver.erase(it);
+            }
         }
+    } catch (const std::exception &e) {
+        debug(QString("iperf server thread error: %1").arg(e.what()), 2);
     }
-    if (!m_iperfworkers.isEmpty()){
-        emit StopClient();
-        for (QMap<qint64, IperfWorker*>::iterator it = m_iperfworkers.begin(); it != m_iperfworkers.end();) {
-            // if (it.value()->isRunning()){
-            //     it.value()->setStop();WARN: QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
-            // }
-            delete it.value();
-            it = m_iperfworkers.erase(it);
+    try{
+        if (!m_iperfworkers.isEmpty()){
+            emit StopClient();
+            for (QMap<qint64, IperfWorker*>::iterator it = m_iperfworkers.begin(); it != m_iperfworkers.end();) {
+                // if (it.value()->isRunning()){
+                //     it.value()->setStop();WARN: QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
+                // }
+                debug("delete iperf client worker", 3);
+                delete it.value();
+                it = m_iperfworkers.erase(it);
+            }
         }
+    } catch (const std::exception &e) {
+        debug(QString("iperf client worker error: %1").arg(e.what()), 2);
     }
-    if (!m_threads.isEmpty()){
-        for (QMap<qint64, QThread*>::iterator it = m_threads.begin(); it != m_threads.end();) {
-            it.value()->quit();
-            debug("wait client thread stop", 3);
-            it.value()->wait(8000);
-            debug("wait client thread stoped", 3);
-            // delete it.value();
-            it = m_threads.erase(it);
+    try{
+        if (!m_threads.isEmpty()){
+            for (QMap<qint64, QThread*>::iterator it = m_threads.begin(); it != m_threads.end();) {
+                it.value()->quit();
+                debug(QString("wait client thread stop %1").arg(QString::number(it.key())), 3);
+                it.value()->wait(8000);
+                debug("wait client thread stoped", 3);
+                // delete it.value();
+                it = m_threads.erase(it);
+            }
         }
+    } catch (const std::exception &e) {
+        debug(QString("iperf client thread error: %1").arg(e.what()), 2);
     }
     debug("iperfserver:" + QString::number(m_iperfwserver.count())
           + " threads:" + QString::number(m_thserver.count())
@@ -739,6 +766,20 @@ void QIperfd::onStarted(int m_idx, bool smode, QString ipport)
     m_runstatus[m_idx]=1;
 }
 
+void QIperfd::onReStarted(int m_idx, bool smode, QString ipport)
+{
+    //CMD_IPERF_RESTARTED:m_idx:smode:ipport
+    QString msg = QString(CMD_IPERF_RESTARTED)+":"+QString::number(m_idx);
+    if (smode){
+        msg = msg + ":S";
+    }else{
+        msg = msg + ":C";
+    }
+    msg = msg + ":"+ ipport;
+    debug("onReStarted: " + msg, 2);
+    m_wsserver->sendTextResult(msg);
+}
+
 void QIperfd::onFinished(int refrow, int exitCode, int exitStatus, QString ipport, QString filename, bool servermode)
 {
     QString msg = QString(CMD_IPERF_STOPED)+":"+ QString::number(refrow);
@@ -764,10 +805,11 @@ void QIperfd::onThroughput(int idx, QString sInterval, QString data)
     m_wsserver->sendTextResult(s);
 }
 
-void QIperfd::onIperfExtendWait(int refrow, qint64 iwait)
+void QIperfd::onIperfExtendWait(int refrow, qint64 iwait, int exitCode, int restarttimes)
 {
     QString s = QString(CMD_IPERF_EXTEND_WAIT) + ":" + QString::number(refrow)
-                + ":" + QString::number(iwait);
+                + ":" + QString::number(iwait) + ":" + QString::number(exitCode)
+                + ":" + QString::number(restarttimes);
     onLog("onIperfExtendWait: " + s);
     m_wsserver->sendTextResult(s);
 }
@@ -1146,7 +1188,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
     //handle act message from websocket
     long long cut = msg.indexOf(':', 0);
     QString act = msg.left(cut); //action
-    debug("onWSactMessage: " + act, 3);
+    // debug("onWSactMessage: " + act, 3);
     msg = msg.right(msg.length()-cut-1);
     // expect in json format
     if (act.startsWith(CMD_IPERF_ADD)){
@@ -1156,9 +1198,11 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         msg = msg.right(msg.length()-cut-1);
         cut = msg.indexOf(':', 0);
         QString ignoreWrongInterval = msg.left(cut); //ignoreWrongInterval
-        debug("CMD_IPERF_ADD: " + refrow + " ignoreWrongInterval:" + ignoreWrongInterval, 4);
         msg = msg.right(msg.length()-cut-1);
-        debug(" msg: " + msg, 4);
+        debug("CMD_IPERF_ADD: " + refrow +
+                  " ignoreWrongInterval:" + ignoreWrongInterval +
+                  " msg: " + msg, 4);
+
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
             add(refrow, ignoreWrongInterval, doc.toVariant().toMap());
@@ -1199,6 +1243,19 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         startAll(bserver);
     }else if (act.startsWith(CMD_IPERF_STOP)){
         stopAll();
+    }else if (act.startsWith(CMD_IPERF_RESTART)){
+        // restart iperf server/client
+        cut = msg.indexOf(':', 0);
+        QString refrow = msg.left(cut); //refrow number
+        // server/client mode
+        QString smode = msg.right(msg.length()-cut-1);
+        onLog(QString("Restart iperf: refrow:%1 (%2)").arg(refrow, smode));
+        if (smode.startsWith("C")){
+            emit setReStart(false);
+        }else{
+            emit setReStart(true);
+        }
+
     }else if (act.startsWith(CMD_PING)){
         debug("CMD_PING", 3);
         cut = msg.indexOf(':', 0);

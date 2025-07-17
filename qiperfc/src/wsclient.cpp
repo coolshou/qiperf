@@ -201,7 +201,7 @@ void WSClient::onTextMessageReceived(QString message)
         message = message.right(message.length()-cut-1);
 
         cut2 = message.indexOf(':', 0);
-        QString m_idx = message.left(cut2); // refrow
+        QString m_idx = message.left(cut2); // m_idx
         message = message.right(message.length()-cut2-1);
 
         if (act.startsWith(CMD_IPERF_STARTED)){
@@ -210,6 +210,12 @@ void WSClient::onTextMessageReceived(QString message)
             message = message.right(message.length()-cut2-1); // key
             debug("CMD_IPERF_STARTED:" + smode + " msg:" + message, 5);
             emit iperfStarted(smode, message);
+        } else if (act.startsWith(CMD_IPERF_RESTARTED)){
+            cut2 = message.indexOf(':', 0);
+            QString smode = message.left(cut2); // S: server/ C: client mode
+            message = message.right(message.length()-cut2-1); // key
+            debug("CMD_IPERF_RESTARTED:"+ m_idx + ":" + smode + " msg:" + message, 3);
+            emit iperfReStarted(smode, message);
         } else if (act.startsWith(CMD_IPERF_STOPED)){
             cut2 = message.indexOf(':', 0);  //
             QString err_no = message.left(cut2); // error code
@@ -243,8 +249,13 @@ void WSClient::onTextMessageReceived(QString message)
             // TODO: multi m_idx request to extent wait time, how to calc the time
             int cut3 = message.indexOf(':', 0);
             QString sWait = message.left(cut3);
+            message = message.right(message.length()-cut3-1);
+            int cut4 = message.indexOf(':', 0);
+            QString errorcode = message.left(cut4);
+            message = message.right(message.length()-cut4-1); // restart counts
+
             debug("CMD_IPERF_EXTEND_WAIT: add wait time: " + sWait, 6);
-            emit iperfExtendWait(m_idx, sWait.toLongLong());
+            emit iperfExtendWait(m_idx, sWait.toLongLong(), errorcode.toInt(), message.toInt());
         } else if (act.startsWith(CMD_SERIAL_OPENED)){
             emit serialopened(m_idx, from, message);
         } else if (act.startsWith(CMD_SSH_OPENED)){

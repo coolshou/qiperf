@@ -58,6 +58,8 @@
 //iperf control
 #define CMD_IPERF_START  "IPERF_START" // start iperf
 #define CMD_IPERF_STARTED  "IPERF_STARTED" // iperf is running
+#define CMD_IPERF_RESTART  "IPERF_RESTART" // restart iperf
+#define CMD_IPERF_RESTARTED  "IPERF_RESTARTED" // iperf restart OK
 #define CMD_IPERF_STOP   "IPERF_STOP"  // stop iperf
 #define CMD_IPERF_STOPED   "IPERF_STOPED"  // iperf is stop
 #define CMD_IPERF_ERRORED   "IPERF_ERRORED"  // iperf is error

@@ -40,14 +40,15 @@ public:
 
 signals:
     void workerFinished(qint64 idx, bool servermode); // Signal to notify manager that this worker is done
-    void started(int refrow, bool smode, QString ipport); // refrow, S/C, IPPort
+    void started(int refrow, bool smode, QString ipport); //start: refrow, S/C, IPPort
+    void restarted(int refrow, bool smode, QString ipport); //restart: refrow, S/C, IPPort
     void finished(int refrow, int exitCode, int exitStatus, QString ipport, QString filename, bool servermode); // refrow, exitcode, exitStatus, , IPPort
-    void workerRestart();
+
     void log(int idx, QString msg); // refrow
     // void onStdout(int idx, QString text); // refrow
     void onStderr(int idx, int refrow, QString text, QString ipport); // idx, refrow, msg, ipport
     void iperfTPdata(int refrow, QString sInterval,  QString data); // refrow, sInterval, throughput data
-    void iperfExtendWait(int refrow, qint64 iwait); // refrow
+    void iperfExtendWait(int refrow, qint64 iwait, int exitCode, int restarttimes); // refrow, extra wait time(sec), error code, restart count
     void stopSelfDestructor();
     void debuginfo(QString msg);
 
@@ -61,6 +62,8 @@ public slots:
     void onSetDebugLv(int lv);
     void onSetStartTime(QString stime);
     void onSetReStartTime(int idx, QDateTime restime);
+    void onSetReStart(bool isServer);
+    void setIperfLogPath(QString filepath); //full path of iperf log filename
 private slots:
     void onStarted();
     void onRestart();
@@ -70,7 +73,7 @@ private slots:
     void parserStdOut(QString msg);
     void onThroughputData(int refrow, QString sInterval,  QString data);
     void onDebuginfo(QString msg);
-    void setIperfLogPath(QString filepath); //full path of iperf log filename
+
 
 private:
     QString m_threadid; // real thread id
