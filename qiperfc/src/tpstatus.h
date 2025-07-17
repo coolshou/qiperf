@@ -10,7 +10,8 @@ public:
     enum Status{
         init=0,  // init
         started=1,  // started
-        stoped=2     // stoped
+        stoped=2,     // stoped
+        restarted=3 //re-started
     };
     // init=-1,  // init
     //     started=0,  // started
