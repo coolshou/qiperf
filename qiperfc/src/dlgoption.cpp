@@ -176,9 +176,14 @@ int dlgOption::getFontSize()
 
 QStringList dlgOption::getSysFontFamilies()
 {
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     QFontDatabase db;
     QStringList families = db.families();
     return families;
+#else
+    return QFontDatabase::families();
+#endif
+
 }
 
 QStringList dlgOption::getFontStyles(QString fontfamily)
@@ -186,8 +191,12 @@ QStringList dlgOption::getFontStyles(QString fontfamily)
     if (fontfamily.isEmpty()){
         return QStringList();
     }
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     QFontDatabase db;
     return db.styles(fontfamily);
+#else
+    return QFontDatabase::styles(fontfamily);
+#endif
 }
 
 void dlgOption::setShowGroup(bool bShow)
