@@ -1,12 +1,21 @@
 #include "tpplot.h"
 
 #include <numeric>
-
+#include <QScreen>
 
 TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     :QCustomPlot(parent), m_showgroup(showgroup)
 {
-    setOpenGl(true);
+    //FIXME: under 4K monitor, use setOpenGl(true) cause the TPPlot look over the outer widget width&hight
+    // const QList<QScreen*> screens = QGuiApplication::screens();
+    // for (const QScreen* screen : screens) {
+    //     qDebug() << "Screen: " << screen->name() << " " << screen->size()
+    //              << " physicalSize(mm): " << screen->physicalSize()
+    //              << " devicePixelRatio:" << screen->devicePixelRatio();
+    // }
+
+    setOpenGl(false);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_interval = 1;
     setTPUint(sunit);
     initCustomPlot();
@@ -21,10 +30,10 @@ TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
         // m_LostRateLayer = layer(LAYER_LOSTRATE);
         qDebug() << "addLayer " << LAYER_LOSTRATE << " Fail";
     }
-    clear();
-
+    // replot();
+    clear(); // this will let plot layout looks strange!!
+    // setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     // TODO: init plot chart size not good to fit parent's rect
-    // setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 }
 
 void TPPlot::setStartTime(QDateTime startTime)
@@ -719,7 +728,7 @@ void TPPlot::initCustomPlot()
     // connect(legend, &QCPLegend::layerChanged)
     if (1){//TODO: not good on layout
         // Add the QCustomPlot legend to the container
-        QCPLayoutGrid *subLayout = new QCPLayoutGrid;
+        QCPLayoutGrid *subLayout = new QCPLayoutGrid();
         //TODO: position the legend outside of the graph!!
         plotLayout()->addElement(0, 1, subLayout);
         plotLayout()->setColumnStretchFactor(0, 1); // col 0
