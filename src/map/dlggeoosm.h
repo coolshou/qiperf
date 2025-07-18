@@ -23,12 +23,15 @@ public:
     ~DlgGeoOSM() override;
     void load(QString tile, double lat=24.804162, double lon=121.027736);
     void load(double lat1, double lon1, double lat2, double lon2);
+protected slots:
+    void onSetCenter(bool checked);
 
 private:
     QGroupBox* createOptionsList();
 
     Ui::DlgGeoOSM *ui;
     QGVMap *mMap;
+    QString m_tile;
 };
 
 #endif // DLGGEOOSM_H

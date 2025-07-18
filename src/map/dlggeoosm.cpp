@@ -21,7 +21,7 @@ DlgGeoOSM::DlgGeoOSM(QWidget *parent)
     ui->vlGeo->addWidget(mMap);
     // Options list
     // ui->vlGeo->addWidget(createOptionsList());
-
+    connect(ui->pbSetCenter, &QPushButton::clicked, this, &DlgGeoOSM::onSetCenter);
 }
 
 DlgGeoOSM::~DlgGeoOSM()
@@ -31,7 +31,7 @@ DlgGeoOSM::~DlgGeoOSM()
 
 void DlgGeoOSM::load(QString tile, double lat, double lon)
 {
-    Q_UNUSED(tile)
+    m_tile = tile;
     // map center is lat, lon
     double lat1 = lat + 0.02245;
     double lon1 = lon + 0.0248;
@@ -44,6 +44,16 @@ void DlgGeoOSM::load(double lat1, double lon1, double lat2, double lon2)
 {
     auto target = QGV::GeoRect(QGV::GeoPos(lat1, lon1), QGV::GeoPos(lat2, lon2));
     mMap->cameraTo(QGVCameraActions(mMap).scaleTo(target));
+}
+
+void DlgGeoOSM::onSetCenter(bool checked)
+{
+    Q_UNUSED(checked)
+    if (mMap){
+        double lat = ui->sbLat->value();
+        double lon = ui->sbLon->value();
+        load(m_tile, lat, lon);
+    }
 }
 
 QGroupBox* DlgGeoOSM::createOptionsList()
