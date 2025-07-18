@@ -67,11 +67,7 @@
         <height>200</height>
        </size>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <layout class="QHBoxLayout" name="hl_console"/>
-       </item>
-      </layout>
+      <layout class="QHBoxLayout" name="hl_console" stretch=""/>
      </widget>
     </widget>
    </item>
