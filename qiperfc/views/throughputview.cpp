@@ -21,8 +21,9 @@
 ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
                                QAction *aCopyText, QSettings *cfg,
                                bool showgroup, QString sunit,
-                               QWidget *parent) : AbstractView(parent)
-    , ui(new Ui::ThroughputView), m_actionCopy(aCopy),m_actionPaste(aPaste),
+                               QWidget *parent) :
+    AbstractView(parent),
+    ui(new Ui::ThroughputView), m_actionCopy(aCopy),m_actionPaste(aPaste),
     m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_showgroupTotal(showgroup),
     m_tpunit(sunit)
 //, m_main(main)
@@ -672,7 +673,7 @@ void ThroughputView::initThroughputChart()
 {
     // throughput chart
     m_vLegendScrollBar = new QScrollBar(Qt::Vertical, this);
-    m_tpplot=new TPPlot(m_showgroupTotal, m_tpunit, ui->widget_console);
+    m_tpplot = new TPPlot(m_showgroupTotal, m_tpunit, ui->widget_console);
     // m_tpplot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     qDebug() << "enable openGl:" << m_tpplot->openGl();
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);

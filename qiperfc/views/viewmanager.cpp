@@ -126,7 +126,7 @@ void ViewManager::setFileAction(QAction *openAction, QAction *saveAction)
 void ViewManager::addView(AbstractView *view, bool closeable)
 {
     // int idx = m_views->count();
-    int idx = m_views->keys().count();
+    qint64 idx = m_views->keys().count();
     QString title = view->title();
     QDockWidget *dock = new QDockWidget(title, m_window);
     qDebug() << "ViewManager::addView dock title:" << dock->windowTitle();
@@ -153,23 +153,23 @@ void ViewManager::addView(AbstractView *view, bool closeable)
     m_views->insert(title, view);
     m_docks->insert(view, dock);
     // Access the tab widget
-    QTabWidget *tabWidget = findChild<QTabWidget *>();
-    if (tabWidget) {
-        QTabBar *tabBar = tabWidget->tabBar();
-        qDebug() << "tabBar:"  << QString::number(tabBar->count());
-        // for (int i = 0; i < tabBar->count(); ++i) {
-        //     QPushButton *closeButton = new QPushButton("×");
-        //     closeButton->setFixedSize(16, 16);
-        //     tabBar->setTabButton(i, QTabBar::RightSide, closeButton);
+    // QTabWidget *tabWidget = findChild<QTabWidget *>();
+    // if (tabWidget) {
+    //     QTabBar *tabBar = tabWidget->tabBar();
+    //     qDebug() << "tabBar:"  << QString::number(tabBar->count());
+    //     // for (int i = 0; i < tabBar->count(); ++i) {
+    //     //     QPushButton *closeButton = new QPushButton("×");
+    //     //     closeButton->setFixedSize(16, 16);
+    //     //     tabBar->setTabButton(i, QTabBar::RightSide, closeButton);
 
-        //     connect(closeButton, &QPushButton::clicked, this, [=]() {
-        //         QWidget *w = tabWidget->widget(i);
-        //         if (w) {
-        //             w->close();
-        //         }
-        //     });
-        // }
-    }
+    //     //     connect(closeButton, &QPushButton::clicked, this, [=]() {
+    //     //         QWidget *w = tabWidget->widget(i);
+    //     //         if (w) {
+    //     //             w->close();
+    //     //         }
+    //     //     });
+    //     // }
+    // }
 }
 
 void ViewManager::activateDock(AbstractView *view)
