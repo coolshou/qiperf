@@ -27,8 +27,8 @@ public:
         cpu=5,
         cpucores=6, //hyper thread number
         status=7,  //last seen
-        version=8,
-        buildver=9
+        version=8, //qiperfd version
+        buildver=9 //qiperfd git version
     };
     Q_ENUM(cols)
 
