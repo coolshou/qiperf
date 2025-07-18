@@ -2,8 +2,8 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     qiperfd \
-    qiperftray
-
+    qiperftray \
+    qgeoview
 
 SUBDIRS += \
     qiperfc \
@@ -11,7 +11,9 @@ SUBDIRS += \
 qiperftray.subdir = qiperftray
 qiperfd.subdir = qiperfd
 qiperfc.subdir = qiperfc
+qgeoview.subdir = lib/qgeoview/lib
 qiperftray.depends = qiperfd
+qiperfc.depends = qgeoview
 # qssh.subdir = lib/qssh/src/libs/qssh
 # qiperfd.depends = qssh
 

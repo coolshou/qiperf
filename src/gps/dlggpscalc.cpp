@@ -28,7 +28,7 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
     m_debuglv=3;
     ui->setupUi(this);
 
-    // ui->pbShow3D->setVisible(false);
+    ui->pbShow3D->setVisible(false);
 
     ui->tableWidget->setColumnWidth(GPScols::Latitude, 100);
     ui->tableWidget->setColumnWidth(GPScols::Longitude, 100);
@@ -47,11 +47,13 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
 
     initAction();
     m_dlgOSM = new DlgOpenStreetMap();
+    m_dlgGeo = new DlgGeoOSM();
     connect(this, &DlgGpsCalc::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
     connect(ui->pbLoad, &QPushButton::clicked, this, &DlgGpsCalc::onLoadCliecked);
     connect(ui->pbSave, &QPushButton::clicked, this, &DlgGpsCalc::onSaveCliecked);
     connect(ui->pbCalc, &QPushButton::clicked, this, &DlgGpsCalc::onCalcCliecked);
     connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgGpsCalc::onShowMap);
+    connect(ui->pbShowGeo, &QPushButton::clicked, this, &DlgGpsCalc::onShowGeo);
     connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgGpsCalc::onShow3D);
     connect(ui->pbClear, &QPushButton::clicked, m_clearAction, &QAction::triggered);
     connect(ui->pbToDMS, &QPushButton::clicked, this, &DlgGpsCalc::onToDMS);
@@ -352,6 +354,29 @@ void DlgGpsCalc::onShowMap(bool checked)
     }
 }
 
+void DlgGpsCalc::onShowGeo(bool checked)
+{
+    Q_UNUSED(checked)
+    QString tile = getTile();
+
+    if (ui->tableWidget->rowCount()<1){
+        QMessageBox::information(this, "Info",
+                                 "Require at last one GPS locaton",
+                                 QMessageBox::Ok);
+        return;
+    }
+    if (m_dlgGeo){
+
+        double lat1 = ui->tableWidget->item(0,1)->text().toDouble();
+        double lon1 = ui->tableWidget->item(0,2)->text().toDouble();
+
+        m_dlgGeo->load(tile , lat1, lon1);
+        m_dlgGeo->raise();
+        m_dlgGeo->activateWindow();
+        m_dlgGeo->show();
+    }
+}
+
 void DlgGpsCalc::onShow3D(bool checked)
 {
     Q_UNUSED(checked)
@@ -436,6 +461,7 @@ void DlgGpsCalc::onLoadFinished(bool ok)
 void DlgGpsCalc::onTileAvailable(bool ok)
 {
     ui->pbShowMap->setEnabled(ok);
+    ui->pbShowGeo->setEnabled(ok);
 }
 
 void DlgGpsCalc::onCheckTileFinished()

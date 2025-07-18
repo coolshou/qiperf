@@ -40,6 +40,7 @@ win32:unix:!android:{
 CONFIG += c++17
 
 include(../qiperf.pri)
+include(../lib/qgeoview.pri)
 unix {
 #include(../sigwatch.pri)
 }
@@ -99,6 +100,7 @@ SOURCES += \
     ../src/gps/geotranslate.cpp \
     ../src/gps/gpsfunc.cpp \
     ../src/map/dlgopenstreetmap.cpp \
+    ../src/map/dlggeoosm.cpp \
     ../src/myfunc.cpp \
     ../src/pipeclient.cpp \
     ../src/endpoint.cpp \
@@ -182,6 +184,7 @@ HEADERS += \
     ../src/gps/geotranslate.h \
     ../src/gps/gpsfunc.h \
     ../src/map/dlgopenstreetmap.h \
+    ../src/map/dlggeoosm.h \
     ../src/pipeclient.h \
     ../src/comm.h \
     ../src/endpoint.h \
@@ -273,6 +276,7 @@ FORMS += \
     ../src/dlgshowlog.ui \
     ../src/gps/dlggpscalc.ui \
     ../src/map/dlgopenstreetmap.ui \
+    ../src/map/dlggeoosm.ui \
     ../src/port/portsetbox.ui \
     ../src/port/serialport.ui \
     ../src/port/tcpudpport.ui \

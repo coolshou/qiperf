@@ -9,6 +9,7 @@
 #include <QNetworkReply>
 
 #include "../map/dlgopenstreetmap.h"
+#include "../map/dlggeoosm.h"
 
 namespace Ui {
 class DlgGpsCalc;
@@ -37,7 +38,7 @@ public:
     Q_ENUM(AZEIcols)
 
     explicit DlgGpsCalc(QSettings *cfg, QWidget *parent = nullptr);
-    ~DlgGpsCalc();
+    ~DlgGpsCalc() override;
     void isTileAvailable();
     QString getTile();
     void setShowLine(bool show);
@@ -59,6 +60,7 @@ private slots:
     void onSaveCliecked(bool checked);
     void onCalcCliecked(bool checked);
     void onShowMap(bool checked);
+    void onShowGeo(bool checked);
     void onShow3D(bool checked);
     void onToDMS(bool checked);
     void onToDegree(bool checked);
@@ -78,6 +80,7 @@ private:
     QAction *m_deleteAction;
     QAction *m_clearAction;
     DlgOpenStreetMap *m_dlgOSM;
+    DlgGeoOSM *m_dlgGeo;
     QNetworkReply *reply = nullptr;
     bool showline=false;
     QString m_oldsavepath;
