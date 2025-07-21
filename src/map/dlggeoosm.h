@@ -27,7 +27,7 @@ protected slots:
     void onSetCenter(bool checked);
 
 private:
-    QGroupBox* createOptionsList();
+    QGroupBox* createOptionsList(bool addCheckbox=false);
 
     Ui::DlgGeoOSM *ui;
     QGVMap *mMap;

@@ -20,6 +20,7 @@ DlgGeoOSM::DlgGeoOSM(QWidget *parent)
 
     ui->vlGeo->addWidget(mMap);
     // Options list
+    createOptionsList();
     // ui->vlGeo->addWidget(createOptionsList());
     connect(ui->pbSetCenter, &QPushButton::clicked, this, &DlgGeoOSM::onSetCenter);
 }
@@ -56,31 +57,38 @@ void DlgGeoOSM::onSetCenter(bool checked)
     }
 }
 
-QGroupBox* DlgGeoOSM::createOptionsList()
+QGroupBox* DlgGeoOSM::createOptionsList(bool addCheckbox)
 {
     QList<QPair<QString, QGVWidget*>> widgets = {
-                                                  { "Compass", new QGVWidgetCompass() },
-                                                  { "ZoomButtons", new QGVWidgetZoom() },
-                                                  { "ScaleHorizontal", new QGVWidgetScale(Qt::Horizontal) },
-                                                  { "ScaleVertical", new QGVWidgetScale(Qt::Vertical) },
-                                                  };
-
-    QGroupBox* groupBox = new QGroupBox(tr("Map widgets"));
-    groupBox->setLayout(new QVBoxLayout);
-
+                                                 {"Compass", new QGVWidgetCompass()},
+                                                 {"ScaleHorizontal", new QGVWidgetScale(Qt::Horizontal)},
+                                                 {"ScaleVertical", new QGVWidgetScale(Qt::Vertical)},
+                                                };
+    //{"ZoomButtons", new QGVWidgetZoom()},
+    QGroupBox* groupBox = nullptr;
+    if (addCheckbox){
+        groupBox = new QGroupBox(tr("Map widgets"));
+        groupBox->setLayout(new QVBoxLayout);
+    }
     for (auto pair : widgets) {
         auto name = pair.first;
         auto widget = pair.second;
 
         mMap->addWidget(widget);
-
-        QCheckBox* checkButton = new QCheckBox(name);
-        checkButton->setChecked(true);
-
-        connect(checkButton, &QCheckBox::clicked, this, [widget](const bool checked) { widget->setVisible(checked); });
-
-        groupBox->layout()->addWidget(checkButton);
+        if (addCheckbox){
+            QCheckBox* checkButton = new QCheckBox(name);
+            checkButton->setChecked(true);
+            connect(checkButton, &QCheckBox::clicked, this, [widget](const bool checked) { widget->setVisible(checked); });
+            if (groupBox){
+                groupBox->layout()->addWidget(checkButton);
+            }
+        }
     }
+    if (addCheckbox){
+        if (groupBox){
+            return groupBox;
+        }
+    }
+    return nullptr;
 
-    return groupBox;
 }
