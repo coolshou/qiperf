@@ -14,6 +14,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QFileInfo>
 
 #include "geotranslate.h"
 #include "comm.h"
@@ -28,7 +29,7 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
 {
     m_debuglv=3;
     ui->setupUi(this);
-
+    loadcfg();
     ui->pbShow3D->setVisible(false);
     ui->pbShowMap->setVisible(false);//html base map. not good to show correct position
 
@@ -163,6 +164,7 @@ void DlgGpsCalc::changeEvent(QEvent *e)
 void DlgGpsCalc::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event)
+    savecfg();
     emit closeAll();
 }
 
@@ -252,6 +254,8 @@ void DlgGpsCalc::onLoadCliecked(bool checked)
                                                     path ,
                                                     tr(QIPERF_EXT_FILTER_JSON));
     if (!fileName.isEmpty()){
+        QFileInfo fileInfo(fileName);
+        m_oldsavepath = fileInfo.path();
         onLoad(fileName);
     }
 }
@@ -677,4 +681,22 @@ void DlgGpsCalc::debug(QString msg, int lv)
     if (lv<=m_debuglv){
         qDebug() << "[DlgGpsCalc]" << msg;
     }
+}
+
+void DlgGpsCalc::loadcfg()
+{
+    m_cfg->beginGroup("GpsCalc");
+    // m_cfg->setValue("oldsavepath", m_oldsavepath);
+    m_oldsavepath = m_cfg->value("oldsavepath",
+                                 QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
+    m_cfg->endGroup();
+}
+
+void DlgGpsCalc::savecfg()
+{
+    m_cfg->beginGroup("GpsCalc");
+    m_cfg->setValue("oldsavepath", m_oldsavepath);
+    m_cfg->endGroup();
+    m_cfg->sync();
+
 }

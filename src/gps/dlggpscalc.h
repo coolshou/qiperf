@@ -76,6 +76,8 @@ private:
     void onLoad(QString filename);
     bool onSave(QString filename);
     void debug(QString msg, int lv=3);
+    void loadcfg();
+    void savecfg();
     Ui::DlgGpsCalc *ui;
     QSettings *m_cfg;
     QMenu *m_contextMenu;
