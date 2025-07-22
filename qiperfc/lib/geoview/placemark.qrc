@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/placemark">
+        <file alias="blue">images/blu-circle.png</file>
+        <file alias="green">images/grn-circle.png</file>
+        <file alias="purple">images/purple-circle.png</file>
+        <file alias="red">images/red-circle.png</file>
+        <file alias="yellow">images/ylw-circle.png</file>
+    </qresource>
+</RCC>
