@@ -115,6 +115,8 @@ SOURCES += \
     auto/dlgsimplemicro.cpp \
     auto/simpleworker.cpp \
     lib/axistag.cpp \
+    lib/geoview/placemark.cpp \
+    lib/geoview/polyline.cpp \
     lib/myqcpbars.cpp \
     lib/myqcpgraph.cpp \
     lib/qcustomplot.cpp \
@@ -203,6 +205,8 @@ HEADERS += \
     auto/dlgsimplemicro.h \
     auto/simpleworker.h \
     lib/axistag.h \
+    lib/geoview/placemark.h \
+    lib/geoview/polyline.h \
     lib/myqcpbars.h \
     lib/myqcpgraph.h \
     lib/qcustomplot.h \
@@ -306,7 +310,8 @@ else: unix:!android: target.path = /opt/qiperf/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    ../qiperf.qrc
+    ../qiperf.qrc \
+    lib/geoview/placemark.qrc
 
 # Define a function to extract the version
 defineReplace(extract_version) {
