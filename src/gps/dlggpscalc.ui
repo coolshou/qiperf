@@ -137,7 +137,7 @@
             <enum>Qt::CustomContextMenu</enum>
            </property>
            <attribute name="horizontalHeaderDefaultSectionSize">
-            <number>150</number>
+            <number>100</number>
            </attribute>
            <row>
             <property name="text">
@@ -172,6 +172,16 @@
            <column>
             <property name="text">
              <string>Altitude(MSL)</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>AIP1</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>AIP2</string>
             </property>
            </column>
            <item row="0" column="0">

@@ -1,8 +1,12 @@
 #include "numberdelegate.h"
 
-NumberDelegate::NumberDelegate(NumberType type, QObject *parent)
-    : QStyledItemDelegate{parent}, m_numberType(type)
-{}
+NumberDelegate::NumberDelegate(NumberType type,
+                               double bottom, double top, int decimals,
+                               QObject *parent)
+    : QStyledItemDelegate{parent}, m_numberType(type),
+    m_bottom(bottom), m_top(top), m_decimals(decimals)
+{
+}
 
 QWidget *NumberDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
@@ -17,7 +21,7 @@ QWidget *NumberDelegate::createEditor(QWidget *parent, const QStyleOptionViewIte
     } else { // Double
         // For doubles, set a QDoubleValidator
         // You can specify min/max values and decimals, e.g., new QDoubleValidator(0.0, 100.0, 2, editor)
-        editor->setValidator(new QDoubleValidator(editor));
+        editor->setValidator(new QDoubleValidator(m_bottom, m_top, m_decimals, editor));
     }
 
     return editor;
@@ -27,6 +31,7 @@ void NumberDelegate::setEditorData(QWidget *editor, const QModelIndex &index) co
 {
     // Get the current data from the model and set it to the editor
     QString value = index.model()->data(index, Qt::EditRole).toString();
+    qDebug() << "setEditorData: value:" << value;
     QLineEdit *lineEdit = static_cast<QLineEdit*>(editor);
     lineEdit->setText(value);
 }
@@ -36,4 +41,13 @@ void NumberDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, co
     QLineEdit *lineEdit = static_cast<QLineEdit*>(editor);
     model->setData(index, lineEdit->text(), Qt::EditRole);
 
+}
+
+void NumberDelegate::setRange(double bottom, double top, int decimals)
+{
+    if (m_numberType==NumberDelegate::Double) {
+        m_bottom = bottom;
+        m_top = top;
+        m_decimals = decimals;
+    }
 }

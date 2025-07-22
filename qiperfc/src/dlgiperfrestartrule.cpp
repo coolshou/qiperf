@@ -22,7 +22,9 @@ DlgIperfRestartRule::DlgIperfRestartRule(QSettings *cfg, QWidget *parent)
     ui->twIperfRule->setColumnWidth(cols::Enable, 15);
     ui->twIperfRule->setColumnWidth(cols::Count, 20);
     // Column Count: Only accept integers
-    NumberDelegate *intDelegate = new NumberDelegate(NumberDelegate::Integer, ui->twIperfRule);
+    NumberDelegate *intDelegate = new NumberDelegate(NumberDelegate::Integer,
+                                                     0.0, 1000.0, 0,
+                                                     ui->twIperfRule);
     ui->twIperfRule->setItemDelegateForColumn(cols::Count, intDelegate);
 
     connect(ui->twIperfRule, &QTableWidget::customContextMenuRequested, this, &DlgIperfRestartRule::showContextMenu);

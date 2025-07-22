@@ -117,6 +117,7 @@ SOURCES += \
     lib/axistag.cpp \
     lib/geoview/placemark.cpp \
     lib/geoview/polyline.cpp \
+    lib/geoview/rectangletext.cpp \
     lib/myqcpbars.cpp \
     lib/myqcpgraph.cpp \
     lib/qcustomplot.cpp \
@@ -207,6 +208,7 @@ HEADERS += \
     lib/axistag.h \
     lib/geoview/placemark.h \
     lib/geoview/polyline.h \
+    lib/geoview/rectangletext.h \
     lib/myqcpbars.h \
     lib/myqcpgraph.h \
     lib/qcustomplot.h \

@@ -1463,6 +1463,7 @@ void QIperfC::onGPScalc()
 {
     dlg_gps = new DlgGpsCalc(m_settings);
     connect(this, &QIperfC::closeAll, dlg_gps, &DlgGpsCalc::close);
+    dlg_gps->clearData();
     dlg_gps->show();
 }
 

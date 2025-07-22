@@ -24,7 +24,9 @@ public:
         PositionName=0,
         Latitude=1,
         Longitude=2,
-        Altitude=3
+        Altitude=3,
+        AIP1=4,
+        AIP2=5
     };
     Q_ENUM(GPScols)
     enum AZEIcols{
@@ -42,7 +44,7 @@ public:
     void isTileAvailable();
     QString getTile();
     void setShowLine(bool show);
-
+    void clearData();
 signals:
     void TileAvailable(bool ok);
     void closeAll();
@@ -69,6 +71,7 @@ private slots:
     void onTileAvailable(bool ok);
     void onCheckTileFinished();
     void onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode);
+    void handleButtonClicked(int row, int col);
 private:
     void onLoad(QString filename);
     bool onSave(QString filename);

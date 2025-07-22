@@ -115,13 +115,50 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QLineEdit" name="lineEdit"/>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Marker</string>
+           </property>
+          </widget>
          </item>
          <item>
-          <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+          <widget class="QLineEdit" name="leMarkLabel">
+           <property name="text">
+            <string>Label</string>
+           </property>
+          </widget>
          </item>
          <item>
-          <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+          <widget class="QDoubleSpinBox" name="sbMarkLat">
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="minimum">
+            <double>-90.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>90.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>24.802636000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="sbMarkLon">
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="minimum">
+            <double>-180.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>180.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>121.022430999999997</double>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pbAddMark">
@@ -130,7 +167,21 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="pbClearMark">
+           <property name="text">
+            <string>Clear</string>
+           </property>
+          </widget>
+         </item>
         </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbAddPolyline">
+        <property name="text">
+         <string>Polyline</string>
+        </property>
        </widget>
       </item>
       <item>

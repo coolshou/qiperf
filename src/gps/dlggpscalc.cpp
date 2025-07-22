@@ -9,6 +9,7 @@
 #include <QNetworkRequest>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QPushButton>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -29,26 +30,57 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
     ui->setupUi(this);
 
     ui->pbShow3D->setVisible(false);
+    ui->pbShowMap->setVisible(false);//html base map. not good to show correct position
 
     ui->tableWidget->setColumnWidth(GPScols::Latitude, 100);
     ui->tableWidget->setColumnWidth(GPScols::Longitude, 100);
     ui->tableWidget->setColumnWidth(GPScols::Altitude, 80);
-    // Column Count: Only accept Double
-    NumberDelegate *dDelegate = new NumberDelegate(NumberDelegate::Double, ui->tableWidget);
-    ui->tableWidget->setItemDelegateForColumn(GPScols::Latitude, dDelegate);
-    ui->tableWidget->setItemDelegateForColumn(GPScols::Longitude, dDelegate);
-    ui->tableWidget->setItemDelegateForColumn(GPScols::Altitude, dDelegate);
+    ui->tableWidget->setColumnWidth(GPScols::AIP1, 50);
+    ui->tableWidget->setColumnWidth(GPScols::AIP2, 50);
+    // Only accept Double
+    NumberDelegate *dLatDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                      -90.0, 90.0, 6,
+                                                      ui->tableWidget);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Latitude, dLatDelegate);
+    NumberDelegate *dLonDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                      -180.0, 180.0, 6,
+                                                      ui->tableWidget);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Longitude, dLonDelegate);
+    NumberDelegate *dAltDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                      -10.0, 5500.0, 2,
+                                                      ui->tableWidget);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Altitude, dAltDelegate);
 
     ui->twResult->setColumnWidth(AZEIcols::Distance, 90);
     ui->twResult->setColumnWidth(AZEIcols::Azimuth1, 90);
     ui->twResult->setColumnWidth(AZEIcols::Azimuth2, 90);
     ui->twResult->setColumnWidth(AZEIcols::Elevation1, 100);
     ui->twResult->setColumnWidth(AZEIcols::Elevation2, 100);
+    // Only accept Double
+    NumberDelegate *dDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                   0.0, 10000.0, 2,
+                                                   ui->tableWidget);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::Distance, dDelegate);
+    NumberDelegate *dAziDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                   0.0, 360.0, 2,
+                                                   ui->tableWidget);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::Azimuth1, dAziDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::Azimuth2, dAziDelegate);
+    NumberDelegate *dElDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                   -90.0, 90.0, 2,
+                                                   ui->tableWidget);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::Elevation1, dElDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::Elevation2, dElDelegate);
+
 
     initAction();
     m_dlgOSM = new DlgOpenStreetMap();
+    connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgGpsCalc::onLoadFinished);
     m_dlgGeo = new DlgGeoOSM();
+    connect(m_dlgGeo, &DlgGeoOSM::loadFinished, this, &DlgGpsCalc::onLoadFinished);
+
     connect(this, &DlgGpsCalc::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
+    connect(this, &DlgGpsCalc::closeAll, m_dlgGeo, &DlgGeoOSM::close);
     connect(ui->pbLoad, &QPushButton::clicked, this, &DlgGpsCalc::onLoadCliecked);
     connect(ui->pbSave, &QPushButton::clicked, this, &DlgGpsCalc::onSaveCliecked);
     connect(ui->pbCalc, &QPushButton::clicked, this, &DlgGpsCalc::onCalcCliecked);
@@ -60,7 +92,7 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
     connect(ui->pbToDegree, &QPushButton::clicked, this, &DlgGpsCalc::onToDegree);
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
             this, &DlgGpsCalc::showContextMenu);
-    connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgGpsCalc::onLoadFinished);
+
     connect(this, &DlgGpsCalc::TileAvailable, this , &DlgGpsCalc::onTileAvailable);
     isTileAvailable();
 
@@ -103,6 +135,19 @@ void DlgGpsCalc::setShowLine(bool show)
     showline = show;
 }
 
+void DlgGpsCalc::clearData()
+{
+    //TODO: ask before clear
+    if (ui->tableWidget->rowCount()>0){
+        ui->tableWidget->clearContents();
+        ui->tableWidget->setRowCount(0);
+    }
+    if (ui->twResult->rowCount()>0) {
+        ui->twResult->clearContents();
+        ui->twResult->setRowCount(0);
+    }
+}
+
 void DlgGpsCalc::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
@@ -137,10 +182,7 @@ void DlgGpsCalc::initAction()
 void DlgGpsCalc::onInsert(bool checked)
 {
     Q_UNUSED(checked)
-    int iRow = ui->tableWidget->rowCount();
-    ui->tableWidget->setRowCount(iRow+1);
-    ui->tableWidget->setItem(iRow, 0, new QTableWidgetItem("Pos" + QString::number(iRow)));
-
+    onAddRow("New", 0.0, 0.0, 0.0);
 }
 
 void DlgGpsCalc::onDelete(bool checked)
@@ -154,29 +196,46 @@ void DlgGpsCalc::onDelete(bool checked)
 void DlgGpsCalc::onAddRow(QString name, double latitude, double longitude, double altitude)
 {
     int iRow = ui->tableWidget->rowCount();
-    // ui->tableWidget->setRowCount(iRow);
     ui->tableWidget->insertRow(iRow);
     QString err = QString("name: %1 ,latitude: %2 ,longitude: %3 ,altitude: %4").arg(name,
-                           QString::number(latitude),
-                           QString::number(longitude),
-                           QString::number(altitude));
+                           QString::number(latitude, 'f', 6),
+                           QString::number(longitude, 'f', 6),
+                           QString::number(altitude, 'f', 2));
     debug(err, 5);
     ui->tableWidget->setSortingEnabled(false);
     ui->tableWidget->setItem(iRow, GPScols::PositionName, new QTableWidgetItem(name));
-    ui->tableWidget->setItem(iRow, GPScols::Latitude, new QTableWidgetItem(QString::number(latitude)));
-    ui->tableWidget->setItem(iRow, GPScols::Longitude, new QTableWidgetItem(QString::number(longitude)));
-    ui->tableWidget->setItem(iRow, GPScols::Altitude, new QTableWidgetItem(QString::number(altitude)));
+    ui->tableWidget->setItem(iRow, GPScols::Latitude, new QTableWidgetItem(QString::number(latitude, 'f', 6)));
+    ui->tableWidget->setItem(iRow, GPScols::Longitude, new QTableWidgetItem(QString::number(longitude, 'f', 6)));
+    ui->tableWidget->setItem(iRow, GPScols::Altitude, new QTableWidgetItem(QString::number(altitude, 'f', 2)));
+    QPushButton *btn1 = new QPushButton("...");
+    int iCol = static_cast<int>(GPScols::AIP1);
+    connect(btn1, &QPushButton::clicked, this, [this, iRow, iCol]() {
+        handleButtonClicked(iRow, iCol);
+    });
+    ui->tableWidget->setCellWidget(iRow, GPScols::AIP1, btn1);
+    if (iRow==0){
+        QPushButton *btn2 = new QPushButton("...");
+        iCol = static_cast<int>(GPScols::AIP2);
+        connect(btn2, &QPushButton::clicked, this, [this, iRow, iCol]() {
+            handleButtonClicked(iRow, iCol);
+        });
+        ui->tableWidget->setCellWidget(iRow, GPScols::AIP2, btn2);
+    }else{
+        // disable cell
+        QTableWidgetItem *disableItem = new QTableWidgetItem("");
+        disableItem->setFlags(disableItem->flags() & ~Qt::ItemIsEnabled); //disabled
+        disableItem->setBackground(Qt::lightGray);
+        disableItem->setFlags(disableItem->flags() & ~Qt::ItemIsSelectable); //not selectable
+        ui->tableWidget->setItem(iRow, GPScols::AIP2, disableItem);
+    }
+
     ui->tableWidget->setSortingEnabled(true);
 }
 
 void DlgGpsCalc::onClear(bool checked)
 {
     Q_UNUSED(checked)
-    //TODO: ask before clear
-    if (ui->tableWidget->rowCount()>0){
-        ui->tableWidget->clearContents();
-        ui->tableWidget->setRowCount(0);
-    }
+    clearData();
 }
 
 void DlgGpsCalc::onLoadCliecked(bool checked)
@@ -234,14 +293,16 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
     }
     //check all cell have value
     QTableWidgetItem *itm=nullptr;
-    int iCol = ui->tableWidget->columnCount();
-    for (int row=0;row<iRow;row++){
-        for (int col=0;col<iCol;col++){
-            itm = ui->tableWidget->item(row,col);
+    // int iCol = ui->tableWidget->columnCount();
+    int iCol = static_cast<int>(GPScols::AIP1);
+    for (int row=0; row<iRow; row++){
+        for (int col=0; col<iCol; col++){
+            itm = ui->tableWidget->item(row, col);
             if(itm){
                 if (itm->text().isEmpty()){
                     ui->tableWidget->setFocus();
-                    ui->tableWidget->setCurrentCell(row,col);
+                    ui->tableWidget->setCurrentCell(row, col);
+                    qDebug() << "itm has no text (" << row << "," << col << ")";
                     return;
                 }
             }
@@ -367,8 +428,8 @@ void DlgGpsCalc::onShowGeo(bool checked)
     }
     if (m_dlgGeo){
 
-        double lat1 = ui->tableWidget->item(0,1)->text().toDouble();
-        double lon1 = ui->tableWidget->item(0,2)->text().toDouble();
+        double lat1 = ui->tableWidget->item(0, GPScols::Latitude)->text().toDouble();
+        double lon1 = ui->tableWidget->item(0, GPScols::Longitude)->text().toDouble();
 
         m_dlgGeo->load(tile , lat1, lon1);
         m_dlgGeo->raise();
@@ -437,24 +498,52 @@ void DlgGpsCalc::showContextMenu(const QPoint &pos)
 void DlgGpsCalc::onLoadFinished(bool ok)
 {
     if (ok){
-        if(m_dlgOSM){
-            //reload marker
-            m_dlgOSM->clearMarker();
+        if (m_dlgGeo){
+            m_dlgGeo->clearMarker();
+            m_dlgGeo->clearPolyLines();
             QString label;
-            QString lat;
-            QString lon;
+            double lat0;
+            double lon0;
+            double lat;
+            double lon;
             // marker
             for(int row=0;row<ui->tableWidget->rowCount();row++){
-                label = ui->tableWidget->item(row,0)->text();
-                lat = ui->tableWidget->item(row,1)->text();
-                lon = ui->tableWidget->item(row,2)->text();
+                label = ui->tableWidget->item(row, GPScols::PositionName)->text();
+                lat = ui->tableWidget->item(row, GPScols::Latitude)->text().toDouble();
+                lon = ui->tableWidget->item(row, GPScols::Longitude)->text().toDouble();
                 if (row==0){
-                    m_dlgOSM->addMarker(lat, lon, label, "marker0");
+                    // m_dlgGeo->addMarker(lat, lon, label, Placemark::MarkColor::Red);
+                    lat0 = lat;
+                    lon0 = lon;
+                    m_dlgGeo->addRectangle(QGV::GeoPos(lat0, lon0), QPointF(10.0, 20.0), Qt::red, label);
                 }else{
-                    m_dlgOSM->addMarker(lat, lon, label);
+                    // marker
+                    //m_dlgGeo->addMarker(lat, lon, label);
+                    m_dlgGeo->addRectangle(QGV::GeoPos(lat, lon), QPointF(10.0, 20.0), Qt::yellow, label);
+                    // polyLines
+                    m_dlgGeo->addPolyline(QGV::GeoPos(lat0, lon0),QGV::GeoPos(lat, lon));
                 }
             }
         }
+        //old html base map
+        // if(m_dlgOSM){
+        //     //reload marker
+        //     m_dlgOSM->clearMarker();
+        //     QString label;
+        //     QString lat;
+        //     QString lon;
+        //     // marker
+        //     for(int row=0;row<ui->tableWidget->rowCount();row++){
+        //         label = ui->tableWidget->item(row,0)->text();
+        //         lat = ui->tableWidget->item(row,1)->text();
+        //         lon = ui->tableWidget->item(row,2)->text();
+        //         if (row==0){
+        //             m_dlgOSM->addMarker(lat, lon, label, "marker0");
+        //         }else{
+        //             m_dlgOSM->addMarker(lat, lon, label);
+        //         }
+        //     }
+        // }
     }
 }
 
@@ -483,6 +572,18 @@ void DlgGpsCalc::onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode)
     qDebug() << errorcode << " onCheckTileErrorOccurred: " << reply->errorString();
 }
 
+void DlgGpsCalc::handleButtonClicked(int row, int col)
+{
+    qDebug() << "handleButtonClicked: " << QString::number(row)
+             << " col:" << QString::number(col);
+    // TODO: open AIP module setting dialog, after setting, set correct AIP value back to
+    // Access other data in the same row
+    // QTableWidgetItem *itemNameItem = tableWidget->item(row, 0);
+    // if (itemNameItem) {
+    //     QMessageBox::information(this, "Row Data", QString("Associated name: %1").arg(itemNameItem->text()));
+    // }
+}
+
 void DlgGpsCalc::onLoad(QString filename)
 {
     // qDebug() << "onLoad file:" << filename;
@@ -509,10 +610,12 @@ void DlgGpsCalc::onLoad(QString filename)
     // Now jsonDoc contains the loaded JSON data, and you can access its content
     // For example, if it's an object:
     if (jsonDoc.isObject()) {
+        //clear old contents
         ui->twResult->clearContents();
         ui->twResult->setRowCount(0);
         ui->tableWidget->clearContents();
         ui->tableWidget->setRowCount(0);
+
         QJsonObject rootObject = jsonDoc.object();
         // Process the QJsonObject
         QJsonArray addPos = rootObject["positions"].toArray();
@@ -545,15 +648,15 @@ bool DlgGpsCalc::onSave(QString filename)
             }
             item = ui->tableWidget->item(i, GPScols::Latitude);
             if (item) {
-                posdata["latitude"] = item->text();
+                posdata["latitude"] = item->text().toDouble();
             }
             item = ui->tableWidget->item(i, GPScols::Longitude);
             if (item) {
-                posdata["longitude"] = item->text();
+                posdata["longitude"] = item->text().toDouble();
             }
             item = ui->tableWidget->item(i, GPScols::Altitude);
             if (item) {
-                posdata["altitude"] = item->text();
+                posdata["altitude"] = item->text().toDouble();
             }
             pos.append(posdata);
         }
