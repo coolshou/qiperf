@@ -144,7 +144,7 @@
     <property name="title">
      <string>Tools</string>
     </property>
-    <addaction name="actionGPScalc"/>
+    <addaction name="actionJIO"/>
    </widget>
    <widget class="QMenu" name="menuDevice">
     <property name="title">
@@ -555,13 +555,13 @@
     <string>Iperf2 log</string>
    </property>
   </action>
-  <action name="actionGPScalc">
+  <action name="actionJIO">
    <property name="icon">
     <iconset resource="../../qiperf.qrc">
      <normaloff>:/gps</normaloff>:/gps</iconset>
    </property>
    <property name="text">
-    <string>GPS calc</string>
+    <string>JIO</string>
    </property>
   </action>
   <action name="actionTelnet">

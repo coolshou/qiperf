@@ -1459,7 +1459,7 @@ void QIperfC::onAddSSH()
     }
 }
 
-void QIperfC::onGPScalc()
+void QIperfC::onJIO()
 {
     dlg_gps = new DlgJIO(m_settings);
     connect(this, &QIperfC::closeAll, dlg_gps, &DlgJIO::close);
@@ -1505,7 +1505,7 @@ void QIperfC::initActions()
     connect(ui->actionAddPing, &QAction::triggered, this, &QIperfC::onAddPing);
     connect(ui->actionWlanSTA, &QAction::triggered, this, &QIperfC::onWlanSTA);
     //tools
-    connect(ui->actionGPScalc, &QAction::triggered, this, &QIperfC::onGPScalc);
+    connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onJIO);
     //option
     connect(ui->actionConfig, &QAction::triggered, this, &QIperfC::onConfig);
     // auto

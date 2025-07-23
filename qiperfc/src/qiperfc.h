@@ -156,7 +156,7 @@ private slots:
 
     void onAddSerial();
     void onAddSSH();
-    void onGPScalc();
+    void onJIO();
     void onAddPing();
     void onWlanSTA();
     void onError(QString msg);
