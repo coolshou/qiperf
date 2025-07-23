@@ -19,7 +19,7 @@
 #define QIPERF_EXT_FILTER_PNG "png (*.png)"
 #define QIPERF_EXT_JSON "json"
 #define QIPERF_EXT_FILTER_JSON "json (*.json)"
-
+#define QIPERF_EXT_EXCEL "excel (*.xls *.xlsx)"
 
 #define ALL_EXT_FILTER "All (*.*)"
 #define HTML_EXT "html"
