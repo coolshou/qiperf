@@ -1,7 +1,7 @@
-#include "dlggpscalc.h"
-#include "ui_dlggpscalc.h"
+#include "dlgjio.h"
+#include "ui_dlgjio.h"
 
-#include "gpsfunc.h"
+#include "../src/gps/gpsfunc.h"
 
 #include <QTableWidgetItem>
 #include <QMessageBox>
@@ -16,16 +16,16 @@
 #include <QJsonObject>
 #include <QFileInfo>
 
-#include "geotranslate.h"
+#include "../src/gps/geotranslate.h"
 #include "comm.h"
 #include "../src/numberdelegate.h"
 
 #include <QDebug>
 
 
-DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
+DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DlgGpsCalc), m_cfg(cfg)
+    ui(new Ui::DlgJIO), m_cfg(cfg)
 {
     m_debuglv=3;
     ui->setupUi(this);
@@ -76,35 +76,38 @@ DlgGpsCalc::DlgGpsCalc(QSettings *cfg, QWidget *parent) :
 
     initAction();
     m_dlgOSM = new DlgOpenStreetMap();
-    connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgGpsCalc::onLoadFinished);
+    connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgJIO::onLoadFinished);
     m_dlgGeo = new DlgGeoOSM();
-    connect(m_dlgGeo, &DlgGeoOSM::loadFinished, this, &DlgGpsCalc::onLoadFinished);
+    connect(m_dlgGeo, &DlgGeoOSM::loadFinished, this, &DlgJIO::onLoadFinished);
 
-    connect(this, &DlgGpsCalc::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
-    connect(this, &DlgGpsCalc::closeAll, m_dlgGeo, &DlgGeoOSM::close);
-    connect(ui->pbLoad, &QPushButton::clicked, this, &DlgGpsCalc::onLoadCliecked);
-    connect(ui->pbSave, &QPushButton::clicked, this, &DlgGpsCalc::onSaveCliecked);
-    connect(ui->pbCalc, &QPushButton::clicked, this, &DlgGpsCalc::onCalcCliecked);
-    connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgGpsCalc::onShowMap);
-    connect(ui->pbShowGeo, &QPushButton::clicked, this, &DlgGpsCalc::onShowGeo);
-    connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgGpsCalc::onShow3D);
+    connect(this, &DlgJIO::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
+    connect(this, &DlgJIO::closeAll, m_dlgGeo, &DlgGeoOSM::close);
+    connect(ui->pbLoad, &QPushButton::clicked, this, &DlgJIO::onLoadCliecked);
+    connect(ui->pbSave, &QPushButton::clicked, this, &DlgJIO::onSaveCliecked);
+    connect(ui->pbCalc, &QPushButton::clicked, this, &DlgJIO::onCalcCliecked);
+    connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgJIO::onShowMap);
+    connect(ui->pbShowGeo, &QPushButton::clicked, this, &DlgJIO::onShowGeo);
+    connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgJIO::onShow3D);
     connect(ui->pbClear, &QPushButton::clicked, m_clearAction, &QAction::triggered);
-    connect(ui->pbToDMS, &QPushButton::clicked, this, &DlgGpsCalc::onToDMS);
-    connect(ui->pbToDegree, &QPushButton::clicked, this, &DlgGpsCalc::onToDegree);
+    connect(ui->pbToDMS, &QPushButton::clicked, this, &DlgJIO::onToDMS);
+    connect(ui->pbToDegree, &QPushButton::clicked, this, &DlgJIO::onToDegree);
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
-            this, &DlgGpsCalc::showContextMenu);
+            this, &DlgJIO::showContextMenu);
 
-    connect(this, &DlgGpsCalc::TileAvailable, this , &DlgGpsCalc::onTileAvailable);
+    connect(this, &DlgJIO::TileAvailable, this , &DlgJIO::onTileAvailable);
     isTileAvailable();
 
+    m_dlgaip = new DlgAIP(m_cfg, this);
+    connect(m_dlgaip, &DlgAIP::updateData, this, &DlgJIO::onUpdateData);
+    // connect(m_dlgaip, &DlgAIP::accepted, this, &DlgGpsCalc::onAcceptedAIP);
 }
 
-DlgGpsCalc::~DlgGpsCalc()
+DlgJIO::~DlgJIO()
 {
     delete ui;
 }
 
-void DlgGpsCalc::isTileAvailable()
+void DlgJIO::isTileAvailable()
 {
     // check if OpenStreetMapTile can be access
     // QString tile = getTile();
@@ -119,11 +122,11 @@ void DlgGpsCalc::isTileAvailable()
     QNetworkRequest request(nurl);
     reply = manager->get(request);
 
-    connect(reply, &QNetworkReply::finished, this, &DlgGpsCalc::onCheckTileFinished);
+    connect(reply, &QNetworkReply::finished, this, &DlgJIO::onCheckTileFinished);
 
 }
 
-QString DlgGpsCalc::getTile()
+QString DlgJIO::getTile()
 {
     m_cfg->beginGroup("gps");
     QString tile = m_cfg->value("OpenStreetMapTile").toString();
@@ -131,12 +134,12 @@ QString DlgGpsCalc::getTile()
     return tile;
 }
 
-void DlgGpsCalc::setShowLine(bool show)
+void DlgJIO::setShowLine(bool show)
 {
     showline = show;
 }
 
-void DlgGpsCalc::clearData()
+void DlgJIO::clearData()
 {
     //TODO: ask before clear
     if (ui->tableWidget->rowCount()>0){
@@ -149,7 +152,7 @@ void DlgGpsCalc::clearData()
     }
 }
 
-void DlgGpsCalc::changeEvent(QEvent *e)
+void DlgJIO::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
     switch (e->type()) {
@@ -161,33 +164,33 @@ void DlgGpsCalc::changeEvent(QEvent *e)
     }
 }
 
-void DlgGpsCalc::closeEvent(QCloseEvent *event)
+void DlgJIO::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event)
     savecfg();
     emit closeAll();
 }
 
-void DlgGpsCalc::initAction()
+void DlgJIO::initAction()
 {
     m_contextMenu = new QMenu(this);
 
     m_insertAction = m_contextMenu->addAction("Insert");
-    connect(m_insertAction, &QAction::triggered, this , &DlgGpsCalc::onInsert);
+    connect(m_insertAction, &QAction::triggered, this , &DlgJIO::onInsert);
     m_deleteAction = m_contextMenu->addAction("Delete");
-    connect(m_deleteAction, &QAction::triggered, this , &DlgGpsCalc::onDelete);
+    connect(m_deleteAction, &QAction::triggered, this , &DlgJIO::onDelete);
     m_clearAction = new QAction("clear");
         // m_contextMenu->addAction("clear");
-    connect(m_clearAction, &QAction::triggered, this , &DlgGpsCalc::onClear);
+    connect(m_clearAction, &QAction::triggered, this , &DlgJIO::onClear);
 }
 
-void DlgGpsCalc::onInsert(bool checked)
+void DlgJIO::onInsert(bool checked)
 {
     Q_UNUSED(checked)
     onAddRow("New", 0.0, 0.0, 0.0);
 }
 
-void DlgGpsCalc::onDelete(bool checked)
+void DlgJIO::onDelete(bool checked)
 {
     Q_UNUSED(checked)
     int iRow = ui->tableWidget->currentRow();//->selectRow();
@@ -195,7 +198,7 @@ void DlgGpsCalc::onDelete(bool checked)
     ui->tableWidget->removeRow(iRow);
 }
 
-void DlgGpsCalc::onAddRow(QString name, double latitude, double longitude, double altitude)
+void DlgJIO::onAddRow(QString name, double latitude, double longitude, double altitude)
 {
     int iRow = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(iRow);
@@ -234,13 +237,13 @@ void DlgGpsCalc::onAddRow(QString name, double latitude, double longitude, doubl
     ui->tableWidget->setSortingEnabled(true);
 }
 
-void DlgGpsCalc::onClear(bool checked)
+void DlgJIO::onClear(bool checked)
 {
     Q_UNUSED(checked)
     clearData();
 }
 
-void DlgGpsCalc::onLoadCliecked(bool checked)
+void DlgJIO::onLoadCliecked(bool checked)
 {
     Q_UNUSED(checked)
     QString path;
@@ -260,7 +263,7 @@ void DlgGpsCalc::onLoadCliecked(bool checked)
     }
 }
 
-void DlgGpsCalc::onSaveCliecked(bool checked)
+void DlgJIO::onSaveCliecked(bool checked)
 {
     Q_UNUSED(checked)
     QString path;
@@ -285,7 +288,7 @@ void DlgGpsCalc::onSaveCliecked(bool checked)
     }
 }
 
-void DlgGpsCalc::onCalcCliecked(bool checked)
+void DlgJIO::onCalcCliecked(bool checked)
 {
     Q_UNUSED(checked)
     int iRow = ui->tableWidget->rowCount();
@@ -388,7 +391,7 @@ void DlgGpsCalc::onCalcCliecked(bool checked)
 
 }
 
-void DlgGpsCalc::onShowMap(bool checked)
+void DlgJIO::onShowMap(bool checked)
 {
     Q_UNUSED(checked)
     QString errmsg ="";
@@ -419,7 +422,7 @@ void DlgGpsCalc::onShowMap(bool checked)
     }
 }
 
-void DlgGpsCalc::onShowGeo(bool checked)
+void DlgJIO::onShowGeo(bool checked)
 {
     Q_UNUSED(checked)
     QString tile = getTile();
@@ -442,14 +445,14 @@ void DlgGpsCalc::onShowGeo(bool checked)
     }
 }
 
-void DlgGpsCalc::onShow3D(bool checked)
+void DlgJIO::onShow3D(bool checked)
 {
     Q_UNUSED(checked)
     qDebug() << "TODO Show 3D plot";
 
 }
 
-void DlgGpsCalc::onToDMS(bool checked)
+void DlgJIO::onToDMS(bool checked)
 {
     Q_UNUSED(checked)
     //convert degree to DDD MM.MMMMS SS.SSSSS
@@ -465,7 +468,7 @@ void DlgGpsCalc::onToDMS(bool checked)
 
 }
 
-void DlgGpsCalc::onToDegree(bool checked)
+void DlgJIO::onToDegree(bool checked)
 {
     Q_UNUSED(checked)
     double degree = 0.0;
@@ -485,7 +488,7 @@ void DlgGpsCalc::onToDegree(bool checked)
     }
 }
 
-void DlgGpsCalc::showContextMenu(const QPoint &pos)
+void DlgJIO::showContextMenu(const QPoint &pos)
 {
     if (ui->tableWidget->rowCount()<1){
         m_deleteAction->setEnabled(false);
@@ -499,7 +502,7 @@ void DlgGpsCalc::showContextMenu(const QPoint &pos)
     // m_contextMenu->show();
 }
 
-void DlgGpsCalc::onLoadFinished(bool ok)
+void DlgJIO::onLoadFinished(bool ok)
 {
     if (ok){
         if (m_dlgGeo){
@@ -551,13 +554,13 @@ void DlgGpsCalc::onLoadFinished(bool ok)
     }
 }
 
-void DlgGpsCalc::onTileAvailable(bool ok)
+void DlgJIO::onTileAvailable(bool ok)
 {
     ui->pbShowMap->setEnabled(ok);
     ui->pbShowGeo->setEnabled(ok);
 }
 
-void DlgGpsCalc::onCheckTileFinished()
+void DlgJIO::onCheckTileFinished()
 {
     if (reply->error() == QNetworkReply::NoError) {
         // QByteArray response = reply->readAll();
@@ -571,24 +574,45 @@ void DlgGpsCalc::onCheckTileFinished()
     }
 }
 
-void DlgGpsCalc::onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode)
+void DlgJIO::onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode)
 {
     qDebug() << errorcode << " onCheckTileErrorOccurred: " << reply->errorString();
 }
 
-void DlgGpsCalc::handleButtonClicked(int row, int col)
+void DlgJIO::handleButtonClicked(int row, int col)
 {
     qDebug() << "handleButtonClicked: " << QString::number(row)
              << " col:" << QString::number(col);
-    // TODO: open AIP module setting dialog, after setting, set correct AIP value back to
-    // Access other data in the same row
-    // QTableWidgetItem *itemNameItem = tableWidget->item(row, 0);
-    // if (itemNameItem) {
-    //     QMessageBox::information(this, "Row Data", QString("Associated name: %1").arg(itemNameItem->text()));
-    // }
+    //open AIP module setting dialog, after setting, set correct AIP value back to cell
+    m_dlgaip->setRowCol(row, col);
+    QTableWidgetItem *item = ui->tableWidget->item(row, col);
+    if (item){
+        m_dlgaip->loadData(item->text());
+    }
+    m_dlgaip->show();
 }
 
-void DlgGpsCalc::onLoad(QString filename)
+void DlgJIO::onAcceptedAIP()
+{
+    // qDebug() << "onAcceptedAIP:" << sender();
+    QJsonObject data = m_dlgaip->getData();
+    qDebug() << "onAcceptedAIP:" << data.value("moduletype").toInt()
+             << " x:" << data.value("X_Offset").toDouble()
+             << " y:" << data.value("Y_Offset").toDouble()
+             << " z:" << data.value("Z_Offset").toDouble();
+
+    //TODO: update to row/col
+    // DlgAIP daip = static_cast<DlgAIP>(sender());
+    // qDebug() << "onAcceptedAIP: ModuleType: " << daip.getModuleType();
+}
+
+void DlgJIO::onUpdateData(int row, int col, QString data)
+{
+    QTableWidgetItem *item = ui->tableWidget->item(row, col);
+    item->setText(data);
+}
+
+void DlgJIO::onLoad(QString filename)
 {
     // qDebug() << "onLoad file:" << filename;
     QFile file(filename);
@@ -631,7 +655,7 @@ void DlgGpsCalc::onLoad(QString filename)
     }
 }
 
-bool DlgGpsCalc::onSave(QString filename)
+bool DlgJIO::onSave(QString filename)
 {
     debug("onSave file:" + filename, 6);
     QFile file(filename);
@@ -662,6 +686,16 @@ bool DlgGpsCalc::onSave(QString filename)
             if (item) {
                 posdata["altitude"] = item->text().toDouble();
             }
+            //AIP1
+            item = ui->tableWidget->item(i, GPScols::AIP1);
+            if (item) {
+                qDebug() << "AIP1 data:" << item->text();
+            }
+            //AIP2
+            item = ui->tableWidget->item(i, GPScols::AIP2);
+            if (item) {
+                qDebug() << "AIP2 data:" << item->text();
+            }
             pos.append(posdata);
         }
         rootObject["positions"] = pos;
@@ -676,14 +710,14 @@ bool DlgGpsCalc::onSave(QString filename)
     return true;
 }
 
-void DlgGpsCalc::debug(QString msg, int lv)
+void DlgJIO::debug(QString msg, int lv)
 {
     if (lv<=m_debuglv){
         qDebug() << "[DlgGpsCalc]" << msg;
     }
 }
 
-void DlgGpsCalc::loadcfg()
+void DlgJIO::loadcfg()
 {
     m_cfg->beginGroup("GpsCalc");
     // m_cfg->setValue("oldsavepath", m_oldsavepath);
@@ -692,7 +726,7 @@ void DlgGpsCalc::loadcfg()
     m_cfg->endGroup();
 }
 
-void DlgGpsCalc::savecfg()
+void DlgJIO::savecfg()
 {
     m_cfg->beginGroup("GpsCalc");
     m_cfg->setValue("oldsavepath", m_oldsavepath);

@@ -1,5 +1,5 @@
-#ifndef DLGGPSCALC_H
-#define DLGGPSCALC_H
+#ifndef DLGJIO_H
+#define DLGJIO_H
 
 #include <QDialog>
 #include <QPoint>
@@ -8,14 +8,15 @@
 #include <QSettings>
 #include <QNetworkReply>
 
-#include "../map/dlgopenstreetmap.h"
-#include "../map/dlggeoosm.h"
+#include "../src/map/dlgopenstreetmap.h"
+#include "../src/map/dlggeoosm.h"
+#include "dlgaip.h"
 
 namespace Ui {
-class DlgGpsCalc;
+class DlgJIO;
 }
 
-class DlgGpsCalc : public QDialog
+class DlgJIO : public QDialog
 {
     Q_OBJECT
 
@@ -39,8 +40,8 @@ public:
     };
     Q_ENUM(AZEIcols)
 
-    explicit DlgGpsCalc(QSettings *cfg, QWidget *parent = nullptr);
-    ~DlgGpsCalc() override;
+    explicit DlgJIO(QSettings *cfg, QWidget *parent = nullptr);
+    ~DlgJIO() override;
     void isTileAvailable();
     QString getTile();
     void setShowLine(bool show);
@@ -72,13 +73,15 @@ private slots:
     void onCheckTileFinished();
     void onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode);
     void handleButtonClicked(int row, int col);
+    void onAcceptedAIP();
+    void onUpdateData(int row, int col, QString data);
 private:
     void onLoad(QString filename);
     bool onSave(QString filename);
     void debug(QString msg, int lv=3);
     void loadcfg();
     void savecfg();
-    Ui::DlgGpsCalc *ui;
+    Ui::DlgJIO *ui;
     QSettings *m_cfg;
     QMenu *m_contextMenu;
     QAction *m_insertAction;
@@ -86,10 +89,11 @@ private:
     QAction *m_clearAction;
     DlgOpenStreetMap *m_dlgOSM;
     DlgGeoOSM *m_dlgGeo;
+    DlgAIP *m_dlgaip;
     QNetworkReply *reply = nullptr;
     bool showline=false;
     QString m_oldsavepath;
     int m_debuglv;
 };
 
-#endif // DLGGPSCALC_H
+#endif // DLGJIO_H

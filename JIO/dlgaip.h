@@ -1,0 +1,61 @@
+#ifndef DLGAIP_H
+#define DLGAIP_H
+
+#include <QDialog>
+#include <QJsonObject>
+#include <QVector3D>
+#include <QSettings>
+
+#include "aip.h"
+#include "cyntec.h"
+
+namespace Ui {
+class DlgAIP;
+}
+
+class DlgAIP : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit DlgAIP(QSettings *cfg, QWidget *parent = nullptr);
+    ~DlgAIP();
+    AIP::ModuleType getModuleType();
+    void loadData(QString sdata);
+    void loadData(QJsonObject data);
+    QJsonObject getData();
+    void setPosOffset(float xpos, float ypos, float zpos);
+    void setRowCol(int row, int col);
+signals:
+    void updateData(int row, int col, QString data);
+protected:
+    void changeEvent(QEvent *e);
+    void closeEvent(QCloseEvent *event) override;
+private slots:
+    void onAccepted();
+    void onSelReffileClicked(bool checked);
+    void onChangeModule(QString newtext);
+    void onRefFileTextChanged(QString newtext);
+    void onCyntecBeamFactorIDChanged(QString newBeamFactorID);
+    void onCyntecElementMapChanged(QString newElementMap);
+    void onCyntecBeamTableIDChanged(QString newBeamTableID);
+    void onNewCyntecBeamFactorIDs(QStringList keys);
+    void onNewCyntecBeamTableIDs(QStringList keys);
+    void onUpdateCynteBeamFactorData(QString elementMap, int attDb, double azBW, double elBW);
+    void onUpdateBeamTableData(int az, int el, double azBW, double elBW);
+private:
+    void getCyntecBeamFactorDatas(QString beamFactorID);
+    void getCyntecBeamTableDatas(QString beamTableID);
+    void loadcfg();
+    void savecfg();
+    Ui::DlgAIP *ui;
+    QSettings *m_cfg;
+    int mRow;
+    int mCol;
+    AIP::ModuleType mModuleType;
+    QVector3D mPosOffset; // module center position relative to device center (m)
+    QString m_oldsavepath;
+    Cyntec *mCyntec;
+};
+
+#endif // DLGAIP_H

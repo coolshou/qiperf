@@ -7,6 +7,7 @@
 
 #include "../lib/geoview/polyline.h"
 #include "../lib/geoview/rectangletext.h"
+
 #include <QGeoView/QGVWidgetText.h>
 #include "../lib/qgeoview/samples/shared/rectangle.h"
 #include <QDebug>
@@ -72,7 +73,8 @@ void DlgGeoOSM::load(double lat1, double lon1, double lat2, double lon2)
 
     auto target = QGV::GeoRect(QGV::GeoPos(lat1, lon1), QGV::GeoPos(lat2, lon2));
     // whole map 40KM?why second time it become 800m?
-    mMap->cameraTo(QGVCameraActions(mMap).scaleTo(target), true);
+    mMap->cameraTo(QGVCameraActions(mMap).scaleTo(target));
+    // mMap->getCamera()
     // mMap->flyTo(QGVCameraActions(mMap).scaleTo(target));
     emit loadFinished(true);
 }
@@ -101,12 +103,14 @@ void DlgGeoOSM::addPolyline(QGV::GeoPos pos1, QGV::GeoPos pos2, QColor color, qr
 void DlgGeoOSM::addRectangle(QGV::GeoPos pos1, QPointF size, QColor color,
                              QString label)
 {
-
     auto base = mMap->getProjection()->geoToProj(pos1);
+    // qDebug() << "[" << label <<"] addRectangle base" << base << " size:" << size;
     QGV::GeoRect pos = mMap->getProjection()->projToGeo({ base, base + QPointF(size.x(), size.y()) });
+    qDebug() << "[" << label << "]addRectangle pos" << pos << " size:" << size;
     // Rectangle *item = new Rectangle(pos, color);
-
-    RectangleText *item = new RectangleText(label, pos, size, color);
+    // TODO: add label for Rectangle
+    // MyGeoTextItem *item = MyGeoTextItem(pos, label, mPolysLayer);
+    RectangleText *item = new RectangleText(label, pos, size, color, mMap);
     item->setFlag(QGV::ItemFlag::Highlightable, true);
     item->setSelectable(true);
     // item->setFlag(QGV::ItemFlag::Transformed, true);
@@ -187,6 +191,10 @@ void DlgGeoOSM::onMapStateChanged(QGV::MapState state)
 
 void DlgGeoOSM::onScaleChanged()
 {
+    // TODO: when map change scale
+    qDebug() <<  "onScaleChanged:" << mMap->getCamera().scale();
+
+    /*
     QPointF top_left_geo = mMap->mapToProj(QPoint(0,0));
     QPointF bottom_right_geo = mMap->mapToProj(QPoint(mMap->width(), mMap->height()));
 
@@ -194,6 +202,7 @@ void DlgGeoOSM::onScaleChanged()
              << ", " << QString::number(top_left_geo.y())
              << " bottom_right_geo:" << QString::number(bottom_right_geo.x())
              << ", " << QString::number(bottom_right_geo.y());
+    */
 }
 
 void DlgGeoOSM::createContextMenu()

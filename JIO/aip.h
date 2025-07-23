@@ -11,11 +11,19 @@ struct BeamLattice {
 };
 
 //Antenna-in-Package
-class AiP : public QObject
+class AIP : public QObject
 {
     Q_OBJECT
 public:
-    explicit AiP(QObject *parent = nullptr);
+    enum ModuleType{
+        Unknown,
+        Cyntec,
+        Hanwha,
+    };
+    Q_ENUM(ModuleType)
+
+    explicit AIP(QObject *parent = nullptr);
+    virtual void initBeamData(QString filename);
 
 signals:
 };

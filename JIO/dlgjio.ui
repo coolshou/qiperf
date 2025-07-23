@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DlgGpsCalc</class>
- <widget class="QDialog" name="DlgGpsCalc">
+ <class>DlgJIO</class>
+ <widget class="QDialog" name="DlgJIO">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,10 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>GPS</string>
+   <string>JIO</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../qiperf.qrc">
+   <iconset resource="../qiperf.qrc">
     <normaloff>:/gps</normaloff>:/gps</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
@@ -486,13 +486,13 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../qiperf.qrc"/>
+  <include location="../qiperf.qrc"/>
  </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>DlgGpsCalc</receiver>
+   <receiver>DlgJIO</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -508,7 +508,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>DlgGpsCalc</receiver>
+   <receiver>DlgJIO</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

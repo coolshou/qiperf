@@ -36,7 +36,7 @@
 #include "../views/viewmanager.h"
 #include "../views/throughputview.h"
 #include "../views/serialview.h"
-#include "../src/gps/dlggpscalc.h"
+#include "../JIO/dlgjio.h"
 #include "../views/serialdata.h"
 #include "../views/sshdata.h"
 #include "plugin/plugininterface.h"
@@ -261,7 +261,7 @@ private:
     QString _logfilename;
     bool _logtimestemp;
     QString _logtimestempformat;
-    DlgGpsCalc *dlg_gps;
+    DlgJIO *dlg_gps;
     QString m_OpenStreetMapTile;
 
     // throughput worker
