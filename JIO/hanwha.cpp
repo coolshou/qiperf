@@ -8,7 +8,7 @@
 using namespace QXlsx;
 
 Hanwha::Hanwha(QObject *parent)
-    : AiP{parent}
+    : AIP{parent}
 {
     QString filename="/home/jimmy/SOFT/work/qiperf/aip/a41c_beam_table_export_v2_Hanwha.xlsx";
     initBeamData(filename);

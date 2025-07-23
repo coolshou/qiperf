@@ -4,7 +4,7 @@
 #include <QObject>
 #include "aip.h"
 
-class Hanwha : public AiP
+class Hanwha : public AIP
 {
     Q_OBJECT
 public:
