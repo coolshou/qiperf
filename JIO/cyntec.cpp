@@ -55,6 +55,8 @@ void Cyntec::initBeamData(QString filename)
                                                                 varD.toInt(),
                                                                 varE.toDouble(),
                                                                 varF.toDouble()));
+                }else{
+                    qDebug() << "BeamFactor:No value row:" << irow << " col:" << icol;
                 }
 
             }
@@ -104,10 +106,12 @@ void Cyntec::initBeamData(QString filename)
                                                               varD.toInt(),
                                                               varE.toDouble(),
                                                               varF.toDouble()));
+                }else{
+                    qDebug() << "BeamTable:No value row:" << irow << " col:" << icol;
                 }
 
             }
-            qDebug() << "mBeamFactorData.keys:" << mBeamTableData.keys();
+            qDebug() << "mBeamTableData.keys:" << mBeamTableData.keys();
             QStringList tablekeys;
             for (int tablekey : mBeamTableData.keys()) {
                 // Convert the integer to a QString and add it to stringList
