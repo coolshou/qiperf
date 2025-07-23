@@ -15,10 +15,10 @@ class RectangleText : public Rectangle
     Q_OBJECT
 public:
     RectangleText(QString label, const QGV::GeoRect& geoRect,
-                  QPointF size, QColor color);
+                  QPointF size, QColor color, QGVMap *map=nullptr);
 private:
     QGVWidgetText* mlabel;
-
+    QGVMap* mMap;
 };
 
 #endif // RECTANGLETEXT_H
