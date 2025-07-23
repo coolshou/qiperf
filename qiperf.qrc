@@ -57,6 +57,7 @@
         <file alias="qiperf.qss">qiperf.qss</file>
         <file alias="iperfrule">images/iperfrule.png</file>
         <file alias="qgeoview">images/qgeoview.png</file>
+        <file alias="JIO">JIO/Jio.png</file>
     </qresource>
     <qresource prefix="/template">
         <file alias="result.html">qiperfc/template/result.html</file>

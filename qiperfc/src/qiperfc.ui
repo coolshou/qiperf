@@ -558,7 +558,7 @@
   <action name="actionJIO">
    <property name="icon">
     <iconset resource="../../qiperf.qrc">
-     <normaloff>:/gps</normaloff>:/gps</iconset>
+     <normaloff>:/JIO</normaloff>:/JIO</iconset>
    </property>
    <property name="text">
     <string>JIO</string>

@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../qiperf.qrc">
-    <normaloff>:/gps</normaloff>:/gps</iconset>
+    <normaloff>:/JIO</normaloff>:/JIO</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
    <item>
