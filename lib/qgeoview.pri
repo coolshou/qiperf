@@ -1,7 +1,7 @@
 
 
 #qgeoview
-include(qgeoview/samples/lib.pri)
+# include(qgeoview/samples/lib.pri)
 INCLUDEPATH += \
     $$PWD/qgeoview/lib/include/ \
     $$PWD/qgeoview/lib/include/QGeoView/
