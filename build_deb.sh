@@ -22,6 +22,16 @@ cp -f qiperfc/debian/control.qt5 qiperfc/debian/control
 fi
 
 rm -f *.buildinfo *.changes *.deb
+type cmake &> /dev/null;
+if [ $? -ne 0 ]; then
+    echo "Require cmake to build geographiclib"
+    exit
+fi
+type python3 &> /dev/null;
+if [ $? -ne 0 ]; then
+    echo "Require python3 to build botan"
+    exit
+fi
 if [ ! -e lib/geographiclib/build/src/libGeographicLib.a ]; then
     cd lib/geographiclib
     if [ ! -e build ]; then
@@ -33,14 +43,21 @@ if [ ! -e lib/geographiclib/build/src/libGeographicLib.a ]; then
     cd ../../../
 fi
 if [ ! -e lib/qssh/botan/libbotan-2.a ]; then
-  cd lib/qssh/botan
+  cd lib/qssh
+  if [ ! -e botan/configure.py ];then
+    git submodule init
+    git submodule update
+  fi
+  cd botan
   python3 ./configure.py --disable-shared-library
   make
   cd ../../../
 fi
 if [ ! -e lib/qssh/lib/libQSsh.a ]; then
   cd lib/qssh
-  dpkg-buildpackage -b --no-sign
+  #dpkg-buildpackage -b --no-sign
+  qmake
+  make
   cd ../../
 fi
 for package in ${BUILDPACKAGES[@]} ; do
