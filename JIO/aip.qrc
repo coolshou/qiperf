@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/AIP">
+        <file alias="Cyntec.xlsx">Cyntec/Cyntec_beam_table_v0.2.5.xlsx</file>
+        <file alias="Hanwha.xlsx">Hanwha/a41c_beam_table_export_v5.xlsx</file>
+    </qresource>
+</RCC>

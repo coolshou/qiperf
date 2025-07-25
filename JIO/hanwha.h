@@ -10,8 +10,10 @@ class Hanwha : public AIP
 public:
     explicit Hanwha(QObject *parent = nullptr);
     void initBeamData(QString filename);
+    void initBeamData(QIODevice *device);
     void getBeamData();
-
+signals:
+    void newBeamTableIDs(QStringList keys);
 private:
     QMap<QString, BeamLattice> beamData;
 };

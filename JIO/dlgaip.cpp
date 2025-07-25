@@ -8,6 +8,8 @@
 #include <QMessageBox>
 #include <QJsonParseError>
 #include <QJsonDocument>
+#include <QResource>
+
 #include <QDebug>
 
 
@@ -20,21 +22,26 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     mPosOffset=QVector3D(0.0,0.0,10.0);
     ui->setupUi(this);
     connect(this, &DlgAIP::accepted, this, &DlgAIP::onAccepted);
+    //Cyntec
+    connect(ui->CyntecBeamFactorID, &QComboBox::currentTextChanged, this, &DlgAIP::onCyntecBeamFactorIDChanged);
+    connect(ui->CyntecBeamTableID, &QComboBox::currentTextChanged, this, &DlgAIP::onCyntecBeamTableIDChanged);
+    connect(ui->CyntecElementMap, &QComboBox::currentTextChanged, this, &DlgAIP::onCyntecElementMapChanged);
+    //Hanwha
+    connect(ui->HanwhaBeamTableID, &QComboBox::currentTextChanged, this, &DlgAIP::onHanwhaBeamTableIDChanged);
     loadcfg();
     mModuleType = AIP::ModuleType::Unknown;
     connect(ui->pbSelReffile, &QPushButton::clicked, this, &DlgAIP::onSelReffileClicked);
     connect(ui->cbAIPModule, &QComboBox::currentTextChanged, this, &DlgAIP::onChangeModule);
-    connect(ui->leRefFile, &QLineEdit::textChanged, this, &DlgAIP::onRefFileTextChanged);
-    //Cyntec
-    connect(ui->CyntecBeamFactorID, &QComboBox::currentTextChanged, this, &DlgAIP::onCyntecBeamFactorIDChanged);
-    connect(ui->CyntecElementMap, &QComboBox::currentTextChanged, this, &DlgAIP::onCyntecElementMapChanged);
-    connect(ui->CyntecBeamTableID, &QComboBox::currentTextChanged, this, &DlgAIP::onCyntecBeamTableIDChanged);
+    connect(ui->sbX, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onXValueChanged);
+    connect(ui->sbY, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onYValueChanged);
+    connect(ui->sbZ, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onZValueChanged);
     mCyntec = new Cyntec();
     connect(mCyntec, &Cyntec::newBeamFactorIDs, this, &DlgAIP::onNewCyntecBeamFactorIDs);
     connect(mCyntec, &Cyntec::newBeamTableIDs, this, &DlgAIP::onNewCyntecBeamTableIDs);
     connect(mCyntec, &Cyntec::updateBeamFactorData, this, &DlgAIP::onUpdateCynteBeamFactorData);
     connect(mCyntec, &Cyntec::updateBeamTableData, this, &DlgAIP::onUpdateBeamTableData);
-
+    mHanwha = new Hanwha();
+    connect(mHanwha, &Hanwha::newBeamTableIDs, this, &DlgAIP::onNewHanwhaBeamTableIDs);
     //Hanwha
     //load data ?
 }
@@ -57,6 +64,9 @@ void DlgAIP::loadData(QString sdata)
     if (error.error == QJsonParseError::NoError){
         QJsonObject data= doc.object();
         loadData(data);
+    }else{
+        qDebug() << "DlgAIP::loadData Error: " << error.errorString()
+                 << " sdata:" << sdata;
     }
 }
 
@@ -64,22 +74,35 @@ void DlgAIP::loadData(QJsonObject data)
 {
     //load json data and show on UI
     qDebug() << "TODO load Json data:" << data;
+    int iModuletype = data.value("ModuleType").toInt();
+    ui->cbAIPModule->setCurrentIndex(iModuletype);
+    QString soffset = data.value("offset").toString();
+    QStringList ds = soffset.split(",");
+    if (ds.length()==3){
+        ui->sbX->setValue(ds[0].toDouble());
+        ui->sbY->setValue(ds[1].toDouble());
+        ui->sbZ->setValue(ds[2].toDouble());
+        setPosOffset(ds[0].toDouble(), ds[1].toDouble(), ds[2].toDouble());
+    }else{
+        qDebug() << "Wrong offset format:" << soffset;
+    }
 }
 
 QJsonObject DlgAIP::getData()
 {
-    // get UI's value to turn into JSON format
-    qDebug() << "TODO get Json data";
+    // get UI's value and turn into JSON format
     QJsonObject jobj;
     jobj["moduletype"] = static_cast<int>(mModuleType);
-    jobj["X_Offset"] = mPosOffset.x();
-    jobj["Y_Offset"] = mPosOffset.y();
-    jobj["Z_Offset"] = mPosOffset.z();
+    jobj["offset"] = QString("%1,%2,%3").arg(mPosOffset.x(),
+                                             mPosOffset.y(),
+                                             mPosOffset.z());
+    qDebug() << "get Json data" << jobj;
     return jobj;
 }
 
 void DlgAIP::setPosOffset(float xpos, float ypos, float zpos)
 {
+    qDebug() << "X:" << xpos << " Y:" << ypos << " Z:" << zpos;
     mPosOffset.setX(xpos);
     mPosOffset.setY(ypos);
     mPosOffset.setZ(zpos);
@@ -112,14 +135,22 @@ void DlgAIP::closeEvent(QCloseEvent *event)
 void DlgAIP::onAccepted()
 {
     QJsonObject obj = getData();
-    QJsonDocument doc(obj);
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-    emit updateData(mRow, mCol, strJson);
+    // QJsonDocument doc(obj);
+    // QString strJson(doc.toJson(QJsonDocument::Compact));
+    emit updateData(mRow, mCol, obj);
 }
 
 void DlgAIP::onSelReffileClicked(bool checked)
 {
     Q_UNUSED(checked)
+    if (ui->cbAIPModule->currentText().isEmpty()){
+        QString msg = QString("AIP module must select first");
+        QMessageBox::warning(this, tr("WARNING!!"),
+                             msg,
+                             QMessageBox::Ok);
+        ui->cbAIPModule->setFocus();
+        return;
+    }
     //select file
     QString path;
     if (!m_oldsavepath.isNull()){
@@ -132,7 +163,8 @@ void DlgAIP::onSelReffileClicked(bool checked)
                                                     path ,
                                                     tr(QIPERF_EXT_EXCEL));
     if (!fileName.isEmpty()){
-        ui->leRefFile->setText(fileName);
+        ui->lbRefFile->setText(fileName);
+        onRefFileTextChanged(fileName);
         QFileInfo fileInfo(fileName);
         m_oldsavepath = fileInfo.path();
     }
@@ -140,47 +172,87 @@ void DlgAIP::onSelReffileClicked(bool checked)
 
 void DlgAIP::onChangeModule(QString newtext)
 {
-    qDebug() << "onChangeModule:" << newtext;
+    // qDebug() << "onChangeModule:" << newtext;
+    QString filename="";
     int idxCyntec =ui->tabWidget->indexOf(ui->tabCyntec);
     int idxHanwha =ui->tabWidget->indexOf(ui->tabHanwha);
     if (newtext.startsWith("Cyntec")){
-        ui->leRefFile->setText("Cyntec_beam_table_v0.2.5.xlsx");
+        QResource resCyntec(":/AIP/Cyntec.xlsx");
+        filename = resCyntec.fileName();
         mModuleType = AIP::ModuleType::Cyntec;
+        QFile Cyntecfile(":/AIP/Cyntec.xlsx");
+        if (Cyntecfile.open(QIODevice::ReadOnly)) {
+            qDebug() << "\nCalling Cyntec initBeamData with QFile...";
+            mCyntec->initBeamData(&Cyntecfile);// Pass the address of the QFile object
+            Cyntecfile.close(); // Close the file after initBeamData is done
+        } else {
+            qDebug() << "Failed to open" << filename << "for reading:" << Cyntecfile.errorString();
+        }
         ui->tabWidget->setTabVisible(idxCyntec, true);
         ui->tabWidget->setTabVisible(idxHanwha, false);
     }else if (newtext.startsWith("Hanwha")){
-        ui->leRefFile->setText("a41c_beam_table_export_v5.xlsx");
+        QResource resHanwha(":/AIP/Hanwha.xlsx");
+        filename = resHanwha.fileName();
+        QFile Hanwhafile(":/AIP/Hanwha.xlsx");
+        if (Hanwhafile.open(QIODevice::ReadOnly)) {
+            qDebug() << "\nCalling Hanwha initBeamData with QFile...";
+            mHanwha->initBeamData(&Hanwhafile);// Pass the address of the QFile object
+            Hanwhafile.close(); // Close the file after initBeamData is done
+        } else {
+            qDebug() << "Failed to open" << filename << "for reading:" << Hanwhafile.errorString();
+        }
         mModuleType = AIP::ModuleType::Hanwha;
         ui->tabWidget->setTabVisible(idxCyntec, false);
         ui->tabWidget->setTabVisible(idxHanwha, true);
     }else{
+        mModuleType = AIP::ModuleType::Unknown;
         ui->tabWidget->setTabVisible(idxCyntec, false);
         ui->tabWidget->setTabVisible(idxHanwha, false);
     }
+    ui->lbRefFile->setText(filename);
 }
 
 void DlgAIP::onRefFileTextChanged(QString newtext)
 {
-    QFile f(newtext);
-    if (f.exists()){
-        if(mModuleType == AIP::ModuleType::Cyntec){
-            // read Cyntec's xls file
-            mCyntec->initBeamData(newtext);
+    if (!newtext.isEmpty()){
+        QFile f(newtext);
+        if (f.exists()){
+            if(mModuleType == AIP::ModuleType::Cyntec){
+                // read Cyntec's xls file
+                mCyntec->initBeamData(newtext);
 
-        }else if(mModuleType == AIP::ModuleType::Hanwha){
-            qDebug() << "onRefFileTextChanged: read Hanwha xls file";
+            }else if(mModuleType == AIP::ModuleType::Hanwha){
+                qDebug() << "onRefFileTextChanged: read Hanwha xls file";
+                mHanwha->initBeamData(newtext);
+            }else {
+                qDebug() << "onRefFileTextChanged: unknows module type";
+            }
         }else {
-            qDebug() << "onRefFileTextChanged: unknows module type";
+            qDebug() << "File not exist: " << newtext;
+            QString msg = QString("File not exist: %1").arg(newtext);
+            QMessageBox::warning(this, tr("WARNING!!"),
+                                 msg,
+                                 QMessageBox::Ok);
         }
-    }else {
-        qDebug() << "File not exist: " << newtext;
-        QString msg = QString("File not exist: %1").arg(newtext);
-        QMessageBox::warning(this, tr("WARNING!!"),
-                             msg,
-                             QMessageBox::Ok);
-        ui->leRefFile->setFocus();
+    }else{
+        qDebug() << "No ref xlsx file";
     }
 
+}
+
+void DlgAIP::onXValueChanged(double value)
+{
+    mPosOffset.setX(value);
+}
+
+void DlgAIP::onYValueChanged(double value)
+{
+    mPosOffset.setY(value);
+}
+
+void DlgAIP::onZValueChanged(double value)
+{
+    mPosOffset.setZ(value);
 }
 
 void DlgAIP::onCyntecBeamFactorIDChanged(QString newBeamFactorID)
@@ -258,19 +330,34 @@ void DlgAIP::onCyntecElementMapChanged(QString newElementMap)
 
 void DlgAIP::onCyntecBeamTableIDChanged(QString newBeamTableID)
 {
+    Q_UNUSED(newBeamTableID)
+    qDebug() << "TODO onCyntecBeamTableIDChanged:" << newBeamTableID;
+}
 
+void DlgAIP::onHanwhaBeamTableIDChanged(QString newBeamTableID)
+{
+    Q_UNUSED(newBeamTableID)
+    qDebug() << "TODO onHanwhaBeamTableIDChanged:" << newBeamTableID;
 }
 
 void DlgAIP::onNewCyntecBeamFactorIDs(QStringList keys)
 {
+    // qDebug() << "onNewCyntecBeamFactorIDs:" << keys;
     ui->CyntecBeamFactorID->clear();
     ui->CyntecBeamFactorID->insertItems(0, keys);
 }
 
 void DlgAIP::onNewCyntecBeamTableIDs(QStringList keys)
 {
+    // qDebug() << "onNewCyntecBeamTableIDs:" << keys;
     ui->CyntecBeamTableID->clear();
     ui->CyntecBeamTableID->insertItems(0, keys);
+}
+
+void DlgAIP::onNewHanwhaBeamTableIDs(QStringList keys)
+{
+    ui->HanwhaBeamTableID->clear();
+    ui->HanwhaBeamTableID->insertItems(0, keys);
 }
 
 void DlgAIP::onUpdateCynteBeamFactorData(QString elementMap, int attDb, double azBW, double elBW)
@@ -315,6 +402,8 @@ void DlgAIP::loadcfg()
     m_cfg->beginGroup("AIP");
     m_oldsavepath = m_cfg->value("selrefpath", QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
     m_cfg->endGroup();
+
+    ui->CyntecElementMap->setCurrentText(0);
 }
 
 void DlgAIP::savecfg()

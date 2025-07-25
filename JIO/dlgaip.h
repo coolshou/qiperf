@@ -8,6 +8,7 @@
 
 #include "aip.h"
 #include "cyntec.h"
+#include "hanwha.h"
 
 namespace Ui {
 class DlgAIP;
@@ -27,7 +28,7 @@ public:
     void setPosOffset(float xpos, float ypos, float zpos);
     void setRowCol(int row, int col);
 signals:
-    void updateData(int row, int col, QString data);
+    void updateData(int row, int col, QJsonObject data);
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event) override;
@@ -36,11 +37,16 @@ private slots:
     void onSelReffileClicked(bool checked);
     void onChangeModule(QString newtext);
     void onRefFileTextChanged(QString newtext);
+    void onXValueChanged(double value);
+    void onYValueChanged(double value);
+    void onZValueChanged(double value);
     void onCyntecBeamFactorIDChanged(QString newBeamFactorID);
     void onCyntecElementMapChanged(QString newElementMap);
     void onCyntecBeamTableIDChanged(QString newBeamTableID);
+    void onHanwhaBeamTableIDChanged(QString newBeamTableID);
     void onNewCyntecBeamFactorIDs(QStringList keys);
     void onNewCyntecBeamTableIDs(QStringList keys);
+    void onNewHanwhaBeamTableIDs(QStringList keys);
     void onUpdateCynteBeamFactorData(QString elementMap, int attDb, double azBW, double elBW);
     void onUpdateBeamTableData(int az, int el, double azBW, double elBW);
 private:
@@ -56,6 +62,7 @@ private:
     QVector3D mPosOffset; // module center position relative to device center (m)
     QString m_oldsavepath;
     Cyntec *mCyntec;
+    Hanwha *mHanwha;
 };
 
 #endif // DLGAIP_H

@@ -1,6 +1,8 @@
 #include "cyntec.h"
 
 #include <QFile>
+#include <QCoreApplication>
+#include <QEventLoop>
 #include "xlsxdocument.h"
 #include "xlsxchartsheet.h"
 #include "xlsxworkbook.h"
@@ -11,129 +13,188 @@ using namespace QXlsx;
 Cyntec::Cyntec(QObject *parent)
     : AIP{parent}
 {
-    mBeamFactorData = QMap<int, CyntecBeamFactorData>();
+    mBeamFactorData = new QMap<int, CyntecBeamFactorData>();
+    mBeamTableData = new QMap<int, CyntecBeamTableData>();
 }
 
 void Cyntec::initBeamData(QString filename)
 {
-    QFile f(filename);
-    if (!f.exists()){
+    QFile readFile(filename);
+    if (!readFile.exists()){
         qDebug() << "File not exist: " << filename;
         return;
     }
-    QXlsx::Document xlsReader(filename);
-    if(xlsReader.load()){
-        //BeamFactor
-        if (xlsReader.selectSheet("BeamFactor")){
-            QVariant varB, varC, varD, varE, varF;
-            int irow=1;
-            int icol=2;
-            varB = xlsReader.read(irow, icol);
-            while (varB.isValid()){
-                irow++;
-                varB =  xlsReader.read(irow, icol);
-                if(varB.isValid()){
-                    varC = xlsReader.read(irow, 3);
-                    if (!varC.isValid()){
-                        varC = "";
-                    }
-                    varD = xlsReader.read(irow, 4);
-                    if (!varD.isValid()){
-                        varD = 0;
-                    }
-                    varE = xlsReader.read(irow, 5);
-                    if (!varE.isValid()){
-                        varE = 0.0;
-                    }
-                    varF = xlsReader.read(irow, 6);
-                    if (!varF.isValid()){
-                        varF = 0.0;
-                    }
-                    mBeamFactorData.insert(varB.toInt(),
-                                           CyntecBeamFactorData(varB.toInt(),
-                                                                varC.toString(),
-                                                                varD.toInt(),
-                                                                varE.toDouble(),
-                                                                varF.toDouble()));
-                }else{
-                    qDebug() << "BeamFactor:No value row:" << irow << " col:" << icol;
-                }
+    if (readFile.open(QIODevice::ReadOnly)) {
+        qDebug() << "\nCalling initBeamData with QFile...";
+        initBeamData(&readFile); // Pass the address of the QFile object
+        readFile.close(); // Close the file after initBeamData is done
+    } else {
+        qDebug() << "Failed to open" << filename << "for reading:" << readFile.errorString();
+    }
 
-            }
-            qDebug() << "mBeamFactorData.keys:" << mBeamFactorData.keys();
-            QStringList factorkeys;
-            for (int factorkey : mBeamFactorData.keys()) {
-                // Convert the integer to a QString and add it to stringList
-                factorkeys.append(QString::number(factorkey));
-            }
-            if (factorkeys.length()>0){
-                emit newBeamFactorIDs(factorkeys);
-            }
-            //
-        }else{
-            qDebug() << "sheet 'BeamFactor' not found";
-        }
+}
+
+void Cyntec::initBeamData(QIODevice *filedevice)
+{
+    if (!filedevice) {
+        qDebug() << "Error: QIODevice pointer is null.";
+        return;
+    }
+    if (!filedevice->isOpen()) {
+        qDebug() << "Error: QIODevice is not open.";
+        return;
+    }
+    if (!filedevice->isReadable()) { // Or isWritable(), depending on intent
+        qDebug() << "Error: QIODevice is not readable.";
+        return;
+    }
+
+    QXlsx::Document xlsReader(filedevice);
+    if(xlsReader.load()){
+        // std::shared_ptr<QXlsx::Cell> sharedCell;
+        // Cell* cellB, cellC, cellD, cellE, cellF;
+        QVariant varB, varC, varD, varE, varF;
+        int irow=0;
+        int icol=0;
+        auto cell = xlsReader.cellAt(irow, icol);
 
         //BeamTable
         if (xlsReader.selectSheet("BeamTable")){
-            QVariant varB, varC, varD, varE, varF;
-            int irow=2;
-            int icol=2;
-            varB = xlsReader.read(irow, icol);
-            while (varB.isValid()){
-                irow++;
-                varB =  xlsReader.read(irow, icol);
-                if(varB.isValid()){
-                    varC = xlsReader.read(irow, 3);
-                    if (!varC.isValid()){
-                        varC = 0;
+            mBeamTableData->clear();
+            irow=2;
+            icol=2;
+            cell = xlsReader.cellAt(irow, icol);
+            if (cell != NULL){
+                varB = cell->readValue();
+                while (varB.isValid()){
+                    QCoreApplication::processEvents(QEventLoop::AllEvents);
+                    irow++;
+                    cell = xlsReader.cellAt(irow, icol);
+                    if (cell != NULL){
+                        varB = cell->readValue();
+                        if(varB.isValid()){
+                            cell = xlsReader.cellAt(irow, 3);
+                            if (cell != NULL){
+                                varC = cell->readValue(); //AZ
+                            }
+                            cell = xlsReader.cellAt(irow, 4);
+                            if (cell != NULL){
+                                varD = cell->readValue(); //EL
+                            }
+                            cell = xlsReader.cellAt(irow, 5);
+                            if (cell != NULL){
+                                varE = cell->readValue(); //Azimuth 3dB BW (°)
+                            }
+                            cell = xlsReader.cellAt(irow, 6);
+                            if (cell != NULL){
+                                varF = cell->readValue(); //Elevation 3dB BW (°)
+                            }
+                            // qDebug() << "[TableData]varB:" << varB
+                            //          << "varC:" << varC << " varD:" << varD
+                            //          << "varE:" << varE << " varF:" << varF;
+                            mBeamTableData->insert(varB.toInt(),
+                                                   CyntecBeamTableData(varB.toInt(),
+                                                                       varC.toInt(),
+                                                                       varD.toInt(),
+                                                                       varE.toDouble(),
+                                                                       varF.toDouble()));
+                        }else{
+                            qDebug() << "BeamTable:No value row:" << irow << " col:" << icol;
+                        }
+                    }else{
+                        // qDebug() << "[TableData]cell is NULL " << irow << "," << icol;
+                        break;
                     }
-                    varD = xlsReader.read(irow, 4);
-                    if (!varD.isValid()){
-                        varD = 0;
-                    }
-                    varE = xlsReader.read(irow, 5);
-                    if (!varE.isValid()){
-                        varE = 0.0;
-                    }
-                    varF = xlsReader.read(irow, 6);
-                    if (!varF.isValid()){
-                        varF = 0.0;
-                    }
-                    mBeamTableData.insert(varB.toInt(),
-                                          CyntecBeamTableData(varB.toInt(),
-                                                              varC.toInt(),
-                                                              varD.toInt(),
-                                                              varE.toDouble(),
-                                                              varF.toDouble()));
-                }else{
-                    qDebug() << "BeamTable:No value row:" << irow << " col:" << icol;
                 }
-
-            }
-            qDebug() << "mBeamTableData.keys:" << mBeamTableData.keys();
-            QStringList tablekeys;
-            for (int tablekey : mBeamTableData.keys()) {
-                // Convert the integer to a QString and add it to stringList
-                tablekeys.append(QString::number(tablekey));
-            }
-            if (tablekeys.length()>0){
-                emit newBeamTableIDs(tablekeys);
+                // qDebug() << "mBeamTableData.keys:" << mBeamTableData->keys();
+                QStringList tablekeys;
+                for (int tablekey : mBeamTableData->keys()) {
+                    // Convert the integer to a QString and add it to stringList
+                    tablekeys.append(QString::number(tablekey));
+                }
+                if (tablekeys.length()>0){
+                    // qDebug() << "tablekeys:" << tablekeys.join(",");
+                    emit newBeamTableIDs(tablekeys);
+                }
+            } else {
+                qDebug() << "sheet 'BeamTable' cell of (" << irow << "," << icol << ") is NULL";
             }
         }else{
             qDebug() << "sheet 'BeamTable' not found";
         }
+        //BeamFactor
+        if (xlsReader.selectSheet("BeamFactor")){
+            mBeamFactorData->clear();
+            irow=1;
+            icol=2;
+            cell = xlsReader.cellAt(irow, icol);
+            if (cell != NULL){
+                varB = cell->readValue();
+                // qDebug() << "varB: " << varB;
+                while (varB.isValid()){
+                    QCoreApplication::processEvents(QEventLoop::AllEvents);
+                    irow++;
+                    cell = xlsReader.cellAt(irow, icol);
+                    if (cell != NULL){
+                        varB = cell->readValue();
+                        cell = xlsReader.cellAt(irow, 3);
+                        if (cell != NULL){
+                            varC = cell->readValue(); // Element Map
+                        }
+                        cell = xlsReader.cellAt(irow, 4);
+                        if (cell != NULL){
+                            varD = cell->readValue(); // Att (dB)
+                        }
+                        cell = xlsReader.cellAt(irow, 5);
+                        if (cell != NULL){
+                            varE = cell->readValue(); // Azimuth 3dB BW (°)
+                        }
+                        cell = xlsReader.cellAt(irow, 6);
+                        if (cell != NULL){
+                            varF = cell->readValue(); // Elevation 3dB BW (°)
+                        }
+                        // qDebug() << "[FactorData]varB:" << varB
+                        //          << "varC:" << varC << " varD:" << varD
+                        //          << "varE:" << varE << " varF:" << varF;
+                        mBeamFactorData->insert(varB.toInt(),
+                                                CyntecBeamFactorData(varB.toInt(),
+                                                                     varC.toString(),
+                                                                     varD.toInt(),
+                                                                     varE.toDouble(),
+                                                                     varF.toDouble()));
+                    }else{
+                        // qDebug() << "[FactorData]cell is NULL " << irow << "," << icol;
+                        break;
+                    }
+                }
+                qDebug() << "mBeamFactorData.keys:" << mBeamFactorData->keys().length();
+                QStringList factorkeys;
+                for (int factorkey : mBeamFactorData->keys()) {
+                    // Convert the integer to a QString and add it to stringList
+                    factorkeys.append(QString::number(factorkey));
+                }
+                if (factorkeys.length()>0){
+                    // qDebug() << "factorkeys:" << factorkeys.join(",");
+                    emit newBeamFactorIDs(factorkeys);
+                }
+            } else {
+                qDebug() << "sheet 'BeamFactor' cell of (" << irow << "," << icol << ") is NULL";
+            }
+        }else{
+            qDebug() << "sheet 'BeamFactor' not found";
+        }
+
+
     }else{
-        qDebug() << "Read " << filename << " fail";
+        qDebug() << "[Cyntec::initBeamData]xlsReader error: ";
     }
 }
 
 void Cyntec::getBeamFactorDatas(int beamFactorID)
 {
-    if (mBeamFactorData.isEmpty()){
-        if (mBeamFactorData.contains(beamFactorID)){
-            CyntecBeamFactorData data = mBeamFactorData.value(beamFactorID, CyntecBeamFactorData());
-            qDebug() << "getBeamFactorDatas:" << beamFactorID << " elementMap:" <<data.elementMap;
+    if (!mBeamFactorData->isEmpty()){
+        if (mBeamFactorData->contains(beamFactorID)){
+            CyntecBeamFactorData data = mBeamFactorData->value(beamFactorID, CyntecBeamFactorData());
             emit updateBeamFactorData(data.elementMap, data.attDb,
                                       data.azimuth3dB_BW, data.elevation3dB_BW);
         }else{
@@ -146,9 +207,9 @@ void Cyntec::getBeamFactorDatas(int beamFactorID)
 
 void Cyntec::getBeamTableDatas(int beamTableID)
 {
-    if (mBeamTableData.isEmpty()){
-        if (mBeamTableData.contains(beamTableID)){
-            CyntecBeamTableData data = mBeamTableData.value(beamTableID);
+    if (!mBeamTableData->isEmpty()){
+        if (mBeamTableData->contains(beamTableID)){
+            CyntecBeamTableData data = mBeamTableData->value(beamTableID);
             qDebug() << "getBeamFactorDatas:" << beamTableID
                      << " azDeg:" << data.azDeg << " elDeg:" << data.elDeg;
             emit updateBeamTableData(data.azDeg, data.elDeg,

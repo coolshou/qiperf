@@ -15,6 +15,7 @@ class Cyntec : public AIP
 public:
     explicit Cyntec(QObject *parent = nullptr);
     void initBeamData(QString filename) override;
+    void initBeamData(QIODevice *device);
     void getBeamFactorDatas(int beamFactorID);
     void getBeamTableDatas(int beamTableID);
 signals:
@@ -23,8 +24,8 @@ signals:
     void updateBeamTableData(int az, int el, double azBW, double elBW);
     void newBeamTableIDs(QStringList keys);
 private:
-    QMap<int, CyntecBeamFactorData> mBeamFactorData;
-    QMap<int, CyntecBeamTableData> mBeamTableData;
+    QMap<int, CyntecBeamFactorData> *mBeamFactorData;
+    QMap<int, CyntecBeamTableData> *mBeamTableData;
 };
 
 #endif // CYNTEC_H

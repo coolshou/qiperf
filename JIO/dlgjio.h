@@ -7,6 +7,7 @@
 #include <QAction>
 #include <QSettings>
 #include <QNetworkReply>
+#include <QJsonObject>
 
 #include "../src/map/dlgopenstreetmap.h"
 #include "../src/map/dlggeoosm.h"
@@ -26,8 +27,10 @@ public:
         Latitude=1,
         Longitude=2,
         Altitude=3,
-        AIP1=4,
-        AIP2=5
+        Heading=4,
+        AIP1=5,
+        AIP2=6,
+        IPAddr=7
     };
     Q_ENUM(GPScols)
     enum AZEIcols{
@@ -57,7 +60,9 @@ private slots:
     void initAction();
     void onInsert(bool checked);
     void onDelete(bool checked);
-    void onAddRow(QString name, double latitude, double longitude, double altitude);
+    void onAddRow(QString name, double latitude, double longitude,
+                  double altitude, double heading,
+                  QJsonObject aip1=QJsonObject(), QJsonObject aip2=QJsonObject(), QString ipaddr="");
     void onClear(bool checked);
     void onLoadCliecked(bool checked);
     void onSaveCliecked(bool checked);
@@ -74,7 +79,8 @@ private slots:
     void onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode);
     void handleButtonClicked(int row, int col);
     void onAcceptedAIP();
-    void onUpdateData(int row, int col, QString data);
+    // void onUpdateData(int row, int col, QString data);
+    void onUpdateData(int row, int col, QJsonObject data);
 private:
     void onLoad(QString filename);
     bool onSave(QString filename);

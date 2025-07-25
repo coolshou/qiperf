@@ -10,8 +10,8 @@ using namespace QXlsx;
 Hanwha::Hanwha(QObject *parent)
     : AIP{parent}
 {
-    QString filename="/home/jimmy/SOFT/work/qiperf/aip/a41c_beam_table_export_v2_Hanwha.xlsx";
-    initBeamData(filename);
+    // QString filename="/home/jimmy/SOFT/work/qiperf/aip/a41c_beam_table_export_v2_Hanwha.xlsx";
+    // initBeamData(filename);
 }
 
 void Hanwha::initBeamData(QString filename)
@@ -24,9 +24,33 @@ void Hanwha::initBeamData(QString filename)
     ...
     beamData["239"] = {21.272, 20.795, "normal"};
 */
-    QFile f(filename);
-    if (!f.exists()){
+    QFile readFile(filename);
+    if (!readFile.exists()){
         qDebug() << "File not exist: " << filename;
+        return;
+    }
+    if (readFile.open(QIODevice::ReadOnly)) {
+        qDebug() << "\nCalling initBeamData with QFile...";
+        initBeamData(&readFile); // Pass the address of the QFile object
+        readFile.close(); // Close the file after initBeamData is done
+        qDebug() << "File closed after initBeamData.";
+    } else {
+        qDebug() << "Failed to open" << filename << "for reading:" << readFile.errorString();
+    }
+}
+
+void Hanwha::initBeamData(QIODevice *filedevice)
+{
+    if (!filedevice) {
+        qDebug() << "Error: QIODevice pointer is null.";
+        return;
+    }
+    if (!filedevice->isOpen()) {
+        qDebug() << "Error: QIODevice is not open.";
+        return;
+    }
+    if (!filedevice->isReadable()) { // Or isWritable(), depending on intent
+        qDebug() << "Error: QIODevice is not readable.";
         return;
     }
     int row=14;
@@ -34,7 +58,7 @@ void Hanwha::initBeamData(QString filename)
 
     QVariant varA, varC, varD, varE;
     // qDebug() << "xlsReader(filename): " << filename;
-    QXlsx::Document xlsReader(filename);
+    QXlsx::Document xlsReader(filedevice);
     if(xlsReader.load()){
         for(int i=row; i<=endrow;i++){
             Cell* cellA = xlsReader.cellAt(i, 1).get(); // col A
@@ -77,7 +101,7 @@ void Hanwha::initBeamData(QString filename)
         }
 
     }else{
-        qDebug() << "Read " << filename << " fail";
+        qDebug() << "[Hanwha::initBeamData]xlsReader error: ";
     }
 }
 

@@ -13,8 +13,9 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
-#include <QJsonObject>
 #include <QFileInfo>
+#include <QVariantMap>
+#include <QVariant>
 
 #include "../src/gps/geotranslate.h"
 #include "comm.h"
@@ -36,8 +37,9 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     ui->tableWidget->setColumnWidth(GPScols::Latitude, 100);
     ui->tableWidget->setColumnWidth(GPScols::Longitude, 100);
     ui->tableWidget->setColumnWidth(GPScols::Altitude, 80);
-    ui->tableWidget->setColumnWidth(GPScols::AIP1, 50);
-    ui->tableWidget->setColumnWidth(GPScols::AIP2, 50);
+    ui->tableWidget->setColumnWidth(GPScols::Heading, 60);
+    ui->tableWidget->setColumnWidth(GPScols::AIP1, 40);
+    ui->tableWidget->setColumnWidth(GPScols::AIP2, 40);
     // Only accept Double
     NumberDelegate *dLatDelegate = new NumberDelegate(NumberDelegate::Double,
                                                       -90.0, 90.0, 6,
@@ -51,6 +53,10 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
                                                       -10.0, 5500.0, 2,
                                                       ui->tableWidget);
     ui->tableWidget->setItemDelegateForColumn(GPScols::Altitude, dAltDelegate);
+    NumberDelegate *dHeadDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                      0.0, 359, 1,
+                                                      ui->tableWidget);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Heading, dHeadDelegate);
 
     ui->twResult->setColumnWidth(AZEIcols::Distance, 90);
     ui->twResult->setColumnWidth(AZEIcols::Azimuth1, 90);
@@ -99,6 +105,7 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
 
     m_dlgaip = new DlgAIP(m_cfg, this);
     connect(m_dlgaip, &DlgAIP::updateData, this, &DlgJIO::onUpdateData);
+    connect(this, &DlgJIO::closeAll, m_dlgaip, &DlgAIP::close);
     // connect(m_dlgaip, &DlgAIP::accepted, this, &DlgGpsCalc::onAcceptedAIP);
 }
 
@@ -187,7 +194,7 @@ void DlgJIO::initAction()
 void DlgJIO::onInsert(bool checked)
 {
     Q_UNUSED(checked)
-    onAddRow("New", 0.0, 0.0, 0.0);
+    onAddRow("New", 0.0, 0.0, 0.0, 0.0);
 }
 
 void DlgJIO::onDelete(bool checked)
@@ -198,26 +205,34 @@ void DlgJIO::onDelete(bool checked)
     ui->tableWidget->removeRow(iRow);
 }
 
-void DlgJIO::onAddRow(QString name, double latitude, double longitude, double altitude)
+void DlgJIO::onAddRow(QString name, double latitude, double longitude,
+                      double altitude, double heading,
+                      QJsonObject aip1, QJsonObject aip2, QString ipaddr)
 {
     int iRow = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(iRow);
     QString err = QString("name: %1 ,latitude: %2 ,longitude: %3 ,altitude: %4").arg(name,
                            QString::number(latitude, 'f', 6),
                            QString::number(longitude, 'f', 6),
-                           QString::number(altitude, 'f', 2));
+                           QString::number(altitude, 'f', 2),
+                           QString::number(heading, 'f', 2));
     debug(err, 5);
     ui->tableWidget->setSortingEnabled(false);
     ui->tableWidget->setItem(iRow, GPScols::PositionName, new QTableWidgetItem(name));
     ui->tableWidget->setItem(iRow, GPScols::Latitude, new QTableWidgetItem(QString::number(latitude, 'f', 6)));
     ui->tableWidget->setItem(iRow, GPScols::Longitude, new QTableWidgetItem(QString::number(longitude, 'f', 6)));
     ui->tableWidget->setItem(iRow, GPScols::Altitude, new QTableWidgetItem(QString::number(altitude, 'f', 2)));
+    ui->tableWidget->setItem(iRow, GPScols::Heading, new QTableWidgetItem(QString::number(heading, 'f', 2)));
+    //how to hold AIP data?
     QPushButton *btn1 = new QPushButton("...");
     int iCol = static_cast<int>(GPScols::AIP1);
     connect(btn1, &QPushButton::clicked, this, [this, iRow, iCol]() {
         handleButtonClicked(iRow, iCol);
     });
     ui->tableWidget->setCellWidget(iRow, GPScols::AIP1, btn1);
+    QTableWidgetItem *aip1item = new QTableWidgetItem("");
+    aip1item->setData(Qt::UserRole, aip1.toVariantMap());
+    ui->tableWidget->setItem(iRow, GPScols::AIP1, aip1item);
     if (iRow==0){
         QPushButton *btn2 = new QPushButton("...");
         iCol = static_cast<int>(GPScols::AIP2);
@@ -225,6 +240,9 @@ void DlgJIO::onAddRow(QString name, double latitude, double longitude, double al
             handleButtonClicked(iRow, iCol);
         });
         ui->tableWidget->setCellWidget(iRow, GPScols::AIP2, btn2);
+        QTableWidgetItem *aip2item = new QTableWidgetItem("");
+        aip2item->setData(Qt::UserRole, aip2.toVariantMap());
+        ui->tableWidget->setItem(iRow, GPScols::AIP1, aip2item);
     }else{
         // disable cell
         QTableWidgetItem *disableItem = new QTableWidgetItem("");
@@ -233,6 +251,7 @@ void DlgJIO::onAddRow(QString name, double latitude, double longitude, double al
         disableItem->setFlags(disableItem->flags() & ~Qt::ItemIsSelectable); //not selectable
         ui->tableWidget->setItem(iRow, GPScols::AIP2, disableItem);
     }
+    ui->tableWidget->setItem(iRow, GPScols::IPAddr, new QTableWidgetItem(ipaddr));
 
     ui->tableWidget->setSortingEnabled(true);
 }
@@ -355,8 +374,8 @@ void DlgJIO::onCalcCliecked(bool checked)
         }
         ui->twResult->setItem(i-1, AZEIcols::Name, new QTableWidgetItem(pos1 + " : " + pos));
         ui->twResult->setItem(i-1, AZEIcols::Distance, new QTableWidgetItem(QString::number(distance)));
-        ui->twResult->setItem(i-1, AZEIcols::Azimuth1, new QTableWidgetItem(QString::number(azimuth)));
-        ui->twResult->setItem(i-1, AZEIcols::Azimuth2, new QTableWidgetItem(QString::number(azimuth2)));
+        ui->twResult->setItem(i-1, AZEIcols::Azimuth1, new QTableWidgetItem(QString::number(azimuth, 'f', 1)));
+        ui->twResult->setItem(i-1, AZEIcols::Azimuth2, new QTableWidgetItem(QString::number(azimuth2, 'f', 1)));
 
         totalazimuth = totalazimuth + azimuth;
         el1 = GeoTranslate::calcElevationAngle(altmsl1, altmsl, distance*1000);
@@ -365,8 +384,8 @@ void DlgJIO::onCalcCliecked(bool checked)
                  << " distance:" << QString::number(distance)
                  << " el1:" << QString::number(el1) << " el2:" << QString::number(el2);
 
-        ui->twResult->setItem(i-1, AZEIcols::Elevation1, new QTableWidgetItem(QString::number(el1)));
-        ui->twResult->setItem(i-1, AZEIcols::Elevation2, new QTableWidgetItem(QString::number(el2)));
+        ui->twResult->setItem(i-1, AZEIcols::Elevation1, new QTableWidgetItem(QString::number(el1, 'f', 1)));
+        ui->twResult->setItem(i-1, AZEIcols::Elevation2, new QTableWidgetItem(QString::number(el2, 'f', 1)));
         totalel = totalel + el1;
         if (showline){
             if (m_dlgOSM){
@@ -377,10 +396,10 @@ void DlgJIO::onCalcCliecked(bool checked)
         }
     }
     double azimuthDegree = totalazimuth/ui->twResult->rowCount();
-    ui->leExpectAzimuth->setText(QString::number(azimuthDegree));
+    ui->leExpectAzimuth->setText(QString::number(azimuthDegree, 'f', 1));
     qDebug() << "totalel:" << QString::number(totalel);
     double elDegree = totalel/ui->twResult->rowCount();
-    ui->leExpectElevation->setText(QString::number(elDegree));
+    ui->leExpectElevation->setText(QString::number(elDegree, 'f', 1));
 
     if (showline){
         if (m_dlgOSM){
@@ -587,7 +606,16 @@ void DlgJIO::handleButtonClicked(int row, int col)
     m_dlgaip->setRowCol(row, col);
     QTableWidgetItem *item = ui->tableWidget->item(row, col);
     if (item){
-        m_dlgaip->loadData(item->text());
+        QVariant v = item->data(Qt::UserRole);
+        qDebug() << "AIP data:"
+                 << QString::number(row) << "," <<  QString::number(col)
+                 << " = " << v;
+        if (v.canConvert<QJsonObject>()){
+            // QJsonObject j = v.toObject();
+            m_dlgaip->loadData(qvariant_cast<QJsonObject>(v));
+        }else{
+            qDebug() << "data from " << item << " can not convert to QJsonObject format";
+        }
     }
     m_dlgaip->show();
 }
@@ -606,10 +634,10 @@ void DlgJIO::onAcceptedAIP()
     // qDebug() << "onAcceptedAIP: ModuleType: " << daip.getModuleType();
 }
 
-void DlgJIO::onUpdateData(int row, int col, QString data)
+void DlgJIO::onUpdateData(int row, int col, QJsonObject data)
 {
     QTableWidgetItem *item = ui->tableWidget->item(row, col);
-    item->setText(data);
+    item->setData(Qt::UserRole, data.toVariantMap());
 }
 
 void DlgJIO::onLoad(QString filename)
@@ -650,7 +678,10 @@ void DlgJIO::onLoad(QString filename)
         for (QJsonArray::const_iterator it=addPos.constBegin(); it!=addPos.constEnd(); ++it) {
             QJsonObject posdata= it->toObject();
             onAddRow(posdata["name"].toString(), posdata["latitude"].toDouble(),
-                     posdata["longitude"].toDouble(), posdata["altitude"].toDouble());
+                     posdata["longitude"].toDouble(), posdata["altitude"].toDouble(),
+                     posdata["heading"].toDouble(),
+                     posdata["AIP1"].toObject(), posdata["AIP2"].toObject(),
+                     posdata["IPAddr"].toString());
         }
     }
 }
@@ -686,15 +717,35 @@ bool DlgJIO::onSave(QString filename)
             if (item) {
                 posdata["altitude"] = item->text().toDouble();
             }
+            item = ui->tableWidget->item(i, GPScols::Heading);
+            if (item) {
+                posdata["heading"] = item->text().toDouble();
+            }
             //AIP1
             item = ui->tableWidget->item(i, GPScols::AIP1);
             if (item) {
-                qDebug() << "AIP1 data:" << item->text();
+                QVariant varAIP1 =  item->data(Qt::UserRole);
+                if (varAIP1.canConvert<QVariantMap>()){
+                    qDebug() << "AIP1 data:" << varAIP1.toMap() ;
+                    posdata["AIP1"] = QJsonObject::fromVariantMap(varAIP1.toMap());
+                }else{
+                    qDebug() << "Wrong API1 data:";
+                }
             }
             //AIP2
             item = ui->tableWidget->item(i, GPScols::AIP2);
             if (item) {
-                qDebug() << "AIP2 data:" << item->text();
+                QVariant varAIP2 =  item->data(Qt::UserRole);
+                if (varAIP2.canConvert<QVariantMap>()){
+                    qDebug() << "AIP2 data:" << varAIP2.toMap() ;
+                    posdata["AIP2"] = QJsonObject::fromVariantMap(varAIP2.toMap());
+                }else{
+                    qDebug() << "Wrong API2 data:";
+                }
+            }
+            item = ui->tableWidget->item(i, GPScols::IPAddr);
+            if (item) {
+                posdata["IPAddr"] = item->text();
             }
             pos.append(posdata);
         }
