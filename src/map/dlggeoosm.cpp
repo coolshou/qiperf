@@ -73,9 +73,9 @@ void DlgGeoOSM::load(double lat1, double lon1, double lat2, double lon2)
 
     auto target = QGV::GeoRect(QGV::GeoPos(lat1, lon1), QGV::GeoPos(lat2, lon2));
     // whole map 40KM?why second time it become 800m?
-    mMap->cameraTo(QGVCameraActions(mMap).scaleTo(target));
+    // mMap->cameraTo(QGVCameraActions(mMap).scaleTo(target));
     // mMap->getCamera()
-    // mMap->flyTo(QGVCameraActions(mMap).scaleTo(target));
+    mMap->flyTo(QGVCameraActions(mMap).scaleTo(target));
     emit loadFinished(true);
 }
 

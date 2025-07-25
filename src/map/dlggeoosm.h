@@ -1,6 +1,14 @@
 #ifndef DLGGEOOSM_H
 #define DLGGEOOSM_H
 
+/*
+ Use QGeoView to display Geographic Information of OSM (OpenStreetMap)
+
+show:
+    1. place marker
+    2. polyline
+    3. rf sector (fan-shaped) Coverage
+*/
 #include <QDialog>
 #include <QGroupBox>
 
