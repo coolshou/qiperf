@@ -99,7 +99,6 @@ SOURCES += \
     ../src/filewatcher.cpp \
     ../src/gps/geotranslate.cpp \
     ../src/gps/gpsfunc.cpp \
-    ../src/map/dlgopenstreetmap.cpp \
     ../src/map/dlggeoosm.cpp \
     ../src/myfunc.cpp \
     ../src/pipeclient.cpp \
@@ -170,6 +169,7 @@ SOURCES += \
     views/serialview.cpp \
     views/throughputview.cpp
 #    src/tpstatuschecker.cpp
+#    ../src/map/dlgopenstreetmap.cpp
 SOURCES += \
     ../JIO/aip.cpp \
     ../JIO/dlgaip.cpp \
@@ -187,7 +187,6 @@ HEADERS += \
     ../src/filewatcher.h \
     ../src/gps/geotranslate.h \
     ../src/gps/gpsfunc.h \
-    ../src/map/dlgopenstreetmap.h \
     ../src/map/dlggeoosm.h \
     ../src/pipeclient.h \
     ../src/comm.h \
@@ -281,12 +280,12 @@ HEADERS += \
     ../JIO/cyntecbeamfactordata.h \
     ../JIO/cyntecbeamtabledate.h
 
+#    ../src/map/dlgopenstreetmap.h
 # lib/tplegenditem.h \
     # ../qiperfd/src/wsserver.h \
 
 FORMS += \
     ../src/dlgshowlog.ui \
-    ../src/map/dlgopenstreetmap.ui \
     ../src/map/dlggeoosm.ui \
     ../src/port/portsetbox.ui \
     ../src/port/serialport.ui \
@@ -308,6 +307,7 @@ FORMS += \
     views/sshview.ui \
     views/throughputview.ui
 
+#    ../src/map/dlgopenstreetmap.ui
 FORMS += \
     ../JIO/dlgaip.ui \
     ../JIO/dlgjio.ui

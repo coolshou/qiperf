@@ -32,7 +32,7 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     ui->setupUi(this);
     loadcfg();
     ui->pbShow3D->setVisible(false);
-    ui->pbShowMap->setVisible(false);//html base map. not good to show correct position
+    // ui->pbShowMap->setVisible(false);//html base map. not good to show correct position
 
     ui->tableWidget->setColumnWidth(GPScols::Latitude, 100);
     ui->tableWidget->setColumnWidth(GPScols::Longitude, 100);
@@ -81,17 +81,17 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
 
 
     initAction();
-    m_dlgOSM = new DlgOpenStreetMap();
-    connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgJIO::onLoadFinished);
+    // m_dlgOSM = new DlgOpenStreetMap();
+    // connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgJIO::onLoadFinished);
     m_dlgGeo = new DlgGeoOSM();
     connect(m_dlgGeo, &DlgGeoOSM::loadFinished, this, &DlgJIO::onLoadFinished);
 
-    connect(this, &DlgJIO::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
+    // connect(this, &DlgJIO::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
     connect(this, &DlgJIO::closeAll, m_dlgGeo, &DlgGeoOSM::close);
     connect(ui->pbLoad, &QPushButton::clicked, this, &DlgJIO::onLoadCliecked);
     connect(ui->pbSave, &QPushButton::clicked, this, &DlgJIO::onSaveCliecked);
     connect(ui->pbCalc, &QPushButton::clicked, this, &DlgJIO::onCalcCliecked);
-    connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgJIO::onShowMap);
+    // connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgJIO::onShowMap);
     connect(ui->pbShowGeo, &QPushButton::clicked, this, &DlgJIO::onShowGeo);
     connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgJIO::onShow3D);
     connect(ui->pbClear, &QPushButton::clicked, m_clearAction, &QAction::triggered);
@@ -107,6 +107,8 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     connect(m_dlgaip, &DlgAIP::updateData, this, &DlgJIO::onUpdateData);
     connect(this, &DlgJIO::closeAll, m_dlgaip, &DlgAIP::close);
     // connect(m_dlgaip, &DlgAIP::accepted, this, &DlgGpsCalc::onAcceptedAIP);
+
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DlgJIO::close);
 }
 
 DlgJIO::~DlgJIO()
@@ -388,11 +390,11 @@ void DlgJIO::onCalcCliecked(bool checked)
         ui->twResult->setItem(i-1, AZEIcols::Elevation2, new QTableWidgetItem(QString::number(el2, 'f', 1)));
         totalel = totalel + el1;
         if (showline){
-            if (m_dlgOSM){
-                m_dlgOSM->addDistLine(QString::number(lat1), QString::number(lon1),
-                                      QString::number(lat), QString::number(lon),
-                                      QString::number(distance));
-            }
+            // if (m_dlgOSM){
+            //     m_dlgOSM->addDistLine(QString::number(lat1), QString::number(lon1),
+            //                           QString::number(lat), QString::number(lon),
+            //                           QString::number(distance));
+            // }
         }
     }
     double azimuthDegree = totalazimuth/ui->twResult->rowCount();
@@ -402,44 +404,44 @@ void DlgJIO::onCalcCliecked(bool checked)
     ui->leExpectElevation->setText(QString::number(elDegree, 'f', 1));
 
     if (showline){
-        if (m_dlgOSM){
-            m_dlgOSM->addAzimuthIndicator(QString::number(lat1), QString::number(lon1),
-                                          QString::number(azimuthDegree), QString::number(200));
-        }
+        // if (m_dlgOSM){
+        //     m_dlgOSM->addAzimuthIndicator(QString::number(lat1), QString::number(lon1),
+        //                                   QString::number(azimuthDegree), QString::number(200));
+        // }
     }
 
 }
 
-void DlgJIO::onShowMap(bool checked)
-{
-    Q_UNUSED(checked)
-    QString errmsg ="";
-    //TODO: check openstreetmap can be accessable
-    QString tile = getTile();
-    if (tile.isEmpty()){
-        errmsg = "Require OpenStreetMapTile set eq: https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-        qDebug() << errmsg;
-        QMessageBox::warning(this, "ERROR", errmsg, QMessageBox::Ok);
-        return;
-    }
+// void DlgJIO::onShowMap(bool checked)
+// {
+//     Q_UNUSED(checked)
+//     QString errmsg ="";
+//     //TODO: check openstreetmap can be accessable
+//     QString tile = getTile();
+//     if (tile.isEmpty()){
+//         errmsg = "Require OpenStreetMapTile set eq: https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+//         qDebug() << errmsg;
+//         QMessageBox::warning(this, "ERROR", errmsg, QMessageBox::Ok);
+//         return;
+//     }
 
-    if (ui->tableWidget->rowCount()<1){
-        QMessageBox::information(this, "Info",
-                                 "Require at last one GPS locaton",
-                                 QMessageBox::Ok);
-        return;
-    }
+//     if (ui->tableWidget->rowCount()<1){
+//         QMessageBox::information(this, "Info",
+//                                  "Require at last one GPS locaton",
+//                                  QMessageBox::Ok);
+//         return;
+//     }
 
-    if (m_dlgOSM){
-        // QString pos1 = ui->tableWidget->item(0,0)->text();
-        QString lat1 = ui->tableWidget->item(0,1)->text();
-        QString lon1 = ui->tableWidget->item(0,2)->text();
-        m_dlgOSM->load(tile , lat1, lon1);
-        m_dlgOSM->raise();
-        m_dlgOSM->activateWindow();
-        m_dlgOSM->show();
-    }
-}
+//     if (m_dlgOSM){
+//         // QString pos1 = ui->tableWidget->item(0,0)->text();
+//         QString lat1 = ui->tableWidget->item(0,1)->text();
+//         QString lon1 = ui->tableWidget->item(0,2)->text();
+//         m_dlgOSM->load(tile , lat1, lon1);
+//         m_dlgOSM->raise();
+//         m_dlgOSM->activateWindow();
+//         m_dlgOSM->show();
+//     }
+// }
 
 void DlgJIO::onShowGeo(bool checked)
 {
@@ -575,7 +577,7 @@ void DlgJIO::onLoadFinished(bool ok)
 
 void DlgJIO::onTileAvailable(bool ok)
 {
-    ui->pbShowMap->setEnabled(ok);
+    // ui->pbShowMap->setEnabled(ok);
     ui->pbShowGeo->setEnabled(ok);
 }
 

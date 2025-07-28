@@ -9,7 +9,7 @@
 #include <QNetworkReply>
 #include <QJsonObject>
 
-#include "../src/map/dlgopenstreetmap.h"
+// #include "../src/map/dlgopenstreetmap.h"
 #include "../src/map/dlggeoosm.h"
 #include "dlgaip.h"
 
@@ -67,7 +67,7 @@ private slots:
     void onLoadCliecked(bool checked);
     void onSaveCliecked(bool checked);
     void onCalcCliecked(bool checked);
-    void onShowMap(bool checked);
+    // void onShowMap(bool checked);
     void onShowGeo(bool checked);
     void onShow3D(bool checked);
     void onToDMS(bool checked);
@@ -93,7 +93,7 @@ private:
     QAction *m_insertAction;
     QAction *m_deleteAction;
     QAction *m_clearAction;
-    DlgOpenStreetMap *m_dlgOSM;
+    // DlgOpenStreetMap *m_dlgOSM;
     DlgGeoOSM *m_dlgGeo;
     DlgAIP *m_dlgaip;
     QNetworkReply *reply = nullptr;
