@@ -8,6 +8,7 @@
 #include <QSettings>
 #include <QNetworkReply>
 #include <QJsonObject>
+#include <QAbstractButton>
 
 // #include "../src/map/dlgopenstreetmap.h"
 #include "../src/map/dlggeoosm.h"
@@ -42,7 +43,11 @@ public:
         Elevation2=5
     };
     Q_ENUM(AZEIcols)
-
+    enum AIPcols{
+        Azimuth=0,
+        Elevation=1
+    };
+    Q_ENUM(AIPcols)
     explicit DlgJIO(QSettings *cfg, QWidget *parent = nullptr);
     ~DlgJIO() override;
     void isTileAvailable();
@@ -52,6 +57,7 @@ public:
 signals:
     void TileAvailable(bool ok);
     void closeAll();
+
 protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *event) override;
@@ -81,6 +87,8 @@ private slots:
     void onAcceptedAIP();
     // void onUpdateData(int row, int col, QString data);
     void onUpdateData(int row, int col, QJsonObject data);
+    void onUpdateModelType(int row, int col, QString smodel);
+    void onUpdateModelType(int row, int col, int model);
 private:
     void onLoad(QString filename);
     bool onSave(QString filename);

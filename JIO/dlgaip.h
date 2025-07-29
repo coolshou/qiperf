@@ -29,6 +29,8 @@ public:
     void setRowCol(int row, int col);
 signals:
     void updateData(int row, int col, QJsonObject data);
+    void updateModelType(int row, int col, QString smodel);
+
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event) override;
@@ -37,6 +39,7 @@ private slots:
     void onSelReffileClicked(bool checked);
     void onChangeModule(QString newtext);
     void onRefFileTextChanged(QString newtext);
+    void onPreSetPosTextChanged(QString newtext);
     void onXValueChanged(double value);
     void onYValueChanged(double value);
     void onZValueChanged(double value);

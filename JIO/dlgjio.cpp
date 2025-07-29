@@ -79,6 +79,8 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     ui->twResult->setItemDelegateForColumn(AZEIcols::Elevation1, dElDelegate);
     ui->twResult->setItemDelegateForColumn(AZEIcols::Elevation2, dElDelegate);
 
+    ui->twAIP->setItemDelegateForColumn(AIPcols::Azimuth, dAziDelegate);
+    ui->twAIP->setItemDelegateForColumn(AIPcols::Elevation, dElDelegate);
 
     initAction();
     // m_dlgOSM = new DlgOpenStreetMap();
@@ -105,10 +107,11 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
 
     m_dlgaip = new DlgAIP(m_cfg, this);
     connect(m_dlgaip, &DlgAIP::updateData, this, &DlgJIO::onUpdateData);
+    connect(m_dlgaip, &DlgAIP::updateModelType, this,
+            static_cast<void (DlgJIO::*)(int, int, QString)>(&DlgJIO::onUpdateModelType));
     connect(this, &DlgJIO::closeAll, m_dlgaip, &DlgAIP::close);
-    // connect(m_dlgaip, &DlgAIP::accepted, this, &DlgGpsCalc::onAcceptedAIP);
 
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &DlgJIO::close);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DlgJIO::close); // close button click
 }
 
 DlgJIO::~DlgJIO()
@@ -213,12 +216,12 @@ void DlgJIO::onAddRow(QString name, double latitude, double longitude,
 {
     int iRow = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(iRow);
-    QString err = QString("name: %1 ,latitude: %2 ,longitude: %3 ,altitude: %4").arg(name,
+    QString err = QString("[onAddRow]name: %1 ,latitude: %2 ,longitude: %3 ,altitude: %4 , heading: %5").arg(name,
                            QString::number(latitude, 'f', 6),
                            QString::number(longitude, 'f', 6),
                            QString::number(altitude, 'f', 2),
                            QString::number(heading, 'f', 2));
-    debug(err, 5);
+    debug(err, 3);
     ui->tableWidget->setSortingEnabled(false);
     ui->tableWidget->setItem(iRow, GPScols::PositionName, new QTableWidgetItem(name));
     ui->tableWidget->setItem(iRow, GPScols::Latitude, new QTableWidgetItem(QString::number(latitude, 'f', 6)));
@@ -234,7 +237,10 @@ void DlgJIO::onAddRow(QString name, double latitude, double longitude,
     ui->tableWidget->setCellWidget(iRow, GPScols::AIP1, btn1);
     QTableWidgetItem *aip1item = new QTableWidgetItem("");
     aip1item->setData(Qt::UserRole, aip1.toVariantMap());
+    qDebug() << "AIP1:" << aip1;
     ui->tableWidget->setItem(iRow, GPScols::AIP1, aip1item);
+    //TODO: update btn text
+    onUpdateModelType(iRow, GPScols::AIP1, aip1.value("moduletype").toInt());
     if (iRow==0){
         QPushButton *btn2 = new QPushButton("...");
         iCol = static_cast<int>(GPScols::AIP2);
@@ -244,7 +250,10 @@ void DlgJIO::onAddRow(QString name, double latitude, double longitude,
         ui->tableWidget->setCellWidget(iRow, GPScols::AIP2, btn2);
         QTableWidgetItem *aip2item = new QTableWidgetItem("");
         aip2item->setData(Qt::UserRole, aip2.toVariantMap());
-        ui->tableWidget->setItem(iRow, GPScols::AIP1, aip2item);
+        qDebug() << "aip2:" << aip2;
+        ui->tableWidget->setItem(iRow, GPScols::AIP2, aip2item);
+        //TODO: update btn text
+        onUpdateModelType(iRow, GPScols::AIP2, aip2.value("moduletype").toInt());
     }else{
         // disable cell
         QTableWidgetItem *disableItem = new QTableWidgetItem("");
@@ -398,10 +407,10 @@ void DlgJIO::onCalcCliecked(bool checked)
         }
     }
     double azimuthDegree = totalazimuth/ui->twResult->rowCount();
-    ui->leExpectAzimuth->setText(QString::number(azimuthDegree, 'f', 1));
+    ui->leAM7az->setText(QString::number(azimuthDegree, 'f', 1));
     qDebug() << "totalel:" << QString::number(totalel);
     double elDegree = totalel/ui->twResult->rowCount();
-    ui->leExpectElevation->setText(QString::number(elDegree, 'f', 1));
+    ui->leAM7el->setText(QString::number(elDegree, 'f', 1));
 
     if (showline){
         // if (m_dlgOSM){
@@ -553,25 +562,6 @@ void DlgJIO::onLoadFinished(bool ok)
                 }
             }
         }
-        //old html base map
-        // if(m_dlgOSM){
-        //     //reload marker
-        //     m_dlgOSM->clearMarker();
-        //     QString label;
-        //     QString lat;
-        //     QString lon;
-        //     // marker
-        //     for(int row=0;row<ui->tableWidget->rowCount();row++){
-        //         label = ui->tableWidget->item(row,0)->text();
-        //         lat = ui->tableWidget->item(row,1)->text();
-        //         lon = ui->tableWidget->item(row,2)->text();
-        //         if (row==0){
-        //             m_dlgOSM->addMarker(lat, lon, label, "marker0");
-        //         }else{
-        //             m_dlgOSM->addMarker(lat, lon, label);
-        //         }
-        //     }
-        // }
     }
 }
 
@@ -639,7 +629,35 @@ void DlgJIO::onAcceptedAIP()
 void DlgJIO::onUpdateData(int row, int col, QJsonObject data)
 {
     QTableWidgetItem *item = ui->tableWidget->item(row, col);
+    qDebug() << row << "," << col << " DlgJIO::onUpdateData" <<data;
     item->setData(Qt::UserRole, data.toVariantMap());
+    onUpdateModelType(row, col, data.value("moduletype").toInt());
+}
+
+void DlgJIO::onUpdateModelType(int row, int col, QString smodel)
+{
+    QWidget *cell = ui->tableWidget->cellWidget(row, col);
+    if (cell != nullptr){
+        QPushButton *pb = static_cast<QPushButton*>(cell);
+        qDebug() << "onUpdateModelType: " << QString::number(row) << ","
+                 <<  QString::number(col) << " model:" << smodel;
+        pb->setText(smodel);
+        // ui->tableWidget->setCellWidget(row, col, pb);
+    } else {
+        qDebug() << "no QPushButton in cell "  << QString::number(row) << ","
+                 <<  QString::number(col) ;
+    }
+}
+
+void DlgJIO::onUpdateModelType(int row, int col, int model)
+{
+    if (static_cast<AIP::ModuleType>(model) == AIP::ModuleType::Cyntec){
+        onUpdateModelType(row, col, "C");
+    }else if (static_cast<AIP::ModuleType>(model) == AIP::ModuleType::Hanwha){
+        onUpdateModelType(row, col, "H");
+    }else{
+        onUpdateModelType(row, col, "...");
+    }
 }
 
 void DlgJIO::onLoad(QString filename)
@@ -676,14 +694,14 @@ void DlgJIO::onLoad(QString filename)
 
         QJsonObject rootObject = jsonDoc.object();
         // Process the QJsonObject
-        QJsonArray addPos = rootObject["positions"].toArray();
+        QJsonArray addPos = rootObject.value("positions").toArray();
         for (QJsonArray::const_iterator it=addPos.constBegin(); it!=addPos.constEnd(); ++it) {
             QJsonObject posdata= it->toObject();
-            onAddRow(posdata["name"].toString(), posdata["latitude"].toDouble(),
-                     posdata["longitude"].toDouble(), posdata["altitude"].toDouble(),
-                     posdata["heading"].toDouble(),
-                     posdata["AIP1"].toObject(), posdata["AIP2"].toObject(),
-                     posdata["IPAddr"].toString());
+            onAddRow(posdata.value("name").toString(), posdata.value("latitude").toDouble(),
+                     posdata.value("longitude").toDouble(), posdata.value("altitude").toDouble(),
+                     posdata.value("heading").toDouble(),
+                     posdata.value("AIP1").toObject(), posdata.value("AIP2").toObject(),
+                     posdata.value("IPAddr").toString());
         }
     }
 }
@@ -742,7 +760,7 @@ bool DlgJIO::onSave(QString filename)
                     qDebug() << "AIP2 data:" << varAIP2.toMap() ;
                     posdata["AIP2"] = QJsonObject::fromVariantMap(varAIP2.toMap());
                 }else{
-                    qDebug() << "Wrong API2 data:";
+                    qDebug() << "Row:" << QString::number(i) << " Wrong API2 data";
                 }
             }
             item = ui->tableWidget->item(i, GPScols::IPAddr);
@@ -766,7 +784,7 @@ bool DlgJIO::onSave(QString filename)
 void DlgJIO::debug(QString msg, int lv)
 {
     if (lv<=m_debuglv){
-        qDebug() << "[DlgGpsCalc]" << msg;
+        qDebug() << "[DlgJIO]" << msg;
     }
 }
 

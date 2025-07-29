@@ -53,8 +53,8 @@ void Hanwha::initBeamData(QIODevice *filedevice)
         qDebug() << "Error: QIODevice is not readable.";
         return;
     }
-    int row=14;
-    int endrow=255;
+    int row=15;
+    int endrow=253;
 
     QVariant varA, varC, varD, varE;
     // qDebug() << "xlsReader(filename): " << filename;

@@ -19,7 +19,7 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::DlgAIP), m_cfg(cfg)
 {
-    mPosOffset=QVector3D(0.0,0.0,10.0);
+    mPosOffset=QVector3D(0.0, 0.0, 10.0);
     ui->setupUi(this);
     connect(this, &DlgAIP::accepted, this, &DlgAIP::onAccepted);
     //Cyntec
@@ -35,6 +35,7 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     connect(ui->sbX, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onXValueChanged);
     connect(ui->sbY, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onYValueChanged);
     connect(ui->sbZ, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onZValueChanged);
+    connect(ui->cbPreSetPos, &QComboBox::currentTextChanged, this, &DlgAIP::onPreSetPosTextChanged);
     mCyntec = new Cyntec();
     connect(mCyntec, &Cyntec::newBeamFactorIDs, this, &DlgAIP::onNewCyntecBeamFactorIDs);
     connect(mCyntec, &Cyntec::newBeamTableIDs, this, &DlgAIP::onNewCyntecBeamTableIDs);
@@ -44,6 +45,8 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     connect(mHanwha, &Hanwha::newBeamTableIDs, this, &DlgAIP::onNewHanwhaBeamTableIDs);
     //Hanwha
     //load data ?
+
+
 }
 
 DlgAIP::~DlgAIP()
@@ -73,19 +76,35 @@ void DlgAIP::loadData(QString sdata)
 void DlgAIP::loadData(QJsonObject data)
 {
     //load json data and show on UI
-    qDebug() << "TODO load Json data:" << data;
-    int iModuletype = data.value("ModuleType").toInt();
+    int iModuletype = data.value("moduletype").toInt();
+    qDebug() << "loadData, iModuletype:" << QString::number(iModuletype);
     ui->cbAIPModule->setCurrentIndex(iModuletype);
-    QString soffset = data.value("offset").toString();
-    QStringList ds = soffset.split(",");
-    if (ds.length()==3){
-        ui->sbX->setValue(ds[0].toDouble());
-        ui->sbY->setValue(ds[1].toDouble());
-        ui->sbZ->setValue(ds[2].toDouble());
-        setPosOffset(ds[0].toDouble(), ds[1].toDouble(), ds[2].toDouble());
-    }else{
-        qDebug() << "Wrong offset format:" << soffset;
+    if (iModuletype>0){
+        QString smodel="...";
+        if (static_cast<AIP::ModuleType>(iModuletype)==AIP::ModuleType::Cyntec){
+            smodel="C"; //Cyntec
+        }else if (static_cast<AIP::ModuleType>(iModuletype)==AIP::ModuleType::Hanwha){
+            smodel="H"; //Hanwha
+        }
+        emit updateModelType(mRow, mCol, smodel);
     }
+    QString soffset = data.value("offset").toString();
+    double x=0.0;
+    double y=0.0;
+    double z=0.0;
+    if (!soffset.isEmpty()){
+        QStringList ds = soffset.split(",");
+        if (ds.length()==3){
+            x = ds[0].toDouble();
+            y = ds[1].toDouble();
+            z = ds[2].toDouble();
+        }
+    }
+    qDebug() << "loadData, x,y,z=" << QString::number(x) << " , "
+             << QString::number(y) << " , " << QString::number(z);
+    ui->sbX->setValue(x);
+    ui->sbY->setValue(y);
+    ui->sbZ->setValue(z);
 }
 
 QJsonObject DlgAIP::getData()
@@ -93,9 +112,9 @@ QJsonObject DlgAIP::getData()
     // get UI's value and turn into JSON format
     QJsonObject jobj;
     jobj["moduletype"] = static_cast<int>(mModuleType);
-    jobj["offset"] = QString("%1,%2,%3").arg(mPosOffset.x(),
-                                             mPosOffset.y(),
-                                             mPosOffset.z());
+    jobj["offset"] = QString("%1,%2,%3").arg(QString::number(mPosOffset.x(), 'f' ,2),
+                                             QString::number(mPosOffset.y(), 'f' ,2),
+                                             QString::number(mPosOffset.z(), 'f' ,2));
     qDebug() << "get Json data" << jobj;
     return jobj;
 }
@@ -240,18 +259,38 @@ void DlgAIP::onRefFileTextChanged(QString newtext)
 
 }
 
+void DlgAIP::onPreSetPosTextChanged(QString newtext)
+{
+    double x = 0;
+    double y = 0;
+    double z = 0;
+    if (newtext.startsWith("CM7 AIP0")){
+
+    }else if (newtext.startsWith("AM7 AIP0")){
+
+    }else if (newtext.startsWith("AM7 AIP1")){
+
+    }
+    ui->sbX->setValue(x);
+    ui->sbY->setValue(y);
+    ui->sbZ->setValue(z);
+}
+
 void DlgAIP::onXValueChanged(double value)
 {
+    qDebug() << " X ValueChanged:" << value;
     mPosOffset.setX(value);
 }
 
 void DlgAIP::onYValueChanged(double value)
 {
+    qDebug() << " Y ValueChanged:" << value;
     mPosOffset.setY(value);
 }
 
 void DlgAIP::onZValueChanged(double value)
 {
+    qDebug() << " Z ValueChanged:" << value;
     mPosOffset.setZ(value);
 }
 
@@ -363,7 +402,7 @@ void DlgAIP::onNewHanwhaBeamTableIDs(QStringList keys)
 void DlgAIP::onUpdateCynteBeamFactorData(QString elementMap, int attDb, double azBW, double elBW)
 {
     int idx = ui->CyntecElementMap->findText(elementMap);
-    if (idx){
+    if (idx != ui->CyntecElementMap->currentIndex()){
         ui->CyntecElementMap->setCurrentIndex(idx);
     }
     ui->CyntecATT->setValue(attDb);
