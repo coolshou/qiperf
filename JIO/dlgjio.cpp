@@ -221,7 +221,7 @@ void DlgJIO::onAddRow(QString name, double latitude, double longitude,
                            QString::number(longitude, 'f', 6),
                            QString::number(altitude, 'f', 2),
                            QString::number(heading, 'f', 2));
-    debug(err, 3);
+    debug(err, 5);
     ui->tableWidget->setSortingEnabled(false);
     ui->tableWidget->setItem(iRow, GPScols::PositionName, new QTableWidgetItem(name));
     ui->tableWidget->setItem(iRow, GPScols::Latitude, new QTableWidgetItem(QString::number(latitude, 'f', 6)));
@@ -237,7 +237,7 @@ void DlgJIO::onAddRow(QString name, double latitude, double longitude,
     ui->tableWidget->setCellWidget(iRow, GPScols::AIP1, btn1);
     QTableWidgetItem *aip1item = new QTableWidgetItem("");
     aip1item->setData(Qt::UserRole, aip1.toVariantMap());
-    qDebug() << "AIP1:" << aip1;
+    // qDebug() << "AIP1:" << aip1;
     ui->tableWidget->setItem(iRow, GPScols::AIP1, aip1item);
     //TODO: update btn text
     onUpdateModelType(iRow, GPScols::AIP1, aip1.value("moduletype").toInt());
@@ -250,7 +250,7 @@ void DlgJIO::onAddRow(QString name, double latitude, double longitude,
         ui->tableWidget->setCellWidget(iRow, GPScols::AIP2, btn2);
         QTableWidgetItem *aip2item = new QTableWidgetItem("");
         aip2item->setData(Qt::UserRole, aip2.toVariantMap());
-        qDebug() << "aip2:" << aip2;
+        // qDebug() << "aip2:" << aip2;
         ui->tableWidget->setItem(iRow, GPScols::AIP2, aip2item);
         //TODO: update btn text
         onUpdateModelType(iRow, GPScols::AIP2, aip2.value("moduletype").toInt());
