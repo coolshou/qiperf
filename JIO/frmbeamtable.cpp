@@ -9,22 +9,26 @@
 #include "xlsxchartsheet.h"
 #include "xlsxworkbook.h"
 
-
 #include <QDebug>
 
-FrmBeamTable::FrmBeamTable(QWidget *parent)
-    :QCustomPlot(parent)
-    // : QWidget(parent)
-    , ui(new Ui::FrmBeamTable)
+FrmBeamTable::FrmBeamTable(AIP::ModuleType moduletype, QWidget *parent):
+    QCustomPlot(parent),
+    ui(new Ui::FrmBeamTable), mModuletype(moduletype)
 {
     ui->setupUi(this);
     setInteractions(QCP::iSelectItems | QCP::iRangeDrag | QCP::iRangeZoom);
     // axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
     // axisRect()->setRangeDragAxes(this->xAxis, this->yAxis);
+    setWindowTitle("Unknown");
 
     setXaxis("AZ (deg)", -70, 70);
     setYaxis("EL (deg)", -30, 30);
-
+    if (moduletype==AIP::ModuleType::Cyntec){
+        setWindowTitle("Cyntec");
+    }
+    if (moduletype==AIP::ModuleType::Hanwha){
+        setWindowTitle("Hanwha");
+    }
     if (0){
         // test data
         // loadData("Cyntec_beam_table_v0.2.5.xlsx"); //test Cyntec data

@@ -45,7 +45,8 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     connect(mHanwha, &Hanwha::newBeamTableIDs, this, &DlgAIP::onNewHanwhaBeamTableIDs);
     //Hanwha
     //load data ?
-
+    connect(ui->pbCyntecBeamTable, &QPushButton::clicked, this, &DlgAIP::onCyntecBeamTableClicked);
+    connect(ui->pbHanwhaBeamTable, &QPushButton::clicked, this, &DlgAIP::onHanwhaBeamTableClicked);
 
 }
 
@@ -418,6 +419,27 @@ void DlgAIP::onUpdateBeamTableData(int az, int el, double azBW, double elBW)
     ui->CyntecEL->setValue(el);
 }
 
+void DlgAIP::onCyntecBeamTableClicked(bool checked)
+{
+    Q_UNUSED(checked)
+    if (mCyntec){
+        FrmBeamTable *cBeamT = new FrmBeamTable(AIP::ModuleType::Cyntec);
+
+        cBeamT->setGridPoints(mCyntec->getBeamTableDatas());
+        cBeamT->show();
+    }
+}
+
+void DlgAIP::onHanwhaBeamTableClicked(bool checked)
+{
+    Q_UNUSED(checked)
+    if (mHanwha){
+        FrmBeamTable *hBeamT = new FrmBeamTable(AIP::ModuleType::Hanwha);
+        hBeamT->setGridPoints(mHanwha->getBeamTableDatas());
+        hBeamT->show();
+    }
+}
+
 void DlgAIP::getCyntecBeamFactorDatas(QString beamFactorID)
 {
     if(mCyntec){
@@ -430,7 +452,7 @@ void DlgAIP::getCyntecBeamFactorDatas(QString beamFactorID)
 void DlgAIP::getCyntecBeamTableDatas(QString beamTableID)
 {
     if(mCyntec){
-        mCyntec->getBeamTableDatas(beamTableID.toInt());
+        mCyntec->getBeamTableData(beamTableID.toInt());
     }else{
         qDebug() << "mCyntec not init";
     }

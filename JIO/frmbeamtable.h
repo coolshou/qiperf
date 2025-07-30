@@ -5,19 +5,19 @@
 #include <QIODevice>
 #include <QColor>
 #include "lib/qcustomplot.h"
-// #include "tooltiphelper.h"
+
+#include "aip.h"
 
 namespace Ui {
 class FrmBeamTable;
 }
 
-// class FrmBeamTable : public QWidget
 class FrmBeamTable : public QCustomPlot
 {
     Q_OBJECT
 
 public:
-    explicit FrmBeamTable(QWidget *parent = nullptr);
+    explicit FrmBeamTable(AIP::ModuleType moduletype, QWidget *parent = nullptr);
     ~FrmBeamTable();
     void setXaxis(QString label, double min, double max);
     void setYaxis(QString label, double min, double max);
@@ -35,7 +35,8 @@ protected:
 
 private:
     Ui::FrmBeamTable *ui;
-    QCustomPlot *plot;
+    AIP::ModuleType mModuletype;
+    // QCustomPlot *plot;
     QVector<QVector<double>> mdata; // [[id, az, el], [id, az, el]...]
     // QList<QCPItemEllipse*> mEllipses;
     QMap<int, QCPItemEllipse*> mEllipses; // hold Ellipse

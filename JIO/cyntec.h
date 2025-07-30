@@ -17,7 +17,8 @@ public:
     void initBeamData(QString filename) override;
     void initBeamData(QIODevice *device);
     void getBeamFactorDatas(int beamFactorID);
-    void getBeamTableDatas(int beamTableID);
+    void getBeamTableData(int beamTableID);
+    QVector<QVector<double>> getBeamTableDatas(int limitid=95); //[[id,az,el],[]]...
 signals:
     void newBeamFactorIDs(QStringList keys);
     void updateBeamFactorData(QString elementMap, int attDb, double azBW, double elBW);

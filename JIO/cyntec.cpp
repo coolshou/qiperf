@@ -94,8 +94,8 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                             //          << "varE:" << varE << " varF:" << varF;
                             mBeamTableData->insert(varB.toInt(),
                                                    CyntecBeamTableData(varB.toInt(),
-                                                                       varC.toInt(),
-                                                                       varD.toInt(),
+                                                                       varC.toDouble(),
+                                                                       varD.toDouble(),
                                                                        varE.toDouble(),
                                                                        varF.toDouble()));
                         }else{
@@ -205,7 +205,7 @@ void Cyntec::getBeamFactorDatas(int beamFactorID)
     }
 }
 
-void Cyntec::getBeamTableDatas(int beamTableID)
+void Cyntec::getBeamTableData(int beamTableID)
 {
     if (!mBeamTableData->isEmpty()){
         if (mBeamTableData->contains(beamTableID)){
@@ -220,4 +220,17 @@ void Cyntec::getBeamTableDatas(int beamTableID)
     }else{
         qDebug() << "mBeamTableData is isEmpty";
     }
+}
+
+QVector<QVector<double>> Cyntec::getBeamTableDatas(int limitid)
+{
+    QVector<QVector<double>> data;
+    for (auto key: mBeamTableData->keys()){
+        CyntecBeamTableData d = mBeamTableData->value(key);
+        if (limitid==d.beamtableId){
+            break;
+        }
+        data.append({d.beamtableId, d.azDeg, d.elDeg});
+    }
+    return data;
 }

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "aip.h"
+#include "hanwhabeamtabledata.h"
 
 class Hanwha : public AIP
 {
@@ -11,11 +12,13 @@ public:
     explicit Hanwha(QObject *parent = nullptr);
     void initBeamData(QString filename);
     void initBeamData(QIODevice *device);
-    void getBeamData();
+    void getBeamTableData(int beamTableID);
+    QVector<QVector<double>> getBeamTableDatas(int limitid=240);
 signals:
     void newBeamTableIDs(QStringList keys);
+    void updateBeamTableData(int az, int el, double azBW, double elBW);
 private:
-    QMap<QString, BeamLattice> beamData;
+    QMap<int, HanwhaBeamTableData> *mBeamTableData;
 };
 
 #endif // HANWHA_H

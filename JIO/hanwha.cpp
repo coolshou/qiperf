@@ -10,8 +10,7 @@ using namespace QXlsx;
 Hanwha::Hanwha(QObject *parent)
     : AIP{parent}
 {
-    // QString filename="/home/jimmy/SOFT/work/qiperf/aip/a41c_beam_table_export_v2_Hanwha.xlsx";
-    // initBeamData(filename);
+    mBeamTableData = new QMap<int, HanwhaBeamTableData>();
 }
 
 void Hanwha::initBeamData(QString filename)
@@ -60,6 +59,7 @@ void Hanwha::initBeamData(QIODevice *filedevice)
     // qDebug() << "xlsReader(filename): " << filename;
     QXlsx::Document xlsReader(filedevice);
     if(xlsReader.load()){
+        mBeamTableData->clear();
         for(int i=row; i<=endrow;i++){
             Cell* cellA = xlsReader.cellAt(i, 1).get(); // col A
             if ( cellA != NULL )
@@ -97,7 +97,9 @@ void Hanwha::initBeamData(QIODevice *filedevice)
                 qDebug() << "get cell " << i << " x 5 fail";
                 continue;
             }
-            beamData[varA.toString()] = {varC.toDouble(),varD.toDouble(), varE.toString()};
+            mBeamTableData->insert(varA.toInt(), HanwhaBeamTableData(varA.toDouble(),
+                                                                     varC.toDouble(),
+                                                                     varD.toDouble()));
         }
 
     }else{
@@ -105,7 +107,26 @@ void Hanwha::initBeamData(QIODevice *filedevice)
     }
 }
 
-void Hanwha::getBeamData()
+void Hanwha::getBeamTableData(int beamTableID)
 {
-    qDebug() << "beamData: " << beamData.size();
+    if (!mBeamTableData->isEmpty()){
+        if (mBeamTableData->contains(beamTableID)){
+            HanwhaBeamTableData data = mBeamTableData->value(beamTableID);
+            //TODO: double azBW, double elBW value
+            emit updateBeamTableData(data.azDeg, data.elDeg, 0, 0);
+        }
+    }
+}
+
+QVector<QVector<double>> Hanwha::getBeamTableDatas(int limitid)
+{
+    QVector<QVector<double>> data;
+    for (auto key : mBeamTableData->keys()){
+        HanwhaBeamTableData d = mBeamTableData->value(key);
+        if (d.beamtableId == limitid) {
+            break;
+        }
+        data.append({d.beamtableId, d.azDeg, d.elDeg});
+    }
+    return data;
 }

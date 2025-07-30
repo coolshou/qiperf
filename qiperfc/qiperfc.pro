@@ -302,7 +302,6 @@ else: unix:!android: target.path = /opt/qiperf/bin
 
 RESOURCES += \
     ../qiperf.qrc \
-    ../JIO/aip.qrc \
     lib/geoview/placemark.qrc
 
 # Define a function to extract the version

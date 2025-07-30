@@ -15,14 +15,18 @@ HEADERS += \
     $$PWD/aip.h \
     $$PWD/cyntec.h \
     $$PWD/cyntecbeamfactordata.h \
-    $$PWD/cyntecbeamtabledate.h \
+    $$PWD/cyntecbeamtabledata.h \
     $$PWD/dlgaip.h \
     $$PWD/dlgjio.h \
     $$PWD/frmbeamtable.h \
     $$PWD/hanwha.h \
+    $$PWD/hanwhabeamtabledata.h \
     $$PWD/lbrrestclient.h
 
 FORMS += \
     $$PWD/dlgaip.ui \
     $$PWD/dlgjio.ui \
     $$PWD/frmbeamtable.ui
+
+RESOURCES += \
+    $$PWD/aip.qrc \
