@@ -84,6 +84,7 @@ QXLSX_HEADERPATH=$$PWD/lib/QXlsx/QXlsx/header/  # current QXlsx header path is .
 QXLSX_SOURCEPATH=$$PWD/lib/QXlsx/QXlsx/source/  # current QXlsx source path is ./source/
 include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
 
+include($$PWD/../JIO/jio.pri)
 # debug
 #CONFIG += sanitizer
 #CONFIG += sanitize_address
@@ -93,7 +94,6 @@ include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../JIO/agmsensor.cpp \
     ../src/cpumonitor.cpp \
     ../src/dlgshowlog.cpp \
     ../src/filewatcher.cpp \
@@ -170,13 +170,6 @@ SOURCES += \
     views/throughputview.cpp
 #    src/tpstatuschecker.cpp
 #    ../src/map/dlgopenstreetmap.cpp
-SOURCES += \
-    ../JIO/aip.cpp \
-    ../JIO/dlgaip.cpp \
-    ../JIO/dlgjio.cpp \
-    ../JIO/cyntec.cpp \
-    ../JIO/hanwha.cpp \
-    ../JIO/lbrrestclient.cpp
 
     # lib/tplegenditem.cpp \
     # ../qiperfd/src/wsserver.cpp \
@@ -269,16 +262,6 @@ HEADERS += \
 
 #    src/tpstatuschecker.h
 
-HEADERS += \
-    ../JIO/aip.h \
-    ../JIO/dlgaip.h \
-    ../JIO/dlgjio.h \
-    ../JIO/cyntec.h \
-    ../JIO/hanwha.h \
-    ../JIO/lbrrestclient.h \
-    ../JIO/agmsensor.h \
-    ../JIO/cyntecbeamfactordata.h \
-    ../JIO/cyntecbeamtabledate.h
 
 #    ../src/map/dlgopenstreetmap.h
 # lib/tplegenditem.h \
@@ -308,9 +291,6 @@ FORMS += \
     views/throughputview.ui
 
 #    ../src/map/dlgopenstreetmap.ui
-FORMS += \
-    ../JIO/dlgaip.ui \
-    ../JIO/dlgjio.ui
 
 UI_DIR= \
     $$PWD/ui
