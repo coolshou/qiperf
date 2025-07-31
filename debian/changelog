@@ -1,8 +1,8 @@
-qiperf (0.14.11407.17-1) unstable; urgency=medium
+qiperf (0.14.11407.31-1) unstable; urgency=medium
 
   * Add When iperf error stop, restart it
 
- -- coolshou <coolshou2060@gmail.com>  Thu, 17 Jul 2025 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Thu, 31 Jul 2025 10:00:00 +0800
 
 qiperf (0.13.11407.03-1) unstable; urgency=medium
 
