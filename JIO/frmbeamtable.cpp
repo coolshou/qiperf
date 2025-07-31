@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QFile>
 #include <QBrush>
+#include <QIcon>
 
 #include "xlsxdocument.h"
 #include "xlsxchartsheet.h"
@@ -20,14 +21,16 @@ FrmBeamTable::FrmBeamTable(AIP::ModuleType moduletype, QWidget *parent):
     // axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
     // axisRect()->setRangeDragAxes(this->xAxis, this->yAxis);
     setWindowTitle("Unknown");
-
+    addLayer("items", layer("legend"));
     setXaxis("AZ (deg)", -70, 70);
     setYaxis("EL (deg)", -30, 30);
     if (moduletype==AIP::ModuleType::Cyntec){
         setWindowTitle("Cyntec");
+        setWindowIcon(QIcon(":/AIP/cyntec"));
     }
     if (moduletype==AIP::ModuleType::Hanwha){
         setWindowTitle("Hanwha");
+        setWindowIcon(QIcon(":/AIP/hanwha"));
     }
     if (0){
         // test data
