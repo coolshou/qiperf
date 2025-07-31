@@ -53,9 +53,9 @@ helper class to parser about info from device
 out_rotation[0]: Yaw   (偏航角) - 指北方向
 out_rotation[1]: Pitch (俯仰角) - 上下傾斜
 out_rotation[2]: Roll  (翻轉角) - 左右傾斜
-eq: 設備放水平(躺平) -> pitch = 0
-    設備立起來(垂直) -> pitch = 90
-    設備倒立        -> pitch = -90
+
+面朝上 out_rotation[1]=-90
+面朝下 out_rotation[1]=+90
 
 */
 
