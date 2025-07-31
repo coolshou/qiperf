@@ -636,8 +636,7 @@ void DlgJIO::onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode)
 
 void DlgJIO::handleButtonClicked(int row, int col)
 {
-    qDebug() << "handleButtonClicked: " << QString::number(row)
-             << " col:" << QString::number(col);
+    // qDebug() << "handleButtonClicked: " << QString::number(row) << " col:" << QString::number(col);
     //open AIP module setting dialog, after setting, set correct AIP value back to cell
     m_dlgaip->setRowCol(row, col);
     QTableWidgetItem *item = ui->tableWidget->item(row, col);
@@ -683,10 +682,9 @@ void DlgJIO::onUpdateModelType(int row, int col, QString smodel)
     QWidget *cell = ui->tableWidget->cellWidget(row, col);
     if (cell != nullptr){
         QPushButton *pb = static_cast<QPushButton*>(cell);
-        qDebug() << "onUpdateModelType: " << QString::number(row) << ","
-                 <<  QString::number(col) << " model:" << smodel;
+        // qDebug() << "onUpdateModelType: " << QString::number(row) << ","
+        //          <<  QString::number(col) << " model:" << smodel;
         pb->setText(smodel);
-        // ui->tableWidget->setCellWidget(row, col, pb);
     } else {
         qDebug() << "no QPushButton in cell "  << QString::number(row) << ","
                  <<  QString::number(col) ;

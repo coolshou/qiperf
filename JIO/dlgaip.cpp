@@ -40,9 +40,10 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     connect(mCyntec, &Cyntec::newBeamFactorIDs, this, &DlgAIP::onNewCyntecBeamFactorIDs);
     connect(mCyntec, &Cyntec::newBeamTableIDs, this, &DlgAIP::onNewCyntecBeamTableIDs);
     connect(mCyntec, &Cyntec::updateBeamFactorData, this, &DlgAIP::onUpdateCynteBeamFactorData);
-    connect(mCyntec, &Cyntec::updateBeamTableData, this, &DlgAIP::onUpdateBeamTableData);
+    connect(mCyntec, &Cyntec::updateBeamTableData, this, &DlgAIP::onUpdateCyntecBeamTableData);
     mHanwha = new Hanwha();
     connect(mHanwha, &Hanwha::newBeamTableIDs, this, &DlgAIP::onNewHanwhaBeamTableIDs);
+    connect(mHanwha, &Hanwha::updateBeamTableData, this, &DlgAIP::onUpdateCyntecBeamTableData);
     //Hanwha
     //load data ?
     connect(ui->pbCyntecBeamTable, &QPushButton::clicked, this, &DlgAIP::onCyntecBeamTableClicked);
@@ -78,7 +79,7 @@ void DlgAIP::loadData(QJsonObject data)
 {
     //load json data and show on UI
     int iModuletype = data.value("moduletype").toInt();
-    qDebug() << "loadData, iModuletype:" << QString::number(iModuletype);
+    // qDebug() << "loadData, iModuletype:" << QString::number(iModuletype);
     ui->cbAIPModule->setCurrentIndex(iModuletype);
     if (iModuletype>0){
         QString smodel="...";
@@ -101,8 +102,8 @@ void DlgAIP::loadData(QJsonObject data)
             z = ds[2].toDouble();
         }
     }
-    qDebug() << "loadData, x,y,z=" << QString::number(x) << " , "
-             << QString::number(y) << " , " << QString::number(z);
+    // qDebug() << "loadData, x,y,z=" << QString::number(x) << " , "
+    //          << QString::number(y) << " , " << QString::number(z);
     ui->sbX->setValue(x);
     ui->sbY->setValue(y);
     ui->sbZ->setValue(z);
@@ -202,7 +203,7 @@ void DlgAIP::onChangeModule(QString newtext)
         mModuleType = AIP::ModuleType::Cyntec;
         QFile Cyntecfile(":/AIP/Cyntec.xlsx");
         if (Cyntecfile.open(QIODevice::ReadOnly)) {
-            qDebug() << "\nCalling Cyntec initBeamData with QFile...";
+            qDebug() << "Calling Cyntec initBeamData with QFile...";
             mCyntec->initBeamData(&Cyntecfile);// Pass the address of the QFile object
             Cyntecfile.close(); // Close the file after initBeamData is done
         } else {
@@ -215,7 +216,7 @@ void DlgAIP::onChangeModule(QString newtext)
         filename = resHanwha.fileName();
         QFile Hanwhafile(":/AIP/Hanwha.xlsx");
         if (Hanwhafile.open(QIODevice::ReadOnly)) {
-            qDebug() << "\nCalling Hanwha initBeamData with QFile...";
+            qDebug() << "Calling Hanwha initBeamData with QFile...";
             mHanwha->initBeamData(&Hanwhafile);// Pass the address of the QFile object
             Hanwhafile.close(); // Close the file after initBeamData is done
         } else {
@@ -279,19 +280,19 @@ void DlgAIP::onPreSetPosTextChanged(QString newtext)
 
 void DlgAIP::onXValueChanged(double value)
 {
-    qDebug() << " X ValueChanged:" << value;
+    // qDebug() << " X ValueChanged:" << value;
     mPosOffset.setX(value);
 }
 
 void DlgAIP::onYValueChanged(double value)
 {
-    qDebug() << " Y ValueChanged:" << value;
+    // qDebug() << " Y ValueChanged:" << value;
     mPosOffset.setY(value);
 }
 
 void DlgAIP::onZValueChanged(double value)
 {
-    qDebug() << " Z ValueChanged:" << value;
+    // qDebug() << " Z ValueChanged:" << value;
     mPosOffset.setZ(value);
 }
 
@@ -371,13 +372,21 @@ void DlgAIP::onCyntecElementMapChanged(QString newElementMap)
 void DlgAIP::onCyntecBeamTableIDChanged(QString newBeamTableID)
 {
     Q_UNUSED(newBeamTableID)
-    qDebug() << "TODO onCyntecBeamTableIDChanged:" << newBeamTableID;
+    if (!newBeamTableID.isEmpty()){
+        if (mCyntec){
+            mCyntec->getBeamTableData(newBeamTableID.toInt());
+        }
+    }
 }
 
 void DlgAIP::onHanwhaBeamTableIDChanged(QString newBeamTableID)
 {
     Q_UNUSED(newBeamTableID)
-    qDebug() << "TODO onHanwhaBeamTableIDChanged:" << newBeamTableID;
+    if (!newBeamTableID.isEmpty()){
+        if (mHanwha){
+            mHanwha->getBeamTableData(newBeamTableID.toInt());
+        }
+    }
 }
 
 void DlgAIP::onNewCyntecBeamFactorIDs(QStringList keys)
@@ -411,7 +420,7 @@ void DlgAIP::onUpdateCynteBeamFactorData(QString elementMap, int attDb, double a
     ui->CyntecElevationBW->setValue(elBW);
 }
 
-void DlgAIP::onUpdateBeamTableData(int az, int el, double azBW, double elBW)
+void DlgAIP::onUpdateCyntecBeamTableData(double az, double el, double azBW, double elBW)
 {
     Q_UNUSED(azBW)
     Q_UNUSED(elBW)
@@ -424,7 +433,9 @@ void DlgAIP::onCyntecBeamTableClicked(bool checked)
     Q_UNUSED(checked)
     if (mCyntec){
         FrmBeamTable *cBeamT = new FrmBeamTable(AIP::ModuleType::Cyntec);
-
+        connect(this, &DlgAIP::finished, cBeamT, &FrmBeamTable::close);
+        connect(ui->CyntecBeamTableID, &QComboBox::currentTextChanged,
+                cBeamT, &FrmBeamTable::selectEllipse);
         cBeamT->setGridPoints(mCyntec->getBeamTableDatas());
         cBeamT->show();
     }
@@ -435,9 +446,20 @@ void DlgAIP::onHanwhaBeamTableClicked(bool checked)
     Q_UNUSED(checked)
     if (mHanwha){
         FrmBeamTable *hBeamT = new FrmBeamTable(AIP::ModuleType::Hanwha);
+        connect(this, &DlgAIP::finished, hBeamT, &FrmBeamTable::close);
+        connect(ui->HanwhaBeamTableID, &QComboBox::currentTextChanged,
+                hBeamT, &FrmBeamTable::selectEllipse);
         hBeamT->setGridPoints(mHanwha->getBeamTableDatas());
         hBeamT->show();
     }
+}
+
+void DlgAIP::onUpdateHanwhaBeamTableData(double az, double el, double azBW, double elBW)
+{
+    Q_UNUSED(azBW)
+    Q_UNUSED(elBW)
+    ui->HanwhaAZ->setValue(az);
+    ui->HanwhaEL->setValue(el);
 }
 
 void DlgAIP::getCyntecBeamFactorDatas(QString beamFactorID)

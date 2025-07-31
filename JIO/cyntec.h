@@ -22,7 +22,7 @@ public:
 signals:
     void newBeamFactorIDs(QStringList keys);
     void updateBeamFactorData(QString elementMap, int attDb, double azBW, double elBW);
-    void updateBeamTableData(int az, int el, double azBW, double elBW);
+    void updateBeamTableData(double az, double el, double azBW, double elBW);
     void newBeamTableIDs(QStringList keys);
 private:
     QMap<int, CyntecBeamFactorData> *mBeamFactorData;

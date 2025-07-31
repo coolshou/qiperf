@@ -101,7 +101,14 @@ void Hanwha::initBeamData(QIODevice *filedevice)
                                                                      varC.toDouble(),
                                                                      varD.toDouble()));
         }
-
+        QStringList tablekeys;
+        for (int tablekey : mBeamTableData->keys()) {
+            // Convert the integer to a QString and add it to stringList
+            tablekeys.append(QString::number(tablekey));
+        }
+        if (tablekeys.length()>0){
+            emit newBeamTableIDs(tablekeys);
+        }
     }else{
         qDebug() << "[Hanwha::initBeamData]xlsReader error: ";
     }

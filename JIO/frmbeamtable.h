@@ -29,6 +29,9 @@ public:
     void setEllipseBGColor(int id, QColor bgcolor);
     void clearEllipseBGColor(int id);
     void setEllipse(int id, QString text, QColor bgcolor);
+    void clearEllipseSelection();
+public slots:
+    void selectEllipse(QString id);
 protected:
     void changeEvent(QEvent *e);
     void mouseMoveEvent(QMouseEvent *event) override;

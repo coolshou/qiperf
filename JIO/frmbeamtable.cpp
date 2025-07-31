@@ -310,6 +310,27 @@ void FrmBeamTable::setEllipse(int id, QString text, QColor bgcolor)
     }
 }
 
+void FrmBeamTable::clearEllipseSelection()
+{
+    for (auto itm: mEllipses.values()){
+        itm->setSelected(false);
+    }
+}
+
+void FrmBeamTable::selectEllipse(QString id)
+{
+    if (!id.isEmpty()){
+        int idx = id.toInt();
+        if (mEllipses.contains(idx)){
+            clearEllipseSelection();
+            QCPItemEllipse *ellipse = mEllipses.value(idx);
+            // qDebug() << "FrmBeamTable::selectEllipse:" << idx << " ellipse:" << ellipse;
+            ellipse->setSelected(true);
+            replot();
+        }
+    }
+}
+
 void FrmBeamTable::changeEvent(QEvent *e)
 {
     QWidget::changeEvent(e);

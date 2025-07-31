@@ -113,7 +113,6 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                     tablekeys.append(QString::number(tablekey));
                 }
                 if (tablekeys.length()>0){
-                    // qDebug() << "tablekeys:" << tablekeys.join(",");
                     emit newBeamTableIDs(tablekeys);
                 }
             } else {
@@ -210,8 +209,9 @@ void Cyntec::getBeamTableData(int beamTableID)
     if (!mBeamTableData->isEmpty()){
         if (mBeamTableData->contains(beamTableID)){
             CyntecBeamTableData data = mBeamTableData->value(beamTableID);
-            qDebug() << "getBeamFactorDatas:" << beamTableID
-                     << " azDeg:" << data.azDeg << " elDeg:" << data.elDeg;
+            // qDebug() << "getBeamTableData:" << beamTableID
+            //          << " azDeg:" << data.azDeg << " elDeg:" << data.elDeg
+            //          << " azBW:" << data.azimuth3dB_BW << " elBW:" << data.elevation3dB_BW;
             emit updateBeamTableData(data.azDeg, data.elDeg,
                                      data.azimuth3dB_BW, data.elevation3dB_BW);
         }else{
