@@ -66,7 +66,6 @@ SOURCES += \
     src/iperfworker.cpp \
     src/main.cpp \
     src/myinfo.cpp \
-    src/myservice.cpp \
     src/pipeserver.cpp \
     src/qiperfd.cpp \
     src/virtualdevice.cpp \
@@ -79,6 +78,7 @@ SOURCES += \
     src/wsserver.cpp
 
 #$$PWD/../src/sighandler.cpp
+#    src/myservice.cpp \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -100,7 +100,6 @@ HEADERS += \
     src/fileclient.h \
     src/iperfworker.h \
     src/myinfo.h \
-    src/myservice.h \
     src/pipeserver.h \
     src/qiperfd.h \
     src/virtualdevice.h \
@@ -114,6 +113,7 @@ HEADERS += \
     src/wsserver.h
     #
     #$$PWD/../src/sighandler.h
+    # src/myservice.h
 
 android {
     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
