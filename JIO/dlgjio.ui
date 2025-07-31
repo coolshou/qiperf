@@ -14,7 +14,7 @@
    <string>JIO</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../qiperf.qrc">
+   <iconset resource="../../../../../../../../home/jimmy/work/qiperf/qiperf.qrc">
     <normaloff>:/JIO</normaloff>:/JIO</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
@@ -178,20 +178,40 @@
             <property name="text">
              <string>Latitude</string>
             </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;緯度&lt;br/&gt;&lt;a href=&quot;https://zh.wikipedia.org/wiki/%E8%B5%A4%E9%81%93&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;赤道&lt;/span&gt;&lt;/a&gt;的0度到南北極的90度&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Longitude</string>
             </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Altitude(MSL)</string>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;經度&lt;/p&gt;&lt;p&gt;子午線，是0度經線所在地。其他位置的經度是通過測量其從本初子午向東至180°向西至180° W&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>Heading(°)</string>
+             <string>Altitude</string>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;海平面高度 (m)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;MSL: Mean Sea Level 平均海平面&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Head(°)</string>
+            </property>
+            <property name="toolTip">
+             <string>磁北度數</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Pitch(°)</string>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;俯仰度數&lt;br/&gt;面朝上 -90, 面朝下 +90&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </column>
            <column>
@@ -696,7 +716,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../qiperf.qrc"/>
+  <include location="../../../../../../../../home/jimmy/work/qiperf/qiperf.qrc"/>
  </resources>
  <connections/>
  <buttongroups>

@@ -29,6 +29,8 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     ui(new Ui::DlgJIO), m_cfg(cfg)
 {
     m_debuglv=3;
+    m_InquireTimer= new QTimer(this);
+    connect(m_InquireTimer, &QTimer::timeout, this, &DlgJIO::onInquireTimerTimeout);
     ui->setupUi(this);
     loadcfg();
     ui->pbShow3D->setVisible(false);
@@ -36,8 +38,9 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
 
     ui->tableWidget->setColumnWidth(GPScols::Latitude, 100);
     ui->tableWidget->setColumnWidth(GPScols::Longitude, 100);
-    ui->tableWidget->setColumnWidth(GPScols::Altitude, 80);
-    ui->tableWidget->setColumnWidth(GPScols::Heading, 60);
+    ui->tableWidget->setColumnWidth(GPScols::Altitude, 60);
+    ui->tableWidget->setColumnWidth(GPScols::Heading, 50);
+    ui->tableWidget->setColumnWidth(GPScols::Pitch, 50);
     ui->tableWidget->setColumnWidth(GPScols::AIP1, 40);
     ui->tableWidget->setColumnWidth(GPScols::AIP2, 40);
     // Only accept Double
@@ -57,6 +60,10 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
                                                       0.0, 359, 1,
                                                       ui->tableWidget);
     ui->tableWidget->setItemDelegateForColumn(GPScols::Heading, dHeadDelegate);
+    NumberDelegate *dPitchDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                      -90.0, 90, 1,
+                                                       ui->tableWidget);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Pitch, dPitchDelegate);
 
     ui->twResult->setColumnWidth(AZEIcols::Distance, 90);
     ui->twResult->setColumnWidth(AZEIcols::Azimuth1, 90);
@@ -111,6 +118,7 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
             static_cast<void (DlgJIO::*)(int, int, QString)>(&DlgJIO::onUpdateModelType));
     connect(this, &DlgJIO::closeAll, m_dlgaip, &DlgAIP::close);
 
+    connect(ui->pbInquire, &QPushButton::clicked, this, &DlgJIO::onInquireClicked);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DlgJIO::close); // close button click
 }
 
@@ -419,6 +427,42 @@ void DlgJIO::onCalcCliecked(bool checked)
         // }
     }
 
+}
+
+void DlgJIO::onInquireClicked(bool checked)
+{
+    if (checked){
+        m_InquireTimer->start(1000);// 1sec
+
+    }else{
+        if (m_InquireTimer->isActive()){
+            m_InquireTimer->stop();
+        }
+    }
+}
+
+void DlgJIO::onInquireTimerTimeout()
+{
+    if (ui->tableWidget->rowCount()>0){
+        for (int row; row < ui->tableWidget->rowCount(); row++){
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            //IPAddr
+            QTableWidgetItem *itm= ui->tableWidget->item(row, GPScols::IPAddr);
+            if (itm){
+                if (!itm->text().isEmpty()){
+                    qDebug() << "onInquireTimerTimeout //TODO Inquire:" << itm->text();
+
+                }else{
+                    qDebug() << "No IPAddr at row:" << row << ", col:" << static_cast<int>(GPScols::IPAddr);
+                }
+            }else{
+                qDebug() << "No item at row:" << row << ", col:" << static_cast<int>(GPScols::IPAddr);
+            }
+        }
+    }else{
+        qDebug() << "No item of device";
+        m_InquireTimer->stop();
+    }
 }
 
 // void DlgJIO::onShowMap(bool checked)

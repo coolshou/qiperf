@@ -9,6 +9,7 @@
 #include <QNetworkReply>
 #include <QJsonObject>
 #include <QAbstractButton>
+#include <QTimer>
 
 // #include "../src/map/dlgopenstreetmap.h"
 #include "../src/map/dlggeoosm.h"
@@ -29,9 +30,10 @@ public:
         Longitude=2,
         Altitude=3,
         Heading=4,
-        AIP1=5,
-        AIP2=6,
-        IPAddr=7
+        Pitch=5,
+        AIP1=6,
+        AIP2=7,
+        IPAddr=8
     };
     Q_ENUM(GPScols)
     enum AZEIcols{
@@ -73,6 +75,8 @@ private slots:
     void onLoadCliecked(bool checked);
     void onSaveCliecked(bool checked);
     void onCalcCliecked(bool checked);
+    void onInquireClicked(bool checked);
+    void onInquireTimerTimeout();
     // void onShowMap(bool checked);
     void onShowGeo(bool checked);
     void onShow3D(bool checked);
@@ -108,6 +112,7 @@ private:
     bool showline=false;
     QString m_oldsavepath;
     int m_debuglv;
+    QTimer * m_InquireTimer;
 };
 
 #endif // DLGJIO_H
