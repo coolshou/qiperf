@@ -19,12 +19,12 @@ include(../QCtrlSignals/qctrlsignals.pri)
 #include(../sigwatch.pri)
 
 }
-unix:!android {
-    #LIBS += -lsystemd
-    CONFIG += link_pkgconfig
-    PKGCONFIG += libsystemd
-    LIBS += $$system(pkg-config --libs libsystemd)
-}
+# unix:!android {
+#     #LIBS += -lsystemd
+#     CONFIG += link_pkgconfig
+#     PKGCONFIG += libsystemd
+#     LIBS += $$system(pkg-config --libs libsystemd)
+# }
 win32:{
     LIBS += -lws2_32
     LIBS += -liphlpapi
