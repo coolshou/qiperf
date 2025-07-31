@@ -22,6 +22,7 @@ FrmBeamTable::FrmBeamTable(AIP::ModuleType moduletype, QWidget *parent):
     // axisRect()->setRangeDragAxes(this->xAxis, this->yAxis);
     setWindowTitle("Unknown");
     addLayer("items", layer("legend"));
+    addLayer("itemlabel", layer("items"));
     setXaxis("AZ (deg)", -70, 70);
     setYaxis("EL (deg)", -30, 30);
     if (moduletype==AIP::ModuleType::Cyntec){
@@ -241,6 +242,7 @@ void FrmBeamTable::setGridPoints(QVector<QVector<double>> data)
 
         // Add Beam ID label
         QCPItemText *label = new QCPItemText(this);
+        label->setLayer("itemlabel");
         // Anchor label to ellipse center
         label->position->setParentAnchor(circle->center);
         // Offset label upward (in plot coordinates)
@@ -248,7 +250,7 @@ void FrmBeamTable::setGridPoints(QVector<QVector<double>> data)
         // Align label so its bottom center touches the anchor point
         label->setPositionAlignment(Qt::AlignTop | Qt::AlignHCenter);
         label->setText(QString::number(beamIds[i]));
-        label->setFont(QFont("Arial", 6));
+        label->setFont(QFont("Arial", 8));
         label->setColor(Qt::black);
         // rssi
         QCPItemText *lb = new QCPItemText(this);
