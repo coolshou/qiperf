@@ -64,8 +64,15 @@ class AGMSensor : public QObject
     Q_OBJECT
 public:
     explicit AGMSensor(QObject *parent = nullptr);
+    QString sendQuery();
+    void parserData(QString data);
 
 signals:
+    //status: Calibration_status_of_the_Sensors , 3: Calibrated OK
+    // heading: out_heading: 285.543610
+    // headingerror: out_headingErr: 0.017453
+    // Pitch:
+    void updateData(int status, double heading, double headingerror, double pitch);
 private:
     double mYaw; //degree
     double mPitch; //degree

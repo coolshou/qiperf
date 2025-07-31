@@ -14,6 +14,7 @@
 // #include "../src/map/dlgopenstreetmap.h"
 #include "../src/map/dlggeoosm.h"
 #include "dlgaip.h"
+#include "dlgset.h"
 
 namespace Ui {
 class DlgJIO;
@@ -69,12 +70,13 @@ private slots:
     void onInsert(bool checked);
     void onDelete(bool checked);
     void onAddRow(QString name, double latitude, double longitude,
-                  double altitude, double heading,
+                  double altitude, double heading, double pitch,
                   QJsonObject aip1=QJsonObject(), QJsonObject aip2=QJsonObject(), QString ipaddr="");
     void onClear(bool checked);
     void onLoadCliecked(bool checked);
     void onSaveCliecked(bool checked);
     void onCalcCliecked(bool checked);
+    void onSet(bool checked);
     void onInquireClicked(bool checked);
     void onInquireTimerTimeout();
     // void onShowMap(bool checked);
@@ -93,6 +95,8 @@ private slots:
     void onUpdateData(int row, int col, QJsonObject data);
     void onUpdateModelType(int row, int col, QString smodel);
     void onUpdateModelType(int row, int col, int model);
+    void onUpdateSetting(QString sshusername, QString sshpassword,
+                         QString webusername, QString webpassword);
 private:
     void onLoad(QString filename);
     bool onSave(QString filename);
@@ -113,6 +117,11 @@ private:
     QString m_oldsavepath;
     int m_debuglv;
     QTimer * m_InquireTimer;
+    DlgSet *m_dlgset;
+    QString mSshusername;
+    QString mSshpassword;
+    QString mWebusername;
+    QString mWebpassword;
 };
 
 #endif // DLGJIO_H

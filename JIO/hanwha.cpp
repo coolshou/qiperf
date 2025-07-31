@@ -119,9 +119,15 @@ void Hanwha::getBeamTableData(int beamTableID)
     if (!mBeamTableData->isEmpty()){
         if (mBeamTableData->contains(beamTableID)){
             HanwhaBeamTableData data = mBeamTableData->value(beamTableID);
+            qDebug() << "Hanwha::getBeamTableData:" << beamTableID
+                     << " azDeg:" << data.azDeg;
             //TODO: double azBW, double elBW value
             emit updateBeamTableData(data.azDeg, data.elDeg, 0, 0);
+        }else{
+            qDebug() << "BeamTableData fo not have key:" << beamTableID;
         }
+    }else{
+        qDebug() << "BeamTableData is empty";
     }
 }
 

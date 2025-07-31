@@ -384,6 +384,7 @@ void DlgAIP::onHanwhaBeamTableIDChanged(QString newBeamTableID)
     Q_UNUSED(newBeamTableID)
     if (!newBeamTableID.isEmpty()){
         if (mHanwha){
+            qDebug() << "onHanwhaBeamTableIDChanged:" << newBeamTableID;
             mHanwha->getBeamTableData(newBeamTableID.toInt());
         }
     }

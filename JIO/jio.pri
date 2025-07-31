@@ -5,6 +5,7 @@ SOURCES += \
     $$PWD/cyntec.cpp \
     $$PWD/dlgaip.cpp \
     $$PWD/dlgjio.cpp \
+    $$PWD/dlgset.cpp \
     $$PWD/frmbeamtable.cpp \
     $$PWD/hanwha.cpp \
     $$PWD/lbrrestclient.cpp
@@ -18,6 +19,7 @@ HEADERS += \
     $$PWD/cyntecbeamtabledata.h \
     $$PWD/dlgaip.h \
     $$PWD/dlgjio.h \
+    $$PWD/dlgset.h \
     $$PWD/frmbeamtable.h \
     $$PWD/hanwha.h \
     $$PWD/hanwhabeamtabledata.h \
@@ -26,6 +28,7 @@ HEADERS += \
 FORMS += \
     $$PWD/dlgaip.ui \
     $$PWD/dlgjio.ui \
+    $$PWD/dlgset.ui \
     $$PWD/frmbeamtable.ui
 
 RESOURCES += \

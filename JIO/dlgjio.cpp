@@ -36,8 +36,8 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     ui->pbShow3D->setVisible(false);
     // ui->pbShowMap->setVisible(false);//html base map. not good to show correct position
 
-    ui->tableWidget->setColumnWidth(GPScols::Latitude, 100);
-    ui->tableWidget->setColumnWidth(GPScols::Longitude, 100);
+    ui->tableWidget->setColumnWidth(GPScols::Latitude, 90);
+    ui->tableWidget->setColumnWidth(GPScols::Longitude, 90);
     ui->tableWidget->setColumnWidth(GPScols::Altitude, 60);
     ui->tableWidget->setColumnWidth(GPScols::Heading, 50);
     ui->tableWidget->setColumnWidth(GPScols::Pitch, 50);
@@ -118,6 +118,10 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
             static_cast<void (DlgJIO::*)(int, int, QString)>(&DlgJIO::onUpdateModelType));
     connect(this, &DlgJIO::closeAll, m_dlgaip, &DlgAIP::close);
 
+    m_dlgset = new DlgSet(this);
+    connect(m_dlgset, &DlgSet::updateSetting, this, &DlgJIO::onUpdateSetting);
+
+    connect(ui->pbSet, &QPushButton::clicked, this, &DlgJIO::onSet);
     connect(ui->pbInquire, &QPushButton::clicked, this, &DlgJIO::onInquireClicked);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DlgJIO::close); // close button click
 }
@@ -207,7 +211,7 @@ void DlgJIO::initAction()
 void DlgJIO::onInsert(bool checked)
 {
     Q_UNUSED(checked)
-    onAddRow("New", 0.0, 0.0, 0.0, 0.0);
+    onAddRow("New", 0.0, 0.0, 0.0, 0.0, 0.0);
 }
 
 void DlgJIO::onDelete(bool checked)
@@ -219,7 +223,7 @@ void DlgJIO::onDelete(bool checked)
 }
 
 void DlgJIO::onAddRow(QString name, double latitude, double longitude,
-                      double altitude, double heading,
+                      double altitude, double heading, double pitch,
                       QJsonObject aip1, QJsonObject aip2, QString ipaddr)
 {
     int iRow = ui->tableWidget->rowCount();
@@ -236,6 +240,7 @@ void DlgJIO::onAddRow(QString name, double latitude, double longitude,
     ui->tableWidget->setItem(iRow, GPScols::Longitude, new QTableWidgetItem(QString::number(longitude, 'f', 6)));
     ui->tableWidget->setItem(iRow, GPScols::Altitude, new QTableWidgetItem(QString::number(altitude, 'f', 2)));
     ui->tableWidget->setItem(iRow, GPScols::Heading, new QTableWidgetItem(QString::number(heading, 'f', 2)));
+    ui->tableWidget->setItem(iRow, GPScols::Pitch, new QTableWidgetItem(QString::number(pitch, 'f', 2)));
     //how to hold AIP data?
     QPushButton *btn1 = new QPushButton("...");
     int iCol = static_cast<int>(GPScols::AIP1);
@@ -429,9 +434,21 @@ void DlgJIO::onCalcCliecked(bool checked)
 
 }
 
+void DlgJIO::onSet(bool checked)
+{
+    Q_UNUSED(checked)
+    //show config of ssh username/password
+    if (m_dlgset){
+        m_dlgset->setSSH(mSshusername, mSshpassword);
+        m_dlgset->setWeb(mWebusername, mWebpassword);
+        m_dlgset->show();
+    }
+}
+
 void DlgJIO::onInquireClicked(bool checked)
 {
     if (checked){
+        qDebug() << "Inquire start after 1 sec";
         m_InquireTimer->start(1000);// 1sec
 
     }else{
@@ -443,15 +460,17 @@ void DlgJIO::onInquireClicked(bool checked)
 
 void DlgJIO::onInquireTimerTimeout()
 {
+
     if (ui->tableWidget->rowCount()>0){
-        for (int row; row < ui->tableWidget->rowCount(); row++){
+        qDebug() << "do Inquire";
+        for (int row=0; row < ui->tableWidget->rowCount(); row++){
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             //IPAddr
             QTableWidgetItem *itm= ui->tableWidget->item(row, GPScols::IPAddr);
             if (itm){
                 if (!itm->text().isEmpty()){
                     qDebug() << "onInquireTimerTimeout //TODO Inquire:" << itm->text();
-
+                    //Use ssh
                 }else{
                     qDebug() << "No IPAddr at row:" << row << ", col:" << static_cast<int>(GPScols::IPAddr);
                 }
@@ -702,6 +721,15 @@ void DlgJIO::onUpdateModelType(int row, int col, int model)
     }
 }
 
+void DlgJIO::onUpdateSetting(QString sshusername, QString sshpassword,
+                             QString webusername, QString webpassword)
+{
+    mSshusername = sshusername;
+    mSshpassword = sshpassword;
+    mWebusername = webusername;
+    mWebpassword = webpassword;
+}
+
 void DlgJIO::onLoad(QString filename)
 {
     // qDebug() << "onLoad file:" << filename;
@@ -736,12 +764,19 @@ void DlgJIO::onLoad(QString filename)
 
         QJsonObject rootObject = jsonDoc.object();
         // Process the QJsonObject
+        QJsonObject sshobj = rootObject.value("ssh").toObject();
+        mSshusername = sshobj.value("username").toString();
+        mSshpassword = sshobj.value("password").toString();
+        QJsonObject webobj = rootObject.value("web").toObject();
+        mWebusername = webobj.value("username").toString();
+        mWebpassword = webobj.value("password").toString();
+
         QJsonArray addPos = rootObject.value("positions").toArray();
         for (QJsonArray::const_iterator it=addPos.constBegin(); it!=addPos.constEnd(); ++it) {
             QJsonObject posdata= it->toObject();
             onAddRow(posdata.value("name").toString(), posdata.value("latitude").toDouble(),
                      posdata.value("longitude").toDouble(), posdata.value("altitude").toDouble(),
-                     posdata.value("heading").toDouble(),
+                     posdata.value("heading").toDouble(), posdata.value("pitch").toDouble(),
                      posdata.value("AIP1").toObject(), posdata.value("AIP2").toObject(),
                      posdata.value("IPAddr").toString());
         }
@@ -758,6 +793,16 @@ bool DlgJIO::onSave(QString filename)
     }
     QJsonDocument jsonDoc ;
     QJsonObject rootObject;
+    //ssh
+    QJsonObject sshObj;
+    sshObj["username"] = mSshusername;
+    sshObj["password"] = mSshpassword;
+    rootObject["ssh"] = sshObj;
+    //web
+    QJsonObject webObj;
+    webObj["username"] = mWebusername;
+    webObj["password"] = mWebpassword;
+    rootObject["web"] = webObj;
     QJsonArray pos;
     QTableWidgetItem *item;
     if (ui->tableWidget->rowCount()>0){
@@ -782,6 +827,10 @@ bool DlgJIO::onSave(QString filename)
             item = ui->tableWidget->item(i, GPScols::Heading);
             if (item) {
                 posdata["heading"] = item->text().toDouble();
+            }
+            item = ui->tableWidget->item(i, GPScols::Pitch);
+            if (item) {
+                posdata["pitch"] = item->text().toDouble();
             }
             //AIP1
             item = ui->tableWidget->item(i, GPScols::AIP1);
