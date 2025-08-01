@@ -46,7 +46,7 @@ void UdpSrv::readyRead()
     quint16 senderPort;
     socket->readDatagram(Buffer.data(),Buffer.size(),&sender,&senderPort);
 
-    debug(QString("UdpSrv::readyRead:%1").arg(Buffer));
+    debug(QString("UdpSrv::readyRead:%1").arg(QString::fromUtf8(Buffer)));
 }
 
 void UdpSrv::onTimeout()
