@@ -639,7 +639,7 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
                 0,
                 &msg_buf_struct,
                 1,
-                packet_info_buf,
+                reinterpret_cast<void*>(packet_info_buf),
                 sizeof(packet_info_buf),
                 0
             };
