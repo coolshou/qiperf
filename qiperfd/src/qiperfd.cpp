@@ -1630,7 +1630,7 @@ int QIperfd::checkFirewallStatus()
 #endif
     if (!process.waitForFinished(5000)){
         debug("Error run cmd: " + command + " Fail");
-        debug(QString("(%1)").arg(process.readAll()));
+        debug(QString("(%1)").arg(QString::fromUtf8(process.readAll())));
         return -1;
     }
 
@@ -1881,7 +1881,7 @@ void QIperfd::getIperfVer(QString cmd, double ver)
 #endif
     if (!process.waitForFinished(5000)){//wait 5 sec
         debug("Error run cmd: " + cmd + " " + args.join(" ") + " Fail");
-        debug(QString("(%1)").arg(process.readAll()));
+        debug(QString("(%1)").arg(QString::fromUtf8(process.readAll())));
     }
 
     QString out;
