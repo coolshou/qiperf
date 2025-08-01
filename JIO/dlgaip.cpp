@@ -43,7 +43,7 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     connect(mCyntec, &Cyntec::updateBeamTableData, this, &DlgAIP::onUpdateCyntecBeamTableData);
     mHanwha = new Hanwha();
     connect(mHanwha, &Hanwha::newBeamTableIDs, this, &DlgAIP::onNewHanwhaBeamTableIDs);
-    connect(mHanwha, &Hanwha::updateBeamTableData, this, &DlgAIP::onUpdateCyntecBeamTableData);
+    connect(mHanwha, &Hanwha::updateBeamTableData, this, &DlgAIP::onUpdateHanwhaBeamTableData);
     //Hanwha
     //load data ?
     connect(ui->pbCyntecBeamTable, &QPushButton::clicked, this, &DlgAIP::onCyntecBeamTableClicked);

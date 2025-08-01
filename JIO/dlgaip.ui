@@ -280,7 +280,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabCyntec">
       <attribute name="icon">
@@ -614,6 +614,9 @@
          <layout class="QGridLayout" name="gridLayout_6">
           <item row="2" column="4">
            <widget class="QDoubleSpinBox" name="HanwhaEL">
+            <property name="decimals">
+             <number>3</number>
+            </property>
             <property name="minimum">
              <double>-90.000000000000000</double>
             </property>
@@ -624,6 +627,9 @@
           </item>
           <item row="2" column="2">
            <widget class="QDoubleSpinBox" name="HanwhaAZ">
+            <property name="decimals">
+             <number>3</number>
+            </property>
             <property name="minimum">
              <double>-90.000000000000000</double>
             </property>

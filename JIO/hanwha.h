@@ -16,7 +16,7 @@ public:
     QVector<QVector<double>> getBeamTableDatas(int limitid=240);
 signals:
     void newBeamTableIDs(QStringList keys);
-    void updateBeamTableData(int az, int el, double azBW, double elBW);
+    void updateBeamTableData(double az, double el, double azBW, double elBW);
 private:
     QMap<int, HanwhaBeamTableData> *mBeamTableData;
 };

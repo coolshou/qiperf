@@ -120,7 +120,8 @@ void Hanwha::getBeamTableData(int beamTableID)
         if (mBeamTableData->contains(beamTableID)){
             HanwhaBeamTableData data = mBeamTableData->value(beamTableID);
             qDebug() << "Hanwha::getBeamTableData:" << beamTableID
-                     << " azDeg:" << data.azDeg;
+                     << " azDeg:" << data.azDeg
+                     << " elDeg" << data.elDeg;
             //TODO: double azBW, double elBW value
             emit updateBeamTableData(data.azDeg, data.elDeg, 0, 0);
         }else{
