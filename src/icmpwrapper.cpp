@@ -445,6 +445,11 @@ int IcmpWrapper::pingHost(QString &shostname, uint16_t id)
     // char icmp_payload[icmp_payload_size];
     // Allocate space for the ICMP payload buffer
     char *icmp_payload = (char *)malloc(icmp_payload_size);
+    if (!icmp_payload) {
+        // Handle allocation failure
+        perror("malloc failed");
+        return EXIT_FAILURE;
+    }
     // Fill the ICMP payload buffer with some data (if needed)
     // For example, you might fill it with zeros or some specific data
     memset(icmp_payload, 255, icmp_payload_size);
@@ -797,6 +802,9 @@ next:
         }
     }
     qDebug() << "close_socket" ;
+    free(icmp_payload);  // Deallocate when done
+    icmp_payload = nullptr;  // Optional: nullify pointer to prevent dangling access
+
     close_socket(sockfd);
     qDebug() << "return" ;
     return EXIT_SUCCESS;
