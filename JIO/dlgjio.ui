@@ -592,7 +592,7 @@
             <item>
              <widget class="QLabel" name="label_7">
               <property name="text">
-               <string>P1:</string>
+               <string>AM7:</string>
               </property>
              </widget>
             </item>
