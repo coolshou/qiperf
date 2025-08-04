@@ -1,7 +1,11 @@
 #include "cpumonitor.h"
 
+#include <QRegularExpression>
+
 CpuMonitor::CpuMonitor(QObject *parent) : QObject(parent)
 {
+    mGetStatusFail = 0;
+    connect(this, &CpuMonitor::getCPUStatusFail, this, &CpuMonitor::onGetCPUStatusFail);
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &CpuMonitor::updateCpuUsage);
 
@@ -123,7 +127,20 @@ void CpuMonitor::updateCpuUsage()
         emit cpuUsageChanged(overallCpuUsage);
         // qDebug() << "CPU Usage: " << QString::number(overallCpuUsage, 'f', 2) << "%"; // Uncomment for debug
     } else {
+        emit getCPUStatusFail();
         qWarning() << "Failed to get CPU times for current OS.";
+    }
+}
+
+void CpuMonitor::onGetCPUStatusFail()
+{
+    mGetStatusFail = mGetStatusFail + 1;
+    if (mGetStatusFail>10){
+        //when error 10 times, stop
+        if (timer->isActive()){
+            emit cpuUsageChanged(-1);
+            timer->stop();
+        }
     }
 }
 
@@ -136,32 +153,32 @@ bool CpuMonitor::readCpuTimes(long long &totalTime, long long &idleTime)
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return false;
     }
-
     QTextStream in(&file);
     QString line = in.readLine();
     file.close();
+    if (line.isEmpty() || !line.startsWith("cpu")) {
+        qDebug() << "Invalid or missing CPU line:" << line;
+        return false;
+    }
+    static const QRegularExpression whitespaceRegExp("\\s+");
+    QStringList parts = line.split(whitespaceRegExp, Qt::SkipEmptyParts);
+    // Minimum parts: cpu, user, nice, system, idle
+    if (parts.size() >= 5) {
+        quint64 user = parts[1].toULongLong();
+        quint64 nice = parts[2].toULongLong();
+        quint64 system = parts[3].toULongLong();
+        quint64 idle = parts[4].toULongLong();
+        // These fields might not always be present depending on kernel version
+        quint64 iowait = (parts.size() >= 6) ? parts[5].toULongLong() : 0;
+        quint64 irq = (parts.size() >= 7) ? parts[6].toULongLong() : 0;
+        quint64 softirq = (parts.size() >= 8) ? parts[7].toULongLong() : 0;
+        quint64 steal = (parts.size() >= 9) ? parts[8].toULongLong() : 0;
+        quint64 guest = (parts.size() >= 10) ? parts[9].toULongLong() : 0;
+        quint64 guest_nice = (parts.size() >= 11) ? parts[10].toULongLong() : 0;
 
-    if (line.startsWith("cpu ")) {
-        QStringList parts = line.split(" ", Qt::SkipEmptyParts);
-        // Minimum parts: cpu, user, nice, system, idle
-        if (parts.size() >= 5) {
-            long long user = parts[1].toLongLong();
-            long long nice = parts[2].toLongLong();
-            long long system = parts[3].toLongLong();
-            long long idle = parts[4].toLongLong();
-
-            // These fields might not always be present depending on kernel version
-            long long iowait = (parts.size() >= 6) ? parts[5].toLongLong() : 0;
-            long long irq = (parts.size() >= 7) ? parts[6].toLongLong() : 0;
-            long long softirq = (parts.size() >= 8) ? parts[7].toLongLong() : 0;
-            long long steal = (parts.size() >= 9) ? parts[8].toLongLong() : 0;
-            long long guest = (parts.size() >= 10) ? parts[9].toLongLong() : 0;
-            long long guest_nice = (parts.size() >= 11) ? parts[10].toLongLong() : 0;
-
-            idleTime = idle + iowait; // iowait is typically considered idle time
-            totalTime = user + nice + system + idle + iowait + irq + softirq + steal + guest + guest_nice;
-            return true;
-        }
+        idleTime = idle + iowait; // iowait is typically considered idle time
+        totalTime = user + nice + system + idle + iowait + irq + softirq + steal + guest + guest_nice;
+        return true;
     }
     return false;
 }

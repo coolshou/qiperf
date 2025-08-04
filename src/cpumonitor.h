@@ -29,12 +29,13 @@ public:
 
 signals:
     void cpuUsageChanged(double percentage);
-
+    void getCPUStatusFail();
 private slots:
     void updateCpuUsage();
-
+    void onGetCPUStatusFail();
 private:
     QTimer *timer;
+    int mGetStatusFail; // continious fail
     double overallCpuUsage = 0.0;
 
     // Platform-specific members for storing previous CPU times
