@@ -49,6 +49,7 @@ protected slots:
     void onAddMark(bool checked);
     void onClearMark(bool checked);
     void onAddPolylines(bool checked);
+    void onAddArrowLine(bool checked);
     void onMapStateChanged(QGV::MapState state);
     void onScaleChanged();
 signals:
@@ -58,6 +59,9 @@ private:
     void createTrackingWidget();
     void addPolylines(const QVector<QGV::GeoPos>& linePts, QColor color,
                      qreal linewidth=1);
+    void addArrowLine(QGV::GeoPos origin, double azimuthDeg, double length,
+                      QColor color=QColor(Qt::red), qreal linewidth=1, double arrowLength = 3.0,
+                      double arrowAngleDeg = 30.0);
     QGroupBox* createOptionsList(bool addCheckbox=false);
 
     Ui::DlgGeoOSM *ui;

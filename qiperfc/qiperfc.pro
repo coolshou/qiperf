@@ -114,9 +114,6 @@ SOURCES += \
     auto/dlgsimplemicro.cpp \
     auto/simpleworker.cpp \
     lib/axistag.cpp \
-    lib/geoview/placemark.cpp \
-    lib/geoview/polyline.cpp \
-    lib/geoview/rectangletext.cpp \
     lib/myqcpbars.cpp \
     lib/myqcpgraph.cpp \
     lib/qcustomplot.cpp \
@@ -169,11 +166,26 @@ SOURCES += \
     views/viewmanager.cpp \
     views/serialview.cpp \
     views/throughputview.cpp
+
+SOURCES += \
+        $$PWD/lib/geoview/placemark.cpp \
+        $$PWD/lib/geoview/polyline.cpp \
+        $$PWD/lib/geoview/rectangletext.cpp \
+        $$PWD/lib/geoview/directionarrow.cpp
+
 #    src/tpstatuschecker.cpp
 #    ../src/map/dlgopenstreetmap.cpp
 
     # lib/tplegenditem.cpp \
     # ../qiperfd/src/wsserver.cpp \
+
+
+HEADERS += \
+    $$PWD/lib/geoview/placemark.h \
+    $$PWD/lib/geoview/polyline.h \
+    $$PWD/lib/geoview/rectangletext.h \
+    $$PWD/lib/geoview/directionarrow.h
+
 
 HEADERS += \
     ../src/cpumonitor.h \
@@ -200,9 +212,6 @@ HEADERS += \
     auto/dlgsimplemicro.h \
     auto/simpleworker.h \
     lib/axistag.h \
-    lib/geoview/placemark.h \
-    lib/geoview/polyline.h \
-    lib/geoview/rectangletext.h \
     lib/myqcpbars.h \
     lib/myqcpgraph.h \
     lib/qcustomplot.h \

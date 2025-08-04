@@ -6,6 +6,7 @@
 #include <QCheckBox>
 
 #include "../lib/geoview/polyline.h"
+#include "../lib/geoview/directionarrow.h"
 #include "../lib/geoview/rectangletext.h"
 
 #include <QGeoView/QGVWidgetText.h>
@@ -48,6 +49,7 @@ DlgGeoOSM::DlgGeoOSM(QWidget *parent)
     connect(ui->pbAddMark, &QPushButton::clicked, this, &DlgGeoOSM::onAddMark);
     connect(ui->pbClearMark, &QPushButton::clicked, this, &DlgGeoOSM::onClearMark);
     connect(ui->pbAddPolyline, &QPushButton::clicked, this, &DlgGeoOSM::onAddPolylines);
+    connect(ui->pbAddArrowLine, &QPushButton::clicked, this, &DlgGeoOSM::onAddArrowLine);
 }
 
 DlgGeoOSM::~DlgGeoOSM()
@@ -183,6 +185,15 @@ void DlgGeoOSM::onAddPolylines(bool checked)
     addPolylines(linePoints, Qt::GlobalColor::red, 5);
 }
 
+void DlgGeoOSM::onAddArrowLine(bool checked)
+{
+    Q_UNUSED(checked)
+    QGV::GeoPos org= QGV::GeoPos{ui->ArrowLatitude->value(),
+                                  ui->ArrowLongitude->value()};
+    addArrowLine(org, ui->ArrowAzimuth->value(), ui->ArrowLength->value(),
+                 QColor(Qt::red), ui->ArrowLineWidth->value());
+}
+
 void DlgGeoOSM::onMapStateChanged(QGV::MapState state)
 {
     qDebug() << "onMapStateChanged:" << QString::number(static_cast<int>(state));
@@ -229,6 +240,16 @@ void DlgGeoOSM::createTrackingWidget()
 void DlgGeoOSM::addPolylines(const QVector<QGV::GeoPos> &linePts, QColor color, qreal linewidth)
 {
     mPolysLayer->addItem(new Polyline(linePts, color, linewidth));
+}
+
+void DlgGeoOSM::addArrowLine(QGV::GeoPos origin, double azimuthDeg, double length,
+                             QColor color, qreal linewidth,
+                             double arrowLength, double arrowAngleDeg)
+{
+    DirectionArrow *arrowline = new DirectionArrow(origin, azimuthDeg, length,
+                                                   color, linewidth,
+                                                   arrowLength, arrowAngleDeg);
+    mPolysLayer->addItem(arrowline);
 }
 
 QGroupBox* DlgGeoOSM::createOptionsList(bool addCheckbox)
