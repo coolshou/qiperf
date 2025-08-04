@@ -44,8 +44,8 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     mHanwha = new Hanwha();
     connect(mHanwha, &Hanwha::newBeamTableIDs, this, &DlgAIP::onNewHanwhaBeamTableIDs);
     connect(mHanwha, &Hanwha::updateBeamTableData, this, &DlgAIP::onUpdateHanwhaBeamTableData);
-    //Hanwha
-    //load data ?
+
+
     connect(ui->pbCyntecBeamTable, &QPushButton::clicked, this, &DlgAIP::onCyntecBeamTableClicked);
     connect(ui->pbHanwhaBeamTable, &QPushButton::clicked, this, &DlgAIP::onHanwhaBeamTableClicked);
 
@@ -150,6 +150,7 @@ void DlgAIP::changeEvent(QEvent *e)
 void DlgAIP::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event)
+    qDebug() << "DlgAIP::closeEvent:" << event;
     savecfg();
 }
 
@@ -384,7 +385,7 @@ void DlgAIP::onHanwhaBeamTableIDChanged(QString newBeamTableID)
     Q_UNUSED(newBeamTableID)
     if (!newBeamTableID.isEmpty()){
         if (mHanwha){
-            qDebug() << "onHanwhaBeamTableIDChanged:" << newBeamTableID;
+            // qDebug() << "onHanwhaBeamTableIDChanged:" << newBeamTableID;
             mHanwha->getBeamTableData(newBeamTableID.toInt());
         }
     }
@@ -447,7 +448,9 @@ void DlgAIP::onHanwhaBeamTableClicked(bool checked)
     Q_UNUSED(checked)
     if (mHanwha){
         FrmBeamTable *hBeamT = new FrmBeamTable(AIP::ModuleType::Hanwha);
-        connect(this, &DlgAIP::finished, hBeamT, &FrmBeamTable::close);
+        connect(this, &DlgAIP::accepted, hBeamT, &FrmBeamTable::close);
+        connect(this, &DlgAIP::rejected, hBeamT, &FrmBeamTable::close);
+        connect(this, &DlgAIP::finished, this, &DlgAIP::onCloseHanwhaBeamTable);
         connect(ui->HanwhaBeamTableID, &QComboBox::currentTextChanged,
                 hBeamT, &FrmBeamTable::selectEllipse);
         hBeamT->setGridPoints(mHanwha->getBeamTableDatas());
@@ -479,6 +482,11 @@ void DlgAIP::getCyntecBeamTableDatas(QString beamTableID)
     }else{
         qDebug() << "mCyntec not init";
     }
+}
+
+void DlgAIP::onCloseHanwhaBeamTable(int code)
+{
+    qDebug() << "onCloseHanwhaBeamTable:" << code;
 }
 
 void DlgAIP::loadcfg()

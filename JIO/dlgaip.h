@@ -60,6 +60,7 @@ private slots:
 private:
     void getCyntecBeamFactorDatas(QString beamFactorID);
     void getCyntecBeamTableDatas(QString beamTableID);
+    void onCloseHanwhaBeamTable(int code);
     void loadcfg();
     void savecfg();
     Ui::DlgAIP *ui;
