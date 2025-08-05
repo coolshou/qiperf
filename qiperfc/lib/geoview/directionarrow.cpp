@@ -24,28 +24,18 @@ DirectionArrow::DirectionArrow(QGV::GeoPos origin, double azimuthDeg, double len
     mEndPos.setLon(ePos.longitude());
 
     //main line
-    // addPoint(origin);
-    // addPoint(ePos);
     // arrow wing
     double backAzimuth = azimuthDeg + 180.0;
-
+    // arrow left wing
     QGeoCoordinate leftWing = ePos.atDistanceAndAzimuth(
         arrowLength, backAzimuth - arrowAngleDeg);
     mLeftPos.setLat(leftWing.latitude());
     mLeftPos.setLon(leftWing.longitude());
-
+    // arrow right wing
     QGeoCoordinate rightWing = ePos.atDistanceAndAzimuth(
         arrowLength, backAzimuth + arrowAngleDeg);
     mRightPos.setLat(rightWing.latitude());
     mRightPos.setLon(rightWing.longitude());
-
-    // left wing
-    // addPoint(ePos);
-    // addPoint(leftWing);
-
-    // right wing
-    // addPoint(ePos);
-    // addPoint(rightWing);
 }
 
 void DirectionArrow::onProjection(QGVMap *geoMap)
