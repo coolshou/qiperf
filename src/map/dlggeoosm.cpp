@@ -132,6 +132,12 @@ void DlgGeoOSM::clearPolyLines()
     }
 }
 
+void DlgGeoOSM::clearAll()
+{
+    clearMarker();
+    clearPolyLines();
+}
+
 QPixmap DlgGeoOSM::createQGVImage() const
 {
 

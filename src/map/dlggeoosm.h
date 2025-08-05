@@ -41,8 +41,13 @@ public:
                      QColor color=Qt::GlobalColor::yellow, qreal linewidth=5);
     void addRectangle(QGV::GeoPos pos1, QPointF size=QPointF(10.0, 20.0),
                       QColor color=Qt::GlobalColor::yellow, QString label="");
+    void addArrowLine(QGV::GeoPos origin, double azimuthDeg, double length,
+                      QColor color=QColor(Qt::red), qreal linewidth=3,
+                      double arrowLength = 20.0,
+                      double arrowAngleDeg = 30.0);
     void clearMarker();
     void clearPolyLines();
+    void clearAll();
     QPixmap createQGVImage() const;
 protected slots:
     void onSetCenter(bool checked);
@@ -59,9 +64,7 @@ private:
     void createTrackingWidget();
     void addPolylines(const QVector<QGV::GeoPos>& linePts, QColor color,
                      qreal linewidth=1);
-    void addArrowLine(QGV::GeoPos origin, double azimuthDeg, double length,
-                      QColor color=QColor(Qt::red), qreal linewidth=1, double arrowLength = 3.0,
-                      double arrowAngleDeg = 30.0);
+
     QGroupBox* createOptionsList(bool addCheckbox=false);
 
     Ui::DlgGeoOSM *ui;
