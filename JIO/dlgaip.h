@@ -48,6 +48,7 @@ private slots:
     void onCyntecElementMapChanged(QString newElementMap);
     void onCyntecBeamTableIDChanged(QString newBeamTableID);
     void onHanwhaBeamTableIDChanged(QString newBeamTableID);
+    void onHanwhaBeamTypeTextChanged(QString newBeamType);
     void onNewCyntecBeamFactorIDs(QStringList keys);
     void onNewCyntecBeamTableIDs(QStringList keys);
     void onNewHanwhaBeamTableIDs(QStringList keys);
@@ -57,7 +58,7 @@ private slots:
     void onHanwhaBeamTableClicked(bool checked);
     void onUpdateHanwhaBeamTableData(double az, double el, double azBW, double elBW);
     void onUpdateBeamTypes(QStringList beamtypes);
-
+    void onUpdateBeamTypeGroup(QMap<QString, QStringList> data);
 private:
     void getCyntecBeamFactorDatas(QString beamFactorID);
     void getCyntecBeamTableDatas(QString beamTableID);
@@ -73,6 +74,7 @@ private:
     QString m_oldsavepath;
     Cyntec *mCyntec;
     Hanwha *mHanwha;
+    QMap<QString, QStringList> mHanwhaBeamTypeGroup;
 };
 
 #endif // DLGAIP_H

@@ -60,27 +60,28 @@ void Hanwha::initBeamData(QIODevice *filedevice)
     int colAZ=3;
     int colEI=4;
     int colBeamType=5;
-    QVariant varA, varC, varD, varE;
+    QVariant varBeamDir, varC, varD, varE;
     QXlsx::Document xlsReader(filedevice);
     if(xlsReader.load()){
         mBeamTableData->clear();
+        mBeamTypeData.clear();
         mBeamtypes.clear();
         // for(int i=row; i<=endrow;i++){
         auto cell = xlsReader.cellAt(row, colBeamDirID); // col A
         if ( cell != NULL )
         {
-            varA = cell->readValue();
-            while (varA.isValid()){
+            varBeamDir = cell->readValue();
+            while (varBeamDir.isValid()){
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
                 row++;
                 cell = xlsReader.cellAt(row, colBeamDirID); // col A
                 if ( cell != NULL )
                 {
-                    varA = cell->readValue(); // read cell value (number(double), QDateTime, QString ...)
+                    varBeamDir = cell->readValue();
                     cell = xlsReader.cellAt(row, colAZ); // col C : AZ
                     if ( cell != NULL )
                     {
-                        varC = cell->readValue(); // read cell value (number(double), QDateTime, QString ...)
+                        varC = cell->readValue();
                     }else{
                         qDebug() << "get cell " << row << " x " << colAZ << " fail";
                     }
@@ -95,13 +96,17 @@ void Hanwha::initBeamData(QIODevice *filedevice)
                     if ( cell != NULL )
                     {
                         varE = cell->readValue(); // read cell value (number(double), QDateTime, QString ...)
-                        if (!mBeamtypes.contains(varE.toString())){
-                            mBeamtypes.append(varE.toString());
+                        // if (!mBeamtypes.contains(varE.toString())){
+                        //     mBeamtypes.append(varE.toString());
+                        // }
+                        if (!mBeamTypeData.contains(varE.toString())){
+                            mBeamTypeData[varE.toString()]=QStringList();
                         }
+                        mBeamTypeData[varE.toString()].append(varBeamDir.toString());
                     }else{
                         qDebug() << "get cell " << row << " x " << colBeamType << " fail";
                     }
-                    mBeamTableData->insert(varA.toInt(), HanwhaBeamTableData(varA.toInt(),
+                    mBeamTableData->insert(varBeamDir.toInt(), HanwhaBeamTableData(varBeamDir.toInt(),
                                                                              varC.toDouble(),
                                                                              varD.toDouble(),
                                                                              varE.toString()));
@@ -117,8 +122,9 @@ void Hanwha::initBeamData(QIODevice *filedevice)
             if (tablekeys.length()>0){
                 emit newBeamTableIDs(tablekeys);
             }
-            if (mBeamtypes.length()>0){
-                emit updateBeamTypes(mBeamtypes);
+            if (mBeamTypeData.keys().count()>0){
+                emit updateBeamTypes(mBeamTypeData.keys());
+                emit updateBeamTypeGroup(mBeamTypeData);
             }
         }else{
             qDebug() << "data format is wrong";
@@ -148,6 +154,7 @@ void Hanwha::getBeamTableData(int beamTableID)
 
 QVector<QVector<double>> Hanwha::getBeamTableDatas(int limitid)
 {
+    //all BeamTableDatas
     QVector<QVector<double>> data;
     for (auto key : mBeamTableData->keys()){
         HanwhaBeamTableData d = mBeamTableData->value(key);
@@ -155,6 +162,23 @@ QVector<QVector<double>> Hanwha::getBeamTableDatas(int limitid)
             break;
         }
         data.append({d.beamtableId, d.azDeg, d.elDeg});
+    }
+    return data;
+}
+
+QVector<QVector<double> > Hanwha::getBeamTableDatas(QString beamtype)
+{
+    QVector<QVector<double>> data;
+    if (mBeamTypeData.contains(beamtype)){
+        QStringList ids = mBeamTypeData.value(beamtype);
+        for (const QString &id : ids) {
+            if (mBeamTableData->contains(id.toInt())){
+                HanwhaBeamTableData d = mBeamTableData->value(id.toInt());
+                data.append({d.beamtableId, d.azDeg, d.elDeg});
+            }
+        }
+    }else{
+        qDebug() << "No mBeamTypeData of " << beamtype;
     }
     return data;
 }

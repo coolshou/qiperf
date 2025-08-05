@@ -28,6 +28,7 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     connect(ui->CyntecElementMap, &QComboBox::currentTextChanged, this, &DlgAIP::onCyntecElementMapChanged);
     //Hanwha
     connect(ui->HanwhaBeamTableID, &QComboBox::currentTextChanged, this, &DlgAIP::onHanwhaBeamTableIDChanged);
+    connect(ui->HanwhaBeamType, &QComboBox::currentTextChanged, this, &DlgAIP::onHanwhaBeamTypeTextChanged);
     loadcfg();
     mModuleType = AIP::ModuleType::Unknown;
     connect(ui->pbSelReffile, &QPushButton::clicked, this, &DlgAIP::onSelReffileClicked);
@@ -42,10 +43,10 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     connect(mCyntec, &Cyntec::updateBeamFactorData, this, &DlgAIP::onUpdateCynteBeamFactorData);
     connect(mCyntec, &Cyntec::updateBeamTableData, this, &DlgAIP::onUpdateCyntecBeamTableData);
     mHanwha = new Hanwha();
-    connect(mHanwha, &Hanwha::newBeamTableIDs, this, &DlgAIP::onNewHanwhaBeamTableIDs);
+    // connect(mHanwha, &Hanwha::newBeamTableIDs, this, &DlgAIP::onNewHanwhaBeamTableIDs);
     connect(mHanwha, &Hanwha::updateBeamTableData, this, &DlgAIP::onUpdateHanwhaBeamTableData);
     connect(mHanwha, &Hanwha::updateBeamTypes, this, &DlgAIP::onUpdateBeamTypes);
-
+    connect(mHanwha, &Hanwha::updateBeamTypeGroup, this, &DlgAIP::onUpdateBeamTypeGroup);
     connect(ui->pbCyntecBeamTable, &QPushButton::clicked, this, &DlgAIP::onCyntecBeamTableClicked);
     connect(ui->pbHanwhaBeamTable, &QPushButton::clicked, this, &DlgAIP::onHanwhaBeamTableClicked);
 
@@ -391,6 +392,15 @@ void DlgAIP::onHanwhaBeamTableIDChanged(QString newBeamTableID)
     }
 }
 
+void DlgAIP::onHanwhaBeamTypeTextChanged(QString newBeamType)
+{
+    if (mHanwhaBeamTypeGroup.contains(newBeamType)){
+        QStringList data= mHanwhaBeamTypeGroup.value(newBeamType);
+        ui->HanwhaBeamTableID->clear();
+        ui->HanwhaBeamTableID->insertItems(0, data);
+    }
+}
+
 void DlgAIP::onNewCyntecBeamFactorIDs(QStringList keys)
 {
     // qDebug() << "onNewCyntecBeamFactorIDs:" << keys;
@@ -453,7 +463,9 @@ void DlgAIP::onHanwhaBeamTableClicked(bool checked)
         connect(this, &DlgAIP::finished, this, &DlgAIP::onCloseHanwhaBeamTable);
         connect(ui->HanwhaBeamTableID, &QComboBox::currentTextChanged,
                 hBeamT, &FrmBeamTable::selectEllipse);
-        hBeamT->setGridPoints(mHanwha->getBeamTableDatas());
+        //
+        QString beamtype = ui->HanwhaBeamType->currentText();
+        hBeamT->setGridPoints(mHanwha->getBeamTableDatas(beamtype));
         hBeamT->show();
     }
 }
@@ -469,6 +481,11 @@ void DlgAIP::onUpdateHanwhaBeamTableData(double az, double el, double azBW, doub
 void DlgAIP::onUpdateBeamTypes(QStringList beamtypes)
 {
     ui->HanwhaBeamType->insertItems(0,beamtypes);
+}
+
+void DlgAIP::onUpdateBeamTypeGroup(QMap<QString, QStringList> data)
+{
+    mHanwhaBeamTypeGroup = data;
 }
 
 void DlgAIP::getCyntecBeamFactorDatas(QString beamFactorID)
