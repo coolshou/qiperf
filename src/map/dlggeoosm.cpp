@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QVBoxLayout>
 #include <QCheckBox>
+#include <QApplication>
 
 #include "../lib/geoview/polyline.h"
 #include "../lib/geoview/directionarrow.h"
@@ -18,6 +19,8 @@ DlgGeoOSM::DlgGeoOSM(QWidget *parent)
     , ui(new Ui::DlgGeoOSM)
 {
     ui->setupUi(this);
+    currentMousePos = new QGV::GeoPos();
+    clipboard = QApplication::clipboard();
     Helpers::setupCachedNetworkAccessManager(this);
 
     mMap = new QGVMap(this);
@@ -119,16 +122,18 @@ void DlgGeoOSM::addRectangle(QGV::GeoPos pos1, QPointF size, QColor color,
 
 void DlgGeoOSM::clearMarker()
 {
-    for (int i = 0; i < mItemsLayer->countItems(); i++) {
-        mItemsLayer->removeItem(mItemsLayer->getItem(mItemsLayer->countItems() - 1));
-    }
+    mItemsLayer->deleteItems();
+    // for (int i = 0; i < mItemsLayer->countItems(); i++) {
+    //     mItemsLayer->removeItem(mItemsLayer->getItem(mItemsLayer->countItems() - 1));
+    // }
 }
 
 void DlgGeoOSM::clearPolyLines()
 {
-    for (int i = 0; i < mPolysLayer->countItems(); i++) {
-        mPolysLayer->removeItem(mPolysLayer->getItem(mPolysLayer->countItems() - 1));
-    }
+    mPolysLayer->deleteItems();
+    // for (int i = 0; i < mPolysLayer->countItems(); i++) {
+    //     mPolysLayer->removeItem(mPolysLayer->getItem(mPolysLayer->countItems() - 1));
+    // }
 }
 
 void DlgGeoOSM::clearAllPlot()
@@ -223,7 +228,7 @@ void DlgGeoOSM::onScaleChanged()
 void DlgGeoOSM::createContextMenu()
 {
     auto actPosition = new QAction("Copy current mouse position", this);
-    // connect(actPosition, &QAction::triggered,)
+    connect(actPosition, &QAction::triggered, this, &DlgGeoOSM::onCopyMousePosition);
     mMap->addAction(actPosition);
 
 }
@@ -237,7 +242,9 @@ void DlgGeoOSM::createTrackingWidget()
     mMap->addWidget(text);
     connect(mMap, &QGVMap::mapMouseMove, text, [this, text](QPointF projPos) {
         // Current projection position can be converted to geo-coordinates and printed by corresponding functions.
-        auto geoPos = mMap->getProjection()->projToGeo(projPos);
+        QGV::GeoPos geoPos = mMap->getProjection()->projToGeo(projPos);
+        currentMousePos->setLat(geoPos.latitude());
+        currentMousePos->setLon(geoPos.longitude());
         text->setText(QString("<b>%1, %2</b>").arg(geoPos.latToString(), geoPos.lonToString()));
     });
 }
@@ -245,6 +252,13 @@ void DlgGeoOSM::createTrackingWidget()
 void DlgGeoOSM::addPolylines(const QVector<QGV::GeoPos> &linePts, QColor color, qreal linewidth)
 {
     mPolysLayer->addItem(new Polyline(linePts, color, linewidth));
+}
+
+void DlgGeoOSM::onCopyMousePosition(bool checked)
+{
+    Q_UNUSED(checked)
+    QString s= currentMousePos->latToString() + "," + currentMousePos->lonToString();
+    clipboard->setText(s);
 }
 
 void DlgGeoOSM::addArrowLine(QGV::GeoPos origin, double azimuthDeg, double length,

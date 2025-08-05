@@ -11,6 +11,7 @@ show:
 */
 #include <QDialog>
 #include <QGroupBox>
+#include <QClipboard>
 
 #include <QGeoView/QGVMap.h>
 #include <QGeoView/QGVLayer.h>
@@ -64,7 +65,7 @@ private:
     void createTrackingWidget();
     void addPolylines(const QVector<QGV::GeoPos>& linePts, QColor color,
                      qreal linewidth=1);
-
+    void onCopyMousePosition(bool checked);
     QGroupBox* createOptionsList(bool addCheckbox=false);
 
     Ui::DlgGeoOSM *ui;
@@ -72,6 +73,8 @@ private:
     QGVLayer* mItemsLayer;
     QGVLayer* mPolysLayer;
     QString m_tile;
+    QGV::GeoPos *currentMousePos;
+    QClipboard *clipboard;
 };
 
 #endif // DLGGEOOSM_H
