@@ -85,6 +85,7 @@ private slots:
     void onToDMS(bool checked);
     void onToDegree(bool checked);
     void showContextMenu(const QPoint &pos);
+    void onDeviceCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
     void onLoadFinished(bool ok);
     void onTileAvailable(bool ok);
     void onCheckTileFinished();

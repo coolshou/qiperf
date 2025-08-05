@@ -106,9 +106,11 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     connect(ui->pbClear, &QPushButton::clicked, m_clearAction, &QAction::triggered);
     connect(ui->pbToDMS, &QPushButton::clicked, this, &DlgJIO::onToDMS);
     connect(ui->pbToDegree, &QPushButton::clicked, this, &DlgJIO::onToDegree);
+
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
             this, &DlgJIO::showContextMenu);
-
+    connect(ui->tableWidget, &QTableWidget::currentCellChanged,
+            this, &DlgJIO::onDeviceCellChanged);
     connect(this, &DlgJIO::TileAvailable, this , &DlgJIO::onTileAvailable);
     isTileAvailable();
 
@@ -404,9 +406,9 @@ void DlgJIO::onCalcCliecked(bool checked)
         totalazimuth = totalazimuth + azimuth;
         el1 = GeoTranslate::calcElevationAngle(altmsl1, altmsl, distance*1000);
         el2 = GeoTranslate::calcElevationAngle(altmsl, altmsl1, distance*1000);
-        qDebug() << " " << QString::number(altmsl1) << " - "  << QString::number(altmsl)
-                 << " distance:" << QString::number(distance)
-                 << " el1:" << QString::number(el1) << " el2:" << QString::number(el2);
+        // qDebug() << " " << QString::number(altmsl1) << " - "  << QString::number(altmsl)
+        //          << " distance:" << QString::number(distance)
+        //          << " el1:" << QString::number(el1) << " el2:" << QString::number(el2);
 
         ui->twResult->setItem(i-1, AZEIcols::Elevation1, new QTableWidgetItem(QString::number(el1, 'f', 1)));
         ui->twResult->setItem(i-1, AZEIcols::Elevation2, new QTableWidgetItem(QString::number(el2, 'f', 1)));
@@ -424,6 +426,42 @@ void DlgJIO::onCalcCliecked(bool checked)
     qDebug() << "totalel:" << QString::number(totalel);
     double elDegree = totalel/ui->twResult->rowCount();
     ui->leAM7el->setText(QString::number(elDegree, 'f', 1));
+
+
+    double refAz = azimuthDegree +180;
+    if (refAz>=360){
+        refAz = refAz - 360;
+    }
+    //group CM7 by Azimuth2
+    QColor lColor = QColor(144, 238, 144); //light green
+    QColor rColor = QColor(173, 216, 230); //light blue
+    QColor nColor = QColor(Qt::lightGray);
+    double relative;
+    double cmaz;
+    for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
+        // QTableWidgetItem *itmN = ui->twResult->item(iRow, AZEIcols::Name);
+        // if (itmN){
+        //     qDebug() << "itmN:" << itmN->text();
+        // }
+        QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::Azimuth2);
+        if (itm){
+            cmaz = itm->text().toDouble() + 180;
+            relative = fmod((cmaz - azimuthDegree + 360), 360);
+            qDebug() << "cmaz:" << cmaz << "  relative:" << relative;
+            if (relative > 0 && relative < 90){
+                //azimuthDegree 的第一象限
+                itm->setBackground(QBrush(lColor));
+                itm->setToolTip("CM7-FirstQuadrant");
+            }else if (relative > 270 && relative < 360){
+                //azimuthDegree 的第四象限
+                itm->setBackground(QBrush(rColor));
+                itm->setToolTip("CM7-FourthQuadrant");
+            }else{
+                qDebug() << "No in Coverage range";
+                itm->setBackground(QBrush(nColor));
+            }
+        }
+    }
 
     if (showline){
         // if (m_dlgOSM){
@@ -526,11 +564,12 @@ void DlgJIO::onShowGeo(bool checked)
                                  QMessageBox::Ok);
         return;
     }
-    if (m_dlgGeo){
+    onCalcCliecked(true);
 
+    if (m_dlgGeo){
+        m_dlgGeo->clearAll();
         double lat1 = ui->tableWidget->item(0, GPScols::Latitude)->text().toDouble();
         double lon1 = ui->tableWidget->item(0, GPScols::Longitude)->text().toDouble();
-
         m_dlgGeo->load(tile , lat1, lon1);
         m_dlgGeo->raise();
         m_dlgGeo->activateWindow();
@@ -595,6 +634,13 @@ void DlgJIO::showContextMenu(const QPoint &pos)
     // m_contextMenu->show();
 }
 
+void DlgJIO::onDeviceCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
+{
+    Q_UNUSED(previousRow)
+    Q_UNUSED(previousColumn)
+    qDebug() << "current cell:" << currentRow << "," << currentColumn;
+}
+
 void DlgJIO::onLoadFinished(bool ok)
 {
     if (ok){
@@ -606,6 +652,10 @@ void DlgJIO::onLoadFinished(bool ok)
             double lon0;
             double lat;
             double lon;
+            double azdeg;
+            QRgb rgb1 = 0xFFDC7000;
+            QGV::GeoPos am7;
+            QGV::GeoPos cm;
             // marker
             for(int row=0;row<ui->tableWidget->rowCount();row++){
                 label = ui->tableWidget->item(row, GPScols::PositionName)->text();
@@ -615,13 +665,22 @@ void DlgJIO::onLoadFinished(bool ok)
                     // m_dlgGeo->addMarker(lat, lon, label, Placemark::MarkColor::Red);
                     lat0 = lat;
                     lon0 = lon;
-                    m_dlgGeo->addRectangle(QGV::GeoPos(lat0, lon0), QPointF(10.0, 20.0), Qt::red, label);
+                    am7 = QGV::GeoPos{lat0, lon0};
+                    m_dlgGeo->addRectangle(am7, QPointF(10.0, 20.0), Qt::red, label);
+                    //draw Arrow line
+                    m_dlgGeo->addArrowLine(am7, ui->leAM7az->text().toDouble(), 100,
+                                           QColor(Qt::red));
+
                 }else{
                     // marker
+                    cm = QGV::GeoPos{lat, lon};
                     //m_dlgGeo->addMarker(lat, lon, label);
-                    m_dlgGeo->addRectangle(QGV::GeoPos(lat, lon), QPointF(10.0, 20.0), Qt::yellow, label);
+                    m_dlgGeo->addRectangle(cm, QPointF(10.0, 20.0), Qt::yellow, label);
                     // polyLines
-                    m_dlgGeo->addPolyline(QGV::GeoPos(lat0, lon0),QGV::GeoPos(lat, lon));
+                    m_dlgGeo->addPolyline(am7, cm);
+                    //draw Arrow line
+                    azdeg = ui->twResult->item(row-1, AZEIcols::Azimuth2)->text().toDouble();
+                    m_dlgGeo->addArrowLine(cm, azdeg, 100, QColor(rgb1));
                 }
             }
         }
