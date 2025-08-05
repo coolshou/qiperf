@@ -47,7 +47,7 @@ public:
                       double arrowAngleDeg = 30.0);
     void clearMarker();
     void clearPolyLines();
-    void clearAll();
+    void clearAllPlot();
     QPixmap createQGVImage() const;
 protected slots:
     void onSetCenter(bool checked);

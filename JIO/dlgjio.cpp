@@ -567,7 +567,7 @@ void DlgJIO::onShowGeo(bool checked)
     onCalcCliecked(true);
 
     if (m_dlgGeo){
-        m_dlgGeo->clearAll();
+        m_dlgGeo->clearAllPlot();
         double lat1 = ui->tableWidget->item(0, GPScols::Latitude)->text().toDouble();
         double lon1 = ui->tableWidget->item(0, GPScols::Longitude)->text().toDouble();
         m_dlgGeo->load(tile , lat1, lon1);
@@ -645,8 +645,8 @@ void DlgJIO::onLoadFinished(bool ok)
 {
     if (ok){
         if (m_dlgGeo){
-            m_dlgGeo->clearMarker();
-            m_dlgGeo->clearPolyLines();
+            // m_dlgGeo->clearMarker();
+            // m_dlgGeo->clearPolyLines();
             QString label;
             double lat0;
             double lon0;

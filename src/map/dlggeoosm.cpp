@@ -105,7 +105,6 @@ void DlgGeoOSM::addRectangle(QGV::GeoPos pos1, QPointF size, QColor color,
                              QString label)
 {
     auto base = mMap->getProjection()->geoToProj(pos1);
-    // qDebug() << "[" << label <<"] addRectangle base" << base << " size:" << size;
     QGV::GeoRect pos = mMap->getProjection()->projToGeo({ base, base + QPointF(size.x(), size.y()) });
     qDebug() << "[" << label << "]addRectangle pos" << pos << " size:" << size;
     // Rectangle *item = new Rectangle(pos, color);
@@ -132,7 +131,7 @@ void DlgGeoOSM::clearPolyLines()
     }
 }
 
-void DlgGeoOSM::clearAll()
+void DlgGeoOSM::clearAllPlot()
 {
     clearMarker();
     clearPolyLines();
