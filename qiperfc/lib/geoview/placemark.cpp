@@ -29,7 +29,7 @@ Placemark::Placemark(const QGV::GeoPos& geoPos, int color)
     if (color == MarkColor::Yellow){
         sColor=":/placemark/yellow";
     }else if(color == MarkColor::Blue){
-            sColor=":/placemark/blue";
+        sColor=":/placemark/blue";
     }else if(color == MarkColor::Green){
         sColor=":/placemark/green";
     }else if(color == MarkColor::Purple){

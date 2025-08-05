@@ -7,6 +7,7 @@ AGMSensor::AGMSensor(QObject *parent)
 QString AGMSensor::sendQuery()
 {
     QString cmd = "sensors_call_so";
+    return cmd;
 }
 
 /*
