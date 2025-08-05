@@ -56,6 +56,7 @@ private slots:
     void onCyntecBeamTableClicked(bool checked);
     void onHanwhaBeamTableClicked(bool checked);
     void onUpdateHanwhaBeamTableData(double az, double el, double azBW, double elBW);
+    void onUpdateBeamTypes(QStringList beamtypes);
 
 private:
     void getCyntecBeamFactorDatas(QString beamFactorID);

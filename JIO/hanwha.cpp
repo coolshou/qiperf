@@ -1,5 +1,7 @@
 #include "hanwha.h"
 
+#include <QCoreApplication>
+#include <QEventLoop>
 #include <QFile>
 #include <QDebug>
 #include "xlsxdocument.h"
@@ -52,62 +54,74 @@ void Hanwha::initBeamData(QIODevice *filedevice)
         qDebug() << "Error: QIODevice is not readable.";
         return;
     }
-    int row=15;
-    int endrow=253;
-
+    int row=13;
+    // int endrow=253;
+    int colBeamDirID=1;
+    int colAZ=3;
+    int colEI=4;
+    int colBeamType=5;
     QVariant varA, varC, varD, varE;
-    // qDebug() << "xlsReader(filename): " << filename;
     QXlsx::Document xlsReader(filedevice);
     if(xlsReader.load()){
         mBeamTableData->clear();
-        for(int i=row; i<=endrow;i++){
-            Cell* cellA = xlsReader.cellAt(i, 1).get(); // col A
-            if ( cellA != NULL )
-            {
-                varA = cellA->readValue(); // read cell value (number(double), QDateTime, QString ...)
-                // qDebug() << varA; // display value. it is 'Hello Qt!'.
-            }else{
-                qDebug() << "get cell " << i << " x 1 fail";
-                continue;
+        mBeamtypes.clear();
+        // for(int i=row; i<=endrow;i++){
+        auto cell = xlsReader.cellAt(row, colBeamDirID); // col A
+        if ( cell != NULL )
+        {
+            varA = cell->readValue();
+            while (varA.isValid()){
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
+                row++;
+                cell = xlsReader.cellAt(row, colBeamDirID); // col A
+                if ( cell != NULL )
+                {
+                    varA = cell->readValue(); // read cell value (number(double), QDateTime, QString ...)
+                    cell = xlsReader.cellAt(row, colAZ); // col C : AZ
+                    if ( cell != NULL )
+                    {
+                        varC = cell->readValue(); // read cell value (number(double), QDateTime, QString ...)
+                    }else{
+                        qDebug() << "get cell " << row << " x " << colAZ << " fail";
+                    }
+                    cell = xlsReader.cellAt(row, colEI); // col D : EI
+                    if ( cell != NULL )
+                    {
+                        varD = cell->readValue(); // read cell value (number(double), QDateTime, QString ...)
+                    }else{
+                        qDebug() << "get cell " << row << " x " << colEI << " fail";
+                    }
+                    cell = xlsReader.cellAt(row, colBeamType); // col E : beamtype
+                    if ( cell != NULL )
+                    {
+                        varE = cell->readValue(); // read cell value (number(double), QDateTime, QString ...)
+                        if (!mBeamtypes.contains(varE.toString())){
+                            mBeamtypes.append(varE.toString());
+                        }
+                    }else{
+                        qDebug() << "get cell " << row << " x " << colBeamType << " fail";
+                    }
+                    mBeamTableData->insert(varA.toInt(), HanwhaBeamTableData(varA.toInt(),
+                                                                             varC.toDouble(),
+                                                                             varD.toDouble(),
+                                                                             varE.toString()));
+                }else{
+                    break;
+                }
             }
-            Cell* cellC = xlsReader.cellAt(i, 3).get(); // col C : AZ
-            if ( cellC != NULL )
-            {
-                varC = cellC->readValue(); // read cell value (number(double), QDateTime, QString ...)
-                // qDebug() << varC; // display value. it is 'Hello Qt!'.
-            }else{
-                qDebug() << "get cell " << i << " x 3 fail";
-                continue;
+            QStringList tablekeys;
+            for (int tablekey : mBeamTableData->keys()) {
+                // Convert the integer to a QString and add it to stringList
+                tablekeys.append(QString::number(tablekey));
             }
-            Cell* cellD = xlsReader.cellAt(i, 4).get(); // col D : EI
-            if ( cellD != NULL )
-            {
-                varD = cellD->readValue(); // read cell value (number(double), QDateTime, QString ...)
-                // qDebug() << varD; // display value. it is 'Hello Qt!'.
-            }else{
-                qDebug() << "get cell " << i << " x 4 fail";
-                continue;
+            if (tablekeys.length()>0){
+                emit newBeamTableIDs(tablekeys);
             }
-            Cell* cellE = xlsReader.cellAt(i, 5).get(); // col E : beamtype
-            if ( cellE != NULL )
-            {
-                varE = cellE->readValue(); // read cell value (number(double), QDateTime, QString ...)
-                // qDebug() << varE; // display value. it is 'Hello Qt!'.
-            }else{
-                qDebug() << "get cell " << i << " x 5 fail";
-                continue;
+            if (mBeamtypes.length()>0){
+                emit updateBeamTypes(mBeamtypes);
             }
-            mBeamTableData->insert(varA.toInt(), HanwhaBeamTableData(varA.toDouble(),
-                                                                     varC.toDouble(),
-                                                                     varD.toDouble()));
-        }
-        QStringList tablekeys;
-        for (int tablekey : mBeamTableData->keys()) {
-            // Convert the integer to a QString and add it to stringList
-            tablekeys.append(QString::number(tablekey));
-        }
-        if (tablekeys.length()>0){
-            emit newBeamTableIDs(tablekeys);
+        }else{
+            qDebug() << "data format is wrong";
         }
     }else{
         qDebug() << "[Hanwha::initBeamData]xlsReader error: ";

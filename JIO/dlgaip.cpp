@@ -44,7 +44,7 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     mHanwha = new Hanwha();
     connect(mHanwha, &Hanwha::newBeamTableIDs, this, &DlgAIP::onNewHanwhaBeamTableIDs);
     connect(mHanwha, &Hanwha::updateBeamTableData, this, &DlgAIP::onUpdateHanwhaBeamTableData);
-
+    connect(mHanwha, &Hanwha::updateBeamTypes, this, &DlgAIP::onUpdateBeamTypes);
 
     connect(ui->pbCyntecBeamTable, &QPushButton::clicked, this, &DlgAIP::onCyntecBeamTableClicked);
     connect(ui->pbHanwhaBeamTable, &QPushButton::clicked, this, &DlgAIP::onHanwhaBeamTableClicked);
@@ -464,6 +464,11 @@ void DlgAIP::onUpdateHanwhaBeamTableData(double az, double el, double azBW, doub
     Q_UNUSED(elBW)
     ui->HanwhaAZ->setValue(az);
     ui->HanwhaEL->setValue(el);
+}
+
+void DlgAIP::onUpdateBeamTypes(QStringList beamtypes)
+{
+    ui->HanwhaBeamType->insertItems(0,beamtypes);
 }
 
 void DlgAIP::getCyntecBeamFactorDatas(QString beamFactorID)

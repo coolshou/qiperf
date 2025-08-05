@@ -612,20 +612,24 @@
        <item>
         <widget class="QWidget" name="widget_4" native="true">
          <layout class="QGridLayout" name="gridLayout_6">
-          <item row="2" column="4">
-           <widget class="QDoubleSpinBox" name="HanwhaEL">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="minimum">
-             <double>-90.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>90.000000000000000</double>
+          <item row="1" column="4">
+           <widget class="QPushButton" name="pbHanwhaBeamTable">
+            <property name="text">
+             <string>BeamTable</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
+          <item row="1" column="1">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>BeamTableID:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
            <widget class="QDoubleSpinBox" name="HanwhaAZ">
             <property name="decimals">
              <number>3</number>
@@ -638,30 +642,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QComboBox" name="HanwhaBeamTableID"/>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLabel" name="label_16">
-            <property name="text">
-             <string>AZ:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>BeamTableID:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3">
+          <item row="3" column="3">
            <widget class="QLabel" name="label_17">
             <property name="text">
              <string>EL:</string>
@@ -671,12 +652,44 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
-           <widget class="QPushButton" name="pbHanwhaBeamTable">
-            <property name="text">
-             <string>BeamTable</string>
+          <item row="3" column="4">
+           <widget class="QDoubleSpinBox" name="HanwhaEL">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-90.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>90.000000000000000</double>
             </property>
            </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>AZ:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QComboBox" name="HanwhaBeamTableID"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>BeamType:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QComboBox" name="HanwhaBeamType"/>
           </item>
          </layout>
         </widget>

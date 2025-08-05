@@ -17,8 +17,10 @@ public:
 signals:
     void newBeamTableIDs(QStringList keys);
     void updateBeamTableData(double az, double el, double azBW, double elBW);
+    void updateBeamTypes(QStringList beamtypes);
 private:
     QMap<int, HanwhaBeamTableData> *mBeamTableData;
+    QStringList mBeamtypes;
 };
 
 #endif // HANWHA_H
