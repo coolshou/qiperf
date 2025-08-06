@@ -1,11 +1,14 @@
 #include "rectangletext.h"
 
+#include <QDebug>
+
 RectangleText::RectangleText(QString label, const QGV::GeoRect &geoRect,
                              QPointF size,  QColor color, QGVMap *map)
     :Rectangle(geoRect, color), mMap(map)
 {
     Q_UNUSED(size)
-    Q_UNUSED(label)
+    mlabel = new QGVWidgetText();
+    mlabel->setText(label);
     qDebug() << "["<<  label << "]latitude:" << geoRect.topRight().latToString()
              << "longitude:" << geoRect.topRight().lonToString();
     //TODO: following will fix on a position, the position should next to the Rectangle
@@ -25,4 +28,9 @@ RectangleText::RectangleText(QString label, const QGV::GeoRect &geoRect,
 
 
 
+}
+
+QString RectangleText::getText()
+{
+    return mlabel->getText();
 }

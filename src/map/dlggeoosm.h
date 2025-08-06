@@ -22,6 +22,7 @@ show:
 #include <QGeoView/QGVGlobal.h>
 #include <helpers.h>
 #include "../lib/geoview/placemark.h"
+#include "frmaddrectangle.h"
 
 namespace Ui {
 class DlgGeoOSM;
@@ -50,6 +51,10 @@ public:
     void clearPolyLines();
     void clearAllPlot();
     QPixmap createQGVImage() const;
+
+public slots:
+    void setItmHighlight(QString label);
+
 protected slots:
     void onSetCenter(bool checked);
     void onAddMark(bool checked);
@@ -58,13 +63,16 @@ protected slots:
     void onAddArrowLine(bool checked);
     void onMapStateChanged(QGV::MapState state);
     void onScaleChanged();
+    void onAddRectangleAccepted();
 signals:
     void loadFinished(bool ok);
+    void addPosition(QString label, double lat, double lon);
 private:
     void createContextMenu();
     void createTrackingWidget();
     void addPolylines(const QVector<QGV::GeoPos>& linePts, QColor color,
                      qreal linewidth=1);
+    void onAddPosition(bool checked);
     void onCopyMousePosition(bool checked);
     QGroupBox* createOptionsList(bool addCheckbox=false);
 
@@ -75,6 +83,7 @@ private:
     QString m_tile;
     QGV::GeoPos *currentMousePos;
     QClipboard *clipboard;
+    FrmAddRectangle *mfrmAddRect;
 };
 
 #endif // DLGGEOOSM_H

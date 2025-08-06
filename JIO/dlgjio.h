@@ -13,6 +13,7 @@
 
 // #include "../src/map/dlgopenstreetmap.h"
 #include "../src/map/dlggeoosm.h"
+#include "../src/gps/iplocationprovider.h"
 #include "dlgaip.h"
 #include "dlgset.h"
 
@@ -60,6 +61,7 @@ public:
 signals:
     void TileAvailable(bool ok);
     void closeAll();
+    void highlightItm(QString label);
 
 protected:
     void changeEvent(QEvent *e) override;
@@ -87,6 +89,7 @@ private slots:
     void showContextMenu(const QPoint &pos);
     void onDeviceCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
     void onLoadFinished(bool ok);
+    void onAddPosition(QString label, double lat, double lon);
     void onTileAvailable(bool ok);
     void onCheckTileFinished();
     void onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode);
@@ -98,12 +101,15 @@ private slots:
     void onUpdateModelType(int row, int col, int model);
     void onUpdateSetting(QString sshusername, QString sshpassword,
                          QString webusername, QString webpassword);
+    void onLocationReady(const IpLocation& location);
 private:
+    void getSelfIpLocation();
     void onLoad(QString filename);
     bool onSave(QString filename);
     void debug(QString msg, int lv=3);
     void loadcfg();
     void savecfg();
+    // double bearing(double lat1, double lon1, double lat2, double lon2);
     Ui::DlgJIO *ui;
     QSettings *m_cfg;
     QMenu *m_contextMenu;
@@ -123,6 +129,8 @@ private:
     QString mSshpassword;
     QString mWebusername;
     QString mWebpassword;
+    IpLocationProvider* provider;
+    IpLocation mIpLocation;
 };
 
 #endif // DLGJIO_H

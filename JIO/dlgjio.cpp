@@ -94,9 +94,11 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     // connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgJIO::onLoadFinished);
     m_dlgGeo = new DlgGeoOSM();
     connect(m_dlgGeo, &DlgGeoOSM::loadFinished, this, &DlgJIO::onLoadFinished);
-
+    connect(m_dlgGeo, &DlgGeoOSM::addPosition, this, &DlgJIO::onAddPosition);
     // connect(this, &DlgJIO::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
     connect(this, &DlgJIO::closeAll, m_dlgGeo, &DlgGeoOSM::close);
+    connect(this, &DlgJIO::highlightItm, m_dlgGeo, &DlgGeoOSM::setItmHighlight);
+
     connect(ui->pbLoad, &QPushButton::clicked, this, &DlgJIO::onLoadCliecked);
     connect(ui->pbSave, &QPushButton::clicked, this, &DlgJIO::onSaveCliecked);
     connect(ui->pbCalc, &QPushButton::clicked, this, &DlgJIO::onCalcCliecked);
@@ -112,7 +114,14 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     connect(ui->tableWidget, &QTableWidget::currentCellChanged,
             this, &DlgJIO::onDeviceCellChanged);
     connect(this, &DlgJIO::TileAvailable, this , &DlgJIO::onTileAvailable);
+
     isTileAvailable();
+    provider = new IpLocationProvider(this);
+    connect(provider, &IpLocationProvider::locationReady, this, &DlgJIO::onLocationReady);
+    connect(provider, &IpLocationProvider::locationError, this, [](const QString& err) {
+        qWarning() << "Location fetch failed:" << err;
+    });
+    getSelfIpLocation();
 
     m_dlgaip = new DlgAIP(m_cfg, this);
     connect(m_dlgaip, &DlgAIP::updateData, this, &DlgJIO::onUpdateData);
@@ -175,6 +184,9 @@ void DlgJIO::clearData()
     if (ui->twResult->rowCount()>0) {
         ui->twResult->clearContents();
         ui->twResult->setRowCount(0);
+    }
+    if (m_dlgGeo){
+        m_dlgGeo->clearAllPlot();
     }
 }
 
@@ -388,15 +400,15 @@ void DlgJIO::onCalcCliecked(bool checked)
         // msl =  GeoTranslate::convertEllipsoidToMSL(lat, lon, alt);
         // qDebug() << " Pos:" << pos << " Elevation hight:" << QString::number(msl);
         if (ui->rbVincenty->isChecked()){
-            VincentyResult vrs = vincentyInverse(lat1 , lon1, lat, lon);
+            VincentyResult vrs = vincentyInverse(lat1, lon1, lat, lon);
             distance = vrs.distance/1000; // m -> KM
             azimuth = vrs.initialBearing;
             azimuth2 = vrs.finalBearing;
         }
         if (ui->rbHaversine->isChecked()){
-            distance = haversine(lat1 , lon1, lat, lon);
-            azimuth = calcBearing(lat1 , lon1, lat, lon);
-            azimuth2 = calcBearing(lat, lon, lat1 , lon1);
+            distance = haversine(lat1, lon1, lat, lon);
+            azimuth = calcBearing(lat1, lon1, lat, lon);
+            azimuth2 = calcBearing(lat, lon, lat1, lon1);
         }
         ui->twResult->setItem(i-1, AZEIcols::Name, new QTableWidgetItem(pos1 + " : " + pos));
         ui->twResult->setItem(i-1, AZEIcols::Distance, new QTableWidgetItem(QString::number(distance)));
@@ -422,8 +434,9 @@ void DlgJIO::onCalcCliecked(bool checked)
         }
     }
     double azimuthDegree = totalazimuth/ui->twResult->rowCount();
+    qDebug() << "azimuthDegree:" << QString::number(azimuthDegree);
     ui->leAM7az->setText(QString::number(azimuthDegree, 'f', 1));
-    qDebug() << "totalel:" << QString::number(totalel);
+    // qDebug() << "totalel:" << QString::number(totalel);
     double elDegree = totalel/ui->twResult->rowCount();
     ui->leAM7el->setText(QString::number(elDegree, 'f', 1));
 
@@ -438,30 +451,44 @@ void DlgJIO::onCalcCliecked(bool checked)
     QColor nColor = QColor(Qt::lightGray);
     double relative;
     double cmaz;
+    QList<QTableWidgetItem*> cm7rs;
+    QList<QTableWidgetItem*> cm7ls;
     for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
-        // QTableWidgetItem *itmN = ui->twResult->item(iRow, AZEIcols::Name);
-        // if (itmN){
-        //     qDebug() << "itmN:" << itmN->text();
-        // }
         QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::Azimuth2);
         if (itm){
             cmaz = itm->text().toDouble() + 180;
             relative = fmod((cmaz - azimuthDegree + 360), 360);
-            qDebug() << "cmaz:" << cmaz << "  relative:" << relative;
+            // qDebug() << "cmaz:" << cmaz << "  relative:" << relative;
             if (relative > 0 && relative < 90){
                 //azimuthDegree 的第一象限
                 itm->setBackground(QBrush(lColor));
                 itm->setToolTip("CM7-FirstQuadrant");
+                cm7rs.append(itm);
             }else if (relative > 270 && relative < 360){
                 //azimuthDegree 的第四象限
                 itm->setBackground(QBrush(rColor));
                 itm->setToolTip("CM7-FourthQuadrant");
+                cm7ls.append(itm);
             }else{
                 qDebug() << "No in Coverage range";
                 itm->setBackground(QBrush(nColor));
             }
         }
     }
+    //TODO: AM7 AIP1 Az, El
+    double aip1az=0;
+    if (cm7rs.length()>1){
+        for(auto azitm: cm7rs){
+            aip1az = aip1az + azitm->text().toDouble();
+        }
+        aip1az = aip1az/cm7rs.length();
+    }else if (cm7rs.length()==1){
+        aip1az = cm7rs.value(0)->text().toDouble();
+    }else {
+        qDebug() << "No AIP1 AZ value";
+    }
+
+    //TODO: AM7 AIP2 Az, El
 
     if (showline){
         // if (m_dlgOSM){
@@ -558,18 +585,24 @@ void DlgJIO::onShowGeo(bool checked)
     Q_UNUSED(checked)
     QString tile = getTile();
 
-    if (ui->tableWidget->rowCount()<1){
-        QMessageBox::information(this, "Info",
-                                 "Require at last one GPS locaton",
-                                 QMessageBox::Ok);
-        return;
+    // if (ui->tableWidget->rowCount()<1){
+    //     QMessageBox::information(this, "Info",
+    //                              "Require at last one GPS locaton",
+    //                              QMessageBox::Ok);
+    //     return;
+    // }
+    if (ui->tableWidget->rowCount()>1){
+        onCalcCliecked(true);
     }
-    onCalcCliecked(true);
 
     if (m_dlgGeo){
         m_dlgGeo->clearAllPlot();
-        double lat1 = ui->tableWidget->item(0, GPScols::Latitude)->text().toDouble();
-        double lon1 = ui->tableWidget->item(0, GPScols::Longitude)->text().toDouble();
+        double lat1 = mIpLocation.latitude;
+        double lon1 = mIpLocation.longitude;
+        if (ui->tableWidget->rowCount()>0){
+            lat1 = ui->tableWidget->item(0, GPScols::Latitude)->text().toDouble();
+            lon1 = ui->tableWidget->item(0, GPScols::Longitude)->text().toDouble();
+        }
         m_dlgGeo->load(tile , lat1, lon1);
         m_dlgGeo->raise();
         m_dlgGeo->activateWindow();
@@ -638,15 +671,18 @@ void DlgJIO::onDeviceCellChanged(int currentRow, int currentColumn, int previous
 {
     Q_UNUSED(previousRow)
     Q_UNUSED(previousColumn)
-    qDebug() << "current cell:" << currentRow << "," << currentColumn;
+    // qDebug() << "current cell:" << currentRow << "," << currentColumn;
+    QTableWidgetItem *itm = ui->tableWidget->item(currentRow, GPScols::PositionName);
+    if (itm){
+        QString lable= itm->text();
+        emit highlightItm(lable);
+    }
 }
 
 void DlgJIO::onLoadFinished(bool ok)
 {
     if (ok){
         if (m_dlgGeo){
-            // m_dlgGeo->clearMarker();
-            // m_dlgGeo->clearPolyLines();
             QString label;
             double lat0;
             double lon0;
@@ -667,7 +703,7 @@ void DlgJIO::onLoadFinished(bool ok)
                     lon0 = lon;
                     am7 = QGV::GeoPos{lat0, lon0};
                     m_dlgGeo->addRectangle(am7, QPointF(10.0, 20.0), Qt::red, label);
-                    //draw Arrow line
+                    //draw Main Arrow line
                     m_dlgGeo->addArrowLine(am7, ui->leAM7az->text().toDouble(), 100,
                                            QColor(Qt::red));
 
@@ -685,6 +721,11 @@ void DlgJIO::onLoadFinished(bool ok)
             }
         }
     }
+}
+
+void DlgJIO::onAddPosition(QString label, double lat, double lon)
+{
+    onAddRow(label, lat, lon, 0.0, 0.0, 0.0);
 }
 
 void DlgJIO::onTileAvailable(bool ok)
@@ -787,6 +828,18 @@ void DlgJIO::onUpdateSetting(QString sshusername, QString sshpassword,
     mSshpassword = sshpassword;
     mWebusername = webusername;
     mWebpassword = webpassword;
+}
+
+void DlgJIO::onLocationReady(const IpLocation &location)
+{
+    // qDebug() << "Coordinates:" << location.latitude << "," << location.longitude;
+    mIpLocation = location;
+}
+
+void DlgJIO::getSelfIpLocation()
+{
+    provider->fetchLocation();
+
 }
 
 void DlgJIO::onLoad(QString filename)
@@ -955,3 +1008,16 @@ void DlgJIO::savecfg()
     m_cfg->sync();
 
 }
+
+// double DlgJIO::bearing(double lat1, double lon1, double lat2, double lon2)
+// {
+//     double p1 = qDegreesToRadians(lat1);
+//     double p2 = qDegreesToRadians(lat2);
+//     double dl = qDegreesToRadians(lon2 - lon1);
+
+//     double y = sin(dl) * cos(p2);
+//     double x = cos(p1) * sin(p2) - sin(p1) * cos(p2) * cos(dl);
+//     double theta = atan2(y, x);
+//     double bearingDeg = fmod(qRadiansToDegrees(theta) + 360.0, 360.0);
+//     return bearingDeg;
+// }

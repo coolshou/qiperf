@@ -99,7 +99,9 @@ SOURCES += \
     ../src/filewatcher.cpp \
     ../src/gps/geotranslate.cpp \
     ../src/gps/gpsfunc.cpp \
+    ../src/gps/iplocationprovider.cpp \
     ../src/map/dlggeoosm.cpp \
+    ../src/map/frmaddrectangle.cpp \
     ../src/myfunc.cpp \
     ../src/pipeclient.cpp \
     ../src/endpoint.cpp \
@@ -179,21 +181,15 @@ SOURCES += \
     # lib/tplegenditem.cpp \
     # ../qiperfd/src/wsserver.cpp \
 
-
-HEADERS += \
-    $$PWD/lib/geoview/placemark.h \
-    $$PWD/lib/geoview/polyline.h \
-    $$PWD/lib/geoview/rectangletext.h \
-    $$PWD/lib/geoview/directionarrow.h
-
-
 HEADERS += \
     ../src/cpumonitor.h \
     ../src/dlgshowlog.h \
     ../src/filewatcher.h \
     ../src/gps/geotranslate.h \
     ../src/gps/gpsfunc.h \
+    ../src/gps/iplocationprovider.h \
     ../src/map/dlggeoosm.h \
+    ../src/map/frmaddrectangle.h \
     ../src/pipeclient.h \
     ../src/comm.h \
     ../src/endpoint.h \
@@ -271,6 +267,12 @@ HEADERS += \
     views/viewtype.h \
     plugin/plugininterface.h
 
+HEADERS += \
+    $$PWD/lib/geoview/placemark.h \
+    $$PWD/lib/geoview/polyline.h \
+    $$PWD/lib/geoview/rectangletext.h \
+    $$PWD/lib/geoview/directionarrow.h
+
 #    src/tpstatuschecker.h
 
 
@@ -281,6 +283,7 @@ HEADERS += \
 FORMS += \
     ../src/dlgshowlog.ui \
     ../src/map/dlggeoosm.ui \
+    ../src/map/frmaddrectangle.ui \
     ../src/port/portsetbox.ui \
     ../src/port/serialport.ui \
     ../src/port/tcpudpport.ui \

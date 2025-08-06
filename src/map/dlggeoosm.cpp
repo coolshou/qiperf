@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QCheckBox>
 #include <QApplication>
+#include <QAction>
 
 #include "../lib/geoview/polyline.h"
 #include "../lib/geoview/directionarrow.h"
@@ -21,10 +22,12 @@ DlgGeoOSM::DlgGeoOSM(QWidget *parent)
     ui->setupUi(this);
     currentMousePos = new QGV::GeoPos();
     clipboard = QApplication::clipboard();
+    mfrmAddRect = new FrmAddRectangle(this);
+    connect(mfrmAddRect, &FrmAddRectangle::accepted, this, &DlgGeoOSM::onAddRectangleAccepted);
     Helpers::setupCachedNetworkAccessManager(this);
 
     mMap = new QGVMap(this);
-    connect(mMap, &QGVMap::scaleChanged, this , &DlgGeoOSM::onScaleChanged);
+    // connect(mMap, &QGVMap::scaleChanged, this , &DlgGeoOSM::onScaleChanged);
     // connect(mMap, &QGVMap::stateChanged, this, &DlgGeoOSM::onMapStateChanged);
     // Background layer
     auto osmLayer = new QGVLayerOSM();
@@ -63,6 +66,7 @@ DlgGeoOSM::~DlgGeoOSM()
 void DlgGeoOSM::load(QString tile, double lat, double lon)
 {
     m_tile = tile;
+    setWindowTitle(m_tile);
     // map center is lat, lon
     double lat1 = lat + 0.02245;
     double lon1 = lon - 0.0248;
@@ -108,38 +112,50 @@ void DlgGeoOSM::addRectangle(QGV::GeoPos pos1, QPointF size, QColor color,
                              QString label)
 {
     auto base = mMap->getProjection()->geoToProj(pos1);
+    qDebug() << "addRectangle: base:" << base;
     QGV::GeoRect pos = mMap->getProjection()->projToGeo({ base, base + QPointF(size.x(), size.y()) });
-    qDebug() << "[" << label << "]addRectangle pos" << pos << " size:" << size;
-    // Rectangle *item = new Rectangle(pos, color);
-    // TODO: add label for Rectangle
-    // MyGeoTextItem *item = MyGeoTextItem(pos, label, mPolysLayer);
+    // TODO: the Rectangle should consider size, and place the pos at center of Rectangle
     RectangleText *item = new RectangleText(label, pos, size, color, mMap);
     item->setFlag(QGV::ItemFlag::Highlightable, true);
     item->setSelectable(true);
     // item->setFlag(QGV::ItemFlag::Transformed, true);
-    mPolysLayer->addItem(item);
+    // mPolysLayer->addItem(item);
+    mItemsLayer->addItem(item);
 }
 
 void DlgGeoOSM::clearMarker()
 {
     mItemsLayer->deleteItems();
-    // for (int i = 0; i < mItemsLayer->countItems(); i++) {
-    //     mItemsLayer->removeItem(mItemsLayer->getItem(mItemsLayer->countItems() - 1));
-    // }
 }
 
 void DlgGeoOSM::clearPolyLines()
 {
     mPolysLayer->deleteItems();
-    // for (int i = 0; i < mPolysLayer->countItems(); i++) {
-    //     mPolysLayer->removeItem(mPolysLayer->getItem(mPolysLayer->countItems() - 1));
-    // }
 }
 
 void DlgGeoOSM::clearAllPlot()
 {
     clearMarker();
     clearPolyLines();
+}
+
+void DlgGeoOSM::setItmHighlight(QString label)
+{
+    for(int i=0;i<mItemsLayer->countItems();i++)
+    {
+        RectangleText *itm = static_cast<RectangleText*>(mItemsLayer->getItem(i));
+        if (label.compare(itm->getText())==0){
+            itm->setSelected(true); // show item selected
+        }else{
+            itm->setSelected(false);
+
+        }
+    }
+    for(int i=0;i<mPolysLayer->countItems();i++)
+    {
+        QGVItem *itm = mPolysLayer->getItem(i);
+        qDebug() << "mPolysLayer:" << itm;
+    }
 }
 
 QPixmap DlgGeoOSM::createQGVImage() const
@@ -212,7 +228,7 @@ void DlgGeoOSM::onMapStateChanged(QGV::MapState state)
 void DlgGeoOSM::onScaleChanged()
 {
     // TODO: when map change scale
-    qDebug() <<  "onScaleChanged:" << mMap->getCamera().scale();
+    // qDebug() <<  "onScaleChanged:" << mMap->getCamera().scale();
 
     /*
     QPointF top_left_geo = mMap->mapToProj(QPoint(0,0));
@@ -225,10 +241,25 @@ void DlgGeoOSM::onScaleChanged()
     */
 }
 
+void DlgGeoOSM::onAddRectangleAccepted()
+{
+    QGV::GeoPos pos = mfrmAddRect->getPos();
+    QString label = mfrmAddRect->getLable();
+    QSize size = mfrmAddRect->getSize();
+    QColor c= mfrmAddRect->getColor();
+    addRectangle(pos, QPointF(size.width(), size.height()), c, label);
+    emit addPosition(label, pos.latitude(), pos.longitude());
+}
+
 void DlgGeoOSM::createContextMenu()
 {
-    auto actPosition = new QAction("Copy current mouse position", this);
+    QAction *actAddPosition = new QAction("Add Position", this);
+    connect(actAddPosition, &QAction::triggered, this, &DlgGeoOSM::onAddPosition);
+
+    QAction *actPosition = new QAction("Copy current mouse position", this);
     connect(actPosition, &QAction::triggered, this, &DlgGeoOSM::onCopyMousePosition);
+    mMap->addAction(actAddPosition);
+
     mMap->addAction(actPosition);
 
 }
@@ -252,6 +283,14 @@ void DlgGeoOSM::createTrackingWidget()
 void DlgGeoOSM::addPolylines(const QVector<QGV::GeoPos> &linePts, QColor color, qreal linewidth)
 {
     mPolysLayer->addItem(new Polyline(linePts, color, linewidth));
+}
+
+void DlgGeoOSM::onAddPosition(bool checked)
+{
+    Q_UNUSED(checked)
+    // add a device at current mouse pos
+    mfrmAddRect->setPos(currentMousePos->latitude(), currentMousePos->longitude());
+    mfrmAddRect->show();
 }
 
 void DlgGeoOSM::onCopyMousePosition(bool checked)
