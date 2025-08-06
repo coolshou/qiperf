@@ -385,7 +385,8 @@ void DlgJIO::onCalcCliecked(bool checked)
     // double msl=0.0;
     double distance = 0;
     double azimuth = 0;
-    double totalazimuth = 0.0;
+    QList<double> azbearings;
+    // QList<double> elbearings;
     double azimuth2 = 0;
     double el1=0.0;
     double el2=0.0;
@@ -402,20 +403,25 @@ void DlgJIO::onCalcCliecked(bool checked)
         if (ui->rbVincenty->isChecked()){
             VincentyResult vrs = vincentyInverse(lat1, lon1, lat, lon);
             distance = vrs.distance/1000; // m -> KM
-            azimuth = vrs.initialBearing;
-            azimuth2 = vrs.finalBearing;
+            azimuth = vrs.finalBearing;
+            if (azimuth>180){
+                azimuth2 = azimuth-180;
+            }else{
+                azimuth2 = azimuth+180;
+            }
         }
         if (ui->rbHaversine->isChecked()){
             distance = haversine(lat1, lon1, lat, lon);
             azimuth = calcBearing(lat1, lon1, lat, lon);
             azimuth2 = calcBearing(lat, lon, lat1, lon1);
         }
+        azbearings.append(azimuth);
         ui->twResult->setItem(i-1, AZEIcols::Name, new QTableWidgetItem(pos1 + " : " + pos));
         ui->twResult->setItem(i-1, AZEIcols::Distance, new QTableWidgetItem(QString::number(distance)));
         ui->twResult->setItem(i-1, AZEIcols::Azimuth1, new QTableWidgetItem(QString::number(azimuth, 'f', 1)));
         ui->twResult->setItem(i-1, AZEIcols::Azimuth2, new QTableWidgetItem(QString::number(azimuth2, 'f', 1)));
 
-        totalazimuth = totalazimuth + azimuth;
+        // totalazimuth = totalazimuth + azimuth;
         el1 = GeoTranslate::calcElevationAngle(altmsl1, altmsl, distance*1000);
         el2 = GeoTranslate::calcElevationAngle(altmsl, altmsl1, distance*1000);
         // qDebug() << " " << QString::number(altmsl1) << " - "  << QString::number(altmsl)
@@ -424,6 +430,7 @@ void DlgJIO::onCalcCliecked(bool checked)
 
         ui->twResult->setItem(i-1, AZEIcols::Elevation1, new QTableWidgetItem(QString::number(el1, 'f', 1)));
         ui->twResult->setItem(i-1, AZEIcols::Elevation2, new QTableWidgetItem(QString::number(el2, 'f', 1)));
+        // elbearings.append(el1);
         totalel = totalel + el1;
         if (showline){
             // if (m_dlgOSM){
@@ -433,10 +440,11 @@ void DlgJIO::onCalcCliecked(bool checked)
             // }
         }
     }
-    double azimuthDegree = totalazimuth/ui->twResult->rowCount();
-    qDebug() << "azimuthDegree:" << QString::number(azimuthDegree);
+    double azimuthDegree = averageBearing(azbearings);
+    qDebug() << " azimuthDegree:" << QString::number(azimuthDegree);
     ui->leAM7az->setText(QString::number(azimuthDegree, 'f', 1));
     // qDebug() << "totalel:" << QString::number(totalel);
+
     double elDegree = totalel/ui->twResult->rowCount();
     ui->leAM7el->setText(QString::number(elDegree, 'f', 1));
 
@@ -669,9 +677,9 @@ void DlgJIO::showContextMenu(const QPoint &pos)
 
 void DlgJIO::onDeviceCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
 {
+    Q_UNUSED(currentColumn)
     Q_UNUSED(previousRow)
     Q_UNUSED(previousColumn)
-    // qDebug() << "current cell:" << currentRow << "," << currentColumn;
     QTableWidgetItem *itm = ui->tableWidget->item(currentRow, GPScols::PositionName);
     if (itm){
         QString lable= itm->text();
@@ -713,7 +721,7 @@ void DlgJIO::onLoadFinished(bool ok)
                     //m_dlgGeo->addMarker(lat, lon, label);
                     m_dlgGeo->addRectangle(cm, QPointF(10.0, 20.0), Qt::yellow, label);
                     // polyLines
-                    m_dlgGeo->addPolyline(am7, cm);
+                    m_dlgGeo->addLinkline(am7, cm);
                     //draw Arrow line
                     azdeg = ui->twResult->item(row-1, AZEIcols::Azimuth2)->text().toDouble();
                     m_dlgGeo->addArrowLine(cm, azdeg, 100, QColor(rgb1));
@@ -834,6 +842,25 @@ void DlgJIO::onLocationReady(const IpLocation &location)
 {
     // qDebug() << "Coordinates:" << location.latitude << "," << location.longitude;
     mIpLocation = location;
+}
+
+double DlgJIO::averageBearing(const QList<double> &bearings)
+{
+    if (bearings.isEmpty()) return -1.0; // 或者 return NaN
+
+    double sumX = 0.0;
+    double sumY = 0.0;
+
+    for (double angle : bearings) {
+        sumX += qCos(qDegreesToRadians(angle));
+        sumY += qSin(qDegreesToRadians(angle));
+    }
+
+    double avgRad = qAtan2(sumY, sumX);
+    double avgDeg = qRadiansToDegrees(avgRad);
+    if (avgDeg < 0.0) avgDeg += 360.0;
+
+    return avgDeg;
 }
 
 void DlgJIO::getSelfIpLocation()

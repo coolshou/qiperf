@@ -103,6 +103,7 @@ private slots:
                          QString webusername, QString webpassword);
     void onLocationReady(const IpLocation& location);
 private:
+    double averageBearing(const QList<double>& bearings);
     void getSelfIpLocation();
     void onLoad(QString filename);
     bool onSave(QString filename);

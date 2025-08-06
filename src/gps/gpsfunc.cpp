@@ -167,7 +167,7 @@ VincentyResult vincentyInverse(double lat1, double lon1, double lat2, double lon
     double finalBearing = qAtan2(cosU1 * sinLambda, -sinU1 * cosU2 + cosU1 * sinU2 * cosLambda);
     finalBearing = qRadiansToDegrees(finalBearing);
     // 確保方位角在 0-360 度之間
-    finalBearing = fmod(finalBearing + 180.0, 360.0);
+    finalBearing = fmod(finalBearing + 360.0, 360.0);
 
     return {distance, initialBearing, finalBearing};
 }
