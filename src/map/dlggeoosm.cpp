@@ -33,6 +33,9 @@ DlgGeoOSM::DlgGeoOSM(QWidget *parent)
     auto osmLayer = new QGVLayerOSM();
     mMap->addItem(osmLayer);
 
+    //link line
+    mLinkLineLayer = new QGVLayer();
+    mMap->addItem(mLinkLineLayer);
     // Marker Layer;
     mItemsLayer = new QGVLayer();
     mMap->addItem(mItemsLayer);
@@ -56,6 +59,7 @@ DlgGeoOSM::DlgGeoOSM(QWidget *parent)
     connect(ui->pbClearMark, &QPushButton::clicked, this, &DlgGeoOSM::onClearMark);
     connect(ui->pbAddPolyline, &QPushButton::clicked, this, &DlgGeoOSM::onAddPolylines);
     connect(ui->pbAddArrowLine, &QPushButton::clicked, this, &DlgGeoOSM::onAddArrowLine);
+    connect(ui->cbShowLinkLine, &QCheckBox::clicked, this, &DlgGeoOSM::showLinkline);
 }
 
 DlgGeoOSM::~DlgGeoOSM()
@@ -102,17 +106,25 @@ void DlgGeoOSM::addMarker(double lat, double lon, QString label,
     item->setSelectable(true);
 }
 
-void DlgGeoOSM::addPolyline(QGV::GeoPos pos1, QGV::GeoPos pos2, QColor color, qreal linewidth)
+void DlgGeoOSM::addLinkline(QGV::GeoPos pos1, QGV::GeoPos pos2, QColor color, qreal linewidth)
 {
     QVector<QGV::GeoPos> linePoints{pos1, pos2};
     addPolylines(linePoints, color, linewidth);
+}
+
+void DlgGeoOSM::showLinkline(bool show)
+{
+    for (int i=0; i<mLinkLineLayer->countItems();i++){
+        QGVItem *itm = mLinkLineLayer->getItem(i);
+        itm->setVisible(show);
+    }
 }
 
 void DlgGeoOSM::addRectangle(QGV::GeoPos pos1, QPointF size, QColor color,
                              QString label)
 {
     auto base = mMap->getProjection()->geoToProj(pos1);
-    qDebug() << "addRectangle: base:" << base;
+    // qDebug() << "addRectangle: base:" << base;
     QGV::GeoRect pos = mMap->getProjection()->projToGeo({ base, base + QPointF(size.x(), size.y()) });
     // TODO: the Rectangle should consider size, and place the pos at center of Rectangle
     RectangleText *item = new RectangleText(label, pos, size, color, mMap);
@@ -151,6 +163,7 @@ void DlgGeoOSM::setItmHighlight(QString label)
 
         }
     }
+    qDebug() << "mPolysLayer:num:" << mPolysLayer->countItems();
     for(int i=0;i<mPolysLayer->countItems();i++)
     {
         QGVItem *itm = mPolysLayer->getItem(i);
@@ -204,10 +217,10 @@ void DlgGeoOSM::onAddPolylines(bool checked)
 {
     Q_UNUSED(checked)
     // test data
-    QVector<QGV::GeoPos> linePoints{
-                                    QGV::GeoPos{ 24.802636, 121.022431 },
-                                    QGV::GeoPos{ 24.804162, 121.027736 },
-                                    };
+    QGV::GeoPos pos1{ui->sbLat->value(), ui->sbLon->value()};
+    QGV::GeoPos pos2{ui->sbMarkLat->value(), ui->sbMarkLon->value()};
+
+    QVector<QGV::GeoPos> linePoints{pos1, pos2};
     addPolylines(linePoints, Qt::GlobalColor::red, 5);
 }
 
@@ -282,7 +295,7 @@ void DlgGeoOSM::createTrackingWidget()
 
 void DlgGeoOSM::addPolylines(const QVector<QGV::GeoPos> &linePts, QColor color, qreal linewidth)
 {
-    mPolysLayer->addItem(new Polyline(linePts, color, linewidth));
+    mLinkLineLayer->addItem(new Polyline(linePts, color, linewidth));
 }
 
 void DlgGeoOSM::onAddPosition(bool checked)

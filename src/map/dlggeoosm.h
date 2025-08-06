@@ -39,7 +39,7 @@ public:
     void load(double lat1, double lon1, double lat2, double lon2);
     void addMarker(double lat, double lon, QString label="lable",
                    Placemark::MarkColor color=Placemark::MarkColor::Yellow);
-    void addPolyline(QGV::GeoPos pos1, QGV::GeoPos pos2,
+    void addLinkline(QGV::GeoPos pos1, QGV::GeoPos pos2,
                      QColor color=Qt::GlobalColor::yellow, qreal linewidth=5);
     void addRectangle(QGV::GeoPos pos1, QPointF size=QPointF(10.0, 20.0),
                       QColor color=Qt::GlobalColor::yellow, QString label="");
@@ -60,6 +60,7 @@ protected slots:
     void onAddMark(bool checked);
     void onClearMark(bool checked);
     void onAddPolylines(bool checked);
+    void showLinkline(bool show);
     void onAddArrowLine(bool checked);
     void onMapStateChanged(QGV::MapState state);
     void onScaleChanged();
@@ -78,6 +79,7 @@ private:
 
     Ui::DlgGeoOSM *ui;
     QGVMap *mMap;
+    QGVLayer* mLinkLineLayer;
     QGVLayer* mItemsLayer;
     QGVLayer* mPolysLayer;
     QString m_tile;
