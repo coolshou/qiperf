@@ -7,6 +7,8 @@ QT += serialport
 CONFIG += c++17 console
 CONFIG -= app_bundle
 
+# following will disable c++ exceptions,
+QMAKE_CXXFLAGS += -fno-exceptions
 #following setting will overwrite qtcreater's setting
 #CONFIG += release
 #CONFIG += debug

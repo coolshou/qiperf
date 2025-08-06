@@ -420,31 +420,56 @@ int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host
 void QIperfd::startServer(int idx)
 {
     //start iperf server
-    try{
-        QThread *th = m_thserver.value(idx);
-        m_iperfwserver.value(idx)->setIperfLogPath(tmpfilepath +
-                                                   QDir::separator() +
-                                                   s_starttime);
-        th->start();
-    }catch (const std::exception &e) {
-        // Handle the exception and show an error message
-        debug(QString("startServer Exception Caught:%1").arg(e.what()));
+    QThread *th = m_thserver.value(idx);
+    if (!th) {
+        debug("startServer: QThread is null");
+        return;
     }
+    IperfWorker *worker = m_iperfwserver.value(idx);
+    if (!worker) {
+        debug("startServer: IperfWorker is null");
+        return;
+    }
+    worker->setIperfLogPath(tmpfilepath + QDir::separator() + s_starttime);
+    th->start();
+    // try{
+    //     QThread *th = m_thserver.value(idx);
+    //     m_iperfwserver.value(idx)->setIperfLogPath(tmpfilepath +
+    //                                                QDir::separator() +
+    //                                                s_starttime);
+    //     th->start();
+    // }catch (const std::exception &e) {
+    //     // Handle the exception and show an error message
+    //     debug(QString("startServer Exception Caught:%1").arg(e.what()));
+    // }
 }
 
 void QIperfd::start(int idx)
 {
     //start iperf client
-    try{
-        QThread *th = m_threads.value(idx);
-        m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath +
-                                                   QDir::separator() +
-                                                   s_starttime);
-        th->start();
-    }catch (const std::exception &e) {
-        // Handle the exception and show an error message
-        debug(QString("start client Exception Caught: %1").arg(e.what()));
+    QThread *th = m_threads.value(idx);
+    if (!th) {
+        debug("start client: QThread is null");
+        return;
     }
+    IperfWorker *worker = m_iperfworkers.value(idx);
+    if (!worker) {
+        debug("start client: IperfWorker is null");
+        return;
+    }
+    worker->setIperfLogPath(tmpfilepath + QDir::separator() + s_starttime);
+    th->start();
+
+    // try{
+    //     QThread *th = m_threads.value(idx);
+    //     m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath +
+    //                                                QDir::separator() +
+    //                                                s_starttime);
+    //     th->start();
+    // }catch (const std::exception &e) {
+    //     // Handle the exception and show an error message
+    //     debug(QString("start client Exception Caught: %1").arg(e.what()));
+    // }
 }
 QString QIperfd::longLongListToString(const QList<long long int>& list, const QString& separator) {
     QStringList stringList;
@@ -498,64 +523,110 @@ void QIperfd::stopAll()
 void QIperfd::clear()
 {
     //clear all m_iperfwserver/m_iperfworkers & m_threads
-    try{
-        if (!m_iperfwserver.isEmpty()){
-            emit StopServer();
-            for (QMap<qint64, IperfWorker*>::iterator it = m_iperfwserver.begin(); it != m_iperfwserver.end();) {
-                // if (it.value()->isRunning()){
-                //     it.value()->setStop(); // WARN: QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
-                // }
-                debug("delete iperf server worker", 3);
-                delete it.value();
-                it = m_iperfwserver.erase(it);
-            }
+    if (!m_iperfwserver.isEmpty()) {
+        emit StopServer();
+        auto it = m_iperfwserver.begin();
+        while (it != m_iperfwserver.end()) {
+            debug("delete iperf server worker", 3);
+            delete it.value(); // Ensure value is valid
+            it = m_iperfwserver.erase(it);
         }
-    } catch (const std::exception &e) {
-        debug(QString("iperf server worker error: %1").arg(e.what()), 2);
     }
-    try{
-        if (!m_thserver.isEmpty()){
-            for (QMap<qint64, QThread*>::iterator it = m_thserver.begin(); it != m_thserver.end();) {
+
+    if (!m_thserver.isEmpty()) {
+        auto it = m_thserver.begin();
+        while (it != m_thserver.end()) {
+            if (it.value()) {
                 it.value()->quit();
                 debug("wait server thread stop", 3);
                 it.value()->wait(5000);
-                debug("wait server thread stoped", 3);
-                // delete it.value();
-                it = m_thserver.erase(it);
+                debug("wait server thread stopped", 3);
             }
+            it = m_thserver.erase(it);
         }
-    } catch (const std::exception &e) {
-        debug(QString("iperf server thread error: %1").arg(e.what()), 2);
     }
-    try{
-        if (!m_iperfworkers.isEmpty()){
-            emit StopClient();
-            for (QMap<qint64, IperfWorker*>::iterator it = m_iperfworkers.begin(); it != m_iperfworkers.end();) {
-                // if (it.value()->isRunning()){
-                //     it.value()->setStop();WARN: QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
-                // }
-                debug("delete iperf client worker", 3);
-                delete it.value();
-                it = m_iperfworkers.erase(it);
-            }
+
+    if (!m_iperfworkers.isEmpty()) {
+        emit StopClient();
+        auto it = m_iperfworkers.begin();
+        while (it != m_iperfworkers.end()) {
+            debug("delete iperf client worker", 3);
+            delete it.value();
+            it = m_iperfworkers.erase(it);
         }
-    } catch (const std::exception &e) {
-        debug(QString("iperf client worker error: %1").arg(e.what()), 2);
     }
-    try{
-        if (!m_threads.isEmpty()){
-            for (QMap<qint64, QThread*>::iterator it = m_threads.begin(); it != m_threads.end();) {
+
+    if (!m_threads.isEmpty()) {
+        auto it = m_threads.begin();
+        while (it != m_threads.end()) {
+            if (it.value()) {
                 it.value()->quit();
-                debug(QString("wait client thread stop %1").arg(QString::number(it.key())), 3);
+                debug(QString("wait client thread stop %1").arg(it.key()), 3);
                 it.value()->wait(8000);
-                debug("wait client thread stoped", 3);
-                // delete it.value();
-                it = m_threads.erase(it);
+                debug("wait client thread stopped", 3);
             }
+            it = m_threads.erase(it);
         }
-    } catch (const std::exception &e) {
-        debug(QString("iperf client thread error: %1").arg(e.what()), 2);
     }
+
+    // try{
+    //     if (!m_iperfwserver.isEmpty()){
+    //         emit StopServer();
+    //         for (QMap<qint64, IperfWorker*>::iterator it = m_iperfwserver.begin(); it != m_iperfwserver.end();) {
+    //             // if (it.value()->isRunning()){
+    //             //     it.value()->setStop(); // WARN: QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
+    //             // }
+    //             debug("delete iperf server worker", 3);
+    //             delete it.value();
+    //             it = m_iperfwserver.erase(it);
+    //         }
+    //     }
+    // } catch (const std::exception &e) {
+    //     debug(QString("iperf server worker error: %1").arg(e.what()), 2);
+    // }
+    // try{
+    //     if (!m_thserver.isEmpty()){
+    //         for (QMap<qint64, QThread*>::iterator it = m_thserver.begin(); it != m_thserver.end();) {
+    //             it.value()->quit();
+    //             debug("wait server thread stop", 3);
+    //             it.value()->wait(5000);
+    //             debug("wait server thread stoped", 3);
+    //             // delete it.value();
+    //             it = m_thserver.erase(it);
+    //         }
+    //     }
+    // } catch (const std::exception &e) {
+    //     debug(QString("iperf server thread error: %1").arg(e.what()), 2);
+    // }
+    // try{
+    //     if (!m_iperfworkers.isEmpty()){
+    //         emit StopClient();
+    //         for (QMap<qint64, IperfWorker*>::iterator it = m_iperfworkers.begin(); it != m_iperfworkers.end();) {
+    //             // if (it.value()->isRunning()){
+    //             //     it.value()->setStop();WARN: QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
+    //             // }
+    //             debug("delete iperf client worker", 3);
+    //             delete it.value();
+    //             it = m_iperfworkers.erase(it);
+    //         }
+    //     }
+    // } catch (const std::exception &e) {
+    //     debug(QString("iperf client worker error: %1").arg(e.what()), 2);
+    // }
+    // try{
+    //     if (!m_threads.isEmpty()){
+    //         for (QMap<qint64, QThread*>::iterator it = m_threads.begin(); it != m_threads.end();) {
+    //             it.value()->quit();
+    //             debug(QString("wait client thread stop %1").arg(QString::number(it.key())), 3);
+    //             it.value()->wait(8000);
+    //             debug("wait client thread stoped", 3);
+    //             // delete it.value();
+    //             it = m_threads.erase(it);
+    //         }
+    //     }
+    // } catch (const std::exception &e) {
+    //     debug(QString("iperf client thread error: %1").arg(e.what()), 2);
+    // }
     debug("iperfserver:" + QString::number(m_iperfwserver.count())
           + " threads:" + QString::number(m_thserver.count())
           + " iperfclient:" + QString::number(m_iperfworkers.count())
@@ -1358,52 +1429,97 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         if (d.length()==7){
             long long port = 0;
             SSHTask *task = nullptr;
-            try{
-                QString idx = d[0];
-                QString sshTarget = d[1];
-                QString sshPort = d[2];
-                QString key = sshTarget + ":" + sshPort;
-                QString username = d[3];
-                QString password = d[4];
-                QString privateKeyFile = d[5];
-                int timeout = d[6].toInt();
-                debug("idx:" + idx + " sshTarget:" + sshTarget
+            QString idx = d[0];
+            QString sshTarget = d[1];
+            QString sshPort = d[2];
+            QString key = sshTarget + ":" + sshPort;
+            QString username = d[3];
+            QString password = d[4];
+            QString privateKeyFile = d[5];
+            int timeout = d[6].toInt();
+
+            debug("idx:" + idx + " sshTarget:" + sshTarget
                       + " sshPort:" + sshPort
                       + " username:" + username
                       + " password:" + password
                       + " privateKeyFile:" + privateKeyFile
                       + " timeout:" + QString::number(timeout), 5);
-                //TODO: m_sshtasks's key format?
-                if (!m_sshtasks.contains(key)){ // not exist
-                    port =  QIPERF_SSHPORT + m_sshtasks.count();
-                    task = new SSHTask(idx, sshTarget, sshPort,
-                                       "any", QString::number(port),
-                                       VirtualDeviceTcp::Mode::BINARY,
-                                       username, password, privateKeyFile, timeout);
-                    connect(task, &SSHTask::finished, this, &QIperfd::onSSHTaskFinished);
-                    connect(task, &SSHTask::started,  this, &QIperfd::onSSHTaskStarted);
-                    m_sshtasks.insert(key, task);
-                    QTimer::singleShot(0, task, SLOT(init())); // start it
-                } else {
-                    task = m_sshtasks.value(key);
-                    quint16 localport = task->getLocalPort();
-                    if (task->isRunning()){
-                        debug(sshTarget + " exist!! Using port:" + QString::number(localport), 4);
-                        // TODO: update setting?
-                        // task->setConfig(QString::number(localport), baudrate,
-                        //                 databits, parity, stopbits, flowcontrol);
-                        task->close();
-                        QTimer::singleShot(0, task, SLOT(init())); // start it
-                        onSSHTaskStarted(idx, localport);
-                    }else{
-                        QString emsg = "SSHTask is not running: " + task->getLastError();
-                        debug(emsg, 2);
-                        onSSHTaskError(idx, emsg);
-                    }
+
+            if (!m_sshtasks.contains(key)) {
+                port = QIPERF_SSHPORT + m_sshtasks.count();
+                auto *task = new SSHTask(idx, sshTarget, sshPort,
+                                         "any", QString::number(port),
+                                         VirtualDeviceTcp::Mode::BINARY,
+                                         username, password, privateKeyFile, timeout);
+                connect(task, &SSHTask::finished, this, &QIperfd::onSSHTaskFinished);
+                connect(task, &SSHTask::started,  this, &QIperfd::onSSHTaskStarted);
+                m_sshtasks.insert(key, task);
+                QTimer::singleShot(0, task, SLOT(init()));
+            } else {
+                auto *task = m_sshtasks.value(key);
+                if (!task) {
+                    debug("SSHTask lookup failed: task is null", 2);
+                    return;
                 }
-            } catch (const std::exception &e) {
-                debug(QString("SSHTask error: %1").arg(e.what()), 2);
+                quint16 localport = task->getLocalPort();
+                if (task->isRunning()) {
+                    debug(sshTarget + " exist!! Using port:" + QString::number(localport), 4);
+                    task->close(); // safe to restart
+                    QTimer::singleShot(0, task, SLOT(init()));
+                    onSSHTaskStarted(idx, localport);
+                } else {
+                    QString emsg = "SSHTask is not running: " + task->getLastError();
+                    debug(emsg, 2);
+                    onSSHTaskError(idx, emsg);
+                }
             }
+
+            // try{
+            //     QString idx = d[0];
+            //     QString sshTarget = d[1];
+            //     QString sshPort = d[2];
+            //     QString key = sshTarget + ":" + sshPort;
+            //     QString username = d[3];
+            //     QString password = d[4];
+            //     QString privateKeyFile = d[5];
+            //     int timeout = d[6].toInt();
+            //     debug("idx:" + idx + " sshTarget:" + sshTarget
+            //           + " sshPort:" + sshPort
+            //           + " username:" + username
+            //           + " password:" + password
+            //           + " privateKeyFile:" + privateKeyFile
+            //           + " timeout:" + QString::number(timeout), 5);
+            //     //TODO: m_sshtasks's key format?
+            //     if (!m_sshtasks.contains(key)){ // not exist
+            //         port =  QIPERF_SSHPORT + m_sshtasks.count();
+            //         task = new SSHTask(idx, sshTarget, sshPort,
+            //                            "any", QString::number(port),
+            //                            VirtualDeviceTcp::Mode::BINARY,
+            //                            username, password, privateKeyFile, timeout);
+            //         connect(task, &SSHTask::finished, this, &QIperfd::onSSHTaskFinished);
+            //         connect(task, &SSHTask::started,  this, &QIperfd::onSSHTaskStarted);
+            //         m_sshtasks.insert(key, task);
+            //         QTimer::singleShot(0, task, SLOT(init())); // start it
+            //     } else {
+            //         task = m_sshtasks.value(key);
+            //         quint16 localport = task->getLocalPort();
+            //         if (task->isRunning()){
+            //             debug(sshTarget + " exist!! Using port:" + QString::number(localport), 4);
+            //             // TODO: update setting?
+            //             // task->setConfig(QString::number(localport), baudrate,
+            //             //                 databits, parity, stopbits, flowcontrol);
+            //             task->close();
+            //             QTimer::singleShot(0, task, SLOT(init())); // start it
+            //             onSSHTaskStarted(idx, localport);
+            //         }else{
+            //             QString emsg = "SSHTask is not running: " + task->getLastError();
+            //             debug(emsg, 2);
+            //             onSSHTaskError(idx, emsg);
+            //         }
+            //     }
+            // } catch (const std::exception &e) {
+            //     debug(QString("SSHTask error: %1").arg(e.what()), 2);
+            // }
         }else{
             debug(" Wrong format of create ssh: " + msg, 2);
             // onSSHTaskError(idx, QString("Wrong format of create ssh: %1").arg(msg));

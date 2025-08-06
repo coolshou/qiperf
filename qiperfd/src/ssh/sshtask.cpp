@@ -72,7 +72,7 @@ QString SSHTask::getLastError()
 
 void SSHTask::init()
 {
-    try{
+    // try{
         SshConnectionParameters para = SshConnectionParameters();
         para.setHost(_sshTarget);
         para.setPort(_sshPort.toInt());
@@ -89,17 +89,17 @@ void SSHTask::init()
 
         // if (!para.host().isEmpty())
         {
-            try{
+            // try{
                 _sshDeviceShell = new SSHDeviceShell(para, this);
-            } catch (const std::exception &e) {
-                qDebug() << "SSHDeviceShell error: " << e.what();
-            }
-            try{
+            // } catch (const std::exception &e) {
+            //     qDebug() << "SSHDeviceShell error: " << e.what();
+            // }
+            // try{
                 // qDebug() << QString("new VirtualDeviceTcp: %1,%2,%3").arg(m_idx, _localIp, _localPort);
                 _DeviceTcp = new VirtualDeviceTcp(m_idx, _localIp, _localPort, _mode, this);
-            } catch (const std::exception &e) {
-                qDebug() << "VirtualDeviceTcp error: " << e.what();
-            }
+            // } catch (const std::exception &e) {
+            //     qDebug() << "VirtualDeviceTcp error: " << e.what();
+            // }
 
             connect(_sshDeviceShell, &VirtualDevice::finished, this, &SSHTask::slotFinished);
             connect(_DeviceTcp, &VirtualDevice::finished, this, &SSHTask::slotFinished);
@@ -111,9 +111,9 @@ void SSHTask::init()
             QTimer::singleShot(0, _sshDeviceShell, SLOT(init()));
             QTimer::singleShot(0, _DeviceTcp, SLOT(init()));
         }
-    } catch (const std::exception &e) {
-        qDebug() << "SshConnectionParameters " << e.what();
-    }
+    // } catch (const std::exception &e) {
+    //     qDebug() << "SshConnectionParameters " << e.what();
+    // }
 }
 
 void SSHTask::close()

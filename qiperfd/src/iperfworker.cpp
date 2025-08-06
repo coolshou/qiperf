@@ -132,63 +132,118 @@ void IperfWorker::work()
     QJsonDocument doc(m_restartrules);
     QString jsonString = doc.toJson(QJsonDocument::Indented);
     debug("restartrule: " + jsonString, 5);
+    m_stop = false;
 
-    try{
-        m_stop = false;
-        //create iperf procress
-        m_iperf =  new QProcess(m_parent);
-        m_iperf->setProgram(m_cmd);
-        debug("IperfWorker::work: " + m_cmd + " args:" + m_arguments.join(" "), 5);
-        m_iperf->setArguments(m_arguments);
-        connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
-        connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
-    //    connect(m_iperf, &QProcess::readyRead, this, &IperfWorker::readyReadStdOut);
-        connect(m_iperf, &QProcess::started, this, &IperfWorker::onStarted);
-        connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
-
-        if (m_delaystart>0){
-            debug("m_delaystart: " + QString::number(m_delaystart));
-            // emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
-            QDateTime waitStartTime = QDateTime::currentDateTime();
-            QDateTime waitEndTime = QDateTime::currentDateTime();
-            int iWait = waitStartTime.secsTo(waitEndTime);
-            while (iWait < m_delaystart){
-                QCoreApplication::processEvents(QEventLoop::AllEvents);
-                QThread::msleep(100);
-                waitEndTime = QDateTime::currentDateTime();
-                iWait = waitStartTime.secsTo(waitEndTime);
-            }
-        }
-
-        m_iperf->start();
-        if (m_iperf->waitForStarted()){
-            if (m_selfdestruction->isActive()){
-                emit stopSelfDestructor();
-            }
-            emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
-            // emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
-            QString msg = QString("start iperf %1(pid:%2)").arg(m_servermode?"server":"client",
-                                                              QString::number(m_iperf->processId()));
-            debug(msg, 4);
-            // emit log(m_idx, "iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "));
-            debug("iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "), 4);
-            while (!m_stop){
-                //procress iperf output
-                QThread::msleep(500);
-                QCoreApplication::processEvents(QEventLoop::AllEvents); // must have
-            }
-        }else{
-            // emit log(m_idx, "iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "));
-            debug("iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "), 4);
-            // emit log(m_idx, m_iperf->readAllStandardError());
-            debug(m_iperf->readAllStandardError(), 4);
-        }
-    }catch (const std::exception &e) {
-        // Handle the exception and show an error message
-        debug("IperfWorker::work Exception Caught" + QString(e.what()));
-    }catch (...){
-        debug("IperfWorker::work Unknown ERROR");
+    // Create iperf process
+    m_iperf = new QProcess(m_parent);
+    if (!m_iperf) {
+        debug("Failed to allocate QProcess", 1);
+        return;
     }
+
+    m_iperf->setProgram(m_cmd);
+    debug("IperfWorker::work: " + m_cmd + " args:" + m_arguments.join(" "), 5);
+    m_iperf->setArguments(m_arguments);
+
+    connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
+    connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
+    // connect(m_iperf, &QProcess::readyRead, this, &IperfWorker::readyReadStdOut);
+    connect(m_iperf, &QProcess::started, this, &IperfWorker::onStarted);
+    connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
+
+    // Handle optional delayed start
+    if (m_delaystart > 0) {
+        debug("m_delaystart: " + QString::number(m_delaystart));
+        QDateTime waitStartTime = QDateTime::currentDateTime();
+        int iWait = 0;
+        while (iWait < m_delaystart) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+            QThread::msleep(100);
+            iWait = waitStartTime.secsTo(QDateTime::currentDateTime());
+        }
+    }
+
+    // Launch iperf
+    m_iperf->start();
+
+    if (m_iperf->waitForStarted()) {
+        if (m_selfdestruction && m_selfdestruction->isActive()) {
+            emit stopSelfDestructor();
+        }
+
+        emit started(m_refrow, m_servermode, getBindKey());
+
+        QString msg = QString("start iperf %1(pid:%2)")
+                          .arg(m_servermode ? "server" : "client",
+                               QString::number(m_iperf->processId()));
+        debug(msg, 4);
+        debug("iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "), 4);
+
+        while (!m_stop) {
+            QThread::msleep(500);
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+        }
+    } else {
+        debug("iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "), 4);
+        debug(m_iperf->readAllStandardError(), 4);
+    }
+
+    // try{
+    //     m_stop = false;
+    //     //create iperf procress
+    //     m_iperf =  new QProcess(m_parent);
+    //     m_iperf->setProgram(m_cmd);
+    //     debug("IperfWorker::work: " + m_cmd + " args:" + m_arguments.join(" "), 5);
+    //     m_iperf->setArguments(m_arguments);
+    //     connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
+    //     connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
+    // //    connect(m_iperf, &QProcess::readyRead, this, &IperfWorker::readyReadStdOut);
+    //     connect(m_iperf, &QProcess::started, this, &IperfWorker::onStarted);
+    //     connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
+
+    //     if (m_delaystart>0){
+    //         debug("m_delaystart: " + QString::number(m_delaystart));
+    //         // emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
+    //         QDateTime waitStartTime = QDateTime::currentDateTime();
+    //         QDateTime waitEndTime = QDateTime::currentDateTime();
+    //         int iWait = waitStartTime.secsTo(waitEndTime);
+    //         while (iWait < m_delaystart){
+    //             QCoreApplication::processEvents(QEventLoop::AllEvents);
+    //             QThread::msleep(100);
+    //             waitEndTime = QDateTime::currentDateTime();
+    //             iWait = waitStartTime.secsTo(waitEndTime);
+    //         }
+    //     }
+
+    //     m_iperf->start();
+    //     if (m_iperf->waitForStarted()){
+    //         if (m_selfdestruction->isActive()){
+    //             emit stopSelfDestructor();
+    //         }
+    //         emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
+    //         // emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
+    //         QString msg = QString("start iperf %1(pid:%2)").arg(m_servermode?"server":"client",
+    //                                                           QString::number(m_iperf->processId()));
+    //         debug(msg, 4);
+    //         // emit log(m_idx, "iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "));
+    //         debug("iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "), 4);
+    //         while (!m_stop){
+    //             //procress iperf output
+    //             QThread::msleep(500);
+    //             QCoreApplication::processEvents(QEventLoop::AllEvents); // must have
+    //         }
+    //     }else{
+    //         // emit log(m_idx, "iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "));
+    //         debug("iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "), 4);
+    //         // emit log(m_idx, m_iperf->readAllStandardError());
+    //         debug(m_iperf->readAllStandardError(), 4);
+    //     }
+    // }catch (const std::exception &e) {
+    //     // Handle the exception and show an error message
+    //     debug("IperfWorker::work Exception Caught" + QString(e.what()));
+    // }catch (...){
+    //     debug("IperfWorker::work Unknown ERROR");
+    // }
 }
 
 void IperfWorker::onWorkerRestart()
