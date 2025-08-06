@@ -1281,7 +1281,7 @@ void QIperfC::onDoNtpSync(QString target)
             }
         }
     }else{
-        qDebug() << "connect to ws: " + s + " Fail";
+        qDebug() << "[onDoNtpSync]connect to ws: " + s + " Fail";
     }
 }
 
