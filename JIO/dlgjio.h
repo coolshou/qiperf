@@ -49,7 +49,9 @@ public:
     Q_ENUM(AZEIcols)
     enum AIPcols{
         Azimuth=0,
-        Elevation=1
+        Elevation=1,
+        Azdiff=2,
+        BeamDirectionID=3
     };
     Q_ENUM(AIPcols)
     explicit DlgJIO(QSettings *cfg, QWidget *parent = nullptr);

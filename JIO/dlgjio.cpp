@@ -427,32 +427,18 @@ void DlgJIO::onCalcCliecked(bool checked)
         // qDebug() << " " << QString::number(altmsl1) << " - "  << QString::number(altmsl)
         //          << " distance:" << QString::number(distance)
         //          << " el1:" << QString::number(el1) << " el2:" << QString::number(el2);
-
         ui->twResult->setItem(i-1, AZEIcols::Elevation1, new QTableWidgetItem(QString::number(el1, 'f', 1)));
         ui->twResult->setItem(i-1, AZEIcols::Elevation2, new QTableWidgetItem(QString::number(el2, 'f', 1)));
         // elbearings.append(el1);
         totalel = totalel + el1;
-        if (showline){
-            // if (m_dlgOSM){
-            //     m_dlgOSM->addDistLine(QString::number(lat1), QString::number(lon1),
-            //                           QString::number(lat), QString::number(lon),
-            //                           QString::number(distance));
-            // }
-        }
     }
     double azimuthDegree = averageBearing(azbearings);
     qDebug() << " azimuthDegree:" << QString::number(azimuthDegree);
     ui->leAM7az->setText(QString::number(azimuthDegree, 'f', 1));
     // qDebug() << "totalel:" << QString::number(totalel);
-
     double elDegree = totalel/ui->twResult->rowCount();
     ui->leAM7el->setText(QString::number(elDegree, 'f', 1));
 
-
-    // double refAz = azimuthDegree +180;
-    // if (refAz>=360){
-    //     refAz = refAz - 360;
-    // }
     //group CM7 by Azimuth2
     QColor lColor = QColor(144, 238, 144); //light green
     QColor rColor = QColor(173, 216, 230); //light blue
@@ -483,9 +469,10 @@ void DlgJIO::onCalcCliecked(bool checked)
             }
         }
     }
-    //TODO: AM7 AIP1 Az, El
+    //AM7 AIP1 Az, TODO El
     QList<double> aipRs;
     double aip1az=0;
+    double aip1azdiff=0;
     if (cm7rs.length()>1){
         for(auto azitm: cm7rs){
             aipRs.append(azitm->text().toDouble());
@@ -496,10 +483,11 @@ void DlgJIO::onCalcCliecked(bool checked)
     }else {
         qDebug() << "No AIP1 AZ value";
     }
-
+    aip1azdiff = aip1az-azimuthDegree;
     QList<double> aipLs;
-    //TODO: AM7 AIP2 Az, El
+    //AM7 AIP2 Az,TODO El
     double aip2az=0;
+    double aip2azdiff=0;
     if (cm7ls.length()>1){
         for(auto azitm: cm7ls){
             aipLs.append(azitm->text().toDouble());
@@ -510,18 +498,17 @@ void DlgJIO::onCalcCliecked(bool checked)
     }else {
         qDebug() << "No AIP2 AZ value";
     }
+    aip2azdiff = azimuthDegree-aip2az;
     ui->twAIP->setItem(0, AIPcols::Azimuth,
                        new QTableWidgetItem(QString::number(aip1az)));
+    //TODO AIP1 el
+    ui->twAIP->setItem(0, AIPcols::Azdiff,
+                       new QTableWidgetItem(QString::number(aip1azdiff)));
     ui->twAIP->setItem(1, AIPcols::Azimuth,
                        new QTableWidgetItem(QString::number(aip2az)));
-
-    if (showline){
-        // if (m_dlgOSM){
-        //     m_dlgOSM->addAzimuthIndicator(QString::number(lat1), QString::number(lon1),
-        //                                   QString::number(azimuthDegree), QString::number(200));
-        // }
-    }
-
+    //TODO AIP2 el
+    ui->twAIP->setItem(1, AIPcols::Azdiff,
+                       new QTableWidgetItem(QString::number(aip2azdiff)));
 }
 
 void DlgJIO::onSet(bool checked)

@@ -419,6 +419,16 @@
                 <string>Elevation(°)</string>
                </property>
               </column>
+              <column>
+               <property name="text">
+                <string>Azdiff</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>BeamDirectionID</string>
+               </property>
+              </column>
              </widget>
             </item>
            </layout>

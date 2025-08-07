@@ -280,7 +280,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabCyntec">
       <attribute name="icon">
@@ -299,60 +299,8 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0" columnstretch="0,0,0,0,0,0">
-          <item row="0" column="2" colspan="2">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>BeamTableID:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="CyntecElementMap">
-            <item>
-             <property name="text">
-              <string>0</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>8x8</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>8x4</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>8x2</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>4x4</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Element Map:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="4" colspan="2">
-           <widget class="QComboBox" name="CyntecBeamTableID"/>
-          </item>
-          <item row="2" column="2" colspan="4">
+         <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0,0" columnstretch="0,0,0,0,0,0,0,0">
+          <item row="3" column="2" colspan="6">
            <widget class="QWidget" name="widget_2" native="true">
             <layout class="QGridLayout" name="gridLayout_3">
              <item row="0" column="0">
@@ -471,17 +419,76 @@
             </layout>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_7">
+          <item row="2" column="3">
+           <widget class="QDoubleSpinBox" name="CyntecAZ">
+            <property name="minimum">
+             <double>-90.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>90.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="4">
+           <widget class="QLabel" name="label_14">
             <property name="text">
-             <string>BeamFactorID:</string>
+             <string>EL:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
-          <item row="2" column="0" rowspan="3" colspan="2">
+          <item row="1" column="1">
+           <widget class="QComboBox" name="CyntecElementMap">
+            <item>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>8x8</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>8x4</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>8x2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4x4</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>AZ:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2" colspan="2">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>BeamTableID:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" rowspan="3" colspan="2">
            <widget class="QWidget" name="widget_3" native="true">
             <property name="minimumSize">
              <size>
@@ -542,40 +549,10 @@
              <item row="1" column="1">
               <widget class="QDoubleSpinBox" name="CyntecAzimuthBW"/>
              </item>
-             <item row="3" column="0">
-              <widget class="QPushButton" name="pbCyntecBeamTable">
-               <property name="text">
-                <string>BeamTable</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </item>
-          <item row="1" column="4">
-           <widget class="QLabel" name="label_14">
-            <property name="text">
-             <string>EL:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QDoubleSpinBox" name="CyntecAZ">
-            <property name="minimum">
-             <double>-90.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>90.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="CyntecBeamFactorID"/>
-          </item>
-          <item row="1" column="5">
+          <item row="2" column="5">
            <widget class="QDoubleSpinBox" name="CyntecEL">
             <property name="minimum">
              <double>-90.000000000000000</double>
@@ -585,13 +562,46 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="label_10">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_7">
             <property name="text">
-             <string>AZ:</string>
+             <string>BeamFactorID:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Element Map:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="CyntecBeamFactorID"/>
+          </item>
+          <item row="1" column="4" colspan="2">
+           <widget class="QComboBox" name="CyntecBeamTableID"/>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string>BeamType:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4" colspan="2">
+           <widget class="QComboBox" name="CyntecBeamType"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QPushButton" name="pbCyntecBeamTable">
+            <property name="text">
+             <string>BeamTable</string>
             </property>
            </widget>
           </item>
