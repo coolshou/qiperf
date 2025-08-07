@@ -49,6 +49,7 @@ public:
                       double arrowAngleDeg = 30.0);
     void clearMarker();
     void clearPolyLines();
+    void clearLinkLines();
     void clearAllPlot();
     QPixmap createQGVImage() const;
 

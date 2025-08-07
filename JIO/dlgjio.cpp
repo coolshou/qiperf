@@ -449,10 +449,10 @@ void DlgJIO::onCalcCliecked(bool checked)
     ui->leAM7el->setText(QString::number(elDegree, 'f', 1));
 
 
-    double refAz = azimuthDegree +180;
-    if (refAz>=360){
-        refAz = refAz - 360;
-    }
+    // double refAz = azimuthDegree +180;
+    // if (refAz>=360){
+    //     refAz = refAz - 360;
+    // }
     //group CM7 by Azimuth2
     QColor lColor = QColor(144, 238, 144); //light green
     QColor rColor = QColor(173, 216, 230); //light blue
@@ -462,9 +462,9 @@ void DlgJIO::onCalcCliecked(bool checked)
     QList<QTableWidgetItem*> cm7rs;
     QList<QTableWidgetItem*> cm7ls;
     for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
-        QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::Azimuth2);
+        QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::Azimuth1);
         if (itm){
-            cmaz = itm->text().toDouble() + 180;
+            cmaz = itm->text().toDouble();// + 180;
             relative = fmod((cmaz - azimuthDegree + 360), 360);
             // qDebug() << "cmaz:" << cmaz << "  relative:" << relative;
             if (relative > 0 && relative < 90){
@@ -484,19 +484,36 @@ void DlgJIO::onCalcCliecked(bool checked)
         }
     }
     //TODO: AM7 AIP1 Az, El
+    QList<double> aipRs;
     double aip1az=0;
     if (cm7rs.length()>1){
         for(auto azitm: cm7rs){
-            aip1az = aip1az + azitm->text().toDouble();
+            aipRs.append(azitm->text().toDouble());
         }
-        aip1az = aip1az/cm7rs.length();
+        aip1az = averageBearing(aipRs);
     }else if (cm7rs.length()==1){
         aip1az = cm7rs.value(0)->text().toDouble();
     }else {
         qDebug() << "No AIP1 AZ value";
     }
 
+    QList<double> aipLs;
     //TODO: AM7 AIP2 Az, El
+    double aip2az=0;
+    if (cm7ls.length()>1){
+        for(auto azitm: cm7ls){
+            aipLs.append(azitm->text().toDouble());
+        }
+        aip2az = averageBearing(aipLs);
+    }else if (cm7ls.length()==1){
+        aip2az = cm7ls.value(0)->text().toDouble();
+    }else {
+        qDebug() << "No AIP2 AZ value";
+    }
+    ui->twAIP->setItem(0, AIPcols::Azimuth,
+                       new QTableWidgetItem(QString::number(aip1az)));
+    ui->twAIP->setItem(1, AIPcols::Azimuth,
+                       new QTableWidgetItem(QString::number(aip2az)));
 
     if (showline){
         // if (m_dlgOSM){
@@ -593,12 +610,6 @@ void DlgJIO::onShowGeo(bool checked)
     Q_UNUSED(checked)
     QString tile = getTile();
 
-    // if (ui->tableWidget->rowCount()<1){
-    //     QMessageBox::information(this, "Info",
-    //                              "Require at last one GPS locaton",
-    //                              QMessageBox::Ok);
-    //     return;
-    // }
     if (ui->tableWidget->rowCount()>1){
         onCalcCliecked(true);
     }
@@ -698,9 +709,10 @@ void DlgJIO::onLoadFinished(bool ok)
             double lon;
             double azdeg;
             QRgb rgb1 = 0xFFDC7000;
+            QRgb rgbaz = 0xFF6CBCF1;
             QGV::GeoPos am7;
             QGV::GeoPos cm;
-            // marker
+            // marker & phy arrow line
             for(int row=0;row<ui->tableWidget->rowCount();row++){
                 label = ui->tableWidget->item(row, GPScols::PositionName)->text();
                 lat = ui->tableWidget->item(row, GPScols::Latitude)->text().toDouble();
@@ -725,6 +737,13 @@ void DlgJIO::onLoadFinished(bool ok)
                     //draw Arrow line
                     azdeg = ui->twResult->item(row-1, AZEIcols::Azimuth2)->text().toDouble();
                     m_dlgGeo->addArrowLine(cm, azdeg, 100, QColor(rgb1));
+                }
+            }
+            //final signal Azimuth
+            if (ui->twAIP->rowCount()>0){
+                for(int row=0;row<ui->twAIP->rowCount();row++){
+                    azdeg = ui->twAIP->item(row, AIPcols::Azimuth)->text().toDouble();
+                    m_dlgGeo->addArrowLine(am7, azdeg, 200, QColor(rgbaz));
                 }
             }
         }

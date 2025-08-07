@@ -145,10 +145,16 @@ void DlgGeoOSM::clearPolyLines()
     mPolysLayer->deleteItems();
 }
 
+void DlgGeoOSM::clearLinkLines()
+{
+    mLinkLineLayer->deleteItems();
+}
+
 void DlgGeoOSM::clearAllPlot()
 {
     clearMarker();
     clearPolyLines();
+    clearLinkLines();
 }
 
 void DlgGeoOSM::setItmHighlight(QString label)
