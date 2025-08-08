@@ -8,7 +8,8 @@ CONFIG += c++17 console
 CONFIG -= app_bundle
 
 # following will disable c++ exceptions,
-QMAKE_CXXFLAGS += -fno-exceptions
+#QMAKE_CXXFLAGS += -fno-exceptions
+
 #following setting will overwrite qtcreater's setting
 #CONFIG += release
 #CONFIG += debug
@@ -39,12 +40,12 @@ win32:{
 }
 
 # QSSH
-# include(../lib/qssh/qssh.pri)  # this will cause compile error??why
+# include(../lib/qssh.pri)  # this will cause compile error??why
 # Don't clutter the example
 DEFINES -= QT_NO_CAST_FROM_ASCII
 DEFINES -= QT_NO_CAST_TO_ASCII
-# require compile qssh.pro first (lib/qssh/lib/libQSsh.a)
-# or cd lib/qssh; dpkg-buildpackage -b --no-sign
+# # require compile qssh.pro first (lib/qssh/lib/libQSsh.a)
+# # or cd lib/qssh; dpkg-buildpackage -b --no-sign
 isEmpty(BOTANPATH): BOTANPATH = $${PWD}/../lib/qssh/botan
 
 INCLUDEPATH += ../lib/qssh/src/libs/
@@ -61,6 +62,7 @@ LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
      $$OUT_PWD/../lib/qssh/lib/QSsh.lib
 }
 # QSSH END
+
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0

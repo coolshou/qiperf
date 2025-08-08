@@ -88,7 +88,7 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
 
     ui->twAIP->setItemDelegateForColumn(AIPcols::Azimuth, dAziDelegate);
     ui->twAIP->setItemDelegateForColumn(AIPcols::Elevation, dElDelegate);
-
+    ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 100);
     initAction();
     // m_dlgOSM = new DlgOpenStreetMap();
     // connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgJIO::onLoadFinished);
@@ -469,6 +469,12 @@ void DlgJIO::onCalcCliecked(bool checked)
             }
         }
     }
+    // 1. get cm7rs Max and Min value
+    // diff = |Max - Min|
+    // check diff < 3dB Az BW
+    // Max, Min should not over AM7az ± dirBW ± 3dB_AzBW/2
+    ui->tableWidget->item(0, GPScols::AIP1); //cyntec or hanwha
+
     //AM7 AIP1 Az, TODO El
     QList<double> aipRs;
     double aip1az=0;
@@ -498,7 +504,7 @@ void DlgJIO::onCalcCliecked(bool checked)
     }else {
         qDebug() << "No AIP2 AZ value";
     }
-    aip2azdiff = azimuthDegree-aip2az;
+    aip2azdiff = aip2az-azimuthDegree;
     ui->twAIP->setItem(0, AIPcols::Azimuth,
                        new QTableWidgetItem(QString::number(aip1az)));
     //TODO AIP1 el

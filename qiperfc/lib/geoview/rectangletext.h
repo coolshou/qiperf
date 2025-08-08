@@ -10,6 +10,8 @@
 #include <QGeoView/QGVGlobal.h>
 #include <QGeoView/QGVMap.h>
 
+#include "qgvcolortext.h"
+
 class RectangleText : public Rectangle
 {
     Q_OBJECT
@@ -18,7 +20,8 @@ public:
                   QPointF size, QColor color, QGVMap *map=nullptr);
     QString getText();
 private:
-    QGVWidgetText* mlabel;
+    // QGVWidgetText* mlabel;
+    QGVColorText* mlabel;
     QGVMap* mMap;
 };
 
