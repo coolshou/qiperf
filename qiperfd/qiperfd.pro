@@ -50,11 +50,11 @@ isEmpty(BOTANINCPATH): BOTANINCPATH = $$BOTANPATH
 
 INCLUDEPATH += ../lib/qssh/src/libs/
 unix {
-    LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
-        $$OUT_PWD/../lib/qssh/lib/libQSsh.a
     INCLUDEPATH += $$BOTANPATH
     LIBS += -L$$BOTANINCPATH/ \
         $$BOTANPATH/libbotan-2.a
+    LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
+        $$OUT_PWD/../lib/qssh/lib/libQSsh.a
 }
 win32:{
 LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
