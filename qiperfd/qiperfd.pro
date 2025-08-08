@@ -49,10 +49,12 @@ isEmpty(BOTANPATH): BOTANPATH = $${PWD}/../lib/qssh/botan
 
 INCLUDEPATH += ../lib/qssh/src/libs/
 unix {
-    LIBS += $$OUT_PWD/../lib/qssh/lib/libQSsh.a
-
     INCLUDEPATH += $$BOTANPATH
+
+    LIBS += -Wl,--start-group
+    LIBS += $$OUT_PWD/../lib/qssh/lib/libQSsh.a
     LIBS += $$BOTANPATH/libbotan-2.a
+    LIBS += -Wl,--end-group
 }
 win32:{
 LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
