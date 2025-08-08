@@ -46,15 +46,13 @@ DEFINES -= QT_NO_CAST_TO_ASCII
 # require compile qssh.pro first (lib/qssh/lib/libQSsh.a)
 # or cd lib/qssh; dpkg-buildpackage -b --no-sign
 isEmpty(BOTANPATH): BOTANPATH = $${PWD}/../lib/qssh/botan
-isEmpty(BOTANINCPATH): BOTANINCPATH = $$BOTANPATH
 
 INCLUDEPATH += ../lib/qssh/src/libs/
 unix {
+    LIBS += $$OUT_PWD/../lib/qssh/lib/libQSsh.a
+
     INCLUDEPATH += $$BOTANPATH
-    LIBS += -L$$BOTANINCPATH/ \
-        $$BOTANPATH/libbotan-2.a
-    LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
-        $$OUT_PWD/../lib/qssh/lib/libQSsh.a
+    LIBS += $$BOTANPATH/libbotan-2.a
 }
 win32:{
 LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
