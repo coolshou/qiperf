@@ -170,11 +170,11 @@ SOURCES += \
     views/throughputview.cpp
 
 SOURCES += \
-    $$PWD/lib/geoview/placemark.cpp \
-    $$PWD/lib/geoview/polyline.cpp \
-    $$PWD/lib/geoview/rectangletext.cpp \
-    $$PWD/lib/geoview/directionarrow.cpp \
-    $$PWD/lib/geoview/qgvcolortext.cpp
+    lib/geoview/placemark.cpp \
+    lib/geoview/polyline.cpp \
+    lib/geoview/rectangletext.cpp \
+    lib/geoview/directionarrow.cpp \
+    lib/geoview/qgvcolortext.cpp
 
 #    src/tpstatuschecker.cpp
 #    ../src/map/dlgopenstreetmap.cpp
@@ -269,11 +269,11 @@ HEADERS += \
     plugin/plugininterface.h
 
 HEADERS += \
-    $$PWD/lib/geoview/placemark.h \
-    $$PWD/lib/geoview/polyline.h \
-    $$PWD/lib/geoview/rectangletext.h \
-    $$PWD/lib/geoview/directionarrow.h \
-    $$PWD/lib/geoview/qgvcolortext.h
+    lib/geoview/placemark.h \
+    lib/geoview/polyline.h \
+    lib/geoview/rectangletext.h \
+    lib/geoview/directionarrow.h \
+    lib/geoview/qgvcolortext.h
 
 #    src/tpstatuschecker.h
 
