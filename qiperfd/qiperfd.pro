@@ -4,7 +4,9 @@ QT += core network websockets
 QT += serialport
 
 
-CONFIG += c++17 console
+# CONFIG += c++17
+CONFIG += c++11
+CONFIG += console
 CONFIG -= app_bundle
 
 # following will disable c++ exceptions,
@@ -53,7 +55,9 @@ unix {
     INCLUDEPATH += $$BOTANPATH
     # use static lib
     LIBS += $$OUT_PWD/../lib/qssh/lib/libQSsh.a
+    LIBS += -Wl,--whole-archive
     LIBS += $$BOTANPATH/libbotan-2.a
+    LIBS += -Wl,--no-whole-archive
 }
 win32:{
 LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
