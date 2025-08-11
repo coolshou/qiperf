@@ -41,7 +41,7 @@ public:
                    Placemark::MarkColor color=Placemark::MarkColor::Yellow);
     void addLinkline(QGV::GeoPos pos1, QGV::GeoPos pos2,
                      QColor color=Qt::GlobalColor::yellow, qreal linewidth=5);
-    void addRectangle(QGV::GeoPos pos1, QPointF size=QPointF(10.0, 20.0),
+    void addRectangle(QGV::GeoPos pos1, QPointF size=QPointF(20.0, 10.0),
                       QColor color=Qt::GlobalColor::yellow, QString label="");
     void addArrowLine(QGV::GeoPos origin, double azimuthDeg, double length,
                       QColor color=QColor(Qt::red), qreal linewidth=3,

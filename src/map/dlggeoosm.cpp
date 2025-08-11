@@ -126,6 +126,7 @@ void DlgGeoOSM::addRectangle(QGV::GeoPos pos1, QPointF size, QColor color,
     auto base = mMap->getProjection()->geoToProj(pos1);
     // qDebug() << "addRectangle: base:" << base;
     QGV::GeoRect pos = mMap->getProjection()->projToGeo({ base, base + QPointF(size.x(), size.y()) });
+
     // TODO: the Rectangle should consider size, and place the pos at center of Rectangle
     RectangleText *item = new RectangleText(label, pos, size, color, mMap);
     item->setFlag(QGV::ItemFlag::Highlightable, true);
@@ -285,10 +286,12 @@ void DlgGeoOSM::createContextMenu()
 
 void DlgGeoOSM::createTrackingWidget()
 {
-    // QGVWidgetText will be used to show current position.
+    // QGVWidgetText will be used to show current GPS position .
     QGVWidgetText* text = new QGVWidgetText();
-    // text->setAnchor(QPoint(0, 0), { Qt::TopEdge });
-    text->setAnchor(QPoint(0, 0), { Qt::BottomEdge });
+    QSet<Qt::Edge> combinedEdge;//= Qt::RightEdge | Qt::BottomEdge;
+    combinedEdge.insert(Qt::RightEdge);
+    combinedEdge.insert(Qt::BottomEdge);
+    text->setAnchor(QPoint(5, -2),  combinedEdge);
     mMap->addWidget(text);
     connect(mMap, &QGVMap::mapMouseMove, text, [this, text](QPointF projPos) {
         // Current projection position can be converted to geo-coordinates and printed by corresponding functions.

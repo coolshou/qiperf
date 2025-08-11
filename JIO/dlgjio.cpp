@@ -715,7 +715,7 @@ void DlgJIO::onLoadFinished(bool ok)
                     lat0 = lat;
                     lon0 = lon;
                     am7 = QGV::GeoPos{lat0, lon0};
-                    m_dlgGeo->addRectangle(am7, QPointF(10.0, 20.0), Qt::red, label);
+                    m_dlgGeo->addRectangle(am7, QPointF(20.0, 10.0), Qt::red, label);
                     //draw Main Arrow line
                     m_dlgGeo->addArrowLine(am7, ui->leAM7az->text().toDouble(), 100,
                                            QColor(Qt::red));
@@ -724,7 +724,7 @@ void DlgJIO::onLoadFinished(bool ok)
                     // marker
                     cm = QGV::GeoPos{lat, lon};
                     //m_dlgGeo->addMarker(lat, lon, label);
-                    m_dlgGeo->addRectangle(cm, QPointF(10.0, 20.0), Qt::yellow, label);
+                    m_dlgGeo->addRectangle(cm, QPointF(20.0, 10.0), Qt::yellow, label);
                     // polyLines
                     m_dlgGeo->addLinkline(am7, cm);
                     //draw Arrow line
