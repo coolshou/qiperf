@@ -37,7 +37,8 @@ win32:unix:!android:{
 }
 
 # following will cause QCustomPlot double free on APP exit!!
-CONFIG += c++17
+#CONFIG += c++17
+CONFIG += c++11
 
 include(../qiperf.pri)
 include(../lib/qgeoview.pri)
@@ -85,6 +86,7 @@ QXLSX_SOURCEPATH=$$PWD/lib/QXlsx/QXlsx/source/  # current QXlsx source path is .
 include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
 
 include($$PWD/../JIO/jio.pri)
+include($$PWD/../lib/qssh.pri)
 # debug
 #CONFIG += sanitizer
 #CONFIG += sanitize_address
