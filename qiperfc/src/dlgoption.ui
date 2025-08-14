@@ -24,7 +24,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab_iperf">
       <attribute name="title">
@@ -282,7 +282,7 @@
        </property>
        <item>
         <widget class="QWidget" name="widget_7" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
           <property name="spacing">
            <number>4</number>
           </property>
@@ -327,6 +327,44 @@
          <property name="text">
           <string>Close To SystemTray</string>
          </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="widget_4" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="cbCpuCheck">
+            <property name="text">
+             <string>Check CPU Usage interval (sec):</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="sbCpuCheckInterval">
+            <property name="maximum">
+             <number>999</number>
+            </property>
+            <property name="value">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>

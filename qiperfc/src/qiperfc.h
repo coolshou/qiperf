@@ -167,6 +167,7 @@ private slots:
     void onShowGroup(bool bShow);
     void onIgnoreWrongInterval(bool bIgnore);
     void onUpdateOpenStreetMapTile(QString tile);
+    void onUpdateCpuCheckInterval(int interval);
     void onSerialOpened(QString refrow, QString serveraddress, QString serveraPort);
     void onSerialClosed(QString idx);
     void onSSHOpened(QString refrow, QString serveraddress, QString serveraPort);
@@ -222,6 +223,7 @@ private:
     QLabel *m_status_label;
     QLabel *m_cpu_label;
     CpuMonitor *m_cpumonitor;
+    int mCpuCheckInterval;
     QLabel *m_label_qiperfd;
 
     QDateTime m_TestStartTime;

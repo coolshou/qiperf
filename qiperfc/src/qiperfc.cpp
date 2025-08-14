@@ -84,7 +84,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_dlgoption, &dlgOption::updateTPUnit, m_throughputview, &ThroughputView::onUpdateTPUnit);
     connect(m_dlgoption, &dlgOption::updateOpenStreetMapTile, this, &QIperfC::onUpdateOpenStreetMapTile);
     initStatusbar();
-
+    connect(m_dlgoption, &dlgOption::updateCpuCheckInterval, this, &QIperfC::onUpdateCpuCheckInterval);
     //UI actions
     initActions();
     initToolbar();
@@ -870,6 +870,7 @@ void QIperfC::loadSettings()
     restoreState(m_settings->value("windowState").toByteArray());
     m_oldsavepath = m_settings->value("oldsavepath",
                                       QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
+    mCpuCheckInterval = m_settings->value("CpuCheckInterval", 1).toInt();
     m_settings->endGroup();
 
     m_settings->beginGroup("agent");
@@ -1112,6 +1113,14 @@ void QIperfC::onIgnoreWrongInterval(bool bIgnore)
 void QIperfC::onUpdateOpenStreetMapTile(QString tile)
 {
     m_OpenStreetMapTile = tile;
+}
+
+void QIperfC::onUpdateCpuCheckInterval(int interval)
+{
+    mCpuCheckInterval = interval;
+    if (m_cpumonitor){
+        m_cpumonitor->setInterval(interval);
+    }
 }
 
 void QIperfC::onSerialOpened(QString refrow, QString serveraddress, QString serveraPort)
@@ -1543,7 +1552,7 @@ void QIperfC::initStatusbar()
     ui->statusbar->addWidget(m_status_label, 2);
     connect(this , &QIperfC::updateStatus, this,  &QIperfC::onUpdateStatus);
     // CPU usage
-    m_cpumonitor = new CpuMonitor();
+    m_cpumonitor = new CpuMonitor(mCpuCheckInterval);
     m_cpu_label = new QLabel();
     m_cpu_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
     ui->statusbar->addWidget(m_cpu_label, 0);

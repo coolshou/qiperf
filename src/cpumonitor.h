@@ -22,9 +22,9 @@ class CpuMonitor : public QObject
     Q_OBJECT
 
 public:
-    explicit CpuMonitor(QObject *parent = nullptr);
+    explicit CpuMonitor(int interval=1, QObject *parent = nullptr);
     ~CpuMonitor();
-
+    void setInterval(int interval);
     double getOverallCpuUsage() const { return overallCpuUsage; }
 
 signals:
@@ -35,6 +35,7 @@ private slots:
     void onGetCPUStatusFail();
 private:
     QTimer *timer;
+    int mInterval; //
     int mGetStatusFail; // continious fail
     double overallCpuUsage = 0.0;
 

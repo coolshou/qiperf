@@ -32,6 +32,8 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
 
     connect(ui->cb_TPUnit, &QComboBox::currentTextChanged, this, &dlgOption::onTPUnitChanged);
     ui->tabWidget->setCurrentIndex(0);
+    connect(ui->cbCpuCheck, &QCheckBox::clicked, this, &dlgOption::onCpuCheckClicked);
+    connect(ui->sbCpuCheckInterval, &QSpinBox::valueChanged, this, &dlgOption::onCpuCheckIntervalValueChanged);
 }
 
 dlgOption::~dlgOption()
@@ -228,6 +230,21 @@ void dlgOption::updateFontStyle(QString fontfamily)
         ui->cbFontStyle->addItem("");
         ui->cbFontStyle->addItems(ffs);
     }
+}
+
+void dlgOption::onCpuCheckClicked(bool checked)
+{
+    int value=0;
+    ui->sbCpuCheckInterval->setEnabled(checked);
+    if (checked){
+        value = ui->sbCpuCheckInterval->value();
+    }
+    emit updateCpuCheckInterval(value);
+}
+
+void dlgOption::onCpuCheckIntervalValueChanged(int value)
+{
+    emit updateCpuCheckInterval(value);
 }
 
 // void dlgOption::setTPsize(int width, int heigth)

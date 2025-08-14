@@ -2,7 +2,8 @@
 
 #include <QRegularExpression>
 
-CpuMonitor::CpuMonitor(QObject *parent) : QObject(parent)
+CpuMonitor::CpuMonitor(int interval, QObject *parent)
+    : QObject(parent), mInterval(interval*1000)
 {
     mGetStatusFail = 0;
     connect(this, &CpuMonitor::getCPUStatusFail, this, &CpuMonitor::onGetCPUStatusFail);
@@ -12,13 +13,25 @@ CpuMonitor::CpuMonitor(QObject *parent) : QObject(parent)
     initializeCpuTimes(); // Call platform-specific initial time capture
 
     // Start the timer to update every 1 second (adjust as needed)
-    timer->start(1000);
+    timer->start(mInterval);
 }
 
 CpuMonitor::~CpuMonitor()
 {
     if (timer->isActive()) {
         timer->stop();
+    }
+}
+
+void CpuMonitor::setInterval(int interval)
+{
+    qDebug() << "CpuMonitor::setInterval:" << QString::number(interval);
+    mInterval = interval*1000;
+    if (timer->isActive()) {
+        timer->stop();
+    }
+    if (mInterval>0){
+        timer->start(mInterval);
     }
 }
 
