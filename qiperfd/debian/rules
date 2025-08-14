@@ -37,8 +37,8 @@ DEB_VERSION=$(shell grep -m1 -oP '(?<=\().*?(?=\))' debian/changelog)${DISTRO_NA
 override_dh_shlibdeps:
 	dh_shlibdeps
 	# for ubuntu 24.10 QT6
-	sed -i "s/libqt6network6t64/libqt6network6 | libqt6network6t64/g" debian/qiperfd.substvars
-	sed -i "s/, qt6-websockets-abi (= 6.4.2)//g" debian/qiperfd.substvars
+	#sed -i "s/libqt6network6t64/libqt6network6 | libqt6network6t64/g" debian/qiperfd.substvars
+	#sed -i "s/, qt6-websockets-abi (= 6.4.2)//g" debian/qiperfd.substvars
 
 #override_dh_auto_build:
 #	echo "Building package for ${DEB_VERSION}" > build-info.txt
