@@ -126,6 +126,6 @@ double MyQCPGraph::getMaxXValue()
         maxX = (data()->constEnd() - 1)->key;
         // qDebug() << "Last (max) X-value from sorted data directly:" << maxX;
     }
-    qDebug() << "Maximum X-value of the graph:" << maxX;
+    // qDebug() << "Maximum X-value of the graph:" << maxX;
     return maxX;
 }
