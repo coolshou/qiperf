@@ -41,8 +41,17 @@ void DlgSet::changeEvent(QEvent *e)
 
 void DlgSet::onAccepted()
 {
+    ControlBy ctl = ControlBy::None;
     //TODO: check text before send
+
+    if (ui->cbControlBySSH->isChecked()){
+        ctl = ControlBy::SSH;
+    }
+    if (ui->cbControlByQIperfd->isChecked()){
+        ctl = ControlBy::QIPERFD;
+    }
     emit updateSetting(ui->leSSHUsername->text(), ui->leSSHPassword->text(),
-                       ui->leWebUsername->text(), ui->leWebPassword->text());
+                       ui->leWebUsername->text(), ui->leWebPassword->text(),
+                       ctl);
 }
 
