@@ -1447,7 +1447,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
 
             if (!m_sshtasks.contains(key)) {
                 port = QIPERF_SSHPORT + m_sshtasks.count();
-                auto *task = new SSHTask(idx, sshTarget, sshPort,
+                task = new SSHTask(idx, sshTarget, sshPort,
                                          "any", QString::number(port),
                                          VirtualDeviceTcp::Mode::BINARY,
                                          username, password, privateKeyFile, timeout);
