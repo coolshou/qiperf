@@ -1,5 +1,6 @@
 #include "myfunc.h"
 
+
 // MyFunc::MyFunc(QObject *parent): QObject(parent)
 // {
 
@@ -111,4 +112,37 @@ TimeComponents MyFunc::secondsToComponents(int totalSeconds)
     result.minutes = (totalSeconds % 3600) / 60;
     result.seconds = totalSeconds % 60;
     return result;
+}
+
+QString MyFunc::closeCodeToString(QWebSocketProtocol::CloseCode code) {
+    switch (code) {
+    case QWebSocketProtocol::CloseCodeNormal:
+        return "Normal Closure";
+    case QWebSocketProtocol::CloseCodeGoingAway:
+        return "Going Away";
+    case QWebSocketProtocol::CloseCodeProtocolError:
+        return "Protocol Error";
+    case QWebSocketProtocol::CloseCodeDatatypeNotSupported:
+        return "Unsupported Data";
+    case QWebSocketProtocol::CloseCodeReserved1004:
+        return "No Status Received";
+    case QWebSocketProtocol::CloseCodeMissingStatusCode:
+        return "Missing Status";
+    case QWebSocketProtocol::CloseCodeAbnormalDisconnection:
+        return "Abnormal Disconnection";
+    case QWebSocketProtocol::CloseCodeWrongDatatype:
+        return "Wrong Data type";
+    case QWebSocketProtocol::CloseCodePolicyViolated:
+        return "Policy Violation";
+    case QWebSocketProtocol::CloseCodeTooMuchData:
+        return "Message Too Big";
+    case QWebSocketProtocol::CloseCodeMissingExtension:
+        return "Missing Extension";
+    case QWebSocketProtocol::CloseCodeBadOperation:
+        return "Bad Operation";
+    case QWebSocketProtocol::CloseCodeTlsHandshakeFailed:
+        return "TLS Handshake Failure";
+    default:
+        return QString("Unknown (%1)").arg(static_cast<int>(code));
+    }
 }

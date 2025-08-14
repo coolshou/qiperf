@@ -59,8 +59,7 @@
 #include <QFileInfo>
 
 #include "comm.h"
-
-#include <QDebug>
+#include "myfunc.h"
 
 QT_USE_NAMESPACE
 
@@ -123,7 +122,8 @@ qint64 WSServer::sendTextMessage(QString msg, QString target)
             m_sendtype=WSServer::sendtype::text;
             rc= m_clients.value(t)->sendTextMessage(msg);
             if (rc<=0){
-                qDebug() << "ERROR sendText to " << t << " size=" << rc << " : " << msg;
+                qDebug() << "ERROR sendText to " << t
+                         << " size=" << QString::number(rc) << " : " << msg;
             }
         }else{
             qDebug() << "m_clients do not have:" << t;
@@ -147,7 +147,8 @@ qint64 WSServer::sendBinaryMessage(QByteArray &data, QString target)
         if (m_clients.contains(t)) {
             rc = m_clients.value(t)->sendBinaryMessage(data);
             if (rc<=0){
-                qDebug() << "ERROR sendBinaryMessage to " << t << " size=" << rc << " : " << data;
+                qDebug() << "ERROR sendBinaryMessage to " << t
+                         << " size=" << QString::number(rc) << " : " << data;
             }
         }
         QCoreApplication::processEvents(QEventLoop::AllEvents);
@@ -162,6 +163,7 @@ void WSServer::onLog(QString text)
 
 void WSServer::addFileToSend(QString filename, QString target)
 {
+    Q_UNUSED(target)
     if (m_filenames.contains(filename)){
         qDebug() << "addFileToSend: File exist: " << filename;
         return;
@@ -174,7 +176,6 @@ void WSServer::addFileToSend(QString filename, QString target)
 //        continue;
     }
     qDebug() << "send file: " << filename << " TO: " << m_currentClient;
-    // qDebug() << "send file TO: " << m_currentClient;
     m_files.enqueue(file);
     m_sendtype=WSServer::sendtype::file;
     sendNextChunk(m_currentClient);
@@ -259,12 +260,16 @@ void WSServer::socketDisconnected()
 
 void WSServer::onSslErrors(const QList<QSslError> &errors)
 {
-    qDebug() << "Ssl errors occurred" << errors;
+    QStringList errorStrings;
+    for (const QSslError &error : errors) {
+        errorStrings << error.errorString();
+    }
+    qDebug() << "Ssl errors occurred" << errorStrings.join("\n");;
 }
 
 void WSServer::onServerError(QWebSocketProtocol::CloseCode closeCode)
 {
-    qDebug() << "Server Error occurred:" << closeCode;
+    qDebug() << "Server Error occurred:" << MyFunc::closeCodeToString(closeCode);
 }
 
 void WSServer::onBytesWritten(qint64 bytes)
@@ -275,7 +280,6 @@ void WSServer::onBytesWritten(qint64 bytes)
     {
         if (m_sendtype==WSServer::sendtype::file){
             QString target = pClient->peerAddress().toString();
-//            qDebug() << "onBytesWritten: " << target << " size: " << QString::number(bytes);
             sendNextChunk(target);
         }
     }
@@ -327,12 +331,11 @@ void WSServer::sendNextChunk(QString target)
     qint64 rc;
     buffer.append(m_currentFile->read(m_chunkSize - buffer.size()));
     rc = client->sendBinaryMessage(buffer);
-//    qDebug() << "Sent chunk of size:" << buffer.size() << "for file:" << m_fileName;
     if (rc != buffer.size()){
-        qDebug() << "send chunk of size error: \nexpect: " << QString::number(buffer.size()) <<
-                    "\nactually: " << QString::number(rc);
+        qDebug() << "send chunk of size error: \n"
+                 << "expect: " << QString::number(buffer.size()) << "\n"
+                 << "actually: " << QString::number(rc);
     }
-
 }
 
 void WSServer::updateListen()
@@ -358,7 +361,8 @@ void WSServer::sendTextResult(QString msg)
     //send Test back to client
     qint64 rc = sendTextMessage(msg);
     if (rc<0){
-        qDebug() << "sendTextResult: sendTextMessage return size:(" << rc << "):" << msg;
+        qDebug() << "sendTextResult: sendTextMessage return size:("
+                 << QString::number(rc) << "):" << msg;
     }
 }
 

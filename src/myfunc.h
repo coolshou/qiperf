@@ -2,7 +2,7 @@
 #define MYFUNC_H
 
 // #include <QObject>
-
+#include <QWebSocketProtocol>
 #include <QHostAddress>
 #include <QAbstractSocket>
 #include <QString>
@@ -24,6 +24,7 @@ public:
     static QString formatUnit(QString val);
     static QString secToHumanReadable(long long seconds);
     static TimeComponents secondsToComponents(int totalSeconds);
+    static QString closeCodeToString(QWebSocketProtocol::CloseCode code);
 };
 
 #endif // MYFUNC_H
