@@ -2,8 +2,10 @@
 
 
 
-QGVColorText::QGVColorText()
+QGVColorText::QGVColorText(const QGV::GeoPos &geoPos, const QSizeF &size)
 {
+    // setAnchor(, { Qt::BottomEdge });
+    setGeometry(geoPos, size);
     // QPainter painter(this);
     // QFont font = painter.font(); // current font used by the painter
     // metrics = new QFontMetrics(font);
@@ -43,17 +45,20 @@ QPainterPath QGVColorText::projShape() const
 void QGVColorText::projPaint(QPainter *painter)
 {
     if (mProjRect.isEmpty()) {
+        qDebug() << "QGVColorText::projPaint NO mProjRect";
         return;
     }
     if (getText().isEmpty()){
+        qDebug() << "QGVColorText::projPaint NO Text";
         return;
     }
 
     QRectF paintRect = mProjRect;
-
+    qDebug() << "paintRect:" << paintRect;
+    qDebug() << "mProjPos:" <<mProjPos;
     painter->setRenderHint(QPainter::SmoothPixmapTransform);
     // painter->drawImage(paintRect, getImage());
-    painter->drawText(paintRect, getText());
+    painter->drawText(mProjPos, getText());
 }
 
 void QGVColorText::calculateGeometry()
@@ -65,10 +70,11 @@ void QGVColorText::calculateGeometry()
     if (!mGeoPos.isEmpty()) {
         mProjPos = getMap()->getProjection()->geoToProj(mGeoPos);
     }
-    QPainter painter(this);
-    QFont font = painter.font(); // current font used by the painter
-    QFontMetrics metrics = QFontMetrics(font);
-    QSize textSize = metrics.size(Qt::TextSingleLine, getText());
+    // QPainter painter(this);
+    // QFont font = painter.font(); // current font used by the painter
+    // QFontMetrics metrics = QFontMetrics(font);
+    // QSize textSize = metrics.size(Qt::TextSingleLine, getText());
+    QSize textSize = QSize(10, 10);
 
     const QSizeF baseSize = !mSize.isEmpty() ? mSize : textSize;
     const QPointF baseAnchor = QPointF(baseSize.width() / 2, baseSize.height() / 2);
@@ -77,6 +83,7 @@ void QGVColorText::calculateGeometry()
     qDebug() << "mGeoPos:" << mGeoPos
              << " mProjPos:" << mProjPos
              << " mProjRect:" << mProjRect;
+    // setAnchor(mProjRect.topLeft().toPoint(), { Qt::BottomEdge });
     // resetBoundary();
     // refresh();
 }

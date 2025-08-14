@@ -16,8 +16,8 @@ class RectangleText : public Rectangle
 {
     Q_OBJECT
 public:
-    RectangleText(QString label, const QGV::GeoRect& geoRect,
-                  QPointF size, QColor color, QGVMap *map=nullptr);
+    explicit RectangleText(QString label, const QGV::GeoRect& geoRect,
+                  QPointF fsize, QColor color, QGVMap *map=nullptr);
     QString getText();
 private:
     // QGVWidgetText* mlabel;

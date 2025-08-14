@@ -11,7 +11,7 @@ class QGVColorText : public QGVWidgetText
 {
     Q_OBJECT
 public:
-    QGVColorText();
+    explicit QGVColorText(const QGV::GeoPos &geoPos, const QSizeF &size);
     void setGeometry(const QGV::GeoPos& geoPos, const QSizeF& size = QSizeF());
     void setGeometry(const QPointF& projPos, const QSizeF& size = QSizeF());
 
