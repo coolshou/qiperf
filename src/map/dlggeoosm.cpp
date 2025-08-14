@@ -163,11 +163,12 @@ void DlgGeoOSM::setItmHighlight(QString label)
     for(int i=0;i<mItemsLayer->countItems();i++)
     {
         RectangleText *itm = static_cast<RectangleText*>(mItemsLayer->getItem(i));
-        if (label.compare(itm->getText())==0){
-            itm->setSelected(true); // show item selected
-        }else{
-            itm->setSelected(false);
-
+        if(itm){
+            if (label.compare(itm->getText())==0){
+                itm->setSelected(true); // show item selected
+            }else{
+                itm->setSelected(false);
+            }
         }
     }
     qDebug() << "mPolysLayer:num:" << mPolysLayer->countItems();
