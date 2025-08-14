@@ -1886,7 +1886,7 @@ void QIperfd::initiperf22(QString tmp, QString tmp_path, QString arch)
     {
         QFile::remove(m_iperfexe22);
     }
-    // iperf2.1
+    // iperf2.2
     #if defined(Q_OS_ANDROID)
         QFile i22File(":/android/" + arch + "/iperf");
     #else

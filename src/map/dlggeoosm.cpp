@@ -171,11 +171,10 @@ void DlgGeoOSM::setItmHighlight(QString label)
             }
         }
     }
-    qDebug() << "mPolysLayer:num:" << mPolysLayer->countItems();
     for(int i=0;i<mPolysLayer->countItems();i++)
     {
         QGVItem *itm = mPolysLayer->getItem(i);
-        qDebug() << "mPolysLayer:" << itm;
+        qDebug() << "TODO: mPolysLayer itm:" << itm;
     }
 }
 
