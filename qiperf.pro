@@ -3,8 +3,8 @@ TEMPLATE = subdirs
 SUBDIRS += \
     qiperfd \
     qiperftray \
-    qgeoview
-#    qssh
+    qgeoview \
+    qssh
 
 SUBDIRS += \
     qiperfc \
@@ -13,12 +13,13 @@ qiperftray.subdir = qiperftray
 qiperfd.subdir = qiperfd
 qiperfc.subdir = qiperfc
 qgeoview.subdir = lib/qgeoview/lib
-#qssh.subdir = lib/qssh
+# qssh.subdir = lib/qssh
+qssh.subdir = lib/qssh/src/libs/qssh
+
 qiperftray.depends = qiperfd
 qiperfc.depends = qgeoview
-#qiperfd.depends = qssh
-# qssh.subdir = lib/qssh/src/libs/qssh
-# qiperfd.depends = qssh
+qiperfd.depends = qssh
+
 
 DEBIAN.files += \
     debian/changelog \
