@@ -380,7 +380,7 @@ void TpWorker::work()
     //Start server
     err = "[TpWorker]websocket keys:" + m_ws.keys().join(" ");
     debug(err);
-    for (auto key: m_ws.keys()){
+    foreach (QString key, m_ws.keys()){
         debug("[TpWorker]Let Server " + key + " CMD_IPERF_START "+ startTime + ":S");
         rs = m_ws[key]->sendText(QString(CMD_IPERF_START)+":"+startTime+":S");
         if (rs<=0){
@@ -415,7 +415,7 @@ void TpWorker::work()
         return;
     }
     //Start client
-    for (auto key: m_ws.keys()){
+    foreach (QString key, m_ws.keys()){
         debug("[TpWorker]Let Client " + key + " CMD_IPERF_START " + startTime + ":C");
         rs = m_ws[key]->sendText(QString(CMD_IPERF_START)+":"+startTime+":C");
         if (rs<=0){
