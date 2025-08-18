@@ -151,6 +151,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
     if (!bindaddr.isEmpty()){
         args = args + " -B " + bindaddr;
     }
+    int duration = 0;
     if (!bServer){
         bool bidir = jsondata["bidir"].toBool();
         if (bidir){
@@ -160,7 +161,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
         if (reverse){
             args = args + " -R ";
         }
-        int duration = jsondata["duration"].toInt();
+        duration = jsondata["duration"].toInt();
         if (duration>=0){
             args = args + " -t " + QString::number(duration);
         }
@@ -169,6 +170,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
         //     args = args + " -Z";
         // }
     }
+
     uint interval = jsondata["interval"].toUInt();
     if (interval>0){
         args = args + " -i " + QString::number(interval);
