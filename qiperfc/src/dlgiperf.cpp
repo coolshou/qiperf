@@ -559,29 +559,6 @@ void DlgIperf::onChkRestartOnError(Qt::CheckState state)
         ui->pbRestartRule->setEnabled(false);
     }
 }
-// #else
-// void DlgIperf::onChkBidirStatech(Qt::CheckState state)
-// {
-//     if (state==Qt::Checked){
-//         ui->chk_reverse->setCheckState(Qt::Unchecked);
-//     }
-// }
-
-// void DlgIperf::onChkReverseStatech(Qt::CheckState state)
-// {
-//     if (state==Qt::Checked){
-//         ui->chk_bidir->setCheckState(Qt::Unchecked);
-//     }
-// }
-// void DlgIperf::onTimeStampstateChanged(Qt::CheckState state)
-// {
-//     if (state==Qt::Checked){
-//         ui->leTimeStamp->setEnabled(true);
-//     }else{
-//         ui->leTimeStamp->setEnabled(false);
-//     }
-// }
-// #endif
 
 void DlgIperf::onSelectMServer(QString text)
 {
