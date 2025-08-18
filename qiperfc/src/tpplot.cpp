@@ -163,6 +163,7 @@ void TPPlot::setShowGroup(bool bShow)
                     }
                 }
             }else{
+                qDebug() << "add lostlegenditerator " << lostlegenditerator.value();
                 if(!legend->hasItem(lostlegenditerator.value())){
                     qDebug() << "add lostlegend " <<  lostlegenditerator.value();
                     if(!legend->addItem(lostlegenditerator.value())){

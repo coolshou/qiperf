@@ -156,7 +156,7 @@ void WSClient::onConnected()
 {
     if (m_keepalive){
         if (idleTimer){
-            qInfo() << "WebSocket connected : " << m_url << " ,start idleTimer";
+            debug("WebSocket connected : " + m_url.toString() + " ,start idleTimer", 3);
             idleTimer->start();
         }
     }

@@ -82,6 +82,7 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
 //    m_bindaddr = bindaddr;
 //    m_target = target;
     if (m_servermode){
+        //server
         if (m_bidir){
             setBidirTag(TPDIRRx);
         }else if(m_reverse){
@@ -90,16 +91,17 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
             setBidirTag(TPDIRRx);
         }
     }else{
+        //client
         if (m_bidir){
             setBidirTag(TPDIRTx);
         }else if (m_reverse){
+            // setBidirTag(TPDIRRx);
             setBidirTag(TPDIRTx);
         }else{
             setBidirTag(TPDIRNO);
         }
     }
     // m_interval = interval;
-    // debug("init[" + getBindKey() + "] reg m_bidirtag:" + m_bidirtag + " interval:" + QString::number(m_interval));
     m_selfdestructionTime = (10+m_interval+m_delaystart) * 1000; //10 sec + report interval
     m_selfdestruction = new QTimer(this);
     m_selfdestruction->setInterval(m_selfdestructionTime);
@@ -187,63 +189,6 @@ void IperfWorker::work()
         debug("iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "), 4);
         debug(m_iperf->readAllStandardError(), 4);
     }
-
-    // try{
-    //     m_stop = false;
-    //     //create iperf procress
-    //     m_iperf =  new QProcess(m_parent);
-    //     m_iperf->setProgram(m_cmd);
-    //     debug("IperfWorker::work: " + m_cmd + " args:" + m_arguments.join(" "), 5);
-    //     m_iperf->setArguments(m_arguments);
-    //     connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
-    //     connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
-    // //    connect(m_iperf, &QProcess::readyRead, this, &IperfWorker::readyReadStdOut);
-    //     connect(m_iperf, &QProcess::started, this, &IperfWorker::onStarted);
-    //     connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
-
-    //     if (m_delaystart>0){
-    //         debug("m_delaystart: " + QString::number(m_delaystart));
-    //         // emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
-    //         QDateTime waitStartTime = QDateTime::currentDateTime();
-    //         QDateTime waitEndTime = QDateTime::currentDateTime();
-    //         int iWait = waitStartTime.secsTo(waitEndTime);
-    //         while (iWait < m_delaystart){
-    //             QCoreApplication::processEvents(QEventLoop::AllEvents);
-    //             QThread::msleep(100);
-    //             waitEndTime = QDateTime::currentDateTime();
-    //             iWait = waitStartTime.secsTo(waitEndTime);
-    //         }
-    //     }
-
-    //     m_iperf->start();
-    //     if (m_iperf->waitForStarted()){
-    //         if (m_selfdestruction->isActive()){
-    //             emit stopSelfDestructor();
-    //         }
-    //         emit started(m_refrow, m_servermode, getBindKey());// TODO: good place to notice started??
-    //         // emit log(m_idx, "start iperf (pid:"+ QString::number(m_iperf->processId())+")");
-    //         QString msg = QString("start iperf %1(pid:%2)").arg(m_servermode?"server":"client",
-    //                                                           QString::number(m_iperf->processId()));
-    //         debug(msg, 4);
-    //         // emit log(m_idx, "iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "));
-    //         debug("iperf: \"" + QDir::toNativeSeparators(m_cmd) + "\" "+  m_arguments.join(" "), 4);
-    //         while (!m_stop){
-    //             //procress iperf output
-    //             QThread::msleep(500);
-    //             QCoreApplication::processEvents(QEventLoop::AllEvents); // must have
-    //         }
-    //     }else{
-    //         // emit log(m_idx, "iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "));
-    //         debug("iperf not started!! \"" + QDir::toNativeSeparators(m_cmd) + "\" " + m_arguments.join(" "), 4);
-    //         // emit log(m_idx, m_iperf->readAllStandardError());
-    //         debug(m_iperf->readAllStandardError(), 4);
-    //     }
-    // }catch (const std::exception &e) {
-    //     // Handle the exception and show an error message
-    //     debug("IperfWorker::work Exception Caught" + QString(e.what()));
-    // }catch (...){
-    //     debug("IperfWorker::work Unknown ERROR");
-    // }
 }
 
 void IperfWorker::onWorkerRestart()
@@ -350,6 +295,7 @@ void IperfWorker::setIperfLogPath(QString filepath)
 void IperfWorker::setBidirTag(QString bidir)
 {
     m_bidirtag = bidir;
+    qDebug() << "m_bidirtag:" <<m_bidirtag;
 }
 
 void IperfWorker::setRefRow(QString refrow)
@@ -391,9 +337,10 @@ void IperfWorker::debug(QString msg, int debuglv)
 {
     if (debuglv<=m_debuglv){
         if (!msg.isEmpty()){
-            QString emsg="(m_threadid:"+m_threadid+")"+"-m_idx:"+QString::number(m_idx)+"-"+msg;
-            // qDebug() << emsg;
-            emit debuginfo(emsg);
+            // QString emsg="";
+            // emsg = emsg + "(m_threadid:"+m_threadid+") ";
+            // emsg = emsg + "m_idx:"+QString::number(m_idx)+"-"+msg;
+            emit debuginfo(msg);
         }
     }
 }
@@ -424,7 +371,7 @@ void IperfWorker::onStarted()
     // TODO: restart should not use new log file?
     QString tmp = m_iperflogpath+QDir::separator()+getBindKey()+".log";
     m_logfile=new QFile(tmp);
-    debug("m_logfile: " + QDir::toNativeSeparators(m_logfile->fileName()));
+    debug(" m_logfile: " + QDir::toNativeSeparators(m_logfile->fileName()));
 
     if(m_logfile->open(QIODevice::WriteOnly|QIODevice::Append)){
         m_logtextstream = new QTextStream(m_logfile);
@@ -569,9 +516,9 @@ void IperfWorker::parserStdOut(QString msg)
 void IperfWorker::onThroughputData(int refrow, QString sInterval, QString data)
 {
     if(m_bidirtag.isEmpty()){
-        debug("No m_bidirtag, not reprort ThroughputData: ("+sInterval+")" + data, 6);
+        debug("Not reprort TpData: ("+sInterval+")" + data, 2);
     }else{
-        debug("[IperfWorker::onThroughputData]refrow:" + QString::number(refrow) + " sInterval:" + sInterval, 5);
+        debug("Refrow:" + QString::number(refrow) + " (" + sInterval+ ")" + data, 2);
         emit iperfTPdata(refrow, sInterval, data);
     }
 }
