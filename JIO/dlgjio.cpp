@@ -135,6 +135,19 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     connect(ui->pbSet, &QPushButton::clicked, this, &DlgJIO::onSet);
     connect(ui->pbInquire, &QPushButton::clicked, this, &DlgJIO::onInquireClicked);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DlgJIO::close); // close button click
+
+    //ssh
+    mSSHRemoteRunner = new QSsh::SshRemoteProcessRunner(this);
+    connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::connectionError,
+            this, &DlgJIO::handleSSHConnectionError);
+    connect(mSSHRemoteRunner, SIGNAL(processStarted()),
+            SLOT(handleSSHProcessStarted()));
+    connect(mSSHRemoteRunner, SIGNAL(readyReadStandardOutput()), SLOT(handleSSHProcessStdout()));
+    connect(mSSHRemoteRunner, SIGNAL(readyReadStandardError()), SLOT(handleSSHProcessStderr()));
+    connect(mSSHRemoteRunner, SIGNAL(processClosed(int)),
+            SLOT(handleSSHProcessClosed(int)));
+    m_state = Inactive;
+    m_started = false;
 }
 
 DlgJIO::~DlgJIO()
@@ -188,6 +201,39 @@ void DlgJIO::clearData()
     if (m_dlgGeo){
         m_dlgGeo->clearAllPlot();
     }
+}
+
+QString DlgJIO::getStMotion(QString target)
+{
+    //get st_motion info
+    QString result="";
+    /*
+# 檢查 st_motion process 有沒有帶，沒有的話要手動帶
+ps | grep st_motion  | grep -v grep
+# 帶 st_motion 的 指令
+st_motion rc e d e e 100 1 1 2 4 4 uen 3 eun 0 1 100 0 0.5 0 2 3000 &
+# 讀 sensor 的值
+sensors_call_so
+## NOTE: require Calibration
+Calibration_status_of_the_Sensors = 2
+
+*/
+    if (mControlBy==DlgSet::ControlBy::SSH){
+
+    }
+    return result;
+}
+
+QString DlgJIO::getGpsInfo(QString target)
+{
+    // get GPS info
+    QString result="";
+    //   gps_call_so
+    if (mControlBy==DlgSet::ControlBy::SSH){
+        m_sshParams.setHost(target);
+        mSSHRemoteRunner->run("gps_call_so", m_sshParams);
+    }
+    return result;
 }
 
 void DlgJIO::changeEvent(QEvent *e)
@@ -522,7 +568,7 @@ void DlgJIO::onSet(bool checked)
     Q_UNUSED(checked)
     //show config of ssh username/password
     if (m_dlgset){
-        m_dlgset->setSSH(mSshusername, mSshpassword);
+        m_dlgset->setSSH(mSshUsername, mSshPassword);
         m_dlgset->setWeb(mWebusername, mWebpassword);
         m_dlgset->show();
     }
@@ -531,8 +577,11 @@ void DlgJIO::onSet(bool checked)
 void DlgJIO::onInquireClicked(bool checked)
 {
     if (checked){
+        m_sshParams.setUserName(mSshUsername);
+        m_sshParams.setPassword(mSshPassword);
+
         qDebug() << "Inquire start after 1 sec";
-        m_InquireTimer->start(1000);// 1sec
+        m_InquireTimer->start(3000);// 1sec
 
     }else{
         if (m_InquireTimer->isActive()){
@@ -554,6 +603,11 @@ void DlgJIO::onInquireTimerTimeout()
                 if (!itm->text().isEmpty()){
                     qDebug() << "onInquireTimerTimeout //TODO Inquire:" << itm->text();
                     //Use ssh
+                    if (mControlBy == DlgSet::ControlBy::SSH){
+                        qDebug() << "control by SSH";
+                        getGpsInfo(itm->text());
+
+                    }
                 }else{
                     qDebug() << "No IPAddr at row:" << row << ", col:" << static_cast<int>(GPScols::IPAddr);
                 }
@@ -695,14 +749,15 @@ void DlgJIO::onLoadFinished(bool ok)
 {
     if (ok){
         if (m_dlgGeo){
+            QTableWidgetItem *itm=nullptr;
             QString label;
             double lat0;
             double lon0;
             double lat;
             double lon;
             double azdeg;
-            QRgb rgb1 = 0xFFDC7000;
-            QRgb rgbaz = 0xFF6CBCF1;
+            QRgb rgb1 = 0xFFDC7000; //淺棕色
+            QRgb rgbaz = 0xFF6CBCF1; //中等亮度的藏青色
             QGV::GeoPos am7;
             QGV::GeoPos cm;
             // marker & phy arrow line
@@ -717,9 +772,12 @@ void DlgJIO::onLoadFinished(bool ok)
                     am7 = QGV::GeoPos{lat0, lon0};
                     m_dlgGeo->addRectangle(am7, QPointF(20.0, 10.0), Qt::red, label);
                     //draw Main Arrow line
-                    m_dlgGeo->addArrowLine(am7, ui->leAM7az->text().toDouble(), 100,
-                                           QColor(Qt::red));
-
+                    if (!ui->leAM7az->text().isEmpty()){
+                        m_dlgGeo->addArrowLine(am7,
+                                               ui->leAM7az->text().toDouble(),
+                                               100,
+                                               QColor(Qt::red));
+                    }
                 }else{
                     // marker
                     cm = QGV::GeoPos{lat, lon};
@@ -728,15 +786,23 @@ void DlgJIO::onLoadFinished(bool ok)
                     // polyLines
                     m_dlgGeo->addLinkline(am7, cm);
                     //draw Arrow line
-                    azdeg = ui->twResult->item(row-1, AZEIcols::Azimuth2)->text().toDouble();
-                    m_dlgGeo->addArrowLine(cm, azdeg, 100, QColor(rgb1));
+                    itm = ui->twResult->item(row-1, AZEIcols::Azimuth2);
+                    if (itm){
+                        azdeg = itm->text().toDouble();
+                        m_dlgGeo->addArrowLine(cm, azdeg, 100, QColor(rgb1));
+                    }
                 }
             }
             //final signal Azimuth
             if (ui->twAIP->rowCount()>0){
                 for(int row=0;row<ui->twAIP->rowCount();row++){
-                    azdeg = ui->twAIP->item(row, AIPcols::Azimuth)->text().toDouble();
-                    m_dlgGeo->addArrowLine(am7, azdeg, 200, QColor(rgbaz));
+                    itm = ui->twAIP->item(row, AIPcols::Azimuth);
+                    if (itm){
+                        if (!itm->text().isEmpty()){
+                            azdeg = itm->text().toDouble();
+                            m_dlgGeo->addArrowLine(am7, azdeg, 200, QColor(rgbaz));
+                        }
+                    }
                 }
             }
         }
@@ -842,18 +908,237 @@ void DlgJIO::onUpdateModelType(int row, int col, int model)
 }
 
 void DlgJIO::onUpdateSetting(QString sshusername, QString sshpassword,
-                             QString webusername, QString webpassword)
+                             QString webusername, QString webpassword,
+                             DlgSet::ControlBy ctl)
 {
-    mSshusername = sshusername;
-    mSshpassword = sshpassword;
+    mSshUsername = sshusername;
+    mSshPassword = sshpassword;
     mWebusername = webusername;
     mWebpassword = webpassword;
+    mControlBy = ctl;
 }
 
 void DlgJIO::onLocationReady(const IpLocation &location)
 {
     // qDebug() << "Coordinates:" << location.latitude << "," << location.longitude;
     mIpLocation = location;
+}
+
+void DlgJIO::handleSSHConnectionError()
+{
+    qDebug() << "SSHConnectionError: " << mSSHRemoteRunner->lastConnectionErrorString();
+}
+
+void DlgJIO::handleSSHProcessStarted()
+{
+    if (m_started)
+    {
+        qDebug() << "Error: Received started() signal again.";
+    }
+    else
+    {
+        m_started = true;
+        m_remoteStdout.clear();
+        m_remoteStderr.clear();
+        // if (m_state == TestingCrash)
+        // {
+        //     QSsh::SshRemoteProcessRunner *const killer = new QSsh::SshRemoteProcessRunner(this);
+        //     //TODO: other platform, eq: windows
+        //     killer->run("pkill -9 sleep", m_sshParams);
+        // }
+        // else if (m_state == TestingIoDevice)
+        // {
+        //     connect(m_catProcess.data(), SIGNAL(readyRead()), SLOT(handleReadyRead()));
+        //     m_textStream.reset(new QTextStream(m_catProcess.data()));
+        //     *m_textStream << testString();
+        //     m_textStream->flush();
+        // }
+    }
+}
+
+void DlgJIO::handleSSHProcessStdout()
+{
+    if (!m_started)
+    {
+        qDebug() << "Error: Remote output from non-started process.";
+    }
+    else if (m_state != TestingSuccess && m_state != TestingTerminal)
+    {
+        qDebug() << "Error: Got remote standard output in state " << m_state;
+    }
+    else
+    {
+        m_remoteStdout += mSSHRemoteRunner->readAllStandardOutput();
+    }
+}
+
+void DlgJIO::handleSSHProcessStderr()
+{
+    if (!m_started)
+    {
+        qDebug() << "Error: Remote error output from non-started process.";
+    }
+    else if (m_state == TestingSuccess)
+    {
+        qDebug() << "Error: Unexpected remote standard error output.";
+    }
+    else
+    {
+        m_remoteStderr += mSSHRemoteRunner->readAllStandardError();
+    }
+}
+
+void DlgJIO::handleSSHProcessClosed(int exitStatus)
+{
+    switch (exitStatus)
+    {
+    case QSsh::SshRemoteProcess::NormalExit:
+        if (!m_started)
+        {
+            qDebug() << "Error: Process exited without starting." ;
+            return;
+        }
+        switch (m_state)
+        {
+        case TestingSuccess:
+        {
+            const int exitCode = mSSHRemoteRunner->processExitCode();
+            if (exitCode != 0)
+            {
+                qDebug() << "Error: exit code is " << exitCode
+                          << ", expected zero." ;
+                return;
+            }
+            if (m_remoteStdout.isEmpty())
+            {
+                qDebug() << "Error: Command did not produce output.";
+                return;
+            }
+            qDebug() << "\n" << QString::fromUtf8(m_remoteStdout) << "\n";
+            // std::cout << "Ok.\nTesting unsuccessful remote process... " << std::flush;
+            // m_state = TestingFailure;
+            // m_started = false;
+            // m_timeoutTimer->start();
+            // mSSHRemoteRunner->run("top -n 1", m_sshParams); // Does not succeed without terminal.
+            // m_timeoutTimer->stop();
+            // QCoreApplication::exit(EXIT_SUCCESS);
+            break;
+        }
+        case TestingFailure:
+        {
+            const int exitCode = mSSHRemoteRunner->processExitCode();
+            if (exitCode == 0)
+            {
+                qDebug() << "Error: exit code is zero, expected non-zero.";
+                return;
+            }
+            if (m_remoteStderr.isEmpty())
+            {
+                qDebug() << "Error: Command did not produce error output.";
+                return;
+            }
+
+            qDebug() << "Ok.\nTesting crashing remote process... ";
+            m_state = TestingCrash;
+            m_started = false;
+            // m_timeoutTimer->start();
+            mSSHRemoteRunner->run("/bin/sleep 100", m_sshParams);
+            break;
+        }
+        case TestingCrash:
+            if (mSSHRemoteRunner->processExitCode() == 0)
+            {
+                qDebug() << "Error: Successful exit from process that was "
+                             "supposed to crash.";
+            }
+            else
+            {
+                qDebug() << "// Some shells (e.g. mksh) don't report 'killed', but just a non-zero exit code.";
+                // handleSuccessfulCrashTest();
+            }
+            break;
+        case TestingTerminal:
+        {
+            const int exitCode = mSSHRemoteRunner->processExitCode();
+            if (exitCode != 0)
+            {
+                qDebug() << "Error: exit code is " << exitCode
+                          << ", expected zero." ;
+                return;
+            }
+            if (m_remoteStdout.isEmpty())
+            {
+                qDebug() << "Error: Command did not produce output.";
+
+                return;
+            }
+            qDebug() << "Ok.\nTesting I/O device functionality... ";
+            // m_state = TestingIoDevice;
+            // m_sshConnection = new SshConnection(m_sshParams);
+            // connect(m_sshConnection, SIGNAL(connected()), SLOT(handleConnected()));
+            // connect(m_sshConnection, SIGNAL(error(QSsh::SshError)),
+            //         SLOT(handleConnectionError()));
+            // m_sshConnection->connectToHost();
+            // m_timeoutTimer->start();
+            break;
+        }
+        case TestingIoDevice:
+            qDebug() << "TestingIoDevice";
+            // if (m_catProcess->exitCode() == 0)
+            // {
+            //     qDebug() << "Error: Successful exit from process that was supposed to crash.";
+
+            // }
+            // else
+            // {
+            //     handleSuccessfulIoTest();
+            // }
+            break;
+        case TestingProcessChannels:
+            if (m_remoteStderr.isEmpty())
+            {
+                qDebug() << "Error: Did not receive readyReadStderr()." ;
+                return;
+            }
+            // if (m_remoteData != StderrOutput)
+            // {
+            //     qDebug() << "Error: Expected output '" << StderrOutput.data() << "', received '"
+            //               << m_remoteData.data() << "'." ;
+
+            //     return;
+            // }
+            qDebug() << "Ok.\nAll tests succeeded." ;
+            // QCoreApplication::quit();
+            break;
+        case Inactive:
+            Q_ASSERT(false);
+        }
+        break;
+    case QSsh::SshRemoteProcess::FailedToStart:
+        if (m_started)
+        {
+            qDebug() << "Error: Got 'failed to start' signal for process "
+                         "that has not started yet.";
+        }
+        else
+        {
+            qDebug() << "Error: Process failed to start." ;
+        }
+        break;
+    case QSsh::SshRemoteProcess::CrashExit:
+        switch (m_state)
+        {
+        case TestingCrash:
+            qDebug() << "handleSuccessfulCrashTest();";
+            break;
+        case TestingIoDevice:
+            qDebug() << "handleSuccessfulIoTest();";
+            break;
+        default:
+            qDebug() << "Error: Unexpected crash." ;
+            return;
+        }
+    }
 }
 
 double DlgJIO::averageBearing(const QList<double> &bearings)
@@ -916,8 +1201,8 @@ void DlgJIO::onLoad(QString filename)
         QJsonObject rootObject = jsonDoc.object();
         // Process the QJsonObject
         QJsonObject sshobj = rootObject.value("ssh").toObject();
-        mSshusername = sshobj.value("username").toString();
-        mSshpassword = sshobj.value("password").toString();
+        mSshUsername = sshobj.value("username").toString();
+        mSshPassword = sshobj.value("password").toString();
         QJsonObject webobj = rootObject.value("web").toObject();
         mWebusername = webobj.value("username").toString();
         mWebpassword = webobj.value("password").toString();
@@ -946,8 +1231,8 @@ bool DlgJIO::onSave(QString filename)
     QJsonObject rootObject;
     //ssh
     QJsonObject sshObj;
-    sshObj["username"] = mSshusername;
-    sshObj["password"] = mSshpassword;
+    sshObj["username"] = mSshUsername;
+    sshObj["password"] = mSshPassword;
     rootObject["ssh"] = sshObj;
     //web
     QJsonObject webObj;

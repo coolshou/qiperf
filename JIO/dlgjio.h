@@ -11,6 +11,9 @@
 #include <QAbstractButton>
 #include <QTimer>
 
+#include <qssh/sshconnection.h>
+#include <qssh/sshremoteprocessrunner.h>
+
 // #include "../src/map/dlgopenstreetmap.h"
 #include "../src/map/dlggeoosm.h"
 #include "../src/gps/iplocationprovider.h"
@@ -54,12 +57,19 @@ public:
         BeamDirectionID=3
     };
     Q_ENUM(AIPcols)
+    enum State {
+        Inactive, TestingSuccess, TestingFailure, TestingCrash, TestingTerminal, TestingIoDevice,
+        TestingProcessChannels
+    };
+    Q_ENUM(State)
     explicit DlgJIO(QSettings *cfg, QWidget *parent = nullptr);
     ~DlgJIO() override;
     void isTileAvailable();
     QString getTile();
     void setShowLine(bool show);
     void clearData();
+    QString getStMotion(QString target);
+    QString getGpsInfo(QString target);
 signals:
     void TileAvailable(bool ok);
     void closeAll();
@@ -102,8 +112,16 @@ private slots:
     void onUpdateModelType(int row, int col, QString smodel);
     void onUpdateModelType(int row, int col, int model);
     void onUpdateSetting(QString sshusername, QString sshpassword,
-                         QString webusername, QString webpassword);
+                         QString webusername, QString webpassword,
+                         DlgSet::ControlBy ctl);
     void onLocationReady(const IpLocation& location);
+    // SSH
+    void handleSSHConnectionError();
+    void handleSSHProcessStarted();
+    void handleSSHProcessStdout();
+    void handleSSHProcessStderr();
+    void handleSSHProcessClosed(int exitStatus);
+
 private:
     double averageBearing(const QList<double>& bearings);
     void getSelfIpLocation();
@@ -128,12 +146,20 @@ private:
     int m_debuglv;
     QTimer * m_InquireTimer;
     DlgSet *m_dlgset;
-    QString mSshusername;
-    QString mSshpassword;
+    QString mSshUsername;
+    QString mSshPassword;
     QString mWebusername;
     QString mWebpassword;
+    DlgSet::ControlBy  mControlBy; //1 : ssh, 2: qiperfd
     IpLocationProvider* provider;
     IpLocation mIpLocation;
+    QSsh::SshConnectionParameters m_sshParams;
+    QSsh::SshRemoteProcessRunner *mSSHRemoteRunner;
+    QByteArray m_remoteStdout;
+    QByteArray m_remoteStderr;
+    State m_state;
+    bool m_started;
+    QScopedPointer<QTextStream> m_textStream;
 };
 
 #endif // DLGJIO_H
