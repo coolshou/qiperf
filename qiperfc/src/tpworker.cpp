@@ -807,15 +807,17 @@ void TpWorker::handleMonitoringFinished()
 
 void TpWorker::onStop(){
     QString cmd="";
-    foreach (auto key, m_ws.keys()){
-        if (m_ws[key]){
+    foreach (QString key, m_ws.keys()){
+        WSClient *wsc = m_ws[key];
+        if (wsc){
             cmd = QString(CMD_IPERF_STOP)+":" + key;
             debug("[TpWorker]"+ key + " m_ws send cmd: " + cmd);
-            m_ws[key]->sendText(cmd);
+            wsc->sendText(cmd);
+
             QThread::sleep(1);
             debug("[TpWorker]"+ key + " CMD_IPERF_CLEAR ",4);
-            m_ws[key]->sendText(CMD_IPERF_CLEAR);
-            m_ws[key]->close(); //close websocket
+            wsc->sendText(CMD_IPERF_CLEAR);
+            wsc->close(); //close websocket
         }
     }
 

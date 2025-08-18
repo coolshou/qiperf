@@ -104,6 +104,9 @@ qint64 WSClient::sendText(QString message)
         if (rc <=0){
             debug("error sendText size=" + QString::number(rc) + ", " + message);
         }
+        if (!m_webSocket->flush()){
+            qDebug() << "No data to send";
+        }
     }else{
         debug("m_webSocket not isValid (going to send: "+ message +")" );
     }

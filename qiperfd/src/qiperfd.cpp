@@ -527,7 +527,7 @@ void QIperfd::clear()
         emit StopServer();
         auto it = m_iperfwserver.begin();
         while (it != m_iperfwserver.end()) {
-            debug("delete iperf server worker", 3);
+            debug("[QIperfd::clear]delete iperf server worker", 3);
             delete it.value(); // Ensure value is valid
             it = m_iperfwserver.erase(it);
         }
@@ -538,9 +538,9 @@ void QIperfd::clear()
         while (it != m_thserver.end()) {
             if (it.value()) {
                 it.value()->quit();
-                debug("wait server thread stop", 3);
+                debug("[QIperfd::clear]wait server thread stop", 3);
                 it.value()->wait(5000);
-                debug("wait server thread stopped", 3);
+                debug("[QIperfd::clear]wait server thread stopped", 3);
             }
             it = m_thserver.erase(it);
         }
@@ -550,7 +550,7 @@ void QIperfd::clear()
         emit StopClient();
         auto it = m_iperfworkers.begin();
         while (it != m_iperfworkers.end()) {
-            debug("delete iperf client worker", 3);
+            debug("[QIperfd::clear]delete iperf client worker", 3);
             delete it.value();
             it = m_iperfworkers.erase(it);
         }
@@ -561,72 +561,14 @@ void QIperfd::clear()
         while (it != m_threads.end()) {
             if (it.value()) {
                 it.value()->quit();
-                debug(QString("wait client thread stop %1").arg(it.key()), 3);
+                debug(QString("[QIperfd::clear]wait client thread stop %1").arg(it.key()), 3);
                 it.value()->wait(8000);
-                debug("wait client thread stopped", 3);
+                debug("[QIperfd::clear]wait client thread stopped", 3);
             }
             it = m_threads.erase(it);
         }
     }
 
-    // try{
-    //     if (!m_iperfwserver.isEmpty()){
-    //         emit StopServer();
-    //         for (QMap<qint64, IperfWorker*>::iterator it = m_iperfwserver.begin(); it != m_iperfwserver.end();) {
-    //             // if (it.value()->isRunning()){
-    //             //     it.value()->setStop(); // WARN: QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
-    //             // }
-    //             debug("delete iperf server worker", 3);
-    //             delete it.value();
-    //             it = m_iperfwserver.erase(it);
-    //         }
-    //     }
-    // } catch (const std::exception &e) {
-    //     debug(QString("iperf server worker error: %1").arg(e.what()), 2);
-    // }
-    // try{
-    //     if (!m_thserver.isEmpty()){
-    //         for (QMap<qint64, QThread*>::iterator it = m_thserver.begin(); it != m_thserver.end();) {
-    //             it.value()->quit();
-    //             debug("wait server thread stop", 3);
-    //             it.value()->wait(5000);
-    //             debug("wait server thread stoped", 3);
-    //             // delete it.value();
-    //             it = m_thserver.erase(it);
-    //         }
-    //     }
-    // } catch (const std::exception &e) {
-    //     debug(QString("iperf server thread error: %1").arg(e.what()), 2);
-    // }
-    // try{
-    //     if (!m_iperfworkers.isEmpty()){
-    //         emit StopClient();
-    //         for (QMap<qint64, IperfWorker*>::iterator it = m_iperfworkers.begin(); it != m_iperfworkers.end();) {
-    //             // if (it.value()->isRunning()){
-    //             //     it.value()->setStop();WARN: QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
-    //             // }
-    //             debug("delete iperf client worker", 3);
-    //             delete it.value();
-    //             it = m_iperfworkers.erase(it);
-    //         }
-    //     }
-    // } catch (const std::exception &e) {
-    //     debug(QString("iperf client worker error: %1").arg(e.what()), 2);
-    // }
-    // try{
-    //     if (!m_threads.isEmpty()){
-    //         for (QMap<qint64, QThread*>::iterator it = m_threads.begin(); it != m_threads.end();) {
-    //             it.value()->quit();
-    //             debug(QString("wait client thread stop %1").arg(QString::number(it.key())), 3);
-    //             it.value()->wait(8000);
-    //             debug("wait client thread stoped", 3);
-    //             // delete it.value();
-    //             it = m_threads.erase(it);
-    //         }
-    //     }
-    // } catch (const std::exception &e) {
-    //     debug(QString("iperf client thread error: %1").arg(e.what()), 2);
-    // }
     debug("iperfserver:" + QString::number(m_iperfwserver.count())
           + " threads:" + QString::number(m_thserver.count())
           + " iperfclient:" + QString::number(m_iperfworkers.count())

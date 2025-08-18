@@ -116,7 +116,6 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
 IperfWorker::~IperfWorker()
 {
     if (!m_iperf->atEnd()){
-        // emit log(m_idx, "force kill iperf procress");
         debug("force kill iperf procress");
         m_iperf->kill();
     }
@@ -299,17 +298,16 @@ void IperfWorker::onSetReStart(bool isServer)
 void IperfWorker::setStop()
 {
     m_stop = true;
-    qDebug() << "server mode:" << m_servermode << " m_iperf state: " << m_iperf->state();
     if (m_iperf){
-        debug("kill iperf: "+ QString::number(m_iperf->processId()), 1);
+        qDebug() << "server mode:" << m_servermode << " m_iperf state: " << m_iperf->state();
         if (m_iperf->state() == QProcess::Running) {
+            debug("kill iperf: "+ QString::number(m_iperf->processId()), 1);
 #if defined(Q_OS_LINUX)
             kill(m_iperf->processId(), SIGINT); //ctrl+c
 #else
             m_iperf->terminate(); // Attempt graceful termination // Sends SIGTERM
 #endif
             if (m_iperf->waitForFinished(3000)){
-                // emit log(m_idx, "iperf killed");
                 debug("iperf killed", 2);
             }else{
                 if (m_iperf->state() == QProcess::Running) {
@@ -392,9 +390,11 @@ int IperfWorker::getRefRow()
 void IperfWorker::debug(QString msg, int debuglv)
 {
     if (debuglv<=m_debuglv){
-        QString msg="("+m_threadid+")"+"-"+QString::number(m_idx)+"-"+msg;
-        qDebug() << msg;
-        emit debuginfo(msg);
+        if (!msg.isEmpty()){
+            QString emsg="(m_threadid:"+m_threadid+")"+"-m_idx:"+QString::number(m_idx)+"-"+msg;
+            // qDebug() << emsg;
+            emit debuginfo(emsg);
+        }
     }
 }
 
@@ -579,5 +579,5 @@ void IperfWorker::onThroughputData(int refrow, QString sInterval, QString data)
 void IperfWorker::onDebuginfo(QString msg)
 {
     debug("IperfWorker::onDebuginfo:" + msg, 4);
-    emit debuginfo("[IperfWrapper]" + msg);
+    emit debuginfo("[IperfWorker]" + msg);
 }
