@@ -119,11 +119,15 @@ qint64 WSServer::sendTextMessage(QString msg, QString target)
     qint64 rc=0;
     for(auto &t: as_const(ts)) {
         if (m_clients.contains(t)) {
+            QWebSocket *ws = m_clients.value(t);
             m_sendtype=WSServer::sendtype::text;
-            rc= m_clients.value(t)->sendTextMessage(msg);
+            rc= ws->sendTextMessage(msg);
             if (rc<=0){
                 qDebug() << "ERROR sendText to " << t
                          << " size=" << QString::number(rc) << " : " << msg;
+            }
+            if (ws->flush() == 0){
+                qDebug() << "No more data to flush";
             }
         }else{
             qDebug() << "m_clients do not have:" << t;
