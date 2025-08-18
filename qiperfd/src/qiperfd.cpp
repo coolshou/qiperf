@@ -261,11 +261,11 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     connect(iperfer, &IperfWorker::debuginfo, this, &QIperfd::onDebuginfo);
     connect(iperfer, &IperfWorker::workerFinished, this, &QIperfd::handleWorkerFinished);
     // connect(this, &QIperfd::setStop, iperfer, &IperfWorker::setStop);
-    if (bServer){
-        connect(this, &QIperfd::StopServer, iperfer, &IperfWorker::setStop);
-    }else{
-        connect(this, &QIperfd::StopClient, iperfer, &IperfWorker::setStop);
-    }
+    // if (bServer){
+    connect(this, &QIperfd::StopServer, iperfer, &IperfWorker::setStop);
+    // }else{
+    connect(this, &QIperfd::StopClient, iperfer, &IperfWorker::setStop);
+    // }
     connect(this, &QIperfd::setDebugLv, iperfer, &IperfWorker::onSetDebugLv);
     connect(this, &QIperfd::setStartTime, iperfer, &IperfWorker::onSetStartTime);
     connect(this, &QIperfd::setReStart, iperfer, &IperfWorker::onSetReStart);
@@ -492,14 +492,14 @@ void QIperfd::startAll(bool bServer)
     if (bServer){
         for (auto it = m_thserver.begin(); it != m_thserver.end(); ++it)
         {
-            debug(" start iperfworkers server:" + QString::number(it.key()), 5);
+            debug(" start iperfworkers server:" + QString::number(it.key()), 2);
             startServer(it.key());
             // QCoreApplication::processEvents(QEventLoop::AllEvents);// do not add this ?
         }
     }else{
         for (auto it = m_threads.begin(); it != m_threads.end(); ++it)
         {
-            debug(" start iperfworkers client:" + QString::number(it.key()), 5);
+            debug(" start iperfworkers client:" + QString::number(it.key()), 2);
             start(it.key());
             // QCoreApplication::processEvents(QEventLoop::AllEvents);// do not add this ?
         }
@@ -856,7 +856,7 @@ void QIperfd::onFinished(int refrow, int exitCode, int exitStatus, QString ippor
     QString msg = QString(CMD_IPERF_STOPED)+":"+ QString::number(refrow);
     msg = msg + ":" + QString::number(exitCode)+  ":" + QString::number(exitStatus);
     msg = msg + ":" + ipport;
-    onLog("onFinished: " + msg);
+    onLog("onFinished: " + msg + " server:" + QString::number(servermode));
     m_wsserver->sendTextResult(msg);
     if (!filename.isEmpty()){
         if(QFileInfo::exists(filename)){
@@ -1310,7 +1310,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         if (smode.contains("S")){
             bserver=true;
         }
-        onLog(QString("s_starttime: %1 (%2)").arg(s_starttime, bserver?"server":"client"));
+        // onLog(QString("s_starttime: %1 (%2)").arg(s_starttime, bserver?"server":"client"));
         startAll(bserver);
     }else if (act.startsWith(CMD_IPERF_STOP)){
         stopAll();

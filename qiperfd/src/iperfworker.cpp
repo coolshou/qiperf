@@ -70,6 +70,7 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     int omitidx = m_arguments.indexOf("--omit");
     m_omit = m_arguments.value(omitidx+1, 0).toInt();
     m_iperfwrapper->setOmit(m_omit);
+
     int durationidx = m_arguments.indexOf("-t")+1; // index of duration value in m_arguments
     // int extrawait = 3; //extra 3 sec, not good?
     int extrawait = 0; //
@@ -266,7 +267,6 @@ void IperfWorker::onSelfDestructor()
 
 void IperfWorker::onSetDebugLv(int lv)
 {
-
     m_debuglv = lv;
 }
 
@@ -299,25 +299,35 @@ void IperfWorker::onSetReStart(bool isServer)
 void IperfWorker::setStop()
 {
     m_stop = true;
-    if (m_iperf && m_iperf->state() == QProcess::Running) {
-        m_iperf->terminate(); // Attempt graceful termination
-        if (m_iperf->waitForFinished(3000)){
-            // emit log(m_idx, "iperf killed");
-            debug("iperf killed", 4);
-        }else{
-            if (m_iperf->state() == QProcess::Running) {
-                int pid = m_iperf->processId();
-                if (pid >0){
-                    debug("force terminate iperf id: " + QString::number(pid));
-        #if defined(Q_OS_WIN32)
-                    m_iperf->kill();
-        #else
-                    m_iperf->terminate();
-        #endif
-                }else{
-                    debug("NOT Running m_iperf: " + m_iperf->program() + m_iperf->arguments().join(" "));
+    qDebug() << "server mode:" << m_servermode << " m_iperf state: " << m_iperf->state();
+    if (m_iperf){
+        debug("kill iperf: "+ QString::number(m_iperf->processId()), 1);
+        if (m_iperf->state() == QProcess::Running) {
+#if defined(Q_OS_LINUX)
+            kill(m_iperf->processId(), SIGINT); //ctrl+c
+#else
+            m_iperf->terminate(); // Attempt graceful termination // Sends SIGTERM
+#endif
+            if (m_iperf->waitForFinished(3000)){
+                // emit log(m_idx, "iperf killed");
+                debug("iperf killed", 2);
+            }else{
+                if (m_iperf->state() == QProcess::Running) {
+                    int pid = m_iperf->processId();
+                    if (pid >0){
+                        debug("force terminate iperf id: " + QString::number(pid));
+#if defined(Q_OS_WIN32)
+                        m_iperf->kill();
+#else
+                        m_iperf->terminate();// Sends SIGTERM
+#endif
+                    }else{
+                        debug("NOT Running m_iperf: " + m_iperf->program() + m_iperf->arguments().join(" "));
+                    }
                 }
             }
+        }else {
+            debug("m_iperf state:"+ static_cast<int>(m_iperf->state()), 1);
         }
     }
     emit workerFinished(m_idx, m_servermode); // Notify manager that this worker is logically done
@@ -382,7 +392,9 @@ int IperfWorker::getRefRow()
 void IperfWorker::debug(QString msg, int debuglv)
 {
     if (debuglv<=m_debuglv){
-        emit debuginfo("("+m_threadid+")"+"-"+QString::number(m_idx)+"-"+msg);
+        QString msg="("+m_threadid+")"+"-"+QString::number(m_idx)+"-"+msg;
+        qDebug() << msg;
+        emit debuginfo(msg);
     }
 }
 
@@ -496,6 +508,8 @@ void IperfWorker::readyReadStdErr()
 
 void IperfWorker::onFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+//TODO: iperf2 server will not stop by it self, so it will not have trigger this,
+//?  use -t for time in seconds to listen for new connections as well as to receive traffic
     if (exitCode==0){
         //normal stop
         if (m_restartonNormalStop){
