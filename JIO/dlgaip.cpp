@@ -29,7 +29,6 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     //Hanwha
     connect(ui->HanwhaBeamTableID, &QComboBox::currentTextChanged, this, &DlgAIP::onHanwhaBeamTableIDChanged);
     connect(ui->HanwhaBeamType, &QComboBox::currentTextChanged, this, &DlgAIP::onHanwhaBeamTypeTextChanged);
-    loadcfg();
     mModuleType = AIP::ModuleType::Unknown;
     connect(ui->pbSelReffile, &QPushButton::clicked, this, &DlgAIP::onSelReffileClicked);
     connect(ui->cbAIPModule, &QComboBox::currentTextChanged, this, &DlgAIP::onChangeModule);
@@ -49,7 +48,7 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     connect(mHanwha, &Hanwha::updateBeamTypeGroup, this, &DlgAIP::onUpdateBeamTypeGroup);
     connect(ui->pbCyntecBeamTable, &QPushButton::clicked, this, &DlgAIP::onCyntecBeamTableClicked);
     connect(ui->pbHanwhaBeamTable, &QPushButton::clicked, this, &DlgAIP::onHanwhaBeamTableClicked);
-
+    loadcfg();
 }
 
 DlgAIP::~DlgAIP()
@@ -398,6 +397,8 @@ void DlgAIP::onHanwhaBeamTypeTextChanged(QString newBeamType)
         QStringList data= mHanwhaBeamTypeGroup.value(newBeamType);
         ui->HanwhaBeamTableID->clear();
         ui->HanwhaBeamTableID->insertItems(0, data);
+    }else{
+        qDebug() << "No '" <<newBeamType<< "' in mHanwhaBeamTypeGroup";
     }
 }
 
@@ -518,6 +519,7 @@ void DlgAIP::loadcfg()
     m_cfg->endGroup();
 
     ui->CyntecElementMap->setCurrentText(0);
+    onHanwhaBeamTypeTextChanged(ui->HanwhaBeamType->currentText());
 }
 
 void DlgAIP::savecfg()
