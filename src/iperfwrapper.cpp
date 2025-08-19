@@ -280,10 +280,8 @@ void IperfWrapper::parserIperf2(QString linedata)
         bool lastMatchesPort = false;
         if (ds.length() >= 9) {
             isReverse = linedata.contains("reverse");
-            // lastMatchesPort = ds.last().contains(QString::number(m_port));
             lastMatchesPort = ds[8].contains(QString::number(m_port));
         }
-        // sDir = (isReverse ^ lastMatchesPort) ? TPDIRRx : TPDIRTx;
         if (m_bidir){
             if (!isReverse && !lastMatchesPort){
                 sDir = m_bidirtag;
@@ -296,10 +294,7 @@ void IperfWrapper::parserIperf2(QString linedata)
             }
         }
         if (!sDir.isEmpty()){
-            debug("sDir : " + sDir + " isReverse:" + QString::number(isReverse) +
-                  " lastMatchesPort:" + QString::number(lastMatchesPort));
             if (!m_idxdir.contains(idx)) {
-                debug("Record : " + idx + " = " + sDir, 3);
                 m_idxdir.insert(idx, sDir);
             } else {
                 debug("THIS should not Happen!! update idx:" + idx + " dir to :" + sDir, 3);
@@ -313,7 +308,7 @@ void IperfWrapper::parserIperf2(QString linedata)
         if (m_idxdir.contains(idx)){
             sDir = m_idxdir.value(idx);
         } else {
-            debug("//No need report:" + idx);
+            debug("//No need report:" + idx, 5);
             return;
         }
         QString sTag = m_servermode ? "s" : "c";
