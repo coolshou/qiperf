@@ -4,6 +4,8 @@
 #include <QtPlugin> // Required for Q_DECLARE_INTERFACE
 #include <QString>
 #include <QMenu> // If your plugin will add menus directly
+#include <QAction>
+#include <QSettings>
 
 class PluginInterface
 {
@@ -17,7 +19,9 @@ public:
 
     // Method to integrate with the main application's menu
     virtual QMenu* createPluginMenu(QWidget* parent) = 0; // Or return a list of QActions, etc.
+    virtual QAction* createPluginAction(QWidget* parent) = 0; // Or return a list of QActions, etc.
     virtual void initialize() = 0; // For any setup the plugin needs
+    virtual void setConfig(QSettings *cfg);
 
 };
 

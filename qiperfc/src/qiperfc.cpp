@@ -48,6 +48,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_clipboard = QApplication::clipboard();
     ui->setupUi(this);
     loadPlugins();
+    loadTools();
     loadSettings();
     m_smicroIdx = -1;
     m_logpath = logpath + "data";
@@ -160,6 +161,8 @@ QIperfC::~QIperfC()
 #if (DEBUG_EXPORT_HTML==1)
     delete m_debugdlg;
 #endif
+    unloadPlugins();
+    unloadTools();
     if (m_dlgrecord){
         delete m_dlgrecord;
     }
@@ -742,7 +745,7 @@ void QIperfC::showTrayMessage(QString title, QString msg,
 }
 
 void QIperfC::loadPlugins()
-{
+{  //demo plugin
     QDir pluginsDir(qApp->applicationDirPath());
         // Adjust path for deployment: usually 'plugins' or specific subdirectories
 #ifdef Q_OS_WIN
@@ -802,6 +805,72 @@ void QIperfC::unloadPlugins()
 {
     // Unload plugins
     for (QPluginLoader* loader : qAsConst(pluginLoaders)) {
+        if (loader->isLoaded()) {
+            loader->unload();
+        }
+        delete loader;
+    }
+}
+
+void QIperfC::loadTools()
+{
+    QDir pluginsDir(qApp->applicationDirPath());
+    //jio
+    QString fileName;
+#ifdef Q_OS_WIN
+    fileName = qApp->applicationDirPath() + QDir::separator() + "libjio.dll";
+#elif defined(Q_OS_UNIX)
+    fileName = qApp->applicationDirPath() + QDir::separator() + "libjio.so";
+#endif
+    if (!fileName.isEmpty()){
+        if (QFile::exists(fileName)) {
+            qDebug() << "Load lib: " << fileName;
+            if (QLibrary::isLibrary(fileName)) { // Check if it's a valid library file
+                QPluginLoader *loader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
+                QObject *plugin = loader->instance();
+
+                if (plugin) {
+                    // Try to cast the loaded plugin to our interface
+                    PluginInterface *iPlugin = qobject_cast<PluginInterface *>(plugin);
+                    if (iPlugin) {
+                        qDebug() << "Loaded plugin:" << iPlugin->pluginName();
+                        iPlugin->setConfig(m_settings);
+                        mToolplugins.append(iPlugin);
+                        mToolpluginLoaders.append(loader);
+
+                        // Add plugin's menu to the main menu bar
+                        // QMenu* pluginMenu = iPlugin->createPluginMenu(this);
+                        // if (pluginMenu) {
+                        //     ui->menuTools->addMenu(pluginMenu);
+                        // }
+                        QAction* pluginAction = iPlugin->createPluginAction(this);
+                        if (pluginAction) {
+                            ui->menuTools->addAction(pluginAction);
+                        }
+
+                        iPlugin->initialize(); // Call plugin's initialization method
+                    } else {
+                        qWarning() << "Could not cast plugin" << fileName << "to PluginInterface.";
+                        qWarning() << loader->errorString();
+                        loader->unload(); // Unload if it's not our expected plugin type
+                        delete loader;
+                    }
+                } else {
+                    qWarning() << "Failed to load plugin:" << fileName;
+                    qWarning() << loader->errorString();
+                    delete loader;
+                }
+            }else {
+                qDebug() << "Not valid library file: " << fileName;
+            }
+        }
+    }
+}
+
+void QIperfC::unloadTools()
+{
+    // Unload plugins
+    for (QPluginLoader* loader : qAsConst(mToolpluginLoaders)) {
         if (loader->isLoaded()) {
             loader->unload();
         }
@@ -1470,10 +1539,10 @@ void QIperfC::onAddSSH()
 
 void QIperfC::onJIO()
 {
-    dlg_gps = new DlgJIO(m_settings);
-    connect(this, &QIperfC::closeAll, dlg_gps, &DlgJIO::close);
-    dlg_gps->clearData();
-    dlg_gps->show();
+    dlg_jio = new DlgJIO(m_settings);
+    connect(this, &QIperfC::closeAll, dlg_jio, &DlgJIO::close);
+    dlg_jio->clearData();
+    dlg_jio->show();
 }
 
 void QIperfC::initActions()
@@ -1514,7 +1583,7 @@ void QIperfC::initActions()
     connect(ui->actionAddPing, &QAction::triggered, this, &QIperfC::onAddPing);
     connect(ui->actionWlanSTA, &QAction::triggered, this, &QIperfC::onWlanSTA);
     //tools
-    connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onJIO);
+    // connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onJIO);
     //option
     connect(ui->actionConfig, &QAction::triggered, this, &QIperfC::onConfig);
     // auto

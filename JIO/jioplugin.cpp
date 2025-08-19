@@ -9,12 +9,12 @@ JioPlugin::JioPlugin(QObject *parent)
 
 QString JioPlugin::pluginName() const
 {
-    return "My Sample Plugin";
+    return "JIO";
 }
 
 QString JioPlugin::pluginDescription() const
 {
-    return "A simple plugin that adds an item to the menu.";
+    return "JIO project control tools";
 }
 
 QString JioPlugin::pluginVersion() const
@@ -30,13 +30,14 @@ QMenu* JioPlugin::createPluginMenu(QWidget* parent)
     connect(action1, &QAction::triggered, this, &JioPlugin::onMyActionTriggered);
     pluginMenu->addAction(action1);
 
-    QAction* action2 = new QAction("Do Something 2", pluginMenu);
-    connect(action2, &QAction::triggered, [this]() {
-        QMessageBox::information(nullptr, "Plugin Action", "Action 2 from " + pluginName() + " triggered!");
-    });
-    pluginMenu->addAction(action2);
-
     return pluginMenu;
+}
+
+QAction *JioPlugin::createPluginAction(QWidget *parent)
+{
+    QAction* action1 = new QAction(QIcon(":/AIP/JIO"), "JIO", parent);
+    connect(action1, &QAction::triggered, this, &JioPlugin::onAction1Triggered);
+    return action1;
 }
 
 void JioPlugin::initialize()
@@ -44,7 +45,21 @@ void JioPlugin::initialize()
     qDebug() << "JioPlugin initialized!";
 }
 
+void JioPlugin::setConfig(QSettings *cfg)
+{
+    mCfg = cfg;
+}
+
 void JioPlugin::onMyActionTriggered()
 {
     QMessageBox::information(nullptr, "Plugin Action", "Action 1 from " + pluginName() + " triggered!");
+}
+
+void JioPlugin::onAction1Triggered(bool checked)
+{
+    Q_UNUSED(checked)
+    dlg_jio = new DlgJIO(mCfg);
+    connect(this, &JioPlugin::destroyed, dlg_jio, &DlgJIO::close);
+    dlg_jio->clearData();
+    dlg_jio->show();
 }

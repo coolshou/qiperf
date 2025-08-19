@@ -4,11 +4,6 @@ QT += positioning # for QGeoCoordinate
 greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat # requite by QT6 QTextCodec
 
 
-include(../lib/qssh/qssh.pri)
-include(../qiperfc/lib/QXlsx/QXlsx/QXlsx.pri)
-include(../lib/qgeoview.pri)
-include(../lib/geographiclib.pri)
-
 INCLUDEPATH += \
     ../qiperfc \
     ../src

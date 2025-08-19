@@ -128,6 +128,8 @@ private:
                          QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::Information, int msecs = 10000);
     void loadPlugins();
     void unloadPlugins();
+    void loadTools();
+    void unloadTools();
     void updateRunStatus(bool bStart);
 
     // void initPingChart();
@@ -195,6 +197,8 @@ private:
     QAction *quitAction;
     QList<QPluginLoader*> pluginLoaders;
     QList<PluginInterface*> plugins;
+    QList<QPluginLoader*> mToolpluginLoaders;
+    QList<PluginInterface*> mToolplugins;
     // CustomHeaderView *header;
     QString settingfilepath;
     QString m_logpath;
@@ -263,7 +267,7 @@ private:
     QString _logfilename;
     bool _logtimestemp;
     QString _logtimestempformat;
-    DlgJIO *dlg_gps;
+    DlgJIO *dlg_jio;
     QString m_OpenStreetMapTile;
 
     // throughput worker

@@ -7,6 +7,10 @@ TEMPLATE = lib
 # Define as a plugin
 CONFIG   += plugin
 
+include(../lib/qssh/qssh.pri)
+include(../qiperfc/lib/QXlsx/QXlsx/QXlsx.pri)
+include(../lib/qgeoview.pri)
+include(../lib/geographiclib.pri)
 include(jio.pri)
 
 INCLUDEPATH += \

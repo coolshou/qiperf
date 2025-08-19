@@ -4,6 +4,9 @@
 #include "plugininterface.h"
 #include <QObject>
 #include <QAction>
+#include <QSettings>
+
+#include "dlgjio.h"
 
 class JioPlugin : public QObject, public PluginInterface
 {
@@ -21,10 +24,15 @@ public:
     QString pluginDescription() const override;
     QString pluginVersion() const override;
     QMenu* createPluginMenu(QWidget* parent) override;
+    QAction *createPluginAction(QWidget* parent) override;
     void initialize() override;
-
+    void setConfig(QSettings *cfg) override;
 private slots:
     void onMyActionTriggered();
+    void onAction1Triggered(bool checked);
+private:
+    QSettings *mCfg;
+    DlgJIO *dlg_jio;
 };
 
 #endif // JIOPLUGIN_H
