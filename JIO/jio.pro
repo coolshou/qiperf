@@ -20,11 +20,13 @@ INCLUDEPATH += \
 HEADERS += \
     jioplugin.h \
     ../qiperfc/plugin/plugininterface.h \
-    ../src/map/dlggeoosm.h
+    ../src/map/dlggeoosm.h \
+    ../qiperfc/lib/geoview/rectangletext.h
 
 SOURCES += \
 	jioplugin.cpp \
-	../src/map/dlggeoosm.cpp
+	../src/map/dlggeoosm.cpp \
+	../qiperfc/lib/geoview/rectangletext.cpp
 
 FORMS += \
 	../src/map/dlggeoosm.ui
