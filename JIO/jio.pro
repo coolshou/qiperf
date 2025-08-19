@@ -14,14 +14,17 @@ include(../lib/geographiclib.pri)
 include(jio.pri)
 
 INCLUDEPATH += \
-    ../qiperfc/plugin/
+    ../qiperfc/plugin/ \
+    ../qiperfc/src/map/
 
 HEADERS += \
     jioplugin.h \
-    ../qiperfc/plugin/plugininterface.h
+    ../qiperfc/plugin/plugininterface.h \
+    ../qiperfc/src/map/dlggeoosm.h
 
 SOURCES += \
-	jioplugin.cpp
+	jioplugin.cpp \
+	../qiperfc/src/map/dlggeoosm.cpp
 
 # Add a JSON metadata file (optional but recommended)
 # This file can contain additional information about your plugin
