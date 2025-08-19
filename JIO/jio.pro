@@ -26,6 +26,9 @@ SOURCES += \
 	jioplugin.cpp \
 	../qiperfc/src/map/dlggeoosm.cpp
 
+FORMS += \
+	../qiperfc/src/map/dlggeoosm.ui
+
 # Add a JSON metadata file (optional but recommended)
 # This file can contain additional information about your plugin
 QMAKE_JSON_EXTENSIONS = \
