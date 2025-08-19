@@ -32,6 +32,7 @@ HEADERS += \
     $$PWD/frmbeamtable.h \
     $$PWD/hanwha.h \
     $$PWD/hanwhabeamtabledata.h \
+    $$PWD/jiocmd.h \
     $$PWD/lbrrestclient.h
 
 FORMS += \
