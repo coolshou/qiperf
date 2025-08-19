@@ -60,8 +60,11 @@ unix {
     LIBS += -Wl,--no-whole-archive
 }
 win32:{
-LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
-     $$OUT_PWD/../lib/qssh/lib/QSsh.lib
+    LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
+        $$OUT_PWD/../lib/qssh/lib/QSsh.lib
+    LIBS += -L$$OUT_PWD/../lib/qssh/botan/ \
+        $$OUT_PWD/../lib/qssh/botan/botan.lib
+
 }
 # QSSH END
 
