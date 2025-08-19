@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
+    JIO/jio.pro \
     qiperfd \
     qiperftray \
     qgeoview \
