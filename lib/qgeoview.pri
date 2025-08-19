@@ -1,4 +1,5 @@
 
+DEFINES -= QT_NO_CAST_FROM_ASCII
 
 #qgeoview
 # include(qgeoview/samples/lib.pri)
