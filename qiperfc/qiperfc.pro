@@ -10,23 +10,7 @@ QT += positioning # for QGeoCoordinate
 #CONFIG += release
 #CONFIG += debug
 
-QT += opengl
-DEFINES += QCUSTOMPLOT_USE_OPENGL # qcustomplot use OPENGL
-unix:!android {
-    # 22.04 (freeglut3-dev)
-    INCLUDEPATH +=/usr/include/GL/
-    LIBS += -lglut
-    # -lOpenGL
-    # 24.04 (libglut-dev)
-    #CONFIG += link_pkgconfig
-    #PKGCONFIG += glut
-}
-win32: {
-    LIBS += \
-        -lOpengl32 \
-        -lglu32
-    LIBS += -lws2_32
-}
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 # greaterThan(QT_MAJOR_VERSION, 4): CONFIG += c++11
 lessThan(QT_MAJOR_VERSION, 5): QMAKE_CXXFLAGS += -std=c++11
@@ -47,26 +31,7 @@ unix {
 }
 
 #GeographicLib
-# cmake .. -DBUILD_SHARED_LIBS=OFF
-INCLUDEPATH += \
-    $$PWD/../lib/geographiclib/build/include \
-    $$PWD/../lib/geographiclib/include
-unix {
-LIBS += \
-    -L$$PWD/../lib/geographiclib/build/src -lGeographicLib
-}
-# cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_CXX_FLAGS="/EHsc /wd4819  /wd4456  /wd4244 /WX-"  ..
-# msbuild -p:Configuration=Release GeographicLib.sln
-# msbuild -p:Configuration=Debug GeographicLib.sln
-win32 {
-    CONFIG(debug, debug|release) {
-        LIBS += \
-            -L$$PWD/../lib/geographiclib/build/lib/Debug -lGeographicLib
-    }else{
-        LIBS += \
-            -L$$PWD/../lib/geographiclib/build/lib/Release -lGeographicLib
-    }
-}
+include(../lib/geographiclib.pri)
 
 INCLUDEPATH += \
     $$PWD/lib \
@@ -84,9 +49,10 @@ QXLSX_PARENTPATH=$$PWD/lib/QXlsx/QXlsx         # current QXlsx path is . (. mean
 QXLSX_HEADERPATH=$$PWD/lib/QXlsx/QXlsx/header/  # current QXlsx header path is ./header/
 QXLSX_SOURCEPATH=$$PWD/lib/QXlsx/QXlsx/source/  # current QXlsx source path is ./source/
 include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
-
-include($$PWD/../JIO/jio.pri)
+include($$PWD/lib/qcustomplot.pri)
 include($$PWD/../lib/qssh.pri)
+include($$PWD/../JIO/jio.pri)
+
 # debug
 #CONFIG += sanitizer
 #CONFIG += sanitize_address
@@ -117,10 +83,6 @@ SOURCES += \
     ../src/port/tcpudpport.cpp \
     auto/dlgsimplemicro.cpp \
     auto/simpleworker.cpp \
-    lib/axistag.cpp \
-    lib/myqcpbars.cpp \
-    lib/myqcpgraph.cpp \
-    lib/qcustomplot.cpp \
     src/codeeditor.cpp \
     src/customheaderview.cpp \
     src/dlgintbox.cpp \
@@ -210,10 +172,6 @@ HEADERS += \
     ../src/tpmgrdata.h \
     auto/dlgsimplemicro.h \
     auto/simpleworker.h \
-    lib/axistag.h \
-    lib/myqcpbars.h \
-    lib/myqcpgraph.h \
-    lib/qcustomplot.h \
     src/codeeditor.h \
     src/customheaderview.h \
     src/dlgintbox.h \
