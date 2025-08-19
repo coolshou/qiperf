@@ -20,14 +20,14 @@ INCLUDEPATH += \
 HEADERS += \
     jioplugin.h \
     ../qiperfc/plugin/plugininterface.h \
-    ../qiperfc/src/map/dlggeoosm.h
+    ../src/map/dlggeoosm.h
 
 SOURCES += \
 	jioplugin.cpp \
-	../qiperfc/src/map/dlggeoosm.cpp
+	../src/map/dlggeoosm.cpp
 
 FORMS += \
-	../qiperfc/src/map/dlggeoosm.ui
+	../src/map/dlggeoosm.ui
 
 # Add a JSON metadata file (optional but recommended)
 # This file can contain additional information about your plugin
