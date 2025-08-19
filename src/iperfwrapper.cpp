@@ -264,7 +264,7 @@ void IperfWrapper::parserIperf2(QString linedata)
         }
         return;
     } else if (linedata.contains("--") || linedata.contains("Connecting") ||
-        linedata.contains("local") || linedata.contains("Interval") ||
+        linedata.contains("Interval") ||
         linedata.contains("(omitted)") || linedata.contains("- - ") ||
         linedata.contains("Reverse mode") || linedata.contains("sender") ||
         linedata.contains("error") || linedata.contains("warning:")) {
@@ -280,21 +280,42 @@ void IperfWrapper::parserIperf2(QString linedata)
         bool lastMatchesPort = false;
         if (ds.length() >= 9) {
             isReverse = linedata.contains("reverse");
-            lastMatchesPort = ds.last().contains(QString::number(m_port));
+            // lastMatchesPort = ds.last().contains(QString::number(m_port));
+            lastMatchesPort = ds[8].contains(QString::number(m_port));
         }
-        sDir = (isReverse ^ lastMatchesPort) ? TPDIRRx : TPDIRTx;
-        debug("sDir : " + sDir, 2);
-        if (!m_idxdir.contains(idx)) {
-            debug("Record : " + idx + " = " + sDir, 3);
-            m_idxdir.insert(idx, sDir);
-        } else {
-            debug("THIS should not Happen!! update idx:" + idx + " dir to :" + sDir, 3);
+        // sDir = (isReverse ^ lastMatchesPort) ? TPDIRRx : TPDIRTx;
+        if (m_bidir){
+            if (!isReverse && !lastMatchesPort){
+                sDir = m_bidirtag;
+            }
+        }else{
+            if (!isReverse && !lastMatchesPort){
+                sDir = TPDIRRx;
+            }else{
+                sDir = TPDIRTx;
+            }
+        }
+        if (!sDir.isEmpty()){
+            debug("sDir : " + sDir + " isReverse:" + QString::number(isReverse) +
+                  " lastMatchesPort:" + QString::number(lastMatchesPort));
+            if (!m_idxdir.contains(idx)) {
+                debug("Record : " + idx + " = " + sDir, 3);
+                m_idxdir.insert(idx, sDir);
+            } else {
+                debug("THIS should not Happen!! update idx:" + idx + " dir to :" + sDir, 3);
+            }
         }
     } else if (linedata.isEmpty()) {
             // ignore warning: line
     } else {
         // Handle throughput data
         linedata = getIdx(linedata, idx);
+        if (m_idxdir.contains(idx)){
+            sDir = m_idxdir.value(idx);
+        } else {
+            debug("//No need report:" + idx);
+            return;
+        }
         QString sTag = m_servermode ? "s" : "c";
         int iparallel = m_parallel.toInt();
         QStringList data = linedata.split(" ", Qt::SkipEmptyParts);
@@ -349,8 +370,9 @@ void IperfWrapper::parserIperf2(QString linedata)
                             debug("Malformed packet lost field: " + data[8], 3);
                         }
                     }
-                    if (!sDir.isNull())
+                    if (!sDir.isEmpty()){
                         irec.insert("dir", sDir);
+                    }
 
                     if (!idx.contains("SUM", Qt::CaseInsensitive)) {
                         if (linedata.contains("receiver"))
@@ -602,7 +624,7 @@ QString IperfWrapper::getIdx(QString linedata, QString &idx)
             result = linedata.right(linedata.length()-iE-1).trimmed();
             debug("getIdx idx: " + idx +  "  right(" + result + ")", 5);
         }else{
-            qDebug() << "getIdx format not in expect [ 1]: " << tmp;
+            debug("getIdx format not in expect [ 1]: " + tmp);
         }
     }
     return result;
@@ -615,7 +637,7 @@ void IperfWrapper::setSetting(int refrow, bool servermode, QString parallel, boo
     m_parallel = parallel;
     m_bidir = bidir;
     m_bidirtag = bidirtag;
-    qDebug() << "setSetting m_bidirtag:" << m_bidirtag;
+    debug("setSetting m_bidirtag:" + m_bidirtag);
 }
 
 void IperfWrapper::setFile(QString filename)
