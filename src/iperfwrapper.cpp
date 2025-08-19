@@ -619,7 +619,7 @@ QString IperfWrapper::getIdx(QString linedata, QString &idx)
             result = linedata.right(linedata.length()-iE-1).trimmed();
             debug("getIdx idx: " + idx +  "  right(" + result + ")", 5);
         }else{
-            debug("getIdx format not in expect [ 1]: " + tmp);
+            debug("getIdx format not in expect eq [ 1]: " + tmp, 5);
         }
     }
     return result;
