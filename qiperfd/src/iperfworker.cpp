@@ -244,7 +244,8 @@ void IperfWorker::setStop()
 {
     m_stop = true;
     if (m_iperf){
-        qDebug() << "server mode:" << m_servermode << " m_iperf state: " << m_iperf->state();
+        debug("server mode:" + QString::number(m_servermode) +
+              " m_iperf state: " + QString::number(static_cast<int>(m_iperf->state())));
         if (m_iperf->state() == QProcess::Running) {
             debug("kill iperf: "+ QString::number(m_iperf->processId()), 1);
 #if defined(Q_OS_LINUX)
