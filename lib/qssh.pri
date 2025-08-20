@@ -107,5 +107,7 @@ unix {
 win32:{
     LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
         $$OUT_PWD/../lib/qssh/lib/QSsh.lib
-    LIBS += $$BOTANPATH/libbotan-2.lib
+    INCLUDEPATH += $$BOTANPATH \
+        $$BOTANPATH/build/include
+    LIBS += $$BOTANPATH/botan.lib
 }
