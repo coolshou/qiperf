@@ -1,8 +1,9 @@
-qiperf (0.14.11408.07-1) unstable; urgency=medium
+qiperf (0.14.11408.20-1) unstable; urgency=medium
 
-  * Add When iperf error stop, restart it
+  * change Linux IperfWorker::setStop use SIGINT (Ctrl+c)
+  * Fix Iperf2 -R did not show throughput plot chart
 
- -- coolshou <coolshou2060@gmail.com>  Thu, 08 Aug 2025 10:00:00 +0800
+ -- coolshou <coolshou2060@gmail.com>  Wed, 20 Aug 2025 10:00:00 +0800
 
 qiperf (0.13.11407.03-1) unstable; urgency=medium
 
