@@ -184,6 +184,7 @@ private:
     FileWatcher *m_filewatcher;
     IcmpPing *m_icmpping;
     bool bNtpserver; // enable NTP server
+    bool bUseSysIperf;
     NtpServer *m_ntpserver;
     NtpSync *m_ntpsync;
     void initiperf2(QString tmp, QString tmp_path, QString arch);

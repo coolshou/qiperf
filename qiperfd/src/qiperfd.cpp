@@ -144,6 +144,9 @@ void QIperfd::loadcfg(QString apppath)
     bNtpserver = cfg->value("EnableNtpServer", false).toBool();
 
     cfg->endGroup();
+    cfg->beginGroup("iperf");
+    bUseSysIperf = cfg->value("UseSysIperf", false).toBool();
+    cfg->endGroup();
 }
 
 void QIperfd::savecfg()
@@ -152,6 +155,9 @@ void QIperfd::savecfg()
     cfg->setValue("ifname", mgr_ifname);
     cfg->setValue("port", mgr_port);
     cfg->setValue("EnableNtpServer", bNtpserver);
+    cfg->endGroup();
+    cfg->beginGroup("iperf");
+    cfg->setValue("UseSysIperf", bUseSysIperf);
     cfg->endGroup();
     cfg->sync();
 }
@@ -1857,15 +1863,18 @@ void QIperfd::initiperf3(QString tmp, QString tmp_path, QString arch)
     m_iperfexe3 = apppath + QDir::separator() + "windows" +QDir::separator() + arch + QDir::separator() + "iperf3.exe";
     m_iperfexe3 = QDir::toNativeSeparators(m_iperfexe3);
 #else
-    m_iperfexe3 = tmp + tmp_path + QDir::separator() + "iperf3";
-    if (QFileInfo::exists(m_iperfexe3))
-    {
-        QFile::remove(m_iperfexe3);
-    }
-    // iperf3
-    #if defined(Q_OS_ANDROID)
+    if (bUseSysIperf){
+        m_iperfexe3 = "/usr/bin/iperf3";
+    }else{
+        m_iperfexe3 = tmp + tmp_path + QDir::separator() + "iperf3";
+        if (QFileInfo::exists(m_iperfexe3))
+        {
+            QFile::remove(m_iperfexe3);
+        }
+// iperf3
+#if defined(Q_OS_ANDROID)
         QFile i3File(":/android/" + arch + "/iperf3");
-    #else
+#else
         Q_UNUSED(arch)
         QFile i3File(apppath+QDir::separator()+"linux"+QDir::separator()+"iperf3");
         if(i3File.exists()){
@@ -1880,7 +1889,8 @@ void QIperfd::initiperf3(QString tmp, QString tmp_path, QString arch)
         }else{
             debug(i3File.fileName() + " NOT EXIST!!");
         }
-    #endif
+#endif
+    }
 #endif
 }
 
@@ -1915,7 +1925,11 @@ void QIperfd::initIperf(QString apppath)
     initiperf2(tmp, tmp_path, arch);
     initiperf21(tmp, tmp_path, arch);
     initiperf22(tmp, tmp_path, arch);
-    m_iperfexe2 = m_iperfexe22;
+    if (bUseSysIperf){
+        m_iperfexe2 ="/usr/bin/iperf";
+    }else{
+        m_iperfexe2 = m_iperfexe22;
+    }
     initiperf3(tmp, tmp_path, arch);
 
 }
