@@ -130,9 +130,7 @@ private:
     void startNtpServer();
     void initIperf(QString apppath);
     void getIperfVer(QString cmd, double ver);
-    // QString getIperf2ver();
-    // QString getIperf21ver();
-    // void getIperfVersion();
+    void initJIOOpenWRT();
 #if defined(Q_OS_WINDOWS)
     // Helper function to create a task using COM API
     bool createScheduledTask(const QString &taskName, const QString &taskCommand, const QString &taskArgs, const QDateTime &runTime);
@@ -185,6 +183,8 @@ private:
     IcmpPing *m_icmpping;
     bool bNtpserver; // enable NTP server
     bool bUseSysIperf;
+    bool bIsJIOOpenWRT; // JIO Openwrt device
+    bool bIsAM7;
     NtpServer *m_ntpserver;
     NtpSync *m_ntpsync;
     void initiperf2(QString tmp, QString tmp_path, QString arch);

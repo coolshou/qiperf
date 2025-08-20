@@ -15,6 +15,9 @@
 #include "qiperfd.h"
 #include "../src/comm.h"
 #include "../src/versions.h"
+
+#include "../JIO/jiocmd.h"
+
 #if defined(Q_OS_WIN32)
 #include <comdef.h>
 #include <Wbemidl.h>
@@ -104,6 +107,8 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     m_filewatcher = new FileWatcher(qiperfdlog);
     connect(m_filewatcher, &FileWatcher::onNewLine, this, &QIperfd::onNewLine);
 
+    initJIOOpenWRT();
+
     informMessage(INFO_QIPERFD_STARTED, true);
     checkFirewallStatus();
 }
@@ -146,6 +151,8 @@ void QIperfd::loadcfg(QString apppath)
     cfg->endGroup();
     cfg->beginGroup("iperf");
     bUseSysIperf = cfg->value("UseSysIperf", false).toBool();
+    bIsJIOOpenWRT = cfg->value("JIOOpenWRT", false).toBool();
+    bIsAM7 = cfg->value("IsAM7", false).toBool();
     cfg->endGroup();
 }
 
@@ -1986,6 +1993,33 @@ void QIperfd::getIperfVer(QString cmd, double ver)
                 }
                 break;
             }
+        }
+    }
+}
+
+void QIperfd::initJIOOpenWRT()
+{
+    if (bIsJIOOpenWRT){
+        QString scmd="";
+        if (bIsAM7){
+            //AP
+            scmd = JIO_SET_AM7_IPERF_BETTER;
+        }else{
+            //STA
+            scmd = JIO_SET_CM7_IPERF_BETTER;
+        }
+        QProcess process;
+        onLog("Exec cmd: " + scmd);
+        process.startCommand(scmd);
+        process.waitForFinished();// Optional: blocks until done
+
+        QString output = process.readAllStandardOutput();
+        QString error = process.readAllStandardError();
+        if (!output.isEmpty()){
+            qDebug() << "cmd STD Output:" << output;
+        }
+        if (!error.isEmpty()){
+            qDebug() << "cmd STD Error:" << error;
         }
     }
 }
