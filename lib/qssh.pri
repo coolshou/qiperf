@@ -110,4 +110,5 @@ win32:{
     INCLUDEPATH += $$BOTANPATH \
         $$BOTANPATH/build/include
     LIBS += $$BOTANPATH/botan.lib
+    LIBS += -lUser32
 }
