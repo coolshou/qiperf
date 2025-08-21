@@ -271,7 +271,7 @@ void IperfWorker::setStop()
                 // }
             }
         }else {
-            debug("m_iperf state:"+ QString::number(m_iperf->state()), 1);
+            debug("m_iperf is not running, state:"+ QString::number(m_iperf->state()), 1);
         }
     }
     emit workerFinished(m_idx, m_servermode); // Notify manager that this worker is logically done
