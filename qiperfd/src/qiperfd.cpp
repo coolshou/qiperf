@@ -529,7 +529,9 @@ void QIperfd::stop(int idx)
 void QIperfd::stopAll()
 {
     // emit setStop();
+    debug("emit StopClient()");
     emit StopClient();
+    debug("emit StopServer()");
     emit StopServer();
 }
 
