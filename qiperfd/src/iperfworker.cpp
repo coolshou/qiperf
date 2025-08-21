@@ -51,12 +51,6 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
         m_restartonNormalStop = m_restartrule["restartonNormalStop"].toBool();
         m_restartrules = m_restartrule["iperfRestartRules"].toArray();
     }
-    m_iperfwrapper = new IperfWrapper(m_ignoreWrongInterval);
-    m_iperfwrapper->setDelaytime(delaystart);
-    m_iperfwrapper->setInterval(interval);
-    m_iperfwrapper->setArgs(arg);
-    connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfWorker::onThroughputData);
-    connect(m_iperfwrapper, &IperfWrapper::debuginfo, this, &IperfWorker::onDebuginfo);
 //    this->deleteLater(); //this will cause stdout not flush??
 //    m_cmd = cmd; //iperf exec fullpath
 #if QT_VERSION < 0x050E00 // < 5.14.0
@@ -74,7 +68,8 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     int durationidx = m_arguments.indexOf("-t")+1; // index of duration value in m_arguments
     // int extrawait = 3; //extra 3 sec, not good?
     int extrawait = 0; //
-    m_duration = m_arguments.value(durationidx, 0).toInt()+ extrawait;
+    uint duration=m_arguments.value(durationidx, 0).toUInt();
+    m_duration = duration + extrawait;
     if (m_omit>0){
         m_duration = m_duration + m_omit ;
     }
@@ -101,6 +96,14 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
             setBidirTag(TPDIRNO);
         }
     }
+    m_iperfwrapper = new IperfWrapper(m_ignoreWrongInterval);
+    m_iperfwrapper->setDelaytime(delaystart);
+    m_iperfwrapper->setInterval(interval);
+    m_iperfwrapper->setArgs(arg);
+    m_iperfwrapper->setDuration(duration);
+    connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfWorker::onThroughputData);
+    connect(m_iperfwrapper, &IperfWrapper::debuginfo, this, &IperfWorker::onDebuginfo);
+
     // m_interval = interval;
     m_selfdestructionTime = (10+m_interval+m_delaystart) * 1000; //10 sec + report interval
     m_selfdestruction = new QTimer(this);

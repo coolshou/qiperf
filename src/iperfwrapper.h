@@ -21,6 +21,7 @@ public:
     void setSetting(int refrow, bool servermode, QString parallel, bool bidir, QString bidirtag);
     void setFile(QString filename);
     void setIperf(QString version, QString protocal, uint port);
+    void setDuration(uint duration);
     void setDelaytime(int delaytime);
     void setRestarttimeoffset(qint64 restarttimeoffset); //
     void setInterval(uint interval);

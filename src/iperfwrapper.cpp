@@ -656,6 +656,11 @@ void IperfWrapper::setIperf(QString version, QString protocal, uint port)
     m_port = port;
 }
 
+void IperfWrapper::setDuration(uint duration)
+{
+    mDuration = duration;
+}
+
 void IperfWrapper::setDelaytime(int delaytime)
 {
     m_delaytime = delaytime;
