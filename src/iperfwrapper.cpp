@@ -155,6 +155,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
     }
     // int duration = 0;
     mDuration = jsondata.value("duration", 0).toUInt();
+    debug("iperf2 mDuration: "+ QString::number(mDuration));
     if (!bServer){
         bool bidir = jsondata["bidir"].toBool();
         if (bidir){
