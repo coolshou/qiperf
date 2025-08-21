@@ -466,6 +466,7 @@ void DlgAIP::onHanwhaBeamTableClicked(bool checked)
                 hBeamT, &FrmBeamTable::selectEllipse);
         //
         QString beamtype = ui->HanwhaBeamType->currentText();
+        hBeamT->setWindowTitle(hBeamT->windowTitle()+"-"+beamtype);
         hBeamT->setGridPoints(mHanwha->getBeamTableDatas(beamtype));
         hBeamT->show();
     }
