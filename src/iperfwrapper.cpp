@@ -327,6 +327,7 @@ void IperfWrapper::parserIperf2(QString linedata)
                 if (ds.length() == 2){
                     interval = ds[1].toDouble() - ds[0].toDouble();
                     chkInterval = ds[1];
+                    debug("s:"+ds[0]+ " e:" + ds[1] + " mDuration:" +QString::number(mDuration));
                     if ((ds[0].toDouble() == 0)&&
                         (qAbs(ds[1].toDouble() - mDuration) < 1e-9)
                         ){
