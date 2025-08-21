@@ -2010,7 +2010,12 @@ void QIperfd::initJIOOpenWRT()
         }
         QProcess process;
         onLog("Exec cmd: " + scmd);
+#if QT_VERSION < 0x060000  // < 6.0
+        QStringList cmds = scmd.split(" ");
+        process.start(cmds[0], cmds.mid(1, cmds.count()-1));
+#else
         process.startCommand(scmd);
+#endif
         process.waitForFinished();// Optional: blocks until done
 
         QString output = process.readAllStandardOutput();
