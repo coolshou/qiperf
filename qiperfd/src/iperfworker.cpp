@@ -256,19 +256,19 @@ void IperfWorker::setStop()
             if (m_iperf->waitForFinished(3000)){
                 debug("iperf killed", 2);
             }else{
-                if (m_iperf->state() == QProcess::Running) {
+                // if (m_iperf->state() == QProcess::Running) {
                     int pid = m_iperf->processId();
                     if (pid >0){
                         debug("force terminate iperf id: " + QString::number(pid));
-#if defined(Q_OS_WIN32)
+// #if defined(Q_OS_WIN32)
                         m_iperf->kill();
-#else
-                        m_iperf->terminate();// Sends SIGTERM
-#endif
+// #else
+                        // m_iperf->terminate();// Sends SIGTERM
+// #endif
                     }else{
                         debug("NOT Running m_iperf: " + m_iperf->program() + m_iperf->arguments().join(" "));
                     }
-                }
+                // }
             }
         }else {
             debug("m_iperf state:"+ QString::number(m_iperf->state()), 1);

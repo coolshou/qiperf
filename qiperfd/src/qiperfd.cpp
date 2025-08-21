@@ -1268,6 +1268,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         // onLog(QString("s_starttime: %1 (%2)").arg(s_starttime, bserver?"server":"client"));
         startAll(bserver);
     }else if (act.startsWith(CMD_IPERF_STOP)){
+        onLog(CMD_IPERF_STOP);
         stopAll();
     }else if (act.startsWith(CMD_IPERF_RESTART)){
         // restart iperf server/client
@@ -2021,10 +2022,10 @@ void QIperfd::initJIOOpenWRT()
         QString output = process.readAllStandardOutput();
         QString error = process.readAllStandardError();
         if (!output.isEmpty()){
-            qDebug() << "cmd STD Output:" << output;
+            onLog("cmd STD Output:" + output);
         }
         if (!error.isEmpty()){
-            qDebug() << "cmd STD Error:" << error;
+            onLog("cmd STD Error:" + error);
         }
     }
 }
