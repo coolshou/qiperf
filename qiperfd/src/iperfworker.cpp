@@ -334,6 +334,19 @@ int IperfWorker::getRefRow()
     return m_refrow;
 }
 
+qint64 IperfWorker::getPID()
+{
+    // get QProcress PID
+    if (m_iperf){
+        if (m_iperf->state() == QProcess::Running){
+            return m_iperf->processId();
+        }else{
+            debug("m_iperf is not running");
+        }
+    }
+    return 0;
+}
+
 void IperfWorker::debug(QString msg, int debuglv)
 {
     if (debuglv<=m_debuglv){

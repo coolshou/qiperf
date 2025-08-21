@@ -543,7 +543,12 @@ void QIperfd::clear()
         auto it = m_iperfwserver.begin();
         while (it != m_iperfwserver.end()) {
             debug("[QIperfd::clear]delete iperf server worker", 3);
-            delete it.value(); // Ensure value is valid
+            IperfWorker* obj = it.value();
+            if (obj->getPID()){
+                //still running
+                obj->setStop();
+            }
+            delete obj; // Ensure value is valid
             it = m_iperfwserver.erase(it);
         }
     }
@@ -566,7 +571,12 @@ void QIperfd::clear()
         auto it = m_iperfworkers.begin();
         while (it != m_iperfworkers.end()) {
             debug("[QIperfd::clear]delete iperf client worker", 3);
-            delete it.value();
+            IperfWorker* obj = it.value();
+            if (obj->getPID()){
+                //still running
+                obj->setStop();
+            }
+            delete obj;
             it = m_iperfworkers.erase(it);
         }
     }
@@ -1270,7 +1280,8 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         // onLog(QString("s_starttime: %1 (%2)").arg(s_starttime, bserver?"server":"client"));
         startAll(bserver);
     }else if (act.startsWith(CMD_IPERF_STOP)){
-        onLog(CMD_IPERF_STOP);
+        QString s = QString("%1 target: %2").arg(CMD_IPERF_STOP, msg);
+        onLog(s);
         stopAll();
     }else if (act.startsWith(CMD_IPERF_RESTART)){
         // restart iperf server/client

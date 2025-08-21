@@ -35,6 +35,7 @@ public:
     void toLogFile(QString msg);
     bool getServerMode();
     int getRefRow();
+    qint64 getPID();
     void debug(QString msg, int debuglv=3);
     QString getThreadID();
 
