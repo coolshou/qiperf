@@ -108,6 +108,7 @@ QString DlgIperf::getJsonCfg()
     if (ui->cbTimeStamp->isChecked()){
         serverObj.insert("timestamps", ui->leTimeStamp->text().trimmed());
     }
+    serverObj.insert("duration", ui->sb_duration->value());
 
     //client
     QJsonObject clientObj;

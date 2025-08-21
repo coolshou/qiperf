@@ -55,6 +55,7 @@ private:
     int m_delaytime;
     qint64 m_restarttimeoffset; // store restart time and init start time diff in sec
     uint m_interval;
+    uint mDuration; // -t
     int m_omit=0;
     bool m_ignorewronginterval;
     bool bWithtimestamp=false;

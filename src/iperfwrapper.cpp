@@ -44,6 +44,8 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
     if (!bindaddr.isEmpty()){
         args = args + " --bind " + bindaddr;
     }
+    mDuration = jsondata.value("duration", 0).toUInt();
+
     if (!bServer){
         bool bidir = jsondata["bidir"].toBool();
         if (bidir){
@@ -53,9 +55,9 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
         if (reverse){
             args = args + " -R";
         }
-        int duration = jsondata["duration"].toInt();
-        if (duration>=0){
-            args = args + " -t " + QString::number(duration);
+
+        if (mDuration>=0){
+            args = args + " -t " + QString::number(mDuration);
         }
         bool zerocopy = jsondata["zerocopy"].toBool();
         if (zerocopy){
@@ -325,6 +327,11 @@ void IperfWrapper::parserIperf2(QString linedata)
                 if (ds.length() == 2){
                     interval = ds[1].toDouble() - ds[0].toDouble();
                     chkInterval = ds[1];
+                    if ((ds[0].toDouble() == 0)&&
+                        (qAbs(ds[1].toDouble() - mDuration) < 1e-9)
+                        ){
+                        debug("iperf2 reach end of test: " + linedata);
+                    }
                 }
             }
 
