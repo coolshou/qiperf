@@ -40,7 +40,7 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     m_tmplogpath(tmplogpath),
     m_parent(parent)
 {
-    m_debuglv = 7;
+    m_debuglv = 3;
     m_restarttimes = 0;
     m_logfile = nullptr;
     m_logtextstream = nullptr;

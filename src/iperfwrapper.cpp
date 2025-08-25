@@ -20,7 +20,7 @@
 IperfWrapper::IperfWrapper(bool ignorewronginterval, QObject *parent)
     : QObject{parent}, m_ignorewronginterval(ignorewronginterval)
 {
-    m_debuglv=5;
+    m_debuglv=3;
     m_restarttimeoffset = 0;
     endcount = 0;
 }
@@ -491,7 +491,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                 sDir = m_bidirtag;
             }
             if (sDir.isEmpty()){
-                debug("Ignore Not sDir line data:" + linedata, 1);
+                debug("Ignore Not sDir line data:" + linedata, 6);
                 return;
             }
             // TCP:

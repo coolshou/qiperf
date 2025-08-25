@@ -337,10 +337,12 @@ void WSClient::onSslErrors(const QList<QSslError> &errors)
 void WSClient::onError(QAbstractSocket::SocketError error)
 {
     if (error != QAbstractSocket::RemoteHostClosedError){
-        debug("[" +m_webSocket->peerAddress().toString() + "]WSClient::onError:" + m_webSocket->errorString());
+        debug("[" + m_webSocket->peerAddress().toString() +
+              "]WSClient::onError:" + m_webSocket->errorString());
     }else{
         // TODO : handle RemoteHostClosedError
-        debug("WSClient::onError:"+ m_webSocket->errorString());
+        debug("[" + m_webSocket->peerAddress().toString() +
+              "]WSClient::onError:"+ m_webSocket->errorString());
     }
     //TODO: handle websocket not connect issue
 }
