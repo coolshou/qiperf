@@ -44,6 +44,18 @@ Calibration_status_of_the_Sensors: 3
 Qulity is very good.
 Sensor mode: Polling
 
+
+# Calibration:
+killall st_motion
+# clear old data
+st_motion c m
+# place device stand-up
+# start
+st_motion rc e d e e 100 1 1 2 4 4 uen 3 eun 0 1 100 0 0.5 0 2 3000 &
+# start 直立畫8
+# sensor_call_so 到出現Calibration status 3為止
+while true;do sensors_call_so ;sleep 3;done
+
 */
 void AGMSensor::parserData(QString data)
 {   int status=0;
