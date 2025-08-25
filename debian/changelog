@@ -1,7 +1,6 @@
 qiperf (0.15.11408.25-1) unstable; urgency=medium
 
-  * Add When iperf error stop, restart it
-  * Add throughput plot group line by "Pair", "Direction", "Comment"
+  * Fix crash issue
 
  -- coolshou <coolshou2060@gmail.com>  Mon, 25 Aug 2025 10:00:00 +0800
 
