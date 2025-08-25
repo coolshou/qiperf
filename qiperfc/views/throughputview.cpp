@@ -618,10 +618,15 @@ void ThroughputView::onItemDClicked(QModelIndex idx)
             }else{
                 qDebug() << "TODO: handle double click on column comment";
                 // QMessageBox::information(this, "comment", tp->data(TP::cols::comment).toString());
-                NMessageBox *msg = new NMessageBox(QMessageBox::Information,
-                                                   "comment",
-                                                   tp->data(TP::cols::comment).toString());
-                msg->show();
+                QVariant d = tp->data(TP::cols::comment);
+                if (d.isValid() && ! d.isNull()) {
+                    QString comment = d.toString();
+                    if (!comment.isEmpty()){
+                        NMessageBox *msg = new NMessageBox(QMessageBox::Information,
+                                                           "comment", comment);
+                        msg->show();
+                    }
+                }
             }
         }
     }
