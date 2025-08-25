@@ -23,6 +23,7 @@ public:
     explicit IperfWorker(qint64 idx, int version, QString cmd, QString arg="-s",
                          uint port=5201, QString bindaddr="0.0.0.0", QString target="",
                          bool bidir=false, bool reverse=false, int interval=1,
+                         qint64 duration=30,
                          int delaystart=0, bool ignoreWrongInterval=false,
                          bool restartonerror=false, QJsonObject restartrule = QJsonObject(),
                          QString tmplogpath = "/tmp",
@@ -91,6 +92,7 @@ private:
     bool m_bidir=false;
     bool m_reverse=false;
     int m_interval=1;  // report interval
+    int m_duration;
     int m_delaystart;
     bool m_ignoreWrongInterval;
     bool m_restartonerror;
@@ -115,7 +117,6 @@ private:
 
     QStringList m_arguments;  //iperf args
     int m_omit=0;
-    int m_duration;
     QProcess *m_iperf; // iperf procress
     QMap<QString, QJsonArray> m_tpdatas;
     int m_debuglv;

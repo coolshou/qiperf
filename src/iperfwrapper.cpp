@@ -44,7 +44,6 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
     if (!bindaddr.isEmpty()){
         args = args + " --bind " + bindaddr;
     }
-    mDuration = jsondata.value("duration", 0).toUInt();
 
     if (!bServer){
         bool bidir = jsondata["bidir"].toBool();
@@ -56,9 +55,9 @@ QString IperfWrapper::toIperf3args(QVariantMap jsondata)
             args = args + " -R";
         }
 
-        // if (mDuration>=0){
+        mDuration = jsondata.value("duration", 0).toUInt();
         args = args + " -t " + QString::number(mDuration);
-        // }
+
         bool zerocopy = jsondata["zerocopy"].toBool();
         if (zerocopy){
             args = args + " -Z";
@@ -153,9 +152,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
     if (!bindaddr.isEmpty()){
         args = args + " -B " + bindaddr;
     }
-    int duration = 0;
     // mDuration = jsondata.value("duration", 0).toUInt();
-    // debug("iperf2 mDuration: "+ QString::number(mDuration));
     if (!bServer){
         bool bidir = jsondata["bidir"].toBool();
         if (bidir){
@@ -165,7 +162,7 @@ QString IperfWrapper::toIperf2args(QVariantMap jsondata)
         if (reverse){
             args = args + " -R ";
         }
-        duration = jsondata.value("duration", 0).toUInt();
+        int duration = jsondata.value("duration", 0).toUInt();
         if (duration>=0){
             args = args + " -t " + QString::number(duration);
         }
@@ -642,7 +639,7 @@ void IperfWrapper::setSetting(int refrow, bool servermode, QString parallel, boo
     m_parallel = parallel;
     m_bidir = bidir;
     m_bidirtag = bidirtag;
-    debug("setSetting m_bidirtag:" + m_bidirtag);
+    debug("setSetting m_bidirtag:" + m_bidirtag, 5);
 }
 
 void IperfWrapper::setFile(QString filename)

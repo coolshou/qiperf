@@ -243,7 +243,8 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
 qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint port,
                  QString bindaddr, QString target,
                  QString parallel, QString protocal, bool bidir, bool reverse,
-                 int interval, int delaytime, bool bServer, bool ignoreWrongInterval,
+                 int interval, qint64 duration,
+                 int delaytime, bool bServer, bool ignoreWrongInterval,
                  bool restartonerror, QJsonObject restartrule)
 { // add a IperfWorker to run iperf server/client
     // TODO: check host/port used?
@@ -256,11 +257,13 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
         idx = m_threads.count();
         m_threads.insert(idx, iperf_th);
     }
+    debug("create IperfWorker", 6);
     IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port,
                                            bindaddr, target, bidir, reverse,
-                                           interval, delaytime,
+                                           interval, duration, delaytime,
                                            ignoreWrongInterval, restartonerror,
                                            restartrule, tmpfilepath+QDir::separator());
+    debug("IperfWorker created", 6);
     iperfer->setRefRow(refrow);
     iperfer->setExtra(parallel, protocal, port);
 //    connect(iperfer, &IperfWorker::onStdout, this, &QIperfd::readStdOut);
@@ -323,6 +326,10 @@ qint64 QIperfd::add(QString refrow, QString sIgnoreWrongInterval, QVariantMap js
     bool reverse = jsondata["reverse"].toBool(); // for server mode use
     int interval = jsondata["interval"].toInt();
     int delaytime = jsondata["delaytime"].toInt();
+    qint64 duration = 0;
+    if (jsondata.contains("duration")){
+        duration = jsondata["duration"].toDouble();
+    }
     bool ignoreWrongInterval = false;
     if (sIgnoreWrongInterval.startsWith("1")){
         ignoreWrongInterval = true;
@@ -353,8 +360,10 @@ qint64 QIperfd::add(QString refrow, QString sIgnoreWrongInterval, QVariantMap js
         debug("Not support Iperf version:" + QString::number(ver), 4);
         return -1;
     }
+    debug("args:" + args, 5);
     return add(refrow, ver, cmd, args, port, binaddr,
-               target, parallel, protocal, bidir, reverse, interval, delaytime,
+               target, parallel, protocal, bidir, reverse, interval, duration,
+               delaytime,
                isServer, ignoreWrongInterval,
                restartonerror, restartruleObject);
 }
@@ -1243,7 +1252,8 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
 
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
-            add(refrow, ignoreWrongInterval, doc.toVariant().toMap());
+            qint64 rc = add(refrow, ignoreWrongInterval, doc.toVariant().toMap());
+            debug("iperf idx: "+ QString::number(rc),5);
         }else{
             onLog("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + msg.toUtf8());
         }

@@ -27,13 +27,14 @@
 IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
                          uint port, QString bindaddr, QString target,
                          bool bidir, bool reverse, int interval,
+                         qint64 duration,
                          int delaystart, bool ignoreWrongInterval,
                          bool restartonerror, QJsonObject restartrule,
                          QString tmplogpath,
                          QObject *parent)
     : QObject{parent}, m_idx(idx), m_version(version), m_cmd(cmd), m_port(port),
       m_bindaddr(bindaddr), m_target(target), m_bidir(bidir), m_reverse(reverse),
-    m_interval(interval), m_delaystart(delaystart),
+    m_interval(interval), m_duration(duration), m_delaystart(delaystart),
     m_ignoreWrongInterval(ignoreWrongInterval),
     m_restartonerror(restartonerror), m_restartrule(restartrule),
     m_tmplogpath(tmplogpath),
@@ -58,18 +59,20 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
 #else
     m_arguments = arg.split(" ", Qt::SkipEmptyParts);
 #endif
+    m_servermode=false;
     if (m_arguments.contains("-s")){
         m_servermode=true;
     }
-    int omitidx = m_arguments.indexOf("--omit");
-    m_omit = m_arguments.value(omitidx+1, 0).toInt();
-    m_iperfwrapper->setOmit(m_omit);
+    m_omit=0;
+    if (m_arguments.contains("--omit")){
+        int omitidx = m_arguments.indexOf("--omit");
+        m_omit = m_arguments.value(omitidx+1, 0).toInt();
+        m_iperfwrapper->setOmit(m_omit);
+    }
 
-    int durationidx = m_arguments.indexOf("-t")+1; // index of duration value in m_arguments
-    // int extrawait = 3; //extra 3 sec, not good?
     int extrawait = 0; //
-    uint duration=m_arguments.value(durationidx, 0).toUInt();
-    m_duration = duration + extrawait;
+    m_duration = m_duration + extrawait;
+
     if (m_omit>0){
         m_duration = m_duration + m_omit ;
     }
@@ -299,7 +302,7 @@ void IperfWorker::setIperfLogPath(QString filepath)
 void IperfWorker::setBidirTag(QString bidir)
 {
     m_bidirtag = bidir;
-    qDebug() << "m_bidirtag:" <<m_bidirtag;
+    debug("m_bidirtag:" +m_bidirtag, 6);
 }
 
 void IperfWorker::setRefRow(QString refrow)
@@ -542,6 +545,5 @@ void IperfWorker::onThroughputData(int refrow, QString sInterval, QString data)
 
 void IperfWorker::onDebuginfo(QString msg)
 {
-    debug("IperfWorker::onDebuginfo:" + msg, 4);
-    emit debuginfo("[IperfWorker]" + msg);
+    emit debuginfo("[IperfWrapper]" + msg);
 }

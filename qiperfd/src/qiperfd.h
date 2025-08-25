@@ -66,7 +66,7 @@ public:
     qint64 add(QString refrow, int version,QString m_cmd,QString args, uint port,
             QString bindaddr="0.0.0.0", QString target="",
             QString parallel="0", QString protocal="TCP",
-            bool bidir=false, bool reverse=false, int interval=1,
+            bool bidir=false, bool reverse=false, int interval=1, qint64 duration=30,
             int delaytime=0, bool bServer=false, bool ignoreWrongInterval=false,
             bool restartonerror=false, QJsonObject restartrule = QJsonObject());
     qint64 add(QString refrow, QString sIgnoreWrongInterval, QVariantMap jsondata);
