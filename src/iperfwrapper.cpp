@@ -20,8 +20,9 @@
 IperfWrapper::IperfWrapper(bool ignorewronginterval, QObject *parent)
     : QObject{parent}, m_ignorewronginterval(ignorewronginterval)
 {
-    m_debuglv=3;
+    m_debuglv=5;
     m_restarttimeoffset = 0;
+    endcount = 0;
 }
 QString IperfWrapper::toIperf3args(QVariantMap jsondata)
 {
@@ -270,12 +271,12 @@ void IperfWrapper::parserIperf2(QString linedata)
         linedata.contains("Reverse mode") || linedata.contains("sender") ||
         linedata.contains("error") || linedata.contains("warning:")) {
         // Skip uninteresting lines
-        debug("Skipping line: " + linedata, 4);
+        debug("Skipping line: " + linedata, 7);
     } else if (linedata.contains("connected with")) {
         // Parse connection info and direction
         linedata = getIdx(linedata, idx);
         QStringList ds = linedata.split(" ", Qt::SkipEmptyParts);
-        debug("ds:" + ds.join(",") + " length:" + QString::number(ds.length()), 4);
+        debug("ds:" + ds.join(",") + " length:" + QString::number(ds.length()), 6);
 
         bool isReverse = false;
         bool lastMatchesPort = false;
@@ -309,7 +310,7 @@ void IperfWrapper::parserIperf2(QString linedata)
         if (m_idxdir.contains(idx)){
             sDir = m_idxdir.value(idx);
         } else {
-            debug("//No need report:" + idx, 5);
+            debug("//No need report:" + idx, 6);
             return;
         }
         QString sTag = m_servermode ? "s" : "c";
@@ -326,25 +327,30 @@ void IperfWrapper::parserIperf2(QString linedata)
                 if (ds.length() == 2){
                     interval = ds[1].toDouble() - ds[0].toDouble();
                     chkInterval = ds[1];
-                    debug("s:"+ds[0]+ " e:" + ds[1] + " mDuration:" +QString::number(mDuration));
+                    debug("idx:"+idx+"=> s:"+ds[0]+ " e:" + ds[1] + " mDuration:" +QString::number(mDuration), 7);
+                    float diff = qAbs(ds[1].toDouble() - mDuration);
+                    debug("diff: " + QString::number(diff), 7);
                     if ((ds[0].toDouble() == 0)&&
-                        (qAbs(ds[1].toDouble() - mDuration) < 1e-9)
-                        ){
-                        debug("iperf2 reach end of test: " + linedata);
+                        (diff >0.01) && (diff < m_interval) ){
+                        endcount = endcount + 1;
+                    }
+                    if (endcount>=m_parallel.toInt()){
+                        debug("endcount:"+QString::number(endcount)+" iperf2 reach end of test: " + linedata);
+                        emit iperf2ended();
                     }
                 }
             }
 
             if (m_ignorewronginterval && !linedata.contains("receiver") &&
                 qAbs(m_interval - interval) > 0.5) {
-                debug("Ignore wrong interval: " + QString::number(interval), 4);
+                debug("["+idx+"] Ignore wrong interval: " + QString::number(interval), 4);
                 return;
             }
 
             if (m_omit > 0) {
                 double dInterval = chkInterval.toDouble() - m_omit;
                 if (dInterval <= 0) {
-                    debug("Ignore omit time: " + QString::number(dInterval), 2);
+                    debug("["+idx+"] Ignore omit time: " + QString::number(dInterval), 2);
                     return;
                 }
             }
@@ -624,7 +630,7 @@ QString IperfWrapper::getIdx(QString linedata, QString &idx)
         if (match.hasMatch()) {
             idx = match.captured(1);
             result = linedata.right(linedata.length()-iE-1).trimmed();
-            debug("getIdx idx: " + idx +  "  right(" + result + ")", 5);
+            debug("getIdx idx: " + idx +  "  right(" + result + ")", 6);
         }else{
             debug("getIdx format not in expect eq [ 1]: " + tmp, 5);
         }

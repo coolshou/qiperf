@@ -37,6 +37,7 @@ signals:
     void workFinished();
     void progress(QString filename, int currentlineno);
     void debuginfo(QString msg);
+    void iperf2ended();// indicate iperf2 server should stop
 private:
     // int getTimeStempLength(QString timestempformat);
     qint64 getTimeStempLength(const std::string& format_string);
@@ -63,6 +64,7 @@ private:
     qint64 iTimestampLength=0;
     QStringList m_arguments;  //iperf args
     int m_debuglv;
+    int endcount;
 };
 
 #endif // IPERFWRAPPER_H

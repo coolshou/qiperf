@@ -40,7 +40,7 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     m_tmplogpath(tmplogpath),
     m_parent(parent)
 {
-    m_debuglv = 3;
+    m_debuglv = 7;
     m_restarttimes = 0;
     m_logfile = nullptr;
     m_logtextstream = nullptr;
@@ -67,9 +67,7 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     if (m_arguments.contains("--omit")){
         int omitidx = m_arguments.indexOf("--omit");
         m_omit = m_arguments.value(omitidx+1, 0).toInt();
-        m_iperfwrapper->setOmit(m_omit);
     }
-
     int extrawait = 0; //
     m_duration = m_duration + extrawait;
 
@@ -104,8 +102,10 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     m_iperfwrapper->setInterval(interval);
     m_iperfwrapper->setArgs(arg);
     m_iperfwrapper->setDuration(duration);
+    m_iperfwrapper->setOmit(m_omit);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfWorker::onThroughputData);
     connect(m_iperfwrapper, &IperfWrapper::debuginfo, this, &IperfWorker::onDebuginfo);
+    connect(m_iperfwrapper, &IperfWrapper::iperf2ended, this, &IperfWorker::setStop);
 
     // m_interval = interval;
     m_selfdestructionTime = (10+m_interval+m_delaystart) * 1000; //10 sec + report interval
