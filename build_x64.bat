@@ -42,7 +42,8 @@ if "%BUILDAPP%"=="1" (
     )
     IF NOT EXIST "lib\qssh\botan\botan.lib" (
        cd lib\qssh\botan
-       python configure.py --cc=msvc --os=windows --cpu=x64 --without-documentation
+       python configure.py --cc=msvc --os=windows --cpu=x64 --build-targets="static,shared" --without-documentation --without-sphinx --without-rst2man
+
        nmake
        # --disable-shared-library
        cd ..\..\..\

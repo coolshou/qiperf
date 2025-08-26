@@ -58,6 +58,8 @@ unix {
     LIBS += -Wl,--whole-archive
     LIBS += $$BOTANPATH/libbotan-2.a
     LIBS += -Wl,--no-whole-archive
+    # for static link botan, it still need libdl
+    LIBS += -ldl
 }
 win32:{
     LIBS += -L$$OUT_PWD/../lib/qssh/lib/ \
