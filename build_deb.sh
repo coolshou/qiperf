@@ -49,7 +49,7 @@ if [ ! -e lib/qssh/botan/libbotan-2.a ]; then
     git submodule update
   fi
   cd botan
-  python3 ./configure.py --disable-shared-library
+  python3 ./configure.py --disable-shared-library --without-documentation
   make
   cd ../../../
 fi

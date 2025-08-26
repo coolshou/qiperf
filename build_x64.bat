@@ -42,8 +42,9 @@ if "%BUILDAPP%"=="1" (
     )
     IF NOT EXIST "lib\qssh\botan\botan.lib" (
        cd lib\qssh\botan
-       python configure.py --cc=msvc --os=windows --cpu=x64
+       python configure.py --cc=msvc --os=windows --cpu=x64 --without-documentation
        nmake
+       # --disable-shared-library
        cd ..\..\..\
     )
     IF NOT EXIST "lib\qssh\lib\libqssh.lib" (
@@ -56,4 +57,8 @@ if "%BUILDAPP%"=="1" (
     qmake
     echo nmake...
     nmake
+    windeployqt6.exe qiperfc_x86_64\qiperfc.exe
+    windeployqt6.exe qiperfd_x86_64\qiperfd.exe
+    windeployqt6.exe qiperftray_x86_64\qiperftray.exe
+
 )
