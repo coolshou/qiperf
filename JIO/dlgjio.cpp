@@ -133,7 +133,10 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     connect(m_dlgset, &DlgSet::updateSetting, this, &DlgJIO::onUpdateSetting);
 
     connect(ui->pbSet, &QPushButton::clicked, this, &DlgJIO::onSet);
+    // keep quire device
     connect(ui->pbInquire, &QPushButton::clicked, this, &DlgJIO::onInquireClicked);
+    // Do Optimiz
+    connect(ui->pbOptimiz, &QPushButton::clicked, this, &DlgJIO::onOptimizClicked);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DlgJIO::close); // close button click
 
     //ssh
@@ -148,6 +151,11 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
             SLOT(handleSSHProcessClosed(int)));
     m_state = Inactive;
     m_started = false;
+
+    // AIP module
+    // AIP - Hanwha
+    initHanwha();
+
 }
 
 DlgJIO::~DlgJIO()
@@ -205,6 +213,7 @@ void DlgJIO::clearData()
 
 QString DlgJIO::getStMotion(QString target)
 {
+    Q_UNUSED(target)
     //get st_motion info
     QString result="";
     /*
@@ -253,6 +262,36 @@ void DlgJIO::closeEvent(QCloseEvent *event)
     Q_UNUSED(event)
     savecfg();
     emit closeAll();
+}
+
+void DlgJIO::initHanwha()
+{
+    connect(ui->pbHanwha, &QPushButton::clicked, this, &DlgJIO::showHanwha);
+    mHanwha = new Hanwha();
+    mDlgHanwha = new DlgHanwha(mHanwha);
+    // connect(mHanwha, &Hanwha::newBeamTableIDs, mDlgHanwha, &DlgHanwha::onNewHanwhaBeamTableIDs);
+    connect(mHanwha, &Hanwha::updateBeamTableData, mDlgHanwha, &DlgHanwha::onUpdateHanwhaBeamTableData);
+    connect(mHanwha, &Hanwha::updateBeamTypes, mDlgHanwha, &DlgHanwha::onUpdateBeamTypes);
+    connect(mHanwha, &Hanwha::updateBeamTypeGroup, mDlgHanwha, &DlgHanwha::onUpdateBeamTypeGroup);
+    connect(mHanwha, &Hanwha::updateRefFile, mDlgHanwha, &DlgHanwha::setRefFileName);
+    connect(mDlgHanwha, &DlgHanwha::reffilechanged, mHanwha, QOverload<QString>::of(&Hanwha::initBeamData));
+
+    QResource resHanwha(":/AIP/Hanwha.xlsx");
+    QString filename = resHanwha.fileName();
+    QFile Hanwhafile(":/AIP/Hanwha.xlsx");
+    if (Hanwhafile.open(QIODevice::ReadOnly)) {
+        qDebug() << "Calling Hanwha initBeamData with QFile...";
+        mHanwha->initBeamData(&Hanwhafile);// Pass the address of the QFile object
+        Hanwhafile.close(); // Close the file after initBeamData is done
+    } else {
+        qDebug() << "Failed to open" << filename << "for reading:" << Hanwhafile.errorString();
+    }
+}
+
+void DlgJIO::showHanwha(bool checked)
+{
+    Q_UNUSED(checked)
+    mDlgHanwha->show();
 }
 
 void DlgJIO::initAction()
@@ -588,6 +627,12 @@ void DlgJIO::onInquireClicked(bool checked)
             m_InquireTimer->stop();
         }
     }
+}
+
+void DlgJIO::onOptimizClicked(bool checked)
+{
+    Q_UNUSED(checked)
+    qDebug() <<"//do Optimiz to get All device's Beam Direction ID/ Att value";
 }
 
 void DlgJIO::onInquireTimerTimeout()

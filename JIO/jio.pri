@@ -13,6 +13,8 @@ SOURCES += \
     $$PWD/aip.cpp \
     $$PWD/cyntec.cpp \
     $$PWD/dlgaip.cpp \
+    $$PWD/dlgcyntec.cpp \
+    $$PWD/dlghanwha.cpp \
     $$PWD/dlgjio.cpp \
     $$PWD/dlgset.cpp \
     $$PWD/frmbeamtable.cpp \
@@ -27,6 +29,8 @@ HEADERS += \
     $$PWD/cyntecbeamfactordata.h \
     $$PWD/cyntecbeamtabledata.h \
     $$PWD/dlgaip.h \
+    $$PWD/dlgcyntec.h \
+    $$PWD/dlghanwha.h \
     $$PWD/dlgjio.h \
     $$PWD/dlgset.h \
     $$PWD/frmbeamtable.h \
@@ -37,6 +41,8 @@ HEADERS += \
 
 FORMS += \
     $$PWD/dlgaip.ui \
+    $$PWD/dlgcyntec.ui \
+    $$PWD/dlghanwha.ui \
     $$PWD/dlgjio.ui \
     $$PWD/dlgset.ui \
     $$PWD/frmbeamtable.ui

@@ -8,7 +8,7 @@
 
 #include "aip.h"
 #include "cyntec.h"
-#include "hanwha.h"
+
 #include "frmbeamtable.h"
 
 namespace Ui {
@@ -37,6 +37,7 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 private slots:
     void onAccepted();
+    void onSelModuleClicked(bool checked);
     void onSelReffileClicked(bool checked);
     void onChangeModule(QString newtext);
     void onRefFileTextChanged(QString newtext);
@@ -47,22 +48,17 @@ private slots:
     void onCyntecBeamFactorIDChanged(QString newBeamFactorID);
     void onCyntecElementMapChanged(QString newElementMap);
     void onCyntecBeamTableIDChanged(QString newBeamTableID);
-    void onHanwhaBeamTableIDChanged(QString newBeamTableID);
-    void onHanwhaBeamTypeTextChanged(QString newBeamType);
     void onNewCyntecBeamFactorIDs(QStringList keys);
     void onNewCyntecBeamTableIDs(QStringList keys);
-    void onNewHanwhaBeamTableIDs(QStringList keys);
+
     void onUpdateCynteBeamFactorData(QString elementMap, int attDb, double azBW, double elBW);
     void onUpdateCyntecBeamTableData(double az, double el, double azBW, double elBW);
     void onCyntecBeamTableClicked(bool checked);
-    void onHanwhaBeamTableClicked(bool checked);
-    void onUpdateHanwhaBeamTableData(double az, double el, double azBW, double elBW);
-    void onUpdateBeamTypes(QStringList beamtypes);
-    void onUpdateBeamTypeGroup(QMap<QString, QStringList> data);
+
 private:
     void getCyntecBeamFactorDatas(QString beamFactorID);
     void getCyntecBeamTableDatas(QString beamTableID);
-    void onCloseHanwhaBeamTable(int code);
+
     void loadcfg();
     void savecfg();
     Ui::DlgAIP *ui;
@@ -73,7 +69,7 @@ private:
     QVector3D mPosOffset; // module center position relative to device center (m)
     QString m_oldsavepath;
     Cyntec *mCyntec;
-    Hanwha *mHanwha;
+    // Hanwha *mHanwha;
     QMap<QString, QStringList> mHanwhaBeamTypeGroup;
 };
 

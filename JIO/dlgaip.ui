@@ -7,17 +7,83 @@
     <x>0</x>
     <y>0</y>
     <width>454</width>
-    <height>551</height>
+    <height>676</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>AIP</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1,0">
    <item>
     <widget class="QWidget" name="widget" native="true">
-     <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0" columnstretch="0,1,0,0,0">
-      <item row="2" column="0" colspan="5">
+     <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0" columnstretch="0,1,0">
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cbAIPModule">
+        <item>
+         <property name="text">
+          <string/>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Cyntec</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Hanwha</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="lbRefFile">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="pbSelReffile">
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>AIP Module:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="pbSelModule">
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>reference file:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="3">
        <widget class="QFrame" name="frame">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
@@ -221,57 +287,53 @@
         </layout>
        </widget>
       </item>
-      <item row="0" column="1" colspan="4">
-       <widget class="QComboBox" name="cbAIPModule">
-        <item>
-         <property name="text">
-          <string/>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Cyntec</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Hanwha</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <widget class="QPushButton" name="pbSelReffile">
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>...</string>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="widget_7" native="true">
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="leBeamDirectionID">
+        <property name="inputMethodHints">
+         <set>Qt::ImhPreferNumbers</set>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="label_23">
         <property name="text">
-         <string>AIP Module:</string>
+         <string>Beam Direction ID:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>reference file:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="3">
-       <widget class="QLabel" name="lbRefFile">
-        <property name="text">
-         <string/>
-        </property>
+      <item row="1" column="0" colspan="2">
+       <widget class="QTableWidget" name="twATT">
+        <row>
+         <property name="text">
+          <string>Tx</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>Rx</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>IIP3</string>
+         </property>
+        </row>
+        <column>
+         <property name="text">
+          <string>1</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </column>
        </widget>
       </item>
      </layout>
@@ -619,143 +681,6 @@
        <string>Hanwha</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <widget class="QWidget" name="widget_4" native="true">
-         <layout class="QGridLayout" name="gridLayout_6">
-          <item row="1" column="1">
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>BeamTableID:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QDoubleSpinBox" name="HanwhaAZ">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="minimum">
-             <double>-90.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>90.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="label_19">
-            <property name="text">
-             <string>BeamType:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="4">
-           <widget class="QDoubleSpinBox" name="HanwhaEL">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="minimum">
-             <double>-90.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>90.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QComboBox" name="HanwhaBeamTableID"/>
-          </item>
-          <item row="3" column="3">
-           <widget class="QLabel" name="label_17">
-            <property name="text">
-             <string>EL:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLabel" name="label_16">
-            <property name="text">
-             <string>AZ:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QPushButton" name="pbHanwhaBeamTable">
-            <property name="text">
-             <string>BeamTable</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QComboBox" name="HanwhaBeamType"/>
-          </item>
-          <item row="4" column="1">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>3dB AZ BW:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="3">
-           <widget class="QLabel" name="label_21">
-            <property name="text">
-             <string>3dB EL BW:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
-           <widget class="QDoubleSpinBox" name="doubleSpinBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="minimum">
-             <double>-90.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>90.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="4">
-           <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="minimum">
-             <double>-90.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>90.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item>
         <spacer name="verticalSpacer_2">
          <property name="orientation">

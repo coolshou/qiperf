@@ -54,6 +54,8 @@ void Hanwha::initBeamData(QIODevice *filedevice)
         qDebug() << "Error: QIODevice is not readable.";
         return;
     }
+    QFile* file = qobject_cast<QFile*>(filedevice);
+    emit updateRefFile(file->fileName());
     int row=13;
     // int endrow=253;
     int colBeamDirID=1;

@@ -19,6 +19,8 @@
 #include "../src/gps/iplocationprovider.h"
 #include "dlgaip.h"
 #include "dlgset.h"
+#include "hanwha.h"
+#include "dlghanwha.h"
 
 namespace Ui {
 class DlgJIO;
@@ -80,6 +82,8 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
+    void initHanwha();
+    void showHanwha(bool checked);
     void initAction();
     void onInsert(bool checked);
     void onDelete(bool checked);
@@ -92,6 +96,7 @@ private slots:
     void onCalcCliecked(bool checked);
     void onSet(bool checked);
     void onInquireClicked(bool checked);
+    void onOptimizClicked(bool checked);
     void onInquireTimerTimeout();
     // void onShowMap(bool checked);
     void onShowGeo(bool checked);
@@ -160,6 +165,8 @@ private:
     State m_state;
     bool m_started;
     QScopedPointer<QTextStream> m_textStream;
+    Hanwha *mHanwha;
+    DlgHanwha *mDlgHanwha;
 };
 
 #endif // DLGJIO_H

@@ -1,0 +1,138 @@
+#include "dlghanwha.h"
+#include "ui_dlghanwha.h"
+
+#include <QStandardPaths>
+#include <QFileDialog>
+#include <QFileInfo>
+
+#include "comm.h"
+
+DlgHanwha::DlgHanwha(Hanwha *hanwha, QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::DlgHanwha), mHanwha(hanwha)
+{
+    ui->setupUi(this);
+    connect(ui->pbSelReffile, &QPushButton::clicked, this, &DlgHanwha::onSelReffileClicked);
+    //Hanwha
+    connect(ui->HanwhaBeamTableID, &QComboBox::currentTextChanged, this, &DlgHanwha::onHanwhaBeamTableIDChanged);
+    connect(ui->HanwhaBeamType, &QComboBox::currentTextChanged, this, &DlgHanwha::onHanwhaBeamTypeTextChanged);
+    connect(ui->pbHanwhaBeamTable, &QPushButton::clicked, this, &DlgHanwha::onHanwhaBeamTableClicked);
+
+}
+
+DlgHanwha::~DlgHanwha()
+{
+    delete ui;
+}
+
+void DlgHanwha::changeEvent(QEvent *e)
+{
+    QDialog::changeEvent(e);
+    switch (e->type()) {
+    case QEvent::LanguageChange:
+        ui->retranslateUi(this);
+        break;
+    default:
+        break;
+    }
+}
+
+void DlgHanwha::onSelReffileClicked(bool checked)
+{
+    Q_UNUSED(checked)
+    //select file
+    QString path;
+    if (!m_oldsavepath.isNull()){
+        path = m_oldsavepath;
+    }else {
+        path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    }
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    tr("Load AIP module data file"),
+                                                    path ,
+                                                    tr(QIPERF_EXT_EXCEL));
+    if (!fileName.isEmpty()){
+        setRefFileName(fileName);
+        onRefFileTextChanged(fileName);
+        QFileInfo fileInfo(fileName);
+        m_oldsavepath = fileInfo.path();
+    }
+}
+
+void DlgHanwha::onHanwhaBeamTableIDChanged(QString newBeamTableID)
+{
+    Q_UNUSED(newBeamTableID)
+    if (!newBeamTableID.isEmpty()){
+        if (mHanwha){
+            // qDebug() << "onHanwhaBeamTableIDChanged:" << newBeamTableID;
+            mHanwha->getBeamTableData(newBeamTableID.toInt());
+        }
+    }
+}
+
+void DlgHanwha::onHanwhaBeamTypeTextChanged(QString newBeamType)
+{
+    if (mHanwhaBeamTypeGroup.contains(newBeamType)){
+        QStringList data= mHanwhaBeamTypeGroup.value(newBeamType);
+        ui->HanwhaBeamTableID->clear();
+        ui->HanwhaBeamTableID->insertItems(0, data);
+    }else{
+        qDebug() << "No '" <<newBeamType<< "' in mHanwhaBeamTypeGroup";
+    }
+}
+
+void DlgHanwha::onHanwhaBeamTableClicked(bool checked)
+{
+    Q_UNUSED(checked)
+    if (mHanwha){
+        FrmBeamTable *hBeamT = new FrmBeamTable(AIP::ModuleType::Hanwha);
+        connect(this, &DlgHanwha::accepted, hBeamT, &FrmBeamTable::close);
+        connect(this, &DlgHanwha::rejected, hBeamT, &FrmBeamTable::close);
+        connect(this, &DlgHanwha::finished, this, &DlgHanwha::onCloseHanwhaBeamTable);
+        connect(ui->HanwhaBeamTableID, &QComboBox::currentTextChanged,
+                hBeamT, &FrmBeamTable::selectEllipse);
+        //
+        QString beamtype = ui->HanwhaBeamType->currentText();
+        hBeamT->setWindowTitle(hBeamT->windowTitle()+"-"+beamtype);
+        hBeamT->setGridPoints(mHanwha->getBeamTableDatas(beamtype));
+        hBeamT->show();
+    }
+}
+
+void DlgHanwha::onUpdateHanwhaBeamTableData(double az, double el, double azBW, double elBW)
+{
+    Q_UNUSED(azBW)
+    Q_UNUSED(elBW)
+    ui->HanwhaAZ->setValue(az);
+    ui->HanwhaEL->setValue(el);
+}
+
+void DlgHanwha::onUpdateBeamTypes(QStringList beamtypes)
+{
+    ui->HanwhaBeamType->insertItems(0,beamtypes);
+}
+
+void DlgHanwha::onUpdateBeamTypeGroup(QMap<QString, QStringList> data)
+{
+    mHanwhaBeamTypeGroup = data;
+}
+
+void DlgHanwha::onRefFileTextChanged(QString newtext)
+{
+    emit reffilechanged(newtext);
+}
+
+void DlgHanwha::setRefFileName(QString filename)
+{
+    ui->lbRefFile->setText(filename);
+}
+
+void DlgHanwha::onCloseHanwhaBeamTable(int code)
+{
+    qDebug() << "onCloseHanwhaBeamTable:" << code;
+}
+void DlgHanwha::onNewHanwhaBeamTableIDs(QStringList keys)
+{
+    ui->HanwhaBeamTableID->clear();
+    ui->HanwhaBeamTableID->insertItems(0, keys);
+}
