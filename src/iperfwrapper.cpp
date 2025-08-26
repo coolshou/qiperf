@@ -275,7 +275,11 @@ void IperfWrapper::parserIperf2(QString linedata)
     } else if (linedata.contains("connected with")) {
         // Parse connection info and direction
         linedata = getIdx(linedata, idx);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList ds = linedata.split(" ", Qt::SkipEmptyParts);
+#else
+        QStringList ds = linedata.split(" ", QString::SkipEmptyParts);
+#endif
         debug("ds:" + ds.join(",") + " length:" + QString::number(ds.length()), 6);
 
         bool isReverse = false;
@@ -315,8 +319,11 @@ void IperfWrapper::parserIperf2(QString linedata)
         }
         QString sTag = m_servermode ? "s" : "c";
         int iparallel = m_parallel.toInt();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList data = linedata.split(" ", Qt::SkipEmptyParts);
-
+#else
+        QStringList data = linedata.split(" ", QString::SkipEmptyParts);
+#endif
         if (data.length() >= 6) {
             QString sInterval = data[0];
             QString chkInterval = "";
