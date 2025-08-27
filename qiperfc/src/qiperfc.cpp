@@ -563,13 +563,11 @@ void QIperfC::onNotice(QString send_addr, QString msg)
                     if (m_ntpfail.contains(send_addr)){
                         itry=m_ntpfail[send_addr];
                         if (itry>5){
-                            qDebug() << send_addr << " ntp sync fail times:" << QString::number(itry) << " IGNORE it";
+                            // qDebug() << send_addr << " ntp sync fail times:" << QString::number(itry) << " IGNORE it";
                             return;
                         }
                     }
-                    if (itry>1){
-                        qInfo() << "Ask NTP sync:" << send_addr << "(try:"<<QString::number(itry)<<")";
-                    }
+                    qInfo() << "Ask NTP sync:" << send_addr << "(try:"<<QString::number(itry)<<")";
                     emit doNtpSync(send_addr);
                 }
                 break;
