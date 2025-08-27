@@ -563,6 +563,7 @@ void QIperfC::onNotice(QString send_addr, QString msg)
                     if (m_ntpfail.contains(send_addr)){
                         itry=m_ntpfail[send_addr];
                         if (itry>5){
+                            qDebug() << send_addr << " ntp sync fail times:" << QString::number(itry) << " IGNORE it";
                             return;
                         }
                     }
@@ -1354,9 +1355,9 @@ void QIperfC::onDoNtpSync(QString target)
                 m_ntpfail[target]=m_ntpfail[target]+1;
             }
         }else{
-            if (!m_ntpfail.contains(target)){
-                m_ntpfail[target]=1;
-            }
+            // if (!m_ntpfail.contains(target)){
+            //     m_ntpfail[target]=1;
+            // }
         }
     }else{
         qDebug() << "[onDoNtpSync]connect to ws: " + s + " Fail";
@@ -1367,17 +1368,21 @@ void QIperfC::onNtpsynced(bool bOK, QString target)
 {
     if (bOK){
         if (!m_ntps.contains(target)){
-            // qInfo() << "onNtpsynced OK:" << target;
             m_ntps.append(target);
         }
     }else {
         QString msg = QString("%1 NTP time sync fail (%2)!").arg(target,
                                                                  QString::number(m_ntpfail[target]));
-        showTrayMessage("NOTICE", msg);
-        // QMessageBox::information(this, "NOTICE",
-        //                          QString("%1 NTP time sync fail (%2)!").arg(target,
-        //                                                                     QString::number(m_ntpfail[target])),
-        //                          QMessageBox::Ok);
+        qDebug() << msg;
+        // showTrayMessage("NOTICE", msg);
+        if (!m_ntpfail.contains(target)){
+            m_ntpfail[target]=1;
+        }else{
+            m_ntpfail[target]=m_ntpfail[target]+1;
+        }
+        if (m_ntps.contains(target)){
+            m_ntps.remove(target);
+        }
     }
 }
 
