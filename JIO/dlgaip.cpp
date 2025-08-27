@@ -22,11 +22,8 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     mPosOffset=QVector3D(0.0, 0.0, 10.0);
     ui->setupUi(this);
     connect(this, &DlgAIP::accepted, this, &DlgAIP::onAccepted);
-    //Cyntec
-    connect(ui->CyntecBeamFactorID, &QComboBox::currentTextChanged, this, &DlgAIP::onCyntecBeamFactorIDChanged);
-    connect(ui->CyntecBeamTableID, &QComboBox::currentTextChanged, this, &DlgAIP::onCyntecBeamTableIDChanged);
-    connect(ui->CyntecElementMap, &QComboBox::currentTextChanged, this, &DlgAIP::onCyntecElementMapChanged);
-    //Hanwha
+
+
     mModuleType = AIP::ModuleType::Unknown;
     connect(ui->pbSelModule, &QPushButton::clicked, this, &DlgAIP::onSelModuleClicked);
     connect(ui->pbSelReffile, &QPushButton::clicked, this, &DlgAIP::onSelReffileClicked);
@@ -35,12 +32,6 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     connect(ui->sbY, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onYValueChanged);
     connect(ui->sbZ, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onZValueChanged);
     connect(ui->cbPreSetPos, &QComboBox::currentTextChanged, this, &DlgAIP::onPreSetPosTextChanged);
-    mCyntec = new Cyntec();
-    connect(mCyntec, &Cyntec::newBeamFactorIDs, this, &DlgAIP::onNewCyntecBeamFactorIDs);
-    connect(mCyntec, &Cyntec::newBeamTableIDs, this, &DlgAIP::onNewCyntecBeamTableIDs);
-    connect(mCyntec, &Cyntec::updateBeamFactorData, this, &DlgAIP::onUpdateCynteBeamFactorData);
-    connect(mCyntec, &Cyntec::updateBeamTableData, this, &DlgAIP::onUpdateCyntecBeamTableData);
-    connect(ui->pbCyntecBeamTable, &QPushButton::clicked, this, &DlgAIP::onCyntecBeamTableClicked);
 
     loadcfg();
 }
@@ -242,7 +233,7 @@ void DlgAIP::onRefFileTextChanged(QString newtext)
         if (f.exists()){
             if(mModuleType == AIP::ModuleType::Cyntec){
                 // read Cyntec's xls file
-                mCyntec->initBeamData(newtext);
+                // mCyntec->initBeamData(newtext);
 
             }else if(mModuleType == AIP::ModuleType::Hanwha){
                 qDebug() << "onRefFileTextChanged: read Hanwha xls file";
@@ -298,162 +289,13 @@ void DlgAIP::onZValueChanged(double value)
     mPosOffset.setZ(value);
 }
 
-void DlgAIP::onCyntecBeamFactorIDChanged(QString newBeamFactorID)
-{
-    getCyntecBeamFactorDatas(newBeamFactorID);
-}
-
-void DlgAIP::onCyntecElementMapChanged(QString newElementMap)
-{
-    if (newElementMap.startsWith("8x8")){
-        for (int i=0;i<8;i++){
-            for (int j=0;j<8;j++){
-                QTableWidgetItem *item = new QTableWidgetItem("O");
-                item->setBackground(QBrush(Qt::green));
-                ui->CyntecElementMapView->setItem(i,j, item);
-            }
-        }
-    }else if (newElementMap.startsWith("8x4")){
-        for (int i=0;i<8;i++){
-            for (int j=0;j<8;j++){
-                QTableWidgetItem *item = new QTableWidgetItem();
-                if (j==0||j==1||j==6||j==7){
-                    item->setText("X");
-                    item->setBackground(QBrush(Qt::gray));
-                }else{
-                    item->setText("O");
-                    item->setBackground(QBrush(Qt::green));
-                }
-                ui->CyntecElementMapView->setItem(i,j, item);
-            }
-        }
-    }else if (newElementMap.startsWith("8x2")){
-        for (int i=0;i<8;i++){
-            for (int j=0;j<8;j++){
-                QTableWidgetItem *item = new QTableWidgetItem();
-                if (j==0||j==1||j==2||j==5||j==6||j==7){
-                    item->setText("X");
-                    item->setBackground(QBrush(Qt::gray));
-                }else{
-                    item->setText("O");
-                    item->setBackground(QBrush(Qt::green));
-                }
-                ui->CyntecElementMapView->setItem(i,j, item);
-            }
-        }
-    }else if (newElementMap.startsWith("4x4")){
-        for (int i=0;i<8;i++){
-            for (int j=0;j<8;j++){
-                QTableWidgetItem *item = new QTableWidgetItem();
-                if (i==0||i==1||i==6||i==7){
-                    item->setText("X");
-                    item->setBackground(QBrush(Qt::gray));
-                }else{
-                    if (j==0||j==1||j==6||j==7){
-                        item->setText("X");
-                        item->setBackground(QBrush(Qt::gray));
-                    }else{
-                        item->setText("O");
-                        item->setBackground(QBrush(Qt::green));
-                    }
-                }
-                ui->CyntecElementMapView->setItem(i,j, item);
-            }
-        }
-    }else {
-        for (int i=0;i<8;i++){
-            for (int j=0;j<8;j++){
-                QTableWidgetItem *item = new QTableWidgetItem("X");
-                item->setBackground(QBrush(Qt::gray));
-                ui->CyntecElementMapView->setItem(i,j, item);
-            }
-        }
-    }
-}
-
-void DlgAIP::onCyntecBeamTableIDChanged(QString newBeamTableID)
-{
-    Q_UNUSED(newBeamTableID)
-    if (!newBeamTableID.isEmpty()){
-        if (mCyntec){
-            mCyntec->getBeamTableData(newBeamTableID.toInt());
-        }
-    }
-}
-
-void DlgAIP::onNewCyntecBeamFactorIDs(QStringList keys)
-{
-    // qDebug() << "onNewCyntecBeamFactorIDs:" << keys;
-    ui->CyntecBeamFactorID->clear();
-    ui->CyntecBeamFactorID->insertItems(0, keys);
-}
-
-void DlgAIP::onNewCyntecBeamTableIDs(QStringList keys)
-{
-    // qDebug() << "onNewCyntecBeamTableIDs:" << keys;
-    ui->CyntecBeamTableID->clear();
-    ui->CyntecBeamTableID->insertItems(0, keys);
-}
-
-
-void DlgAIP::onUpdateCynteBeamFactorData(QString elementMap, int attDb, double azBW, double elBW)
-{
-    int idx = ui->CyntecElementMap->findText(elementMap);
-    if (idx != ui->CyntecElementMap->currentIndex()){
-        ui->CyntecElementMap->setCurrentIndex(idx);
-    }
-    ui->CyntecATT->setValue(attDb);
-    ui->CyntecAzimuthBW->setValue(azBW);
-    ui->CyntecElevationBW->setValue(elBW);
-}
-
-void DlgAIP::onUpdateCyntecBeamTableData(double az, double el, double azBW, double elBW)
-{
-    Q_UNUSED(azBW)
-    Q_UNUSED(elBW)
-    ui->CyntecAZ->setValue(az);
-    ui->CyntecEL->setValue(el);
-}
-
-void DlgAIP::onCyntecBeamTableClicked(bool checked)
-{
-    Q_UNUSED(checked)
-    if (mCyntec){
-        FrmBeamTable *cBeamT = new FrmBeamTable(AIP::ModuleType::Cyntec);
-        connect(this, &DlgAIP::finished, cBeamT, &FrmBeamTable::close);
-        connect(ui->CyntecBeamTableID, &QComboBox::currentTextChanged,
-                cBeamT, &FrmBeamTable::selectEllipse);
-        cBeamT->setGridPoints(mCyntec->getBeamTableDatas());
-        cBeamT->show();
-    }
-}
-
-
-void DlgAIP::getCyntecBeamFactorDatas(QString beamFactorID)
-{
-    if(mCyntec){
-        mCyntec->getBeamFactorDatas(beamFactorID.toInt());
-    }else {
-        qDebug() << "mCyntec not init";
-    }
-}
-
-void DlgAIP::getCyntecBeamTableDatas(QString beamTableID)
-{
-    if(mCyntec){
-        mCyntec->getBeamTableData(beamTableID.toInt());
-    }else{
-        qDebug() << "mCyntec not init";
-    }
-}
-
 void DlgAIP::loadcfg()
 {
     m_cfg->beginGroup("AIP");
     m_oldsavepath = m_cfg->value("selrefpath", QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
     m_cfg->endGroup();
 
-    ui->CyntecElementMap->setCurrentText(0);
+    // ui->CyntecElementMap->setCurrentText(0);
     // onHanwhaBeamTypeTextChanged(ui->HanwhaBeamType->currentText());
 }
 

@@ -143,19 +143,22 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     mSSHRemoteRunner = new QSsh::SshRemoteProcessRunner(this);
     connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::connectionError,
             this, &DlgJIO::handleSSHConnectionError);
-    connect(mSSHRemoteRunner, SIGNAL(processStarted()),
-            SLOT(handleSSHProcessStarted()));
-    connect(mSSHRemoteRunner, SIGNAL(readyReadStandardOutput()), SLOT(handleSSHProcessStdout()));
-    connect(mSSHRemoteRunner, SIGNAL(readyReadStandardError()), SLOT(handleSSHProcessStderr()));
-    connect(mSSHRemoteRunner, SIGNAL(processClosed(int)),
-            SLOT(handleSSHProcessClosed(int)));
+    connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::processStarted,
+            this, &DlgJIO::handleSSHProcessStarted);
+    connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::readyReadStandardOutput,
+            this, &DlgJIO::handleSSHProcessStdout);
+    connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::readyReadStandardError,
+            this, &DlgJIO::handleSSHProcessStderr);
+    connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::processClosed,
+            this, &DlgJIO::handleSSHProcessClosed);
     m_state = Inactive;
     m_started = false;
 
     // AIP module
     // AIP - Hanwha
     initHanwha();
-
+    // AIP - Cyntec
+    initCyntec();
 }
 
 DlgJIO::~DlgJIO()
@@ -291,7 +294,41 @@ void DlgJIO::initHanwha()
 void DlgJIO::showHanwha(bool checked)
 {
     Q_UNUSED(checked)
-    mDlgHanwha->show();
+    if (mDlgHanwha){
+        mDlgHanwha->show();
+    }
+}
+
+void DlgJIO::initCyntec()
+{
+    connect(ui->pbCyntec, &QPushButton::clicked, this, &DlgJIO::showCyntec);
+    mCyntec = new Cyntec();
+    mDlgCyntec = new DlgCyntec(mCyntec);
+    connect(mCyntec, &Cyntec::newBeamFactorIDs, mDlgCyntec, &DlgCyntec::onNewCyntecBeamFactorIDs);
+    connect(mCyntec, &Cyntec::newBeamTableIDs, mDlgCyntec, &DlgCyntec::onNewCyntecBeamTableIDs);
+    connect(mCyntec, &Cyntec::updateBeamFactorData, mDlgCyntec, &DlgCyntec::onUpdateCynteBeamFactorData);
+    connect(mCyntec, &Cyntec::updateBeamTableData, mDlgCyntec, &DlgCyntec::onUpdateCyntecBeamTableData);
+    connect(mDlgCyntec, &DlgCyntec::reffilechanged, mCyntec, QOverload<QString>::of(&Cyntec::initBeamData));
+
+    QResource resCyntec(":/AIP/Cyntec.xlsx");
+    QString filename = resCyntec.fileName();
+    // mModuleType = AIP::ModuleType::Cyntec;
+    QFile Cyntecfile(":/AIP/Cyntec.xlsx");
+    if (Cyntecfile.open(QIODevice::ReadOnly)) {
+        qDebug() << "Calling Cyntec initBeamData with QFile...";
+        mCyntec->initBeamData(&Cyntecfile);// Pass the address of the QFile object
+        Cyntecfile.close(); // Close the file after initBeamData is done
+    } else {
+        qDebug() << "Failed to open" << filename << "for reading:" << Cyntecfile.errorString();
+    }
+}
+
+void DlgJIO::showCyntec(bool checked)
+{
+    Q_UNUSED(checked);
+    if (mDlgCyntec){
+        mDlgCyntec->show();
+    }
 }
 
 void DlgJIO::initAction()

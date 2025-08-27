@@ -45,20 +45,8 @@ private slots:
     void onXValueChanged(double value);
     void onYValueChanged(double value);
     void onZValueChanged(double value);
-    void onCyntecBeamFactorIDChanged(QString newBeamFactorID);
-    void onCyntecElementMapChanged(QString newElementMap);
-    void onCyntecBeamTableIDChanged(QString newBeamTableID);
-    void onNewCyntecBeamFactorIDs(QStringList keys);
-    void onNewCyntecBeamTableIDs(QStringList keys);
-
-    void onUpdateCynteBeamFactorData(QString elementMap, int attDb, double azBW, double elBW);
-    void onUpdateCyntecBeamTableData(double az, double el, double azBW, double elBW);
-    void onCyntecBeamTableClicked(bool checked);
 
 private:
-    void getCyntecBeamFactorDatas(QString beamFactorID);
-    void getCyntecBeamTableDatas(QString beamTableID);
-
     void loadcfg();
     void savecfg();
     Ui::DlgAIP *ui;

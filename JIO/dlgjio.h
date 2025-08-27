@@ -21,6 +21,8 @@
 #include "dlgset.h"
 #include "hanwha.h"
 #include "dlghanwha.h"
+#include "cyntec.h"
+#include "dlgcyntec.h"
 
 namespace Ui {
 class DlgJIO;
@@ -84,6 +86,8 @@ protected:
 private slots:
     void initHanwha();
     void showHanwha(bool checked);
+    void initCyntec();
+    void showCyntec(bool checked);
     void initAction();
     void onInsert(bool checked);
     void onDelete(bool checked);
@@ -167,6 +171,8 @@ private:
     QScopedPointer<QTextStream> m_textStream;
     Hanwha *mHanwha;
     DlgHanwha *mDlgHanwha;
+    Cyntec *mCyntec;
+    DlgCyntec *mDlgCyntec;
 };
 
 #endif // DLGJIO_H
