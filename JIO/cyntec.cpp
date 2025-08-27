@@ -48,6 +48,8 @@ void Cyntec::initBeamData(QIODevice *filedevice)
         qDebug() << "Error: QIODevice is not readable.";
         return;
     }
+    QFile* file = qobject_cast<QFile*>(filedevice);
+    emit updateRefFile(file->fileName());
 
     QXlsx::Document xlsReader(filedevice);
     if(xlsReader.load()){

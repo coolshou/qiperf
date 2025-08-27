@@ -7,9 +7,9 @@
 
 #include "comm.h"
 
-DlgCyntec::DlgCyntec(Cyntec *cyntec, QWidget *parent)
+DlgCyntec::DlgCyntec(QSettings *cfg, Cyntec *cyntec, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::DlgCyntec), mCyntec(cyntec)
+    , ui(new Ui::DlgCyntec), m_cfg(cfg), mCyntec(cyntec)
 {
     ui->setupUi(this);
     connect(ui->pbSelReffile, &QPushButton::clicked, this, &DlgCyntec::onSelReffileClicked);
@@ -18,6 +18,7 @@ DlgCyntec::DlgCyntec(Cyntec *cyntec, QWidget *parent)
     connect(ui->CyntecBeamTableID, &QComboBox::currentTextChanged, this, &DlgCyntec::onCyntecBeamTableIDChanged);
     connect(ui->CyntecElementMap, &QComboBox::currentTextChanged, this, &DlgCyntec::onCyntecElementMapChanged);
     connect(ui->pbCyntecBeamTable, &QPushButton::clicked, this, &DlgCyntec::onCyntecBeamTableClicked);
+    loadcfg();
 }
 
 DlgCyntec::~DlgCyntec()
@@ -112,6 +113,11 @@ void DlgCyntec::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+void DlgCyntec::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event)
+    savecfg();
 }
 void DlgCyntec::onCyntecBeamFactorIDChanged(QString newBeamFactorID)
 {
@@ -208,3 +214,20 @@ void DlgCyntec::getCyntecBeamTableDatas(QString beamTableID)
         qDebug() << "mCyntec not init";
     }
 }
+void DlgCyntec::loadcfg()
+{
+    m_cfg->beginGroup("AIP");
+    m_oldsavepath = m_cfg->value("selrefpath", QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
+    m_cfg->endGroup();
+
+    // ui->CyntecElementMap->setCurrentText(0);
+    // onHanwhaBeamTypeTextChanged(ui->HanwhaBeamType->currentText());
+}
+
+void DlgCyntec::savecfg()
+{
+    m_cfg->beginGroup("AIP");
+    m_cfg->setValue("selrefpath", m_oldsavepath);
+    m_cfg->endGroup();
+}
+

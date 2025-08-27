@@ -20,6 +20,7 @@ public:
     void getBeamTableData(int beamTableID);
     QVector<QVector<double>> getBeamTableDatas(int limitid=95); //[[id,az,el],[]]...
 signals:
+    void updateRefFile(QString filename);
     void newBeamFactorIDs(QStringList keys);
     void updateBeamFactorData(QString elementMap, int attDb, double azBW, double elBW);
     void updateBeamTableData(double az, double el, double azBW, double elBW);

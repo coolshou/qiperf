@@ -271,7 +271,7 @@ void DlgJIO::initHanwha()
 {
     connect(ui->pbHanwha, &QPushButton::clicked, this, &DlgJIO::showHanwha);
     mHanwha = new Hanwha();
-    mDlgHanwha = new DlgHanwha(mHanwha);
+    mDlgHanwha = new DlgHanwha(m_cfg, mHanwha);
     // connect(mHanwha, &Hanwha::newBeamTableIDs, mDlgHanwha, &DlgHanwha::onNewHanwhaBeamTableIDs);
     connect(mHanwha, &Hanwha::updateBeamTableData, mDlgHanwha, &DlgHanwha::onUpdateHanwhaBeamTableData);
     connect(mHanwha, &Hanwha::updateBeamTypes, mDlgHanwha, &DlgHanwha::onUpdateBeamTypes);
@@ -303,11 +303,12 @@ void DlgJIO::initCyntec()
 {
     connect(ui->pbCyntec, &QPushButton::clicked, this, &DlgJIO::showCyntec);
     mCyntec = new Cyntec();
-    mDlgCyntec = new DlgCyntec(mCyntec);
+    mDlgCyntec = new DlgCyntec(m_cfg, mCyntec);
     connect(mCyntec, &Cyntec::newBeamFactorIDs, mDlgCyntec, &DlgCyntec::onNewCyntecBeamFactorIDs);
     connect(mCyntec, &Cyntec::newBeamTableIDs, mDlgCyntec, &DlgCyntec::onNewCyntecBeamTableIDs);
     connect(mCyntec, &Cyntec::updateBeamFactorData, mDlgCyntec, &DlgCyntec::onUpdateCynteBeamFactorData);
     connect(mCyntec, &Cyntec::updateBeamTableData, mDlgCyntec, &DlgCyntec::onUpdateCyntecBeamTableData);
+    connect(mCyntec, &Cyntec::updateRefFile, mDlgCyntec, &DlgCyntec::setRefFileName);
     connect(mDlgCyntec, &DlgCyntec::reffilechanged, mCyntec, QOverload<QString>::of(&Cyntec::initBeamData));
 
     QResource resCyntec(":/AIP/Cyntec.xlsx");

@@ -14,7 +14,7 @@ class DlgCyntec : public QDialog
     Q_OBJECT
 
 public:
-    explicit DlgCyntec(Cyntec *cyntec, QWidget *parent = nullptr);
+    explicit DlgCyntec(QSettings *cfg, Cyntec *cyntec, QWidget *parent = nullptr);
     ~DlgCyntec();
 public slots:
     void onNewCyntecBeamFactorIDs(QStringList keys);
@@ -27,6 +27,7 @@ signals:
     void reffilechanged(QString filename);
 protected:
     void changeEvent(QEvent *e);
+    void closeEvent(QCloseEvent *event) override;
 private slots:
     void onSelReffileClicked(bool checked);
     void onCyntecBeamTableClicked(bool checked);
@@ -36,8 +37,12 @@ private slots:
 private:
     void getCyntecBeamFactorDatas(QString beamFactorID);
     void getCyntecBeamTableDatas(QString beamTableID);
+    void loadcfg();
+    void savecfg();
+
 private:
     Ui::DlgCyntec *ui;
+    QSettings *m_cfg;
     QString m_oldsavepath;
     Cyntec *mCyntec;
 };

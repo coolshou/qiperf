@@ -7,9 +7,9 @@
 
 #include "comm.h"
 
-DlgHanwha::DlgHanwha(Hanwha *hanwha, QWidget *parent)
+DlgHanwha::DlgHanwha(QSettings *cfg, Hanwha *hanwha, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::DlgHanwha), mHanwha(hanwha)
+    , ui(new Ui::DlgHanwha), m_cfg(cfg), mHanwha(hanwha)
 {
     ui->setupUi(this);
     connect(ui->pbSelReffile, &QPushButton::clicked, this, &DlgHanwha::onSelReffileClicked);
@@ -17,7 +17,7 @@ DlgHanwha::DlgHanwha(Hanwha *hanwha, QWidget *parent)
     connect(ui->HanwhaBeamTableID, &QComboBox::currentTextChanged, this, &DlgHanwha::onHanwhaBeamTableIDChanged);
     connect(ui->HanwhaBeamType, &QComboBox::currentTextChanged, this, &DlgHanwha::onHanwhaBeamTypeTextChanged);
     connect(ui->pbHanwhaBeamTable, &QPushButton::clicked, this, &DlgHanwha::onHanwhaBeamTableClicked);
-
+    loadcfg();
 }
 
 DlgHanwha::~DlgHanwha()
@@ -35,6 +35,12 @@ void DlgHanwha::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+
+void DlgHanwha::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event)
+    savecfg();
 }
 
 void DlgHanwha::onSelReffileClicked(bool checked)
@@ -135,4 +141,20 @@ void DlgHanwha::onNewHanwhaBeamTableIDs(QStringList keys)
 {
     ui->HanwhaBeamTableID->clear();
     ui->HanwhaBeamTableID->insertItems(0, keys);
+}
+void DlgHanwha::loadcfg()
+{
+    m_cfg->beginGroup("AIP");
+    m_oldsavepath = m_cfg->value("selrefpath", QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
+    m_cfg->endGroup();
+
+    // ui->CyntecElementMap->setCurrentText(0);
+    // onHanwhaBeamTypeTextChanged(ui->HanwhaBeamType->currentText());
+}
+
+void DlgHanwha::savecfg()
+{
+    m_cfg->beginGroup("AIP");
+    m_cfg->setValue("selrefpath", m_oldsavepath);
+    m_cfg->endGroup();
 }
