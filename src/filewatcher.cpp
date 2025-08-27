@@ -56,8 +56,7 @@ void FileWatcher::readFile()
             //log("m_filepos: "+ QString::number(m_filepos));
         }
     } else {
-        QString s = "Failed to open file for reading:" + m_filePath;
-        // qWarning() << s;
+        QString s = QString("Failed to open file '%1' for reading: %2").arg(m_filePath, file.errorString());
         log(s);
         emit onNewLine(s);
     }
