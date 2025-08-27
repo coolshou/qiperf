@@ -13,7 +13,7 @@
 #include <QDebug>
 
 
-#include "comm.h"
+// #include "comm.h"
 
 DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     : QDialog(parent)
@@ -22,17 +22,13 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     mPosOffset=QVector3D(0.0, 0.0, 10.0);
     ui->setupUi(this);
     connect(this, &DlgAIP::accepted, this, &DlgAIP::onAccepted);
-
-
     mModuleType = AIP::ModuleType::Unknown;
     connect(ui->pbSelModule, &QPushButton::clicked, this, &DlgAIP::onSelModuleClicked);
-    connect(ui->pbSelReffile, &QPushButton::clicked, this, &DlgAIP::onSelReffileClicked);
     connect(ui->cbAIPModule, &QComboBox::currentTextChanged, this, &DlgAIP::onChangeModule);
     connect(ui->sbX, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onXValueChanged);
     connect(ui->sbY, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onYValueChanged);
     connect(ui->sbZ, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onZValueChanged);
     connect(ui->cbPreSetPos, &QComboBox::currentTextChanged, this, &DlgAIP::onPreSetPosTextChanged);
-
     loadcfg();
 }
 
@@ -154,104 +150,16 @@ void DlgAIP::onSelModuleClicked(bool checked)
 
 }
 
-void DlgAIP::onSelReffileClicked(bool checked)
-{
-    Q_UNUSED(checked)
-    if (ui->cbAIPModule->currentText().isEmpty()){
-        QString msg = QString("AIP module must select first");
-        QMessageBox::warning(this, tr("WARNING!!"),
-                             msg,
-                             QMessageBox::Ok);
-        ui->cbAIPModule->setFocus();
-        return;
-    }
-    //select file
-    QString path;
-    if (!m_oldsavepath.isNull()){
-        path = m_oldsavepath;
-    }else {
-        path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
-    }
-    QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Load AIP module data file"),
-                                                    path ,
-                                                    tr(QIPERF_EXT_EXCEL));
-    if (!fileName.isEmpty()){
-        ui->lbRefFile->setText(fileName);
-        onRefFileTextChanged(fileName);
-        QFileInfo fileInfo(fileName);
-        m_oldsavepath = fileInfo.path();
-    }
-}
-
 void DlgAIP::onChangeModule(QString newtext)
 {
     // qDebug() << "onChangeModule:" << newtext;
-    QString filename="";
-    int idxCyntec =ui->tabWidget->indexOf(ui->tabCyntec);
-    int idxHanwha =ui->tabWidget->indexOf(ui->tabHanwha);
     if (newtext.startsWith("Cyntec")){
-        QResource resCyntec(":/AIP/Cyntec.xlsx");
-        filename = resCyntec.fileName();
         mModuleType = AIP::ModuleType::Cyntec;
-        QFile Cyntecfile(":/AIP/Cyntec.xlsx");
-        if (Cyntecfile.open(QIODevice::ReadOnly)) {
-            qDebug() << "Calling Cyntec initBeamData with QFile...";
-            mCyntec->initBeamData(&Cyntecfile);// Pass the address of the QFile object
-            Cyntecfile.close(); // Close the file after initBeamData is done
-        } else {
-            qDebug() << "Failed to open" << filename << "for reading:" << Cyntecfile.errorString();
-        }
-        ui->tabWidget->setTabVisible(idxCyntec, true);
-        ui->tabWidget->setTabVisible(idxHanwha, false);
     }else if (newtext.startsWith("Hanwha")){
-        QResource resHanwha(":/AIP/Hanwha.xlsx");
-        filename = resHanwha.fileName();
-        // QFile Hanwhafile(":/AIP/Hanwha.xlsx");
-        // if (Hanwhafile.open(QIODevice::ReadOnly)) {
-        //     qDebug() << "Calling Hanwha initBeamData with QFile...";
-        //     mHanwha->initBeamData(&Hanwhafile);// Pass the address of the QFile object
-        //     Hanwhafile.close(); // Close the file after initBeamData is done
-        // } else {
-        //     qDebug() << "Failed to open" << filename << "for reading:" << Hanwhafile.errorString();
-        // }
         mModuleType = AIP::ModuleType::Hanwha;
-        ui->tabWidget->setTabVisible(idxCyntec, false);
-        ui->tabWidget->setTabVisible(idxHanwha, true);
     }else{
         mModuleType = AIP::ModuleType::Unknown;
-        ui->tabWidget->setTabVisible(idxCyntec, false);
-        ui->tabWidget->setTabVisible(idxHanwha, false);
     }
-    ui->lbRefFile->setText(filename);
-}
-
-void DlgAIP::onRefFileTextChanged(QString newtext)
-{
-    if (!newtext.isEmpty()){
-        QFile f(newtext);
-        if (f.exists()){
-            if(mModuleType == AIP::ModuleType::Cyntec){
-                // read Cyntec's xls file
-                // mCyntec->initBeamData(newtext);
-
-            }else if(mModuleType == AIP::ModuleType::Hanwha){
-                qDebug() << "onRefFileTextChanged: read Hanwha xls file";
-                // mHanwha->initBeamData(newtext);
-            }else {
-                qDebug() << "onRefFileTextChanged: unknows module type";
-            }
-        }else {
-            qDebug() << "File not exist: " << newtext;
-            QString msg = QString("File not exist: %1").arg(newtext);
-            QMessageBox::warning(this, tr("WARNING!!"),
-                                 msg,
-                                 QMessageBox::Ok);
-        }
-    }else{
-        qDebug() << "No ref xlsx file";
-    }
-
 }
 
 void DlgAIP::onPreSetPosTextChanged(QString newtext)
@@ -292,7 +200,7 @@ void DlgAIP::onZValueChanged(double value)
 void DlgAIP::loadcfg()
 {
     m_cfg->beginGroup("AIP");
-    m_oldsavepath = m_cfg->value("selrefpath", QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
+    // m_oldsavepath = m_cfg->value("selrefpath", QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
     m_cfg->endGroup();
 
     // ui->CyntecElementMap->setCurrentText(0);
@@ -302,6 +210,6 @@ void DlgAIP::loadcfg()
 void DlgAIP::savecfg()
 {
     m_cfg->beginGroup("AIP");
-    m_cfg->setValue("selrefpath", m_oldsavepath);
+    // m_cfg->setValue("selrefpath", m_oldsavepath);
     m_cfg->endGroup();
 }

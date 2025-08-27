@@ -38,9 +38,7 @@ protected:
 private slots:
     void onAccepted();
     void onSelModuleClicked(bool checked);
-    void onSelReffileClicked(bool checked);
     void onChangeModule(QString newtext);
-    void onRefFileTextChanged(QString newtext);
     void onPreSetPosTextChanged(QString newtext);
     void onXValueChanged(double value);
     void onYValueChanged(double value);
@@ -55,10 +53,6 @@ private:
     int mCol;
     AIP::ModuleType mModuleType;
     QVector3D mPosOffset; // module center position relative to device center (m)
-    QString m_oldsavepath;
-    Cyntec *mCyntec;
-    // Hanwha *mHanwha;
-    QMap<QString, QStringList> mHanwhaBeamTypeGroup;
 };
 
 #endif // DLGAIP_H
