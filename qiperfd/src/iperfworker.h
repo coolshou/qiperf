@@ -70,6 +70,7 @@ public slots:
 private slots:
     void onStarted();
     void onRestart();
+    void onNoStdout();
     void readyReadStdOut();
     void readyReadStdErr();
     void onFinished(int exitCode, QProcess::ExitStatus exitStatus);
@@ -83,6 +84,8 @@ private:
     int m_selfdestructionTime;
     QTimer *m_selfdestruction;
     QTimer *m_restarter; // timer to do restart;
+    int mStdoutDetectTime;
+    QTimer *m_stdoutdetect; // detect when no stdout for some time, consider the iperf -s is stoped
     int m_refrow;// refrow
     qint64 m_idx;
     int m_version; // iperf version 2 or 3

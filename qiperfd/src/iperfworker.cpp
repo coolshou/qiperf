@@ -42,6 +42,7 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
 {
     m_debuglv = 3;
     m_restarttimes = 0;
+    mStdoutDetectTime = 5 + m_interval; //sec
     m_logfile = nullptr;
     m_logtextstream = nullptr;
     m_restartonErrorStop = false;
@@ -119,6 +120,12 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
     // Set it to be a single-shot timer
     m_restarter->setSingleShot(true);
     connect(m_restarter, &QTimer::timeout, this, &IperfWorker::onRestart);
+
+    // timer to detect no stdout from iperf
+    m_stdoutdetect = new QTimer(this);
+    m_stdoutdetect->setSingleShot(true);
+    m_stdoutdetect->setInterval(mStdoutDetectTime*1000);
+    connect(m_stdoutdetect, &QTimer::timeout, this, &IperfWorker::onNoStdout);
 }
 
 IperfWorker::~IperfWorker()
@@ -155,7 +162,6 @@ void IperfWorker::work()
 
     connect(m_iperf, &QProcess::readyReadStandardOutput, this, &IperfWorker::readyReadStdOut);
     connect(m_iperf, &QProcess::readyReadStandardError, this, &IperfWorker::readyReadStdErr);
-    // connect(m_iperf, &QProcess::readyRead, this, &IperfWorker::readyReadStdOut);
     connect(m_iperf, &QProcess::started, this, &IperfWorker::onStarted);
     connect(m_iperf, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IperfWorker::onFinished);
 
@@ -217,7 +223,9 @@ void IperfWorker::onSelfDestructor()
 
 void IperfWorker::onSetDebugLv(int lv)
 {
+    debug("IperfWorker::onSetDebugLv:" + QString::number(lv), 0);
     m_debuglv = lv;
+    m_iperfwrapper->setDebugLevel(m_debuglv);
 }
 
 void IperfWorker::onSetStartTime(QString stime)
@@ -430,12 +438,22 @@ void IperfWorker::onRestart()
 
 }
 
+void IperfWorker::onNoStdout()
+{
+    qDebug() << "after "+ QString::number(mStdoutDetectTime)+ " sec no Stdout!!";
+    if (m_iperf->state() == QProcess::Running) {
+        qDebug() << "m_iperf still running, try setStop()";
+        setStop();
+    }
+}
+
 void IperfWorker::readyReadStdOut()
 {
     QByteArray processOutput;
     processOutput = m_iperf->readAllStandardOutput();
 
     if (processOutput.length()>0){
+        m_stdoutdetect->start();
         toLogFile(processOutput);
         foreach (auto line , QString(processOutput).split("\n")){
             //ignore empty line
