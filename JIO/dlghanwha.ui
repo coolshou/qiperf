@@ -139,7 +139,7 @@
       <item row="2" column="1">
        <widget class="QLabel" name="label_15">
         <property name="text">
-         <string>BeamTableID:</string>
+         <string>Beam Direction ID:</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -157,7 +157,7 @@
        </widget>
       </item>
       <item row="2" column="2">
-       <widget class="QComboBox" name="HanwhaBeamTableID"/>
+       <widget class="QComboBox" name="HanwhaBeamDirectionID"/>
       </item>
       <item row="4" column="2">
        <widget class="QDoubleSpinBox" name="HanwhaAZ">

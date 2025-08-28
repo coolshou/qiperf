@@ -1,0 +1,14 @@
+{
+    "GET_PRODUCTTYPE":"uci get system.@system[0].productType",
+    "GET_OPMODE":"getmfg opMode",
+    "GET_AIP1VENDOR":"uci get aip.aip1.vendor",
+    "GET_AIP2VENDOR":"uci get aip.aip2.vendor",
+    "GET_SENSORS":"sensors_call_so",
+    "GET_GPS":"gps_call_so",
+    "GET_BEAMFACTOR":"",
+    "GET_BEAMDIRECTION":"",
+    "GET_RSSI":"",
+    "GET_MCS":"",
+
+
+}

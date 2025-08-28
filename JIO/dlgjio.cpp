@@ -295,6 +295,8 @@ void DlgJIO::showHanwha(bool checked)
 {
     Q_UNUSED(checked)
     if (mDlgHanwha){
+        QString beamtype = mDlgHanwha->getHanwhaBeamType();
+        mDlgHanwha->onHanwhaBeamTypeTextChanged(beamtype);
         mDlgHanwha->show();
     }
 }

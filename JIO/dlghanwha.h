@@ -16,12 +16,15 @@ class DlgHanwha : public QDialog
 public:
     explicit DlgHanwha(QSettings *cfg, Hanwha *hanwha, QWidget *parent = nullptr);
     ~DlgHanwha();
+    QString getHanwhaBeamType();
 public slots:
     void onUpdateHanwhaBeamTableData(double az, double el, double azBW, double elBW);
     void onUpdateBeamTypes(QStringList beamtypes);
     void onUpdateBeamTypeGroup(QMap<QString, QStringList> data);
     void onRefFileTextChanged(QString newtext);
     void setRefFileName(QString filename);
+    void onHanwhaBeamDirectionIDChanged(QString newID);
+    void onHanwhaBeamTypeTextChanged(QString newBeamType);
 signals:
     void reffilechanged(QString filename);
 protected:
@@ -29,8 +32,6 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 private slots:
     void onSelReffileClicked(bool checked);
-    void onHanwhaBeamTableIDChanged(QString newBeamTableID);
-    void onHanwhaBeamTypeTextChanged(QString newBeamType);
     void onHanwhaBeamTableClicked(bool checked);
     void onNewHanwhaBeamTableIDs(QStringList keys);
 private:

@@ -49,3 +49,7 @@ FORMS += \
 
 RESOURCES += \
     $$PWD/aip.qrc \
+    $$PWD/jio.qrc
+
+DISTFILES += \
+    $$PWD/jiocmd.json

@@ -14,7 +14,7 @@ DlgHanwha::DlgHanwha(QSettings *cfg, Hanwha *hanwha, QWidget *parent)
     ui->setupUi(this);
     connect(ui->pbSelReffile, &QPushButton::clicked, this, &DlgHanwha::onSelReffileClicked);
     //Hanwha
-    connect(ui->HanwhaBeamTableID, &QComboBox::currentTextChanged, this, &DlgHanwha::onHanwhaBeamTableIDChanged);
+    connect(ui->HanwhaBeamDirectionID, &QComboBox::currentTextChanged, this, &DlgHanwha::onHanwhaBeamDirectionIDChanged);
     connect(ui->HanwhaBeamType, &QComboBox::currentTextChanged, this, &DlgHanwha::onHanwhaBeamTypeTextChanged);
     connect(ui->pbHanwhaBeamTable, &QPushButton::clicked, this, &DlgHanwha::onHanwhaBeamTableClicked);
     loadcfg();
@@ -23,6 +23,12 @@ DlgHanwha::DlgHanwha(QSettings *cfg, Hanwha *hanwha, QWidget *parent)
 DlgHanwha::~DlgHanwha()
 {
     delete ui;
+}
+
+QString DlgHanwha::getHanwhaBeamType()
+{
+    //get current HanwhaBeamType
+    return ui->HanwhaBeamType->currentText();
 }
 
 void DlgHanwha::changeEvent(QEvent *e)
@@ -65,13 +71,12 @@ void DlgHanwha::onSelReffileClicked(bool checked)
     }
 }
 
-void DlgHanwha::onHanwhaBeamTableIDChanged(QString newBeamTableID)
+void DlgHanwha::onHanwhaBeamDirectionIDChanged(QString newID)
 {
-    Q_UNUSED(newBeamTableID)
-    if (!newBeamTableID.isEmpty()){
+    if (!newID.isEmpty()){
         if (mHanwha){
-            // qDebug() << "onHanwhaBeamTableIDChanged:" << newBeamTableID;
-            mHanwha->getBeamTableData(newBeamTableID.toInt());
+            // qDebug() << "onHanwhaBeamTableIDChanged:" << newID;
+            mHanwha->getBeamTableData(newID.toInt());
         }
     }
 }
@@ -80,8 +85,8 @@ void DlgHanwha::onHanwhaBeamTypeTextChanged(QString newBeamType)
 {
     if (mHanwhaBeamTypeGroup.contains(newBeamType)){
         QStringList data= mHanwhaBeamTypeGroup.value(newBeamType);
-        ui->HanwhaBeamTableID->clear();
-        ui->HanwhaBeamTableID->insertItems(0, data);
+        ui->HanwhaBeamDirectionID->clear();
+        ui->HanwhaBeamDirectionID->insertItems(0, data);
     }else{
         qDebug() << "No '" <<newBeamType<< "' in mHanwhaBeamTypeGroup";
     }
@@ -95,7 +100,7 @@ void DlgHanwha::onHanwhaBeamTableClicked(bool checked)
         connect(this, &DlgHanwha::accepted, hBeamT, &FrmBeamTable::close);
         connect(this, &DlgHanwha::rejected, hBeamT, &FrmBeamTable::close);
         connect(this, &DlgHanwha::finished, this, &DlgHanwha::onCloseHanwhaBeamTable);
-        connect(ui->HanwhaBeamTableID, &QComboBox::currentTextChanged,
+        connect(ui->HanwhaBeamDirectionID, &QComboBox::currentTextChanged,
                 hBeamT, &FrmBeamTable::selectEllipse);
         //
         QString beamtype = ui->HanwhaBeamType->currentText();
@@ -139,8 +144,8 @@ void DlgHanwha::onCloseHanwhaBeamTable(int code)
 }
 void DlgHanwha::onNewHanwhaBeamTableIDs(QStringList keys)
 {
-    ui->HanwhaBeamTableID->clear();
-    ui->HanwhaBeamTableID->insertItems(0, keys);
+    ui->HanwhaBeamDirectionID->clear();
+    ui->HanwhaBeamDirectionID->insertItems(0, keys);
 }
 void DlgHanwha::loadcfg()
 {

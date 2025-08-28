@@ -1,30 +1,43 @@
 #ifndef JIOCMD_H
 #define JIOCMD_H
 
-#define JIO_GET_SENSORS "0"  // ask to get sensor data by sensors_call_so
+#define JIO_GET_SENSORS "GET_SENSORS"  // ask to get sensor data by sensors_call_so
 #define JIO_SENSORS_DATA "1"  // return sensor data
 
-#define JIO_GET_GPS "10"  // ask to get sensor data by gps_call_so
+#define JIO_GET_GPS "GET_GPS"  // ask to get sensor data by gps_call_so
 #define JIO_GPS_DATA "11"  // return gps data
 
-#define JIO_GET_BEAMFACTOR "20" // get BEAMFACTOR/BEAMType
+#define JIO_GET_BEAMFACTOR "GET_BEAMFACTOR" // get BEAMFACTOR/BEAMType
 #define JIO_SET_BEAMFACTOR "21" // set BEAMFACTOR/BEAMType
 
-#define JIO_GET_BEAMDIRECTION "30" // get Beam table (Direction) ID
+#define JIO_GET_BEAMDIRECTION "GET_BEAMDIRECTION" // get Beam table (Direction) ID
 #define JIO_SET_BEAMDIRECTION "31" // set Beam table (Direction) ID
 
-#define JIO_GET_RSSI "40" // get RSSI
+#define JIO_GET_RSSI "GET_RSSI" // get RSSI
 #define JIO_RSSI_DATA "41" // RSSI data
 
-#define JIO_GET_MCS "50" // get MCS
+#define JIO_GET_MCS "GET_MCS" // get MCS
 #define JIO_MCS_DATA "51" // MCS data
+
+#define JIO_GET_PRODUCTTYPE "GET_PRODUCTTYPE"  // CM7, AM7
+#define JIO_GET_AIP1VENDOR "GET_AIP1VENDOR"
+#define JIO_GET_AIP2VENDOR "GET_AIP2VENDOR"
+
+// output will be in dmesg, need parser it
+// logread -f
+
+// CM7 MCS AP "iwpriv rax0 show stainfo"
+// CM7 MCS Client "mwctl apclix0 show stainfo=all"
 
 // getmfg opMode: STA, AP
 // Value: STA
-#define JIO_GET_OPMODE "60" // get OPMODE
+#define JIO_GET_OPMODE "GET_OPMODE" // get OPMODE
 #define JIO_OPMODE_DATA "61" // OPMODE data
 
+// need parser logread -f output
+// AP show STA info
 //iwpriv rax0 show stainfo
+// STA show AP info
 //mwctl apclix0 show stainfo=all
 
 // set before run throughput
