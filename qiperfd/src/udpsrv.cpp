@@ -34,6 +34,7 @@ void UdpSrv::setIfname(QString mgr_ifname)
 
 void UdpSrv::onSetDebugLv(int lv)
 {
+    debug("UdpSrv::onSetDebugLv:" + QString::number(lv), 0);
     m_debuglv = lv;
 }
 

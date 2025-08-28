@@ -77,6 +77,7 @@ void FileClient::debug(QString msg, int lv)
 
 void FileClient::onSetDebugLv(int lv)
 {
+    debug("FileClient::onSetDebugLv:" + QString::number(lv), 0);
     m_debuglv = lv;
 }
 

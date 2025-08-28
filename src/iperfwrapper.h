@@ -28,7 +28,7 @@ public:
     void setArgs(QString arg);
     void setOmit(int omit);
     void debug(QString msg, int debuglv=1);
-    void setDebugLevel(int level);
+    void setDebugLevel(int lv);
 
 public slots:
     void work();

@@ -721,9 +721,10 @@ void IperfWrapper::debug(QString msg, int debuglv)
     }
 }
 
-void IperfWrapper::setDebugLevel(int level)
+void IperfWrapper::setDebugLevel(int lv)
 {
-    m_debuglv = level;
+    debug("IperfWrapper::onSetDebugLv:" + QString::number(lv), 0);
+    m_debuglv = lv;
 }
 
 void IperfWrapper::work()

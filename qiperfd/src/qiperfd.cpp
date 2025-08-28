@@ -1581,6 +1581,7 @@ void QIperfd::handleWorkerFinished(qint64 id, bool servermode)
 
 void QIperfd::onSetDebugLv(int lv)
 {
+    debug("QIperfd::onSetDebugLv:" + QString::number(lv), 0);
     m_debuglv = lv;
 }
 
