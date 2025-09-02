@@ -55,7 +55,7 @@ void Cyntec::initBeamData(QIODevice *filedevice)
     if(xlsReader.load()){
         // std::shared_ptr<QXlsx::Cell> sharedCell;
         // Cell* cellB, cellC, cellD, cellE, cellF;
-        QVariant varB, varC, varD, varE, varF;
+        QVariant varBeamID, varC, varD, varE, varF, varG;
         int irow=0;
         int icol=0;
         auto cell = xlsReader.cellAt(irow, icol);
@@ -67,14 +67,14 @@ void Cyntec::initBeamData(QIODevice *filedevice)
             icol=2;
             cell = xlsReader.cellAt(irow, icol);
             if (cell != NULL){
-                varB = cell->readValue();
-                while (varB.isValid()){
+                varBeamID = cell->readValue();
+                while (varBeamID.isValid()){
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                     irow++;
                     cell = xlsReader.cellAt(irow, icol);
                     if (cell != NULL){
-                        varB = cell->readValue();
-                        if(varB.isValid()){
+                        varBeamID = cell->readValue();
+                        if(varBeamID.isValid()){
                             cell = xlsReader.cellAt(irow, 3);
                             if (cell != NULL){
                                 varC = cell->readValue(); //AZ
@@ -91,11 +91,19 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                             if (cell != NULL){
                                 varF = cell->readValue(); //Elevation 3dB BW (°)
                             }
+                            cell = xlsReader.cellAt(irow, 7);
+                            if (cell != NULL){
+                                varG = cell->readValue(); //comment
+                                if (!mBeamTypeData.contains(varG.toString())){
+                                    mBeamTypeData[varG.toString()]=QStringList();
+                                }
+                                mBeamTypeData[varG.toString()].append(varBeamID.toString());
+                            }
                             // qDebug() << "[TableData]varB:" << varB
                             //          << "varC:" << varC << " varD:" << varD
                             //          << "varE:" << varE << " varF:" << varF;
-                            mBeamTableData->insert(varB.toInt(),
-                                                   CyntecBeamTableData(varB.toInt(),
+                            mBeamTableData->insert(varBeamID.toInt(),
+                                                   CyntecBeamTableData(varBeamID.toInt(),
                                                                        varC.toDouble(),
                                                                        varD.toDouble(),
                                                                        varE.toDouble(),
@@ -114,8 +122,12 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                     // Convert the integer to a QString and add it to stringList
                     tablekeys.append(QString::number(tablekey));
                 }
-                if (tablekeys.length()>0){
-                    emit newBeamTableIDs(tablekeys);
+                // if (tablekeys.length()>0){
+                //     emit newBeamTableIDs(tablekeys);
+                // }
+                if (mBeamTypeData.keys().count()>0){
+                    emit updateBeamTypes(mBeamTypeData.keys());
+                    emit updateBeamTypeGroup(mBeamTypeData);
                 }
             } else {
                 qDebug() << "sheet 'BeamTable' cell of (" << irow << "," << icol << ") is NULL";
@@ -130,14 +142,14 @@ void Cyntec::initBeamData(QIODevice *filedevice)
             icol=2;
             cell = xlsReader.cellAt(irow, icol);
             if (cell != NULL){
-                varB = cell->readValue();
+                varBeamID = cell->readValue();
                 // qDebug() << "varB: " << varB;
-                while (varB.isValid()){
+                while (varBeamID.isValid()){
                     QCoreApplication::processEvents(QEventLoop::AllEvents);
                     irow++;
                     cell = xlsReader.cellAt(irow, icol);
                     if (cell != NULL){
-                        varB = cell->readValue();
+                        varBeamID = cell->readValue();
                         cell = xlsReader.cellAt(irow, 3);
                         if (cell != NULL){
                             varC = cell->readValue(); // Element Map
@@ -157,8 +169,8 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                         // qDebug() << "[FactorData]varB:" << varB
                         //          << "varC:" << varC << " varD:" << varD
                         //          << "varE:" << varE << " varF:" << varF;
-                        mBeamFactorData->insert(varB.toInt(),
-                                                CyntecBeamFactorData(varB.toInt(),
+                        mBeamFactorData->insert(varBeamID.toInt(),
+                                                CyntecBeamFactorData(varBeamID.toInt(),
                                                                      varC.toString(),
                                                                      varD.toInt(),
                                                                      varE.toDouble(),
@@ -235,4 +247,36 @@ QVector<QVector<double>> Cyntec::getBeamTableDatas(int limitid)
         data.append({d.beamtableId, d.azDeg, d.elDeg});
     }
     return data;
+}
+
+QVector<QVector<double> > Cyntec::getBeamTableDatas(QString beamtype)
+{
+    QVector<QVector<double>> data;
+    if (mBeamTypeData.contains(beamtype)){
+        QStringList ids = mBeamTypeData.value(beamtype);
+        for (const QString &id : ids) {
+            if (mBeamTableData->contains(id.toInt())){
+                CyntecBeamTableData d = mBeamTableData->value(id.toInt());
+                data.append({d.beamtableId, d.azDeg, d.elDeg});
+            }
+        }
+    }else{
+        qDebug() << "No mBeamTypeData of " << beamtype;
+    }
+    return data;
+}
+
+int Cyntec::db2att(double db)
+{
+    // db: 0~32 (0.25 step)
+    // att: 0~128
+    if ((db<0)||(db>32)){
+        qDebug() << "Att value out of range 0~32 value:" << QString::number(db);
+        return -1;
+    }
+    //convert db to att value for setting in
+    // 0, 0.25, 0.5, 0.75, 1 ...
+    // Tx Att: 1db
+    // spidev_test -D /dev/spidev2.0 -A "0:4:4"
+    return qRound(db/0.25);
 }

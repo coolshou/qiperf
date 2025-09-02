@@ -25,7 +25,6 @@ signals:
     void updateBeamTypeGroup(QMap<QString, QStringList> data);
 private:
     QMap<int, HanwhaBeamTableData> *mBeamTableData;
-    QStringList mBeamtypes;
     QMap<QString, QStringList> mBeamTypeData;
 };
 

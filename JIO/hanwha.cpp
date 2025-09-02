@@ -67,7 +67,6 @@ void Hanwha::initBeamData(QIODevice *filedevice)
     if(xlsReader.load()){
         mBeamTableData->clear();
         mBeamTypeData.clear();
-        mBeamtypes.clear();
         // for(int i=row; i<=endrow;i++){
         auto cell = xlsReader.cellAt(row, colBeamDirID); // col A
         if ( cell != NULL )
@@ -98,9 +97,6 @@ void Hanwha::initBeamData(QIODevice *filedevice)
                     if ( cell != NULL )
                     {
                         varE = cell->readValue(); // read cell value (number(double), QDateTime, QString ...)
-                        // if (!mBeamtypes.contains(varE.toString())){
-                        //     mBeamtypes.append(varE.toString());
-                        // }
                         if (!mBeamTypeData.contains(varE.toString())){
                             mBeamTypeData[varE.toString()]=QStringList();
                         }
@@ -121,9 +117,9 @@ void Hanwha::initBeamData(QIODevice *filedevice)
                 // Convert the integer to a QString and add it to stringList
                 tablekeys.append(QString::number(tablekey));
             }
-            if (tablekeys.length()>0){
-                emit newBeamTableIDs(tablekeys);
-            }
+            // if (tablekeys.length()>0){
+            //     emit newBeamTableIDs(tablekeys);
+            // }
             if (mBeamTypeData.keys().count()>0){
                 emit updateBeamTypes(mBeamTypeData.keys());
                 emit updateBeamTypeGroup(mBeamTypeData);
@@ -168,7 +164,7 @@ QVector<QVector<double>> Hanwha::getBeamTableDatas(int limitid)
     return data;
 }
 
-QVector<QVector<double> > Hanwha::getBeamTableDatas(QString beamtype)
+QVector<QVector<double>> Hanwha::getBeamTableDatas(QString beamtype)
 {
     QVector<QVector<double>> data;
     if (mBeamTypeData.contains(beamtype)){

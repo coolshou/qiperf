@@ -160,6 +160,7 @@ private slots:
 
     void onAddSerial();
     void onAddSSH();
+    void initJIO();
     void onJIO();
     void onAddPing();
     void onWlanSTA();

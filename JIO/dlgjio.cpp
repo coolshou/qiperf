@@ -359,10 +359,12 @@ void DlgJIO::initCyntec()
     mCyntec = new Cyntec();
     mDlgCyntec = new DlgCyntec(m_cfg, mCyntec);
     connect(mCyntec, &Cyntec::newBeamFactorIDs, mDlgCyntec, &DlgCyntec::onNewCyntecBeamFactorIDs);
-    connect(mCyntec, &Cyntec::newBeamTableIDs, mDlgCyntec, &DlgCyntec::onNewCyntecBeamTableIDs);
+    // connect(mCyntec, &Cyntec::newBeamTableIDs, mDlgCyntec, &DlgCyntec::onNewCyntecBeamTableIDs);
     connect(mCyntec, &Cyntec::updateBeamFactorData, mDlgCyntec, &DlgCyntec::onUpdateCynteBeamFactorData);
     connect(mCyntec, &Cyntec::updateBeamTableData, mDlgCyntec, &DlgCyntec::onUpdateCyntecBeamTableData);
     connect(mCyntec, &Cyntec::updateRefFile, mDlgCyntec, &DlgCyntec::setRefFileName);
+    connect(mCyntec, &Cyntec::updateBeamTypes, mDlgCyntec, &DlgCyntec::onUpdateBeamTypes);
+    connect(mCyntec, &Cyntec::updateBeamTypeGroup, mDlgCyntec, &DlgCyntec::onUpdateBeamTypeGroup);
     connect(mDlgCyntec, &DlgCyntec::reffilechanged, mCyntec, QOverload<QString>::of(&Cyntec::initBeamData));
 
     QResource resCyntec(":/AIP/Cyntec.xlsx");
@@ -382,6 +384,8 @@ void DlgJIO::showCyntec(bool checked)
 {
     Q_UNUSED(checked);
     if (mDlgCyntec){
+        QString beamtype = mDlgCyntec->getCyntecBeamType();
+        mDlgCyntec->onCyntecBeamTypeTextChanged(beamtype);
         mDlgCyntec->activateWindow();
         mDlgCyntec->show();
     }

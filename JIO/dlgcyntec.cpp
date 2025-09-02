@@ -18,12 +18,17 @@ DlgCyntec::DlgCyntec(QSettings *cfg, Cyntec *cyntec, QWidget *parent)
     connect(ui->CyntecBeamTableID, &QComboBox::currentTextChanged, this, &DlgCyntec::onCyntecBeamTableIDChanged);
     connect(ui->CyntecElementMap, &QComboBox::currentTextChanged, this, &DlgCyntec::onCyntecElementMapChanged);
     connect(ui->pbCyntecBeamTable, &QPushButton::clicked, this, &DlgCyntec::onCyntecBeamTableClicked);
+    connect(ui->CyntecBeamType, &QComboBox::currentTextChanged, this, &DlgCyntec::onCyntecBeamTypeTextChanged);
     loadcfg();
 }
 
 DlgCyntec::~DlgCyntec()
 {
     delete ui;
+}
+QString DlgCyntec::getCyntecBeamType()
+{
+    return ui->CyntecBeamType->currentText();
 }
 void DlgCyntec::onSelReffileClicked(bool checked)
 {
@@ -55,6 +60,16 @@ void DlgCyntec::onRefFileTextChanged(QString newtext)
 void DlgCyntec::setRefFileName(QString filename)
 {
     ui->lbRefFile->setText(filename);
+}
+
+void DlgCyntec::onUpdateBeamTypes(QStringList beamtypes)
+{
+    ui->CyntecBeamType->insertItems(0, beamtypes);
+}
+
+void DlgCyntec::onUpdateBeamTypeGroup(QMap<QString, QStringList> data)
+{
+    mCyntecBeamTypeGroup = data;
 }
 
 void DlgCyntec::onNewCyntecBeamFactorIDs(QStringList keys)
@@ -98,7 +113,9 @@ void DlgCyntec::onCyntecBeamTableClicked(bool checked)
         connect(this, &DlgCyntec::finished, cBeamT, &FrmBeamTable::close);
         connect(ui->CyntecBeamTableID, &QComboBox::currentTextChanged,
                 cBeamT, &FrmBeamTable::selectEllipse);
-        cBeamT->setGridPoints(mCyntec->getBeamTableDatas());
+        QString beamtype = ui->CyntecBeamType->currentText();
+        cBeamT->setWindowTitle(cBeamT->windowTitle()+"-"+beamtype);
+        cBeamT->setGridPoints(mCyntec->getBeamTableDatas(beamtype));
         cBeamT->show();
     }
 }
@@ -204,6 +221,15 @@ void DlgCyntec::onCyntecElementMapChanged(QString newElementMap)
                 ui->CyntecElementMapView->setItem(i,j, item);
             }
         }
+    }
+}
+
+void DlgCyntec::onCyntecBeamTypeTextChanged(QString newBeamType)
+{
+    if (mCyntecBeamTypeGroup.contains(newBeamType)){
+        QStringList data= mCyntecBeamTypeGroup.value(newBeamType);
+        ui->CyntecBeamTableID->clear();
+        ui->CyntecBeamTableID->insertItems(0, data);
     }
 }
 void DlgCyntec::getCyntecBeamTableDatas(QString beamTableID)

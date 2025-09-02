@@ -3,18 +3,23 @@
     "GET_OPMODE":"getmfg opMode",
     "GET_AIP1VENDOR":"uci get aip.aip1.vendor",
     "GET_AIP2VENDOR":"uci get aip.aip2.vendor",
+    "GET_AIP1EIRP":"uci get aip.aip1.eirp",
+    "GET_AIP2EIRP":"uci get aip.aip2.eirp",
     "GET_SENSORS":"sensors_call_so",
     "GET_compassOrientation":"uci get system.@system[0].compassOrientation",
     "GET_compassPitch":"uci get system.@system[0].compassPitch",
     "GET_GPS":"gps_call_so",
     "GET_RSSI":"",
     "GET_MCS":"",
+    "IFNAME":["apclix0"],
+    "GET_MAC":"ifconfig %1",
     "MONOTOR_LOG":"logread -f",
     "RESPONSE":{
         "GET_GPS":"GPS_DATA",
         "GET_RSSI":"RSSI_DATA",
         "GET_MCS":"MCS_DATA",
-        "GET_SENSORS":"SENSORS_DATA"
+        "GET_SENSORS":"SENSORS_DATA",
+        "GET_MAC":"MAC_DATA"
     },
     "GPS_DATA":{
         "Latitude:":"\\s*(-?\\d+\\.\\d+)",
@@ -27,5 +32,8 @@
         "out_headingErr:":"\\s*(-?\\d+\\.\\d+)",
         "out_rotation[1]:":"\\s*(-?\\d+\\.\\d+)",
         "Calibration_status_of_the_Sensors:":"\\s*(-?\\d+\\.\\d+)"
+    },
+    "MAC_DATA":{
+        "HWaddr":"\\s+([0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5})"
     }
 }

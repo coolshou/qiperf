@@ -1,5 +1,6 @@
 #include "myfunc.h"
 
+#include <QtMath>
 
 // MyFunc::MyFunc(QObject *parent): QObject(parent)
 // {
@@ -145,4 +146,15 @@ QString MyFunc::closeCodeToString(QWebSocketProtocol::CloseCode code) {
     default:
         return QString("Unknown (%1)").arg(static_cast<int>(code));
     }
+}
+
+
+double calculateFSPL(double distanceMeters, double frequencyHz) {
+    // distanceMeters: m
+    // frequencyHz: Hz
+    // const double speedOfLight = 3e8; // m/s
+    double fspl = 20 * qLn(distanceMeters) / qLn(10)
+                  + 20 * qLn(frequencyHz) / qLn(10)
+                  - 147.55;
+    return fspl;
 }

@@ -142,7 +142,6 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(this, &QIperfC::closeAll, m_dlgtest, &DlgTest::close);
     connect(this, &QIperfC::closeAll, m_views, &ViewManager::close);
 
-
 #if (DEBUG_EXPORT_HTML==1)
     m_debugdlg = new QDialog(this);
     m_debugdlg->setModal(false);
@@ -151,6 +150,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
 
     m_serialviews = new QMap<QString, SerialData>();
     m_sshviews = new QMap<QString, SSHData>();
+
+    initJIO();
 
     createTrayIcon();
 }
@@ -1568,13 +1569,22 @@ void QIperfC::onAddSSH()
     }
 }
 
-void QIperfC::onJIO()
+void QIperfC::initJIO()
 {
     dlg_jio = new DlgJIO(m_settings);
     // connect(dlg_jio, &DlgJIO::requestExec, this, &QIperfC::onRequestExec);
     connect(this, &QIperfC::closeAll, dlg_jio, &DlgJIO::close);
-    dlg_jio->clearData();
-    dlg_jio->show();
+
+    connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onJIO);
+}
+
+void QIperfC::onJIO()
+{
+    if (dlg_jio){
+        dlg_jio->clearData();
+        dlg_jio->activateWindow();
+        dlg_jio->show();
+    }
 }
 
 void QIperfC::initActions()
@@ -1615,7 +1625,7 @@ void QIperfC::initActions()
     connect(ui->actionAddPing, &QAction::triggered, this, &QIperfC::onAddPing);
     connect(ui->actionWlanSTA, &QAction::triggered, this, &QIperfC::onWlanSTA);
     //tools
-    connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onJIO);
+
     //option
     connect(ui->actionConfig, &QAction::triggered, this, &QIperfC::onConfig);
     // auto

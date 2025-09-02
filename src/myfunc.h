@@ -25,6 +25,7 @@ public:
     static QString secToHumanReadable(long long seconds);
     static TimeComponents secondsToComponents(int totalSeconds);
     static QString closeCodeToString(QWebSocketProtocol::CloseCode code);
+    static double calculateFSPL(double distanceMeters, double frequencyHz);
 };
 
 #endif // MYFUNC_H

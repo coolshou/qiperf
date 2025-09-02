@@ -80,6 +80,10 @@
 #define CMD_NTP_SYNC_OK "NTP_SYNC_OK"
 #define CMD_NTP_SYNC_FAIL "NTP_SYNC_FAIL"
 
+//
+#define CMD_REQUEST_EXEC "REQUEST_EXEC"
+#define CMD_REQUEST_RESULT "REQUEST_RESULT"
+
 // serial
 #define CMD_SERIAL_ADD    "SERIAL_ADD"   // add SERIAL setting for rs232, comport:BaudRate:DataBits:Parity:StopBits:FlowControl
 #define CMD_SERIAL_DEL    "SERIAL_DEL"   // close SERAIL of comport

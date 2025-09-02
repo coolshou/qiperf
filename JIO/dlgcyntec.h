@@ -16,6 +16,7 @@ class DlgCyntec : public QDialog
 public:
     explicit DlgCyntec(QSettings *cfg, Cyntec *cyntec, QWidget *parent = nullptr);
     ~DlgCyntec();
+    QString getCyntecBeamType();
 public slots:
     void onNewCyntecBeamFactorIDs(QStringList keys);
     void onNewCyntecBeamTableIDs(QStringList keys);
@@ -23,6 +24,9 @@ public slots:
     void onUpdateCyntecBeamTableData(double az, double el, double azBW, double elBW);
     void onRefFileTextChanged(QString newtext);
     void setRefFileName(QString filename);
+    void onUpdateBeamTypes(QStringList beamtypes);
+    void onUpdateBeamTypeGroup(QMap<QString, QStringList> data);
+    void onCyntecBeamTypeTextChanged(QString newBeamType);
 signals:
     void reffilechanged(QString filename);
 protected:
@@ -34,6 +38,7 @@ private slots:
     void onCyntecBeamFactorIDChanged(QString newBeamFactorID);
     void onCyntecBeamTableIDChanged(QString newBeamTableID);
     void onCyntecElementMapChanged(QString newElementMap);
+
 private:
     void getCyntecBeamFactorDatas(QString beamFactorID);
     void getCyntecBeamTableDatas(QString beamTableID);
@@ -45,6 +50,7 @@ private:
     QSettings *m_cfg;
     QString m_oldsavepath;
     Cyntec *mCyntec;
+    QMap<QString, QStringList> mCyntecBeamTypeGroup;
 };
 
 #endif // DLGCYNTEC_H
