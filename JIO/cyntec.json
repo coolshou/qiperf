@@ -1,0 +1,66 @@
+{
+    "AIP1":"/dev/spidev2.0",
+    "AIP2":"/dev/spidev3.0",
+    "POWER_OFF":"spidev_test -D %1 -m 0",
+    "POWER_ON":"spidev_test -D %1 -m 1",
+    "INIT":"spidev_test -D %1 -i",
+    "RESET":"",
+    "Freq":{
+        "1":266700000,
+        "2":270000000,
+        "3":273300000
+    },
+    "SET_Freq":"spidev_test -D %1 -f 266700000",
+    "GET_Freq":"spidev_test -D %1 -S 3",
+
+    "SET_AntArrayMode":"spidev_test -D %1 -F \"%2 %3 %4 %5\"",
+    "GET_AntArrayMode":"spidev_test -D %1 -S 1",
+    "SET_BeamID":"spidev_test -D %1 -T \"%2 %3 %4 %5\"",
+    "GET_BeamID":"spidev_test -D %1 -S 1",
+    "TotalAttn":[0,1,2,3,4,5,6,7,8],
+    "TxAttn":{
+        "0":0,
+        "1":0.25,
+        "2":0.5,
+        "3":0.75,
+        "4":1.0,
+        "128":32
+    },
+    "SET_TxAttn":"spidev_test -D %1 -A \"0:%2:%3\"",
+    "GET_TxAttn":"spidev_test -D %1 -S 2",
+    "SET_RxAttn":"spidev_test -D %1 -A \"1:%2:%3\"",
+    "GET_RxAttn":"spidev_test -D %1 -S 2",
+    "RxIP3":[0, 2, 4, 6, 8, 10, 12],
+    "SET_LnaAttn":"spidev_test –D %1 –r “%2:%3”",
+    "GET_LnaAttn":"spidev_test -D %1 -S 2",
+    "ATC_OFF":"",
+    "ATC_ON":"",
+    "GET_ATC":"",
+    "SET_3LO":"",
+    "RESPONSE":{
+        "GET_Freq":"Freq_DATA",
+        "GET_AntArrayMode":"BeamFactor_DATA",
+        "GET_BeamID":"BeamTable_DATA",
+        "GET_TxAttn":"TxAtt_DATA",
+        "GET_RxAttn":"RxAtt_DATA",
+        "GET_LnaAttn":"RxIP3_DATA"
+    },
+    "Freq_DATA":{
+        "RF freq=":"\\s*(\\d+)Hz"
+    },
+    "BeamFactor_DATA":{
+        "BeamFactor TxA TxB RxA RxB :":"\\s*(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)"
+    },
+    "BeamTable_DATA":{
+        "BeamTable TxA TxB RxA RxB :":"\\s*(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)"
+    },
+    "TxAtt_DATA":{
+        "TX ATT TxA TxB :":"(\\d+\\.\\d{2})dB"
+    },
+    "RxAtt_DATA":{
+        "RX ATT RxA RxB :":"(\\d+\\.\\d{2})dB"
+    },
+    "RxIP3_DATA":{
+        "RXIP3 RxA RxB :":"(\\d+\\.\\d{2})dB"
+    }
+}

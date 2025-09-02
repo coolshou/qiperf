@@ -663,6 +663,34 @@ void QIperfC::onCopyText()
     }
 }
 
+void QIperfC::onRequestExec(QString targetIP, QString idx, QString sCmd)
+{
+    //
+    QString url = "ws://"+targetIP+":"+QString::number(QIPERFD_WSPORT);
+    WSClient *wsc=new WSClient(targetIP, QUrl(url), "");
+    //TODO: when disconnected do waht?
+    if (dlg_jio){
+        connect(wsc, &WSClient::requestResult, dlg_jio, &DlgJIO::onRequestResult);
+    }
+    //wait connect
+    int timeout=0;
+    while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
+        QThread::msleep(100);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        timeout++;
+    }
+    //ask remote create serialport and start tcp server on port
+    QString sendstr = QString("%1:%2:%3").arg(CMD_REQUEST_EXEC,
+                                              idx,
+                                              sCmd);
+    int rc= wsc->sendText(sendstr);
+    if (rc<=0){
+        qDebug() << "send cmd Fail: " << sendstr;
+    }
+    // ws->close(); // should we close it, or wait response?
+
+}
+
 void QIperfC::closeEvent(QCloseEvent *event)
 {
     if (trayIcon->isVisible() && m_closetosystray) {
@@ -1543,6 +1571,7 @@ void QIperfC::onAddSSH()
 void QIperfC::onJIO()
 {
     dlg_jio = new DlgJIO(m_settings);
+    // connect(dlg_jio, &DlgJIO::requestExec, this, &QIperfC::onRequestExec);
     connect(this, &QIperfC::closeAll, dlg_jio, &DlgJIO::close);
     dlg_jio->clearData();
     dlg_jio->show();

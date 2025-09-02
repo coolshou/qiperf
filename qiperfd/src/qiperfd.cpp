@@ -1530,15 +1530,21 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
         restartQIperfd();
     }else if (act.startsWith(CMD_DEBUG_LV)){
         emit setDebugLv(msg.toInt());
+    }else if (act.startsWith(CMD_REQUEST_EXEC)){
+        cut = msg.indexOf(':', 0);
+        QString refid = msg.left(cut); //
+        msg = msg.right(msg.length()-cut-1);
+        cut = msg.indexOf(':', 0);
+        QString reqcmd = msg.left(cut);
+        msg = msg.right(msg.length()-cut-1);
+        runRequest(refid, target, reqcmd, msg);
     }else {
-#if (TEST_WS==1)
         QString cmd = QString("%1:%2:%3").arg(CMD_NOT_SUPPORT, act, msg);
-        debug(cmd);
+        debug("send back: "+cmd);
         int rc = m_wsserver->sendTextMessage(cmd, target);
         if (rc<=0){
             debug(" Info " + target + " Fail!!");
         }
-#endif
     }
 }
 
@@ -2025,6 +2031,27 @@ void QIperfd::getIperfVer(QString cmd, double ver)
 void QIperfd::initJIOOpenWRT()
 {
     if (bIsJIOOpenWRT){
+        //
+        QFile fJio(":/jio/jiocmd");
+        if (fJio.open(QIODevice::ReadOnly)) {
+            //basic commands
+            QByteArray jsonData = fJio.readAll();
+            fJio.close();
+
+            QJsonParseError parseError;
+            QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &parseError);
+            if (parseError.error != QJsonParseError::NoError) {
+                qDebug() << "Failed to parse JSON:" << parseError.errorString();
+                return; // Or handle the error appropriately
+            }
+            jiocmdObj = jsonDoc.object();
+            // rootObject.keys()
+            jiocmdRespObj = jiocmdObj.value("RESPONSE").toObject();
+            // qDebug() << "jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
+        }else {
+            qDebug() << "Failed to open " << fJio.fileName() << " for reading:" << fJio.errorString();
+        }
+
         QString scmd="";
         if (bIsAM7){
             //AP
@@ -2041,7 +2068,7 @@ void QIperfd::initJIOOpenWRT()
 #else
         process.startCommand(scmd);
 #endif
-        process.waitForFinished();// Optional: blocks until done
+        process.waitForFinished(3000);// Optional: blocks until done
 
         QString output = process.readAllStandardOutput();
         QString error = process.readAllStandardError();
@@ -2052,4 +2079,79 @@ void QIperfd::initJIOOpenWRT()
             onLog("cmd STD Error:" + error);
         }
     }
+}
+
+void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cmds)
+{
+    qDebug() << "runRequest: refid:" << refid
+             << " from: " << from
+             << " reqcmd:" << reqcmd
+             << " exec cmd:" << cmds;
+    QString rpcmd="";
+    if (jiocmdRespObj.contains(reqcmd)){
+        rpcmd = jiocmdRespObj.value(reqcmd).toString();
+        qDebug() << " response tag:" << rpcmd;
+    }else {
+        qDebug() << " No supported reqcmd:" << reqcmd;
+        return;
+    }
+
+    QProcess process;
+    // TODO: other platform
+#if QT_VERSION < 0x060000  // < 6.0
+    process.start("bash", QStringList() << cmds);
+#else
+    process.startCommand(cmds);
+#endif
+    if (!rpcmd.isEmpty()){
+        process.waitForFinished();
+        QString output = process.readAllStandardOutput();
+        // qDebug() << "output:" << output;
+        QString rs = parserResponse(rpcmd, output);
+        // qDebug() << "Response:" << rs;
+        // QString erroutput = process.readAllStandardError();
+        // qDebug() << "erroutput:" << erroutput;
+        QString res = QString("%1:%2:%3:%4").arg(CMD_REQUEST_RESULT, refid, rpcmd, rs);
+        qDebug() << "Response res:" << res;
+        int rc = m_wsserver->sendTextMessage(res, from);
+        if (rc<=0){
+            debug(QString("error send %1").arg(res) , 2);
+        }
+    }else {
+        debug(QString("No RESPONSE data of %1").arg(reqcmd) , 2);
+    }
+}
+
+QString QIperfd::parserResponse(QString rpcmd, QString data)
+{
+    QString rs="";
+    QString reg="";
+    QString pattern="";
+    QJsonObject rObj;
+    //parse data
+    if (jiocmdObj.contains(rpcmd)){
+        QJsonObject pasObj = jiocmdObj.value(rpcmd).toObject();
+        foreach(QString line, data.split("\n")){
+            foreach(QString key, pasObj.keys()){
+                if (line.contains(key)){
+                    reg = pasObj.value(key).toString();
+                    pattern = QString("%1%2").arg(QRegularExpression::escape(key), reg);
+                    QRegularExpression regex(pattern);
+                    QRegularExpressionMatch match = regex.match(line);
+                    if (match.hasMatch()) {
+                        QString capStr = match.captured(1);
+                        rObj.insert(key, capStr.toDouble());
+                    }
+                }
+            }
+        }
+        // qDebug() << "rObj:" << rObj;
+        QJsonDocument doc(rObj);
+        QString strJson(doc.toJson(QJsonDocument::Compact));
+        qDebug() << "strJson: " << strJson ;
+        rs = strJson;
+    }else{
+        debug(QString("No data of %1").arg(rpcmd) , 2);
+    }
+    return rs;
 }

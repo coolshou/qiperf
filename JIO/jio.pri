@@ -20,6 +20,7 @@ SOURCES += \
     $$PWD/frmbeamtable.cpp \
     $$PWD/hanwha.cpp \
     $$PWD/lbrrestclient.cpp
+    # $$PWD/../src/wsclient.cpp
 
 
 HEADERS += \
@@ -38,6 +39,7 @@ HEADERS += \
     $$PWD/hanwhabeamtabledata.h \
     $$PWD/jiocmd.h \
     $$PWD/lbrrestclient.h
+    # $$PWD/../src/wsclient.h
 
 FORMS += \
     $$PWD/dlgaip.ui \
@@ -52,4 +54,6 @@ RESOURCES += \
     $$PWD/jio.qrc
 
 DISTFILES += \
+    $$PWD/cyntec.json \
+    $$PWD/hanwha.json \
     $$PWD/jiocmd.json

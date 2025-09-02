@@ -81,6 +81,7 @@ SOURCES += \
     ../src/port/portsetbox.cpp \
     ../src/port/serialport.cpp \
     ../src/port/tcpudpport.cpp \
+    ../src/wsclient.cpp \
     auto/dlgsimplemicro.cpp \
     auto/simpleworker.cpp \
     src/codeeditor.cpp \
@@ -117,7 +118,6 @@ SOURCES += \
     src/tpplot.cpp \
     src/tpworker.cpp \
     src/udpreceiver.cpp \
-    src/wsclient.cpp \
     src/tooltipeventfilter.cpp \
     views/pingview.cpp \
     views/sshview.cpp \
@@ -170,6 +170,7 @@ HEADERS += \
     ../src/icmpwrapper.h \
     ../src/myfunc.h \
     ../src/tpmgrdata.h \
+    ../src/wsclient.h \
     auto/dlgsimplemicro.h \
     auto/simpleworker.h \
     src/codeeditor.h \
@@ -207,7 +208,6 @@ HEADERS += \
     src/tpstatus.h \
     src/tpworker.h \
     src/udpreceiver.h \
-    src/wsclient.h \
     src/tooltipeventfilter.h \
     views/abstractview.h \
     views/pingview.h \

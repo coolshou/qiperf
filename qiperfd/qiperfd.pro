@@ -267,5 +267,5 @@ DISTFILES += \
     src/ws.key
 
 RESOURCES += \
-    src/qiperfd.qrc
-
+    src/qiperfd.qrc \
+    ../JIO/jio.qrc

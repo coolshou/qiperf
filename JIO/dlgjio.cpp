@@ -18,7 +18,11 @@
 #include <QVariant>
 
 #include "../src/gps/geotranslate.h"
+#include "../src/wsclient.h"
+
 #include "comm.h"
+#include "jiocmd.h"
+
 #include "../src/numberdelegate.h"
 
 #include <QDebug>
@@ -29,66 +33,15 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     ui(new Ui::DlgJIO), m_cfg(cfg)
 {
     m_debuglv=3;
+    jiocmdObj = QJsonObject();
     m_InquireTimer= new QTimer(this);
     connect(m_InquireTimer, &QTimer::timeout, this, &DlgJIO::onInquireTimerTimeout);
     ui->setupUi(this);
     loadcfg();
     ui->pbShow3D->setVisible(false);
     // ui->pbShowMap->setVisible(false);//html base map. not good to show correct position
+    initTableWidget();
 
-    ui->tableWidget->setColumnWidth(GPScols::Latitude, 90);
-    ui->tableWidget->setColumnWidth(GPScols::Longitude, 90);
-    ui->tableWidget->setColumnWidth(GPScols::Altitude, 60);
-    ui->tableWidget->setColumnWidth(GPScols::Heading, 50);
-    ui->tableWidget->setColumnWidth(GPScols::Pitch, 50);
-    ui->tableWidget->setColumnWidth(GPScols::AIP1, 40);
-    ui->tableWidget->setColumnWidth(GPScols::AIP2, 40);
-    // Only accept Double
-    NumberDelegate *dLatDelegate = new NumberDelegate(NumberDelegate::Double,
-                                                      -90.0, 90.0, 6,
-                                                      ui->tableWidget);
-    ui->tableWidget->setItemDelegateForColumn(GPScols::Latitude, dLatDelegate);
-    NumberDelegate *dLonDelegate = new NumberDelegate(NumberDelegate::Double,
-                                                      -180.0, 180.0, 6,
-                                                      ui->tableWidget);
-    ui->tableWidget->setItemDelegateForColumn(GPScols::Longitude, dLonDelegate);
-    NumberDelegate *dAltDelegate = new NumberDelegate(NumberDelegate::Double,
-                                                      -10.0, 5500.0, 2,
-                                                      ui->tableWidget);
-    ui->tableWidget->setItemDelegateForColumn(GPScols::Altitude, dAltDelegate);
-    NumberDelegate *dHeadDelegate = new NumberDelegate(NumberDelegate::Double,
-                                                      0.0, 359, 1,
-                                                      ui->tableWidget);
-    ui->tableWidget->setItemDelegateForColumn(GPScols::Heading, dHeadDelegate);
-    NumberDelegate *dPitchDelegate = new NumberDelegate(NumberDelegate::Double,
-                                                      -90.0, 90, 1,
-                                                       ui->tableWidget);
-    ui->tableWidget->setItemDelegateForColumn(GPScols::Pitch, dPitchDelegate);
-
-    ui->twResult->setColumnWidth(AZEIcols::Distance, 90);
-    ui->twResult->setColumnWidth(AZEIcols::Azimuth1, 90);
-    ui->twResult->setColumnWidth(AZEIcols::Azimuth2, 90);
-    ui->twResult->setColumnWidth(AZEIcols::Elevation1, 100);
-    ui->twResult->setColumnWidth(AZEIcols::Elevation2, 100);
-    // Only accept Double
-    NumberDelegate *dDelegate = new NumberDelegate(NumberDelegate::Double,
-                                                   0.0, 10000.0, 2,
-                                                   ui->tableWidget);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::Distance, dDelegate);
-    NumberDelegate *dAziDelegate = new NumberDelegate(NumberDelegate::Double,
-                                                   0.0, 360.0, 2,
-                                                   ui->tableWidget);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::Azimuth1, dAziDelegate);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::Azimuth2, dAziDelegate);
-    NumberDelegate *dElDelegate = new NumberDelegate(NumberDelegate::Double,
-                                                   -90.0, 90.0, 2,
-                                                   ui->tableWidget);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::Elevation1, dElDelegate);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::Elevation2, dElDelegate);
-
-    ui->twAIP->setItemDelegateForColumn(AIPcols::Azimuth, dAziDelegate);
-    ui->twAIP->setItemDelegateForColumn(AIPcols::Elevation, dElDelegate);
-    ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 100);
     initAction();
     // m_dlgOSM = new DlgOpenStreetMap();
     // connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgJIO::onLoadFinished);
@@ -109,10 +62,6 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     connect(ui->pbToDMS, &QPushButton::clicked, this, &DlgJIO::onToDMS);
     connect(ui->pbToDegree, &QPushButton::clicked, this, &DlgJIO::onToDegree);
 
-    connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
-            this, &DlgJIO::showContextMenu);
-    connect(ui->tableWidget, &QTableWidget::currentCellChanged,
-            this, &DlgJIO::onDeviceCellChanged);
     connect(this, &DlgJIO::TileAvailable, this , &DlgJIO::onTileAvailable);
 
     isTileAvailable();
@@ -159,6 +108,9 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     initHanwha();
     // AIP - Cyntec
     initCyntec();
+    initCmds();
+
+    connect(this, &DlgJIO::requestExec, this, &DlgJIO::doRequestExec);
 }
 
 DlgJIO::~DlgJIO()
@@ -236,16 +188,92 @@ Calibration_status_of_the_Sensors = 2
     return result;
 }
 
-QString DlgJIO::getGpsInfo(QString target)
+QString DlgJIO::getGpsInfo(QString refrow, QString target)
 {
     // get GPS info
     QString result="";
     //   gps_call_so
     if (mControlBy==DlgSet::ControlBy::SSH){
+        //TODO:
         m_sshParams.setHost(target);
         mSSHRemoteRunner->run("gps_call_so", m_sshParams);
+    }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
+        QString cmd = QString("%1:%2").arg(JIO_GET_GPS, jiocmdObj.value(JIO_GET_GPS).toString());
+        qDebug() << "JIO_GET_GPS cmd=> " << cmd;
+        emit requestExec(target, refrow, cmd);
     }
     return result;
+}
+
+QString DlgJIO::getSensorInfo(QString refrow, QString target)
+{
+    // get Sensor info
+    QString result="";
+    //   sensor_call_so
+    if (mControlBy==DlgSet::ControlBy::SSH){
+        //TODO:
+
+    }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
+        QString cmd = QString("%1:%2").arg(JIO_GET_SENSORS, jiocmdObj.value(JIO_GET_SENSORS).toString());
+        qDebug() << "JIO_GET_SENSORS cmd=> " << cmd;
+        emit requestExec(target, refrow, cmd);
+    }
+    return result;
+}
+
+void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg)
+{
+    qDebug() << "onRequestResult refrow:" << refrow << " from: " << serveraddress
+             << " cmd: " << cmd << " msg: " << msg;
+    QJsonParseError error;
+    QJsonDocument doc;
+    if (cmd.contains(JIO_GPS_DATA)){
+        doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
+        if (error.error == QJsonParseError::NoError) {
+            QJsonObject obj = doc.object();
+            QTableWidgetItem *itm;
+            foreach (QString key, obj.keys()){
+                if (key.contains("Latitude:")){
+                    itm = ui->tableWidget->item(refrow.toInt(), GPScols::Latitude);
+                    itm->setText(QString::number(obj.value(key).toDouble(), 'f', 6));
+                }
+                if (key.contains("Longitude:")){
+                    itm = ui->tableWidget->item(refrow.toInt(), GPScols::Longitude);
+                    itm->setText(QString::number(obj.value(key).toDouble(), 'f', 6));
+                }
+                if (key.contains("Altitude")){
+                    itm = ui->tableWidget->item(refrow.toInt(), GPScols::Altitude);
+                    itm->setText(QString::number(obj.value(key).toDouble(), 'f', 2));
+                }
+                // if (key.contains("Heading")){
+                //     itm = ui->tableWidget->item(refrow.toInt(), GPScols::Heading);
+                //     itm->setText(QString::number(obj.value(key).toDouble(), 'f', 2));
+                // }
+            }
+        }else{
+            qDebug() << "Wrong format of JIO_GPS_DATA msg:(" << error.errorString() << ")\n";
+        }
+    }else if (cmd.contains(JIO_SENSORS_DATA)){
+        doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
+        if (error.error == QJsonParseError::NoError) {
+            QJsonObject obj = doc.object();
+            QTableWidgetItem *itm;
+            foreach (QString key, obj.keys()){
+                if (key.contains("out_heading:")){
+                    itm = ui->tableWidget->item(refrow.toInt(), GPScols::Heading);
+                    itm->setText(QString::number(obj.value(key).toDouble(), 'f', 2));
+                }
+                if (key.contains("out_rotation[1]")){
+                    itm = ui->tableWidget->item(refrow.toInt(), GPScols::Pitch);
+                    itm->setText(QString::number(obj.value(key).toDouble(), 'f', 2));
+                }
+            }
+        }else{
+            qDebug() << "Wrong format of JIO_SENSORS_DATA msg:(" << error.errorString() << ")\n";
+        }
+    }else {
+        qDebug() << "TODO: Not support cmd: " << cmd;
+    }
 }
 
 void DlgJIO::changeEvent(QEvent *e)
@@ -265,6 +293,29 @@ void DlgJIO::closeEvent(QCloseEvent *event)
     Q_UNUSED(event)
     savecfg();
     emit closeAll();
+}
+
+void DlgJIO::doRequestExec(QString targetIP, QString idx, QString sCmd)
+{
+    QString url = "ws://"+targetIP+":"+QString::number(QIPERFD_WSPORT);
+    WSClient *wsc=new WSClient(targetIP, QUrl(url), "");
+    //TODO: when disconnected do waht?
+    connect(wsc, &WSClient::requestResult, this, &DlgJIO::onRequestResult);
+    //wait connect
+    int timeout=0;
+    while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
+        QThread::msleep(100);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        timeout++;
+    }
+    //ask remote create serialport and start tcp server on port
+    QString sendstr = QString("%1:%2:%3").arg(CMD_REQUEST_EXEC,
+                                              idx,
+                                              sCmd);
+    int rc= wsc->sendText(sendstr);
+    if (rc<=0){
+        qDebug() << "send cmd Fail: " << sendstr;
+    }
 }
 
 void DlgJIO::initHanwha()
@@ -297,6 +348,7 @@ void DlgJIO::showHanwha(bool checked)
     if (mDlgHanwha){
         QString beamtype = mDlgHanwha->getHanwhaBeamType();
         mDlgHanwha->onHanwhaBeamTypeTextChanged(beamtype);
+        mDlgHanwha->activateWindow();
         mDlgHanwha->show();
     }
 }
@@ -330,8 +382,105 @@ void DlgJIO::showCyntec(bool checked)
 {
     Q_UNUSED(checked);
     if (mDlgCyntec){
+        mDlgCyntec->activateWindow();
         mDlgCyntec->show();
     }
+}
+
+void DlgJIO::initCmds()
+{
+    QFile fJio(":/jio/jiocmd");
+    if (fJio.open(QIODevice::ReadOnly)) {
+        //basic commands
+        QByteArray jsonData = fJio.readAll();
+        fJio.close();
+
+        QJsonParseError parseError;
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qDebug() << "Failed to parse JSON:" << parseError.errorString();
+            return; // Or handle the error appropriately
+        }
+        jiocmdObj = jsonDoc.object();
+        // rootObject.keys()
+
+    }else {
+        qDebug() << "Failed to open " << fJio.fileName() << " for reading:" << fJio.errorString();
+    }
+    QFile fHanwha(":/jio/hanwha");
+    if (fHanwha.open(QIODevice::ReadOnly)) {
+
+    }else {
+        qDebug() << "Failed to open " << fHanwha.fileName() << " for reading:" << fHanwha.errorString();
+    }
+    QFile fCyntec(":/jio/cyntec");
+    if (fCyntec.open(QIODevice::ReadOnly)) {
+
+    }else {
+        qDebug() << "Failed to open " << fCyntec.fileName() << " for reading:" << fCyntec.errorString();
+    }
+}
+
+void DlgJIO::initTableWidget()
+{
+    ui->tableWidget->setColumnWidth(GPScols::Latitude, 90);
+    ui->tableWidget->setColumnWidth(GPScols::Longitude, 90);
+    ui->tableWidget->setColumnWidth(GPScols::Altitude, 60);
+    ui->tableWidget->setColumnWidth(GPScols::Heading, 50);
+    ui->tableWidget->setColumnWidth(GPScols::Pitch, 50);
+    ui->tableWidget->setColumnWidth(GPScols::AIP1, 40);
+    ui->tableWidget->setColumnWidth(GPScols::AIP2, 40);
+    // Only accept Double
+    NumberDelegate *dLatDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                      -90.0, 90.0, 6,
+                                                      ui->tableWidget);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Latitude, dLatDelegate);
+    NumberDelegate *dLonDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                      -180.0, 180.0, 6,
+                                                      ui->tableWidget);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Longitude, dLonDelegate);
+    NumberDelegate *dAltDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                      -10.0, 5500.0, 2,
+                                                      ui->tableWidget);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Altitude, dAltDelegate);
+    NumberDelegate *dHeadDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                       0.0, 359, 1,
+                                                       ui->tableWidget);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Heading, dHeadDelegate);
+    NumberDelegate *dPitchDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                        -90.0, 90, 1,
+                                                        ui->tableWidget);
+    ui->tableWidget->setItemDelegateForColumn(GPScols::Pitch, dPitchDelegate);
+
+    ui->twResult->setColumnWidth(AZEIcols::Distance, 90);
+    ui->twResult->setColumnWidth(AZEIcols::Azimuth1, 90);
+    ui->twResult->setColumnWidth(AZEIcols::Azimuth2, 90);
+    ui->twResult->setColumnWidth(AZEIcols::Elevation1, 100);
+    ui->twResult->setColumnWidth(AZEIcols::Elevation2, 100);
+    // Only accept Double
+    NumberDelegate *dDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                   0.0, 10000.0, 2,
+                                                   ui->tableWidget);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::Distance, dDelegate);
+    NumberDelegate *dAziDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                      0.0, 360.0, 2,
+                                                      ui->tableWidget);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::Azimuth1, dAziDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::Azimuth2, dAziDelegate);
+    NumberDelegate *dElDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                     -90.0, 90.0, 2,
+                                                     ui->tableWidget);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::Elevation1, dElDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::Elevation2, dElDelegate);
+
+    ui->twAIP->setItemDelegateForColumn(AIPcols::Azimuth, dAziDelegate);
+    ui->twAIP->setItemDelegateForColumn(AIPcols::Elevation, dElDelegate);
+    ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 100);
+
+    connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
+            this, &DlgJIO::showContextMenu);
+    connect(ui->tableWidget, &QTableWidget::currentCellChanged,
+            this, &DlgJIO::onDeviceCellChanged);
 }
 
 void DlgJIO::initAction()
@@ -660,7 +809,7 @@ void DlgJIO::onInquireClicked(bool checked)
         m_sshParams.setPassword(mSshPassword);
 
         qDebug() << "Inquire start after 1 sec";
-        m_InquireTimer->start(3000);// 1sec
+        m_InquireTimer->start(3000);// 3sec
 
     }else{
         if (m_InquireTimer->isActive()){
@@ -673,6 +822,20 @@ void DlgJIO::onOptimizClicked(bool checked)
 {
     Q_UNUSED(checked)
     qDebug() <<"//do Optimiz to get All device's Beam Direction ID/ Att value";
+    // tmp
+    if (ui->tableWidget->rowCount()>0){
+        int idx=0;
+        QTableWidgetItem *itm= ui->tableWidget->item(idx, GPScols::IPAddr);
+        QString target = itm->text();
+
+        // QString cmd = QString("%1:%2").arg(JIO_GET_GPS, jiocmdObj.value(JIO_GET_GPS).toString());
+        // qDebug() << "JIO_GET_GPS cmd=> " << cmd;
+        // emit requestExec(target, QString::number(idx), cmd);
+        // //
+        // cmd = QString("%1:%2").arg(JIO_GET_SENSORS, jiocmdObj.value(JIO_GET_SENSORS).toString());
+        // qDebug() << "JIO_GET_SENSORS cmd=> " << cmd;
+        // emit requestExec(target, QString::number(idx), cmd);
+    }
 }
 
 void DlgJIO::onInquireTimerTimeout()
@@ -685,14 +848,12 @@ void DlgJIO::onInquireTimerTimeout()
             //IPAddr
             QTableWidgetItem *itm= ui->tableWidget->item(row, GPScols::IPAddr);
             if (itm){
-                if (!itm->text().isEmpty()){
-                    qDebug() << "onInquireTimerTimeout //TODO Inquire:" << itm->text();
-                    //Use ssh
-                    if (mControlBy == DlgSet::ControlBy::SSH){
-                        qDebug() << "control by SSH";
-                        getGpsInfo(itm->text());
+                QString target = itm->text();
+                if (!target.isEmpty()){
+                    qDebug() << "onInquireTimerTimeout //TODO Inquire:" << target;
+                    getGpsInfo(QString::number(row), target);
+                    getSensorInfo(QString::number(row), target);
 
-                    }
                 }else{
                     qDebug() << "No IPAddr at row:" << row << ", col:" << static_cast<int>(GPScols::IPAddr);
                 }

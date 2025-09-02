@@ -73,21 +73,28 @@ public:
     void setShowLine(bool show);
     void clearData();
     QString getStMotion(QString target);
-    QString getGpsInfo(QString target);
+    QString getGpsInfo(QString refrow, QString target);
+    QString getSensorInfo(QString refrow, QString target);
+public slots:
+    void onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg);
 signals:
     void TileAvailable(bool ok);
     void closeAll();
     void highlightItm(QString label);
+    void requestExec(QString targetIP, QString idx, QString sCmd);
 
 protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
+    void doRequestExec(QString targetIP, QString idx, QString sCmd);
     void initHanwha();
     void showHanwha(bool checked);
     void initCyntec();
     void showCyntec(bool checked);
+    void initCmds();
+    void initTableWidget();
     void initAction();
     void onInsert(bool checked);
     void onDelete(bool checked);
@@ -173,6 +180,8 @@ private:
     DlgHanwha *mDlgHanwha;
     Cyntec *mCyntec;
     DlgCyntec *mDlgCyntec;
+    //cmds
+    QJsonObject jiocmdObj;
 };
 
 #endif // DLGJIO_H

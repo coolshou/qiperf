@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/jio">
-        <file alias="jiocmd.json">jiocmd.json</file>
+        <file alias="jiocmd">jiocmd.json</file>
+        <file alias="hanwha">hanwha.json</file>
+        <file alias="cyntec">cyntec.json</file>
     </qresource>
 </RCC>

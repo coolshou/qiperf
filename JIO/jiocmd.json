@@ -4,11 +4,28 @@
     "GET_AIP1VENDOR":"uci get aip.aip1.vendor",
     "GET_AIP2VENDOR":"uci get aip.aip2.vendor",
     "GET_SENSORS":"sensors_call_so",
+    "GET_compassOrientation":"uci get system.@system[0].compassOrientation",
+    "GET_compassPitch":"uci get system.@system[0].compassPitch",
     "GET_GPS":"gps_call_so",
-    "GET_BEAMFACTOR":"",
-    "GET_BEAMDIRECTION":"",
     "GET_RSSI":"",
     "GET_MCS":"",
-
-
+    "MONOTOR_LOG":"logread -f",
+    "RESPONSE":{
+        "GET_GPS":"GPS_DATA",
+        "GET_RSSI":"RSSI_DATA",
+        "GET_MCS":"MCS_DATA",
+        "GET_SENSORS":"SENSORS_DATA"
+    },
+    "GPS_DATA":{
+        "Latitude:":"\\s*(-?\\d+\\.\\d+)",
+        "Longitude:":"\\s*(-?\\d+\\.\\d+)",
+        "Altitude (MSL):":"\\s*(-?\\d+\\.\\d+)",
+        "Heading:":"\\s*(-?\\d+\\.\\d+)"
+    },
+    "SENSORS_DATA":{
+        "out_heading:":"\\s*(-?\\d+\\.\\d+)",
+        "out_headingErr:":"\\s*(-?\\d+\\.\\d+)",
+        "out_rotation[1]:":"\\s*(-?\\d+\\.\\d+)",
+        "Calibration_status_of_the_Sensors:":"\\s*(-?\\d+\\.\\d+)"
+    }
 }

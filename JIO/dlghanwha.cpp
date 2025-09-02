@@ -88,7 +88,7 @@ void DlgHanwha::onHanwhaBeamTypeTextChanged(QString newBeamType)
         ui->HanwhaBeamDirectionID->clear();
         ui->HanwhaBeamDirectionID->insertItems(0, data);
     }else{
-        qDebug() << "No '" <<newBeamType<< "' in mHanwhaBeamTypeGroup";
+        // qDebug() << "No '" <<newBeamType<< "' in mHanwhaBeamTypeGroup";
     }
 }
 

@@ -104,6 +104,8 @@ public slots:
     void onPaste();
     void onDelete();
     void onCopyText();
+    //cmd pass to ws client
+    void onRequestExec(QString targetIP, QString idx, QString sCmd);
 
 signals:
     void updateEndpointNum(int n);

@@ -99,7 +99,6 @@ qint64 WSClient::sendText(QString message)
 {
     qint64 rc=0;
     if (m_webSocket->isValid()){
-
         rc = m_webSocket->sendTextMessage(message);
         if (rc <=0){
             debug("error sendText size=" + QString::number(rc) + ", " + message);
@@ -271,6 +270,12 @@ void WSClient::onTextMessageReceived(QString message)
             emit ntpstarted(true, from);
         } else if (act.startsWith(CMD_NTP_START_FAIL)){
             emit ntpstarted(false, from);
+        } else if (act.startsWith(CMD_REQUEST_RESULT)){
+            cut2 = message.indexOf(':', 0);
+            QString cmd = message.left(cut2); // cmd
+            message = message.right(message.length()-cut2-1); // data
+            debug(QString("requestResult:%1, %2, %3, %4").arg(m_idx, from, cmd, message));
+            emit requestResult(m_idx, from, cmd, message);
         } else {
             debug("Message received: act:" + act +" refrow:" + m_idx +
                       " :" + message + ": " + from);

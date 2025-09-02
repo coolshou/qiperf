@@ -131,6 +131,10 @@ private:
     void initIperf(QString apppath);
     void getIperfVer(QString cmd, double ver);
     void initJIOOpenWRT();
+    void runRequest(QString refid, QString from, QString reqcmd, QString cmds);
+    QString parserResponse(QString rpcmd, QString data);
+
+
 #if defined(Q_OS_WINDOWS)
     // Helper function to create a task using COM API
     bool createScheduledTask(const QString &taskName, const QString &taskCommand, const QString &taskArgs, const QDateTime &runTime);
@@ -196,6 +200,8 @@ private:
     QMap<QString, SSHTask*> m_sshtasks;
     QMutex m_mutex;
     QString longLongListToString(const QList<long long> &list, const QString &separator = ", ");
+    QJsonObject jiocmdObj;
+    QJsonObject jiocmdRespObj;
 };
 
 #endif // QIPERFD_H

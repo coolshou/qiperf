@@ -2,10 +2,10 @@
 #define JIOCMD_H
 
 #define JIO_GET_SENSORS "GET_SENSORS"  // ask to get sensor data by sensors_call_so
-#define JIO_SENSORS_DATA "1"  // return sensor data
+#define JIO_SENSORS_DATA "SENSORS_DATA"  // return sensor data
 
 #define JIO_GET_GPS "GET_GPS"  // ask to get sensor data by gps_call_so
-#define JIO_GPS_DATA "11"  // return gps data
+#define JIO_GPS_DATA "GPS_DATA"  // return gps data
 
 #define JIO_GET_BEAMFACTOR "GET_BEAMFACTOR" // get BEAMFACTOR/BEAMType
 #define JIO_SET_BEAMFACTOR "21" // set BEAMFACTOR/BEAMType
