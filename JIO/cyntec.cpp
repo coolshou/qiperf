@@ -8,6 +8,11 @@
 #include "xlsxworkbook.h"
 using namespace QXlsx;
 
+#include <QJsonParseError>
+#include <QJsonDocument>
+
+#include "myfunc.h"
+
 #include <QDebug>
 
 Cyntec::Cyntec(QObject *parent)
@@ -15,6 +20,27 @@ Cyntec::Cyntec(QObject *parent)
 {
     mBeamFactorData = new QMap<int, CyntecBeamFactorData>();
     mBeamTableData = new QMap<int, CyntecBeamTableData>();
+    initCmds();
+}
+
+void Cyntec::initCmds()
+{
+    QFile fCyntec(":/jio/cyntec");
+    if (fCyntec.open(QIODevice::ReadOnly)) {
+        QByteArray jsonData = fCyntec.readAll();
+        fCyntec.close();
+
+        QJsonParseError parseError;
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qDebug() << "Failed to parse JSON:" << parseError.errorString();
+            return; // Or handle the error appropriately
+        }
+        cmdObj = jsonDoc.object();
+        cmdObj.value("RESPONSE").toObject();
+    }else {
+        qDebug() << "Failed to open " << fCyntec.fileName() << " for reading:" << fCyntec.errorString();
+    }
 }
 
 void Cyntec::initBeamData(QString filename)
@@ -95,9 +121,17 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                             if (cell != NULL){
                                 varG = cell->readValue(); //comment
                                 if (!mBeamTypeData.contains(varG.toString())){
-                                    mBeamTypeData[varG.toString()]=QStringList();
+                                    mBeamTypeData[varG.toString()]=QList<int>();
                                 }
-                                mBeamTypeData[varG.toString()].append(varBeamID.toString());
+                                mBeamTypeData[varG.toString()].append(varBeamID.toInt());
+                                BeamTypeRange r = mBeamTypeRangeData.value(varG.toString(), {0, 0});
+                                if (varC.toDouble() < r.min){
+                                    r.min = varC.toDouble();
+                                }
+                                if (varC.toDouble() > r.max){
+                                    r.max = varC.toDouble();
+                                }
+                                mBeamTypeRangeData[varG.toString()] = r;
                             }
                             // qDebug() << "[TableData]varB:" << varB
                             //          << "varC:" << varC << " varD:" << varD
@@ -107,7 +141,8 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                                                                        varC.toDouble(),
                                                                        varD.toDouble(),
                                                                        varE.toDouble(),
-                                                                       varF.toDouble()));
+                                                                       varF.toDouble(),
+                                                                       varG.toString()));
                         }else{
                             qDebug() << "BeamTable:No value row:" << irow << " col:" << icol;
                         }
@@ -180,7 +215,7 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                         break;
                     }
                 }
-                qDebug() << "mBeamFactorData.keys:" << mBeamFactorData->keys().length();
+                // qDebug() << "mBeamFactorData.keys:" << mBeamFactorData->keys().length();
                 QStringList factorkeys;
                 for (int factorkey : mBeamFactorData->keys()) {
                     // Convert the integer to a QString and add it to stringList
@@ -253,10 +288,10 @@ QVector<QVector<double> > Cyntec::getBeamTableDatas(QString beamtype)
 {
     QVector<QVector<double>> data;
     if (mBeamTypeData.contains(beamtype)){
-        QStringList ids = mBeamTypeData.value(beamtype);
-        for (const QString &id : ids) {
-            if (mBeamTableData->contains(id.toInt())){
-                CyntecBeamTableData d = mBeamTableData->value(id.toInt());
+        QList<int> ids = mBeamTypeData.value(beamtype);
+        for (const int &id : ids) {
+            if (mBeamTableData->contains(id)){
+                CyntecBeamTableData d = mBeamTableData->value(id);
                 data.append({d.beamtableId, d.azDeg, d.elDeg});
             }
         }
@@ -264,6 +299,11 @@ QVector<QVector<double> > Cyntec::getBeamTableDatas(QString beamtype)
         qDebug() << "No mBeamTypeData of " << beamtype;
     }
     return data;
+}
+
+BeamTypeRange Cyntec::getBeamTypeRange(QString beamtype)
+{
+    return mBeamTypeRangeData.value(beamtype, {0,0});
 }
 
 int Cyntec::db2att(double db)
@@ -279,4 +319,85 @@ int Cyntec::db2att(double db)
     // Tx Att: 1db
     // spidev_test -D /dev/spidev2.0 -A "0:4:4"
     return qRound(db/0.25);
+}
+
+int Cyntec::findClosestBeamID(double targetAz, double targetEl, QString beamtype)
+{
+
+    int closestID = -1;
+    double minDistance = std::numeric_limits<double>::max();
+    // Narrow beam
+    BeamTypeRange r= getBeamTypeRange(beamtype);
+    qDebug() << " beamtype: " << beamtype << " range:" << r.min << "," << r.max;
+
+    CyntecBeamTableData btdata;
+    foreach (int id, mBeamTypeData.value(beamtype)){
+        btdata = mBeamTableData->value(id);
+        double distance = MyFunc::euclideanDistance(btdata.azDeg, btdata.elDeg,
+                                                    targetAz, targetEl);
+        if (distance < minDistance) {
+            minDistance = distance;
+            closestID = id;
+        }
+    }
+    // Tri beam
+
+    // all id
+    // for (auto it = mBeamTableData->constBegin(); it != mBeamTableData->constEnd(); ++it) {
+    //     double az = it.value().azDeg;
+    //     double el = it.value().elDeg;
+    //     // double distance = std::sqrt(std::pow(az - targetAz, 2) + std::pow(el - targetEl, 2));
+    //     double distance = MyFunc::euclideanDistance(az, el, targetAz, targetEl);
+
+    //     if (distance < minDistance) {
+    //         minDistance = distance;
+    //         closestID = it.key();
+    //     }
+    // }
+    qDebug() << "closestID:" << closestID;
+    return closestID;
+}
+
+QVector<int> Cyntec::findNearestNeighbors(int targetID, QString beamtype, int neighborCount)
+{
+    QVector<BeamDistance> distances;
+
+    if (!mBeamTableData->contains(targetID)) return {};
+
+    const CyntecBeamTableData& target = mBeamTableData->value(targetID);
+    QString btype;
+    for (auto it = mBeamTableData->constBegin(); it != mBeamTableData->constEnd(); ++it) {
+        if (it.key() == targetID) continue;
+        btype = it.value().sBeamtype;
+        if (!btype.startsWith(beamtype)) {
+            qDebug() << " Not correct beamtype, ignore";
+            continue;
+        }
+        double d = std::sqrt(std::pow(it.value().azDeg - target.azDeg, 2) +
+                             std::pow(it.value().elDeg - target.elDeg, 2));
+
+        distances.append({it.key(), d});
+    }
+
+    std::sort(distances.begin(), distances.end(),
+              [](const BeamDistance& a, const BeamDistance& b) {
+                  return a.distance < b.distance;
+              });
+
+    QVector<int> result;
+    for (int i = 0; i < std::min(neighborCount, static_cast<int>(distances.size())); ++i) {
+        result.append(distances[i].id);
+    }
+
+    return result;
+}
+
+double Cyntec::getAz(int BeamID)
+{
+    double az = -1;
+    if (mBeamTableData->contains(BeamID)){
+        CyntecBeamTableData btdata = mBeamTableData->value(BeamID);
+        az = btdata.azDeg;
+    }
+    return az;
 }

@@ -44,12 +44,13 @@ public:
     void addRectangle(QGV::GeoPos pos1, QPointF size=QPointF(20.0, 10.0),
                       QColor color=Qt::GlobalColor::yellow, QString label="");
     void addArrowLine(QGV::GeoPos origin, double azimuthDeg, double length,
-                      QColor color=QColor(Qt::red), qreal linewidth=3,
-                      double arrowLength = 20.0,
-                      double arrowAngleDeg = 30.0);
+                      QColor color=QColor(Qt::red), bool init=false,
+                      qreal linewidth=3, double arrowLength = 20.0,
+                      double arrowAngleDeg = 30.0 );
     void clearMarker();
     void clearPolyLines();
     void clearLinkLines();
+    void clearInitLines();
     void clearAllPlot();
     QPixmap createQGVImage() const;
 
@@ -62,6 +63,8 @@ protected slots:
     void onClearMark(bool checked);
     void onAddPolylines(bool checked);
     void showLinkline(bool show);
+    void showHeadingLine(bool show);
+    void showInitHeadingLine(bool show);
     void onAddArrowLine(bool checked);
     void onMapStateChanged(QGV::MapState state);
     void onScaleChanged();
@@ -83,6 +86,7 @@ private:
     QGVLayer* mLinkLineLayer;
     QGVLayer* mItemsLayer;
     QGVLayer* mPolysLayer;
+    QGVLayer* mInitLayer;
     QString m_tile;
     QGV::GeoPos *currentMousePos;
     QClipboard *clipboard;

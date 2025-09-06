@@ -47,6 +47,7 @@ void DlgHanwha::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event)
     savecfg();
+    emit closeall();
 }
 
 void DlgHanwha::onSelReffileClicked(bool checked)
@@ -99,9 +100,10 @@ void DlgHanwha::onHanwhaBeamTableClicked(bool checked)
         FrmBeamTable *hBeamT = new FrmBeamTable(AIP::ModuleType::Hanwha);
         connect(this, &DlgHanwha::accepted, hBeamT, &FrmBeamTable::close);
         connect(this, &DlgHanwha::rejected, hBeamT, &FrmBeamTable::close);
-        connect(this, &DlgHanwha::finished, this, &DlgHanwha::onCloseHanwhaBeamTable);
+        // connect(this, &DlgHanwha::finished, this, &DlgHanwha::onCloseHanwhaBeamTable);
+        connect(this, &DlgHanwha::closeall, hBeamT, &FrmBeamTable::close);
         connect(ui->HanwhaBeamDirectionID, &QComboBox::currentTextChanged,
-                hBeamT, &FrmBeamTable::selectEllipse);
+                hBeamT, &FrmBeamTable::onSelectEllipse);
         //
         QString beamtype = ui->HanwhaBeamType->currentText();
         hBeamT->setWindowTitle(hBeamT->windowTitle()+"-"+beamtype);

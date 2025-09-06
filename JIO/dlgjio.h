@@ -23,6 +23,7 @@
 #include "dlghanwha.h"
 #include "cyntec.h"
 #include "dlgcyntec.h"
+#include "aip.h"
 
 namespace Ui {
 class DlgJIO;
@@ -48,10 +49,13 @@ public:
     enum AZEIcols{
         Name=0,
         Distance=1,
-        Azimuth1=2,
-        Azimuth2=3,
-        Elevation1=4,
-        Elevation2=5
+        P1Azimuth=2,
+        P2Azimuth=3,
+        P1Elevation=4,
+        P2Elevation=5,
+        P2AzDiff=6,
+        P2ElDiff=7,
+        BeamDirID=8
     };
     Q_ENUM(AZEIcols)
     enum AIPcols{
@@ -75,6 +79,7 @@ public:
     QString getStMotion(QString target);
     QString getGpsInfo(QString refrow, QString target);
     QString getSensorInfo(QString refrow, QString target);
+    AIP::ModuleType getModuleType(int row, int col);
 public slots:
     void onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg);
 signals:
@@ -98,6 +103,8 @@ private slots:
     void initAction();
     void onInsert(bool checked);
     void onDelete(bool checked);
+    void onGetGPS(bool checked);
+    void onGetSensor(bool checked);
     void onAddRow(QString name, double latitude, double longitude,
                   double altitude, double heading, double pitch,
                   QJsonObject aip1=QJsonObject(), QJsonObject aip2=QJsonObject(), QString ipaddr="");
@@ -114,6 +121,7 @@ private slots:
     void onShow3D(bool checked);
     void onToDMS(bool checked);
     void onToDegree(bool checked);
+    void onCMBeamDirIDInit(bool checked);
     void showContextMenu(const QPoint &pos);
     void onDeviceCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
     void onLoadFinished(bool ok);
@@ -139,6 +147,8 @@ private slots:
     void handleSSHProcessClosed(int exitStatus);
 
 private:
+    int getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, double diffHead, double diffPitch);
+    double getAz(AIP::ModuleType aiptype, int BeamID);
     double averageBearing(const QList<double>& bearings);
     void getSelfIpLocation();
     void onLoad(QString filename);
@@ -152,6 +162,8 @@ private:
     QMenu *m_contextMenu;
     QAction *m_insertAction;
     QAction *m_deleteAction;
+    QAction *m_GPSAction;
+    QAction *m_SensorAction;
     QAction *m_clearAction;
     // DlgOpenStreetMap *m_dlgOSM;
     DlgGeoOSM *m_dlgGeo;
@@ -182,6 +194,7 @@ private:
     DlgCyntec *mDlgCyntec;
     //cmds
     QJsonObject jiocmdObj;
+
 };
 
 #endif // DLGJIO_H

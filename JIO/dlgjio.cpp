@@ -41,7 +41,6 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     ui->pbShow3D->setVisible(false);
     // ui->pbShowMap->setVisible(false);//html base map. not good to show correct position
     initTableWidget();
-
     initAction();
     // m_dlgOSM = new DlgOpenStreetMap();
     // connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgJIO::onLoadFinished);
@@ -51,18 +50,6 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     // connect(this, &DlgJIO::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
     connect(this, &DlgJIO::closeAll, m_dlgGeo, &DlgGeoOSM::close);
     connect(this, &DlgJIO::highlightItm, m_dlgGeo, &DlgGeoOSM::setItmHighlight);
-
-    connect(ui->pbLoad, &QPushButton::clicked, this, &DlgJIO::onLoadCliecked);
-    connect(ui->pbSave, &QPushButton::clicked, this, &DlgJIO::onSaveCliecked);
-    connect(ui->pbCalc, &QPushButton::clicked, this, &DlgJIO::onCalcCliecked);
-    // connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgJIO::onShowMap);
-    connect(ui->pbShowGeo, &QPushButton::clicked, this, &DlgJIO::onShowGeo);
-    connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgJIO::onShow3D);
-    connect(ui->pbClear, &QPushButton::clicked, m_clearAction, &QAction::triggered);
-    connect(ui->pbToDMS, &QPushButton::clicked, this, &DlgJIO::onToDMS);
-    connect(ui->pbToDegree, &QPushButton::clicked, this, &DlgJIO::onToDegree);
-
-    connect(this, &DlgJIO::TileAvailable, this , &DlgJIO::onTileAvailable);
 
     isTileAvailable();
     provider = new IpLocationProvider(this);
@@ -161,6 +148,10 @@ void DlgJIO::clearData()
         ui->twResult->clearContents();
         ui->twResult->setRowCount(0);
     }
+    if (ui->twAIP->rowCount()>0){
+        ui->twAIP->clearContents();
+        ui->twAIP->setRowCount(2);
+    }
     if (m_dlgGeo){
         m_dlgGeo->clearAllPlot();
     }
@@ -219,6 +210,32 @@ QString DlgJIO::getSensorInfo(QString refrow, QString target)
         emit requestExec(target, refrow, cmd);
     }
     return result;
+}
+
+AIP::ModuleType DlgJIO::getModuleType(int row, int col)
+{
+    if ((row<0) || (row >= ui->tableWidget->rowCount())){
+        qDebug() << "getModuleType row out of range";
+        return AIP::ModuleType::Unknown;
+    }
+    if ((col != static_cast<int>(GPScols::AIP1))&
+        (col != static_cast<int>(GPScols::AIP2))){
+        qDebug() << "getModuleType col out of range";
+        return AIP::ModuleType::Unknown;
+    }
+    QTableWidgetItem *itm= ui->tableWidget->item(row, col);
+    QVariant variant= itm->data(Qt::UserRole);
+    // qDebug() << "getModuleType variant:" << variant;
+    if (variant.canConvert<QJsonObject>()){
+        QJsonObject obj = variant.toJsonObject();
+        qDebug() << "row:" << QString::number(row)
+                 << " col:" << QString::number(col)
+                 << " moduletype:" << obj;
+        return static_cast<AIP::ModuleType>(obj.value("moduletype").toInt());
+    }else{
+        qDebug() << "getModuleType convert to json fail: " << variant;
+        return AIP::ModuleType::Unknown;
+    }
 }
 
 void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg)
@@ -329,6 +346,7 @@ void DlgJIO::initHanwha()
     connect(mHanwha, &Hanwha::updateBeamTypeGroup, mDlgHanwha, &DlgHanwha::onUpdateBeamTypeGroup);
     connect(mHanwha, &Hanwha::updateRefFile, mDlgHanwha, &DlgHanwha::setRefFileName);
     connect(mDlgHanwha, &DlgHanwha::reffilechanged, mHanwha, QOverload<QString>::of(&Hanwha::initBeamData));
+    connect(this, &DlgJIO::closeAll, mDlgHanwha, &DlgHanwha::close);
 
     QResource resHanwha(":/AIP/Hanwha.xlsx");
     QString filename = resHanwha.fileName();
@@ -366,6 +384,7 @@ void DlgJIO::initCyntec()
     connect(mCyntec, &Cyntec::updateBeamTypes, mDlgCyntec, &DlgCyntec::onUpdateBeamTypes);
     connect(mCyntec, &Cyntec::updateBeamTypeGroup, mDlgCyntec, &DlgCyntec::onUpdateBeamTypeGroup);
     connect(mDlgCyntec, &DlgCyntec::reffilechanged, mCyntec, QOverload<QString>::of(&Cyntec::initBeamData));
+    connect(this, &DlgJIO::closeAll, mDlgCyntec, &DlgCyntec::close);
 
     QResource resCyntec(":/AIP/Cyntec.xlsx");
     QString filename = resCyntec.fileName();
@@ -417,12 +436,7 @@ void DlgJIO::initCmds()
     }else {
         qDebug() << "Failed to open " << fHanwha.fileName() << " for reading:" << fHanwha.errorString();
     }
-    QFile fCyntec(":/jio/cyntec");
-    if (fCyntec.open(QIODevice::ReadOnly)) {
 
-    }else {
-        qDebug() << "Failed to open " << fCyntec.fileName() << " for reading:" << fCyntec.errorString();
-    }
 }
 
 void DlgJIO::initTableWidget()
@@ -439,28 +453,36 @@ void DlgJIO::initTableWidget()
                                                       -90.0, 90.0, 6,
                                                       ui->tableWidget);
     ui->tableWidget->setItemDelegateForColumn(GPScols::Latitude, dLatDelegate);
+
     NumberDelegate *dLonDelegate = new NumberDelegate(NumberDelegate::Double,
                                                       -180.0, 180.0, 6,
                                                       ui->tableWidget);
     ui->tableWidget->setItemDelegateForColumn(GPScols::Longitude, dLonDelegate);
+
     NumberDelegate *dAltDelegate = new NumberDelegate(NumberDelegate::Double,
                                                       -10.0, 5500.0, 2,
                                                       ui->tableWidget);
     ui->tableWidget->setItemDelegateForColumn(GPScols::Altitude, dAltDelegate);
+
     NumberDelegate *dHeadDelegate = new NumberDelegate(NumberDelegate::Double,
-                                                       0.0, 359, 1,
+                                                       0.0, 359, 2,
                                                        ui->tableWidget);
     ui->tableWidget->setItemDelegateForColumn(GPScols::Heading, dHeadDelegate);
+
     NumberDelegate *dPitchDelegate = new NumberDelegate(NumberDelegate::Double,
-                                                        -90.0, 90, 1,
+                                                        -90.0, 90, 2,
                                                         ui->tableWidget);
     ui->tableWidget->setItemDelegateForColumn(GPScols::Pitch, dPitchDelegate);
 
+    //
     ui->twResult->setColumnWidth(AZEIcols::Distance, 90);
-    ui->twResult->setColumnWidth(AZEIcols::Azimuth1, 90);
-    ui->twResult->setColumnWidth(AZEIcols::Azimuth2, 90);
-    ui->twResult->setColumnWidth(AZEIcols::Elevation1, 100);
-    ui->twResult->setColumnWidth(AZEIcols::Elevation2, 100);
+    ui->twResult->setColumnWidth(AZEIcols::P1Azimuth, 50);
+    ui->twResult->setColumnWidth(AZEIcols::P2Azimuth, 50);
+    ui->twResult->setColumnWidth(AZEIcols::P1Elevation, 50);
+    ui->twResult->setColumnWidth(AZEIcols::P2Elevation, 50);
+    ui->twResult->setColumnWidth(AZEIcols::P2AzDiff, 70);
+    ui->twResult->setColumnWidth(AZEIcols::P2ElDiff, 70);
+    ui->twResult->setColumnWidth(AZEIcols::BeamDirID, 130);
     // Only accept Double
     NumberDelegate *dDelegate = new NumberDelegate(NumberDelegate::Double,
                                                    0.0, 10000.0, 2,
@@ -469,17 +491,17 @@ void DlgJIO::initTableWidget()
     NumberDelegate *dAziDelegate = new NumberDelegate(NumberDelegate::Double,
                                                       0.0, 360.0, 2,
                                                       ui->tableWidget);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::Azimuth1, dAziDelegate);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::Azimuth2, dAziDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::P1Azimuth, dAziDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::P2Azimuth, dAziDelegate);
     NumberDelegate *dElDelegate = new NumberDelegate(NumberDelegate::Double,
                                                      -90.0, 90.0, 2,
                                                      ui->tableWidget);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::Elevation1, dElDelegate);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::Elevation2, dElDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::P1Elevation, dElDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::P2Elevation, dElDelegate);
 
     ui->twAIP->setItemDelegateForColumn(AIPcols::Azimuth, dAziDelegate);
     ui->twAIP->setItemDelegateForColumn(AIPcols::Elevation, dElDelegate);
-    ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 100);
+    ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 120);
 
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
             this, &DlgJIO::showContextMenu);
@@ -489,15 +511,38 @@ void DlgJIO::initTableWidget()
 
 void DlgJIO::initAction()
 {
+    //tableWidget right menu
     m_contextMenu = new QMenu(this);
-
     m_insertAction = m_contextMenu->addAction("Insert");
     connect(m_insertAction, &QAction::triggered, this , &DlgJIO::onInsert);
     m_deleteAction = m_contextMenu->addAction("Delete");
     connect(m_deleteAction, &QAction::triggered, this , &DlgJIO::onDelete);
+    m_contextMenu->addSeparator();
+    // get GPS info
+    m_GPSAction = m_contextMenu->addAction("Get GPS");
+    connect(m_GPSAction, &QAction::triggered, this , &DlgJIO::onGetGPS);
+    // get Sensor info
+    m_SensorAction = m_contextMenu->addAction("Get Sensor");
+    connect(m_SensorAction, &QAction::triggered, this , &DlgJIO::onGetSensor);
+
+
     m_clearAction = new QAction("clear");
         // m_contextMenu->addAction("clear");
     connect(m_clearAction, &QAction::triggered, this , &DlgJIO::onClear);
+
+    connect(ui->pbLoad, &QPushButton::clicked, this, &DlgJIO::onLoadCliecked);
+    connect(ui->pbSave, &QPushButton::clicked, this, &DlgJIO::onSaveCliecked);
+    connect(ui->pbCalc, &QPushButton::clicked, this, &DlgJIO::onCalcCliecked);
+    // connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgJIO::onShowMap);
+    connect(ui->pbShowGeo, &QPushButton::clicked, this, &DlgJIO::onShowGeo);
+    connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgJIO::onShow3D);
+    connect(ui->pbClear, &QPushButton::clicked, m_clearAction, &QAction::triggered);
+    connect(ui->pbToDMS, &QPushButton::clicked, this, &DlgJIO::onToDMS);
+    connect(ui->pbToDegree, &QPushButton::clicked, this, &DlgJIO::onToDegree);
+
+    connect(this, &DlgJIO::TileAvailable, this , &DlgJIO::onTileAvailable);
+
+    connect(ui->pbCMBeamDirIDInit, &QPushButton::clicked, this, &DlgJIO::onCMBeamDirIDInit);
 }
 
 void DlgJIO::onInsert(bool checked)
@@ -512,6 +557,48 @@ void DlgJIO::onDelete(bool checked)
     int iRow = ui->tableWidget->currentRow();//->selectRow();
     qDebug() << "onDelete:" <<  QString::number(iRow);
     ui->tableWidget->removeRow(iRow);
+}
+
+void DlgJIO::onGetGPS(bool checked)
+{
+    Q_UNUSED(checked)
+    QMap<int, QString> data;
+    int row;
+    QString ip;
+    QModelIndexList ls= ui->tableWidget->selectionModel()->selectedIndexes();
+    foreach (auto midx, ls){
+        row = midx.row();
+        if (!data.contains(row)){
+            ip = ui->tableWidget->item(row, GPScols::IPAddr)->text();
+            data.insert(row, ip);
+        }
+    }
+    foreach (int key, data.keys()){
+        if (!data.value(key).isEmpty()){
+            getGpsInfo(QString::number(key), data.value(key));
+        }
+    }
+}
+
+void DlgJIO::onGetSensor(bool checked)
+{
+    Q_UNUSED(checked)
+    QMap<int, QString> data;
+    int row;
+    QString ip;
+    QModelIndexList ls= ui->tableWidget->selectionModel()->selectedIndexes();
+    foreach (auto midx, ls){
+        row = midx.row();
+        if (!data.contains(row)){
+            ip = ui->tableWidget->item(row, GPScols::IPAddr)->text();
+            data.insert(row, ip);
+        }
+    }
+    foreach (int key, data.keys()){
+        if (!data.value(key).isEmpty()){
+            getSensorInfo(QString::number(key), data.value(key));
+        }
+    }
 }
 
 void DlgJIO::onAddRow(QString name, double latitude, double longitude,
@@ -650,10 +737,17 @@ void DlgJIO::onCalcCliecked(bool checked)
             }
         }
     }
+
     QString pos1 = ui->tableWidget->item(0,GPScols::PositionName)->text();
     double lat1 = ui->tableWidget->item(0,GPScols::Latitude)->text().toDouble();
     double lon1 = ui->tableWidget->item(0,GPScols::Longitude)->text().toDouble();
     double altmsl1 = ui->tableWidget->item(0,GPScols::Altitude)->text().toDouble();
+    //AM7 head
+    //AM7 Pitch
+    //AM7 AIP1 type
+    AIP::ModuleType aip1type = getModuleType(0, static_cast<int>(GPScols::AIP1));
+    //AM7 AIP2
+    AIP::ModuleType aip2type = getModuleType(0, static_cast<int>(GPScols::AIP2));
     // double msl1 = GeoTranslate::convertEllipsoidToMSL(lat1, lon1, alt1);
     // qDebug() << " Pos:" << pos1 << " Elevation hight:" << QString::number(msl1);
     QString pos = "";
@@ -696,8 +790,8 @@ void DlgJIO::onCalcCliecked(bool checked)
         azbearings.append(azimuth);
         ui->twResult->setItem(i-1, AZEIcols::Name, new QTableWidgetItem(pos1 + " : " + pos));
         ui->twResult->setItem(i-1, AZEIcols::Distance, new QTableWidgetItem(QString::number(distance)));
-        ui->twResult->setItem(i-1, AZEIcols::Azimuth1, new QTableWidgetItem(QString::number(azimuth, 'f', 1)));
-        ui->twResult->setItem(i-1, AZEIcols::Azimuth2, new QTableWidgetItem(QString::number(azimuth2, 'f', 1)));
+        ui->twResult->setItem(i-1, AZEIcols::P1Azimuth, new QTableWidgetItem(QString::number(azimuth, 'f', 1)));
+        ui->twResult->setItem(i-1, AZEIcols::P2Azimuth, new QTableWidgetItem(QString::number(azimuth2, 'f', 1)));
 
         // totalazimuth = totalazimuth + azimuth;
         el1 = GeoTranslate::calcElevationAngle(altmsl1, altmsl, distance*1000);
@@ -705,15 +799,16 @@ void DlgJIO::onCalcCliecked(bool checked)
         // qDebug() << " " << QString::number(altmsl1) << " - "  << QString::number(altmsl)
         //          << " distance:" << QString::number(distance)
         //          << " el1:" << QString::number(el1) << " el2:" << QString::number(el2);
-        ui->twResult->setItem(i-1, AZEIcols::Elevation1, new QTableWidgetItem(QString::number(el1, 'f', 1)));
-        ui->twResult->setItem(i-1, AZEIcols::Elevation2, new QTableWidgetItem(QString::number(el2, 'f', 1)));
+        ui->twResult->setItem(i-1, AZEIcols::P1Elevation, new QTableWidgetItem(QString::number(el1, 'f', 1)));
+        ui->twResult->setItem(i-1, AZEIcols::P2Elevation, new QTableWidgetItem(QString::number(el2, 'f', 1)));
         // elbearings.append(el1);
         totalel = totalel + el1;
     }
+    // AM7 heading
     double azimuthDegree = averageBearing(azbearings);
     qDebug() << " azimuthDegree:" << QString::number(azimuthDegree);
     ui->leAM7az->setText(QString::number(azimuthDegree, 'f', 1));
-    // qDebug() << "totalel:" << QString::number(totalel);
+    // AM7 Pitch
     double elDegree = totalel/ui->twResult->rowCount();
     ui->leAM7el->setText(QString::number(elDegree, 'f', 1));
 
@@ -726,7 +821,7 @@ void DlgJIO::onCalcCliecked(bool checked)
     QList<QTableWidgetItem*> cm7rs;
     QList<QTableWidgetItem*> cm7ls;
     for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
-        QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::Azimuth1);
+        QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
         if (itm){
             cmaz = itm->text().toDouble();// + 180;
             relative = fmod((cmaz - azimuthDegree + 360), 360);
@@ -735,11 +830,13 @@ void DlgJIO::onCalcCliecked(bool checked)
                 //azimuthDegree 的第一象限
                 itm->setBackground(QBrush(lColor));
                 itm->setToolTip("CM7-FirstQuadrant");
+                itm->setData(Qt::UserRole, "AIP1");
                 cm7rs.append(itm);
             }else if (relative > 270 && relative < 360){
                 //azimuthDegree 的第四象限
                 itm->setBackground(QBrush(rColor));
                 itm->setToolTip("CM7-FourthQuadrant");
+                itm->setData(Qt::UserRole, "AIP2");
                 cm7ls.append(itm);
             }else{
                 qDebug() << "No in Coverage range";
@@ -751,7 +848,7 @@ void DlgJIO::onCalcCliecked(bool checked)
     // diff = |Max - Min|
     // check diff < 3dB Az BW
     // Max, Min should not over AM7az ± dirBW ± 3dB_AzBW/2
-    ui->tableWidget->item(0, GPScols::AIP1); //cyntec or hanwha
+    // ui->tableWidget->item(0, GPScols::AIP1); //cyntec or hanwha
 
     //AM7 AIP1 Az, TODO El
     QList<double> aipRs;
@@ -783,16 +880,40 @@ void DlgJIO::onCalcCliecked(bool checked)
         qDebug() << "No AIP2 AZ value";
     }
     aip2azdiff = aip2az-azimuthDegree;
+    //AIP1
     ui->twAIP->setItem(0, AIPcols::Azimuth,
                        new QTableWidgetItem(QString::number(aip1az)));
-    //TODO AIP1 el
+    ui->twAIP->setItem(0, AIPcols::Elevation,
+                       new QTableWidgetItem(ui->leAM7el->text()));
     ui->twAIP->setItem(0, AIPcols::Azdiff,
                        new QTableWidgetItem(QString::number(aip1azdiff)));
+    //  Cyntec/Hanwha AM7 id
+    if (aip1type==AIP::ModuleType::Cyntec){
+        ui->twAIP->setItem(0, AIPcols::BeamDirectionID,
+                           new QTableWidgetItem("99"));
+    }else if (aip1type==AIP::ModuleType::Hanwha){
+        ui->twAIP->setItem(0, AIPcols::BeamDirectionID,
+                           new QTableWidgetItem("477"));
+    }else{
+        qDebug() << "Unknown AIP1 type:" << aip1type;
+    }
+    //AIP2
     ui->twAIP->setItem(1, AIPcols::Azimuth,
                        new QTableWidgetItem(QString::number(aip2az)));
-    //TODO AIP2 el
+    ui->twAIP->setItem(1, AIPcols::Elevation,
+                       new QTableWidgetItem(ui->leAM7el->text()));
     ui->twAIP->setItem(1, AIPcols::Azdiff,
                        new QTableWidgetItem(QString::number(aip2azdiff)));
+    //  Cyntec/Hanwha AM7 id
+    if (aip2type==AIP::ModuleType::Cyntec){
+        ui->twAIP->setItem(1, AIPcols::BeamDirectionID,
+                           new QTableWidgetItem("100"));
+    }else if (aip2type==AIP::ModuleType::Hanwha){
+        ui->twAIP->setItem(1, AIPcols::BeamDirectionID,
+                           new QTableWidgetItem("476"));
+    }else{
+        qDebug() << "Unknown AIP2 type:" << aip2type;
+    }
 }
 
 void DlgJIO::onSet(bool checked)
@@ -907,9 +1028,10 @@ void DlgJIO::onShowGeo(bool checked)
     Q_UNUSED(checked)
     QString tile = getTile();
 
-    if (ui->tableWidget->rowCount()>1){
-        onCalcCliecked(true);
-    }
+    //TODO: Do not do Manual calc
+    // if (ui->tableWidget->rowCount()>1){
+    //     onCalcCliecked(true);
+    // }
 
     if (m_dlgGeo){
         m_dlgGeo->clearAllPlot();
@@ -969,14 +1091,66 @@ void DlgJIO::onToDegree(bool checked)
     }
 }
 
+void DlgJIO::onCMBeamDirIDInit(bool checked)
+{   Q_UNUSED(checked)
+    //calc all CM7 beam Direction ID by Az/El diff
+    if (ui->twResult->rowCount()>0){
+        QString cm="";
+        //TODO: AIP type
+        AIP::ModuleType aiptype = AIP::ModuleType::Unknown;
+        // QString aipn;
+        // QTableWidgetItem *aipitem;
+        int initID=-1;
+        double realHeading=0.0;
+        double realPitch=0.0;
+        double expectHeading=0.0;
+        double expectPitch=0.0;
+        double diffHead=0.0;
+        double diffPitch=0.0;
+        for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
+            cm = ui->tableWidget->item(iRow+1, GPScols::PositionName)->text();
+            realHeading = ui->tableWidget->item(iRow+1, GPScols::Heading)->text().toDouble();
+            realPitch = ui->tableWidget->item(iRow+1, GPScols::Pitch)->text().toDouble();
+            aiptype = getModuleType(iRow+1 ,GPScols::AIP1);
+
+            expectHeading = ui->twResult->item(iRow, AZEIcols::P2Azimuth)->text().toDouble();
+            expectPitch = ui->twResult->item(iRow, AZEIcols::P2Elevation)->text().toDouble();
+            qDebug() << cm << " heading real:" << QString::number(realHeading)
+                     << " ,Expect:" << QString::number(expectHeading)
+                     << " El read:" << QString::number(realPitch)
+                     << " ,Expect:" << QString::number(expectPitch);
+            diffHead = expectHeading - realHeading;
+            ui->twResult->setItem(iRow, AZEIcols::P2AzDiff,
+                                  new QTableWidgetItem(QString::number(diffHead)));
+            diffPitch = expectPitch - realPitch;
+            ui->twResult->setItem(iRow, AZEIcols::P2ElDiff,
+                                  new QTableWidgetItem(QString::number(diffPitch)));
+            //get beam Direction ID
+            initID = getNearestBeamDirectionID(cm, aiptype, diffHead, diffPitch);
+            ui->twResult->setItem(iRow, AZEIcols::BeamDirID,
+                                  new QTableWidgetItem(QString::number(initID)));
+            //Use ID's deg+ phy deg draw arrow
+        }
+    }
+}
+
 void DlgJIO::showContextMenu(const QPoint &pos)
 {
     if (ui->tableWidget->rowCount()<1){
         m_deleteAction->setEnabled(false);
         m_deleteAction->setVisible(false);
+        m_GPSAction->setVisible(false);
+        m_SensorAction->setVisible(false);
     }else {
         m_deleteAction->setEnabled(true);
         m_deleteAction->setVisible(true);
+        if (ui->tableWidget->selectionModel()->selectedIndexes().count()>0){
+            m_GPSAction->setVisible(true);
+            m_SensorAction->setVisible(true);
+        }else{
+            m_GPSAction->setVisible(false);
+            m_SensorAction->setVisible(false);
+        }
     }
     QPoint globalPos = ui->tableWidget->mapToGlobal(pos);
     m_contextMenu->exec(globalPos);
@@ -1000,13 +1174,16 @@ void DlgJIO::onLoadFinished(bool ok)
     if (ok){
         if (m_dlgGeo){
             QTableWidgetItem *itm=nullptr;
+            QTableWidgetItem *itmId=nullptr;
             QString label;
+            AIP::ModuleType aiptype = AIP::ModuleType::Unknown;
             double lat0;
             double lon0;
             double lat;
             double lon;
+            double heading;
             double azdeg;
-            QRgb rgb1 = 0xFFDC7000; //淺棕色
+            QRgb rgb1 = 0xFF6C6CF1; //Warm Blue
             QRgb rgbaz = 0xFF6CBCF1; //中等亮度的藏青色
             QGV::GeoPos am7;
             QGV::GeoPos cm;
@@ -1015,7 +1192,10 @@ void DlgJIO::onLoadFinished(bool ok)
                 label = ui->tableWidget->item(row, GPScols::PositionName)->text();
                 lat = ui->tableWidget->item(row, GPScols::Latitude)->text().toDouble();
                 lon = ui->tableWidget->item(row, GPScols::Longitude)->text().toDouble();
+                heading = ui->tableWidget->item(row, GPScols::Heading)->text().toDouble();
+                aiptype = getModuleType(row ,GPScols::AIP1);
                 if (row==0){
+                    //AM7
                     // m_dlgGeo->addMarker(lat, lon, label, Placemark::MarkColor::Red);
                     lat0 = lat;
                     lon0 = lon;
@@ -1023,23 +1203,42 @@ void DlgJIO::onLoadFinished(bool ok)
                     m_dlgGeo->addRectangle(am7, QPointF(20.0, 10.0), Qt::red, label);
                     //draw Main Arrow line
                     if (!ui->leAM7az->text().isEmpty()){
-                        m_dlgGeo->addArrowLine(am7,
-                                               ui->leAM7az->text().toDouble(),
-                                               100,
-                                               QColor(Qt::red));
+                        // expects
+                        azdeg = ui->leAM7az->text().toDouble();
+                        m_dlgGeo->addArrowLine(am7, azdeg, 60, QColor(Qt::red));
+                    }else{
+                        //draw init Arrow Line
+                        m_dlgGeo->addArrowLine(am7, heading,
+                                               100, QColor(Qt::blue), true);
                     }
                 }else{
+                    //CM7
                     // marker
                     cm = QGV::GeoPos{lat, lon};
                     //m_dlgGeo->addMarker(lat, lon, label);
                     m_dlgGeo->addRectangle(cm, QPointF(20.0, 10.0), Qt::yellow, label);
-                    // polyLines
-                    m_dlgGeo->addLinkline(am7, cm);
-                    //draw Arrow line
-                    itm = ui->twResult->item(row-1, AZEIcols::Azimuth2);
-                    if (itm){
-                        azdeg = itm->text().toDouble();
-                        m_dlgGeo->addArrowLine(cm, azdeg, 100, QColor(rgb1));
+
+                    if (ui->twResult->rowCount()>0){
+                        // Link Lines
+                        m_dlgGeo->addLinkline(am7, cm);
+
+                        itmId = ui->twResult->item(row-1, AZEIcols::BeamDirID);
+                        if (itmId){
+                            qDebug() << "have BeamDirID data:" << itmId->text();
+                            azdeg = heading + getAz(aiptype,itmId->text().toInt());
+                            m_dlgGeo->addArrowLine(cm, azdeg, 100, QColor(rgb1), false, 4);
+                        }
+                        itm = ui->twResult->item(row-1, AZEIcols::P2Azimuth);
+                        if (itm){
+                            //draw Arrow line, expect
+                            azdeg = itm->text().toDouble();
+                            m_dlgGeo->addArrowLine(cm, azdeg, 60, QColor(Qt::red));
+                        }
+
+                    }else{
+                        //draw init Arrow Line
+                        m_dlgGeo->addArrowLine(cm, heading,
+                                               100, QColor(Qt::blue), true);
                     }
                 }
             }
@@ -1412,8 +1611,9 @@ double DlgJIO::averageBearing(const QList<double> &bearings)
 
 void DlgJIO::getSelfIpLocation()
 {
+    // accroading IP address to get Location
+    // when ready it will store at mIpLocation
     provider->fetchLocation();
-
 }
 
 void DlgJIO::onLoad(QString filename)
@@ -1443,10 +1643,11 @@ void DlgJIO::onLoad(QString filename)
     // For example, if it's an object:
     if (jsonDoc.isObject()) {
         //clear old contents
-        ui->twResult->clearContents();
-        ui->twResult->setRowCount(0);
-        ui->tableWidget->clearContents();
-        ui->tableWidget->setRowCount(0);
+        clearData();
+        // ui->twResult->clearContents();
+        // ui->twResult->setRowCount(0);
+        // ui->tableWidget->clearContents();
+        // ui->tableWidget->setRowCount(0);
 
         QJsonObject rootObject = jsonDoc.object();
         // Process the QJsonObject
@@ -1581,6 +1782,31 @@ void DlgJIO::savecfg()
     m_cfg->endGroup();
     m_cfg->sync();
 
+}
+
+int DlgJIO::getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, double diffHead, double diffPitch)
+{
+    qDebug() << "getNearestBeamDirectionID:" << name
+             << " az diff:" << diffHead
+             << " el diff:" << diffPitch;
+    if (aiptype==AIP::ModuleType::Cyntec){
+        return mCyntec->findClosestBeamID(diffHead, diffPitch);
+    }else if (aiptype==AIP::ModuleType::Hanwha){
+
+    }else {
+        qDebug() << "Unknown AIP type of " << name;
+    }
+}
+
+double DlgJIO::getAz(AIP::ModuleType aiptype, int BeamID)
+{
+    if (aiptype==AIP::ModuleType::Cyntec){
+        return mCyntec->getAz(BeamID);
+    }else if (aiptype==AIP::ModuleType::Hanwha){
+
+    }else {
+        qDebug() << "Unknown AIP type of " << aiptype;
+    }
 }
 
 // double DlgJIO::bearing(double lat1, double lon1, double lat2, double lon2)

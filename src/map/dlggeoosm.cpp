@@ -42,6 +42,9 @@ DlgGeoOSM::DlgGeoOSM(QWidget *parent)
     // poly Layer
     mPolysLayer = new QGVLayer();
     mMap->addItem(mPolysLayer);
+    // init poly Layer
+    mInitLayer = new QGVLayer();
+    mMap->addItem(mInitLayer);
 
     ui->vlGeo->addWidget(mMap);
     // Options list
@@ -60,6 +63,8 @@ DlgGeoOSM::DlgGeoOSM(QWidget *parent)
     connect(ui->pbAddPolyline, &QPushButton::clicked, this, &DlgGeoOSM::onAddPolylines);
     connect(ui->pbAddArrowLine, &QPushButton::clicked, this, &DlgGeoOSM::onAddArrowLine);
     connect(ui->cbShowLinkLine, &QCheckBox::clicked, this, &DlgGeoOSM::showLinkline);
+    connect(ui->cbShowHeadingLine, &QCheckBox::clicked, this, &DlgGeoOSM::showHeadingLine);
+    connect(ui->cbShowInitHeadingLine, &QCheckBox::clicked, this, &DlgGeoOSM::showInitHeadingLine);
 }
 
 DlgGeoOSM::~DlgGeoOSM()
@@ -120,6 +125,22 @@ void DlgGeoOSM::showLinkline(bool show)
     }
 }
 
+void DlgGeoOSM::showHeadingLine(bool show)
+{
+    for (int i=0; i<mPolysLayer->countItems();i++){
+        QGVItem *itm = mPolysLayer->getItem(i);
+        itm->setVisible(show);
+    }
+}
+
+void DlgGeoOSM::showInitHeadingLine(bool show)
+{
+    for (int i=0; i<mInitLayer->countItems();i++){
+        QGVItem *itm = mInitLayer->getItem(i);
+        itm->setVisible(show);
+    }
+}
+
 void DlgGeoOSM::addRectangle(QGV::GeoPos pos1, QPointF size, QColor color,
                              QString label)
 {
@@ -151,11 +172,17 @@ void DlgGeoOSM::clearLinkLines()
     mLinkLineLayer->deleteItems();
 }
 
+void DlgGeoOSM::clearInitLines()
+{
+    mInitLayer->deleteItems();
+}
+
 void DlgGeoOSM::clearAllPlot()
 {
     clearMarker();
     clearPolyLines();
     clearLinkLines();
+    clearInitLines();
 }
 
 void DlgGeoOSM::setItmHighlight(QString label)
@@ -323,13 +350,18 @@ void DlgGeoOSM::onCopyMousePosition(bool checked)
 }
 
 void DlgGeoOSM::addArrowLine(QGV::GeoPos origin, double azimuthDeg, double length,
-                             QColor color, qreal linewidth,
+                             QColor color, bool init, qreal linewidth,
                              double arrowLength, double arrowAngleDeg)
 {
     DirectionArrow *arrowline = new DirectionArrow(origin, azimuthDeg, length,
                                                    color, linewidth,
                                                    arrowLength, arrowAngleDeg);
-    mPolysLayer->addItem(arrowline);
+    if (init){
+        mInitLayer->addItem(arrowline);
+    }else{
+        mPolysLayer->addItem(arrowline);
+    }
+
 }
 
 QGroupBox* DlgGeoOSM::createOptionsList(bool addCheckbox)

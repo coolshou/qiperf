@@ -317,12 +317,15 @@ void FrmBeamTable::clearEllipseSelection()
     }
 }
 
-void FrmBeamTable::selectEllipse(QString id)
+void FrmBeamTable::onSelectEllipse(QString id, bool clear)
 {
     if (!id.isEmpty()){
         int idx = id.toInt();
         if (mEllipses.contains(idx)){
-            clearEllipseSelection();
+            qDebug() << id << " clear:" << clear;
+            if (clear){
+                clearEllipseSelection();
+            }
             QCPItemEllipse *ellipse = mEllipses.value(idx);
             // qDebug() << "FrmBeamTable::selectEllipse:" << idx << " ellipse:" << ellipse;
             ellipse->setSelected(true);

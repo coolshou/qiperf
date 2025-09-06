@@ -26,6 +26,8 @@ public:
     static TimeComponents secondsToComponents(int totalSeconds);
     static QString closeCodeToString(QWebSocketProtocol::CloseCode code);
     static double calculateFSPL(double distanceMeters, double frequencyHz);
+    static double euclideanDistance(double az1, double el1, double az2, double el2);
+
 };
 
 #endif // MYFUNC_H

@@ -374,6 +374,26 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="cbShowHeadingLine">
+         <property name="text">
+          <string>Show Heading Line</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cbShowInitHeadingLine">
+         <property name="text">
+          <string>Show Init Heading Line</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

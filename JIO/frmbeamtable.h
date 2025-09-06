@@ -31,7 +31,7 @@ public:
     void setEllipse(int id, QString text, QColor bgcolor);
     void clearEllipseSelection();
 public slots:
-    void selectEllipse(QString id);
+    void onSelectEllipse(QString id, bool clear=true);
 protected:
     void changeEvent(QEvent *e);
     void mouseMoveEvent(QMouseEvent *event) override;

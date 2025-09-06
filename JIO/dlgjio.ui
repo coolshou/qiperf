@@ -303,7 +303,10 @@
             </size>
            </property>
            <attribute name="horizontalHeaderDefaultSectionSize">
-            <number>120</number>
+            <number>90</number>
+           </attribute>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>false</bool>
            </attribute>
            <column>
             <property name="text">
@@ -317,22 +320,58 @@
            </column>
            <column>
             <property name="text">
-             <string extracomment="從北方順時針轉度數">P1 azimuth(°)</string>
+             <string extracomment="從北方順時針轉度數">P1 Az(°)</string>
+            </property>
+            <property name="toolTip">
+             <string>P1 從北方順時針轉度數</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string extracomment="從北方順時針轉度數">P2 azimuth(°)</string>
+             <string extracomment="從北方順時針轉度數">P2 Az(°)</string>
+            </property>
+            <property name="toolTip">
+             <string>P2 從北方順時針轉度數</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>P1 Elevation(°)</string>
+             <string>P1 El(°)</string>
+            </property>
+            <property name="toolTip">
+             <string>P1 俯仰角度(+俯視, -仰視)</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>P2 Elevation(°)</string>
+             <string>P2 El(°)</string>
+            </property>
+            <property name="toolTip">
+             <string>P2 俯仰角度(+俯視, -仰視)</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>P2 Az Diff</string>
+            </property>
+            <property name="toolTip">
+             <string>P2 Az 差值</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>P2 El Diff</string>
+            </property>
+            <property name="toolTip">
+             <string>P2 El 差值</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>P2 BeamDirection ID</string>
+            </property>
+            <property name="toolTip">
+             <string>Beam Direction ID</string>
             </property>
            </column>
           </widget>
@@ -426,7 +465,10 @@
               </column>
               <column>
                <property name="text">
-                <string>BeamDirectionID</string>
+                <string>BeamDirection ID</string>
+               </property>
+               <property name="toolTip">
+                <string>Beam Direction ID</string>
                </property>
               </column>
              </widget>
@@ -711,7 +753,7 @@
             <item row="0" column="0">
              <widget class="QLabel" name="label_4">
               <property name="text">
-               <string>AM7az(°):</string>
+               <string>AM7 az(°):</string>
               </property>
              </widget>
             </item>
@@ -725,7 +767,7 @@
             <item row="0" column="1">
              <widget class="QLabel" name="label_5">
               <property name="text">
-               <string>AM7el(°):</string>
+               <string>AM7 el(°):</string>
               </property>
              </widget>
             </item>
@@ -740,6 +782,26 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="pbCMBeamDirIDInit">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Beam Direction ID Init</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbOptimiz">
+           <property name="text">
+            <string>Optimiz(TODO)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer_2">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -751,9 +813,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-         <item>
-          <widget class="QWidget" name="widget_6" native="true"/>
          </item>
         </layout>
        </widget>
@@ -792,13 +851,6 @@
         </property>
         <property name="checked">
          <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbOptimiz">
-        <property name="text">
-         <string>Optimiz(TODO)</string>
         </property>
        </widget>
       </item>

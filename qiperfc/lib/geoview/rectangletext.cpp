@@ -4,18 +4,15 @@
 
 RectangleText::RectangleText(QString label, const QGV::GeoRect &geoRect,
                              QPointF fsize,  QColor color, QGVMap *map)
-    :Rectangle(geoRect, color), mMap(map)
+    :Rectangle(geoRect, color), mGeoRect(geoRect), mLabel(label), mMap(map)
 {
     // Q_UNUSED(size)
     // mlabel = new QGVWidgetText();
-    qDebug() << "geoRect:"<< geoRect;
-             // << " base:topLeft:" << base.topLeft()
-             // << " bottomRight:" << base.bottomRight();
     // auto pos = getMap()->
-    mlabel = new QGVColorText(QGV::GeoPos(geoRect.latTop(), geoRect.lonLeft()),
+    mColorlabel = new QGVColorText(QGV::GeoPos(geoRect.latTop(), geoRect.lonLeft()),
                               QSizeF(fsize.x(), fsize.y()));
-    mlabel->setMap(map);
-    mlabel->setText(label);
+    mColorlabel->setMap(map);
+    mColorlabel->setText(label);
     //TODO: following will fix on a position, the position should next to the Rectangle
     // QRect base = mMap->getProjection()->geoToProj(geoRect).toRect();
     // mlabel->setGeometry(QGV::GeoPos(geoRect.latTop(), geoRect.lonLeft()),
@@ -23,7 +20,7 @@ RectangleText::RectangleText(QString label, const QGV::GeoRect &geoRect,
     // mlabel->setAnchor(base.topLeft(),
     //                   {Qt::TopEdge} );
     if (mMap){
-        mMap->addWidget(mlabel);
+        mMap->addWidget(mColorlabel);
     }
     qDebug() << "["<<  label << "]latitude:" << geoRect.topRight().latToString()
              << "longitude:" << geoRect.topRight().lonToString();
@@ -33,5 +30,14 @@ RectangleText::RectangleText(QString label, const QGV::GeoRect &geoRect,
 
 QString RectangleText::getText()
 {
-    return mlabel->getText();
+    return mColorlabel->getText();
+}
+
+QString RectangleText::projTooltip(const QPointF &projPos) const
+{   Q_UNUSED(projPos)
+    QGV::GeoPos topLeftGeo = mGeoRect.topLeft();
+    const QPointF& ppos = getMap()->getProjection()->geoToProj(topLeftGeo);
+    auto geo = getMap()->getProjection()->projToGeo(ppos);
+
+    return mLabel + "\nPosition " + geo.latToString() + " " + geo.lonToString();
 }

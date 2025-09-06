@@ -26,6 +26,8 @@ SOURCES += \
 HEADERS += \
     $$PWD/agmsensor.h \
     $$PWD/aip.h \
+    $$PWD/beamdistance.h \
+    $$PWD/beamtyperange.h \
     $$PWD/cyntec.h \
     $$PWD/cyntecbeamfactordata.h \
     $$PWD/cyntecbeamtabledata.h \

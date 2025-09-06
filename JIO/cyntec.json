@@ -10,6 +10,7 @@
         "2":270000000,
         "3":273300000
     },
+    "GET_STATUS":"spidev_test -D %1 -S 0",
     "SET_Freq":"spidev_test -D %1 -f 266700000",
     "GET_Freq":"spidev_test -D %1 -S 3",
 
@@ -43,7 +44,8 @@
         "GET_BeamID":"BeamTable_DATA",
         "GET_TxAttn":"TxAtt_DATA",
         "GET_RxAttn":"RxAtt_DATA",
-        "GET_LnaAttn":"RxIP3_DATA"
+        "GET_LnaAttn":"RxIP3_DATA",
+        "GET_STATUS":"STATUS_DATA"
     },
     "Freq_DATA":{
         "RF freq=":"\\s*(\\d+)Hz"
@@ -61,6 +63,13 @@
         "RX ATT RxA RxB :":"(\\d+\\.\\d{2})dB"
     },
     "RxIP3_DATA":{
+        "RXIP3 RxA RxB :":"(\\d+\\.\\d{2})dB"
+    },
+    "STATUS_DATA":{
+        "BeamFactor TxA TxB RxA RxB :":"\\s*(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)",
+        "BeamTable TxA TxB RxA RxB :":"\\s*(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)",
+        "TX ATT TxA TxB :":"(\\d+\\.\\d{2})dB",
+        "RX ATT RxA RxB :":"(\\d+\\.\\d{2})dB",
         "RXIP3 RxA RxB :":"(\\d+\\.\\d{2})dB"
     }
 }

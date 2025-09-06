@@ -25,10 +25,12 @@ public slots:
     void onRefFileTextChanged(QString newtext);
     void setRefFileName(QString filename);
     void onUpdateBeamTypes(QStringList beamtypes);
-    void onUpdateBeamTypeGroup(QMap<QString, QStringList> data);
+    void onUpdateBeamTypeGroup(QMap<QString, QList<int>> data);
     void onCyntecBeamTypeTextChanged(QString newBeamType);
 signals:
     void reffilechanged(QString filename);
+    void closeall();
+    void SelectEllipse(QString id, bool clear);
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event) override;
@@ -38,7 +40,7 @@ private slots:
     void onCyntecBeamFactorIDChanged(QString newBeamFactorID);
     void onCyntecBeamTableIDChanged(QString newBeamTableID);
     void onCyntecElementMapChanged(QString newElementMap);
-
+    void onSelectAroundID(bool checked);
 private:
     void getCyntecBeamFactorDatas(QString beamFactorID);
     void getCyntecBeamTableDatas(QString beamTableID);
@@ -50,7 +52,7 @@ private:
     QSettings *m_cfg;
     QString m_oldsavepath;
     Cyntec *mCyntec;
-    QMap<QString, QStringList> mCyntecBeamTypeGroup;
+    QMap<QString, QList<int>> mCyntecBeamTypeGroup;
 };
 
 #endif // DLGCYNTEC_H

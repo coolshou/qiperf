@@ -10,6 +10,8 @@
 #include <QJsonDocument>
 #include <QResource>
 
+#include "dlgjio.h"
+
 #include <QDebug>
 
 
@@ -114,6 +116,15 @@ void DlgAIP::setRowCol(int row, int col)
 {
     mRow=row;
     mCol=col;
+    if (mRow==0){
+        if (mCol==DlgJIO::GPScols::AIP1){
+            ui->cbPreSetPos->setCurrentIndex(2);
+        }else{
+            ui->cbPreSetPos->setCurrentIndex(3);
+        }
+    }else{
+        ui->cbPreSetPos->setCurrentIndex(1);
+    }
 }
 
 void DlgAIP::changeEvent(QEvent *e)
@@ -152,9 +163,28 @@ void DlgAIP::onSelModuleClicked(bool checked)
 
 void DlgAIP::onChangeModule(QString newtext)
 {
+    ui->twBeam->clear();
+    ui->twATT->clear();
     // qDebug() << "onChangeModule:" << newtext;
     if (newtext.startsWith("Cyntec")){
         mModuleType = AIP::ModuleType::Cyntec;
+
+        ui->twBeam->setColumnCount(5);
+        QStringList hb;
+        hb << "Name" << "TxA" << "TxB" << "RxA" << "RxB" ;
+        ui->twBeam->setHorizontalHeaderLabels(hb);
+        ui->twBeam->setRowCount(2);
+        ui->twBeam->setItem(0,0, new QTableWidgetItem("BeamDirection"));
+        ui->twBeam->setItem(1,0, new QTableWidgetItem("BeamFactor"));
+        //
+        ui->twATT->setColumnCount(3);
+        QStringList hs;
+        hs << "Name" << "A" << "B";
+        ui->twATT->setHorizontalHeaderLabels(hs);
+        ui->twATT->setRowCount(3);
+        ui->twATT->setItem(0,0, new QTableWidgetItem("TxAtt"));
+        ui->twATT->setItem(1,0, new QTableWidgetItem("RxAtt"));
+        ui->twATT->setItem(2,0, new QTableWidgetItem("RxIP3Att"));
     }else if (newtext.startsWith("Hanwha")){
         mModuleType = AIP::ModuleType::Hanwha;
     }else{

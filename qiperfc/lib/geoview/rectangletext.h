@@ -20,8 +20,13 @@ public:
                   QPointF fsize, QColor color, QGVMap *map=nullptr);
     QString getText();
 private:
-    // QGVWidgetText* mlabel;
-    QGVColorText* mlabel;
+    QString projTooltip(const QPointF& projPos) const override;
+
+private:
+    // QGVWidgetText* mColorlabel;
+    QGV::GeoRect mGeoRect;
+    QString mLabel;
+    QGVColorText* mColorlabel;
     QGVMap* mMap;
 };
 

@@ -27,6 +27,7 @@ public slots:
     void onHanwhaBeamTypeTextChanged(QString newBeamType);
 signals:
     void reffilechanged(QString filename);
+    void closeall();
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event) override;

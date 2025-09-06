@@ -149,7 +149,7 @@ QString MyFunc::closeCodeToString(QWebSocketProtocol::CloseCode code) {
 }
 
 
-double calculateFSPL(double distanceMeters, double frequencyHz) {
+double MyFunc::calculateFSPL(double distanceMeters, double frequencyHz) {
     // distanceMeters: m
     // frequencyHz: Hz
     // const double speedOfLight = 3e8; // m/s
@@ -157,4 +157,8 @@ double calculateFSPL(double distanceMeters, double frequencyHz) {
                   + 20 * qLn(frequencyHz) / qLn(10)
                   - 147.55;
     return fspl;
+}
+double MyFunc::euclideanDistance(double az1, double el1, double az2, double el2) {
+    //歐氏距離
+    return std::sqrt(std::pow(az1 - az2, 2) + std::pow(el1 - el2, 2));
 }
