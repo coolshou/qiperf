@@ -10,6 +10,7 @@
 #include <QJsonObject>
 #include <QAbstractButton>
 #include <QTimer>
+#include <QThread>
 
 #include <qssh/sshconnection.h>
 #include <qssh/sshremoteprocessrunner.h>
@@ -19,6 +20,8 @@
 #include "../src/gps/iplocationprovider.h"
 #include "dlgaip.h"
 #include "dlgset.h"
+#include "dlgoptimize.h"
+#include "optimizeworker.h"
 #include "hanwha.h"
 #include "dlghanwha.h"
 #include "cyntec.h"
@@ -80,6 +83,7 @@ public:
     QString getGpsInfo(QString refrow, QString target);
     QString getSensorInfo(QString refrow, QString target);
     AIP::ModuleType getModuleType(int row, int col);
+    QJsonObject createInitData();
 public slots:
     void onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg);
 signals:
@@ -87,13 +91,16 @@ signals:
     void closeAll();
     void highlightItm(QString label);
     void requestExec(QString targetIP, QString idx, QString sCmd);
-
+    void startOptimiz();//
+    void stopOptimiz();//
 protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void doRequestExec(QString targetIP, QString idx, QString sCmd);
+    void onStartOptimiz();
+    void onStopOptimiz();
     void initHanwha();
     void showHanwha(bool checked);
     void initCyntec();
@@ -114,7 +121,7 @@ private slots:
     void onCalcCliecked(bool checked);
     void onSet(bool checked);
     void onInquireClicked(bool checked);
-    void onOptimizClicked(bool checked);
+    void onOptimizeClicked(bool checked);
     void onInquireTimerTimeout();
     // void onShowMap(bool checked);
     void onShowGeo(bool checked);
@@ -145,7 +152,9 @@ private slots:
     void handleSSHProcessStdout();
     void handleSSHProcessStderr();
     void handleSSHProcessClosed(int exitStatus);
-
+    //opt
+    void onOptimizeStarted();
+    void onOptimizeStoped(int error);
 private:
     int getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, double diffHead, double diffPitch);
     double getAz(AIP::ModuleType aiptype, int BeamID);
@@ -168,6 +177,7 @@ private:
     // DlgOpenStreetMap *m_dlgOSM;
     DlgGeoOSM *m_dlgGeo;
     DlgAIP *m_dlgaip;
+    DlgOptimize *mDlgOptimize;
     QNetworkReply *reply = nullptr;
     bool showline=false;
     QString m_oldsavepath;
@@ -195,6 +205,8 @@ private:
     //cmds
     QJsonObject jiocmdObj;
 
+    OptimizeWorker *mOptWorker;
+    QThread *mOptThread;
 };
 
 #endif // DLGJIO_H

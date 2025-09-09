@@ -16,12 +16,15 @@ SOURCES += \
     $$PWD/dlgcyntec.cpp \
     $$PWD/dlghanwha.cpp \
     $$PWD/dlgjio.cpp \
+    $$PWD/dlgoptimize.cpp \
     $$PWD/dlgset.cpp \
     $$PWD/frmbeamtable.cpp \
     $$PWD/hanwha.cpp \
-    $$PWD/lbrrestclient.cpp
+    $$PWD/lbrrestclient.cpp \
+    $$PWD/optimizemodel.cpp \
+    $$PWD/optimizeworker.cpp
     # $$PWD/../src/wsclient.cpp
-
+    #$$PWD/../qiperfc/lib/qcpitemtriangle.cpp
 
 HEADERS += \
     $$PWD/agmsensor.h \
@@ -35,19 +38,26 @@ HEADERS += \
     $$PWD/dlgcyntec.h \
     $$PWD/dlghanwha.h \
     $$PWD/dlgjio.h \
+    $$PWD/dlgoptimize.h \
     $$PWD/dlgset.h \
     $$PWD/frmbeamtable.h \
     $$PWD/hanwha.h \
     $$PWD/hanwhabeamtabledata.h \
     $$PWD/jiocmd.h \
-    $$PWD/lbrrestclient.h
+    $$PWD/lbrrestclient.h \
+    $$PWD/optimizedata.h \
+    $$PWD/optimizeitem.h \
+    $$PWD/optimizemodel.h \
+    $$PWD/optimizeworker.h
     # $$PWD/../src/wsclient.h
+    # $$PWD/../qiperfc/lib/qcpitemtriangle.h
 
 FORMS += \
     $$PWD/dlgaip.ui \
     $$PWD/dlgcyntec.ui \
     $$PWD/dlghanwha.ui \
     $$PWD/dlgjio.ui \
+    $$PWD/dlgoptimize.ui \
     $$PWD/dlgset.ui \
     $$PWD/frmbeamtable.ui
 

@@ -20,17 +20,18 @@ public:
 public slots:
     void onNewCyntecBeamFactorIDs(QStringList keys);
     void onNewCyntecBeamTableIDs(QStringList keys);
-    void onUpdateCynteBeamFactorData(QString elementMap, int attDb, double azBW, double elBW);
+    void onUpdateCynteBeamFactorData(QString elementMap, double attDb, double azBW, double elBW);
     void onUpdateCyntecBeamTableData(double az, double el, double azBW, double elBW);
     void onRefFileTextChanged(QString newtext);
     void setRefFileName(QString filename);
     void onUpdateBeamTypes(QStringList beamtypes);
     void onUpdateBeamTypeGroup(QMap<QString, QList<int>> data);
+    void onUpdateBeamFactorSupport(QMap<QString, QList<int>> data);
     void onCyntecBeamTypeTextChanged(QString newBeamType);
 signals:
     void reffilechanged(QString filename);
     void closeall();
-    void SelectEllipse(QString id, bool clear);
+    void SelectEllipse(QString id, bool clear, QColor color);
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event) override;
@@ -44,6 +45,7 @@ private slots:
 private:
     void getCyntecBeamFactorDatas(QString beamFactorID);
     void getCyntecBeamTableDatas(QString beamTableID);
+    void updateCyntecBeamTableID(QString beamType, QString beamFactorID);
     void loadcfg();
     void savecfg();
 
@@ -53,6 +55,8 @@ private:
     QString m_oldsavepath;
     Cyntec *mCyntec;
     QMap<QString, QList<int>> mCyntecBeamTypeGroup;
+    QMap<QString, QList<int>> mCyntecBeamFactorSupport;
+    FrmBeamTable *cBeamT;
 };
 
 #endif // DLGCYNTEC_H

@@ -67,13 +67,10 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
 
     m_dlgset = new DlgSet(this);
     connect(m_dlgset, &DlgSet::updateSetting, this, &DlgJIO::onUpdateSetting);
+    connect(this, &DlgJIO::closeAll, m_dlgset, &DlgSet::close);
 
-    connect(ui->pbSet, &QPushButton::clicked, this, &DlgJIO::onSet);
-    // keep quire device
-    connect(ui->pbInquire, &QPushButton::clicked, this, &DlgJIO::onInquireClicked);
-    // Do Optimiz
-    connect(ui->pbOptimiz, &QPushButton::clicked, this, &DlgJIO::onOptimizClicked);
-    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DlgJIO::close); // close button click
+    mDlgOptimize = new DlgOptimize(this);
+    connect(this, &DlgJIO::closeAll, mDlgOptimize, &DlgOptimize::close);
 
     //ssh
     mSSHRemoteRunner = new QSsh::SshRemoteProcessRunner(this);
@@ -98,6 +95,8 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     initCmds();
 
     connect(this, &DlgJIO::requestExec, this, &DlgJIO::doRequestExec);
+    connect(this, &DlgJIO::startOptimiz, this, &DlgJIO::onStartOptimiz);
+    connect(this, &DlgJIO::stopOptimiz, this, &DlgJIO::onStopOptimiz);
 }
 
 DlgJIO::~DlgJIO()
@@ -238,6 +237,122 @@ AIP::ModuleType DlgJIO::getModuleType(int row, int col)
     }
 }
 
+QJsonObject DlgJIO::createInitData()
+{
+    //create Init Data for Optimize use
+    QJsonObject rootObject;
+    QJsonObject aipObj;
+    rootObject["LocalAddr"]= ui->leLocalAddr->text();
+    //ssh
+    QJsonObject sshObj;
+    sshObj["username"] = mSshUsername;
+    sshObj["password"] = mSshPassword;
+    rootObject["ssh"] = sshObj;
+    //web
+    QJsonObject webObj;
+    webObj["username"] = mWebusername;
+    webObj["password"] = mWebpassword;
+    rootObject["web"] = webObj;
+    QJsonArray pos;
+    QTableWidgetItem *item;
+    if (ui->tableWidget->rowCount()>0){
+        for(int i=0; i< ui->tableWidget->rowCount(); i++){
+            QJsonObject posdata;
+            if (i==0){
+                posdata["type"]=0; // AP (AM7)
+            }else{
+                posdata["type"]=1; // client (CM7)
+            }
+            item = ui->tableWidget->item(i, GPScols::PositionName);
+            if (item) {
+                posdata["name"] = item->text();
+            }
+            item = ui->tableWidget->item(i, GPScols::Latitude);
+            if (item) {
+                posdata["latitude"] = item->text().toDouble();
+            }
+            item = ui->tableWidget->item(i, GPScols::Longitude);
+            if (item) {
+                posdata["longitude"] = item->text().toDouble();
+            }
+            item = ui->tableWidget->item(i, GPScols::Altitude);
+            if (item) {
+                posdata["altitude"] = item->text().toDouble();
+            }
+            item = ui->tableWidget->item(i, GPScols::Heading);
+            if (item) {
+                posdata["heading"] = item->text().toDouble();
+            }
+            item = ui->tableWidget->item(i, GPScols::Pitch);
+            if (item) {
+                posdata["pitch"] = item->text().toDouble();
+            }
+            //AIP1
+            item = ui->tableWidget->item(i, GPScols::AIP1);
+            if (item) {
+                QVariant varAIP1 =  item->data(Qt::UserRole);
+                if (varAIP1.canConvert<QVariantMap>()){
+                    qDebug() << "AIP1 data:" << varAIP1.toMap() ;
+                    aipObj = QJsonObject::fromVariantMap(varAIP1.toMap());
+                    if (i==0){
+                        if (ui->twAIP->rowCount()>0){
+                            item = ui->twAIP->item(0, AIPcols::BeamDirectionID);
+                            if (item){
+                                aipObj["BeamID"] = item->text().toInt();
+                            }
+                        }
+                    }else{
+                        if (ui->twResult->rowCount()>0){
+                            item = ui->twResult->item(i-1, AZEIcols::P2AzDiff);
+                            if (item){
+                                aipObj["AzDiff"] = item->text().toDouble();
+                            }
+                            item = ui->twResult->item(i-1, AZEIcols::P2ElDiff);
+                            if (item){
+                                aipObj["ElDiff"] = item->text().toDouble();
+                            }
+                            item = ui->twResult->item(i-1, AZEIcols::BeamDirID);
+                            if (item){
+                                aipObj["BeamID"] = item->text().toInt();
+                            }
+                        }
+                    }
+                    posdata["AIP1"] = aipObj;
+                }else{
+                    qDebug() << "Wrong API1 data:";
+                }
+            }
+            //AIP2
+            item = ui->tableWidget->item(i, GPScols::AIP2);
+            if (item) {
+                QVariant varAIP2 =  item->data(Qt::UserRole);
+                if (varAIP2.canConvert<QVariantMap>()){
+                    qDebug() << "AIP2 data:" << varAIP2.toMap() ;
+                    aipObj = QJsonObject::fromVariantMap(varAIP2.toMap());
+                    if (i==0){
+                        if (ui->twAIP->rowCount()>1){
+                            item = ui->twAIP->item(1, AIPcols::BeamDirectionID);
+                            if (item){
+                                aipObj["BeamID"] = item->text().toInt();
+                            }
+                        }
+                    }
+                    posdata["AIP2"] = aipObj;
+                }else{
+                    qDebug() << "Row:" << QString::number(i) << " Wrong API2 data";
+                }
+            }
+            item = ui->tableWidget->item(i, GPScols::IPAddr);
+            if (item) {
+                posdata["IPAddr"] = item->text();
+            }
+            pos.append(posdata);
+        }
+        rootObject["positions"] = pos;
+    }
+    return rootObject;
+}
+
 void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg)
 {
     qDebug() << "onRequestResult refrow:" << refrow << " from: " << serveraddress
@@ -335,6 +450,22 @@ void DlgJIO::doRequestExec(QString targetIP, QString idx, QString sCmd)
     }
 }
 
+void DlgJIO::onStartOptimiz()
+{
+    if (mOptThread){
+        qDebug() << "Start Optimize";
+        mOptThread->start();
+    }
+}
+
+void DlgJIO::onStopOptimiz()
+{
+    if (mOptWorker){
+        qDebug() <<"stop Optimize";
+        // mOptWorker
+    }
+}
+
 void DlgJIO::initHanwha()
 {
     connect(ui->pbHanwha, &QPushButton::clicked, this, &DlgJIO::showHanwha);
@@ -383,6 +514,7 @@ void DlgJIO::initCyntec()
     connect(mCyntec, &Cyntec::updateRefFile, mDlgCyntec, &DlgCyntec::setRefFileName);
     connect(mCyntec, &Cyntec::updateBeamTypes, mDlgCyntec, &DlgCyntec::onUpdateBeamTypes);
     connect(mCyntec, &Cyntec::updateBeamTypeGroup, mDlgCyntec, &DlgCyntec::onUpdateBeamTypeGroup);
+    connect(mCyntec, &Cyntec::updateBeamFactorSupport, mDlgCyntec, &DlgCyntec::onUpdateBeamFactorSupport);
     connect(mDlgCyntec, &DlgCyntec::reffilechanged, mCyntec, QOverload<QString>::of(&Cyntec::initBeamData));
     connect(this, &DlgJIO::closeAll, mDlgCyntec, &DlgCyntec::close);
 
@@ -539,6 +671,12 @@ void DlgJIO::initAction()
     connect(ui->pbClear, &QPushButton::clicked, m_clearAction, &QAction::triggered);
     connect(ui->pbToDMS, &QPushButton::clicked, this, &DlgJIO::onToDMS);
     connect(ui->pbToDegree, &QPushButton::clicked, this, &DlgJIO::onToDegree);
+    connect(ui->pbSet, &QPushButton::clicked, this, &DlgJIO::onSet);
+    // keep quire device
+    connect(ui->pbInquire, &QPushButton::clicked, this, &DlgJIO::onInquireClicked);
+    // Do Optimiz
+    connect(ui->pbOptimize, &QPushButton::clicked, this, &DlgJIO::onOptimizeClicked);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DlgJIO::close); // close button click
 
     connect(this, &DlgJIO::TileAvailable, this , &DlgJIO::onTileAvailable);
 
@@ -943,24 +1081,46 @@ void DlgJIO::onInquireClicked(bool checked)
     }
 }
 
-void DlgJIO::onOptimizClicked(bool checked)
+void DlgJIO::onOptimizeClicked(bool checked)
 {
-    Q_UNUSED(checked)
-    qDebug() <<"//do Optimiz to get All device's Beam Direction ID/ Att value";
-    // tmp
-    if (ui->tableWidget->rowCount()>0){
-        int idx=0;
-        QTableWidgetItem *itm= ui->tableWidget->item(idx, GPScols::IPAddr);
-        QString target = itm->text();
+    if (checked){
+        qDebug() <<"//do Optimiz to get All device's Beam Direction ID/ Att value";
+        // init data
+        QJsonObject dataobj = createInitData();
+        // Optimiz worker run in thread
+        // worker
+        mOptWorker = new OptimizeWorker(dataobj);
+        connect(mOptWorker, &OptimizeWorker::started, this, &DlgJIO::onOptimizeStarted);
+        connect(this, &DlgJIO::stopOptimiz, mOptWorker, &OptimizeWorker::Stop);
+        // thread
+        mOptThread = new QThread();
+        connect(mOptThread, &QThread::started, mOptWorker, &OptimizeWorker::work);
+        // connect(mOptWorker, &OptimizeWorker::stoped, mOptThread, &QThread::deleteLater);
+        connect(mOptWorker, &OptimizeWorker::stoped, this, &DlgJIO::onOptimizeStoped);
 
-        // QString cmd = QString("%1:%2").arg(JIO_GET_GPS, jiocmdObj.value(JIO_GET_GPS).toString());
-        // qDebug() << "JIO_GET_GPS cmd=> " << cmd;
-        // emit requestExec(target, QString::number(idx), cmd);
-        // //
-        // cmd = QString("%1:%2").arg(JIO_GET_SENSORS, jiocmdObj.value(JIO_GET_SENSORS).toString());
-        // qDebug() << "JIO_GET_SENSORS cmd=> " << cmd;
-        // emit requestExec(target, QString::number(idx), cmd);
+        mOptWorker->moveToThread(mOptThread);
+
+        mDlgOptimize->exec();
+        emit startOptimiz();
+    } else {
+        // TODO: check run status?
+        emit stopOptimiz();
     }
+    // if (ui->tableWidget->rowCount()>0){
+    //     int idx=0;
+    //     QTableWidgetItem *itm= ui->tableWidget->item(idx, GPScols::IPAddr);
+    //     QString target = itm->text();
+
+    //     // QString cmd = QString("%1:%2").arg(JIO_GET_GPS, jiocmdObj.value(JIO_GET_GPS).toString());
+    //     // qDebug() << "JIO_GET_GPS cmd=> " << cmd;
+    //     // emit requestExec(target, QString::number(idx), cmd);
+    //     // //
+    //     // cmd = QString("%1:%2").arg(JIO_GET_SENSORS, jiocmdObj.value(JIO_GET_SENSORS).toString());
+    //     // qDebug() << "JIO_GET_SENSORS cmd=> " << cmd;
+    //     // emit requestExec(target, QString::number(idx), cmd);
+    // }else{
+    //     qDebug() << "onOptimizeClicked";
+    // }
 }
 
 void DlgJIO::onInquireTimerTimeout()
@@ -1590,6 +1750,20 @@ void DlgJIO::handleSSHProcessClosed(int exitStatus)
     }
 }
 
+void DlgJIO::onOptimizeStarted()
+{
+    ui->pbOptimize->setText("Stop");
+}
+
+void DlgJIO::onOptimizeStoped(int error)
+{
+    qDebug() << "onOptimizeStoped: error:" << error;
+    ui->pbOptimize->setText("Optimiz");
+    if (mOptThread){
+        mOptThread->deleteLater();
+    }
+}
+
 double DlgJIO::averageBearing(const QList<double> &bearings)
 {
     if (bearings.isEmpty()) return -1.0; // 或者 return NaN
@@ -1644,12 +1818,10 @@ void DlgJIO::onLoad(QString filename)
     if (jsonDoc.isObject()) {
         //clear old contents
         clearData();
-        // ui->twResult->clearContents();
-        // ui->twResult->setRowCount(0);
-        // ui->tableWidget->clearContents();
-        // ui->tableWidget->setRowCount(0);
 
         QJsonObject rootObject = jsonDoc.object();
+        QString localaddr= rootObject.value("LocalAddr").toString();
+        ui->leLocalAddr->setText(localaddr);
         // Process the QJsonObject
         QJsonObject sshobj = rootObject.value("ssh").toObject();
         mSshUsername = sshobj.value("username").toString();
@@ -1679,82 +1851,13 @@ bool DlgJIO::onSave(QString filename)
         return false; // Or handle the error appropriately
     }
     QJsonDocument jsonDoc ;
-    QJsonObject rootObject;
-    //ssh
-    QJsonObject sshObj;
-    sshObj["username"] = mSshUsername;
-    sshObj["password"] = mSshPassword;
-    rootObject["ssh"] = sshObj;
-    //web
-    QJsonObject webObj;
-    webObj["username"] = mWebusername;
-    webObj["password"] = mWebpassword;
-    rootObject["web"] = webObj;
-    QJsonArray pos;
-    QTableWidgetItem *item;
-    if (ui->tableWidget->rowCount()>0){
-        for(int i=0; i< ui->tableWidget->rowCount(); i++){
-            QJsonObject posdata;
-            item = ui->tableWidget->item(i, GPScols::PositionName);
-            if (item) {
-                posdata["name"] = item->text();
-            }
-            item = ui->tableWidget->item(i, GPScols::Latitude);
-            if (item) {
-                posdata["latitude"] = item->text().toDouble();
-            }
-            item = ui->tableWidget->item(i, GPScols::Longitude);
-            if (item) {
-                posdata["longitude"] = item->text().toDouble();
-            }
-            item = ui->tableWidget->item(i, GPScols::Altitude);
-            if (item) {
-                posdata["altitude"] = item->text().toDouble();
-            }
-            item = ui->tableWidget->item(i, GPScols::Heading);
-            if (item) {
-                posdata["heading"] = item->text().toDouble();
-            }
-            item = ui->tableWidget->item(i, GPScols::Pitch);
-            if (item) {
-                posdata["pitch"] = item->text().toDouble();
-            }
-            //AIP1
-            item = ui->tableWidget->item(i, GPScols::AIP1);
-            if (item) {
-                QVariant varAIP1 =  item->data(Qt::UserRole);
-                if (varAIP1.canConvert<QVariantMap>()){
-                    qDebug() << "AIP1 data:" << varAIP1.toMap() ;
-                    posdata["AIP1"] = QJsonObject::fromVariantMap(varAIP1.toMap());
-                }else{
-                    qDebug() << "Wrong API1 data:";
-                }
-            }
-            //AIP2
-            item = ui->tableWidget->item(i, GPScols::AIP2);
-            if (item) {
-                QVariant varAIP2 =  item->data(Qt::UserRole);
-                if (varAIP2.canConvert<QVariantMap>()){
-                    qDebug() << "AIP2 data:" << varAIP2.toMap() ;
-                    posdata["AIP2"] = QJsonObject::fromVariantMap(varAIP2.toMap());
-                }else{
-                    qDebug() << "Row:" << QString::number(i) << " Wrong API2 data";
-                }
-            }
-            item = ui->tableWidget->item(i, GPScols::IPAddr);
-            if (item) {
-                posdata["IPAddr"] = item->text();
-            }
-            pos.append(posdata);
-        }
-        rootObject["positions"] = pos;
-        jsonDoc.setObject(rootObject);
-        QString strJson(jsonDoc.toJson(QJsonDocument::Indented));
+    QJsonObject rootObject = createInitData();
+    jsonDoc.setObject(rootObject);
+    QString strJson(jsonDoc.toJson(QJsonDocument::Indented));
+    QTextStream out(&file);
+    out << strJson;
+    out.flush();
 
-        QTextStream out(&file);
-        out << strJson;
-        out.flush();
-    }
     file.close();
     return true;
 }
@@ -1786,15 +1889,17 @@ void DlgJIO::savecfg()
 
 int DlgJIO::getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, double diffHead, double diffPitch)
 {
-    qDebug() << "getNearestBeamDirectionID:" << name
-             << " az diff:" << diffHead
-             << " el diff:" << diffPitch;
+    // qDebug() << "getNearestBeamDirectionID:" << name
+    //          << " az diff:" << diffHead
+    //          << " el diff:" << diffPitch;
     if (aiptype==AIP::ModuleType::Cyntec){
         return mCyntec->findClosestBeamID(diffHead, diffPitch);
     }else if (aiptype==AIP::ModuleType::Hanwha){
-
+        qDebug() << "TODO: getNearestBeamDirectionID Hanwha";
+        return -1;
     }else {
         qDebug() << "Unknown AIP type of " << name;
+        return -1;
     }
 }
 
@@ -1803,9 +1908,11 @@ double DlgJIO::getAz(AIP::ModuleType aiptype, int BeamID)
     if (aiptype==AIP::ModuleType::Cyntec){
         return mCyntec->getAz(BeamID);
     }else if (aiptype==AIP::ModuleType::Hanwha){
-
+        qDebug() << "getAz Hanwha";
+        return 0.0;
     }else {
         qDebug() << "Unknown AIP type of " << aiptype;
+        return 0.0;
     }
 }
 

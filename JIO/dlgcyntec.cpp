@@ -12,6 +12,7 @@ DlgCyntec::DlgCyntec(QSettings *cfg, Cyntec *cyntec, QWidget *parent)
     , ui(new Ui::DlgCyntec), m_cfg(cfg), mCyntec(cyntec)
 {
     ui->setupUi(this);
+    cBeamT = nullptr;
     connect(ui->pbSelReffile, &QPushButton::clicked, this, &DlgCyntec::onSelReffileClicked);
     //Cyntec
     connect(ui->CyntecBeamFactorID, &QComboBox::currentTextChanged, this, &DlgCyntec::onCyntecBeamFactorIDChanged);
@@ -73,6 +74,11 @@ void DlgCyntec::onUpdateBeamTypeGroup(QMap<QString, QList<int>> data)
     mCyntecBeamTypeGroup = data;
 }
 
+void DlgCyntec::onUpdateBeamFactorSupport(QMap<QString, QList<int> > data)
+{
+    mCyntecBeamFactorSupport = data;
+}
+
 void DlgCyntec::onNewCyntecBeamFactorIDs(QStringList keys)
 {
     // qDebug() << "onNewCyntecBeamFactorIDs:" << keys;
@@ -87,7 +93,7 @@ void DlgCyntec::onNewCyntecBeamTableIDs(QStringList keys)
     ui->CyntecBeamTableID->insertItems(0, keys);
 }
 
-void DlgCyntec::onUpdateCynteBeamFactorData(QString elementMap, int attDb, double azBW, double elBW)
+void DlgCyntec::onUpdateCynteBeamFactorData(QString elementMap, double attDb, double azBW, double elBW)
 {
     int idx = ui->CyntecElementMap->findText(elementMap);
     if (idx != ui->CyntecElementMap->currentIndex()){
@@ -110,12 +116,8 @@ void DlgCyntec::onCyntecBeamTableClicked(bool checked)
 {
     Q_UNUSED(checked)
     if (mCyntec){
-        FrmBeamTable *cBeamT = new FrmBeamTable(AIP::ModuleType::Cyntec);
-        // connect(this, &DlgCyntec::finished, cBeamT, &FrmBeamTable::close);
+        cBeamT = new FrmBeamTable(AIP::ModuleType::Cyntec);
         connect(this, &DlgCyntec::closeall, cBeamT, &FrmBeamTable::close);
-        //TODO: CyntecBeamTableID change
-        connect(ui->CyntecBeamTableID, &QComboBox::currentTextChanged,
-                cBeamT, &FrmBeamTable::onSelectEllipse);
         connect(this, &DlgCyntec::SelectEllipse, cBeamT, &FrmBeamTable::onSelectEllipse);
         QString beamtype = ui->CyntecBeamType->currentText();
         cBeamT->setWindowTitle(cBeamT->windowTitle()+"-"+beamtype);
@@ -144,6 +146,8 @@ void DlgCyntec::closeEvent(QCloseEvent *event)
 void DlgCyntec::onCyntecBeamFactorIDChanged(QString newBeamFactorID)
 {
     getCyntecBeamFactorDatas(newBeamFactorID);
+    QString beamtype = ui->CyntecBeamType->currentText();
+    updateCyntecBeamTableID(beamtype, newBeamFactorID);
 }
 void DlgCyntec::getCyntecBeamFactorDatas(QString beamFactorID)
 {
@@ -158,6 +162,9 @@ void DlgCyntec::onCyntecBeamTableIDChanged(QString newBeamTableID)
     if (!newBeamTableID.isEmpty()){
         if (mCyntec){
             mCyntec->getBeamTableData(newBeamTableID.toInt());
+        }
+        if (cBeamT){
+            cBeamT->onSelectEllipse(newBeamTableID, true, Qt::red);
         }
     }
 }
@@ -234,10 +241,14 @@ void DlgCyntec::onSelectAroundID(bool checked)
     Q_UNUSED(checked)
     int id = ui->CyntecBeamTableID->currentText().toInt();
     QString beamtype = ui->CyntecBeamType->currentText();
-    QVector<int> ds= mCyntec->findNearestNeighbors(id, beamtype);
+    int glimit = ui->sbAroundLimit->value();
+    QVector<int> ds= mCyntec->findNearestNeighbors(id, beamtype, glimit);
     if (ds.length()>0){
+        if (cBeamT){
+            cBeamT->clearEllipseSelection();
+        }
         foreach (int idx, ds){
-            emit SelectEllipse(QString::number(idx), false);
+            emit SelectEllipse(QString::number(idx), false, Qt::blue);
         }
     }
 
@@ -245,16 +256,9 @@ void DlgCyntec::onSelectAroundID(bool checked)
 
 void DlgCyntec::onCyntecBeamTypeTextChanged(QString newBeamType)
 {
-    if (mCyntecBeamTypeGroup.contains(newBeamType)){
-        QList<int> dataList= mCyntecBeamTypeGroup.value(newBeamType);
-        QList<QString> stringList;
-        for (int value : dataList) {
-            stringList << QString::number(value);
-        }
+    QString beamfactorID = ui->CyntecBeamFactorID->currentText();
+    updateCyntecBeamTableID(newBeamType, beamfactorID);
 
-        ui->CyntecBeamTableID->clear();
-        ui->CyntecBeamTableID->insertItems(0, stringList);
-    }
 }
 void DlgCyntec::getCyntecBeamTableDatas(QString beamTableID)
 {
@@ -262,6 +266,30 @@ void DlgCyntec::getCyntecBeamTableDatas(QString beamTableID)
         mCyntec->getBeamTableData(beamTableID.toInt());
     }else{
         qDebug() << "mCyntec not init";
+    }
+}
+
+void DlgCyntec::updateCyntecBeamTableID(QString beamType, QString beamFactorID)
+{
+    if (mCyntecBeamTypeGroup.contains(beamType)){
+        if (beamFactorID!="0"){
+            QList<int> fs = mCyntecBeamFactorSupport.value(beamFactorID);
+            QList<int> dataList= mCyntecBeamTypeGroup.value(beamType);
+            QList<QString> stringList;
+            for (int value : dataList) {
+                if (fs.contains(value)){
+                    stringList << QString::number(value);
+                }
+            }
+
+            ui->CyntecBeamTableID->clear();
+            ui->CyntecBeamTableID->insertItems(0, stringList);
+            ui->CyntecBeamTableID->setEnabled(true);
+        }else{
+            ui->CyntecBeamTableID->setEnabled(false);
+        }
+    }else{
+        qDebug() << "updateCyntecBeamTableID: mCyntecBeamTypeGroup do not have BeamType:" << beamType;
     }
 }
 void DlgCyntec::loadcfg()

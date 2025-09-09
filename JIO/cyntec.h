@@ -25,26 +25,30 @@ public:
     QVector<QVector<double>> getBeamTableDatas(int limitid=95); //[[id,az,el],[]]...
     QVector<QVector<double>> getBeamTableDatas(QString beamtype);
     BeamTypeRange getBeamTypeRange(QString beamtype);
+    CyntecBeamFactorData getBeamFactorRange(int beamfactor);
     int db2att(double db);
-    int findClosestBeamID(double targetAz, double targetEl, QString beamtype="Narrow");
+    int findClosestBeamID(double targetAz, double targetEl,
+                          QString beamtype="Narrow", int beamfactor=1);
     QVector<int> findNearestNeighbors(int targetID, QString beamtype="Narrow",
-                                      int neighborCount = 6);
+                                      int neighborGroup = 1);
     double getAz(int BeamID);
 signals:
     void updateRefFile(QString filename);
     void newBeamFactorIDs(QStringList keys);
-    void updateBeamFactorData(QString elementMap, int attDb, double azBW, double elBW);
+    void updateBeamFactorData(QString elementMap, double attDb, double azBW, double elBW);
     void updateBeamTableData(double az, double el, double azBW, double elBW);
     void newBeamTableIDs(QStringList keys);
     void updateBeamTypes(QStringList beamtypes);
     void updateBeamTypeGroup(QMap<QString, QList<int>> data);
+    void updateBeamFactorSupport(QMap<QString, QList<int>> data);
 private:
     QMap<int, CyntecBeamFactorData> *mBeamFactorData;
     QMap<int, CyntecBeamTableData> *mBeamTableData;
     // QStringList mBeamtypes;
-    QMap<QString, QList<int>> mBeamTypeData; // beam type => list of ID
+    QMap<QString, QList<int>> mBeamTypeData; // beam type (Narrow, Spoiled, Tri) => list of ID
     QMap<QString, BeamTypeRange> mBeamTypeRangeData;
     QJsonObject cmdObj;
+    QMap<QString, QList<int>> mBeamFactorSupport; // diff BeamFactorID support diff Beam Direction ID (BeamTableID)
 };
 
 #endif // CYNTEC_H

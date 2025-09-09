@@ -17,12 +17,19 @@ FrmBeamTable::FrmBeamTable(AIP::ModuleType moduletype, QWidget *parent):
     ui(new Ui::FrmBeamTable), mModuletype(moduletype)
 {
     ui->setupUi(this);
+    mTriangleTarget = nullptr;
     setInteractions(QCP::iSelectItems | QCP::iRangeDrag | QCP::iRangeZoom);
     // axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
     // axisRect()->setRangeDragAxes(this->xAxis, this->yAxis);
     setWindowTitle("Unknown");
-    addLayer("items", layer("legend"));
-    addLayer("itemlabel", layer("items"));
+    if (!layer("items")){
+        addLayer("items", layer("legend"));
+        // addLayer("overlay", layer("items"));
+        if (!layer("itemlabel")){
+            addLayer("itemlabel", layer("items"));
+        }
+        // addLayer("target", layer("itemlabel"));
+    }
     setXaxis("AZ (deg)", -70, 70);
     setYaxis("EL (deg)", -30, 30);
     if (moduletype==AIP::ModuleType::Cyntec){
@@ -33,15 +40,9 @@ FrmBeamTable::FrmBeamTable(AIP::ModuleType moduletype, QWidget *parent):
         setWindowTitle("Hanwha");
         setWindowIcon(QIcon(":/AIP/hanwha"));
     }
-    if (0){
-        // test data
-        // loadData("Cyntec_beam_table_v0.2.5.xlsx"); //test Cyntec data
-        loadData("a41c_beam_table_export_v5.xlsx"); //test Hanwha data
-        setGridPoints(mdata); // show points
-        setEllipse(1, "text", Qt::red);
-    }
-    // plot->replot();
     replot();
+
+    addTriangleTarget(QPointF(1,1));
 }
 
 FrmBeamTable::~FrmBeamTable()
@@ -240,6 +241,16 @@ void FrmBeamTable::setGridPoints(QVector<QVector<double>> data)
         circle->setProperty("el", QString::number(y));
         mEllipses.insert(beamIds[i], circle);// Store for later use
 
+        QCPItemText *lb = new QCPItemText(this);
+        lb->setLayer("overlay");
+        lb->position->setParentAnchor(circle->center);
+        // lb->position->setCoords(0, 10.0);
+        lb->setPositionAlignment(Qt::AlignCenter | Qt::AlignHCenter);
+        lb->setText("");
+        lb->setFont(QFont("Arial", 8, QFont::Bold));
+        lb->setColor(Qt::black);
+        mEllipsesValue.insert(beamIds[i], lb);
+
         // Add Beam ID label
         QCPItemText *label = new QCPItemText(this);
         label->setLayer("itemlabel");
@@ -253,15 +264,7 @@ void FrmBeamTable::setGridPoints(QVector<QVector<double>> data)
         label->setFont(QFont("Arial", 8));
         label->setColor(Qt::black);
         // rssi
-        QCPItemText *lb = new QCPItemText(this);
-        lb->setLayer("overlay");
-        lb->position->setParentAnchor(circle->center);
-        // lb->position->setCoords(0, 10.0);
-        lb->setPositionAlignment(Qt::AlignCenter | Qt::AlignHCenter);
-        lb->setText("");
-        lb->setFont(QFont("Arial", 8, QFont::Bold));
-        lb->setColor(Qt::black);
-        mEllipsesValue.insert(beamIds[i], lb);
+
     }
     // connect(this, &FrmBeamTable::itemClick)
     // Connect click handler for items
@@ -275,17 +278,40 @@ void FrmBeamTable::setGridPoints(QVector<QVector<double>> data)
     //                  });
 }
 
+void FrmBeamTable::setEllipseColor(int id, QColor color)
+{
+    if (mEllipses.contains(id)){
+        QCPItemEllipse *ellipse = mEllipses.value(id);
+        setEllipseColor(ellipse, color);
+    }else{
+        qDebug() << "[setEllipseColor]Dod not have Ellipse of " << QString::number(id);
+    }
+}
+
+void FrmBeamTable::setEllipseColor(QCPItemEllipse *ellipse, QColor color)
+{
+    QPen pen = QPen(color,2);
+    ellipse->setPen(pen);
+    QPen pen2 = QPen(color,3);
+    ellipse->setSelectedPen(pen2);
+}
+
 void FrmBeamTable::setEllipseBGColor(int id, QColor bgcolor)
 {
     if (mEllipses.contains(id)){
         QCPItemEllipse *ellipse = mEllipses.value(id);
-        QBrush brush = QBrush();
-        brush.setColor(bgcolor);
-        brush.setStyle(Qt::SolidPattern);
-        ellipse->setBrush(brush);
+        setEllipseBGColor(ellipse, bgcolor);
     }else{
         qDebug() << "[setEllipseBGColor]Dod not have Ellipse of " << QString::number(id);
     }
+}
+
+void FrmBeamTable::setEllipseBGColor(QCPItemEllipse *ellipse, QColor bgcolor)
+{
+    QBrush brush = QBrush();
+    brush.setColor(bgcolor);
+    brush.setStyle(Qt::SolidPattern);
+    ellipse->setBrush(brush);
 }
 
 void FrmBeamTable::clearEllipseBGColor(int id)
@@ -299,12 +325,14 @@ void FrmBeamTable::clearEllipseBGColor(int id)
 
 }
 
-void FrmBeamTable::setEllipse(int id, QString text, QColor bgcolor)
+void FrmBeamTable::setEllipse(int id, QString text, QColor color, QColor bgcolor)
 {
     if (mEllipses.contains(id)){
         QCPItemText *lb = mEllipsesValue.value(id);
         lb->setText(text);
-        setEllipseBGColor(id, bgcolor);
+        setEllipseColor(id, color);
+        Q_UNUSED(bgcolor)
+        // setEllipseBGColor(id, bgcolor);
     }else{
         qDebug() << "[setEllipse]Dod not have Ellipse of " << QString::number(id);
     }
@@ -314,22 +342,38 @@ void FrmBeamTable::clearEllipseSelection()
 {
     for (auto itm: mEllipses.values()){
         itm->setSelected(false);
+        itm->setBrush(Qt::NoBrush);
+        itm->setPen(QPen(Qt::green, 2));
+        itm->setSelectedPen(QPen(Qt::red, 3));  // Highlight when selected
     }
 }
 
-void FrmBeamTable::onSelectEllipse(QString id, bool clear)
+void FrmBeamTable::addTriangleTarget(QPointF pos)
+{
+    // TODO : not working?? did not show Triangle in QCustomPlot
+    mTriangleTarget = new QCPItemTriangle(this);
+    mTriangleTarget->setLayer("items");
+    mTriangleTarget->setCenter(pos);
+    replot();
+}
+
+void FrmBeamTable::onSelectEllipse(QString id, bool clear,  QColor color)
 {
     if (!id.isEmpty()){
         int idx = id.toInt();
-        if (mEllipses.contains(idx)){
-            qDebug() << id << " clear:" << clear;
-            if (clear){
-                clearEllipseSelection();
+        if (mEllipses.keys().length()>0){
+            if (mEllipses.contains(idx)){
+                qDebug() << id << " clear:" << clear;
+                if (clear){
+                    clearEllipseSelection();
+                }
+                QCPItemEllipse *ellipse = mEllipses.value(idx);
+                setEllipseColor(ellipse, color);
+                // setEllipseBGColor(ellipse, bgcolor);
+                // qDebug() << "FrmBeamTable::selectEllipse:" << idx << " ellipse:" << ellipse;
+                ellipse->setSelected(true);
+                replot();
             }
-            QCPItemEllipse *ellipse = mEllipses.value(idx);
-            // qDebug() << "FrmBeamTable::selectEllipse:" << idx << " ellipse:" << ellipse;
-            ellipse->setSelected(true);
-            replot();
         }
     }
 }

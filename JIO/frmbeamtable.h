@@ -5,6 +5,7 @@
 #include <QIODevice>
 #include <QColor>
 #include "lib/qcustomplot.h"
+#include "lib/qcpitemtriangle.h"
 
 #include "aip.h"
 
@@ -26,12 +27,16 @@ public:
     void loadCyntecData(QIODevice *filedevice);
     void loadHanwhaData(QIODevice *filedevice);
     void setGridPoints(QVector<QVector<double>> data);
+    void setEllipseColor(int id, QColor color);
+    void setEllipseColor(QCPItemEllipse *ellipse, QColor color);
     void setEllipseBGColor(int id, QColor bgcolor);
+    void setEllipseBGColor(QCPItemEllipse *ellipse, QColor bgcolor);
     void clearEllipseBGColor(int id);
-    void setEllipse(int id, QString text, QColor bgcolor);
+    void setEllipse(int id, QString text, QColor color, QColor bgcolor);
     void clearEllipseSelection();
+    void addTriangleTarget(QPointF pos);
 public slots:
-    void onSelectEllipse(QString id, bool clear=true);
+    void onSelectEllipse(QString id, bool clear=true,  QColor color=Qt::green);
 protected:
     void changeEvent(QEvent *e);
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -41,10 +46,9 @@ private:
     AIP::ModuleType mModuletype;
     // QCustomPlot *plot;
     QVector<QVector<double>> mdata; // [[id, az, el], [id, az, el]...]
-    // QList<QCPItemEllipse*> mEllipses;
-    QMap<int, QCPItemEllipse*> mEllipses; // hold Ellipse
-    QMap<int, QCPItemText*> mEllipsesValue;
-
+    QMap<int, QCPItemEllipse*> mEllipses; // hold Ellipse (circle)
+    QMap<int, QCPItemText*> mEllipsesValue; //store text
+    QCPItemTriangle *mTriangleTarget; // store target pos
     // TooltipHelper *helper;
     int mMinRow=0;
     int mMaxRow;
