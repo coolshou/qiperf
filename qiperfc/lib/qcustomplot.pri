@@ -18,12 +18,14 @@ win32: {
 }
 
 HEADERS += \
+	$$PWD/qcpitemtriangle.h \
 	$$PWD/qcustomplot.h \
 	$$PWD/axistag.h \
 	$$PWD/myqcpbars.h \
 	$$PWD/myqcpgraph.h
 
 SOURCES += \
+	$$PWD/qcpitemtriangle.cpp \
 	$$PWD/qcustomplot.cpp \
 	$$PWD/axistag.cpp \
 	$$PWD/myqcpbars.cpp \
