@@ -58,7 +58,10 @@ public:
         P2Elevation=5,
         P2AzDiff=6,
         P2ElDiff=7,
-        BeamDirID=8
+        BeamDirID=8,
+        P2RxAtt1=9,
+        P2RxAtt2=10,
+        P2RxIP3Att=11
     };
     Q_ENUM(AZEIcols)
     enum AIPcols{
@@ -93,11 +96,13 @@ signals:
     void requestExec(QString targetIP, QString idx, QString sCmd);
     void startOptimiz();//
     void stopOptimiz();//
+    void sigAddIperf(QString cfg);
 protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
+    void onAddIperf(QString cfg);
     void doRequestExec(QString targetIP, QString idx, QString sCmd);
     void onStartOptimiz();
     void onStopOptimiz();
@@ -129,6 +134,7 @@ private slots:
     void onToDMS(bool checked);
     void onToDegree(bool checked);
     void onCMBeamDirIDInit(bool checked);
+    void onAttInit(bool checked);
     void showContextMenu(const QPoint &pos);
     void onDeviceCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
     void onLoadFinished(bool ok);
@@ -155,6 +161,7 @@ private slots:
     //opt
     void onOptimizeStarted();
     void onOptimizeStoped(int error);
+    void onOptimizeWorkerDebug(QString msg);
 private:
     int getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, double diffHead, double diffPitch);
     double getAz(AIP::ModuleType aiptype, int BeamID);

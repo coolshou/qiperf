@@ -42,7 +42,7 @@ FrmBeamTable::FrmBeamTable(AIP::ModuleType moduletype, QWidget *parent):
     }
     replot();
 
-    addTriangleTarget(QPointF(1,1));
+    // addTriangleTarget(QPointF(1,1));
 }
 
 FrmBeamTable::~FrmBeamTable()

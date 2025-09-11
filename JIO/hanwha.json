@@ -31,5 +31,20 @@
     "ATC_OFF":"nxmd_lib_tool atc_off",
     "ATC_ON":"nxmd_lib_tool atc_on",
     "GET_ATC":"nxmd_lib_tool get_atc",
-    "SET_3LO":"nxmd_lib_tool reg_write 15 0002 000000000a48"
+    "SET_3LO":"nxmd_lib_tool reg_write 15 0002 000000000a48",
+    "DistanceData":[
+        {"3":{"TargetEIRP":30.0}},
+        {"20":{"TargetEIRP":33.0}},
+        {"50":{"TargetEIRP":35.0}},
+        {"100":{"TargetEIRP":40.0}},
+        {"200":{"TargetEIRP":43.0}},
+        {"300":{"TargetEIRP":45.0}},
+        {"400":{"TargetEIRP":47.0}},
+        {"500":{"TargetEIRP":46.0}},
+        {"600":{"TargetEIRP":45.0}},
+        {"700":{"TargetEIRP":45.0}},
+        {"800":{"TargetEIRP":48.0}},
+        {"900":{"TargetEIRP":48.0}},
+        {"1000":{"TargetEIRP":45.0}},
+    ]
 }

@@ -10,7 +10,7 @@ public:
     OptimizeData(QDateTime time=QDateTime()) : m_testdate(time),
         m_id(-1), m_mcs(-1.0), m_rssi(0.0), m_snr(0.0),
         m_cmName(""), m_cmId(-1), m_cmMcs(-1.0), m_cmRssi(0.0), m_cmSnr(0.0),
-        m_ul(-1), m_dl(-1){}
+        m_ul(-1.0), m_dl(-1.0){}
 
     OptimizeData(QDateTime time, int id, double mcs, double rssi, double snr,
                  QString cmName, int cmId, double cmMcs, double cmRssi, double cmSnr)

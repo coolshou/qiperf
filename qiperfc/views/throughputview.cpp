@@ -209,10 +209,16 @@ void ThroughputView::onAddIperf()
     int rc = dlgiperf->exec();// show dlgiperf
     if (rc == QDialog::Accepted){
         QString rs= dlgiperf->getJsonCfg();
-        //        qDebug()<< "on_pairAdd: \n" << rs;
-        m_tpmgr->add(rs);
+        AddIperf(rs);
         emit updateActionsSave(true);
     }
+}
+
+void ThroughputView::AddIperf(QString cfg)
+{
+    // cfg is json format in string
+    qDebug()<< "ThroughputView onAddIperf: \n" << cfg;
+    m_tpmgr->add(cfg);
 }
 
 void ThroughputView::onPairEdit()

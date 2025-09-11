@@ -368,10 +368,25 @@
            </column>
            <column>
             <property name="text">
-             <string>P2 BeamDirection ID</string>
+             <string>P2 BeamDir ID</string>
             </property>
             <property name="toolTip">
              <string>Beam Direction ID</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>P2 RxAtt1</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>P2 RxAtt2</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>P2 RxIP3Att</string>
             </property>
            </column>
           </widget>
@@ -465,7 +480,7 @@
               </column>
               <column>
                <property name="text">
-                <string>BeamDirection ID</string>
+                <string>BeamDir ID</string>
                </property>
                <property name="toolTip">
                 <string>Beam Direction ID</string>
@@ -791,6 +806,13 @@
            </property>
            <property name="text">
             <string>Beam Direction ID Init</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbAttInit">
+           <property name="text">
+            <string>Init Att</string>
            </property>
           </widget>
          </item>

@@ -20,6 +20,7 @@ Cyntec::Cyntec(QObject *parent)
 {
     mBeamFactorData = new QMap<int, CyntecBeamFactorData>();
     mBeamTableData = new QMap<int, CyntecBeamTableData>();
+    mRangeDataObj = QJsonObject();
     initCmds();
 }
 
@@ -37,7 +38,11 @@ void Cyntec::initCmds()
             return; // Or handle the error appropriately
         }
         cmdObj = jsonDoc.object();
+        //TODO
         cmdObj.value("RESPONSE").toObject();
+
+        mRangeDataObj = cmdObj.value("DistanceData").toObject();
+        qDebug() << "mRangeDataObj:" << mRangeDataObj;
     }else {
         qDebug() << "Failed to open " << fCyntec.fileName() << " for reading:" << fCyntec.errorString();
     }
@@ -464,4 +469,23 @@ double Cyntec::getAz(int BeamID)
         az = btdata.azDeg;
     }
     return az;
+}
+
+double Cyntec::getTargetEIRP(double dist)
+{
+    //expect EIRP
+    double eirp=0.0;
+    if (!mRangeDataObj.isEmpty()){
+        foreach(const QString& key, mRangeDataObj.keys()) {
+            if (dist > key.toDouble()){
+                auto d = mRangeDataObj.value(key).toObject();
+                eirp = d.value("TargetEIRP").toDouble();
+            }else {
+                break;
+            }
+        }
+    }else {
+        qDebug() << "No mRangeDataObj";
+    }
+    return eirp;
 }

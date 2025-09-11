@@ -17,6 +17,17 @@ DlgOptimize::DlgOptimize(QWidget *parent)
     ui->treeView->setAlternatingRowColors(true);    // Optional: visual polish
     ui->treeView->show();
 
+    ui->treeView->setColumnWidth(OptimizeColumn::TESTDATE, 140);
+    ui->treeView->setColumnWidth(OptimizeColumn::ID, 50);
+    ui->treeView->setColumnWidth(OptimizeColumn::MCS, 50);
+    ui->treeView->setColumnWidth(OptimizeColumn::RSSI, 50);
+    ui->treeView->setColumnWidth(OptimizeColumn::SNR, 50);
+    // ui->treeView->setColumnWidth(OptimizeColumn::CM_NAME, 80);
+    ui->treeView->setColumnWidth(OptimizeColumn::CM_ID, 50);
+    ui->treeView->setColumnWidth(OptimizeColumn::CM_MCS, 50);
+    ui->treeView->setColumnWidth(OptimizeColumn::CM_RSSI, 50);
+    ui->treeView->setColumnWidth(OptimizeColumn::CM_SNR, 50);
+
     //test data
     // model
     OptimizeData newTest(QDateTime::currentDateTime());

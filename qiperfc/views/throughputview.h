@@ -60,6 +60,7 @@ public slots:
     void onCopyText() override;
 
     void onAddIperf();
+    void AddIperf(QString cfg);
     void onPairEdit();
     void onPairDelete();
     void onPairSwap();

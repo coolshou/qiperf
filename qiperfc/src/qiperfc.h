@@ -106,6 +106,7 @@ public slots:
     void onCopyText();
     //cmd pass to ws client
     void onRequestExec(QString targetIP, QString idx, QString sCmd);
+    void onAddIperf(QString cfg);
 
 signals:
     void updateEndpointNum(int n);

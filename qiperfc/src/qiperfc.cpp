@@ -692,6 +692,11 @@ void QIperfC::onRequestExec(QString targetIP, QString idx, QString sCmd)
 
 }
 
+void QIperfC::onAddIperf(QString cfg)
+{
+    m_throughputview->AddIperf(cfg);
+}
+
 void QIperfC::closeEvent(QCloseEvent *event)
 {
     if (trayIcon->isVisible() && m_closetosystray) {
@@ -1574,7 +1579,7 @@ void QIperfC::initJIO()
     dlg_jio = new DlgJIO(m_settings);
     // connect(dlg_jio, &DlgJIO::requestExec, this, &QIperfC::onRequestExec);
     connect(this, &QIperfC::closeAll, dlg_jio, &DlgJIO::close);
-
+    connect(dlg_jio, &DlgJIO::sigAddIperf, this, &QIperfC::onAddIperf);
     connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onJIO);
 }
 

@@ -22,6 +22,7 @@
 
 #include "comm.h"
 #include "jiocmd.h"
+#include "myfunc.h"
 
 #include "../src/numberdelegate.h"
 
@@ -427,6 +428,11 @@ void DlgJIO::closeEvent(QCloseEvent *event)
     emit closeAll();
 }
 
+void DlgJIO::onAddIperf(QString cfg)
+{
+    emit sigAddIperf(cfg);
+}
+
 void DlgJIO::doRequestExec(QString targetIP, QString idx, QString sCmd)
 {
     QString url = "ws://"+targetIP+":"+QString::number(QIPERFD_WSPORT);
@@ -462,7 +468,8 @@ void DlgJIO::onStopOptimiz()
 {
     if (mOptWorker){
         qDebug() <<"stop Optimize";
-        // mOptWorker
+        // mOptWorker->setStop(true);
+        emit stopOptimiz();
     }
 }
 
@@ -615,21 +622,30 @@ void DlgJIO::initTableWidget()
     ui->twResult->setColumnWidth(AZEIcols::P2AzDiff, 70);
     ui->twResult->setColumnWidth(AZEIcols::P2ElDiff, 70);
     ui->twResult->setColumnWidth(AZEIcols::BeamDirID, 130);
+    ui->twResult->setColumnWidth(AZEIcols::P2RxAtt1, 80);
+    ui->twResult->setColumnWidth(AZEIcols::P2RxAtt2, 80);
+    ui->twResult->setColumnWidth(AZEIcols::P2RxIP3Att, 80);
     // Only accept Double
     NumberDelegate *dDelegate = new NumberDelegate(NumberDelegate::Double,
                                                    0.0, 10000.0, 2,
-                                                   ui->tableWidget);
+                                                   ui->twResult);
     ui->twResult->setItemDelegateForColumn(AZEIcols::Distance, dDelegate);
     NumberDelegate *dAziDelegate = new NumberDelegate(NumberDelegate::Double,
                                                       0.0, 360.0, 2,
-                                                      ui->tableWidget);
+                                                      ui->twResult);
     ui->twResult->setItemDelegateForColumn(AZEIcols::P1Azimuth, dAziDelegate);
     ui->twResult->setItemDelegateForColumn(AZEIcols::P2Azimuth, dAziDelegate);
     NumberDelegate *dElDelegate = new NumberDelegate(NumberDelegate::Double,
                                                      -90.0, 90.0, 2,
-                                                     ui->tableWidget);
+                                                     ui->twResult);
     ui->twResult->setItemDelegateForColumn(AZEIcols::P1Elevation, dElDelegate);
     ui->twResult->setItemDelegateForColumn(AZEIcols::P2Elevation, dElDelegate);
+    NumberDelegate *dAttDelegate = new NumberDelegate(NumberDelegate::Double,
+                                                     0.0, 90.0, 2,
+                                                     ui->twResult);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::P2RxAtt1, dAttDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::P2RxAtt2, dAttDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::P2RxIP3Att, dAttDelegate);
 
     ui->twAIP->setItemDelegateForColumn(AIPcols::Azimuth, dAziDelegate);
     ui->twAIP->setItemDelegateForColumn(AIPcols::Elevation, dElDelegate);
@@ -675,12 +691,14 @@ void DlgJIO::initAction()
     // keep quire device
     connect(ui->pbInquire, &QPushButton::clicked, this, &DlgJIO::onInquireClicked);
     // Do Optimiz
+
     connect(ui->pbOptimize, &QPushButton::clicked, this, &DlgJIO::onOptimizeClicked);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DlgJIO::close); // close button click
 
     connect(this, &DlgJIO::TileAvailable, this , &DlgJIO::onTileAvailable);
 
     connect(ui->pbCMBeamDirIDInit, &QPushButton::clicked, this, &DlgJIO::onCMBeamDirIDInit);
+    connect(ui->pbAttInit, &QPushButton::clicked, this, &DlgJIO::onAttInit);
 }
 
 void DlgJIO::onInsert(bool checked)
@@ -1091,6 +1109,8 @@ void DlgJIO::onOptimizeClicked(bool checked)
         // worker
         mOptWorker = new OptimizeWorker(dataobj);
         connect(mOptWorker, &OptimizeWorker::started, this, &DlgJIO::onOptimizeStarted);
+        connect(mOptWorker, &OptimizeWorker::debugMsg, this, &DlgJIO::onOptimizeWorkerDebug);
+        connect(mOptWorker, &OptimizeWorker::sigAddIperf, this, &DlgJIO::onAddIperf);
         connect(this, &DlgJIO::stopOptimiz, mOptWorker, &OptimizeWorker::Stop);
         // thread
         mOptThread = new QThread();
@@ -1100,7 +1120,9 @@ void DlgJIO::onOptimizeClicked(bool checked)
 
         mOptWorker->moveToThread(mOptThread);
 
-        mDlgOptimize->exec();
+        mDlgOptimize->show();
+        mDlgOptimize->raise();           // Bring to top of Z-order
+        mDlgOptimize->activateWindow();  // Request focus
         emit startOptimiz();
     } else {
         // TODO: check run status?
@@ -1291,6 +1313,31 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
                                   new QTableWidgetItem(QString::number(initID)));
             //Use ID's deg+ phy deg draw arrow
         }
+    }
+}
+
+void DlgJIO::onAttInit(bool checked)
+{
+    Q_UNUSED(checked)
+    AIP::ModuleType aiptype = AIP::ModuleType::Unknown;
+    double freq= ui->cbRFFreq->currentText().toDouble() * 10000000;
+    double distance=0.0;
+    double fspl=0.0;
+    double targetEIRP=0;
+    for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
+        distance = ui->twResult->item(iRow, AZEIcols::Distance)->text().toDouble();
+        fspl = MyFunc::calculateFSPL(distance*1000, freq);
+        qDebug() << iRow << " fspl:" << fspl;
+        aiptype = getModuleType(iRow+1 ,GPScols::AIP1);
+        if (aiptype==AIP::ModuleType::Cyntec) {
+            if (mCyntec){
+                targetEIRP = mCyntec->getTargetEIRP(distance*1000);
+                qDebug() << iRow << " targetEIRP:" << targetEIRP;
+            }
+        }else {
+            qDebug()<< "TODO: onAttInit aiptype:" << static_cast<int>(aiptype);
+        }
+
     }
 }
 
@@ -1759,9 +1806,16 @@ void DlgJIO::onOptimizeStoped(int error)
 {
     qDebug() << "onOptimizeStoped: error:" << error;
     ui->pbOptimize->setText("Optimiz");
+
     if (mOptThread){
-        mOptThread->deleteLater();
+        // mOptThread->deleteLater();
+        // mOptThread->stop();
     }
+}
+
+void DlgJIO::onOptimizeWorkerDebug(QString msg)
+{
+    debug("OptimizeWorker:"+ msg);
 }
 
 double DlgJIO::averageBearing(const QList<double> &bearings)

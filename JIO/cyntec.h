@@ -32,6 +32,7 @@ public:
     QVector<int> findNearestNeighbors(int targetID, QString beamtype="Narrow",
                                       int neighborGroup = 1);
     double getAz(int BeamID);
+    double getTargetEIRP(double dist);
 signals:
     void updateRefFile(QString filename);
     void newBeamFactorIDs(QStringList keys);
@@ -48,6 +49,7 @@ private:
     QMap<QString, QList<int>> mBeamTypeData; // beam type (Narrow, Spoiled, Tri) => list of ID
     QMap<QString, BeamTypeRange> mBeamTypeRangeData;
     QJsonObject cmdObj;
+    QJsonObject mRangeDataObj;
     QMap<QString, QList<int>> mBeamFactorSupport; // diff BeamFactorID support diff Beam Direction ID (BeamTableID)
 };
 

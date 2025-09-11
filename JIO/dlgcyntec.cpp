@@ -84,6 +84,10 @@ void DlgCyntec::onNewCyntecBeamFactorIDs(QStringList keys)
     // qDebug() << "onNewCyntecBeamFactorIDs:" << keys;
     ui->CyntecBeamFactorID->clear();
     ui->CyntecBeamFactorID->insertItems(0, keys);
+    //init
+    if (ui->CyntecBeamFactorID->findText("1")!=-1){
+        ui->CyntecBeamFactorID->setCurrentText("1");
+    }
 }
 
 void DlgCyntec::onNewCyntecBeamTableIDs(QStringList keys)
