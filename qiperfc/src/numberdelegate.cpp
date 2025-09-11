@@ -31,7 +31,6 @@ void NumberDelegate::setEditorData(QWidget *editor, const QModelIndex &index) co
 {
     // Get the current data from the model and set it to the editor
     QString value = index.model()->data(index, Qt::EditRole).toString();
-    qDebug() << "setEditorData: value:" << value;
     QLineEdit *lineEdit = static_cast<QLineEdit*>(editor);
     lineEdit->setText(value);
 }

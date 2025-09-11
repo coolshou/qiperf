@@ -251,12 +251,12 @@ void WSServer::socketDisconnected()
         QString sfrom = pClient->peerAddress().toString();
         QString sfromPort = QString::number(pClient->peerPort());
         QString speer= QString("%1:%2").arg(sfrom, sfromPort);
-        onLog("Client disconnected:"+speer);
+        // onLog("Client disconnected:"+speer);
         if (m_clients.contains(speer)) {
-            qDebug() << "m_clients: remove: " << speer;
+            onLog("m_clients: remove: " + speer);
             m_clients.remove(speer);
         }else{
-            qDebug() << "m_clients does not have " << speer;
+            onLog("m_clients does not have " + speer);
         }
         pClient->deleteLater();
         pClient = nullptr;

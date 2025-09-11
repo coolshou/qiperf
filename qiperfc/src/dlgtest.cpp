@@ -29,7 +29,6 @@ void DlgTest::onTest()
 {
     //    QString s="[{\"idx\":\"7\",\"unit\":\"Mbits/sec\",\"value\":\"22.3\"},{\"idx\":\"10\",\"unit\":\"Mbits/sec\",\"value\":\"22.2\"},{\"idx\":\"12\",\"unit\":\"Mbits/sec\",\"value\":\"22.0\"}]";
 
-    //    onIperfTPdata("0", "0.0-1.0", s);
     //    ui->pb_test->setEnabled(true);
 
 }

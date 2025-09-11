@@ -56,7 +56,7 @@ void FileSaveSocket::onReadyRead()
                 emit finished();
             }
         }
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
 
@@ -64,7 +64,6 @@ void FileSaveSocket::onClientDisconnected()
 {
     QTcpSocket *clientSocket = qobject_cast<QTcpSocket*>(sender());
     if (clientSocket) {
-        // qDebug() << "FileSaveSocket::onClientDisconnected: Client disconnected: " << clientSocket->peerAddress().toString();
         clientSocket->deleteLater();
         emit socketDisconnected(this);
     }
