@@ -228,9 +228,9 @@ AIP::ModuleType DlgJIO::getModuleType(int row, int col)
     // qDebug() << "getModuleType variant:" << variant;
     if (variant.canConvert<QJsonObject>()){
         QJsonObject obj = variant.toJsonObject();
-        qDebug() << "row:" << QString::number(row)
-                 << " col:" << QString::number(col)
-                 << " moduletype:" << obj;
+        // qDebug() << "row:" << QString::number(row)
+        //          << " col:" << QString::number(col)
+        //          << " moduletype:" << obj;
         return static_cast<AIP::ModuleType>(obj.value("moduletype").toInt());
     }else{
         qDebug() << "getModuleType convert to json fail: " << variant;
@@ -964,7 +964,7 @@ void DlgJIO::onCalcCliecked(bool checked)
     }
     // AM7 heading
     double azimuthDegree = averageBearing(azbearings);
-    qDebug() << " azimuthDegree:" << QString::number(azimuthDegree);
+    // qDebug() << " azimuthDegree:" << QString::number(azimuthDegree);
     ui->leAM7az->setText(QString::number(azimuthDegree, 'f', 1));
     // AM7 Pitch
     double elDegree = totalel/ui->twResult->rowCount();
@@ -1299,10 +1299,10 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
 
             expectHeading = ui->twResult->item(iRow, AZEIcols::P2Azimuth)->text().toDouble();
             expectPitch = ui->twResult->item(iRow, AZEIcols::P2Elevation)->text().toDouble();
-            qDebug() << cm << " heading real:" << QString::number(realHeading)
-                     << " ,Expect:" << QString::number(expectHeading)
-                     << " El read:" << QString::number(realPitch)
-                     << " ,Expect:" << QString::number(expectPitch);
+            // qDebug() << cm << " heading real:" << QString::number(realHeading)
+            //          << " ,Expect:" << QString::number(expectHeading)
+            //          << " El read:" << QString::number(realPitch)
+            //          << " ,Expect:" << QString::number(expectPitch);
             diffHead = expectHeading - realHeading;
             ui->twResult->setItem(iRow, AZEIcols::P2AzDiff,
                                   new QTableWidgetItem(QString::number(diffHead)));
@@ -1322,7 +1322,7 @@ void DlgJIO::onAttInit(bool checked)
 {
     Q_UNUSED(checked)
     AIP::ModuleType aiptype = AIP::ModuleType::Unknown;
-    double freq= ui->cbRFFreq->currentText().toDouble() * 10000000;
+    double freq= ui->cbRFFreq->currentText().toDouble() * 1000000000;
     double distance=0.0;
     double fspl=0.0;
     double targetEIRP=0;
