@@ -5,6 +5,7 @@
 #include <QHash>
 #include <QList>
 #include <QJsonObject>
+#include <QJsonArray>
 
 #include "aip.h"
 #include "cyntecbeamfactordata.h"
@@ -33,6 +34,8 @@ public:
                                       int neighborGroup = 1);
     double getAz(int BeamID);
     double getTargetEIRP(double dist);
+    QVector<double> getRxAtt(double dist);
+    QVector<double> getBFAtt(double dist);
 signals:
     void updateRefFile(QString filename);
     void newBeamFactorIDs(QStringList keys);

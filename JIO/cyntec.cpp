@@ -38,11 +38,12 @@ void Cyntec::initCmds()
             return; // Or handle the error appropriately
         }
         cmdObj = jsonDoc.object();
-        //TODO
+        //TODO RESPONSE
         cmdObj.value("RESPONSE").toObject();
+        // qDebug() << "cmdObj:" << cmdObj;
 
         mRangeDataObj = cmdObj.value("DistanceData").toObject();
-        qDebug() << "mRangeDataObj:" << mRangeDataObj;
+        // qDebug() << "mRangeDataObj:" << mRangeDataObj;
     }else {
         qDebug() << "Failed to open " << fCyntec.fileName() << " for reading:" << fCyntec.errorString();
     }
@@ -473,7 +474,7 @@ double Cyntec::getAz(int BeamID)
 
 double Cyntec::getTargetEIRP(double dist)
 {
-    //expect EIRP
+    //expect EIRP by dist (meter)
     double eirp=0.0;
     if (!mRangeDataObj.isEmpty()){
         foreach(const QString& key, mRangeDataObj.keys()) {
@@ -488,4 +489,50 @@ double Cyntec::getTargetEIRP(double dist)
         qDebug() << "No mRangeDataObj";
     }
     return eirp;
+}
+
+QVector<double> Cyntec::getRxAtt(double dist)
+{
+    QVector<double> ds;
+    double att1=0.0;
+    double att2=0.0;
+    if (!mRangeDataObj.isEmpty()){
+        foreach(const QString& key, mRangeDataObj.keys()) {
+            if (dist > key.toDouble()){
+                auto d = mRangeDataObj.value(key).toObject();
+                att1 = d.value("RX1ATT").toDouble();
+                att2 = d.value("RX2ATT").toDouble();
+            }else {
+                break;
+            }
+        }
+    }else {
+        qDebug() << "getRxAtt: No mRangeDataObj";
+    }
+    ds.append(att1);
+    ds.append(att2);
+    return ds;
+}
+
+QVector<double> Cyntec::getBFAtt(double dist)
+{
+    QVector<double> ds;
+    double att1=0.0;
+    double att2=0.0;
+    if (!mRangeDataObj.isEmpty()){
+        foreach(const QString& key, mRangeDataObj.keys()) {
+            if (dist > key.toDouble()){
+                auto d = mRangeDataObj.value(key).toObject();
+                att1 = d.value("BF1ATT").toDouble();
+                att2 = d.value("BF2ATT").toDouble();
+            }else {
+                break;
+            }
+        }
+    }else {
+        qDebug() << "getBFAtt: No mRangeDataObj";
+    }
+    ds.append(att1);
+    ds.append(att2);
+    return ds;
 }

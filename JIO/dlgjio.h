@@ -59,9 +59,10 @@ public:
         P2AzDiff=6,
         P2ElDiff=7,
         BeamDirID=8,
-        P2RxAtt1=9,
-        P2RxAtt2=10,
-        P2RxIP3Att=11
+        P2Rx1Att=9,
+        P2Rx2Att=10,
+        P2BF1Att=11,
+        P2BF2Att=12
     };
     Q_ENUM(AZEIcols)
     enum AIPcols{

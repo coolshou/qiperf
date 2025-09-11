@@ -376,17 +376,22 @@
            </column>
            <column>
             <property name="text">
-             <string>P2 RxAtt1</string>
+             <string>P2 Rx1Att</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>P2 RxAtt2</string>
+             <string>P2 Rx2Att</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>P2 RxIP3Att</string>
+             <string>P2 BF1Att</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>P2 BF2Att</string>
             </property>
            </column>
           </widget>

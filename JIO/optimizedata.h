@@ -13,9 +13,11 @@ public:
         m_ul(-1.0), m_dl(-1.0){}
 
     OptimizeData(QDateTime time, int id, double mcs, double rssi, double snr,
-                 QString cmName, int cmId, double cmMcs, double cmRssi, double cmSnr)
+                 QString cmName, int cmId, double cmMcs, double cmRssi, double cmSnr,
+                 double ul=0.0, double dl=0.0)
         : m_testdate(time), m_id(id), m_mcs(mcs), m_rssi(rssi), m_snr(snr),
-        m_cmName(cmName), m_cmId(cmId), m_cmMcs(cmMcs), m_cmRssi(cmRssi), m_cmSnr(cmSnr) {}
+        m_cmName(cmName), m_cmId(cmId), m_cmMcs(cmMcs), m_cmRssi(cmRssi), m_cmSnr(cmSnr),
+        m_ul(ul), m_dl(dl) {}
 
     bool isEmpty() const {
         return m_id <= 0;  // Define invalid ID as "empty"

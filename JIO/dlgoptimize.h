@@ -20,6 +20,10 @@ protected:
     void changeEvent(QEvent *e);
 
 private:
+    void testdata1();
+    void testdata2();
+    void testdata3();
+    void testdata4();
     Ui::DlgOptimize *ui;
     OptimizeModel *model;
 };

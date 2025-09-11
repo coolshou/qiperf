@@ -621,10 +621,11 @@ void DlgJIO::initTableWidget()
     ui->twResult->setColumnWidth(AZEIcols::P2Elevation, 50);
     ui->twResult->setColumnWidth(AZEIcols::P2AzDiff, 70);
     ui->twResult->setColumnWidth(AZEIcols::P2ElDiff, 70);
-    ui->twResult->setColumnWidth(AZEIcols::BeamDirID, 130);
-    ui->twResult->setColumnWidth(AZEIcols::P2RxAtt1, 80);
-    ui->twResult->setColumnWidth(AZEIcols::P2RxAtt2, 80);
-    ui->twResult->setColumnWidth(AZEIcols::P2RxIP3Att, 80);
+    ui->twResult->setColumnWidth(AZEIcols::BeamDirID, 110);
+    ui->twResult->setColumnWidth(AZEIcols::P2Rx1Att, 80);
+    ui->twResult->setColumnWidth(AZEIcols::P2Rx2Att, 80);
+    ui->twResult->setColumnWidth(AZEIcols::P2BF1Att, 80);
+    ui->twResult->setColumnWidth(AZEIcols::P2BF2Att, 80);
     // Only accept Double
     NumberDelegate *dDelegate = new NumberDelegate(NumberDelegate::Double,
                                                    0.0, 10000.0, 2,
@@ -641,11 +642,12 @@ void DlgJIO::initTableWidget()
     ui->twResult->setItemDelegateForColumn(AZEIcols::P1Elevation, dElDelegate);
     ui->twResult->setItemDelegateForColumn(AZEIcols::P2Elevation, dElDelegate);
     NumberDelegate *dAttDelegate = new NumberDelegate(NumberDelegate::Double,
-                                                     0.0, 90.0, 2,
+                                                     0.0, 120.0, 2,
                                                      ui->twResult);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::P2RxAtt1, dAttDelegate);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::P2RxAtt2, dAttDelegate);
-    ui->twResult->setItemDelegateForColumn(AZEIcols::P2RxIP3Att, dAttDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::P2Rx1Att, dAttDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::P2Rx2Att, dAttDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::P2BF1Att, dAttDelegate);
+    ui->twResult->setItemDelegateForColumn(AZEIcols::P2BF2Att, dAttDelegate);
 
     ui->twAIP->setItemDelegateForColumn(AIPcols::Azimuth, dAziDelegate);
     ui->twAIP->setItemDelegateForColumn(AIPcols::Elevation, dElDelegate);
@@ -1324,15 +1326,31 @@ void DlgJIO::onAttInit(bool checked)
     double distance=0.0;
     double fspl=0.0;
     double targetEIRP=0;
+    QVector<double> ds;
     for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
-        distance = ui->twResult->item(iRow, AZEIcols::Distance)->text().toDouble();
-        fspl = MyFunc::calculateFSPL(distance*1000, freq);
-        qDebug() << iRow << " fspl:" << fspl;
+        distance = ui->twResult->item(iRow, AZEIcols::Distance)->text().toDouble()*1000;
+        fspl = MyFunc::calculateFSPL(distance, freq);
+        qDebug() << iRow << "freq:" << freq << " ,distance:" << distance <<" fspl:" << fspl;
         aiptype = getModuleType(iRow+1 ,GPScols::AIP1);
         if (aiptype==AIP::ModuleType::Cyntec) {
             if (mCyntec){
-                targetEIRP = mCyntec->getTargetEIRP(distance*1000);
+                targetEIRP = mCyntec->getTargetEIRP(distance);
                 qDebug() << iRow << " targetEIRP:" << targetEIRP;
+                ds = mCyntec->getRxAtt(distance);
+                if (ds.length()>=2){
+                    ui->twResult->setItem(iRow, AZEIcols::P2Rx1Att,
+                                          new QTableWidgetItem(QString::number(ds[0])));
+                    ui->twResult->setItem(iRow, AZEIcols::P2Rx2Att,
+                                          new QTableWidgetItem(QString::number(ds[1])));
+                }
+                ds = mCyntec->getBFAtt(distance);
+                if (ds.length()>=2){
+                    ui->twResult->setItem(iRow, AZEIcols::P2BF1Att,
+                                          new QTableWidgetItem(QString::number(ds[0])));
+                    ui->twResult->setItem(iRow, AZEIcols::P2BF2Att,
+                                          new QTableWidgetItem(QString::number(ds[1])));
+                }
+
             }
         }else {
             qDebug()<< "TODO: onAttInit aiptype:" << static_cast<int>(aiptype);
