@@ -24,7 +24,8 @@
 
 #include "../src/comm.h"
 
-IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
+IperfWorker::IperfWorker(QString returnAddress, qint64 idx, int version,
+                         QString cmd, QString arg,
                          uint port, QString bindaddr, QString target,
                          bool bidir, bool reverse, int interval,
                          qint64 duration,
@@ -32,8 +33,9 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
                          bool restartonerror, QJsonObject restartrule,
                          QString tmplogpath,
                          QObject *parent)
-    : QObject{parent}, m_idx(idx), m_version(version), m_cmd(cmd), m_port(port),
-      m_bindaddr(bindaddr), m_target(target), m_bidir(bidir), m_reverse(reverse),
+    : QObject{parent}, mReturnAddress(returnAddress), m_idx(idx),
+    m_version(version), m_cmd(cmd), m_port(port),
+    m_bindaddr(bindaddr), m_target(target), m_bidir(bidir), m_reverse(reverse),
     m_interval(interval), m_duration(duration), m_delaystart(delaystart),
     m_ignoreWrongInterval(ignoreWrongInterval),
     m_restartonerror(restartonerror), m_restartrule(restartrule),
@@ -42,7 +44,8 @@ IperfWorker::IperfWorker(qint64 idx, int version, QString cmd, QString arg,
 {
     m_debuglv = 3;
     m_restarttimes = 0;
-    mStdoutDetectTime = 5 + m_interval; //sec
+    m_running = false;
+    mStdoutDetectTime = 5 + m_interval+ m_delaystart; //sec
     m_logfile = nullptr;
     m_logtextstream = nullptr;
     m_restartonErrorStop = false;
@@ -557,7 +560,7 @@ void IperfWorker::onThroughputData(int refrow, QString sInterval, QString data)
         debug("Not reprort TpData: ("+sInterval+")" + data, 6);
     }else{
         debug("Refrow:" + QString::number(refrow) + " (" + sInterval+ ")" + data, 4);
-        emit iperfTPdata(refrow, sInterval, data);
+        emit iperfTPdata(mReturnAddress, refrow, sInterval, data);
     }
 }
 

@@ -109,7 +109,8 @@ QList<QString> WSServer::getClients()
 
 qint64 WSServer::sendTextMessage(QString msg, QString target)
 {
-    //send msg to target, if target is null, send to all connected client
+    //send msg to target,
+    // if target is null, send to all connected client => this may cause problem!!
     QList<QString> ts;
     if (!target.isNull()){
         ts.append(target);

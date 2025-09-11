@@ -63,16 +63,16 @@ public:
     QString getInterfaceAddr(QString ifname);
     QString getManagerInterface();
     QString getIfNameByHumanReadableName(QString name);
-    qint64 add(QString refrow, int version,QString m_cmd,QString args, uint port,
+    qint64 add(QString returnAddress, QString refrow, int version,QString m_cmd,QString args, uint port,
             QString bindaddr="0.0.0.0", QString target="",
             QString parallel="0", QString protocal="TCP",
             bool bidir=false, bool reverse=false, int interval=1, qint64 duration=30,
             int delaytime=0, bool bServer=false, bool ignoreWrongInterval=false,
             bool restartonerror=false, QJsonObject restartrule = QJsonObject());
-    qint64 add(QString refrow, QString sIgnoreWrongInterval, QVariantMap jsondata);
+    qint64 add(QString returnAddress, QString refrow, QString sIgnoreWrongInterval, QVariantMap jsondata);
     void del(int idx, bool servermode);
-    int addIperfServer(QString refrow, int version, uint port, QString bindHost="");
-    int addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs);
+    // int addIperfServer(QString refrow, int version, uint port, QString bindHost="");
+    // int addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs);
     void startServer(int idx); // start idx of iperf server
     void start(int idx); // start idx of iperf
     void startAll(bool bServer=false); // start all of iperfs
@@ -94,7 +94,7 @@ public slots:
     void onStarted(int m_idx, bool smode, QString ipport);
     void onReStarted(int m_idx, bool smode, QString ipport);
     void onFinished(int refrow, int exitCode, int exitStatus, QString ipport, QString filename, bool servermode);
-    void onThroughput(int idx, QString sInterval, QString data); // idx, refrow, throughput data
+    void onThroughput(QString returnAddress, int idx, QString sInterval, QString data); // idx, refrow, throughput data
     void onIperfExtendWait(int refrow, qint64 iwait, int exitCode, int restarttimes);
     void onQuit();
     void onNewLine(QString line);

@@ -217,7 +217,7 @@ void ThroughputView::onAddIperf()
 void ThroughputView::AddIperf(QString cfg)
 {
     // cfg is json format in string
-    qDebug()<< "ThroughputView onAddIperf: \n" << cfg;
+    // qDebug()<< "ThroughputView onAddIperf: \n" << cfg;
     m_tpmgr->add(cfg);
 }
 

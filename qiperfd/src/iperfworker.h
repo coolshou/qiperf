@@ -21,7 +21,8 @@ class IperfWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit IperfWorker(qint64 idx, int version, QString cmd, QString arg="-s",
+    explicit IperfWorker(QString returnAddress, qint64 idx, int version,
+                         QString cmd, QString arg="-s",
                          uint port=5201, QString bindaddr="0.0.0.0", QString target="",
                          bool bidir=false, bool reverse=false, int interval=1,
                          qint64 duration=30,
@@ -50,7 +51,7 @@ signals:
     void log(int idx, QString msg); // refrow
     // void onStdout(int idx, QString text); // refrow
     void onStderr(int idx, int refrow, QString text, QString ipport); // idx, refrow, msg, ipport
-    void iperfTPdata(int refrow, QString sInterval,  QString data); // refrow, sInterval, throughput data
+    void iperfTPdata(QString returnAddress, int refrow, QString sInterval,  QString data); // refrow, sInterval, throughput data
     void iperfExtendWait(int refrow, qint64 iwait, int exitCode, int restarttimes); // refrow, extra wait time(sec), error code, restart count
     void stopSelfDestructor();
     void debuginfo(QString msg);
@@ -80,6 +81,7 @@ private slots:
 
 
 private:
+    QString mReturnAddress;
     QString m_threadid; // real thread id
     int m_selfdestructionTime;
     QTimer *m_selfdestruction;

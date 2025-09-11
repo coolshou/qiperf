@@ -240,7 +240,8 @@ QString QIperfd::getIfNameByHumanReadableName(QString name)
     return ifname;
 }
 
-qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, uint port,
+qint64 QIperfd::add(QString returnAddress, QString refrow, int version,
+                    QString m_cmd, QString args, uint port,
                  QString bindaddr, QString target,
                  QString parallel, QString protocal, bool bidir, bool reverse,
                  int interval, qint64 duration,
@@ -258,7 +259,8 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
         m_threads.insert(idx, iperf_th);
     }
     debug("create IperfWorker", 6);
-    IperfWorker *iperfer = new IperfWorker(idx, version, m_cmd, args, port,
+    IperfWorker *iperfer = new IperfWorker(returnAddress, idx, version, m_cmd,
+                                           args, port,
                                            bindaddr, target, bidir, reverse,
                                            interval, duration, delaytime,
                                            ignoreWrongInterval, restartonerror,
@@ -298,8 +300,10 @@ qint64 QIperfd::add(QString refrow, int version, QString m_cmd, QString args, ui
     return idx;
 }
 
-qint64 QIperfd::add(QString refrow, QString sIgnoreWrongInterval, QVariantMap jsondata)
+qint64 QIperfd::add(QString returnAddress, QString refrow,
+                    QString sIgnoreWrongInterval, QVariantMap jsondata)
 {
+    // add iperf by jsondata
     int ver = jsondata["version"].toInt();
     QString cmd;
     if (ver == static_cast<int>(IPERF_VER::V3)){
@@ -361,7 +365,7 @@ qint64 QIperfd::add(QString refrow, QString sIgnoreWrongInterval, QVariantMap js
         return -1;
     }
     debug("args:" + args, 5);
-    return add(refrow, ver, cmd, args, port, binaddr,
+    return add(returnAddress, refrow, ver, cmd, args, port, binaddr,
                target, parallel, protocal, bidir, reverse, interval, duration,
                delaytime,
                isServer, ignoreWrongInterval,
@@ -391,79 +395,80 @@ void QIperfd::del(int idx, bool servermode)
     }
 }
 
-int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bindHost)
-{
-    debug("addIperfServer:" + bindHost + ":" + QString::number(port), 4);
+// int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bindHost)
+// {
+//     // add a Iperf Server
+//     debug("addIperfServer:" + bindHost + ":" + QString::number(port), 4);
 
-    QString cmd;
-    QString argbind;
-    // add a iperf server
-    if (version==static_cast<int>(IPERF_VER::V3)){
-        cmd = m_iperfexe3;
-        argbind = " --bind ";
-    }else if ((version==static_cast<int>(IPERF_VER::V2))||
-               (version==static_cast<int>(IPERF_VER::V21))||
-               (version==static_cast<int>(IPERF_VER::V22))
-               ){
-        cmd = m_iperfexe2;
-        argbind = " -B ";
-    }else{
-        debug("Not support Iperf version:" + QString::number(version), 4);
-        return -1;
-    }
-    QString args=" -s ";
-    if (!(bindHost=="")) {
-        args.append(argbind);
-        args.append(bindHost);
-    }
-    return add(refrow, version, cmd, args, port, bindHost);
-}
+//     QString cmd;
+//     QString argbind;
+//     // add a iperf server
+//     if (version==static_cast<int>(IPERF_VER::V3)){
+//         cmd = m_iperfexe3;
+//         argbind = " --bind ";
+//     }else if ((version==static_cast<int>(IPERF_VER::V2))||
+//                (version==static_cast<int>(IPERF_VER::V21))||
+//                (version==static_cast<int>(IPERF_VER::V22))
+//                ){
+//         cmd = m_iperfexe2;
+//         argbind = " -B ";
+//     }else{
+//         debug("Not support Iperf version:" + QString::number(version), 4);
+//         return -1;
+//     }
+//     QString args=" -s ";
+//     if (!(bindHost=="")) {
+//         args.append(argbind);
+//         args.append(bindHost);
+//     }
+//     return add(refrow, version, cmd, args, port, bindHost);
+// }
 
-int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs)
-{
-    debug("addIperfClient:" + Host + ":" + QString::number(port));
-    QString cmd;
-    // add a iperf server
-    if (version==static_cast<int>(IPERF_VER::V3)){
-        cmd = m_iperfexe3;
-    }else if ((version==static_cast<int>(IPERF_VER::V2))||
-               (version==static_cast<int>(IPERF_VER::V21))||
-               (version==static_cast<int>(IPERF_VER::V22))
-               ){
-        cmd = m_iperfexe2;
-    }else{
-        debug("Not support Iperf version:" + QString::number(version), 4);
-        return -1;
-    }
-    QString args = iperfargs;
-    return add(refrow, version, cmd, args, port);
-}
+// int QIperfd::addIperfClient(QString refrow, int version, uint port, QString Host, QString iperfargs)
+// {
+//     // add a Iperf Client
+//     debug("addIperfClient:" + Host + ":" + QString::number(port));
+//     QString cmd;
+//     // add a iperf server
+//     if (version==static_cast<int>(IPERF_VER::V3)){
+//         cmd = m_iperfexe3;
+//     }else if ((version==static_cast<int>(IPERF_VER::V2))||
+//                (version==static_cast<int>(IPERF_VER::V21))||
+//                (version==static_cast<int>(IPERF_VER::V22))
+//                ){
+//         cmd = m_iperfexe2;
+//     }else{
+//         debug("Not support Iperf version:" + QString::number(version), 4);
+//         return -1;
+//     }
+//     QString args = iperfargs;
+//     return add(refrow, version, cmd, args, port);
+// }
 
 void QIperfd::startServer(int idx)
 {
     //start iperf server
     QThread *th = m_thserver.value(idx);
     if (!th) {
-        debug("startServer: QThread is null");
+        debug("startServer: QThread is null", 3);
+        return;
+    }
+    if (th->isRunning() ){
+        debug( "startServer m_thserver(" + QString::number(idx) + ") already running", 3);
         return;
     }
     IperfWorker *worker = m_iperfwserver.value(idx);
     if (!worker) {
-        debug("startServer: IperfWorker is null");
+        debug("startServer: IperfWorker is null", 3);
         return;
     }
+    // if (worker->isRunning()) {
+    //     debug( "m_iperfwserver(" + QString::number(idx) + ") already running", 3);
+    //     return;
+    // }
+    debug(" start iperfworkers server:" + QString::number(idx), 2);
     worker->setIperfLogPath(tmpfilepath + QDir::separator() + s_starttime);
     th->start();
-    // try{
-    //     QThread *th = m_thserver.value(idx);
-    //     m_iperfwserver.value(idx)->setIperfLogPath(tmpfilepath +
-    //                                                QDir::separator() +
-    //                                                s_starttime);
-    //     th->start();
-    // }catch (const std::exception &e) {
-    //     // Handle the exception and show an error message
-    //     debug(QString("startServer Exception Caught:%1").arg(e.what()));
-    // }
 }
 
 void QIperfd::start(int idx)
@@ -474,25 +479,25 @@ void QIperfd::start(int idx)
         debug("start client: QThread is null");
         return;
     }
+    if (th->isRunning()){
+        debug( "start m_threads(" + QString::number(idx) + ") already running");
+        return;
+    }
+
     IperfWorker *worker = m_iperfworkers.value(idx);
     if (!worker) {
         debug("start client: IperfWorker is null");
         return;
     }
+    if (worker->isRunning()) {
+        debug( "m_iperfworkers(" + QString::number(idx) + ") already running");
+        return;
+    }
     worker->setIperfLogPath(tmpfilepath + QDir::separator() + s_starttime);
+    debug(" start iperfworkers client:" + QString::number(idx), 2);
     th->start();
-
-    // try{
-    //     QThread *th = m_threads.value(idx);
-    //     m_iperfworkers.value(idx)->setIperfLogPath(tmpfilepath +
-    //                                                QDir::separator() +
-    //                                                s_starttime);
-    //     th->start();
-    // }catch (const std::exception &e) {
-    //     // Handle the exception and show an error message
-    //     debug(QString("start client Exception Caught: %1").arg(e.what()));
-    // }
 }
+
 QString QIperfd::longLongListToString(const QList<long long int>& list, const QString& separator) {
     QStringList stringList;
     for (long long int value : list) {
@@ -514,14 +519,12 @@ void QIperfd::startAll(bool bServer)
     if (bServer){
         for (auto it = m_thserver.begin(); it != m_thserver.end(); ++it)
         {
-            debug(" start iperfworkers server:" + QString::number(it.key()), 2);
             startServer(it.key());
-            // QCoreApplication::processEvents(QEventLoop::AllEvents);// do not add this ?
+            // QCoreApplication::processEvents(QEventLoop::AllEvents);// do not add this, cause things run in
         }
     }else{
         for (auto it = m_threads.begin(); it != m_threads.end(); ++it)
         {
-            debug(" start iperfworkers client:" + QString::number(it.key()), 2);
             start(it.key());
             // QCoreApplication::processEvents(QEventLoop::AllEvents);// do not add this ?
         }
@@ -749,8 +752,8 @@ void QIperfd::onPipeMessage(int idx, const QString msg)
                     args = " " + arg.toString();
                 }
                 onLog("add iperf: " + args);
-                // TODO: refrow
-                add("0", ver, cmd, args, port);
+                // TODO: onPipeMessage refrow,
+                add("", "0", ver, cmd, args, port);
             }
             else if (QString::compare(act, CMD_IPERF_START, Qt::CaseInsensitive) == 0)
             {
@@ -845,11 +848,12 @@ void QIperfd::onFinished(int refrow, int exitCode, int exitStatus, QString ippor
 
 }
 
-void QIperfd::onThroughput(int idx, QString sInterval, QString data)
+void QIperfd::onThroughput(QString returnAddress, int idx, QString sInterval, QString data)
 {
-    QString s = QString(CMD_IPERF_TP_DATA) + ":" + QString::number(idx)
+    QString tp_data = QString(CMD_IPERF_TP_DATA) + ":" + QString::number(idx)
                 + ":" + sInterval + ":" + data;
-    m_wsserver->sendTextResult(s);
+    // m_wsserver->sendTextResult(tp_data);
+    m_wsserver->sendTextMessage(tp_data, returnAddress);
 }
 
 void QIperfd::onIperfExtendWait(int refrow, qint64 iwait, int exitCode, int restarttimes)
@@ -1252,7 +1256,8 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
 
         QJsonDocument doc = QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError){
-            qint64 rc = add(refrow, ignoreWrongInterval, doc.toVariant().toMap());
+            qint64 rc = add(target, refrow, ignoreWrongInterval,
+                            doc.toVariant().toMap());
             debug("iperf idx: "+ QString::number(rc),5);
         }else{
             onLog("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + msg.toUtf8());

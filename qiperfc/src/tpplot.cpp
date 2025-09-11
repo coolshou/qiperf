@@ -163,7 +163,7 @@ void TPPlot::setShowGroup(bool bShow)
                     }
                 }
             }else{
-                qDebug() << "add lostlegenditerator " << lostlegenditerator.value();
+                // qDebug() << "add lostlegenditerator " << lostlegenditerator.value();
                 if(!legend->hasItem(lostlegenditerator.value())){
                     qDebug() << "add lostlegend " <<  lostlegenditerator.value();
                     if(!legend->addItem(lostlegenditerator.value())){
@@ -385,26 +385,31 @@ void TPPlot::onIperfTPdata(QString sInterval,
     int x = (int)sInterval.toDouble(); //ignore .0x Difference of xdata
     double y = data.toDouble();
     Q_UNUSED(grouptag) //TODO grouptag?
-    // qDebug() << "[TPPlot::onIperfTPdata]sInterval:" << sInterval << " x:" << QString::number(x)
-    //          << " y:" << QString::number(y)
+    // qDebug() << "[TPPlot::onIperfTPdata]:" << refrowidx
+    //          << " sInterval:" << sInterval << " x:" << QString::number(x)
+    //          << " TP:" << QString::number(y);
     //          << " grouptag:" << grouptag;
     addTPData(refrowidx, x, y, lostrate.toDouble());
 }
 
 void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double lostrate)
 {
+    double sumydata = ydata;
     QMutexLocker locker(&m_mutex); // Locks m_mutex,
     // do not double lock in following functions!!, it will cause app hang!!
     MyQCPGraph *myGraph = getGraph(refrowidx);
     // if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
     {
         //TODO: when xdata is not continious, should we fill up with 0?
-        myGraph->getMaxXValue();
+        // myGraph->getMaxXValue();
         //throughput graph
         if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             myGraph->addData(xdata, ydata);
         }else{
-            ydata = myGraph->sumValue(xdata, ydata);
+            //Total TP?
+            sumydata = myGraph->sumValue(xdata, ydata);
+            // qDebug() << "addData" << refrowidx << " xdata:" << xdata
+            //          << " TP:"<< ydata  << " sum:" << sumydata;
         }
         if (!m_showgroup){
             if (m_legends.contains(refrowidx)){
@@ -418,7 +423,7 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
         }
     }
     // enlarge/shrink y range
-    updateYAxisRange(0, ydata);
+    updateYAxisRange(0, sumydata);
     updateXAxisRange(0, xdata + m_interval);
 
     //lost rate
