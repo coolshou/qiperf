@@ -20,6 +20,7 @@
 #include <QStandardPaths>
 #include <QMessageLogContext>
 #include <QMessageBox>
+#include <QMutex>
 #include <QDebug>
 
 #include <qlogging.h>
@@ -51,19 +52,24 @@ int isNotRoot()
     return 0;
 }
 
+static QFile logFile;
 static QTextStream output_ts;
+static QMutex logMutex;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    QMutexLocker locker(&logMutex);  // Lock for thread safety
+    if (!logFile.isOpen())
+        return;
+
     QString endl = "\n";
     QDateTime t = QDateTime::currentDateTime();
     output_ts << "[" + t.toString(MYTIMESTEMP) + "] ";
 
     const char *file = context.file ? context.file : "";
     QString line ="";
-    if (strcmp(file, "") != 0) {
+    if (*file) {
         line = QString("(%1:%2)").arg(file, QString::number(context.line));
     }
-    //    const char *function = context.function ? context.function : "";
     switch (type) {
     case QtDebugMsg:
         output_ts << QString("DEBUG: %1 %2").arg(msg, line) << endl;
@@ -191,24 +197,21 @@ int main(int argc, char *argv[])
         QDir dir(logfilePath);
         if (!dir.exists())
             dir.mkpath(".");
-        QString logfile = logfilePath + QIPERFD_NAME + ".log";
-        qDebug() << "logfile: " << logfile;
-        if (QFile::exists(logfile)){
+        QString logfilename = logfilePath + QIPERFD_NAME + ".log";
+        qDebug() << "logfile: " << logfilename;
+        if (QFile::exists(logfilename)){
             // check log file exist, backup it
-            QFileInfo finfo(logfile);
+            QFileInfo finfo(logfilename);
             QDateTime oldtime =  finfo.fileTime(QFileDevice::FileModificationTime);
             qDebug() << "logfile ModificationTime: "  << oldtime;
             QString baklogfile =  logfilePath + QIPERFD_NAME + "_" + oldtime.toString(DATETIME_NOW_FORMAT)+ ".log";
-            QFile::rename(logfile, baklogfile);
+            QFile::rename(logfilename, baklogfile);
         }
-        QFile outFile(logfile);
-        if (! outFile.open(QIODevice::WriteOnly | QIODevice::Append)){
-            qDebug() << "open file " << logfile << " Fail";
-        } else {
-            output_ts.setDevice(&outFile);
-            //output_ts = new QTextStream(&outFile);
+        logFile.setFileName(logfilename);
+        if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+            output_ts.setDevice(&logFile);
+            qInstallMessageHandler(myMessageOutput);
         }
-        qInstallMessageHandler(myMessageOutput);
 
         QCoreApplication app(argc, argv);
         // handle ctrl+c

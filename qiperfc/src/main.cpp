@@ -15,19 +15,25 @@
 #include <QMessageLogContext>
 #include <QMessageBox>
 #include <QStyleFactory>
+#include <QMutex>
 
 #include <qlogging.h>
-
+static QFile logFile;
 static QTextStream output_ts;
+static QMutex logMutex;
+
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    QMutexLocker locker(&logMutex);  // Lock for thread safety
+    if (!logFile.isOpen())
+        return;
+
     QString endl = "\n";
     QDateTime t = QDateTime::currentDateTime();
     output_ts << "[" + t.toString(MYTIMESTEMP) + "] ";
     const char *file = context.file ? context.file : "";
-    //    const char *function = context.function ? context.function : "";
     QString line ="";
-    if (strcmp(file, "") != 0) {
+    if (*file) {
         line = QString("(%1:%2)").arg(file, QString::number(context.line));
     }
     switch (type) {
@@ -54,6 +60,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     }
     output_ts.flush(); //empty all data from its write buffer into the device
 }
+
 int main(int argc, char *argv[])
 {
     int rc;
@@ -64,28 +71,23 @@ int main(int argc, char *argv[])
     QDir dir(logfilePath);
     if (!dir.exists())
         dir.mkpath(".");
-    QString logfile = logfilePath + QIPERFC_NAME + ".log";
-    qDebug() << "logfile:  " << logfile;
-    if (QFile::exists(logfile)){
+    QString logfilename = logfilePath + QIPERFC_NAME + ".log";
+    qDebug() << "logfile:  " << logfilename;
+    if (QFile::exists(logfilename)){
         // check log file exist, backup it
-        QFileInfo finfo(logfile);
+        QFileInfo finfo(logfilename);
         QDateTime oldtime =  finfo.fileTime(QFileDevice::FileModificationTime);
         qDebug() << "logfile ModificationTime: "  << oldtime;
         QString baklogfile =  logfilePath + QIPERFC_NAME + "_" + oldtime.toString(DATETIME_NOW_FORMAT)+ ".log";
-        QFile::rename(logfile, baklogfile);
+        QFile::rename(logfilename, baklogfile);
+    }
+    logFile.setFileName(logfilename);
+    if (logFile.open(QIODevice::Append | QIODevice::Text)) {
+        output_ts.setDevice(&logFile);
+        qInstallMessageHandler(myMessageOutput);
     }
 
-    qInstallMessageHandler(myMessageOutput);
     QApplication app(argc, argv);
-    QFile outFile(logfile);
-    if (! outFile.open(QIODevice::WriteOnly | QIODevice::Append)){
-        QString s =  "open file " + logfile + " Fail" ;
-        qDebug() << s;
-        QMessageBox::warning(nullptr, "ERROR", s);
-        return -1;
-    } else {
-        output_ts.setDevice(&outFile);
-    }
 
 #if defined(Q_OS_LINUX) && TEST_SIGWATCH
     UnixSignalWatcher sigwatch;
