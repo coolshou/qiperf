@@ -17,7 +17,11 @@ public:
     // reimplemented virtual methods:
     virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details=nullptr) const Q_DECL_OVERRIDE;
 
+    QCPItemPosition * const topLeft;
+    QCPItemPosition * const bottomRight;
+
 protected:
+    QPointF plotToPixel(const QPointF &plotCoord) const;
     void draw(QCPPainter *painter) override;
     QPointF anchorPixelPosition(int anchorId) const override;
 private:

@@ -1,7 +1,8 @@
 #include "qcpitemtriangle.h"
 
 QCPItemTriangle::QCPItemTriangle(QCustomPlot *parentPlot)
-    :QCPAbstractItem(parentPlot)
+    :QCPAbstractItem(parentPlot), topLeft(createPosition("topLeft")),
+    bottomRight(createPosition("bottomRight"))
 {
     mCenter=QPointF(0,0);
     mSize = 1;
@@ -58,18 +59,24 @@ double QCPItemTriangle::selectTest(const QPointF &pos, bool onlySelectable, QVar
     return -1; // Not selected
 }
 
+QPointF QCPItemTriangle::plotToPixel(const QPointF &plotCoord) const
+{
+    return QPointF(mParentPlot->xAxis->coordToPixel(plotCoord.x()),
+                   mParentPlot->yAxis->coordToPixel(plotCoord.y()));
+}
+
 void QCPItemTriangle::draw(QCPPainter *painter) {
     QVector<QPointF> vertices = computeVertices();
 
     QPolygonF triangle;
-    for (const QPointF &pt : vertices)
-        triangle << pt;
+    for (const QPointF &pt : vertices){
+        triangle << plotToPixel(pt);
+    }
 
     qDebug() << "Drawing triangle at center:" << mCenter;
 
     painter->setPen(QPen(Qt::red, 2));
     painter->setBrush(QBrush(Qt::red));
-    // painter->drawText(mCenter, tr("yafeilinux"));
     painter->drawPolygon(triangle);
 }
 
