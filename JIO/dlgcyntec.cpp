@@ -244,12 +244,17 @@ void DlgCyntec::onCyntecElementMapChanged(QString newElementMap)
 void DlgCyntec::onSelectAroundID(bool checked)
 {
     Q_UNUSED(checked)
+    bool doClear=false;
+    if (ui->cbClear->checkState()==Qt::CheckState::Checked){
+        doClear = true;
+    }
+
     int id = ui->CyntecBeamTableID->currentText().toInt();
     QString beamtype = ui->CyntecBeamType->currentText();
     int glimit = ui->sbAroundLimit->value();
     QVector<int> ds= mCyntec->findNearestNeighbors(id, beamtype, glimit);
     if (ds.length()>0){
-        if (cBeamT){
+        if (cBeamT && doClear){
             cBeamT->clearEllipseSelection();
         }
         foreach (int idx, ds){

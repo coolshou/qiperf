@@ -367,6 +367,7 @@ int Cyntec::findClosestBeamID(double targetAz, double targetEl,
     // << r.minEl << r.maxEl;
     CyntecBeamFactorData f = getBeamFactorRange(beamfactor);
     qDebug() << " HPBW az:" << f.azimuth3dB_BW << " el: " << f.elevation3dB_BW;
+
     // check if targetAz/El out of range
     double limitAz = r.minAz - f.azimuth3dB_BW/2;
     double limitMaxAz = r.maxAz + f.azimuth3dB_BW/2;
@@ -381,6 +382,7 @@ int Cyntec::findClosestBeamID(double targetAz, double targetEl,
         return closestID;
     }
 
+    // find Closest BeamID
     CyntecBeamTableData btdata;
     foreach (int id, mBeamTypeData.value(beamtype)){
         btdata = mBeamTableData->value(id);
@@ -391,21 +393,6 @@ int Cyntec::findClosestBeamID(double targetAz, double targetEl,
             closestID = id;
         }
     }
-    // Tri beam
-
-    // all id
-    // for (auto it = mBeamTableData->constBegin(); it != mBeamTableData->constEnd(); ++it) {
-    //     double az = it.value().azDeg;
-    //     double el = it.value().elDeg;
-    //     // double distance = std::sqrt(std::pow(az - targetAz, 2) + std::pow(el - targetEl, 2));
-    //     double distance = MyFunc::euclideanDistance(az, el, targetAz, targetEl);
-
-    //     if (distance < minDistance) {
-    //         minDistance = distance;
-    //         closestID = it.key();
-    //     }
-    // }
-    // qDebug() << "closestID:" << closestID;
     return closestID;
 }
 
@@ -441,12 +428,7 @@ QVector<int> Cyntec::findNearestNeighbors(int targetID, QString beamtype, int ne
                   return a.distance < b.distance;
               });
 
-
-    // QVector<int> result;
-    // for (int i = 0; i < std::min(neighborCount, static_cast<int>(distances.size())); ++i) {
-    //     result.append(distances[i].id);
-    // }
-    // Step 2: 收集前兩個不同 distance 的群組
+    // 收集前兩個不同 distance 的群組
     QVector<int> result;
     QSet<double> seenDistances;
 

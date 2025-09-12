@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>592</width>
+    <width>740</width>
     <height>394</height>
    </rect>
   </property>
@@ -411,12 +411,18 @@
            <property name="decimals">
             <number>1</number>
            </property>
+           <property name="minimum">
+            <double>-100.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="0" column="3">
           <widget class="QDoubleSpinBox" name="sbTriangleY">
            <property name="decimals">
             <number>1</number>
+           </property>
+           <property name="minimum">
+            <double>-100.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -447,6 +453,16 @@
           </widget>
          </item>
         </layout>
+       </widget>
+      </item>
+      <item row="0" column="7">
+       <widget class="QCheckBox" name="cbClear">
+        <property name="text">
+         <string>Clear mark</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
      </layout>
