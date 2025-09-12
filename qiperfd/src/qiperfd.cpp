@@ -258,7 +258,7 @@ qint64 QIperfd::add(QString returnAddress, QString refrow, int version,
         idx = m_threads.count();
         m_threads.insert(idx, iperf_th);
     }
-    debug("create IperfWorker", 6);
+    debug("create IperfWorker:" + returnAddress, 2);
     IperfWorker *iperfer = new IperfWorker(returnAddress, idx, version, m_cmd,
                                            args, port,
                                            bindaddr, target, bidir, reverse,
