@@ -18,8 +18,9 @@ FrmBeamTable::FrmBeamTable(AIP::ModuleType moduletype, QWidget *parent):
 {
     ui->setupUi(this);
     mTriangleTarget = nullptr;
-    setInteractions(QCP::iSelectItems | QCP::iRangeDrag | QCP::iRangeZoom);
-    // axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
+    this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom| QCP::iSelectItems);
+    this->axisRect()->setupFullAxesBox();
+    this->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
     // axisRect()->setRangeDragAxes(this->xAxis, this->yAxis);
     setWindowTitle("Unknown");
     if (!layer("items")){
@@ -348,13 +349,17 @@ void FrmBeamTable::clearEllipseSelection()
     }
 }
 
-void FrmBeamTable::addTriangleTarget(QPointF pos)
+void FrmBeamTable::addTriangleTarget(QPointF pos, double size)
 {
-    // TODO : not working?? did not show Triangle in QCustomPlot
-    mTriangleTarget = new QCPItemTriangle(this);
+    if (!mTriangleTarget){
+        mTriangleTarget = new QCPItemTriangle(this);
+    }
+    // this->mItems.append(mTriangleTarget);
     mTriangleTarget->setLayer("items");
     mTriangleTarget->setCenter(pos);
+    mTriangleTarget->setSize(size);
     replot();
+
 }
 
 void FrmBeamTable::onSelectEllipse(QString id, bool clear,  QColor color)

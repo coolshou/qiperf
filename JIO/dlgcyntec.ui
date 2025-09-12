@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>512</width>
+    <width>592</width>
     <height>394</height>
    </rect>
   </property>
@@ -60,132 +60,30 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0,0" columnstretch="0,0,0,0,0,0,0,0">
-      <item row="3" column="2" colspan="6">
-       <widget class="QWidget" name="widget_2" native="true">
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="0" column="0">
-          <widget class="QTableWidget" name="CyntecElementMapView">
-           <property name="minimumSize">
-            <size>
-             <width>160</width>
-             <height>160</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>160</width>
-             <height>160</height>
-            </size>
-           </property>
-           <attribute name="horizontalHeaderMinimumSectionSize">
-            <number>10</number>
-           </attribute>
-           <attribute name="horizontalHeaderDefaultSectionSize">
-            <number>18</number>
-           </attribute>
-           <attribute name="verticalHeaderMinimumSectionSize">
-            <number>10</number>
-           </attribute>
-           <attribute name="verticalHeaderDefaultSectionSize">
-            <number>16</number>
-           </attribute>
-           <row>
-            <property name="text">
-             <string>0</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>1</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>2</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>3</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>4</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>5</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>6</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>7</string>
-            </property>
-           </row>
-           <column>
-            <property name="text">
-             <string>0</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>1</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>2</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>3</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>4</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>5</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>6</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>7</string>
-            </property>
-           </column>
-           <item row="0" column="0">
-            <property name="text">
-             <string/>
-            </property>
-           </item>
-          </widget>
-         </item>
-        </layout>
+      <item row="1" column="7">
+       <widget class="QSpinBox" name="sbAroundLimit">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>10</number>
+        </property>
        </widget>
       </item>
-      <item row="2" column="3">
-       <widget class="QDoubleSpinBox" name="CyntecAZ">
+      <item row="2" column="5">
+       <widget class="QDoubleSpinBox" name="CyntecEL">
         <property name="minimum">
          <double>-90.000000000000000</double>
         </property>
         <property name="maximum">
          <double>90.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="6">
+       <widget class="QPushButton" name="pbAround">
+        <property name="text">
+         <string>Around</string>
         </property>
        </widget>
       </item>
@@ -198,6 +96,19 @@
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>BeamFactorID:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4" colspan="2">
+       <widget class="QComboBox" name="CyntecBeamType"/>
       </item>
       <item row="1" column="1">
        <widget class="QComboBox" name="CyntecElementMap">
@@ -226,26 +137,6 @@
           <string>4x4</string>
          </property>
         </item>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="label_10">
-        <property name="text">
-         <string>AZ:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2" colspan="2">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>BeamTableID:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
        </widget>
       </item>
       <item row="3" column="0" rowspan="3" colspan="2">
@@ -312,25 +203,128 @@
         </layout>
        </widget>
       </item>
-      <item row="2" column="5">
-       <widget class="QDoubleSpinBox" name="CyntecEL">
-        <property name="minimum">
-         <double>-90.000000000000000</double>
+      <item row="4" column="3">
+       <widget class="QTableWidget" name="CyntecElementMapView">
+        <property name="minimumSize">
+         <size>
+          <width>160</width>
+          <height>160</height>
+         </size>
         </property>
-        <property name="maximum">
-         <double>90.000000000000000</double>
+        <property name="maximumSize">
+         <size>
+          <width>160</width>
+          <height>160</height>
+         </size>
+        </property>
+        <attribute name="horizontalHeaderMinimumSectionSize">
+         <number>10</number>
+        </attribute>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>18</number>
+        </attribute>
+        <attribute name="verticalHeaderMinimumSectionSize">
+         <number>10</number>
+        </attribute>
+        <attribute name="verticalHeaderDefaultSectionSize">
+         <number>16</number>
+        </attribute>
+        <row>
+         <property name="text">
+          <string>0</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>1</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>3</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>4</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>5</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>6</string>
+         </property>
+        </row>
+        <row>
+         <property name="text">
+          <string>7</string>
+         </property>
+        </row>
+        <column>
+         <property name="text">
+          <string>0</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>1</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>3</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>4</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>5</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>6</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>7</string>
+         </property>
+        </column>
+        <item row="0" column="0">
+         <property name="text">
+          <string/>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="QPushButton" name="pbCyntecBeamTable">
+        <property name="text">
+         <string>BeamTable</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>BeamFactorID:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
+      <item row="1" column="4" colspan="2">
+       <widget class="QComboBox" name="CyntecBeamTableID"/>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label_9">
@@ -345,9 +339,6 @@
       <item row="0" column="1">
        <widget class="QComboBox" name="CyntecBeamFactorID"/>
       </item>
-      <item row="1" column="4" colspan="2">
-       <widget class="QComboBox" name="CyntecBeamTableID"/>
-      </item>
       <item row="0" column="3">
        <widget class="QLabel" name="label_22">
         <property name="text">
@@ -355,31 +346,107 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="4" colspan="2">
-       <widget class="QComboBox" name="CyntecBeamType"/>
-      </item>
-      <item row="0" column="6">
-       <widget class="QPushButton" name="pbCyntecBeamTable">
+      <item row="2" column="2">
+       <widget class="QLabel" name="label_10">
         <property name="text">
-         <string>BeamTable</string>
+         <string>AZ:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
-      <item row="1" column="6">
-       <widget class="QPushButton" name="pbAround">
-        <property name="text">
-         <string>Around</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="7">
-       <widget class="QSpinBox" name="sbAroundLimit">
+      <item row="2" column="3">
+       <widget class="QDoubleSpinBox" name="CyntecAZ">
         <property name="minimum">
-         <number>1</number>
+         <double>-90.000000000000000</double>
         </property>
         <property name="maximum">
-         <number>10</number>
+         <double>90.000000000000000</double>
         </property>
+       </widget>
+      </item>
+      <item row="1" column="2" colspan="2">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>BeamTableID:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="6" colspan="2">
+       <widget class="QFrame" name="frame">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>X</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Y:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Size:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QDoubleSpinBox" name="sbTriangleX">
+           <property name="decimals">
+            <number>1</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QDoubleSpinBox" name="sbTriangleY">
+           <property name="decimals">
+            <number>1</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QPushButton" name="pbTriangle">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Triangle</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="sbTriangleSize">
+           <property name="decimals">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <double>10.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>

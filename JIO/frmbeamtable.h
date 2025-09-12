@@ -34,7 +34,7 @@ public:
     void clearEllipseBGColor(int id);
     void setEllipse(int id, QString text, QColor color, QColor bgcolor);
     void clearEllipseSelection();
-    void addTriangleTarget(QPointF pos);
+    void addTriangleTarget(QPointF pos, double size=1.0);
 public slots:
     void onSelectEllipse(QString id, bool clear=true,  QColor color=Qt::green);
 protected:

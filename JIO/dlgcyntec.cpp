@@ -21,6 +21,7 @@ DlgCyntec::DlgCyntec(QSettings *cfg, Cyntec *cyntec, QWidget *parent)
     connect(ui->pbCyntecBeamTable, &QPushButton::clicked, this, &DlgCyntec::onCyntecBeamTableClicked);
     connect(ui->CyntecBeamType, &QComboBox::currentTextChanged, this, &DlgCyntec::onCyntecBeamTypeTextChanged);
     connect(ui->pbAround, &QPushButton::clicked, this, &DlgCyntec::onSelectAroundID);
+    connect(ui->pbTriangle, &QPushButton::clicked, this, &DlgCyntec::onAddTriangle);
     loadcfg();
 }
 
@@ -258,6 +259,15 @@ void DlgCyntec::onSelectAroundID(bool checked)
 
 }
 
+void DlgCyntec::onAddTriangle(bool checked)
+{
+    Q_UNUSED(checked)
+    double x = ui->sbTriangleX->value();
+    double y = ui->sbTriangleY->value();
+    double s = ui->sbTriangleSize->value();
+    AddTriangle(x, y, s);
+}
+
 void DlgCyntec::onCyntecBeamTypeTextChanged(QString newBeamType)
 {
     QString beamfactorID = ui->CyntecBeamFactorID->currentText();
@@ -311,5 +321,12 @@ void DlgCyntec::savecfg()
     m_cfg->beginGroup("AIP");
     m_cfg->setValue("selrefpath", m_oldsavepath);
     m_cfg->endGroup();
+}
+
+void DlgCyntec::AddTriangle(double xpos, double ypos, double size)
+{
+    if (cBeamT){
+        cBeamT->addTriangleTarget(QPointF(xpos, ypos), size);
+    }
 }
 

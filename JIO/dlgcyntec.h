@@ -42,12 +42,14 @@ private slots:
     void onCyntecBeamTableIDChanged(QString newBeamTableID);
     void onCyntecElementMapChanged(QString newElementMap);
     void onSelectAroundID(bool checked);
+    void onAddTriangle(bool checked);
 private:
     void getCyntecBeamFactorDatas(QString beamFactorID);
     void getCyntecBeamTableDatas(QString beamTableID);
     void updateCyntecBeamTableID(QString beamType, QString beamFactorID);
     void loadcfg();
     void savecfg();
+    void AddTriangle(double xpos, double ypos, double size);
 
 private:
     Ui::DlgCyntec *ui;
