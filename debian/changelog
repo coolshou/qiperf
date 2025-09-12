@@ -1,3 +1,16 @@
+qiperf (0.16.11409.12-1) unstable; urgency=medium
+
+  * Fix iperf server/client run multi times on same PC with CMD_IPERF_START
+  * Fix limit iperf TP data only report to original wsclient
+
+ -- coolshou <coolshou2060@gmail.com>  Fri, 12 Sep 2025 14:04:37 +0800
+
+qiperf (0.15.11408.28-1) unstable; urgency=medium
+
+  * Fix stop iperf2 -s on no stdout to interval + 5 sec
+
+ -- coolshou <coolshou2060@gmail.com>  Thu, 28 Aug 2025 10:00:00 +0800
+
 qiperf (0.15.11408.25-1) unstable; urgency=medium
 
   * Fix crash issue
