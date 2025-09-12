@@ -14,6 +14,9 @@ class QTcpServer;
 class QUdpSocket;
 class QHostAddress;
 
+/*
+ * class to combine TerminalView/SerialView to TCP/UDP
+*/
 class TcpUdpPort : public AbstractPort
 {
     Q_OBJECT

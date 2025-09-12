@@ -199,6 +199,7 @@ void TPPlot::setShowGroup(bool bShow)
         }
     }else{
         //Total => Non Total
+        // TODO: when no data, the plot area will shrink!!
         if(legend->hasItem(mTotalLegendItem)){
             if (!legend->take(mTotalLegendItem)){
                 qDebug() << "remove mTotalLegendItem fail";
@@ -394,57 +395,61 @@ void TPPlot::onIperfTPdata(QString sInterval,
 
 void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double lostrate)
 {
-    double sumydata = ydata;
-    QMutexLocker locker(&m_mutex); // Locks m_mutex,
-    // do not double lock in following functions!!, it will cause app hang!!
-    MyQCPGraph *myGraph = getGraph(refrowidx);
-    // if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
     {
-        //TODO: when xdata is not continious, should we fill up with 0?
-        // myGraph->getMaxXValue();
-        //throughput graph
-        if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
-            myGraph->addData(xdata, ydata);
-        }else{
-            //Total TP?
-            sumydata = myGraph->sumValue(xdata, ydata);
-            // qDebug() << "addData" << refrowidx << " xdata:" << xdata
-            //          << " TP:"<< ydata  << " sum:" << sumydata;
-        }
-        if (!m_showgroup){
-            if (m_legends.contains(refrowidx)){
-                QCPAbstractLegendItem *itm = m_legends.value(refrowidx);
-                if (itm){
-                    itm->setVisible(true);
-                }
+        QMutexLocker locker(&m_mutex); // Locks m_mutex,
+
+            double sumydata = ydata;
+
+        // do not double lock in following functions!!, it will cause app hang!!
+        MyQCPGraph *myGraph = getGraph(refrowidx);
+        // if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
+        {
+            //TODO: when xdata is not continious, should we fill up with 0?
+            // myGraph->getMaxXValue();
+            //throughput graph
+            if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+                myGraph->addData(xdata, ydata);
+            }else{
+                //Total TP?
+                sumydata = myGraph->sumValue(xdata, ydata);
+                // qDebug() << "addData" << refrowidx << " xdata:" << xdata
+                //          << " TP:"<< ydata  << " sum:" << sumydata;
             }
-        } else {
-            mTotalLegendItem->setVisible(true);
+            if (!m_showgroup){
+                if (m_legends.contains(refrowidx)){
+                    QCPAbstractLegendItem *itm = m_legends.value(refrowidx);
+                    if (itm){
+                        itm->setVisible(true);
+                    }
+                }
+            } else {
+                mTotalLegendItem->setVisible(true);
+            }
+        }
+        // enlarge/shrink y range
+        updateYAxisRange(0, sumydata);
+        updateXAxisRange(0, xdata + m_interval);
+
+        //lost rate
+        if (lostrate>0){
+            MyQCPBars *g_lostrate = getLostRateGraph(refrowidx);
+            if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+                // normal lostrate legends
+                g_lostrate->setVisible(!m_showgroup);
+            }else{
+                mTotalLostLegendItem->setVisible(m_showgroup);
+            }
+            // // qDebug() << "g_lostrate: " << xdata << " value:" << lostrate;
+            // if (m_showgroup){
+
+            // }else {
+            //     g_lostrate->setVisible(false);
+            // }
+            qDebug() << "addTPData, x:" << xdata << " lostrate:" << lostrate;
+            g_lostrate->addData(xdata, lostrate);
         }
     }
-    // enlarge/shrink y range
-    updateYAxisRange(0, sumydata);
-    updateXAxisRange(0, xdata + m_interval);
-
-    //lost rate
-    if (lostrate>0){
-        MyQCPBars *g_lostrate = getLostRateGraph(refrowidx);
-        if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
-            // normal lostrate legends
-            g_lostrate->setVisible(!m_showgroup);
-        }else{
-            mTotalLostLegendItem->setVisible(m_showgroup);
-        }
-        // // qDebug() << "g_lostrate: " << xdata << " value:" << lostrate;
-        // if (m_showgroup){
-
-        // }else {
-        //     g_lostrate->setVisible(false);
-        // }
-        qDebug() << "addTPData, x:" << xdata << " lostrate:" << lostrate;
-        g_lostrate->addData(xdata, lostrate);
-    }
-    locker.unlock();
+    // locker.unlock();
     replot();
 }
 

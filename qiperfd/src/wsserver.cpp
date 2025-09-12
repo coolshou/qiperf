@@ -163,8 +163,8 @@ qint64 WSServer::sendBinaryMessage(QByteArray &data, QString target)
 
 void WSServer::onLog(QString text)
 {
-    Q_UNUSED(text)
-    // qInfo() << "WSServer::onLog: " << text;
+    // Q_UNUSED(text)
+    qInfo() << "WSServer::onLog: " << text;
 }
 
 void WSServer::addFileToSend(QString filename, QString target)
