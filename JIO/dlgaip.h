@@ -33,7 +33,7 @@ signals:
     void updateModelType(int row, int col, QString smodel);
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *event) override;
 private slots:
     void onAccepted();

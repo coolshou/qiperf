@@ -29,7 +29,7 @@ signals:
     void reffilechanged(QString filename);
     void closeall();
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *event) override;
 private slots:
     void onSelReffileClicked(bool checked);

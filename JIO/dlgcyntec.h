@@ -33,7 +33,7 @@ signals:
     void closeall();
     void SelectEllipse(QString id, bool clear, QColor color);
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *event) override;
 private slots:
     void onSelReffileClicked(bool checked);
