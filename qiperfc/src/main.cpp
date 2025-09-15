@@ -16,6 +16,7 @@
 #include <QMessageBox>
 #include <QStyleFactory>
 #include <QMutex>
+#include <QMutexLocker>
 
 #include <qlogging.h>
 static QFile logFile;

@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QMap>
 #include <QJsonArray>
+#include <QString>
 
 class IperfWrapper : public QObject
 {
