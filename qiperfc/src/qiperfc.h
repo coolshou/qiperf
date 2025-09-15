@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QPen>
 #include <QObject>
+#include <QString>
 #include <QSettings>
 #include <QClipboard>
 #include <QMenu>
@@ -87,7 +88,7 @@ public slots:
     void onSimpleMicro();
     void onAbout();
     void onShowDebugLog();
-
+    void onShowHttpd();
     void onErrorStop(int err, QString msg);
     void onDebuginfo(QString msg);
     void onNotice(QString send_addr, QString msg);
@@ -147,6 +148,7 @@ private slots:
     void initActions();
     void initToolbar();
     void initStatusbar();
+    void initPlugin();
     void onUpdateStarttime(QDateTime stime);
     void onUpdateStatus(QString msg);
     void onUpdateRunStatus(bool bStart);
@@ -199,6 +201,7 @@ private:
     QAction *showAction;
     QAction *hideAction;
     QAction *quitAction;
+    QAction *httpdAction;
     QList<QPluginLoader*> pluginLoaders;
     QList<PluginInterface*> plugins;
     QList<QPluginLoader*> mToolpluginLoaders;

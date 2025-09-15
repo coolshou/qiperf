@@ -52,6 +52,7 @@ include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
 include($$PWD/lib/qcustomplot.pri)
 include($$PWD/../lib/qssh.pri)
 include($$PWD/../JIO/jio.pri)
+include($$PWD/plugin/httpd.pri)
 
 # debug
 #CONFIG += sanitizer
@@ -279,7 +280,8 @@ else: unix:!android: target.path = /opt/qiperf/bin
 
 RESOURCES += \
     ../qiperf.qrc \
-    lib/geoview/placemark.qrc
+    lib/geoview/placemark.qrc \
+    plugin/httpd/myhttpserver.qrc
 
 # Define a function to extract the version
 defineReplace(extract_version) {

@@ -1,6 +1,5 @@
 #include "qiperfc.h"
 #include "ui_qiperfc.h"
-#include "../src/comm.h"
 #include "../src/myfunc.h"
 
 #include <QJsonObject>
@@ -26,6 +25,8 @@
 #include "tp.h"
 #include "versions.h"
 #include "views/viewtype.h"
+#include "plugin/httpd/myhttpserver.h"
+#include "plugin/httpd/myhttpserverform.h"
 
 #include <QDebug>
 
@@ -89,6 +90,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     //UI actions
     initActions();
     initToolbar();
+    initPlugin();
     updateRunStatus(false);
     // initPingChart();
 
@@ -523,6 +525,23 @@ void QIperfC::onShowDebugLog()
     m_dlgshowlog->activateWindow();
 }
 
+void QIperfC::onShowHttpd()
+{
+    ServerConfig *config = new ServerConfig(this);
+    MyHttpServer *httpsrv = new MyHttpServer(config);
+    MyHttpServerForm *httpfrm = new MyHttpServerForm();
+
+    connect(httpfrm, &MyHttpServerForm::sigRootPathChange, config, &ServerConfig::setRootDir);
+    connect(httpfrm, &MyHttpServerForm::sigStart, httpsrv, &MyHttpServer::start);
+    connect(httpfrm, &MyHttpServerForm::sigStop, httpsrv, &MyHttpServer::stop);
+    connect(httpsrv, &MyHttpServer::started, httpfrm, &MyHttpServerForm::onStarted);
+    connect(httpsrv, &MyHttpServer::stoped, httpfrm, &MyHttpServerForm::onStoped);
+    connect(this, &QIperfC::closeAll, httpfrm, &MyHttpServerForm::close);
+    httpfrm->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+    // httpfrm->setWindowModality(Qt::ApplicationModal); // Optional
+    httpfrm->show();
+}
+
 void QIperfC::onErrorStop(int err, QString msg)
 {
     bErrorStop = err;
@@ -753,7 +772,7 @@ void QIperfC::createTrayMenu(){
     // if (this->isVisible()){
     //     show=false;
     // }
-    showAction = new QAction("Show Window", this);
+    showAction = new QAction(QString::fromUtf8("Show Window"), this);
     connect(showAction, &QAction::triggered, this, &QIperfC::showWindow);
     trayMenu->addAction(showAction);
     // showAction->setEnabled(show);
@@ -1686,6 +1705,13 @@ void QIperfC::initStatusbar()
 //    m_endpoint_label->setOpenExternalLinks(true);
     ui->statusbar->addPermanentWidget(m_label_qiperfd);
     connect(this , &QIperfC::updateEndpointNum, this, &QIperfC::on_updateQIperfdNum);
+}
+
+void QIperfC::initPlugin()
+{
+    httpdAction = new QAction(QIcon(":/httpd"), "Httpd", this);
+    connect(httpdAction, &QAction::triggered, this, &QIperfC::onShowHttpd);
+    ui->menuTools->addAction(httpdAction);
 }
 
 void QIperfC::onUpdateStarttime(QDateTime stime)
