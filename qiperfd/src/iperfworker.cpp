@@ -19,6 +19,8 @@
 #include <pthread.h>
 #endif
 
+#include <QDebug>
+
 #include "../src/tpmgrdata.h"
 // #include <QOverload>
 
