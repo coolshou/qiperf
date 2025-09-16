@@ -1,9 +1,10 @@
-qiperf (0.16.11409.12-1) unstable; urgency=medium
+qiperf (0.16.11409.16-1) unstable; urgency=medium
 
   * Fix iperf server/client run multi times on same PC with CMD_IPERF_START
   * Fix limit iperf TP data only report to original wsclient
+  * qiperf console add simple http file server
 
- -- coolshou <coolshou2060@gmail.com>  Fri, 12 Sep 2025 14:04:37 +0800
+ -- coolshou <coolshou2060@gmail.com>  Mon, 16 Sep 2025 14:04:37 +0800
 
 qiperf (0.15.11408.28-1) unstable; urgency=medium
 
