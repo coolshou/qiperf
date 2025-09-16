@@ -5,6 +5,8 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
+#include "../src/myfunc.h"
+
 MyHttpServerForm::MyHttpServerForm(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::MyHttpServerForm)
@@ -13,6 +15,7 @@ MyHttpServerForm::MyHttpServerForm(QWidget *parent)
     connect(ui->pbStart, &QPushButton::clicked, this, &MyHttpServerForm::onStart);
     connect(ui->leRootPath, &QLineEdit::textChanged, this, &MyHttpServerForm::onRootPathChanged);
     connect(ui->pbSelRootPath, &QPushButton::clicked, this, &MyHttpServerForm::onSelectRootPath);
+    connect(ui->pbReflash, &QPushButton::clicked, this, &MyHttpServerForm::onReflash);
 }
 
 MyHttpServerForm::~MyHttpServerForm()
@@ -23,11 +26,17 @@ MyHttpServerForm::~MyHttpServerForm()
 void MyHttpServerForm::onStarted()
 {
     updateStatus(true);
+    QString host = ui->cbHostAddress->currentText();
+    quint16 port = ui->sbPort->value();
+
+    QString msg = QString("start listen on http://%1:%2").arg(host, QString::number(port));
+    ui->textEdit->append(msg);
 }
 
 void MyHttpServerForm::onStoped()
 {
     updateStatus(false);
+    ui->textEdit->append("httpd Stoped");
 }
 
 void MyHttpServerForm::onSelectRootPath(bool checked)
@@ -45,6 +54,16 @@ void MyHttpServerForm::onSelectRootPath(bool checked)
     }
 }
 
+void MyHttpServerForm::onReflash(bool checked)
+{
+    Q_UNUSED(checked)
+    QStringList ls = MyFunc::getAllIPAddress();
+    qDebug() << "onReflash:" << ls.join(",");
+    ui->cbHostAddress->clear();
+    ui->cbHostAddress->insertItem(0, "Any");
+    ui->cbHostAddress->insertItems(1, ls);
+}
+
 void MyHttpServerForm::onStart(bool checked)
 {
     // Q_UNUSED(checked)
@@ -60,7 +79,7 @@ void MyHttpServerForm::onStart(bool checked)
 
         QHostAddress host = QHostAddress::Any;
         if (ui->cbHostAddress->currentIndex()!=0){
-            //TODO: host value from combobox
+            host.setAddress(ui->cbHostAddress->currentText());
         }
 
         emit sigStart(port, path, host);
@@ -78,7 +97,16 @@ void MyHttpServerForm::updateStatus(bool started)
 {
     if (started){
         ui->pbStart->setText("Stop");
+        ui->leRootPath->setEnabled(false);
+        ui->cbHostAddress->setEnabled(false);
+        ui->sbPort->setEnabled(false);
+        ui->pbSelRootPath->setEnabled(false);
+
     }else{
         ui->pbStart->setText("Start");
+        ui->leRootPath->setEnabled(true);
+        ui->cbHostAddress->setEnabled(true);
+        ui->sbPort->setEnabled(true);
+        ui->pbSelRootPath->setEnabled(true);
     }
 }

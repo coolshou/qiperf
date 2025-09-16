@@ -1,6 +1,7 @@
 #include "myfunc.h"
 
 #include <QtMath>
+#include <QNetworkInterface>
 
 // MyFunc::MyFunc(QObject *parent): QObject(parent)
 // {
@@ -161,4 +162,29 @@ double MyFunc::calculateFSPL(double distanceMeters, double frequencyHz) {
 double MyFunc::euclideanDistance(double az1, double el1, double az2, double el2) {
     //歐氏距離
     return std::sqrt(std::pow(az1 - az2, 2) + std::pow(el1 - el2, 2));
+}
+
+QStringList MyFunc::getAllIPAddress(bool onlyIPv4)
+{
+    const QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
+    QStringList ds;
+    for (const QNetworkInterface &interface : interfaces) {
+        // Skip down or loopback interfaces
+        if (!(interface.flags() & QNetworkInterface::IsUp) ||
+            (interface.flags() & QNetworkInterface::IsLoopBack)){
+            continue;
+        }
+
+        for (const QNetworkAddressEntry &entry : interface.addressEntries()) {
+            QHostAddress ip = entry.ip();
+            if (onlyIPv4){
+                if (ip.protocol() == QAbstractSocket::IPv4Protocol){
+                    ds.append(ip.toString());
+                }
+            }else{
+                ds.append(ip.toString());
+            }
+        }
+    }
+    return ds;
 }

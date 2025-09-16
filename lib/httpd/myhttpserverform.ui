@@ -53,7 +53,7 @@
    </item>
    <item>
     <widget class="QWidget" name="widget_2" native="true">
-     <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,0,0">
+     <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,0,0,0">
       <item row="0" column="0">
        <widget class="QLabel" name="label_2">
         <property name="text">
@@ -61,36 +61,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Port:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="cbHostAddress">
-        <item>
-         <property name="text">
-          <string>Any</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QSpinBox" name="sbPort">
-        <property name="minimum">
-         <number>1000</number>
-        </property>
-        <property name="maximum">
-         <number>65535</number>
-        </property>
-        <property name="value">
-         <number>8080</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
+      <item row="0" column="5">
        <widget class="QPushButton" name="pbStart">
         <property name="minimumSize">
          <size>
@@ -109,6 +80,42 @@
         </property>
         <property name="checkable">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QSpinBox" name="sbPort">
+        <property name="minimum">
+         <number>1000</number>
+        </property>
+        <property name="maximum">
+         <number>65535</number>
+        </property>
+        <property name="value">
+         <number>8080</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cbHostAddress">
+        <item>
+         <property name="text">
+          <string>Any</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Port:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="pbReflash">
+        <property name="text">
+         <string>Reflash</string>
         </property>
        </widget>
       </item>

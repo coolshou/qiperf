@@ -20,6 +20,7 @@ public slots:
     void onStarted();
     void onStoped();
     void onSelectRootPath(bool checked);
+    void onReflash(bool checked);
 signals:
     void sigStart(quint16 port, QString rootpath=QString::fromUtf8("."), QHostAddress host=QHostAddress::Any);
     void sigStop();

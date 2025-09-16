@@ -5,6 +5,7 @@
 #include <QtNetwork>
 #include <QObject>
 #include <QString>
+#include <QFileInfo>
 
 static QString urlDecode(const QByteArray &s) {
     return QUrl::fromPercentEncoding(s);
@@ -84,7 +85,7 @@ private slots:
         // Parse path and query
         QUrl url(QString::fromUtf8(target));
         QString path = url.path();
-        QUrlQuery query(url);
+        // QUrlQuery query(url);
 
         if (path == "/" || path.isEmpty()) {
             handleRootList();
@@ -101,12 +102,20 @@ private slots:
     void handleRootList() {
         QString absRoot = rootDirSafe();
         QDir dir(absRoot);
-        QFileInfoList entries = dir.entryInfoList(QDir::Files, QDir::Name);
 
+        // dir only
+        QFileInfoList dentries = dir.entryInfoList(QDir::Dirs|
+                                                      QDir::NoDotAndDotDot, QDir::Name);
+        // file only, sorte by file name
+        QFileInfoList entries = dir.entryInfoList(QDir::Files, QDir::Name);
         QString html;
         html += "<html><head><meta charset=\"utf-8\"><title>File List</title></head><body>";
         html += "<h3>Files in root</h3><ul>";
-
+        for (const QFileInfo &fi : dentries) {
+            QString name = fi.fileName();
+            QString encoded = QString::fromUtf8(QUrl::toPercentEncoding(name));
+            html += "<li><a href=\"/" + encoded + "\">[" + name + "]</a></li>";
+        }
         for (const QFileInfo &fi : entries) {
             QString name = fi.fileName();
             QString encoded = QString::fromUtf8(QUrl::toPercentEncoding(name));
@@ -201,44 +210,64 @@ private:
     }
 
     void handleDownload(const QUrlQuery &query) {
-        QString rel = query.queryItemValue("path");
-        QString abs;
-        if (!resolveSafePath(rel, &abs, /*wantDir=*/false)) {
-            sendSimple(400, "Invalid or forbidden path");
+        QString relPath = query.queryItemValue("path");
+        QFileInfo info(relPath);
+        if (!info.exists()) {
+            sendSimple(404, "Not Found");
             return;
         }
+        if (info.isDir()) {
+            QDir dir(relPath);
+            QStringList entries = dir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
-        QFile file(abs);
-        if (!file.open(QIODevice::ReadOnly)) {
-            sendSimple(404, "File not found");
-            return;
+            QByteArray body;
+            body += "<html><body><h2>Directory Listing for " + relPath.toUtf8() + "</h2><ul>";
+            for (const QString &entry : entries) {
+                QString fullPath = relPath + "/" + entry;
+                body += "<li><a href=\"/" + QUrl::toPercentEncoding(fullPath) + "\">" + entry.toUtf8() + "</a></li>";
+            }
+            body += "</ul></body></html>";
+
+            sendResponse(200, "OK", "text/html; charset=utf-8", body);
+        } else {
+            QString abs;
+            if (!resolveSafePath(relPath, &abs, /*wantDir=*/false)) {
+                sendSimple(400, "Invalid or forbidden path");
+                return;
+            }
+            QFile file(relPath);
+            if (!file.open(QIODevice::ReadOnly)) {
+                sendSimple(404, "File not found");
+                return;
+            }
+
+            const qint64 size = file.size();
+            QByteArray header;
+            header += "HTTP/1.1 200 OK\r\n";
+            header += "Content-Type: " + contentTypeForFile(abs).toUtf8() + "\r\n";
+            header += "Content-Length: " + QByteArray::number(size) + "\r\n";
+            header += "Accept-Ranges: none\r\n";
+            header += "Connection: close\r\n";
+            header += "Content-Disposition: attachment; filename=\"" + QFileInfo(abs).fileName().toUtf8() + "\"\r\n";
+            header += "\r\n";
+
+            // Send header first
+            if (m_socket->write(header) == -1) { m_socket->disconnectFromHost(); return; }
+
+            // Stream file in chunks to avoid high memory usage
+            static const qint64 CHUNK = 1 << 16; // 64 KiB
+            while (!file.atEnd()) {
+                if (!m_socket->isWritable()) break;
+                QByteArray chunk = file.read(CHUNK);
+                if (chunk.isEmpty()) break;
+                qint64 written = m_socket->write(chunk);
+                if (written == -1) break;
+                // Optional: throttle with waitForBytesWritten to backpressure
+                if (!m_socket->waitForBytesWritten(30000)) break;
+            }
+
+            m_socket->disconnectFromHost();
         }
-
-        const qint64 size = file.size();
-        QByteArray header;
-        header += "HTTP/1.1 200 OK\r\n";
-        header += "Content-Type: " + contentTypeForFile(abs).toUtf8() + "\r\n";
-        header += "Content-Length: " + QByteArray::number(size) + "\r\n";
-        header += "Accept-Ranges: none\r\n";
-        header += "Connection: close\r\n";
-        header += "Content-Disposition: attachment; filename=\"" + QFileInfo(abs).fileName().toUtf8() + "\"\r\n";
-        header += "\r\n";
-
-        // Send header first
-        if (m_socket->write(header) == -1) { m_socket->disconnectFromHost(); return; }
-
-        // Stream file in chunks to avoid high memory usage
-        static const qint64 CHUNK = 1 << 16; // 64 KiB
-        while (!file.atEnd()) {
-            if (!m_socket->isWritable()) break;
-            QByteArray chunk = file.read(CHUNK);
-            if (chunk.isEmpty()) break;
-            qint64 written = m_socket->write(chunk);
-            if (written == -1) break;
-            // Optional: throttle with waitForBytesWritten to backpressure
-            if (!m_socket->waitForBytesWritten(30000)) break;
-        }
-        m_socket->disconnectFromHost();
     }
 
     void sendSimple(int code, const QByteArray &message, const QMap<QByteArray, QByteArray> &extraHeaders = {}) {
@@ -321,39 +350,5 @@ protected:
 private:
     ServerConfig *m_config;
 };
-
-// int main(int argc, char *argv[]) {
-//     QCoreApplication app(argc, argv);
-
-//     QCommandLineParser parser;
-//     parser.setApplicationDescription("Qt Threaded File HTTP Server");
-//     parser.addHelpOption();
-//     QCommandLineOption portOpt({"p","port"}, "Port to listen on", "port", "8080");
-//     QCommandLineOption rootOpt({"r","root"}, "Root directory to serve", "path", QDir::currentPath());
-//     parser.addOption(portOpt);
-//     parser.addOption(rootOpt);
-//     parser.process(app);
-
-//     bool ok = false;
-//     quint16 port = parser.value(portOpt).toUShort(&ok);
-//     if (!ok || port == 0) port = 8080;
-
-//     QString rootDir = QDir(parser.value(rootOpt)).absolutePath();
-
-//     auto config = QSharedPointer<ServerConfig>::create();
-//     {
-//         QWriteLocker locker(&config->lock);
-//         config->rootDir = rootDir;
-//     }
-
-//     HttpServer server(config);
-//     if (!server.listen(QHostAddress::Any, port)) {
-//         qCritical() << "Failed to listen on port" << port << ":" << server.errorString();
-//         return 1;
-//     }
-
-//     qInfo() << "Serving" << rootDir << "on port" << port;
-//     return app.exec();
-// }
 
 #endif // MYHTTPSERVER_H

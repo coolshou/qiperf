@@ -27,7 +27,7 @@ public:
     static QString closeCodeToString(QWebSocketProtocol::CloseCode code);
     static double calculateFSPL(double distanceMeters, double frequencyHz);
     static double euclideanDistance(double az1, double el1, double az2, double el2);
-
+    static QStringList getAllIPAddress(bool onlyIPv4=true);
 };
 
 #endif // MYFUNC_H
