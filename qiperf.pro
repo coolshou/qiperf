@@ -17,7 +17,7 @@ qgeoview.subdir = lib/qgeoview/lib
 qssh.subdir = lib/qssh/src/libs/qssh
 
 qiperftray.depends = qiperfd
-qiperfc.depends = qgeoview
+qiperfc.depends = qgeoview qssh
 qiperfd.depends = qssh
 
 
