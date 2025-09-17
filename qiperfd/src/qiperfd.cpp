@@ -2094,7 +2094,7 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
              << " reqcmd:" << reqcmd
              << " exec cmd:" << cmds;
     QString rpcmd="";
-    // qDebug() << "runRequest jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
+    qDebug() << "runRequest jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
 
     if (jiocmdRespObj.contains(reqcmd)){
         rpcmd = jiocmdRespObj.value(reqcmd).toString();
