@@ -2114,9 +2114,9 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
     if (!rpcmd.isEmpty()){
         process.waitForFinished();
         QString output = process.readAllStandardOutput();
-        // qDebug() << "output:" << output;
+        qDebug() << "runRequest output:" << output;
         QString rs = parserResponse(rpcmd, output);
-        // qDebug() << "Response:" << rs;
+        // qDebug() << "runRequest parserResponse:" << rs;
         // QString erroutput = process.readAllStandardError();
         // qDebug() << "erroutput:" << erroutput;
         QString res = QString("%1:%2:%3:%4").arg(CMD_REQUEST_RESULT, refid, rpcmd, rs);
