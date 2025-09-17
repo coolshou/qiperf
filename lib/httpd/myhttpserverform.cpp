@@ -16,6 +16,7 @@ MyHttpServerForm::MyHttpServerForm(QWidget *parent)
     connect(ui->leRootPath, &QLineEdit::textChanged, this, &MyHttpServerForm::onRootPathChanged);
     connect(ui->pbSelRootPath, &QPushButton::clicked, this, &MyHttpServerForm::onSelectRootPath);
     connect(ui->pbReflash, &QPushButton::clicked, this, &MyHttpServerForm::onReflash);
+    onReflash(false);
 }
 
 MyHttpServerForm::~MyHttpServerForm()

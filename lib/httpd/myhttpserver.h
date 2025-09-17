@@ -211,11 +211,9 @@ private:
 
     void handleDownload(const QUrlQuery &query) {
         QString relPath = query.queryItemValue("path");
+        qDebug() << "relPath: " << relPath;
         QFileInfo info(relPath);
-        if (!info.exists()) {
-            sendSimple(404, "Not Found");
-            return;
-        }
+
         if (info.isDir()) {
             QDir dir(relPath);
             QStringList entries = dir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
@@ -235,7 +233,12 @@ private:
                 sendSimple(400, "Invalid or forbidden path");
                 return;
             }
-            QFile file(relPath);
+            QFileInfo info(abs);
+            if (!info.exists()) {
+                sendSimple(404, "Not Found");
+                return;
+            }
+            QFile file(abs);
             if (!file.open(QIODevice::ReadOnly)) {
                 sendSimple(404, "File not found");
                 return;
