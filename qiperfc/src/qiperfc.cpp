@@ -527,7 +527,7 @@ void QIperfC::onShowDebugLog()
 
 void QIperfC::onShowHttpd()
 {
-    ServerConfig *config = new ServerConfig(this);
+    ServerConfig *config = new ServerConfig();
     MyHttpServer *httpsrv = new MyHttpServer(config);
     MyHttpServerForm *httpfrm = new MyHttpServerForm();
 
@@ -1047,7 +1047,8 @@ void QIperfC::AddSerialView(QString mkey, SerialView *serialview, WSClient *wsc)
 void QIperfC::AddSSHView(QString mkey, SSHView *sshview, WSClient *wsc)
 {
     //windows menu
-    QAction *act = new QAction(QIcon(":/ssh"), mkey, this);
+    qDebug() <<"AddSSHView";
+    QAction *act = new QAction(QIcon(":/ssh.png"), mkey, this);
     act->setData(ViewType::SSH);
     connect(act, &QAction::triggered, this, &QIperfC::showView);
     ui->menuWindows->addAction(act);

@@ -293,7 +293,7 @@ QJsonObject DlgJIO::createInitData()
             if (item) {
                 QVariant varAIP1 =  item->data(Qt::UserRole);
                 if (varAIP1.canConvert<QVariantMap>()){
-                    qDebug() << "AIP1 data:" << varAIP1.toMap() ;
+                    // qDebug() << "AIP1 data:" << varAIP1.toMap() ;
                     aipObj = QJsonObject::fromVariantMap(varAIP1.toMap());
                     if (i==0){
                         if (ui->twAIP->rowCount()>0){
@@ -328,7 +328,7 @@ QJsonObject DlgJIO::createInitData()
             if (item) {
                 QVariant varAIP2 =  item->data(Qt::UserRole);
                 if (varAIP2.canConvert<QVariantMap>()){
-                    qDebug() << "AIP2 data:" << varAIP2.toMap() ;
+                    // qDebug() << "AIP2 data:" << varAIP2.toMap() ;
                     aipObj = QJsonObject::fromVariantMap(varAIP2.toMap());
                     if (i==0){
                         if (ui->twAIP->rowCount()>1){
@@ -1160,6 +1160,7 @@ void DlgJIO::onInquireTimerTimeout()
                 QString target = itm->text();
                 if (!target.isEmpty()){
                     qDebug() << "onInquireTimerTimeout //TODO Inquire:" << target;
+                    //TODO: ping check device can
                     getGpsInfo(QString::number(row), target);
                     getSensorInfo(QString::number(row), target);
 
