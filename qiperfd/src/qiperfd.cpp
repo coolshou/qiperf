@@ -2094,11 +2094,10 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
              << " reqcmd:" << reqcmd
              << " exec cmd:" << cmds;
     QString rpcmd="";
-    qDebug() << "runRequest jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
+    // qDebug() << "runRequest jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
 
     if (jiocmdRespObj.contains(reqcmd)){
         rpcmd = jiocmdRespObj.value(reqcmd).toString();
-        // qDebug() << " response tag:" << rpcmd;
     }else {
         qDebug() << " No supported reqcmd:" << reqcmd;
         return;
@@ -2108,15 +2107,19 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
     // TODO: other platform
 #if QT_VERSION < 0x060000  // < 6.0
     // process.start("bash", QStringList() << "-c" << cmds);
-    qDebug() << "qt5 runRequest cmd: " << cmds;
-    process.start(cmds);
+    // process.start(cmds);
+    QStringList ds = cmds.split(" ");
+    process.start(ds[0], ds.mid(1, ds.count()-1));
 #else
     process.startCommand(cmds);
 #endif
     if (!rpcmd.isEmpty()){
         process.waitForFinished();
         QString output = process.readAllStandardOutput();
-        qDebug() << "runRequest output:" << output;
+        if (output.isEmpty()){
+            QString erroutput = process.readAllStandardError();
+            qDebug() << "' "  << cmds << " ' runRequest erroutput:" << erroutput;
+        }
         QString rs = parserResponse(rpcmd, output);
         // qDebug() << "runRequest parserResponse:" << rs;
         // QString erroutput = process.readAllStandardError();
