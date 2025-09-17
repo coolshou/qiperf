@@ -2107,7 +2107,9 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
     QProcess process;
     // TODO: other platform
 #if QT_VERSION < 0x060000  // < 6.0
-    process.start("bash", QStringList() << "-c" << cmds);
+    // process.start("bash", QStringList() << "-c" << cmds);
+    qDebug() << "qt5 runRequest cmd: " << cmds;
+    process.start(cmds);
 #else
     process.startCommand(cmds);
 #endif
