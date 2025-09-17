@@ -30,13 +30,23 @@ void MyHttpServerForm::onStarted()
     QString host = ui->cbHostAddress->currentText();
     quint16 port = ui->sbPort->value();
 
-    QString msg = QString("start listen on http://%1:%2").arg(host, QString::number(port));
-    ui->textEdit->append(msg);
+    ui->textEdit->clear();
+    QString msg = QString("http://%1:%2").arg(host, QString::number(port));
+    ui->textEdit->append("start listen on "+ msg);
+    ui->textEdit->append("================================================================================");
+    //list files
+    QDir dir(ui->leRootPath->text());
+    QStringList files = dir.entryList(QDir::Files);
+    for (const QString &file : files) {
+        ui->textEdit->append(msg+"/"+file);
+    }
+    ui->textEdit->append("================================================================================");
 }
 
 void MyHttpServerForm::onStoped()
 {
     updateStatus(false);
+    ui->textEdit->clear();
     ui->textEdit->append("httpd Stoped");
 }
 
