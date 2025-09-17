@@ -27,6 +27,7 @@
 #include "cyntec.h"
 #include "dlgcyntec.h"
 #include "aip.h"
+#include "../src/wsclient.h"
 
 namespace Ui {
 class DlgJIO;
@@ -129,6 +130,8 @@ private slots:
     void onInquireClicked(bool checked);
     void onOptimizeClicked(bool checked);
     void onInquireTimerTimeout();
+    void onDisconnected(QString from);
+    void onConnected(QString from);
     // void onShowMap(bool checked);
     void onShowGeo(bool checked);
     void onShow3D(bool checked);
@@ -164,6 +167,9 @@ private slots:
     void onOptimizeStoped(int error);
     void onOptimizeWorkerDebug(QString msg);
 private:
+    QIcon iconForState(const QString &state);
+    void updateStats(QString target, QString state);
+    void setStateIcon(int row, int column, QString state);
     int getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, double diffHead, double diffPitch);
     double getAz(AIP::ModuleType aiptype, int BeamID);
     double averageBearing(const QList<double>& bearings);
@@ -205,14 +211,13 @@ private:
     QByteArray m_remoteStderr;
     State m_state;
     bool m_started;
-    QScopedPointer<QTextStream> m_textStream;
     Hanwha *mHanwha;
     DlgHanwha *mDlgHanwha;
     Cyntec *mCyntec;
     DlgCyntec *mDlgCyntec;
     //cmds
     QJsonObject jiocmdObj;
-
+    QMap<QString, WSClient *> mWScs;
     OptimizeWorker *mOptWorker;
     QThread *mOptThread;
 };

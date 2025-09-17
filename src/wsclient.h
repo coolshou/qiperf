@@ -85,6 +85,7 @@ signals:
     void iperfReStarted(QString smode, QString ipport);  //mode ,ip-port
     void iperfStoped(QString refrow, QString err_no, QString err, QString ipport);  //refrow, error no (0: no error), error message
     void disconnected(QString serverip);
+    void connected(QString serverip);
     void iperfTPdata(QString refrow, QString sInterval, QString data); // refrow, throughput data
     void iperfExtendWait(QString refrow, qint64 iwait, int exitCode, int restarttimes);
     void serialopened(QString refrow, QString serveraddress, QString serveraPort);

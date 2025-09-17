@@ -2050,6 +2050,7 @@ void QIperfd::initJIOOpenWRT()
                 return; // Or handle the error appropriately
             }
             jiocmdObj = jsonDoc.object();
+            // qDebug() << "jiocmdObj:" << jiocmdObj.toVariantMap();
             // rootObject.keys()
             jiocmdRespObj = jiocmdObj.value("RESPONSE").toObject();
             // qDebug() << "jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
@@ -2093,9 +2094,11 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
              << " reqcmd:" << reqcmd
              << " exec cmd:" << cmds;
     QString rpcmd="";
+    // qDebug() << "runRequest jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
+
     if (jiocmdRespObj.contains(reqcmd)){
         rpcmd = jiocmdRespObj.value(reqcmd).toString();
-        qDebug() << " response tag:" << rpcmd;
+        // qDebug() << " response tag:" << rpcmd;
     }else {
         qDebug() << " No supported reqcmd:" << reqcmd;
         return;
@@ -2153,7 +2156,7 @@ QString QIperfd::parserResponse(QString rpcmd, QString data)
         // qDebug() << "rObj:" << rObj;
         QJsonDocument doc(rObj);
         QString strJson(doc.toJson(QJsonDocument::Compact));
-        qDebug() << "strJson: " << strJson ;
+        // qDebug() << "parserResponse strJson: " << strJson ;
         rs = strJson;
     }else{
         debug(QString("No data of %1").arg(rpcmd) , 2);

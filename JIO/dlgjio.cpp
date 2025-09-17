@@ -183,7 +183,6 @@ QString DlgJIO::getGpsInfo(QString refrow, QString target)
 {
     // get GPS info
     QString result="";
-    //   gps_call_so
     if (mControlBy==DlgSet::ControlBy::SSH){
         //TODO:
         m_sshParams.setHost(target);
@@ -244,6 +243,7 @@ QJsonObject DlgJIO::createInitData()
     QJsonObject rootObject;
     QJsonObject aipObj;
     rootObject["LocalAddr"]= ui->leLocalAddr->text();
+    rootObject["ControlBy"]= mControlBy;
     //ssh
     QJsonObject sshObj;
     sshObj["username"] = mSshUsername;
@@ -356,8 +356,8 @@ QJsonObject DlgJIO::createInitData()
 
 void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg)
 {
-    qDebug() << "onRequestResult refrow:" << refrow << " from: " << serveraddress
-             << " cmd: " << cmd << " msg: " << msg;
+    // qDebug() << "onRequestResult refrow:" << refrow << " from: " << serveraddress
+    //          << " cmd: " << cmd << " msg: " << msg;
     QJsonParseError error;
     QJsonDocument doc;
     if (cmd.contains(JIO_GPS_DATA)){
@@ -435,17 +435,18 @@ void DlgJIO::onAddIperf(QString cfg)
 
 void DlgJIO::doRequestExec(QString targetIP, QString idx, QString sCmd)
 {
-    QString url = "ws://"+targetIP+":"+QString::number(QIPERFD_WSPORT);
-    WSClient *wsc=new WSClient(targetIP, QUrl(url), "");
-    //TODO: when disconnected do waht?
-    connect(wsc, &WSClient::requestResult, this, &DlgJIO::onRequestResult);
-    //wait connect
-    int timeout=0;
-    while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
-        QThread::msleep(100);
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
-        timeout++;
-    }
+    // QString url = "ws://"+targetIP+":"+QString::number(QIPERFD_WSPORT);
+    // WSClient *wsc=new WSClient(targetIP, QUrl(url), "");
+    // //TODO: when disconnected do waht?
+    // connect(wsc, &WSClient::requestResult, this, &DlgJIO::onRequestResult);
+    // //wait connect
+    // int timeout=0;
+    // while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
+    //     QThread::msleep(100);
+    //     QCoreApplication::processEvents(QEventLoop::AllEvents);
+    //     timeout++;
+    // }
+    WSClient *wsc= mWScs[targetIP];
     //ask remote create serialport and start tcp server on port
     QString sendstr = QString("%1:%2:%3").arg(CMD_REQUEST_EXEC,
                                               idx,
@@ -772,7 +773,7 @@ void DlgJIO::onAddRow(QString name, double latitude, double longitude,
                            QString::number(heading, 'f', 2));
     debug(err, 5);
     ui->tableWidget->setSortingEnabled(false);
-    ui->tableWidget->setItem(iRow, GPScols::PositionName, new QTableWidgetItem(name));
+    ui->tableWidget->setItem(iRow, GPScols::PositionName, new QTableWidgetItem(iconForState("init"), name));
     ui->tableWidget->setItem(iRow, GPScols::Latitude, new QTableWidgetItem(QString::number(latitude, 'f', 6)));
     ui->tableWidget->setItem(iRow, GPScols::Longitude, new QTableWidgetItem(QString::number(longitude, 'f', 6)));
     ui->tableWidget->setItem(iRow, GPScols::Altitude, new QTableWidgetItem(QString::number(altitude, 'f', 2)));
@@ -1091,12 +1092,16 @@ void DlgJIO::onInquireClicked(bool checked)
         m_sshParams.setUserName(mSshUsername);
         m_sshParams.setPassword(mSshPassword);
 
-        qDebug() << "Inquire start after 1 sec";
+        qDebug() << "Inquire start after 3 sec";
         m_InquireTimer->start(3000);// 3sec
 
     }else{
         if (m_InquireTimer->isActive()){
             m_InquireTimer->stop();
+        }
+        for(int row=1;row < ui->tableWidget->rowCount(); row ++){
+            setStateIcon(row, GPScols::PositionName, "init");
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }
 }
@@ -1149,9 +1154,9 @@ void DlgJIO::onOptimizeClicked(bool checked)
 
 void DlgJIO::onInquireTimerTimeout()
 {
-
     if (ui->tableWidget->rowCount()>0){
         qDebug() << "do Inquire";
+        WSClient *client;
         for (int row=0; row < ui->tableWidget->rowCount(); row++){
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             //IPAddr
@@ -1159,10 +1164,24 @@ void DlgJIO::onInquireTimerTimeout()
             if (itm){
                 QString target = itm->text();
                 if (!target.isEmpty()){
-                    qDebug() << "onInquireTimerTimeout //TODO Inquire:" << target;
-                    //TODO: ping check device can
-                    getGpsInfo(QString::number(row), target);
-                    getSensorInfo(QString::number(row), target);
+                    if (!mWScs.contains(target)){
+                        QString s = "ws://"+target+":"+QString::number(QIPERFD_WSPORT);
+                        client = new WSClient(target, QUrl(s), "", true);
+                        connect(client, &WSClient::connected, this, &DlgJIO::onConnected);
+                        connect(client, &WSClient::disconnected, this, &DlgJIO::onDisconnected);
+                        connect(client, &WSClient::requestResult, this, &DlgJIO::onRequestResult);
+                        mWScs[target] = client;
+                    }else{
+                        client = mWScs[target];
+                    }
+                    if (client->isConnected()){
+                        qDebug() << "onInquireTimerTimeout //TODO Inquire:" << target;
+                        //TODO: ping check device can
+                        getGpsInfo(QString::number(row), target);
+                        getSensorInfo(QString::number(row), target);
+                    }else{
+                        setStateIcon(row, GPScols::PositionName, "NG");
+                    }
 
                 }else{
                     qDebug() << "No IPAddr at row:" << row << ", col:" << static_cast<int>(GPScols::IPAddr);
@@ -1175,6 +1194,22 @@ void DlgJIO::onInquireTimerTimeout()
         qDebug() << "No item of device";
         m_InquireTimer->stop();
     }
+}
+
+void DlgJIO::onDisconnected(QString from)
+{
+    if (mWScs.contains(from)){
+        mWScs.remove(from);
+        updateStats(from, "NG");
+    }
+}
+
+void DlgJIO::onConnected(QString from)
+{
+    // if (!mWScs.contains(from)){
+    //     mWScs
+    // }
+    updateStats(from, "OK");
 }
 
 // void DlgJIO::onShowMap(bool checked)
@@ -1615,19 +1650,6 @@ void DlgJIO::handleSSHProcessStarted()
         m_started = true;
         m_remoteStdout.clear();
         m_remoteStderr.clear();
-        // if (m_state == TestingCrash)
-        // {
-        //     QSsh::SshRemoteProcessRunner *const killer = new QSsh::SshRemoteProcessRunner(this);
-        //     //TODO: other platform, eq: windows
-        //     killer->run("pkill -9 sleep", m_sshParams);
-        // }
-        // else if (m_state == TestingIoDevice)
-        // {
-        //     connect(m_catProcess.data(), SIGNAL(readyRead()), SLOT(handleReadyRead()));
-        //     m_textStream.reset(new QTextStream(m_catProcess.data()));
-        //     *m_textStream << testString();
-        //     m_textStream->flush();
-        // }
     }
 }
 
@@ -1837,6 +1859,44 @@ void DlgJIO::onOptimizeWorkerDebug(QString msg)
     debug("OptimizeWorker:"+ msg);
 }
 
+QIcon DlgJIO::iconForState(const QString &state)
+{
+    if (state == "init")
+        return QIcon(":/jio/INIT");
+    else if (state == "OK")
+        return QIcon(":/jio/OK");
+    else if (state == "NG")
+        return QIcon(":/jio/NG");
+    else
+        return QIcon();  // fallback
+}
+
+void DlgJIO::updateStats(QString target, QString state)
+{
+    for (int row=0; row< ui->tableWidget->rowCount(); row++){
+        auto itm = ui->tableWidget->item(row, GPScols::IPAddr);
+        if (itm){
+            if (itm->text() == target){
+                setStateIcon(row, GPScols::PositionName, state);
+                break;
+            }
+        }
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+}
+
+void DlgJIO::setStateIcon(int row, int column, QString state)
+{
+    QTableWidgetItem *item = ui->tableWidget->item(row, column);
+    if (!item) {
+        item = new QTableWidgetItem();
+        ui->tableWidget->setItem(row, column, item);
+    }
+
+    item->setIcon(iconForState(state));
+    item->setData(Qt::UserRole, state);  // Store state for later use
+}
+
 double DlgJIO::averageBearing(const QList<double> &bearings)
 {
     if (bearings.isEmpty()) return -1.0; // 或者 return NaN
@@ -1895,6 +1955,7 @@ void DlgJIO::onLoad(QString filename)
         QJsonObject rootObject = jsonDoc.object();
         QString localaddr= rootObject.value("LocalAddr").toString();
         ui->leLocalAddr->setText(localaddr);
+        mControlBy = static_cast<DlgSet::ControlBy>(rootObject.value("ControlBy").toInt());
         // Process the QJsonObject
         QJsonObject sshobj = rootObject.value("ssh").toObject();
         mSshUsername = sshobj.value("username").toString();
