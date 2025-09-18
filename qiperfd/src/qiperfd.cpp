@@ -2156,7 +2156,11 @@ QString QIperfd::parserResponse(QString rpcmd, QString data)
                     if (match.hasMatch()) {
                         QString capStr = match.captured(1);
                         rObj.insert(key, capStr.toDouble());
+                    }else{
+                        qDebug() << "not match of line: " << line;
                     }
+                }else{
+                    // qDebug() << "Line: '" << line << "' unexpected to " << key;
                 }
             }
         }
