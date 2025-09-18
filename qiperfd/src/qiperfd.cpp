@@ -165,6 +165,8 @@ void QIperfd::savecfg()
     cfg->endGroup();
     cfg->beginGroup("iperf");
     cfg->setValue("UseSysIperf", bUseSysIperf);
+    cfg->setValue("JIOOpenWRT", bIsJIOOpenWRT);
+    cfg->setValue("IsAM7", bIsAM7);
     cfg->endGroup();
     cfg->sync();
 }
