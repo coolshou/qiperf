@@ -189,7 +189,7 @@ QString DlgJIO::getGpsInfo(QString refrow, QString target)
         mSSHRemoteRunner->run("gps_call_so", m_sshParams);
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
         QString cmd = QString("%1:%2").arg(JIO_GET_GPS, jiocmdObj.value(JIO_GET_GPS).toString());
-        qDebug() << "JIO_GET_GPS cmd=> " << cmd;
+        qDebug() << "JIO_GET_GPS=" << target << " cmd=> "  << cmd;
         emit requestExec(target, refrow, cmd);
     }
     return result;
@@ -205,7 +205,7 @@ QString DlgJIO::getSensorInfo(QString refrow, QString target)
 
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
         QString cmd = QString("%1:%2").arg(JIO_GET_SENSORS, jiocmdObj.value(JIO_GET_SENSORS).toString());
-        qDebug() << "JIO_GET_SENSORS cmd=> " << cmd;
+        qDebug() << "JIO_GET_SENSORS=" << target << " cmd=> " << cmd;
         emit requestExec(target, refrow, cmd);
     }
     return result;
@@ -1099,7 +1099,7 @@ void DlgJIO::onInquireClicked(bool checked)
         if (m_InquireTimer->isActive()){
             m_InquireTimer->stop();
         }
-        for(int row=1;row < ui->tableWidget->rowCount(); row ++){
+        for(int row=0;row < ui->tableWidget->rowCount(); row ++){
             setStateIcon(row, GPScols::PositionName, "init");
             QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
@@ -1175,11 +1175,12 @@ void DlgJIO::onInquireTimerTimeout()
                         client = mWScs[target];
                     }
                     if (client->isConnected()){
-                        qDebug() << "onInquireTimerTimeout //TODO Inquire:" << target;
+                        // qDebug() << "onInquireTimerTimeout //TODO Inquire:" << target;
                         //TODO: ping check device can
                         getGpsInfo(QString::number(row), target);
                         getSensorInfo(QString::number(row), target);
                     }else{
+                        qDebug() << "onInquireTimerTimeout: WSClient not connect, ICON NG";
                         setStateIcon(row, GPScols::PositionName, "NG");
                     }
 
@@ -1200,15 +1201,12 @@ void DlgJIO::onDisconnected(QString from)
 {
     if (mWScs.contains(from)){
         mWScs.remove(from);
-        updateStats(from, "NG");
     }
+    updateStats(from, "NG");
 }
 
 void DlgJIO::onConnected(QString from)
 {
-    // if (!mWScs.contains(from)){
-    //     mWScs
-    // }
     updateStats(from, "OK");
 }
 
@@ -1588,6 +1586,9 @@ void DlgJIO::onUpdateData(int row, int col, QJsonObject data)
 {
     QTableWidgetItem *item = ui->tableWidget->item(row, col);
     qDebug() << row << "," << col << " DlgJIO::onUpdateData" <<data;
+    if (!item){
+        item = new QTableWidgetItem();
+    }
     item->setData(Qt::UserRole, data.toVariantMap());
     onUpdateModelType(row, col, data.value("moduletype").toInt());
 }
