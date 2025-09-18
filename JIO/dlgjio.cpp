@@ -467,11 +467,12 @@ void DlgJIO::onStartOptimiz()
 
 void DlgJIO::onStopOptimiz()
 {
-    if (mOptWorker){
-        qDebug() <<"stop Optimize";
-        // mOptWorker->setStop(true);
-        emit stopOptimiz();
-    }
+    //TODO: DlgJIO::onStopOptimiz()
+    // if (mOptWorker){
+    //     qDebug() <<"stop Optimize";
+    //     // mOptWorker->setStop(true);
+    //     // emit stopOptimiz(); // cause loop (with connect())
+    // }
 }
 
 void DlgJIO::initHanwha()
@@ -1345,8 +1346,12 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
                                   new QTableWidgetItem(QString::number(diffPitch)));
             //get beam Direction ID
             initID = getNearestBeamDirectionID(cm, aiptype, diffHead, diffPitch);
-            ui->twResult->setItem(iRow, AZEIcols::BeamDirID,
-                                  new QTableWidgetItem(QString::number(initID)));
+            QTableWidgetItem *itm = new QTableWidgetItem(QString::number(initID));
+            if (initID<0){
+                itm->setBackground(QBrush(Qt::red));
+            }
+            ui->twResult->setItem(iRow, AZEIcols::BeamDirID, itm);
+
             //Use ID's deg+ phy deg draw arrow
         }
     }
