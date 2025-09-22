@@ -146,7 +146,11 @@ void DlgGeoOSM::addRectangle(QGV::GeoPos pos1, QPointF size, QColor color,
 {
     auto base = mMap->getProjection()->geoToProj(pos1);
     // qDebug() << "addRectangle: base:" << base;
-    QGV::GeoRect pos = mMap->getProjection()->projToGeo({ base, base + QPointF(size.x(), size.y()) });
+    double x = size.x()/2;
+    double y = size.y()/2;
+    QGV::GeoRect pos = mMap->getProjection()->projToGeo({base-QPointF(x, y),
+                                                         base + QPointF(x, y)});
+    // QGV::GeoRect pos = mMap->getProjection()->projToGeo({ base, base + QPointF(size.x(), size.y()) });
 
     // TODO: the Rectangle should consider size, and place the pos at center of Rectangle
     RectangleText *item = new RectangleText(label, pos, size, color, mMap);
