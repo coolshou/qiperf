@@ -133,7 +133,7 @@ private:
     void initJIOOpenWRT();
     void runRequest(QString refid, QString from, QString reqcmd, QString cmds);
     QString parserResponse(QString rpcmd, QString data);
-
+    void processMonitor(QString from, QString reqcmd, QString rpcmd);
 
 #if defined(Q_OS_WINDOWS)
     // Helper function to create a task using COM API

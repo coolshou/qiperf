@@ -2104,36 +2104,41 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
         qDebug() << " No supported reqcmd:" << reqcmd;
         return;
     }
+    if (rpcmd.contains("MONOTOR")){
+        //
+        processMonitor(from, reqcmd, rpcmd);
 
-    QProcess process;
-    // TODO: other platform
-#if QT_VERSION < 0x060000  // < 6.0
-    // process.start("bash", QStringList() << "-c" << cmds);
-    // process.start(cmds);
-    QStringList ds = cmds.split(" ");
-    process.start(ds[0], ds.mid(1, ds.count()-1));
-#else
-    process.startCommand(cmds);
-#endif
-    if (!rpcmd.isEmpty()){
-        process.waitForFinished();
-        QString output = process.readAllStandardOutput();
-        if (output.isEmpty()){
-            QString erroutput = process.readAllStandardError();
-            qDebug() << "' "  << cmds << " ' runRequest erroutput:" << erroutput;
+    }else{
+        QProcess process;
+        // TODO: other platform
+    #if QT_VERSION < 0x060000  // < 6.0
+        process.start("sh", QStringList() << "-c" << cmds);
+        // process.start(cmds);
+        // QStringList ds = cmds.split(" ");
+        // process.start(ds[0], ds.mid(1, ds.count()-1));
+    #else
+        process.startCommand(cmds);
+    #endif
+        if (!rpcmd.isEmpty()){
+            process.waitForFinished();
+            QString output = process.readAllStandardOutput();
+            if (output.isEmpty()){
+                QString erroutput = process.readAllStandardError();
+                qDebug() << "' "  << cmds << " ' runRequest erroutput:" << erroutput;
+            }
+            QString rs = parserResponse(rpcmd, output);
+            // qDebug() << "runRequest parserResponse:" << rs;
+            // QString erroutput = process.readAllStandardError();
+            // qDebug() << "erroutput:" << erroutput;
+            QString res = QString("%1:%2:%3:%4").arg(CMD_REQUEST_RESULT, refid, rpcmd, rs);
+            qDebug() << "Response res:" << res;
+            int rc = m_wsserver->sendTextMessage(res, from);
+            if (rc<=0){
+                debug(QString("error send %1").arg(res) , 2);
+            }
+        }else {
+            debug(QString("No RESPONSE data of %1").arg(reqcmd) , 2);
         }
-        QString rs = parserResponse(rpcmd, output);
-        // qDebug() << "runRequest parserResponse:" << rs;
-        // QString erroutput = process.readAllStandardError();
-        // qDebug() << "erroutput:" << erroutput;
-        QString res = QString("%1:%2:%3:%4").arg(CMD_REQUEST_RESULT, refid, rpcmd, rs);
-        qDebug() << "Response res:" << res;
-        int rc = m_wsserver->sendTextMessage(res, from);
-        if (rc<=0){
-            debug(QString("error send %1").arg(res) , 2);
-        }
-    }else {
-        debug(QString("No RESPONSE data of %1").arg(reqcmd) , 2);
     }
 }
 
@@ -2150,6 +2155,7 @@ QString QIperfd::parserResponse(QString rpcmd, QString data)
             foreach(QString key, pasObj.keys()){
                 if (line.contains(key)){
                     reg = pasObj.value(key).toString();
+                    //eq "Latitude:\\s*(-?\\d+\\.\\d+)"
                     pattern = QString("%1%2").arg(QRegularExpression::escape(key), reg);
                     QRegularExpression regex(pattern);
                     QRegularExpressionMatch match = regex.match(line);
@@ -2173,4 +2179,54 @@ QString QIperfd::parserResponse(QString rpcmd, QString data)
         debug(QString("No data of %1").arg(rpcmd) , 2);
     }
     return rs;
+}
+
+void QIperfd::processMonitor(QString from, QString reqcmd, QString rpcmd)
+{
+    if (jiocmdObj.contains(rpcmd)){
+        QJsonObject rObj; //response obj
+        QProcess process;
+        QJsonObject monObj = jiocmdObj.value(rpcmd).toObject();
+        QString reg = monObj.value("RegExp").toString();
+        QJsonObject capObj = monObj.value("captured").toObject();
+        int times = monObj.value("times").toInt();
+
+        for(int i=0; i< times; i++){
+#if QT_VERSION < 0x060000  // < 6.0
+            process.start("sh", QStringList() << "-c" << reqcmd);
+#else
+            process.startCommand(reqcmd);
+#endif
+            process.waitForFinished();
+            QString output = process.readAllStandardOutput();
+            if (output.isEmpty()){
+                QString erroutput = process.readAllStandardError();
+                qDebug() << "' "  << reqcmd << " ' runRequest erroutput:" << erroutput;
+            }
+            QRegularExpression regex(reg);
+            QRegularExpressionMatch match = regex.match(output);
+
+            if (match.hasMatch()) {
+                QMap<QString, QList<QJsonArray>> outArray;
+                foreach (auto key, capObj.keys()){
+                    QString val = match.captured(key);
+                    QString sp = capObj.value(key).toString();
+                    QStringList ds = val.split(sp); // "00/00/00/00"
+                    QJsonArray dsArray;
+                    for (const QString &str : ds) {
+                        bool ok;
+                        double value = str.toDouble(&ok);
+                        if (ok) {
+                            dsArray.append(value);
+                        }
+                    }
+                    outArray[key].append(dsArray);
+                }
+                qDebug() << "processMonitor: outArray:" << outArray.toStdMap();
+            }
+        }
+        // rObj[] = outArray;
+    }else{
+        debug(QString("processMonitor: No data of %1").arg(rpcmd) , 2);
+    }
 }
