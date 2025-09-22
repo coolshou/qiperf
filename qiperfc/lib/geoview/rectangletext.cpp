@@ -40,7 +40,7 @@ void RectangleText::drawText(QPainter *painter)
     painter->setPen(pen);
     painter->setBrush(brush);
     QRectF rect = getMap()->getProjection()->geoToProj(mGeoRect);
-    qDebug() << "drawText:" << rect;
+    // qDebug() << "drawText:" << rect;
     auto path = QGV::createTextPath(rect.toRect(), mLabel, QFont(), pen.width());
     path = QGV::createTransfromScale(rect.center(), 0.75).map(path);
     painter->drawPath(path);

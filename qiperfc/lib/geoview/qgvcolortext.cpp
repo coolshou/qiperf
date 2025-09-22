@@ -1,7 +1,5 @@
 #include "qgvcolortext.h"
 
-
-
 QGVColorText::QGVColorText(const QGV::GeoPos &geoPos, const QSizeF &size)
 {
     // setAnchor(, { Qt::BottomEdge });
@@ -33,6 +31,7 @@ void QGVColorText::onProjection(QGVMap *geoMap)
 {
     QGVWidgetText::onProjection(geoMap);
     calculateGeometry();
+    // projPaint();
 }
 
 QPainterPath QGVColorText::projShape() const

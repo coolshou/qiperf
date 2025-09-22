@@ -10,8 +10,6 @@
 #include <QGeoView/QGVGlobal.h>
 #include <QGeoView/QGVMap.h>
 
-#include "qgvcolortext.h"
-
 class RectangleText : public Rectangle
 {
     Q_OBJECT
@@ -24,11 +22,9 @@ private:
     void projPaint(QPainter* painter) override;
     void drawText(QPainter* painter);
 private:
-    // QGVWidgetText* mColorlabel;
     QGV::GeoRect mGeoRect;
     QString mLabel;
     QColor mColor;
-    QGVColorText* mColorlabel;
     QGVMap* mMap;
 };
 
