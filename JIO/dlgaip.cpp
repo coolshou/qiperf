@@ -142,7 +142,7 @@ void DlgAIP::changeEvent(QEvent *e)
 void DlgAIP::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event)
-    qDebug() << "DlgAIP::closeEvent:" << event;
+    // qDebug() << "DlgAIP::closeEvent:" << event;
     savecfg();
 }
 

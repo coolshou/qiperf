@@ -376,6 +376,7 @@ void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd,
     if (cmd.contains(JIO_GPS_DATA)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
+            qDebug() << "JIO_GPS_DATA: " << msg;
             QJsonObject obj = doc.object();
             QTableWidgetItem *itm;
             foreach (QString key, obj.keys()){
@@ -402,6 +403,7 @@ void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd,
     }else if (cmd.contains(JIO_SENSORS_DATA)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
+            qDebug() << "JIO_SENSORS_DATA: " << msg;
             QJsonObject obj = doc.object();
             QTableWidgetItem *itm;
             foreach (QString key, obj.keys()){
@@ -420,6 +422,7 @@ void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd,
     }else if (cmd.contains(JIO_AP_INFO)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
+            qDebug() << "JIO_AP_INFO: " << msg;
             QJsonObject obj = doc.object();
             qDebug() << "AP_INFO:" << obj.toVariantMap();
         }else{
@@ -456,17 +459,6 @@ void DlgJIO::onAddIperf(QString cfg)
 
 void DlgJIO::doRequestExec(QString targetIP, QString idx, QString sCmd)
 {
-    // QString url = "ws://"+targetIP+":"+QString::number(QIPERFD_WSPORT);
-    // WSClient *wsc=new WSClient(targetIP, QUrl(url), "");
-    // //TODO: when disconnected do waht?
-    // connect(wsc, &WSClient::requestResult, this, &DlgJIO::onRequestResult);
-    // //wait connect
-    // int timeout=0;
-    // while (!wsc->isConnected() && (timeout<30)){ // timeout 3 sec?
-    //     QThread::msleep(100);
-    //     QCoreApplication::processEvents(QEventLoop::AllEvents);
-    //     timeout++;
-    // }
     WSClient *wsc= mWScs[targetIP];
     //ask remote create serialport and start tcp server on port
     QString sendstr = QString("%1:%2:%3").arg(CMD_REQUEST_EXEC,
@@ -1157,21 +1149,6 @@ void DlgJIO::onOptimizeClicked(bool checked)
         // TODO: check run status?
         emit stopOptimiz();
     }
-    // if (ui->tableWidget->rowCount()>0){
-    //     int idx=0;
-    //     QTableWidgetItem *itm= ui->tableWidget->item(idx, GPScols::IPAddr);
-    //     QString target = itm->text();
-
-    //     // QString cmd = QString("%1:%2").arg(JIO_GET_GPS, jiocmdObj.value(JIO_GET_GPS).toString());
-    //     // qDebug() << "JIO_GET_GPS cmd=> " << cmd;
-    //     // emit requestExec(target, QString::number(idx), cmd);
-    //     // //
-    //     // cmd = QString("%1:%2").arg(JIO_GET_SENSORS, jiocmdObj.value(JIO_GET_SENSORS).toString());
-    //     // qDebug() << "JIO_GET_SENSORS cmd=> " << cmd;
-    //     // emit requestExec(target, QString::number(idx), cmd);
-    // }else{
-    //     qDebug() << "onOptimizeClicked";
-    // }
 }
 
 void DlgJIO::onInquireTimerTimeout()
@@ -1198,7 +1175,6 @@ void DlgJIO::onInquireTimerTimeout()
                     }
                     if (client->isConnected()){
                         // qDebug() << "onInquireTimerTimeout //TODO Inquire:" << target;
-                        //TODO: ping check device can
                         getGpsInfo(QString::number(row), target);
                         getSensorInfo(QString::number(row), target);
                     }else{

@@ -7,12 +7,12 @@ RectangleText::RectangleText(QString label, const QGV::GeoRect &geoRect,
     :Rectangle(geoRect, color), mGeoRect(geoRect), mLabel(label), mColor(color),
     mMap(map)
 {
-
+    Q_UNUSED(fsize)
 }
 
 QString RectangleText::getText()
 {
-    return mColorlabel->getText();
+    return mLabel;
 }
 
 QString RectangleText::projTooltip(const QPointF &projPos) const
@@ -39,9 +39,13 @@ void RectangleText::drawText(QPainter *painter)
     QBrush brush = QBrush(Qt::black);
     painter->setPen(pen);
     painter->setBrush(brush);
+    // setZValue(10); //this affect all Z-value
+    qDebug() << "["<< mLabel << "] "<< painter->hasClipping();
     QRectF rect = getMap()->getProjection()->geoToProj(mGeoRect);
-    // qDebug() << "drawText:" << rect;
+    qDebug() << "["<< mLabel << "] drawText:" << rect;
+    // QRectF txtrect = rect.translate(0, 5);
+    rect.moveTo(rect.x(), rect.y() + 2);
     auto path = QGV::createTextPath(rect.toRect(), mLabel, QFont(), pen.width());
     path = QGV::createTransfromScale(rect.center(), 0.75).map(path);
-    painter->drawPath(path);
+    painter->drawPath(path); //TODO: let the text path on top of the Rectangle,
 }

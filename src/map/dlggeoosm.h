@@ -52,7 +52,6 @@ public:
     void clearLinkLines();
     void clearInitLines();
     void clearAllPlot();
-    QPixmap createQGVImage() const;
 
 public slots:
     void setItmHighlight(QString label);

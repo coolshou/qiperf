@@ -150,9 +150,8 @@ void DlgGeoOSM::addRectangle(QGV::GeoPos pos1, QPointF size, QColor color,
     double y = size.y()/2;
     QGV::GeoRect pos = mMap->getProjection()->projToGeo({base-QPointF(x, y),
                                                          base + QPointF(x, y)});
-    // QGV::GeoRect pos = mMap->getProjection()->projToGeo({ base, base + QPointF(size.x(), size.y()) });
 
-    // TODO: the Rectangle should consider size, and place the pos at center of Rectangle
+    // TODO: the Rectangle should consider size
     RectangleText *item = new RectangleText(label, pos, size, color, mMap);
     item->setFlag(QGV::ItemFlag::Highlightable, true);
     item->setSelectable(true);
@@ -207,26 +206,6 @@ void DlgGeoOSM::setItmHighlight(QString label)
         QGVItem *itm = mPolysLayer->getItem(i);
         qDebug() << "TODO: mPolysLayer itm:" << itm;
     }
-}
-
-QPixmap DlgGeoOSM::createQGVImage() const
-{
-
-    const auto target = QSize(150, 150);
-    // create a TextPath of "QGeoView"
-    const auto path = QGV::createTextPath(QRect(QPoint(0, 0), target), "QGeoView", QFont(), 1);
-    QImage image(target, QImage::Format_ARGB32_Premultiplied);
-    image.fill(qRgba(0, 0, 0, 0));
-    QPixmap pixmap = QPixmap::fromImage(image, Qt::NoFormatConversion);
-    QPainter painter(&pixmap);
-    QPen pen = QPen(Qt::black);
-    pen.setWidth(1);
-    pen.setCosmetic(true);
-    painter.setPen(pen);
-    QBrush brush = QBrush(Qt::black);
-    painter.setBrush(brush);
-    painter.drawPath(path);
-    return pixmap;
 }
 
 void DlgGeoOSM::onSetCenter(bool checked)

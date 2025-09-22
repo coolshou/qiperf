@@ -10,6 +10,8 @@
 #include <QGeoView/QGVGlobal.h>
 #include <QGeoView/QGVMap.h>
 
+#include <QPainter>
+
 class RectangleText : public Rectangle
 {
     Q_OBJECT
