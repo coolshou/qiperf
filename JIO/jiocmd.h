@@ -7,6 +7,9 @@
 #define JIO_GET_GPS "GET_GPS"  // ask to get sensor data by gps_call_so
 #define JIO_GPS_DATA "GPS_DATA"  // return gps data
 
+#define JIO_GET_AP_INFO "GET_AP_INFO"
+#define JIO_AP_INFO "AP_INFO"
+
 #define JIO_GET_BEAMFACTOR "GET_BEAMFACTOR" // get BEAMFACTOR/BEAMType
 #define JIO_SET_BEAMFACTOR "21" // set BEAMFACTOR/BEAMType
 

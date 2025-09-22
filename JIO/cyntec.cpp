@@ -460,6 +460,7 @@ double Cyntec::getTargetEIRP(double dist)
     double eirp=0.0;
     if (!mRangeDataObj.isEmpty()){
         foreach(const QString& key, mRangeDataObj.keys()) {
+            qDebug() << "dist:" << dist << " key:" << key;
             if (dist > key.toDouble()){
                 auto d = mRangeDataObj.value(key).toObject();
                 eirp = d.value("TargetEIRP").toDouble();

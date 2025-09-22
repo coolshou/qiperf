@@ -72,6 +72,34 @@
         "RX ATT RxA RxB :":"(\\d+\\.\\d{2})dB",
         "RXIP3 RxA RxB :":"(\\d+\\.\\d{2})dB"
     },
+    "GainData":{
+        "8x8":{
+            "RXTotalGain":59,
+            "AntGain":23.5,
+            "HPAz":11.19,
+            "HPEl":11.27
+        },
+        "8x4":{
+            "RXTotalGain":53,
+            "AntGain":20.5,
+            "HPAz":22.85,
+            "HPEl":11.27
+        },
+        "8x2":{
+            "RXTotalGain":47,
+            "AntGain":17.5,
+            "HPAz":49.17,
+            "HPEl":11.26
+        },
+        "4x4":{
+            "HPAz":22.7,
+            "HPEl":22.22
+        },
+        "Tri":{
+            "HPAz":45,
+            "HPEl":30
+        }
+    },
     "DistanceData":{
         "3":{"TargetEIRP":33.5,
                 "TX1ATT":20,"TX2ATT":20,

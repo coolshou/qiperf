@@ -20,6 +20,7 @@ signals:
     void stoped(int error);
     void debugMsg(QString msg);
     void sigAddIperf(QString cfg);
+    void sigStartIperf(QString cfg);
 private:
     void setStop(bool stop);
     int mDebugLv;

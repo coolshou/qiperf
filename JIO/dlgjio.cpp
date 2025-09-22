@@ -159,6 +159,7 @@ void DlgJIO::clearData()
 
 QString DlgJIO::getStMotion(QString target)
 {
+    //TODO: check sensor Calibration
     Q_UNUSED(target)
     //get st_motion info
     QString result="";
@@ -189,7 +190,7 @@ QString DlgJIO::getGpsInfo(QString refrow, QString target)
         mSSHRemoteRunner->run("gps_call_so", m_sshParams);
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
         QString cmd = QString("%1:%2").arg(JIO_GET_GPS, jiocmdObj.value(JIO_GET_GPS).toString());
-        qDebug() << "JIO_GET_GPS=" << target << " cmd=> "  << cmd;
+        // qDebug() << "JIO_GET_GPS=" << target << " cmd=> "  << cmd;
         emit requestExec(target, refrow, cmd);
     }
     return result;
@@ -205,10 +206,22 @@ QString DlgJIO::getSensorInfo(QString refrow, QString target)
 
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
         QString cmd = QString("%1:%2").arg(JIO_GET_SENSORS, jiocmdObj.value(JIO_GET_SENSORS).toString());
-        qDebug() << "JIO_GET_SENSORS=" << target << " cmd=> " << cmd;
+        // qDebug() << "JIO_GET_SENSORS=" << target << " cmd=> " << cmd;
         emit requestExec(target, refrow, cmd);
     }
     return result;
+}
+
+void DlgJIO::getAPInfo(QString refrow, QString target)
+{
+    if (mControlBy==DlgSet::ControlBy::SSH){
+        //TODO: getAPInfo (RSSI/SNR/MCS) by ssh
+
+    }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
+        QString cmd = QString("%1:%2").arg(JIO_GET_AP_INFO, jiocmdObj.value(JIO_GET_AP_INFO).toString());
+        // qDebug() << "JIO_GET_GPS=" << target << " cmd=> "  << cmd;
+        emit requestExec(target, refrow, cmd);
+    }
 }
 
 AIP::ModuleType DlgJIO::getModuleType(int row, int col)
@@ -403,6 +416,14 @@ void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd,
             }
         }else{
             qDebug() << "Wrong format of JIO_SENSORS_DATA msg:(" << error.errorString() << ")\n";
+        }
+    }else if (cmd.contains(JIO_AP_INFO)){
+        doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
+        if (error.error == QJsonParseError::NoError) {
+            QJsonObject obj = doc.object();
+            qDebug() << "AP_INFO:" << obj.toVariantMap();
+        }else{
+            qDebug() << "Wrong format of JIO_AP_INFO msg:(" << error.errorString() << ")\n";
         }
     }else {
         qDebug() << "TODO: Not support cmd: " << cmd;

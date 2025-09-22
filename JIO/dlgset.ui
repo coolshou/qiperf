@@ -80,6 +80,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QCheckBox" name="cbControlBySSH">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>SSH</string>
         </property>

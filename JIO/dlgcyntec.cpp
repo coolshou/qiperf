@@ -12,7 +12,9 @@ DlgCyntec::DlgCyntec(QSettings *cfg, Cyntec *cyntec, QWidget *parent)
     , ui(new Ui::DlgCyntec), m_cfg(cfg), mCyntec(cyntec)
 {
     ui->setupUi(this);
-    cBeamT = nullptr;
+    nBeamT = nullptr;
+    sBeamT = nullptr;
+    tBeamT = nullptr;
     connect(ui->pbSelReffile, &QPushButton::clicked, this, &DlgCyntec::onSelReffileClicked);
     //Cyntec
     connect(ui->CyntecBeamFactorID, &QComboBox::currentTextChanged, this, &DlgCyntec::onCyntecBeamFactorIDChanged);
@@ -32,6 +34,18 @@ DlgCyntec::~DlgCyntec()
 QString DlgCyntec::getCyntecBeamType()
 {
     return ui->CyntecBeamType->currentText();
+}
+
+FrmBeamTable *DlgCyntec::getBeamTable()
+{
+    QString beamtype = ui->CyntecBeamType->currentText();
+    if (beamtype.contains("Narrow")){
+        return nBeamT;
+    }else if (beamtype.contains("Spoiled")){
+        return sBeamT;
+    }else {
+        return tBeamT;
+    }
 }
 void DlgCyntec::onSelReffileClicked(bool checked)
 {
@@ -121,13 +135,20 @@ void DlgCyntec::onCyntecBeamTableClicked(bool checked)
 {
     Q_UNUSED(checked)
     if (mCyntec){
-        cBeamT = new FrmBeamTable(AIP::ModuleType::Cyntec);
-        connect(this, &DlgCyntec::closeall, cBeamT, &FrmBeamTable::close);
-        connect(this, &DlgCyntec::SelectEllipse, cBeamT, &FrmBeamTable::onSelectEllipse);
         QString beamtype = ui->CyntecBeamType->currentText();
-        cBeamT->setWindowTitle(cBeamT->windowTitle()+"-"+beamtype);
-        cBeamT->setGridPoints(mCyntec->getBeamTableDatas(beamtype));
-        cBeamT->show();
+        FrmBeamTable *beamtable;
+        beamtable = getBeamTable();
+        if (!beamtable){
+            //different beamtype use diff FrmBeamTable window
+            beamtable = new FrmBeamTable(AIP::ModuleType::Cyntec);
+            connect(this, &DlgCyntec::closeall, beamtable, &FrmBeamTable::close);
+            connect(this, &DlgCyntec::SelectEllipse, beamtable, &FrmBeamTable::onSelectEllipse);
+        }
+
+        beamtable->setWindowTitle(beamtable->windowTitle()+"-"+beamtype);
+        beamtable->setGridPoints(mCyntec->getBeamTableDatas(beamtype));
+        beamtable->activateWindow();
+        beamtable->show();
     }
 }
 
@@ -168,8 +189,10 @@ void DlgCyntec::onCyntecBeamTableIDChanged(QString newBeamTableID)
         if (mCyntec){
             mCyntec->getBeamTableData(newBeamTableID.toInt());
         }
-        if (cBeamT){
-            cBeamT->onSelectEllipse(newBeamTableID, true, Qt::red);
+        FrmBeamTable *beamtable;
+        beamtable = getBeamTable();
+        if (beamtable){
+            beamtable->onSelectEllipse(newBeamTableID, true, Qt::red);
         }
     }
 }
@@ -254,8 +277,10 @@ void DlgCyntec::onSelectAroundID(bool checked)
     int glimit = ui->sbAroundLimit->value();
     QVector<int> ds= mCyntec->findNearestNeighbors(id, beamtype, glimit);
     if (ds.length()>0){
-        if (cBeamT && doClear){
-            cBeamT->clearEllipseSelection();
+        FrmBeamTable *beamtable;
+        beamtable = getBeamTable();
+        if (beamtable && doClear){
+            beamtable->clearEllipseSelection();
         }
         foreach (int idx, ds){
             emit SelectEllipse(QString::number(idx), false, Qt::blue);
@@ -330,8 +355,10 @@ void DlgCyntec::savecfg()
 
 void DlgCyntec::AddTriangle(double xpos, double ypos, double size)
 {
-    if (cBeamT){
-        cBeamT->addTriangleTarget(QPointF(xpos, ypos), size);
+    FrmBeamTable *beamtable;
+    beamtable = getBeamTable();
+    if (beamtable){
+        beamtable->addTriangleTarget(QPointF(xpos, ypos), size);
     }
 }
 

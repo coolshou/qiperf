@@ -17,6 +17,7 @@ public:
     explicit DlgCyntec(QSettings *cfg, Cyntec *cyntec, QWidget *parent = nullptr);
     ~DlgCyntec();
     QString getCyntecBeamType();
+    FrmBeamTable *getBeamTable();
 public slots:
     void onNewCyntecBeamFactorIDs(QStringList keys);
     void onNewCyntecBeamTableIDs(QStringList keys);
@@ -58,7 +59,9 @@ private:
     Cyntec *mCyntec;
     QMap<QString, QList<int>> mCyntecBeamTypeGroup;
     QMap<QString, QList<int>> mCyntecBeamFactorSupport;
-    FrmBeamTable *cBeamT;
+    FrmBeamTable *nBeamT; //Narrow
+    FrmBeamTable *sBeamT; //Spoiled
+    FrmBeamTable *tBeamT; //TRi
 };
 
 #endif // DLGCYNTEC_H

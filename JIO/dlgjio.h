@@ -87,6 +87,7 @@ public:
     QString getStMotion(QString target);
     QString getGpsInfo(QString refrow, QString target);
     QString getSensorInfo(QString refrow, QString target);
+    void getAPInfo(QString refrow, QString target);
     AIP::ModuleType getModuleType(int row, int col);
     QJsonObject createInitData();
 public slots:

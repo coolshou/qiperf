@@ -1,5 +1,5 @@
 {
-    "GET_PRODUCTTYPE":"uci get system.@system[0].productType",
+    "GET_PRODUCTTYPE":"getmfg productType",
     "GET_OPMODE":"getmfg opMode",
     "GET_AIP1VENDOR":"uci get aip.aip1.vendor",
     "GET_AIP2VENDOR":"uci get aip.aip2.vendor",
@@ -9,9 +9,24 @@
     "GET_compassPitch":"uci get system.@system[0].compassPitch",
     "GET_SENSORS":"sensors_call_so",
     "GET_GPS":"gps_call_so",
-    "GET_RSSI":"",
-    "GET_MCS":"",
-    "SET_AP_MCS":"iwpriv rax0 set muruDbgInfo=61-9",
+    "MONOTOR_STA_INFO":"iwpriv rax0 show stainfo",
+    "MONOTOR_STA_DATA":{
+        "RegExp":"R(^\\s*(?:[0-9a-f]{2}:){5}[0-9a-f]{2}\\s+\\S+\\s+\\d+\\s+\\d+\\s+\\d+/\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+(?<RSSI>\\d+/\\d+/--/--)\\s+(?<SNR>\\d+/\\d+/--/--)\\s+\\S+\\s+\\S+\\s+(?<MCS>\\d+/\\d+)\\s+NA/NA)",
+        "Key":"STA "
+    },
+    "GET_AP_INFO":"dmesg -c |grep 'AP '; mwctl apclix0 show stainfo=all; dmesg -c |grep 'AP ';",
+    "AP_INFO_MONITOR":{
+        "RegExp":"R(^\\s*(?:[0-9a-f]{2}:){5}[0-9a-f]{2}\\s+\\S+\\s+\\d+\\s+\\d+\\s+\\d+/\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+(?<RSSI>\\d+/\\d+/--/--)\\s+(?<SNR>\\d+/\\d+/--/--)\\s+\\S+\\s+\\S+\\s+(?<MCS>\\d+/\\d+)\\s+NA/NA)",
+        "captured":{
+            "RSSI":"/",
+            "SNR":"/",
+            "MCS":"/"
+        },
+        "times":10
+    },
+    "MONOTOR_AP_INFO":"mwctl apclix0 show stainfo=all",
+
+    "SET_AP_MU":"iwpriv rax0 set muruDbgInfo=61-9",
     "SET_AP_MU_OFDMA_DL":"",
     "SET_AP_MU_OFDMA_UL":"",
     "IFNAME":["apclix0"],
@@ -22,7 +37,9 @@
         "GET_RSSI":"RSSI_DATA",
         "GET_MCS":"MCS_DATA",
         "GET_SENSORS":"SENSORS_DATA",
-        "GET_MAC":"MAC_DATA"
+        "GET_MAC":"MAC_DATA",
+        "GET_PRODUCTTYPE":"PRODUCTTYPE",
+        "GET_AP_INFO":"AP_INFO_MONITOR"
     },
     "GPS_DATA":{
         "Latitude:":"\\s*(-?\\d+\\.\\d+)",
@@ -38,5 +55,8 @@
     },
     "MAC_DATA":{
         "HWaddr":"\\s+([0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5})"
+    },
+    "PRODUCTTYPE":{
+        "Value:":"\\s*(\\w+)"
     }
 }

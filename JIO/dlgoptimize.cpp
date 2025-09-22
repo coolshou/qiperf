@@ -34,10 +34,10 @@ DlgOptimize::DlgOptimize(QWidget *parent)
     ui->treeView->setItemDelegateForColumn(OptimizeColumn::UL, dDelegate);
     ui->treeView->setItemDelegateForColumn(OptimizeColumn::DL, dDelegate);
     //test data
-    testdata1();
-    testdata2();
-    testdata3();
-    testdata4();
+    // testdata1();
+    // testdata2();
+    // testdata3();
+    // testdata4();
 
     // qDebug() << "rowcount:" << model->rowCount(QModelIndex());     // Should be > 0
     // qDebug() << "columnCount:" << model->columnCount(QModelIndex());  // Should match your header count
