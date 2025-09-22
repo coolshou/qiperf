@@ -21,11 +21,13 @@ public:
     QString getText();
 private:
     QString projTooltip(const QPointF& projPos) const override;
-
+    void projPaint(QPainter* painter) override;
+    void drawText(QPainter* painter);
 private:
     // QGVWidgetText* mColorlabel;
     QGV::GeoRect mGeoRect;
     QString mLabel;
+    QColor mColor;
     QGVColorText* mColorlabel;
     QGVMap* mMap;
 };
