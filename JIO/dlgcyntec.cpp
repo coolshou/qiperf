@@ -47,6 +47,18 @@ FrmBeamTable *DlgCyntec::getBeamTable()
         return tBeamT;
     }
 }
+
+void DlgCyntec::setBeamTable(FrmBeamTable *beamtable)
+{
+    QString beamtype = ui->CyntecBeamType->currentText();
+    if (beamtype.contains("Narrow")){
+        nBeamT=beamtable;
+    }else if (beamtype.contains("Spoiled")){
+        sBeamT=beamtable;
+    }else {
+        tBeamT=beamtable;
+    }
+}
 void DlgCyntec::onSelReffileClicked(bool checked)
 {
     Q_UNUSED(checked)
@@ -143,6 +155,7 @@ void DlgCyntec::onCyntecBeamTableClicked(bool checked)
             beamtable = new FrmBeamTable(AIP::ModuleType::Cyntec);
             connect(this, &DlgCyntec::closeall, beamtable, &FrmBeamTable::close);
             connect(this, &DlgCyntec::SelectEllipse, beamtable, &FrmBeamTable::onSelectEllipse);
+            setBeamTable(beamtable);
         }
 
         beamtable->setWindowTitle(beamtable->windowTitle()+"-"+beamtype);

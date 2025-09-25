@@ -18,6 +18,7 @@ public:
     ~DlgCyntec();
     QString getCyntecBeamType();
     FrmBeamTable *getBeamTable();
+    void setBeamTable(FrmBeamTable *beamtable);
 public slots:
     void onNewCyntecBeamFactorIDs(QStringList keys);
     void onNewCyntecBeamTableIDs(QStringList keys);
