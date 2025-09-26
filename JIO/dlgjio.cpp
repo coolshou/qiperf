@@ -155,6 +155,8 @@ void DlgJIO::clearData()
     if (m_dlgGeo){
         m_dlgGeo->clearAllPlot();
     }
+    ui->leAM7az->setText("");
+    ui->leAM7el->setText("");
 }
 
 QString DlgJIO::getStMotion(QString target)
@@ -919,8 +921,20 @@ void DlgJIO::onCalcCliecked(bool checked)
     //AM7 Pitch
     //AM7 AIP1 type
     AIP::ModuleType aip1type = getModuleType(0, static_cast<int>(GPScols::AIP1));
+    if (aip1type == AIP::ModuleType::Unknown){
+        QString errmsg = "Please setup ModuleType of AIP1";
+        QMessageBox::warning(this, "Error", errmsg, QMessageBox::Ok);
+        ui->tableWidget->selectRow(0);
+        return;
+    }
     //AM7 AIP2
     AIP::ModuleType aip2type = getModuleType(0, static_cast<int>(GPScols::AIP2));
+    if (aip2type == AIP::ModuleType::Unknown){
+        QString errmsg = "Please setup ModuleType of AIP2";
+        QMessageBox::warning(this, "Error", errmsg, QMessageBox::Ok);
+        ui->tableWidget->selectRow(0);
+        return;
+    }
     // double msl1 = GeoTranslate::convertEllipsoidToMSL(lat1, lon1, alt1);
     // qDebug() << " Pos:" << pos1 << " Elevation hight:" << QString::number(msl1);
     QString pos = "";
@@ -1328,6 +1342,12 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
             realHeading = ui->tableWidget->item(iRow+1, GPScols::Heading)->text().toDouble();
             realPitch = ui->tableWidget->item(iRow+1, GPScols::Pitch)->text().toDouble();
             aiptype = getModuleType(iRow+1 ,GPScols::AIP1);
+            if (aiptype == AIP::ModuleType::Unknown){
+                QString errmsg = "Please setup ModuleType";
+                QMessageBox::warning(this, "Error", errmsg, QMessageBox::Ok);
+                ui->tableWidget->selectRow(iRow+1);
+                break;
+            }
 
             expectHeading = ui->twResult->item(iRow, AZEIcols::P2Azimuth)->text().toDouble();
             expectPitch = ui->twResult->item(iRow, AZEIcols::P2Elevation)->text().toDouble();
@@ -1389,7 +1409,10 @@ void DlgJIO::onAttInit(bool checked)
 
             }
         }else {
-            qDebug()<< "TODO: onAttInit aiptype:" << static_cast<int>(aiptype);
+            QString errmsg = "[onAttInit]Please setup ModuleType";
+            QMessageBox::warning(this, "Error", errmsg, QMessageBox::Ok);
+            ui->tableWidget->selectRow(iRow+1);
+            break;
         }
 
     }
