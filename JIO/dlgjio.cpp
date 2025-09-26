@@ -1865,11 +1865,11 @@ void DlgJIO::onOptimizeWorkerDebug(QString msg)
 QIcon DlgJIO::iconForState(const QString &state)
 {
     if (state == "init")
-        return QIcon(":/jio/INIT");
+        return QIcon(":/jio/INIT.png");
     else if (state == "OK")
-        return QIcon(":/jio/OK");
+        return QIcon(":/jio/OK.png");
     else if (state == "NG")
-        return QIcon(":/jio/NG");
+        return QIcon(":/jio/NG.png");
     else
         return QIcon();  // fallback
 }
