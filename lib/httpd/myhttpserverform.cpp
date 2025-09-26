@@ -50,6 +50,12 @@ void MyHttpServerForm::onStoped()
     ui->textEdit->append("httpd Stoped");
 }
 
+void MyHttpServerForm::onErrorNotice(QString err)
+{
+    ui->textEdit->append(err);
+    updateStatus(false);
+}
+
 void MyHttpServerForm::onSelectRootPath(bool checked)
 {
     Q_UNUSED(checked)
@@ -115,6 +121,10 @@ void MyHttpServerForm::updateStatus(bool started)
 
     }else{
         ui->pbStart->setText("Start");
+        if (ui->pbStart->isChecked())
+        {
+            ui->pbStart->setChecked(false);
+        }
         ui->leRootPath->setEnabled(true);
         ui->cbHostAddress->setEnabled(true);
         ui->sbPort->setEnabled(true);

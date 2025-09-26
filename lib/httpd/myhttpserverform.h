@@ -19,6 +19,7 @@ public:
 public slots:
     void onStarted();
     void onStoped();
+    void onErrorNotice(QString err);
     void onSelectRootPath(bool checked);
     void onReflash(bool checked);
 signals:

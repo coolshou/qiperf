@@ -315,7 +315,10 @@ public slots:
     void start(quint16 port, QString rootpath, QHostAddress host=QHostAddress::Any){
         m_config->setRootDir(rootpath);
         if (!listen(host, port)) {
-            qCritical() << "Failed to listen on port" << port << ":" << this->errorString();
+            QString s=QString("Failed to listen on port %1:%2").arg(QString::number(port),
+                                                                      this->errorString());
+            qCritical() << s;
+            emit errorNotice(s);
             return;
         }
         emit started();
@@ -329,6 +332,7 @@ public slots:
 signals:
     void started();
     void stoped();
+    void errorNotice(QString);
 protected:
     void incomingConnection(qintptr socketDescriptor) override {
         QTcpSocket *socket = new QTcpSocket;

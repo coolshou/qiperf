@@ -536,7 +536,9 @@ void QIperfC::onShowHttpd()
     connect(httpfrm, &MyHttpServerForm::sigStop, httpsrv, &MyHttpServer::stop);
     connect(httpsrv, &MyHttpServer::started, httpfrm, &MyHttpServerForm::onStarted);
     connect(httpsrv, &MyHttpServer::stoped, httpfrm, &MyHttpServerForm::onStoped);
+    connect(httpsrv, &MyHttpServer::errorNotice, httpfrm, &MyHttpServerForm::onErrorNotice);
     connect(this, &QIperfC::closeAll, httpfrm, &MyHttpServerForm::close);
+    connect(this, &QIperfC::closeAll, httpsrv, &MyHttpServer::stop);
     httpfrm->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
     // httpfrm->setWindowModality(Qt::ApplicationModal); // Optional
     httpfrm->show();
@@ -1597,7 +1599,6 @@ void QIperfC::onAddSSH()
 void QIperfC::initJIO()
 {
     dlg_jio = new DlgJIO(m_settings);
-    // connect(dlg_jio, &DlgJIO::requestExec, this, &QIperfC::onRequestExec);
     connect(this, &QIperfC::closeAll, dlg_jio, &DlgJIO::close);
     connect(dlg_jio, &DlgJIO::sigAddIperf, this, &QIperfC::onAddIperf);
     connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onJIO);
