@@ -1,6 +1,9 @@
 {
     "GET_PRODUCTTYPE":"getmfg productType",
     "GET_OPMODE":"getmfg opMode",
+    "GET_DEPLOY_MODE":"getmfg dplyMode",
+    "SET_OPMODE_STA":"mfc set defmfg_sta; mfc set mac_sta 54:2A:A2:CE:BB:A0; mfc set freset",
+    "SET_OPMODE_AP":"mfc set defmfg_ap; mfc set mac_ap 54:2A:A2:CE:BB:84; mfc set freset",
     "GET_AIP1VENDOR":"uci get aip.aip1.vendor",
     "GET_AIP2VENDOR":"uci get aip.aip2.vendor",
     "GET_AIP1EIRP":"uci get aip.aip1.eirp",
