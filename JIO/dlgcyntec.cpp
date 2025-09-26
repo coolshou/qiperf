@@ -157,8 +157,9 @@ void DlgCyntec::onCyntecBeamTableClicked(bool checked)
             connect(this, &DlgCyntec::SelectEllipse, beamtable, &FrmBeamTable::onSelectEllipse);
             setBeamTable(beamtable);
         }
-
-        beamtable->setWindowTitle(beamtable->windowTitle()+"-"+beamtype);
+        if (!beamtable->windowTitle().contains(beamtype)){
+            beamtable->setWindowTitle(beamtable->windowTitle()+"-"+beamtype);
+        }
         beamtable->setGridPoints(mCyntec->getBeamTableDatas(beamtype));
         beamtable->activateWindow();
         beamtable->show();
