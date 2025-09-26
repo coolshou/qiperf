@@ -40,9 +40,9 @@ void RectangleText::drawText(QPainter *painter)
     painter->setPen(pen);
     painter->setBrush(brush);
     // setZValue(10); //this affect all Z-value
-    qDebug() << "["<< mLabel << "] "<< painter->hasClipping();
+    // qDebug() << "["<< mLabel << "] "<< painter->hasClipping();
     QRectF rect = getMap()->getProjection()->geoToProj(mGeoRect);
-    qDebug() << "["<< mLabel << "] drawText:" << rect;
+    // qDebug() << "["<< mLabel << "] drawText:" << rect;
     // QRectF txtrect = rect.translate(0, 5);
     rect.moveTo(rect.x(), rect.y() + 2);
     auto path = QGV::createTextPath(rect.toRect(), mLabel, QFont(), pen.width());
