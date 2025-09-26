@@ -72,7 +72,7 @@
         "RX ATT RxA RxB :":"(\\d+\\.\\d{2})dB",
         "RXIP3 RxA RxB :":"(\\d+\\.\\d{2})dB"
     },
-    "GainData":{
+    "BeamTypeData":{
         "8x8":{
             "RXTotalGain":59,
             "AntGain":23.5,
@@ -98,6 +98,10 @@
         "Tri":{
             "HPAz":45,
             "HPEl":30
+        },
+        "Spoiled":{
+            "HPAz":55.31,
+            "HPEl":11.3
         }
     },
     "DistanceData":{
