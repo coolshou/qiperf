@@ -911,7 +911,7 @@
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;keeps getting device's GPS, 3D accelerometer, 3D gyroscope and 3-axis magnetometer value&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
-         <string>Inquire(TODO)</string>
+         <string>Inquire</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
