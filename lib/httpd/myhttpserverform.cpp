@@ -40,9 +40,11 @@ void MyHttpServerForm::LoadCfg(QSettings *cfg)
 
 void MyHttpServerForm::SaveCfg()
 {
-    mCfg->beginGroup("httpd");
-    mCfg->setValue("oldrootpath", mOldRootPath);
-    mCfg->endGroup();
+    if (mCfg){
+        mCfg->beginGroup("httpd");
+        mCfg->setValue("oldrootpath", mOldRootPath);
+        mCfg->endGroup();
+    }
 }
 
 void MyHttpServerForm::onStarted()
