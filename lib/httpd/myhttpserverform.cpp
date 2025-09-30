@@ -35,6 +35,7 @@ void MyHttpServerForm::LoadCfg(QSettings *cfg)
         mCfg->beginGroup("httpd");
         mOldRootPath = mCfg->value("oldrootpath", QDir::homePath()).toString();
         mCfg->endGroup();
+        ui->leRootPath->setText(mOldRootPath);
     }
 }
 

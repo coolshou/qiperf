@@ -529,7 +529,7 @@ void QIperfC::onShowHttpd()
 {
     ServerConfig *config = new ServerConfig();
     MyHttpServer *httpsrv = new MyHttpServer(config);
-    MyHttpServerForm *httpfrm = new MyHttpServerForm();
+    MyHttpServerForm *httpfrm = new MyHttpServerForm(m_settings);
 
     connect(httpfrm, &MyHttpServerForm::sigRootPathChange, config, &ServerConfig::setRootDir);
     connect(httpfrm, &MyHttpServerForm::sigStart, httpsrv, &MyHttpServer::start);
