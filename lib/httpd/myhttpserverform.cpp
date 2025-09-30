@@ -106,7 +106,7 @@ void MyHttpServerForm::onReflash(bool checked)
 {
     Q_UNUSED(checked)
     QStringList ls = MyFunc::getAllIPAddress();
-    qDebug() << "onReflash:" << ls.join(",");
+    // qDebug() << "onReflash:" << ls.join(",");
     ui->cbHostAddress->clear();
     ui->cbHostAddress->insertItem(0, "Any");
     ui->cbHostAddress->insertItems(1, ls);
