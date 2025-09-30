@@ -1,4 +1,10 @@
-qiperf (0.16.11409.16-1) unstable; urgency=medium
+qiperf (0.17.11409.30-1) unstable; urgency=medium
+
+  * JIO fix pos of Rectangle at center Instead topleft
+
+ -- coolshou <coolshou2060@gmail.com>  Tue, 30 Sep 2025 14:04:37 +0800
+
+qiperf (0.16.11409.16-2) unstable; urgency=medium
 
   * Fix iperf server/client run multi times on same PC with CMD_IPERF_START
   * Fix limit iperf TP data only report to original wsclient
