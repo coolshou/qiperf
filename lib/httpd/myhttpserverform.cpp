@@ -7,9 +7,9 @@
 
 #include "../src/myfunc.h"
 
-MyHttpServerForm::MyHttpServerForm(QWidget *parent)
+MyHttpServerForm::MyHttpServerForm(QSettings *cfg, QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::MyHttpServerForm)
+    , ui(new Ui::MyHttpServerForm), mCfg(cfg)
 {
     ui->setupUi(this);
     connect(ui->pbStart, &QPushButton::clicked, this, &MyHttpServerForm::onStart);
@@ -17,11 +17,32 @@ MyHttpServerForm::MyHttpServerForm(QWidget *parent)
     connect(ui->pbSelRootPath, &QPushButton::clicked, this, &MyHttpServerForm::onSelectRootPath);
     connect(ui->pbReflash, &QPushButton::clicked, this, &MyHttpServerForm::onReflash);
     onReflash(false);
+    LoadCfg();
 }
 
 MyHttpServerForm::~MyHttpServerForm()
 {
     delete ui;
+}
+
+void MyHttpServerForm::LoadCfg(QSettings *cfg)
+{
+    // QSettings *mcfg=nullptr;
+    if (cfg != nullptr){
+        mCfg = cfg;
+    }
+    if (mCfg != nullptr){
+        mCfg->beginGroup("httpd");
+        mOldRootPath = mCfg->value("oldrootpath", QDir::homePath()).toString();
+        mCfg->endGroup();
+    }
+}
+
+void MyHttpServerForm::SaveCfg()
+{
+    mCfg->beginGroup("httpd");
+    mCfg->setValue("oldrootpath", mOldRootPath);
+    mCfg->endGroup();
 }
 
 void MyHttpServerForm::onStarted()
@@ -59,12 +80,19 @@ void MyHttpServerForm::onErrorNotice(QString err)
 void MyHttpServerForm::onSelectRootPath(bool checked)
 {
     Q_UNUSED(checked)
+    QString path;
+    if (!mOldRootPath.isEmpty()){
+        path = mOldRootPath;
+    }else {
+        path = QDir::homePath();
+    }
     QString directoryPath = QFileDialog::getExistingDirectory(this,                          // Parent widget
         tr("Select Directory"),        // Dialog title
-        QDir::homePath(),              // Initial directory
+        path,              // Initial directory
         QFileDialog::ShowDirsOnly      // Options: only show directories
                                       );
     if (!directoryPath.isEmpty()) {
+        mOldRootPath = directoryPath;
         // qDebug() << "Selected directory path:" << directoryPath;
         // Do something with the selected directory path
         ui->leRootPath->setText(directoryPath);
@@ -79,6 +107,12 @@ void MyHttpServerForm::onReflash(bool checked)
     ui->cbHostAddress->clear();
     ui->cbHostAddress->insertItem(0, "Any");
     ui->cbHostAddress->insertItems(1, ls);
+}
+
+void MyHttpServerForm::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event)
+    SaveCfg();
 }
 
 void MyHttpServerForm::onStart(bool checked)
