@@ -55,6 +55,7 @@ public:
 
 public slots:
     void setItmHighlight(QString label);
+    void onDeleteItm(QString label);
 
 protected slots:
     void onSetCenter(bool checked);

@@ -51,6 +51,7 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     // connect(this, &DlgJIO::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
     connect(this, &DlgJIO::closeAll, m_dlgGeo, &DlgGeoOSM::close);
     connect(this, &DlgJIO::highlightItm, m_dlgGeo, &DlgGeoOSM::setItmHighlight);
+    connect(this, &DlgJIO::deleteItm, m_dlgGeo, &DlgGeoOSM::onDeleteItm);
 
     isTileAvailable();
     provider = new IpLocationProvider(this);
@@ -371,6 +372,7 @@ QJsonObject DlgJIO::createInitData()
 
 void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg)
 {
+    Q_UNUSED(serveraddress)
     // qDebug() << "onRequestResult refrow:" << refrow << " from: " << serveraddress
     //          << " cmd: " << cmd << " msg: " << msg;
     QJsonParseError error;
@@ -730,8 +732,17 @@ void DlgJIO::onDelete(bool checked)
 {
     Q_UNUSED(checked)
     int iRow = ui->tableWidget->currentRow();//->selectRow();
+    QTableWidgetItem *itm = ui->tableWidget->item(iRow, GPScols::PositionName);
+    QString name="";
+    if (itm!=nullptr){
+        name = itm->text();
+    }
+    // QString name =
     qDebug() << "onDelete:" <<  QString::number(iRow);
     ui->tableWidget->removeRow(iRow);
+    if (!name.isEmpty()){
+        emit deleteItm(name);
+    }
 }
 
 void DlgJIO::onGetGPS(bool checked)
@@ -1489,9 +1500,11 @@ void DlgJIO::onLoadFinished(bool ok)
                     if (!ui->leAM7az->text().isEmpty()){
                         // expects
                         azdeg = ui->leAM7az->text().toDouble();
+                        //TODO: length should not over range
                         m_dlgGeo->addArrowLine(am7, azdeg, 60, QColor(Qt::red));
                     }else{
                         //draw init Arrow Line
+                        //TODO: length should not over range
                         m_dlgGeo->addArrowLine(am7, heading,
                                                100, QColor(Qt::blue), true);
                     }
@@ -1510,17 +1523,20 @@ void DlgJIO::onLoadFinished(bool ok)
                         if (itmId){
                             qDebug() << "have BeamDirID data:" << itmId->text();
                             azdeg = heading + getAz(aiptype,itmId->text().toInt());
+                            //TODO: length should not over range
                             m_dlgGeo->addArrowLine(cm, azdeg, 100, QColor(rgb1), false, 4);
                         }
                         itm = ui->twResult->item(row-1, AZEIcols::P2Azimuth);
                         if (itm){
                             //draw Arrow line, expect
                             azdeg = itm->text().toDouble();
+                            //TODO: length should not over range
                             m_dlgGeo->addArrowLine(cm, azdeg, 60, QColor(Qt::red));
                         }
 
                     }else{
                         //draw init Arrow Line
+                        //TODO: length should not over range
                         m_dlgGeo->addArrowLine(cm, heading,
                                                100, QColor(Qt::blue), true);
                     }
@@ -1533,6 +1549,7 @@ void DlgJIO::onLoadFinished(bool ok)
                     if (itm){
                         if (!itm->text().isEmpty()){
                             azdeg = itm->text().toDouble();
+                            //TODO: length should not over range
                             m_dlgGeo->addArrowLine(am7, azdeg, 200, QColor(rgbaz));
                         }
                     }

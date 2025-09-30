@@ -96,6 +96,7 @@ signals:
     void TileAvailable(bool ok);
     void closeAll();
     void highlightItm(QString label);
+    void deleteItm(QString label);
     void requestExec(QString targetIP, QString idx, QString sCmd);
     void startOptimiz();//
     void stopOptimiz();//

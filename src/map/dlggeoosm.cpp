@@ -208,6 +208,25 @@ void DlgGeoOSM::setItmHighlight(QString label)
     }
 }
 
+void DlgGeoOSM::onDeleteItm(QString label)
+{
+    for(int i=0;i<mItemsLayer->countItems();i++)
+    {
+        RectangleText *itm = static_cast<RectangleText*>(mItemsLayer->getItem(i));
+        if(itm){
+            if (label.compare(itm->getText())==0){
+                mItemsLayer->removeItem(itm);
+                // itm->setSelected(true); // show item selected
+            }
+        }
+    }
+    // for(int i=0;i<mPolysLayer->countItems();i++)
+    // {
+    //     QGVItem *itm = mPolysLayer->getItem(i);
+    //     qDebug() << "TODO: mPolysLayer itm:" << itm;
+    // }
+}
+
 void DlgGeoOSM::onSetCenter(bool checked)
 {
     Q_UNUSED(checked)
