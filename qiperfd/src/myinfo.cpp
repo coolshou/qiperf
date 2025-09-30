@@ -427,7 +427,10 @@ void MyInfo::getMotherboardInfo(QString &vendor,QString &model, QString &serial)
     if (f.exists()){
         serial = readSysFile("/proc/device-tree/serial-number");
     }else{
-        serial = readSysFile("/sys/class/dmi/id/board_serial");
+        f.setFileName("/sys/class/dmi/id/board_serial");
+        if (f.exists()){
+            serial = readSysFile("/sys/class/dmi/id/board_serial");
+        }
     }
 
     debug("Motherboard Vendor:" + vendor, 4);
