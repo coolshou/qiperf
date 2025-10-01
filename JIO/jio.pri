@@ -13,6 +13,7 @@ SOURCES += \
     $$PWD/aip.cpp \
     $$PWD/cyntec.cpp \
     $$PWD/dlgaip.cpp \
+    $$PWD/dlgbeamcmd.cpp \
     $$PWD/dlgcyntec.cpp \
     $$PWD/dlghanwha.cpp \
     $$PWD/dlgjio.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     $$PWD/cyntecbeamfactordata.h \
     $$PWD/cyntecbeamtabledata.h \
     $$PWD/dlgaip.h \
+    $$PWD/dlgbeamcmd.h \
     $$PWD/dlgcyntec.h \
     $$PWD/dlghanwha.h \
     $$PWD/dlgjio.h \
@@ -54,6 +56,7 @@ HEADERS += \
 
 FORMS += \
     $$PWD/dlgaip.ui \
+    $$PWD/dlgbeamcmd.ui \
     $$PWD/dlgcyntec.ui \
     $$PWD/dlghanwha.ui \
     $$PWD/dlgjio.ui \

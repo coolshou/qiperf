@@ -21,6 +21,7 @@
 #include "dlgaip.h"
 #include "dlgset.h"
 #include "dlgoptimize.h"
+#include "dlgbeamcmd.h"
 #include "optimizeworker.h"
 #include "hanwha.h"
 #include "dlghanwha.h"
@@ -101,6 +102,8 @@ signals:
     void startOptimiz();//
     void stopOptimiz();//
     void sigAddIperf(QString cfg);
+    void addBeamIDCmd(QString cmd);
+
 protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *event) override;
@@ -141,6 +144,7 @@ private slots:
     void onToDegree(bool checked);
     void onCMBeamDirIDInit(bool checked);
     void onAttInit(bool checked);
+    void onBeamDirIDCmd(bool checked);
     void showContextMenu(const QPoint &pos);
     void onDeviceCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
     void onLoadFinished(bool ok);
@@ -194,6 +198,7 @@ private:
     DlgGeoOSM *m_dlgGeo;
     DlgAIP *m_dlgaip;
     DlgOptimize *mDlgOptimize;
+    DlgBeamCmd *mDlgBeamCmd;
     QNetworkReply *reply = nullptr;
     bool showline=false;
     QString m_oldsavepath;

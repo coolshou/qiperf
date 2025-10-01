@@ -3,8 +3,10 @@
         <file alias="jiocmd">jiocmd.json</file>
         <file alias="hanwha">hanwha.json</file>
         <file alias="cyntec">cyntec.json</file>
-        <file alias="INIT.png">sInit.png</file>
-        <file alias="NG.png">sNG.png</file>
-        <file alias="OK.png">sOK.png</file>
+        <file alias="INIT.png">images/sInit.png</file>
+        <file alias="NG.png">images/sNG.png</file>
+        <file alias="OK.png">images/sOK.png</file>
+        <file alias="command.png">images/command.png</file>
+        <file alias="Jio.png">images/Jio.png</file>
     </qresource>
 </RCC>

@@ -70,10 +70,11 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     m_dlgset = new DlgSet(this);
     connect(m_dlgset, &DlgSet::updateSetting, this, &DlgJIO::onUpdateSetting);
     connect(this, &DlgJIO::closeAll, m_dlgset, &DlgSet::close);
-
+    mDlgBeamCmd= new DlgBeamCmd(this);
+    connect(this,&DlgJIO::addBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddBeamIDCmd);
+    connect(this, &DlgJIO::closeAll, mDlgBeamCmd, &DlgBeamCmd::close);
     mDlgOptimize = new DlgOptimize(this);
     connect(this, &DlgJIO::closeAll, mDlgOptimize, &DlgOptimize::close);
-
     //ssh
     mSSHRemoteRunner = new QSsh::SshRemoteProcessRunner(this);
     connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::connectionError,
@@ -720,6 +721,7 @@ void DlgJIO::initAction()
 
     connect(ui->pbCMBeamDirIDInit, &QPushButton::clicked, this, &DlgJIO::onCMBeamDirIDInit);
     connect(ui->pbAttInit, &QPushButton::clicked, this, &DlgJIO::onAttInit);
+    connect(ui->pbBeamDirIDCmd, &QPushButton::clicked, this, &DlgJIO::onBeamDirIDCmd);
 }
 
 void DlgJIO::onInsert(bool checked)
@@ -1086,7 +1088,9 @@ void DlgJIO::onCalcCliecked(bool checked)
     ui->twAIP->setItem(0, AIPcols::Azdiff,
                        new QTableWidgetItem(QString::number(aip1azdiff)));
     //  Cyntec/Hanwha AM7 id
+    emit addBeamIDCmd("#AM7 AIP-0");
     if (aip1type==AIP::ModuleType::Cyntec){
+        //TODO:
         ui->twAIP->setItem(0, AIPcols::BeamDirectionID,
                            new QTableWidgetItem("99"));
     }else if (aip1type==AIP::ModuleType::Hanwha){
@@ -1103,6 +1107,7 @@ void DlgJIO::onCalcCliecked(bool checked)
     ui->twAIP->setItem(1, AIPcols::Azdiff,
                        new QTableWidgetItem(QString::number(aip2azdiff)));
     //  Cyntec/Hanwha AM7 id
+    emit addBeamIDCmd("#AM7 AIP-1");
     if (aip2type==AIP::ModuleType::Cyntec){
         ui->twAIP->setItem(1, AIPcols::BeamDirectionID,
                            new QTableWidgetItem("100"));
@@ -1426,6 +1431,15 @@ void DlgJIO::onAttInit(bool checked)
             break;
         }
 
+    }
+}
+
+void DlgJIO::onBeamDirIDCmd(bool checked)
+{
+    Q_UNUSED(checked)
+    if (mDlgBeamCmd){
+        mDlgBeamCmd->activateWindow();
+        mDlgBeamCmd->exec();
     }
 }
 

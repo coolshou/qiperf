@@ -4,6 +4,5 @@
         <file alias="cyntec">Cyntec/logo.png</file>
         <file alias="hanwha">Hanwha/Hanwha.png</file>
         <file alias="Hanwha.xlsx">Hanwha/JioBeamID_SW_final_AZEL info.xlsx</file>
-        <file alias="JIO">Jio.png</file>
     </qresource>
 </RCC>
