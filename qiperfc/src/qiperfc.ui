@@ -48,7 +48,7 @@
      <x>0</x>
      <y>0</y>
      <width>984</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -528,7 +528,7 @@
   <action name="actionSSH">
    <property name="icon">
     <iconset resource="../../qiperf.qrc">
-     <normaloff>:/ssh</normaloff>:/ssh</iconset>
+     <normaloff>:/ssh.png</normaloff>:/ssh.png</iconset>
    </property>
    <property name="text">
     <string>SSH</string>
@@ -557,8 +557,8 @@
   </action>
   <action name="actionJIO">
    <property name="icon">
-    <iconset resource="../../qiperf.qrc">
-     <normaloff>:/JIO</normaloff>:/JIO</iconset>
+    <iconset resource="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/JIO/jio.qrc">
+     <normaloff>:/jio/Jio.png</normaloff>:/jio/Jio.png</iconset>
    </property>
    <property name="text">
     <string>JIO</string>
@@ -581,6 +581,7 @@
  </widget>
  <resources>
   <include location="../../qiperf.qrc"/>
+  <include location="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/JIO/jio.qrc"/>
  </resources>
  <connections/>
 </ui>
