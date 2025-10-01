@@ -14,8 +14,8 @@
    <string>JIO</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/JIO</normaloff>:/JIO</iconset>
+   <iconset resource="jio.qrc">
+    <normaloff>:/jio/Jio.png</normaloff>:/jio/Jio.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
    <property name="spacing">
@@ -614,7 +614,7 @@
                <string/>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="aip.qrc">
                 <normaloff>:/AIP/hanwha</normaloff>:/AIP/hanwha</iconset>
               </property>
               <property name="iconSize">
@@ -640,7 +640,7 @@
                <string/>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="aip.qrc">
                 <normaloff>:/AIP/cyntec</normaloff>:/AIP/cyntec</iconset>
               </property>
               <property name="iconSize">
@@ -976,6 +976,7 @@
  </widget>
  <resources>
   <include location="jio.qrc"/>
+  <include location="aip.qrc"/>
  </resources>
  <connections/>
  <buttongroups>
