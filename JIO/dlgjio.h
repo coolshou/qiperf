@@ -103,6 +103,7 @@ signals:
     void stopOptimiz();//
     void sigAddIperf(QString cfg);
     void addBeamIDCmd(QString cmd);
+    void clearBeamIDCmd();
 
 protected:
     void changeEvent(QEvent *e) override;

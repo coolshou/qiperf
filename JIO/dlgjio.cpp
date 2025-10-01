@@ -72,6 +72,7 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     connect(this, &DlgJIO::closeAll, m_dlgset, &DlgSet::close);
     mDlgBeamCmd= new DlgBeamCmd(this);
     connect(this,&DlgJIO::addBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddBeamIDCmd);
+    connect(this,&DlgJIO::clearBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::clear);
     connect(this, &DlgJIO::closeAll, mDlgBeamCmd, &DlgBeamCmd::close);
     mDlgOptimize = new DlgOptimize(this);
     connect(this, &DlgJIO::closeAll, mDlgOptimize, &DlgOptimize::close);
@@ -901,6 +902,7 @@ void DlgJIO::onSaveCliecked(bool checked)
 void DlgJIO::onCalcCliecked(bool checked)
 {
     Q_UNUSED(checked)
+    emit clearBeamIDCmd();
     int iRow = ui->tableWidget->rowCount();
     if (iRow<2){
         QMessageBox::warning(this, tr("WARNING!!"),

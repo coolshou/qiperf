@@ -15,8 +15,8 @@ class DlgBeamCmd : public QDialog
 public:
     explicit DlgBeamCmd(QWidget *parent = nullptr);
     ~DlgBeamCmd();
-    void clear();
 public slots:
+    void clear();
     void onAddBeamIDCmd(QString cmd);
 protected:
     void changeEvent(QEvent *e);
