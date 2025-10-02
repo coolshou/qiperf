@@ -243,7 +243,7 @@ void WSClient::onTextMessageReceived(QString message)
 
             doc = QJsonDocument::fromJson(message.toUtf8(), &error);
             if (error.error == QJsonParseError::NoError){
-                debug("from:"+from+" ,m_idx:"+m_idx+" ,sInterval:"+sInterval);
+                debug("from:"+from+" ,m_idx:"+m_idx+" ,sInterval:"+sInterval, 4);
                 emit iperfTPdata(m_idx, sInterval, message);
             }else{
                 debug("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + message.toUtf8());

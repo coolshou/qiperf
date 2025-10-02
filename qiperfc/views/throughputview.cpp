@@ -466,9 +466,7 @@ void ThroughputView::onSelectedTPitem(QString idx)
     QModelIndex indexToSelect =  m_tpmgr->setSelectItem(idx);
     // Get the selection model
     QItemSelectionModel *selectionModel = ui->tv_throughput->selectionModel();
-    qDebug() << "(TODO) how to multi-select?, check if ctrl key is down?";
     selectionModel->select(indexToSelect, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
-
     // Optionally, make the selection visible
     ui->tv_throughput->scrollTo(indexToSelect);
 }

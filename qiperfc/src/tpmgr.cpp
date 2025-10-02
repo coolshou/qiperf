@@ -637,7 +637,7 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
     Q_UNUSED(sInterval)
     // Q_UNUSED(unit) // TODO: check unit
     if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) !=0){
-        qDebug() << " Expect unit:" << m_TPUint << " TP unit:" << unit;
+        qDebug() << "addTPdata Expect unit:" << m_TPUint << " TP unit:" << unit;
     }
     TP *tp = getItemByIdx(midx); //parent item
     if (tp==nullptr){
@@ -887,7 +887,6 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                 sum_total = sum_total + pkt_total.toDouble();
 
                 if (fInterval >= m_intervals.value(idx, 0.0)){
-                   // qDebug() << "addTPdata fInterval:" << fInterval << " idx:" << idx << " value:" << value << " packet: " << pkt_lost << " / " <<  pkt_total;
                     addTPdata(refrow, sInterval, idx, value, unit, dir,
                               pkt_lost, pkt_total);
                     m_intervals[idx] = fInterval;
