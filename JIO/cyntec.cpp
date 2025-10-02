@@ -459,8 +459,8 @@ double Cyntec::getTargetEIRP(double dist)
     //expect EIRP by dist (meter)
     double eirp=0.0;
     if (!mRangeDataObj.isEmpty()){
-        foreach(const QString& key, mRangeDataObj.keys()) {
-            qDebug() << "dist:" << dist << " key:" << key;
+        QStringList skeys = sorted(mRangeDataObj.keys());
+        foreach(const QString& key, skeys) {
             if (dist > key.toDouble()){
                 auto d = mRangeDataObj.value(key).toObject();
                 eirp = d.value("TargetEIRP").toDouble();
@@ -480,7 +480,8 @@ QVector<double> Cyntec::getRxAtt(double dist)
     double att1=0.0;
     double att2=0.0;
     if (!mRangeDataObj.isEmpty()){
-        foreach(const QString& key, mRangeDataObj.keys()) {
+        QStringList skeys = sorted(mRangeDataObj.keys());
+        foreach(const QString& key, skeys) {
             if (dist > key.toDouble()){
                 auto d = mRangeDataObj.value(key).toObject();
                 att1 = d.value("RX1ATT").toDouble();
@@ -503,7 +504,8 @@ QVector<double> Cyntec::getBFAtt(double dist)
     double att1=0.0;
     double att2=0.0;
     if (!mRangeDataObj.isEmpty()){
-        foreach(const QString& key, mRangeDataObj.keys()) {
+        QStringList skeys = sorted(mRangeDataObj.keys());
+        foreach(const QString& key, skeys) {
             if (dist > key.toDouble()){
                 auto d = mRangeDataObj.value(key).toObject();
                 att1 = d.value("BF1ATT").toDouble();

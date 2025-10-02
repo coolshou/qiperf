@@ -24,7 +24,7 @@ public:
 
     explicit AIP(QObject *parent = nullptr);
     virtual void initBeamData(QString filename);
-
+    QStringList sorted(QStringList datas);
 signals:
 };
 
