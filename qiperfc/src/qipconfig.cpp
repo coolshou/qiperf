@@ -306,6 +306,12 @@ QString QIPConfig::guessIperf3Protocal(QString filePath, int &port, int &paralle
                 port=ds.value(3).toInt();
             }
         }
+        if (line.startsWith("Connecting to host")){
+            ds = line.split(" ");
+            if (ds.length()==6){
+                port=ds.value(5).toInt();
+            }
+        }
         if (line.startsWith("[") && line.contains("connected")){
             pnum++;
         }
