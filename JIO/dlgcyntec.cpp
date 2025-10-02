@@ -203,11 +203,7 @@ void DlgCyntec::onCyntecBeamTableIDChanged(QString newBeamTableID)
         if (mCyntec){
             mCyntec->getBeamTableData(newBeamTableID.toInt());
         }
-        FrmBeamTable *beamtable;
-        beamtable = getBeamTable();
-        if (beamtable){
-            beamtable->onSelectEllipse(newBeamTableID, true, Qt::red);
-        }
+        emit SelectEllipse(newBeamTableID, true, Qt::red);
     }
 }
 void DlgCyntec::onCyntecElementMapChanged(QString newElementMap)

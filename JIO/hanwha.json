@@ -92,7 +92,7 @@
             "BFRX1ATT":0,"BFRX2ATT":0,"IFRXATT":18,"LNARXATT":0}
     },
     "BEAMTYPE":{
-        "Narrow":{
+        "NARROW":{
             "RxTotalGain":80,
             "AntGain":23.5
         },

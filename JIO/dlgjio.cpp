@@ -2124,7 +2124,7 @@ int DlgJIO::getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, dou
         return mCyntec->findClosestBeamID(diffHead, diffPitch);
     }else if (aiptype==AIP::ModuleType::Hanwha){
         qDebug() << "TODO: getNearestBeamDirectionID Hanwha";
-        return -1;
+        return mHanwha->findClosestBeamID(diffHead, diffPitch);
     }else {
         qDebug() << "Unknown AIP type of " << name;
         return -1;

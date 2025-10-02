@@ -87,7 +87,7 @@ void Cyntec::initBeamData(QIODevice *filedevice)
     if(xlsReader.load()){
         // std::shared_ptr<QXlsx::Cell> sharedCell;
         // Cell* cellB, cellC, cellD, cellE, cellF;
-        QVariant varBeamID, varA, varC, varD, varE, varF, varG;
+        QVariant varBeamID, varA, varAz, varEl, varHPAz, varHPEl, varBeamType;
         int irow=0;
         int icol=0;
         auto cell = xlsReader.cellAt(irow, icol);
@@ -119,52 +119,52 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                             }
                             cell = xlsReader.cellAt(irow, 3);
                             if (cell != NULL){
-                                varC = cell->readValue(); //AZ
+                                varAz = cell->readValue(); //AZ
                             }
                             cell = xlsReader.cellAt(irow, 4);
                             if (cell != NULL){
-                                varD = cell->readValue(); //EL
+                                varEl = cell->readValue(); //EL
                             }
                             cell = xlsReader.cellAt(irow, 5);
                             if (cell != NULL){
-                                varE = cell->readValue(); //Azimuth 3dB BW (°)
+                                varHPAz = cell->readValue(); //Azimuth 3dB BW (°)
                             }
                             cell = xlsReader.cellAt(irow, 6);
                             if (cell != NULL){
-                                varF = cell->readValue(); //Elevation 3dB BW (°)
+                                varHPEl = cell->readValue(); //Elevation 3dB BW (°)
                             }
                             cell = xlsReader.cellAt(irow, 7);
                             if (cell != NULL){
-                                varG = cell->readValue(); //comment
-                                if (!mBeamTypeData.contains(varG.toString())){
-                                    mBeamTypeData[varG.toString()]=QList<int>();
+                                varBeamType = cell->readValue(); //comment
+                                if (!mBeamTypeData.contains(varBeamType.toString())){
+                                    mBeamTypeData[varBeamType.toString()]=QList<int>();
                                 }
-                                mBeamTypeData[varG.toString()].append(varBeamID.toInt());
-                                BeamTypeRange r = mBeamTypeRangeData.value(varG.toString(), {0, 0, 0 ,0});
-                                if (varC.toDouble() < r.minAz){
-                                    r.minAz = varC.toDouble();
+                                mBeamTypeData[varBeamType.toString()].append(varBeamID.toInt());
+                                BeamTypeRange r = mBeamTypeRangeData.value(varBeamType.toString(), {0, 0, 0 ,0});
+                                if (varAz.toDouble() < r.minAz){
+                                    r.minAz = varAz.toDouble();
                                 }
-                                if (varC.toDouble() > r.maxAz){
-                                    r.maxAz = varC.toDouble();
+                                if (varAz.toDouble() > r.maxAz){
+                                    r.maxAz = varAz.toDouble();
                                 }
-                                if (varD.toDouble() < r.minEl){
-                                    r.minEl = varD.toDouble();
+                                if (varEl.toDouble() < r.minEl){
+                                    r.minEl = varEl.toDouble();
                                 }
-                                if (varD.toDouble() > r.maxEl){
-                                    r.maxEl = varD.toDouble();
+                                if (varEl.toDouble() > r.maxEl){
+                                    r.maxEl = varEl.toDouble();
                                 }
-                                mBeamTypeRangeData[varG.toString()] = r;
+                                mBeamTypeRangeData[varBeamType.toString()] = r;
                             }
                             // qDebug() << "[TableData]varB:" << varB
                             //          << "varC:" << varC << " varD:" << varD
                             //          << "varE:" << varE << " varF:" << varF;
                             mBeamTableData->insert(varBeamID.toInt(),
                                                    CyntecBeamTableData(varBeamID.toInt(),
-                                                                       varC.toDouble(),
-                                                                       varD.toDouble(),
-                                                                       varE.toDouble(),
-                                                                       varF.toDouble(),
-                                                                       varG.toString()));
+                                                                       varAz.toDouble(),
+                                                                       varEl.toDouble(),
+                                                                       varHPAz.toDouble(),
+                                                                       varHPEl.toDouble(),
+                                                                       varBeamType.toString()));
                         }else{
                             qDebug() << "BeamTable:No value row:" << irow << " col:" << icol;
                         }
@@ -212,29 +212,29 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                         varBeamID = cell->readValue();
                         cell = xlsReader.cellAt(irow, 3);
                         if (cell != NULL){
-                            varC = cell->readValue(); // Element Map
+                            varAz = cell->readValue(); // Element Map
                         }
                         cell = xlsReader.cellAt(irow, 4);
                         if (cell != NULL){
-                            varD = cell->readValue(); // Att (dB)
+                            varEl = cell->readValue(); // Att (dB)
                         }
                         cell = xlsReader.cellAt(irow, 5);
                         if (cell != NULL){
-                            varE = cell->readValue(); // Azimuth 3dB BW (°)
+                            varHPAz = cell->readValue(); // Azimuth 3dB BW (°)
                         }
                         cell = xlsReader.cellAt(irow, 6);
                         if (cell != NULL){
-                            varF = cell->readValue(); // Elevation 3dB BW (°)
+                            varHPEl = cell->readValue(); // Elevation 3dB BW (°)
                         }
                         // qDebug() << "[FactorData]varB:" << varB
                         //          << "varC:" << varC << " varD:" << varD
                         //          << "varE:" << varE << " varF:" << varF;
                         mBeamFactorData->insert(varBeamID.toInt(),
                                                 CyntecBeamFactorData(varBeamID.toInt(),
-                                                                     varC.toString(),
-                                                                     varD.toInt(),
-                                                                     varE.toDouble(),
-                                                                     varF.toDouble()));
+                                                                     varAz.toString(),
+                                                                     varEl.toInt(),
+                                                                     varHPAz.toDouble(),
+                                                                     varHPEl.toDouble()));
                     }else{
                         // qDebug() << "[FactorData]cell is NULL " << irow << "," << icol;
                         break;

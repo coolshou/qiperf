@@ -92,7 +92,8 @@ public:
     AIP::ModuleType getModuleType(int row, int col);
     QJsonObject createInitData();
     void getBestBeamID(int idx, double azimuthDegree, AIP::ModuleType aip1type, QList<QTableWidgetItem*> cm7rs);
-
+    int findClosestBeamID(double targetAz, double targetEl,
+                          QString beamtype="Narrow", int beamfactor=1);
 public slots:
     void onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg);
     void setTableWidgetBGColor(QTableWidget *tw, int row, int col, QColor color);
