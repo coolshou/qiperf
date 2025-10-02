@@ -91,8 +91,11 @@ public:
     void getAPInfo(QString refrow, QString target);
     AIP::ModuleType getModuleType(int row, int col);
     QJsonObject createInitData();
+    void getBestBeamID(int idx, double azimuthDegree, AIP::ModuleType aip1type, QList<QTableWidgetItem*> cm7rs);
+
 public slots:
     void onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg);
+    void setTableWidgetBGColor(QTableWidget *tw, int row, int col, QColor color);
 signals:
     void TileAvailable(bool ok);
     void closeAll();

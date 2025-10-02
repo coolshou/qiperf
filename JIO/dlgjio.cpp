@@ -439,6 +439,16 @@ void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd,
     }
 }
 
+void DlgJIO::setTableWidgetBGColor(QTableWidget *tw, int row, int col, QColor color)
+{
+    QTableWidgetItem *itm = tw->item(row, col);
+    if (itm){
+        itm->setBackground(QBrush(color));
+    }else{
+        qDebug() << "QTableWidget:" << tw << " do not have item on (row,col)=(" << row << "," << col << ")";
+    }
+}
+
 void DlgJIO::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
@@ -899,6 +909,57 @@ void DlgJIO::onSaveCliecked(bool checked)
     }
 }
 
+void DlgJIO::getBestBeamID(int idx,
+                           double azimuthDegree,
+                           AIP::ModuleType aiptype, QList<QTableWidgetItem*> cm7rs)
+{
+    QList<double> aipDs;
+    double minaz=360;
+    double maxaz=0;
+    double az;
+    double aipaz=0;
+    double aipazdiff=0;
+    if (cm7rs.length()>1){
+        for(auto azitm: cm7rs){
+            az = azitm->text().toDouble();
+            if (az>maxaz){
+                maxaz = az;
+            }
+            if (az<minaz){
+                minaz = az;
+            }
+            aipDs.append(az);
+        }
+        aipaz = averageBearing(aipDs);
+    }else if (cm7rs.length()==1){
+        aipaz = cm7rs.value(0)->text().toDouble();
+    }else {
+        qDebug() << "No AIP"<< idx << " AZ value";
+    }
+    aipazdiff = aipaz-azimuthDegree;
+    //AIP1
+    ui->twAIP->setItem(idx, AIPcols::Azimuth,
+                       new QTableWidgetItem(QString::number(aipaz)));
+    ui->twAIP->setItem(idx, AIPcols::Elevation,
+                       new QTableWidgetItem(ui->leAM7el->text()));
+    ui->twAIP->setItem(idx, AIPcols::Azdiff,
+                       new QTableWidgetItem(QString::number(aipazdiff)));
+    //Get best Cyntec/Hanwha AM7 id
+    emit addBeamIDCmd("#AM7 AIP-"+ QString::number(idx));
+    qDebug() << "AIP:" << idx << " Max az:" << maxaz << " Min Az:" << minaz;
+
+    if (aiptype==AIP::ModuleType::Cyntec){
+        //TODO:
+        ui->twAIP->setItem(idx, AIPcols::BeamDirectionID,
+                           new QTableWidgetItem("99"));
+    }else if (aiptype==AIP::ModuleType::Hanwha){
+        ui->twAIP->setItem(idx, AIPcols::BeamDirectionID,
+                           new QTableWidgetItem("TODO: Hanwha"));
+    }else{
+        qDebug() << "Unknown AIP" << idx << " type:" << aiptype;
+    }
+}
+
 void DlgJIO::onCalcCliecked(bool checked)
 {
     Q_UNUSED(checked)
@@ -966,7 +1027,7 @@ void DlgJIO::onCalcCliecked(bool checked)
     double el2=0.0;
     double totalel=0.0;
     ui->twResult->setRowCount(iRow-1);
-
+    //calc distance & azimuth & Elevation
     for (int i=1; i<ui->tableWidget->rowCount(); i++){
         pos = ui->tableWidget->item(i,GPScols::PositionName)->text();
         lat = ui->tableWidget->item(i,GPScols::Latitude)->text().toDouble();
@@ -1053,72 +1114,42 @@ void DlgJIO::onCalcCliecked(bool checked)
     // ui->tableWidget->item(0, GPScols::AIP1); //cyntec or hanwha
 
     //AM7 AIP1 Az, TODO El
-    QList<double> aipRs;
-    double aip1az=0;
-    double aip1azdiff=0;
-    if (cm7rs.length()>1){
-        for(auto azitm: cm7rs){
-            aipRs.append(azitm->text().toDouble());
-        }
-        aip1az = averageBearing(aipRs);
-    }else if (cm7rs.length()==1){
-        aip1az = cm7rs.value(0)->text().toDouble();
-    }else {
-        qDebug() << "No AIP1 AZ value";
-    }
-    aip1azdiff = aip1az-azimuthDegree;
-    QList<double> aipLs;
-    //AM7 AIP2 Az,TODO El
-    double aip2az=0;
-    double aip2azdiff=0;
-    if (cm7ls.length()>1){
-        for(auto azitm: cm7ls){
-            aipLs.append(azitm->text().toDouble());
-        }
-        aip2az = averageBearing(aipLs);
-    }else if (cm7ls.length()==1){
-        aip2az = cm7ls.value(0)->text().toDouble();
-    }else {
-        qDebug() << "No AIP2 AZ value";
-    }
-    aip2azdiff = aip2az-azimuthDegree;
-    //AIP1
-    ui->twAIP->setItem(0, AIPcols::Azimuth,
-                       new QTableWidgetItem(QString::number(aip1az)));
-    ui->twAIP->setItem(0, AIPcols::Elevation,
-                       new QTableWidgetItem(ui->leAM7el->text()));
-    ui->twAIP->setItem(0, AIPcols::Azdiff,
-                       new QTableWidgetItem(QString::number(aip1azdiff)));
-    //  Cyntec/Hanwha AM7 id
-    emit addBeamIDCmd("#AM7 AIP-0");
-    if (aip1type==AIP::ModuleType::Cyntec){
-        //TODO:
-        ui->twAIP->setItem(0, AIPcols::BeamDirectionID,
-                           new QTableWidgetItem("99"));
-    }else if (aip1type==AIP::ModuleType::Hanwha){
-        ui->twAIP->setItem(0, AIPcols::BeamDirectionID,
-                           new QTableWidgetItem("477"));
-    }else{
-        qDebug() << "Unknown AIP1 type:" << aip1type;
-    }
-    //AIP2
-    ui->twAIP->setItem(1, AIPcols::Azimuth,
-                       new QTableWidgetItem(QString::number(aip2az)));
-    ui->twAIP->setItem(1, AIPcols::Elevation,
-                       new QTableWidgetItem(ui->leAM7el->text()));
-    ui->twAIP->setItem(1, AIPcols::Azdiff,
-                       new QTableWidgetItem(QString::number(aip2azdiff)));
-    //  Cyntec/Hanwha AM7 id
-    emit addBeamIDCmd("#AM7 AIP-1");
-    if (aip2type==AIP::ModuleType::Cyntec){
-        ui->twAIP->setItem(1, AIPcols::BeamDirectionID,
-                           new QTableWidgetItem("100"));
-    }else if (aip2type==AIP::ModuleType::Hanwha){
-        ui->twAIP->setItem(1, AIPcols::BeamDirectionID,
-                           new QTableWidgetItem("476"));
-    }else{
-        qDebug() << "Unknown AIP2 type:" << aip2type;
-    }
+    getBestBeamID(0, azimuthDegree, aip1type, cm7rs);
+    //AM7 AIP2
+    getBestBeamID(1, azimuthDegree, aip2type, cm7ls);
+    // QList<double> aipLs;
+    // //AM7 AIP2 Az,TODO El
+    // double aip2az=0;
+    // double aip2azdiff=0;
+    // if (cm7ls.length()>1){
+    //     for(auto azitm: cm7ls){
+    //         aipLs.append(azitm->text().toDouble());
+    //     }
+    //     aip2az = averageBearing(aipLs);
+    // }else if (cm7ls.length()==1){
+    //     aip2az = cm7ls.value(0)->text().toDouble();
+    // }else {
+    //     qDebug() << "No AIP2 AZ value";
+    // }
+    // aip2azdiff = aip2az-azimuthDegree;
+
+    // ui->twAIP->setItem(1, AIPcols::Azimuth,
+    //                    new QTableWidgetItem(QString::number(aip2az)));
+    // ui->twAIP->setItem(1, AIPcols::Elevation,
+    //                    new QTableWidgetItem(ui->leAM7el->text()));
+    // ui->twAIP->setItem(1, AIPcols::Azdiff,
+    //                    new QTableWidgetItem(QString::number(aip2azdiff)));
+    // //  Cyntec/Hanwha AM7 id
+    // emit addBeamIDCmd("#AM7 AIP-1");
+    // if (aip2type==AIP::ModuleType::Cyntec){
+    //     ui->twAIP->setItem(1, AIPcols::BeamDirectionID,
+    //                        new QTableWidgetItem("100"));
+    // }else if (aip2type==AIP::ModuleType::Hanwha){
+    //     ui->twAIP->setItem(1, AIPcols::BeamDirectionID,
+    //                        new QTableWidgetItem("476"));
+    // }else{
+    //     qDebug() << "Unknown AIP2 type:" << aip2type;
+    // }
 }
 
 void DlgJIO::onSet(bool checked)
@@ -1216,6 +1247,8 @@ void DlgJIO::onInquireTimerTimeout()
 
                 }else{
                     qDebug() << "No IPAddr at row:" << row << ", col:" << static_cast<int>(GPScols::IPAddr);
+                    setTableWidgetBGColor(ui->tableWidget,
+                                          row, static_cast<int>(GPScols::IPAddr), QColor("Red"));
                 }
             }else{
                 qDebug() << "No item at row:" << row << ", col:" << static_cast<int>(GPScols::IPAddr);
