@@ -98,6 +98,10 @@ void FileClient::onBytesWritten(qint64 bytes)
             //no more data to send
             QString filename = m_currentFile->fileName();
             m_currentFile->close();
+            //delete file which had finished sending
+            if (!m_currentFile->remove()){
+                debug("Delete file fail:" + filename);
+            }
             delete m_currentFile;
             m_currentFile = nullptr;
             debug("[onBytesWritten]File transfer completed: " + filename);

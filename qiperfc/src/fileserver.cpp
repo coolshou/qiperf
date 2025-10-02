@@ -36,12 +36,6 @@ void FileServer::setRootPath(QString pathname)
         }
     }
     m_rootpath = QDir::toNativeSeparators(pathname);
-    // qDebug()  << "FileServer::setRootPath: m_filesocks.count: " << m_filesocks.count();
-    //update all FileSaveSocket's m_rootpath
-    // foreach(auto *fsock, m_filesocks){
-    //     fsock->setRootpath(m_rootpath);
-    //     QCoreApplication::processEvents(QEventLoop::AllEvents);
-    // }
 }
 
 void FileServer::close()
@@ -79,7 +73,6 @@ void FileServer::slotReceive(QTcpSocket* socket)
 
 void FileServer::onFinished()
 {
-    // FileSaveSocket *socket = qobject_cast<FileSaveSocket *>(sender());
     QTcpSocket *socket = qobject_cast<QTcpSocket *>(sender());
     if (socket) {
         // qDebug() << "FileServer::onFinished():";// << socket->peerAddress().toString();
@@ -116,7 +109,6 @@ void FileServer::sendFile(QString filename)
     outBlock.resize(0);
 }
 
-// void FileServer::onClientDisconnected(FileSaveSocket *socket)
 void FileServer::onClientDisconnected()
 {
     // client has disconnected, so remove from list

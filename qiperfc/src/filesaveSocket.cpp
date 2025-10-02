@@ -5,6 +5,9 @@
 #include <QCoreApplication>
 #include <QEventLoop>
 
+// read tcpSocket data and save to file
+// FILE:<filename>:<filesize>
+
 FileSaveSocket::FileSaveSocket (QString pathname, QTcpSocket* socket)
 {
     setRootpath(pathname);
