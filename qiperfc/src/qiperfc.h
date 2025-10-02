@@ -251,7 +251,7 @@ private:
     bool m_TPGroup; // show throughput group
     QString m_TPUnit; // store throughput format unit,
     QString m_datapath;
-
+    QStringList mPluginNames;
     FileServer *m_fileserver;
     QString m_oldsavepath=nullptr;
     bool m_closetosystray=false;

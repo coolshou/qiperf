@@ -48,9 +48,10 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     m_clipboard = QApplication::clipboard();
     ui->setupUi(this);
+    loadSettings();
     loadPlugins();
     loadTools();
-    loadSettings();
+
     m_smicroIdx = -1;
     m_logpath = logpath + "data";
     QDir logdir(m_logpath);
@@ -805,13 +806,11 @@ void QIperfC::loadPlugins()
 #ifdef Q_OS_WIN
     if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
         pluginsDir.cdUp();
-    pluginsDir.cd("plugins"); // Example: expect plugins in a 'plugins' subdirectory
 #elif defined(Q_OS_UNIX)
     if (pluginsDir.dirName().toLower() == "bin") // Common for Linux/macOS build structures
         pluginsDir.cdUp();
-    pluginsDir.cd("plugins"); // Example: expect plugins in a 'plugins' subdirectory
 #endif
-
+    //if plugins folder not exist, it will not change to that folder!
     if (!pluginsDir.exists()) {
         qWarning() << "Plugins directory not found:" << pluginsDir.absolutePath();
         return;
@@ -819,11 +818,13 @@ void QIperfC::loadPlugins()
 
     qDebug() << "Searching for plugins folder in:" << pluginsDir.absolutePath();
 
-    for (const QString &fileName : pluginsDir.entryList(QDir::Files)) {
-        if (QLibrary::isLibrary(fileName)) { // Check if it's a valid library file
-            QPluginLoader *loader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
+    // for (const QString &fileName : pluginsDir.entryList(QDir::Files))
+    QString libfilename;
+    for (const QString &fileName : mPluginNames) {
+        libfilename = pluginsDir.absolutePath() + QDir::separator() + fileName;
+        if (QLibrary::isLibrary(libfilename)) { // Check if it's a valid library file
+            QPluginLoader *loader = new QPluginLoader(libfilename);
             QObject *plugin = loader->instance();
-
             if (plugin) {
                 // Try to cast the loaded plugin to our interface
                 PluginInterface *iPlugin = qobject_cast<PluginInterface *>(plugin);
@@ -835,22 +836,23 @@ void QIperfC::loadPlugins()
                     // Add plugin's menu to the main menu bar
                     QMenu* pluginMenu = iPlugin->createPluginMenu(this);
                     if (pluginMenu) {
-                        // ui->menubar->addMenu(pluginMenu);
                         ui->menuDevice->addMenu(pluginMenu);
                     }
 
                     iPlugin->initialize(); // Call plugin's initialization method
                 } else {
-                    qWarning() << "Could not cast plugin" << fileName << "to PluginInterface.";
+                    qWarning() << "Could not cast plugin '" << libfilename << "' to PluginInterface.";
                     qWarning() << loader->errorString();
                     loader->unload(); // Unload if it's not our expected plugin type
                     delete loader;
                 }
             } else {
-                qWarning() << "Failed to load plugin:" << fileName;
+                qWarning() << "Failed to load plugin: " << libfilename;
                 qWarning() << loader->errorString();
                 delete loader;
             }
+        }else{
+            qWarning() << "Not a valid library file: " << libfilename;
         }
     }
 }
@@ -1019,6 +1021,19 @@ void QIperfC::loadSettings()
     m_settings->endGroup();
     m_settings->beginGroup("gps");
     m_OpenStreetMapTile = m_settings->value("OpenStreetMapTile", "https://tile.openstreetmap.org/{z}/{x}/{y}.png").toString();
+    m_settings->endGroup();
+
+    m_settings->beginGroup("plugins");
+    QStringList keys = m_settings->childKeys();
+    for (const QString &key : keys) {
+        QVariant value = m_settings->value(key);
+        qDebug() << key << "=" << value;
+#ifdef Q_OS_WIN
+        mPluginNames.append(QString("lib%1.dll".arg(value.toString()));
+#elif defined(Q_OS_UNIX)
+        mPluginNames.append(QString("lib%1.so").arg(value.toString()));
+#endif
+    }
     m_settings->endGroup();
 }
 
