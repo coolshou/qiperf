@@ -186,7 +186,6 @@ QString ExportHtml::imageToBase64(const QImage &image, const char *format)
 
 void ExportHtml::setData(QList<TP *> tps,  QPixmap chat, QString pcs)
 {
-    // m_tpmgr = tpmgr;
     m_tps = tps;
     // m_tpplot =  tpplot;
     m_chat = chat;
