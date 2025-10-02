@@ -160,7 +160,7 @@ void ThroughputView::onDelete()
     QModelIndex curIdx = ui->tv_throughput->selectionModel()->currentIndex();
     if (curIdx.isValid()){
         TP *tp = m_tpmgr->getItem(curIdx);
-        if (tp->getDataType() == TPMgrData::DataType::config){
+        if (tp->getDataType() == TPMgrData::config){
             // remove releative iperf3 log file
             QString client = tp->getBindKey(false); //client
             QString server = tp->getBindKey(); //server
@@ -551,6 +551,9 @@ void ThroughputView::onEnableItem(bool checked)
         TP *tp;
         foreach(auto idx, idxs){
             tp = m_tpmgr->getItem(idx);
+            if (!tp->isTPDataType()){
+                continue;
+            }
             tp->setEnabled(true);
         }
     }
@@ -564,6 +567,9 @@ void ThroughputView::onDisableItem(bool checked)
         TP *tp;
         foreach(auto idx, idxs){
             tp = m_tpmgr->getItem(idx);
+            if (!tp->isTPDataType()){
+                continue;
+            }
             tp->setEnabled(false);
         }
     }
@@ -677,7 +683,7 @@ QString ThroughputView::getGraphDataToJsonStr(QCPGraph *graph)
 
 void ThroughputView::onDebuginfo(QString msg)
 {
-    qDebug() << "ThroughputView[m_iperfwrapper]" << msg;
+    qDebug() << "[ThroughputView]" << msg;
 }
 
 void ThroughputView::initThroughputChart()
@@ -702,6 +708,7 @@ void ThroughputView::initThroughputChart()
     // connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     // connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
     connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
+    connect(m_tpmgr, &TPMgr::debugMsg, this, &ThroughputView::onDebuginfo);
 
     ui->tv_throughput->setModel(m_tpmgr);
     // ui->tv_throughput->setHeaderHidden(true);// not show header column
@@ -751,7 +758,7 @@ void ThroughputView::initThroughputChart()
 
     //tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
     //ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
-
+    ui->tv_throughput->setSelectionMode(QAbstractItemView::MultiSelection); //multiple selection
     QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
     connect(ism, &QItemSelectionModel::selectionChanged, this, &ThroughputView::onTPselectionChanged);
 

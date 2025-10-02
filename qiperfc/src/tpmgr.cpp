@@ -18,6 +18,7 @@ TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QString tpunit, QObject *paren
     : QAbstractItemModel(parent), m_showgroup(showgroup), m_treeview(treeview),
     m_TPUint(tpunit)
 {
+    mDebug = 3;
     connect(this, &QAbstractItemModel::rowsInserted, this, &TPMgr::onRowsInserted);
     m_unit_bits << "Kbits/sec" << "Mbits/sec" << "Gbits/sec" << "Tbits/sec";
     m_unit_bytes << "KBytes/sec" << "MBytes/sec" << "GBytes/sec" << "TBytes/sec";
@@ -580,6 +581,10 @@ int TPMgr::swapDirection(QModelIndex midx)
 {
     QString dir = TPDIRRx;
     TP *tp= getItem(midx);
+    if (!tp->isTPDataType()){
+        log("[swapDirection]Wrong TP datatype: " + midx.data().toString(), 3);
+        return 1;
+    }
     if (tp->getDirection().contains(TPDIRTx)){
         dir = TPDIRRx;
     }else if (tp->getDirection().contains(TPDIRRx)){
@@ -598,6 +603,10 @@ int TPMgr::swapDirection(QModelIndex midx)
 int TPMgr::swapIPDirection(QModelIndex midx)
 {
     TP *tp= getItem(midx);
+    if (!tp->isTPDataType()){
+        log("[swapIPDirection]Wrong TP datatype:" + midx.data().toString(), 3);
+        return 1;
+    }
     QString server = tp->getServer();
     QString mgrServer = tp->getMgrServer();
     QString client = tp->getClient();
@@ -817,7 +826,7 @@ void TPMgr::stopUpdater()
 TP *TPMgr::newGroupItem()
 {   // create new Total/Group item under rootItem
     QModelIndex midx = indexFromItem(rootItem);
-    qDebug() << " root idx: " << midx;
+    // qDebug() << " root idx: " << midx;
     beginInsertRows(midx, 0, 0);
     groupItem = new TP("0", GRAPH_TOTAL, TPMgrData::group, rootItem);
     rootItem->appendChild(groupItem);
@@ -1000,6 +1009,11 @@ QModelIndex TPMgr::setSelectItem(QString idx)
     }
 }
 
+void TPMgr::setDebug(int lv)
+{
+    mDebug = lv;
+}
+
 void TPMgr::onUpdater()
 {   //update total throughput/lost rate for each iperf test pair (-P >=1) result
     double g_tpvalue=0.0;
@@ -1031,5 +1045,13 @@ void TPMgr::onUpdater()
         }
         itm->setThroughput(QString::number(g_tpvalue));
         itm->setLostRate(QString::number(g_lostvalue), QString::number(g_totalvalue));
+    }
+}
+
+void TPMgr::log(QString msg, int lv)
+{
+    if (lv>mDebug){
+        // qDebug() << "[TPMgr]" << msg;
+        emit debugMsg("[TPMgr]" + msg);
     }
 }

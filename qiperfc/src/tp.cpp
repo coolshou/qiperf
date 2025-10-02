@@ -593,6 +593,15 @@ int TP::getDataType()
     return m_datatype;
 }
 
+bool TP::isTPDataType()
+{
+    if ((getDataType() == static_cast<int>(TPMgrData::TP))||
+        (getDataType() == static_cast<int>(TPMgrData::config))){
+        return true;
+    }
+    return false;
+}
+
 QString TP::getTxRxThroughput()
 {
    double v = m_Tx+m_Rx;

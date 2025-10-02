@@ -73,7 +73,7 @@ public:
     void startUpdater();
     void stopUpdater();
     QModelIndex setSelectItem(QString idx);
-
+    void setDebug(int lv);
 public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
     void onUpdateTPAvg(QString midx, QString sInterval, QString idx,
@@ -87,11 +87,14 @@ signals:
     void IperfTPdata(QString sInterval,
                      QString refrowidx, QString data, QString lostrate,
                      QString grouptag);//Notice iperf throughput value:  time, idx, throughput value, lost rate
+    void debugMsg(QString msg);
 
 private slots:
     void onUpdater();
-
 private:
+    void log(QString msg, int lv=3);
+private:
+    int mDebug;
     bool m_showgroup;
     TPGroup::GroupMode m_groupmode;
     QTreeView *m_treeview; //relative treeview

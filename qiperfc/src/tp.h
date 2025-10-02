@@ -94,6 +94,7 @@ public:
     QString getLastNoticeTime();
     void setDataType(int datatype);
     int getDataType();
+    bool isTPDataType();
     QString getTxRxThroughput();
     QString getMinThroughput();
     QString getMaxThroughput();
