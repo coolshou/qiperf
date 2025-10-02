@@ -650,13 +650,13 @@ void DlgJIO::initTableWidget()
     ui->twResult->setColumnWidth(AZEIcols::P2Azimuth, 50);
     ui->twResult->setColumnWidth(AZEIcols::P1Elevation, 50);
     ui->twResult->setColumnWidth(AZEIcols::P2Elevation, 50);
-    ui->twResult->setColumnWidth(AZEIcols::P2AzDiff, 70);
-    ui->twResult->setColumnWidth(AZEIcols::P2ElDiff, 70);
-    ui->twResult->setColumnWidth(AZEIcols::BeamDirID, 110);
-    ui->twResult->setColumnWidth(AZEIcols::P2Rx1Att, 80);
-    ui->twResult->setColumnWidth(AZEIcols::P2Rx2Att, 80);
-    ui->twResult->setColumnWidth(AZEIcols::P2BF1Att, 80);
-    ui->twResult->setColumnWidth(AZEIcols::P2BF2Att, 80);
+    ui->twResult->setColumnWidth(AZEIcols::P2AzDiff, 60);
+    ui->twResult->setColumnWidth(AZEIcols::P2ElDiff, 60);
+    ui->twResult->setColumnWidth(AZEIcols::BeamDirID, 90);
+    ui->twResult->setColumnWidth(AZEIcols::P2Rx1Att, 60);
+    ui->twResult->setColumnWidth(AZEIcols::P2Rx2Att, 60);
+    ui->twResult->setColumnWidth(AZEIcols::P2BF1Att, 60);
+    ui->twResult->setColumnWidth(AZEIcols::P2BF2Att, 60);
     // Only accept Double
     NumberDelegate *dDelegate = new NumberDelegate(NumberDelegate::Double,
                                                    0.0, 10000.0, 2,
@@ -949,10 +949,11 @@ void DlgJIO::getBestBeamID(int idx,
     qDebug() << "AIP:" << idx << " Max az:" << maxaz << " Min Az:" << minaz;
 
     if (aiptype==AIP::ModuleType::Cyntec){
-        //TODO:
+        //TODO: Cyntec getBestBeamID
         ui->twAIP->setItem(idx, AIPcols::BeamDirectionID,
                            new QTableWidgetItem("99"));
     }else if (aiptype==AIP::ModuleType::Hanwha){
+        //TODO: Hanwha getBestBeamID
         ui->twAIP->setItem(idx, AIPcols::BeamDirectionID,
                            new QTableWidgetItem("TODO: Hanwha"));
     }else{
@@ -1540,7 +1541,6 @@ void DlgJIO::onLoadFinished(bool ok)
                 aiptype = getModuleType(row ,GPScols::AIP1);
                 if (row==0){
                     //AM7
-                    // m_dlgGeo->addMarker(lat, lon, label, Placemark::MarkColor::Red);
                     lat0 = lat;
                     lon0 = lon;
                     am7 = QGV::GeoPos{lat0, lon0};
@@ -1550,12 +1550,12 @@ void DlgJIO::onLoadFinished(bool ok)
                         // expects
                         azdeg = ui->leAM7az->text().toDouble();
                         //TODO: length should not over range
-                        m_dlgGeo->addArrowLine(am7, azdeg, 60, QColor(Qt::red));
+                        m_dlgGeo->addArrowLine(am7, azdeg, 20, QColor(Qt::red), false, 1, 5);
                     }else{
                         //draw init Arrow Line
                         //TODO: length should not over range
                         m_dlgGeo->addArrowLine(am7, heading,
-                                               100, QColor(Qt::blue), true);
+                                               30, QColor(Qt::blue), true, 2, 5);
                     }
                 }else{
                     //CM7
@@ -1566,28 +1566,29 @@ void DlgJIO::onLoadFinished(bool ok)
 
                     if (ui->twResult->rowCount()>0){
                         // Link Lines
-                        m_dlgGeo->addLinkline(am7, cm);
-
-                        itmId = ui->twResult->item(row-1, AZEIcols::BeamDirID);
-                        if (itmId){
-                            qDebug() << "have BeamDirID data:" << itmId->text();
-                            azdeg = heading + getAz(aiptype,itmId->text().toInt());
-                            //TODO: length should not over range
-                            m_dlgGeo->addArrowLine(cm, azdeg, 100, QColor(rgb1), false, 4);
-                        }
+                        m_dlgGeo->addLinkline(am7, cm, Qt::yellow, 2);
                         itm = ui->twResult->item(row-1, AZEIcols::P2Azimuth);
                         if (itm){
                             //draw Arrow line, expect
                             azdeg = itm->text().toDouble();
                             //TODO: length should not over range
-                            m_dlgGeo->addArrowLine(cm, azdeg, 60, QColor(Qt::red));
+                            m_dlgGeo->addArrowLine(cm, azdeg, 20, QColor(Qt::red), false, 1, 5);
                         }
+                        // add later will be on top
+                        itmId = ui->twResult->item(row-1, AZEIcols::BeamDirID);
+                        if (itmId){
+                            qDebug() << "have BeamDirID data:" << itmId->text();
+                            azdeg = heading + getAz(aiptype,itmId->text().toInt());
+                            //Beam Direction ID's az deg: (TODO:length should not over range)
+                            m_dlgGeo->addArrowLine(cm, azdeg, 12, QColor(rgb1), false, 1, 3);
+                        }
+
 
                     }else{
                         //draw init Arrow Line
                         //TODO: length should not over range
                         m_dlgGeo->addArrowLine(cm, heading,
-                                               100, QColor(Qt::blue), true);
+                                               30, QColor(Qt::blue), true, 2, 5);
                     }
                 }
             }
@@ -1599,7 +1600,8 @@ void DlgJIO::onLoadFinished(bool ok)
                         if (!itm->text().isEmpty()){
                             azdeg = itm->text().toDouble();
                             //TODO: length should not over range
-                            m_dlgGeo->addArrowLine(am7, azdeg, 200, QColor(rgbaz));
+                            m_dlgGeo->addArrowLine(am7, azdeg, 15,
+                                                   QColor(rgbaz), false, 1, 5);
                         }
                     }
                 }
