@@ -506,9 +506,9 @@ void IperfWrapper::parserIperf3(QString linedata)
             // UDP:
             // 0.00-1.00   sec  4.18 GBytes  35.9 Gbits/sec  0.001 ms  0/137110 (0%)
 #if QT_VERSION < 0x050E00 // < 5.14.0
-            QStringList data = linedata.split(" ", QString::SkipEmptyParts);
+            QStringList data = linedata.split(" ", QString::SkipEmptyParts);// qt 5.14
 #else
-            QStringList data = linedata.split(" ", Qt::SkipEmptyParts); // qt 5.14
+            QStringList data = linedata.split(" ", Qt::SkipEmptyParts);
 #endif
             if (data.length()>=6){
                 QString sInterval  = data[0]; // Interval

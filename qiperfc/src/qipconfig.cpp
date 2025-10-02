@@ -294,6 +294,9 @@ QString QIPConfig::guessIperf3Protocal(QString filePath, int &port, int &paralle
     }
     // Create a QTextStream associated with the file
     int pnum=0;
+    QString sourceAddr;
+    QString targetAddr;
+
     QString result="TCP";
     QTextStream in(&file);
     QStringList ds;
@@ -314,12 +317,25 @@ QString QIPConfig::guessIperf3Protocal(QString filePath, int &port, int &paralle
         }
         if (line.startsWith("[") && line.contains("connected")){
             pnum++;
+            // guess client & server ip
+            int pos = line.indexOf(']');
+            if (pos != -1) {
+                QString afterBracket = line.mid(pos + 1).trimmed();
+                ds = afterBracket.split(" ");
+                if (ds.length()==9){
+                    sourceAddr = ds.value(1);
+                    targetAddr = ds.value(6);
+                }
+            }
+        }
+        if ((line.contains("[ ID]"))&&(line.contains("Interval"))){
+            break;
         }
     }
     parallel = pnum;
     // Close the file when done
     file.close();
-
+    qDebug() << " from:" << sourceAddr << " to " << targetAddr;
     return result;
 }
 
