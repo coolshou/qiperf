@@ -4,6 +4,8 @@
 #include <QEventLoop>
 #include <QFile>
 #include <QDebug>
+#include <QJsonParseError>
+#include <QJsonDocument>
 
 #include "myfunc.h"
 
@@ -16,6 +18,36 @@ Hanwha::Hanwha(QObject *parent)
     : AIP{parent}
 {
     mBeamTableData = new QMap<int, HanwhaBeamTableData>();
+    // mBeamTypeRangeData = new QMap<QString, BeamTypeRange>();
+    // mBeamTypeData = new QMap<QString, QList<int>>();
+    mRangeDataObj = QJsonObject();
+    initCmds();
+}
+
+void Hanwha::initCmds()
+{
+    QFile fobj(":/jio/hanwha");
+    if (fobj.open(QIODevice::ReadOnly)) {
+        QByteArray jsonData = fobj.readAll();
+        fobj.close();
+
+        QJsonParseError parseError;
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qDebug() << "Failed to parse JSON:" << parseError.errorString();
+            return; // Or handle the error appropriately
+        }
+        cmdObj = jsonDoc.object();
+        //TODO RESPONSE
+        cmdObj.value("RESPONSE").toObject();
+        // qDebug() << "cmdObj:" << cmdObj;
+        // data from 20250829.xlsx
+        mRangeDataObj = cmdObj.value("DistanceData").toObject();
+
+        // qDebug() << "mRangeDataObj:" << mRangeDataObj;
+    }else {
+        qDebug() << "Failed to open " << fobj.fileName() << " for reading:" << fobj.errorString();
+    }
 }
 
 void Hanwha::initBeamData(QString filename)
@@ -121,6 +153,7 @@ void Hanwha::initBeamData(QIODevice *filedevice)
                     }else{
                         qDebug() << "get cell " << row << " x " << colBeamType << " fail";
                     }
+                    qDebug() << "varBeamDirID:" << varBeamDirID.toString() << " varBeamType:" << varBeamType.toString();
                     mBeamTableData->insert(varBeamDirID.toInt(), HanwhaBeamTableData(varBeamDirID.toInt(),
                                                                              varAz.toDouble(),
                                                                              varEl.toDouble(),
@@ -174,11 +207,12 @@ BeamTypeRange Hanwha::getBeamTypeRange(QString beamtype)
 
 int Hanwha::findClosestBeamID(double targetAz, double targetEl, QString beamtype, int beamfactor)
 {
+    Q_UNUSED(beamfactor)
     int closestID = -1;
     double minDistance = std::numeric_limits<double>::max();
     // Narrow beam
     BeamTypeRange r= getBeamTypeRange(beamtype);
-    //TODO: azimuth3dB_BW , elevation3dB_BW
+    qDebug() << "//TODO: [findClosestBeamID] azimuth3dB_BW , elevation3dB_BW";
     double azBW=0;
     double elBW=0;
 
@@ -287,4 +321,172 @@ QVector<int> Hanwha::findNearestNeighbors(int targetID, QString beamtype, int ne
 
     qDebug() << "findNearestNeighbors:" << result;
     return result;
+}
+
+int Hanwha::getBestBeamID(double minaz, double maxaz, double minel, double maxel)
+{
+    Q_UNUSED(minel)
+    Q_UNUSED(maxel)
+    double spAz = maxaz - minaz;
+    if (spAz > 180){
+        spAz = 360 - spAz;
+    }
+    qDebug() << "//TODO:Hanwha getBestBeamID" ;
+
+    //"NERROW" HPBWaz, HPBWel?
+    // BeamTypeRange r = mBeamTypeRangeData.value("NERROW");
+    // if ((r.maxAz < maxaz)||(r.minAz > minaz)){
+    //     //out of range;
+    //     qDebug() << "getBestBeamID: ("<< minaz << "," << maxaz <<")"
+    //              << "Az out of range:" <<r.minAz << "," << r.maxAz;
+    //     //"widwbeam"
+    // }else{
+
+    // }
+
+    // TODO: other type?
+    return 477;
+}
+
+double Hanwha::getTargetEIRP(double dist)
+{
+    //expect EIRP by dist (meter)
+    double eirp=0.0;
+    if (!mRangeDataObj.isEmpty()){
+        QStringList skeys = sorted(mRangeDataObj.keys());
+        foreach(const QString& key, skeys) {
+            if (dist > key.toDouble()){
+                auto d = mRangeDataObj.value(key).toObject();
+                eirp = d.value("TargetEIRP").toDouble();
+            }else {
+                break;
+            }
+        }
+    }else {
+        qDebug() << "No mRangeDataObj";
+    }
+    return eirp;
+}
+
+QVector<double> Hanwha::getRxAtt(double dist)
+{
+    QVector<double> ds;
+    double att1 = 0.0;
+    double att2 = 0.0;
+    double lan = 0.0;
+    if (!mRangeDataObj.isEmpty()){
+        QStringList skeys = sorted(mRangeDataObj.keys());
+        foreach(const QString& key, skeys) {
+            if (dist > key.toDouble()){
+                auto d = mRangeDataObj.value(key).toObject();
+                att1 = d.value("IFRX1ATT").toDouble();
+                att2 = d.value("IFRX2ATT").toDouble();
+                lan = d.value("LNARXATT").toDouble();
+            }else {
+                break;
+            }
+        }
+    }else {
+        qDebug() << "getRxAtt: No mRangeDataObj";
+    }
+    ds.append(att1);
+    ds.append(att2);
+    ds.append(lan);
+    return ds;
+}
+
+QVector<double> Hanwha::getBFRxAtt(double dist)
+{
+    QVector<double> ds;
+    double att1=0.0;
+    double att2=0.0;
+    if (!mRangeDataObj.isEmpty()){
+        QStringList skeys = sorted(mRangeDataObj.keys());
+        foreach(const QString& key, skeys) {
+            if (dist > key.toDouble()){
+                auto d = mRangeDataObj.value(key).toObject();
+                att1 = d.value("BFRX1ATT").toDouble();
+                att2 = d.value("BFRX2ATT").toDouble();
+            }else {
+                break;
+            }
+        }
+    }else {
+        qDebug() << "getBFRxAtt: No mRangeDataObj";
+    }
+    ds.append(att1);
+    ds.append(att2);
+    return ds;
+}
+
+QVector<double> Hanwha::getTxAtt(double dist)
+{
+    QVector<double> ds;
+    double att1 = 0.0;
+    double att2 = 0.0;
+    if (!mRangeDataObj.isEmpty()){
+        QStringList skeys = sorted(mRangeDataObj.keys());
+        foreach(const QString& key, skeys) {
+            if (dist > key.toDouble()){
+                auto d = mRangeDataObj.value(key).toObject();
+                att1 = d.value("IFTX1ATT").toDouble();
+                att2 = d.value("IFTX2ATT").toDouble();
+            }else {
+                break;
+            }
+        }
+    }else {
+        qDebug() << "getTxAtt: No mRangeDataObj";
+    }
+    ds.append(att1);
+    ds.append(att2);
+    return ds;
+}
+
+QVector<double> Hanwha::getBFTxAtt(double dist)
+{
+    QVector<double> ds;
+    double att1=0.0;
+    double att2=0.0;
+    if (!mRangeDataObj.isEmpty()){
+        QStringList skeys = sorted(mRangeDataObj.keys());
+        foreach(const QString& key, skeys) {
+            if (dist > key.toDouble()){
+                auto d = mRangeDataObj.value(key).toObject();
+                att1 = d.value("BFTX1ATT").toDouble();
+                att2 = d.value("BFTX2ATT").toDouble();
+            }else {
+                break;
+            }
+        }
+    }else {
+        qDebug() << "getBFTxAtt: No mRangeDataObj";
+    }
+    ds.append(att1);
+    ds.append(att2);
+    return ds;
+}
+
+QString Hanwha::getCmd(QString key)
+{
+    if (cmdObj.contains(key)){
+        return cmdObj.value(key).toString();
+    }else{
+        qDebug() << "Hanwha::getCmd: NO command of " << key;
+        return "";
+    }
+}
+
+QString Hanwha::getFreqIdx(double ghz)
+{
+    // turn freq to idx which Hanwha support
+    QString idx="";
+    QJsonObject fs = cmdObj.value("Freq").toObject();
+    foreach (auto key, fs.keys()){
+        if (fs.value(key).toDouble() ==ghz){
+            idx = key;
+            break;
+        }
+    }
+    return idx;
 }

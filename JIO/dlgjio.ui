@@ -379,22 +379,47 @@
            </column>
            <column>
             <property name="text">
-             <string>P2 Rx1Att</string>
+             <string>BFTx1Att</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>P2 Rx2Att</string>
+             <string>BFTx2Att</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>P2 BF1Att</string>
+             <string>Tx1Att</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>P2 BF2Att</string>
+             <string>Tx2Att</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>BFRx1Att</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>BFRx2Att</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Rx1Att</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Rx2Att</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>RxLanAtt</string>
             </property>
            </column>
           </widget>

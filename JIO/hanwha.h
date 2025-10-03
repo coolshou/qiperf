@@ -2,6 +2,8 @@
 #define HANWHA_H
 
 #include <QObject>
+#include <QJsonObject>
+
 #include "aip.h"
 #include "hanwhabeamtabledata.h"
 #include "beamtyperange.h"
@@ -12,6 +14,7 @@ class Hanwha : public AIP
     Q_OBJECT
 public:
     explicit Hanwha(QObject *parent = nullptr);
+    void initCmds();
     void getBeamTableData(int beamTableID);
     BeamTypeRange getBeamTypeRange(QString beamtype);
     int findClosestBeamID(double targetAz, double targetEl,
@@ -20,6 +23,15 @@ public:
     QVector<QVector<double>> getBeamTableDatas(QString beamtype);
     QVector<int> findNearestNeighbors(int targetID, QString beamtype="NARROW",
                                       int neighborGroup = 1);
+    int getBestBeamID(double minaz, double maxaz, double minel, double maxel);
+    double getTargetEIRP(double dist);
+    QVector<double> getRxAtt(double dist);
+    QVector<double> getBFRxAtt(double dist);
+    QVector<double> getTxAtt(double dist);
+    QVector<double> getBFTxAtt(double dist);
+    QString getCmd(QString key);
+    QString getFreqIdx(double ghz);
+
 public slots:
     void initBeamData(QString filename);
     void initBeamData(QIODevice *device);
@@ -32,8 +44,10 @@ signals:
     void updateBeamTypeGroup(QMap<QString, QList<int>> data);
 private:
     QMap<int, HanwhaBeamTableData> *mBeamTableData;
-    QMap<QString, QList<int>> mBeamTypeData;
-    QMap<QString, BeamTypeRange> mBeamTypeRangeData;
+    QMap<QString, QList<int>> mBeamTypeData; // store beamtype "NERROW"... beamDirection ID list
+    QMap<QString, BeamTypeRange> mBeamTypeRangeData; // store beamtype "NERROW"... min/max AZ/EL
+    QJsonObject cmdObj;
+    QJsonObject mRangeDataObj;
 };
 
 #endif // HANWHA_H

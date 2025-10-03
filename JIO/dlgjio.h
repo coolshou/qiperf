@@ -61,10 +61,15 @@ public:
         P2AzDiff=6,
         P2ElDiff=7,
         BeamDirID=8,
-        P2Rx1Att=9,
-        P2Rx2Att=10,
-        P2BF1Att=11,
-        P2BF2Att=12
+        P2BFTx1Att=9,
+        P2BFTx2Att=10,
+        P2Tx1Att=11,
+        P2Tx2Att=12,
+        P2BFRx1Att=13,
+        P2BFRx2Att=14,
+        P2Rx1Att=15,
+        P2Rx2Att=16,
+        P2RxLnaAtt=17
     };
     Q_ENUM(AZEIcols)
     enum AIPcols{
@@ -94,6 +99,14 @@ public:
     void getBestBeamID(int idx, double azimuthDegree, AIP::ModuleType aip1type, QList<QTableWidgetItem*> cm7rs);
     int findClosestBeamID(double targetAz, double targetEl,
                           QString beamtype="Narrow", int beamfactor=1);
+    void initBeamCMD(QString c, QString antarraymode="8x8", QString cmName="");
+    void initBeamIdCMD(QString c, QString beamid, QString cmName="");
+    void initBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
+                          QString Tx1att, QString Tx2att, QString cmName="");
+    void initBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
+                          QString Rx1att, QString Rx2att, QString RxLan,
+                          QString cmName="");
+
 public slots:
     void onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg);
     void setTableWidgetBGColor(QTableWidget *tw, int row, int col, QColor color);
@@ -107,6 +120,7 @@ signals:
     void stopOptimiz();//
     void sigAddIperf(QString cfg);
     void addBeamIDCmd(QString cmd);
+    void addCMBeamIDCmd(QString name, QString cmd);
     void clearBeamIDCmd();
 
 protected:
