@@ -153,7 +153,7 @@ void Hanwha::initBeamData(QIODevice *filedevice)
                     }else{
                         qDebug() << "get cell " << row << " x " << colBeamType << " fail";
                     }
-                    qDebug() << "varBeamDirID:" << varBeamDirID.toString() << " varBeamType:" << varBeamType.toString();
+                    // qDebug() << "varBeamDirID:" << varBeamDirID.toString() << " varBeamType:" << varBeamType.toString();
                     mBeamTableData->insert(varBeamDirID.toInt(), HanwhaBeamTableData(varBeamDirID.toInt(),
                                                                              varAz.toDouble(),
                                                                              varEl.toDouble(),

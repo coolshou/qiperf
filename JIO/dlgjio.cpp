@@ -1088,7 +1088,8 @@ void DlgJIO::getBestBeamID(int idx,
             beamid = beamid - 1;
         }
         initBeamIdCMD(c, QString::number(beamid));
-        qDebug() << "// TODO: get Att value by distance";
+        qDebug() << "// TODO: get Att value by distance (use The most remote CM's distance)";
+
         // Tx att
         initBeamTxAttCMD(c, QString::number(0), QString::number(0),
                          QString::number(18), QString::number(18));
