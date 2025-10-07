@@ -48,7 +48,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     m_clipboard = QApplication::clipboard();
     ui->setupUi(this);
-    mPluginNames = nullptr;
+    mPluginNames = QStringList();
     loadSettings();
     loadPlugins();
     loadTools();
@@ -818,7 +818,7 @@ void QIperfC::loadPlugins()
     }
 
     qDebug() << "Searching for plugins folder in:" << pluginsDir.absolutePath();
-    if (mPluginNames){
+    if (!mPluginNames.isEmpty()){
         // for (const QString &fileName : pluginsDir.entryList(QDir::Files))
         QString libfilename;
         for (const QString &fileName : mPluginNames) {
