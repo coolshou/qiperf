@@ -48,6 +48,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_settings=new QSettings(settingfilename, QSettings::IniFormat);
     m_clipboard = QApplication::clipboard();
     ui->setupUi(this);
+    mPluginNames = nullptr;
     loadSettings();
     loadPlugins();
     loadTools();
@@ -817,42 +818,43 @@ void QIperfC::loadPlugins()
     }
 
     qDebug() << "Searching for plugins folder in:" << pluginsDir.absolutePath();
+    if (mPluginNames){
+        // for (const QString &fileName : pluginsDir.entryList(QDir::Files))
+        QString libfilename;
+        for (const QString &fileName : mPluginNames) {
+            libfilename = pluginsDir.absolutePath() + QDir::separator() + fileName;
+            if (QLibrary::isLibrary(libfilename)) { // Check if it's a valid library file
+                QPluginLoader *loader = new QPluginLoader(libfilename);
+                QObject *plugin = loader->instance();
+                if (plugin) {
+                    // Try to cast the loaded plugin to our interface
+                    PluginInterface *iPlugin = qobject_cast<PluginInterface *>(plugin);
+                    if (iPlugin) {
+                        qDebug() << "Loaded plugin:" << iPlugin->pluginName();
+                        plugins.append(iPlugin);
+                        pluginLoaders.append(loader);
 
-    // for (const QString &fileName : pluginsDir.entryList(QDir::Files))
-    QString libfilename;
-    for (const QString &fileName : mPluginNames) {
-        libfilename = pluginsDir.absolutePath() + QDir::separator() + fileName;
-        if (QLibrary::isLibrary(libfilename)) { // Check if it's a valid library file
-            QPluginLoader *loader = new QPluginLoader(libfilename);
-            QObject *plugin = loader->instance();
-            if (plugin) {
-                // Try to cast the loaded plugin to our interface
-                PluginInterface *iPlugin = qobject_cast<PluginInterface *>(plugin);
-                if (iPlugin) {
-                    qDebug() << "Loaded plugin:" << iPlugin->pluginName();
-                    plugins.append(iPlugin);
-                    pluginLoaders.append(loader);
+                        // Add plugin's menu to the main menu bar
+                        QMenu* pluginMenu = iPlugin->createPluginMenu(this);
+                        if (pluginMenu) {
+                            ui->menuDevice->addMenu(pluginMenu);
+                        }
 
-                    // Add plugin's menu to the main menu bar
-                    QMenu* pluginMenu = iPlugin->createPluginMenu(this);
-                    if (pluginMenu) {
-                        ui->menuDevice->addMenu(pluginMenu);
+                        iPlugin->initialize(); // Call plugin's initialization method
+                    } else {
+                        qWarning() << "Could not cast plugin '" << libfilename << "' to PluginInterface.";
+                        qWarning() << loader->errorString();
+                        loader->unload(); // Unload if it's not our expected plugin type
+                        delete loader;
                     }
-
-                    iPlugin->initialize(); // Call plugin's initialization method
                 } else {
-                    qWarning() << "Could not cast plugin '" << libfilename << "' to PluginInterface.";
+                    qWarning() << "Failed to load plugin: " << libfilename;
                     qWarning() << loader->errorString();
-                    loader->unload(); // Unload if it's not our expected plugin type
                     delete loader;
                 }
-            } else {
-                qWarning() << "Failed to load plugin: " << libfilename;
-                qWarning() << loader->errorString();
-                delete loader;
+            }else{
+                qWarning() << "Not a valid library file: " << libfilename;
             }
-        }else{
-            qWarning() << "Not a valid library file: " << libfilename;
         }
     }
 }
