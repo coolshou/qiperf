@@ -16,6 +16,11 @@ DlgBeamCmd::~DlgBeamCmd()
 void DlgBeamCmd::clear()
 {
     ui->textEdit->clear();
+    clearCM();
+}
+
+void DlgBeamCmd::clearCM()
+{
     foreach (auto key, mCMCmds.keys()) {
         mCMCmds.value(key)->clear();
     }

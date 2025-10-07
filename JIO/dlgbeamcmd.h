@@ -18,6 +18,7 @@ public:
     ~DlgBeamCmd();
 public slots:
     void clear();
+    void clearCM();
     void onAddBeamIDCmd(QString cmd);
     void onAddCMBeamIDCmd(QString name, QString cmd);
 protected:

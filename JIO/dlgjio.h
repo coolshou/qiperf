@@ -76,7 +76,16 @@ public:
         Azimuth=0,
         Elevation=1,
         Azdiff=2,
-        BeamDirectionID=3
+        BeamDirectionID=3,
+        BFTx1Att=4,
+        BFTx2Att=5,
+        Tx1Att=6,
+        Tx2Att=7,
+        BFRx1Att=8,
+        BFRx2Att=9,
+        Rx1Att=10,
+        Rx2Att=11,
+        RxLnaAtt=12
     };
     Q_ENUM(AIPcols)
     enum State {
@@ -96,7 +105,8 @@ public:
     void getAPInfo(QString refrow, QString target);
     AIP::ModuleType getModuleType(int row, int col);
     QJsonObject createInitData();
-    void getBestBeamID(int idx, double azimuthDegree, AIP::ModuleType aip1type, QList<QTableWidgetItem*> cm7rs);
+    void getBestBeamID(int idx, double azimuthDegree, AIP::ModuleType aip1type,
+                       QList<QTableWidgetItem*> cm7rs, double maxDistance=0.0);
     int findClosestBeamID(double targetAz, double targetEl,
                           QString beamtype="Narrow", int beamfactor=1);
     void initBeamCMD(QString c, QString antarraymode="8x8", QString cmName="");
@@ -106,6 +116,8 @@ public:
     void initBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
                           QString Rx1att, QString Rx2att, QString RxLan,
                           QString cmName="");
+
+    void initResultHeader(AIP::ModuleType aip1type);
 
 public slots:
     void onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg);
@@ -122,6 +134,7 @@ signals:
     void addBeamIDCmd(QString cmd);
     void addCMBeamIDCmd(QString name, QString cmd);
     void clearBeamIDCmd();
+    void clearCMBeamIDCmd();
 
 protected:
     void changeEvent(QEvent *e) override;
@@ -162,7 +175,7 @@ private slots:
     void onToDMS(bool checked);
     void onToDegree(bool checked);
     void onCMBeamDirIDInit(bool checked);
-    void onAttInit(bool checked);
+    void onAttInit(bool checked=false);
     void onBeamDirIDCmd(bool checked);
     void showContextMenu(const QPoint &pos);
     void onDeviceCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
@@ -246,6 +259,10 @@ private:
     QMap<QString, WSClient *> mWScs;
     OptimizeWorker *mOptWorker;
     QThread *mOptThread;
+    QStringList mHeaderResult;
+    QStringList mHeaderAIP;
+    QStringList mHeaderHanwha;
+    QStringList mHeaderCyntec;
 };
 
 #endif // DLGJIO_H
