@@ -1155,10 +1155,10 @@ void DlgJIO::getBestBeamID(int idx,
         //
         emit addBeamIDCmd(mHanwha->getCmd("ATC_ON").arg(c));
         //
-        emit addBeamIDCmd("--------------------------------------------------------------------------------");
+        emit addBeamIDCmd("#----------------------------------------------------------------------");
         emit addBeamIDCmd(mHanwha->getCmd("GET_EIRP").arg(c, QString::number(1)));
         emit addBeamIDCmd(mHanwha->getCmd("GET_EIRP").arg(c, QString::number(2)));
-        emit addBeamIDCmd("================================================================================");
+        emit addBeamIDCmd("#======================================================================");
     }else{
         qDebug() << "Unknown AIP" << idx << " type:" << aiptype;
     }
@@ -1742,7 +1742,7 @@ void DlgJIO::onAttInit(bool checked)
                 initBeamTxAttCMD("", bfTx1, bfTx2, Tx1, Tx2, cm);
                 initBeamRxAttCMD("", bfRx1, bfRx2, Rx1, Rx2, RxLan, cm);
                 emit addCMBeamIDCmd(cm, mHanwha->getCmd("ATC_ON").arg(""));
-                emit addCMBeamIDCmd(cm, "----------------------------------------------------------------------");
+                emit addCMBeamIDCmd(cm, "#----------------------------------------------------------------------");
             }
         }else{
             QString errmsg = "[onAttInit]Please setup ModuleType";
