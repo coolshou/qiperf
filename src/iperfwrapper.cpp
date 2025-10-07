@@ -543,38 +543,39 @@ void IperfWrapper::parserIperf3(QString linedata)
                 }
                 if (m_tpdatas[sInterval].count()<iparallel){
                     QJsonObject irec = QJsonObject();
-                    irec.insert("idx", QString("%1%2").arg(idx,sTag));  // parallel num
-                    irec.insert("interval", interval);  // interval
-
-                    // debug("("+sInterval + ") " + idx + sTag +
-                    //       " interval:" + QString::number(interval) +
-                    //       " value:" + data[4] +
-                    //       " sDIR:" +  sDir);
-
-                    irec.insert("value", data[4]);  // Bitrate
-                    irec.insert("unit", data[5]);  // Bitrate unit
-                    if (m_protocal.contains("UDP")){
-                        if (data.length() >=9) {
-                            irec.insert("jitter", data[6]);
-                            irec.insert("jitter_unit", data[7]);
-                            QStringList pkts = data[8].split("/");
-                            if (pkts.count()==2){
-                                irec.insert("packet_lost", pkts[0]);
-                                irec.insert("packet_total", pkts[1]);
-                            }else{
-                                debug("Unknown data format of packet lost: " + data[8], 3);
-                            }
-                        }else{
-                            debug("Unknown data format: " + data.join(","), 3);
-                        }
-                    }
-                    if (!sDir.isNull()){
-                        irec.insert("dir", sDir);  // direction
-                    }
                     if (idx.contains("SUM", Qt::CaseInsensitive)){
                         // ignore [SUM] line
                         debug("==linedata==SUM==  " + linedata, 5);
                     }else{
+                        irec.insert("idx", QString("%1%2").arg(idx,sTag));  // parallel num
+                        irec.insert("interval", interval);  // interval
+
+                        // debug("("+sInterval + ") " + idx + sTag +
+                        //       " interval:" + QString::number(interval) +
+                        //       " value:" + data[4] +
+                        //       " sDIR:" +  sDir);
+
+                        irec.insert("value", data[4]);  // Bitrate
+                        irec.insert("unit", data[5]);  // Bitrate unit
+                        if (m_protocal.contains("UDP")){
+                            if (data.length() >=9) {
+                                irec.insert("jitter", data[6]);
+                                irec.insert("jitter_unit", data[7]);
+                                QStringList pkts = data[8].split("/");
+                                if (pkts.count()==2){
+                                    irec.insert("packet_lost", pkts[0]);
+                                    irec.insert("packet_total", pkts[1]);
+                                }else{
+                                    debug("Unknown data format of packet lost: " + data[8], 3);
+                                }
+                            }else{
+                                debug("Unknown data format: " + data.join(","), 3);
+                            }
+                        }
+                        if (!sDir.isNull()){
+                            irec.insert("dir", sDir);  // direction
+                        }
+
                         if (linedata.contains("receiver")){
                             //final data is the average of throughput
                             irec.insert("AVG", true);
@@ -636,11 +637,13 @@ QString IperfWrapper::getIdx(QString linedata, QString &idx)
         QRegularExpressionMatch match = re.match(tmp);
         if (match.hasMatch()) {
             idx = match.captured(1);
-            result = linedata.right(linedata.length()-iE-1).trimmed();
             debug("getIdx idx: " + idx +  "  right(" + result + ")", 6);
-        }else{
-            debug("getIdx format not in expect eq [ 1]: " + tmp, 5);
-        }
+         }
+        //else{
+        //     debug("getIdx format not in expect eq [ 1]: " + tmp, 3);
+        // }
+        // this will remove [  1] part from linedata
+        result = linedata.right(linedata.length()-iE-1).trimmed();
     }
     return result;
 }
