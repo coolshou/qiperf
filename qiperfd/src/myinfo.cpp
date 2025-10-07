@@ -525,7 +525,9 @@ void MyInfo::setSysBufferSize(quint64 buff)
 
 #endif
 }
-void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory, int& cpucorenum) {
+void MyInfo::getCpuMemInfo(QString &cpuModel,QString &totalMemory, int& cpucorenum)
+{
+    //get cpumodel, total memory, cpu core number
     int cpucore=0;
     cpuModel = getCPUModel(cpucore);
     cpucorenum = cpucore;
