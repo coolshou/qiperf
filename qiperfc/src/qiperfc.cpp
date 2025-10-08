@@ -90,6 +90,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_dlgoption, &dlgOption::updateOpenStreetMapTile, this, &QIperfC::onUpdateOpenStreetMapTile);
     initStatusbar();
     connect(m_dlgoption, &dlgOption::updateCpuCheckInterval, this, &QIperfC::onUpdateCpuCheckInterval);
+    connect(m_dlgoption, &dlgOption::updateMemCheckInterval, this, &QIperfC::onUpdateMemCheckInterval);
     //UI actions
     initActions();
     initToolbar();
@@ -999,6 +1000,7 @@ void QIperfC::loadSettings()
     m_oldsavepath = m_settings->value("oldsavepath",
                                       QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
     mCpuCheckInterval = m_settings->value("CpuCheckInterval", 1).toInt();
+    mMemCheckInterval = m_settings->value("MemCheckInterval", 1).toInt();
     m_settings->endGroup();
 
     m_settings->beginGroup("agent");
@@ -1262,6 +1264,14 @@ void QIperfC::onUpdateCpuCheckInterval(int interval)
     mCpuCheckInterval = interval;
     if (m_cpumonitor){
         m_cpumonitor->setInterval(interval);
+    }
+}
+
+void QIperfC::onUpdateMemCheckInterval(int interval)
+{
+    mMemCheckInterval = interval;
+    if (m_memmonitor){
+        m_memmonitor->setInterval(interval);
     }
 }
 
@@ -1715,6 +1725,15 @@ void QIperfC::initStatusbar()
             m_cpu_label, [&](double percentage) {
         m_cpu_label->setText(QString("CPU Usage: %1%").arg(percentage, 0, 'f', 2));
     });
+    //Mem Usage
+    m_memmonitor = new MemMonitor(mMemCheckInterval);
+    m_mem_label = new QLabel();
+    m_mem_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
+    ui->statusbar->addWidget(m_mem_label, 0);
+    connect(m_memmonitor, &MemMonitor::memoryUsageUpdated,
+            m_mem_label, [&](qint64 memMB) {
+                m_mem_label->setText(QString("MEM Usage: %1 MB").arg(memMB));
+            });
     // statusbar of endpints (qiperfd list)
     m_label_qiperfd = new QLabel(this);
     m_label_qiperfd->installEventFilter(this);

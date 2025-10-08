@@ -14,6 +14,7 @@
 #include <QRegularExpression>
 #endif
 #include <QTextStream>
+#include <unistd.h> // for getpid()
 
 #include <QDebug>
 
@@ -55,7 +56,6 @@ void MemMonitor::setInterval(int interval)
 void MemMonitor::updateMemoryUsage() {
     qint64 memKB = getMemoryUsageKB();
     qint64 memMB = round(memKB/1000);
-    qDebug() << "updateMemoryUsage:" << memKB << " MB:" << memMB;
     emit memoryUsageUpdated(memMB);
 }
 
@@ -66,18 +66,19 @@ qint64 MemMonitor::getMemoryUsageKB() {
         return pmc.WorkingSetSize / 1024;
     }
 #elif defined(Q_OS_LINUX)
-    QString path="/proc/self/status";
+    // qint64 pid = getpid();
+    // QString path=QString("/proc/%1/status").arg(pid);
+    // qDebug() << "Current PID:" << pid << " path:" << path;
+    QString path=QString("/proc/self/status");
     QFile file(path);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
-        in.seek(0);
-        QString line;
-        while (!in.atEnd()) {
-            line = in.readLine();
-            qDebug() << "line:" << line;
+        //readall
+        QString data = in.readAll();
+        file.close();
+        foreach (QString line, data.split("\n")) {
             if (line.startsWith("VmRSS:")) {
                 QStringList parts;
-
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
                 parts = QString(line).split(QRegExp("\\s+"));
 #else
@@ -88,12 +89,8 @@ qint64 MemMonitor::getMemoryUsageKB() {
                 }else{
                     qDebug() << "wrong format: " << line;
                 }
-                // return value.toLongLong(); // in KB
-            }else{
-                qDebug() << "debug: " << line;
             }
         }
-        file.close();
     }else{
         qWarning() << "Cannot open file" << path << ":" << file.errorString();
         return file.error();

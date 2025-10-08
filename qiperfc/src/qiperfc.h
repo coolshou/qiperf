@@ -43,6 +43,7 @@
 #include "plugin/plugininterface.h"
 #include "auto/dlgsimplemicro.h"
 #include "cpumonitor.h"
+#include "memmonitor.h"
 
 #if (TEST_ICMP==1)
 #include "../src/icmpping.h"
@@ -176,6 +177,7 @@ private slots:
     void onIgnoreWrongInterval(bool bIgnore);
     void onUpdateOpenStreetMapTile(QString tile);
     void onUpdateCpuCheckInterval(int interval);
+    void onUpdateMemCheckInterval(int interval);
     void onSerialOpened(QString refrow, QString serveraddress, QString serveraPort);
     void onSerialClosed(QString idx);
     void onSSHOpened(QString refrow, QString serveraddress, QString serveraPort);
@@ -234,7 +236,10 @@ private:
     QLabel *m_status_label;
     QLabel *m_cpu_label;
     CpuMonitor *m_cpumonitor;
+    QLabel *m_mem_label;
+    MemMonitor *m_memmonitor;
     int mCpuCheckInterval;
+    int mMemCheckInterval;
     QLabel *m_label_qiperfd;
 
     QDateTime m_TestStartTime;
