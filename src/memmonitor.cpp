@@ -14,7 +14,9 @@
 #include <QRegularExpression>
 #endif
 #include <QTextStream>
+#ifdef (Q_OS_LINUX)
 #include <unistd.h> // for getpid()
+#endif
 
 #include <QDebug>
 
