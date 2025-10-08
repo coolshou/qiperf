@@ -370,7 +370,9 @@ QJsonObject DlgJIO::createInitData()
                     }
                     posdata["AIP2"] = aipObj;
                 }else{
-                    qDebug() << "Row:" << QString::number(i) << " Wrong API2 data";
+                    if (i==0){
+                        qDebug() << "Row:" << QString::number(i) << " Wrong API2 data";
+                    }
                 }
             }
             item = ui->tableWidget->item(i, GPScols::IPAddr);
@@ -1671,7 +1673,7 @@ void DlgJIO::onAttInit(bool checked)
         cm = ui->tableWidget->item(iRow+1, GPScols::PositionName)->text();
         distance = ui->twResult->item(iRow, AZEIcols::Distance)->text().toDouble()*1000;
         fspl = MyFunc::calculateFSPL(distance, freq);
-        qDebug() << iRow << "freq:" << freq << " ,distance:" << distance <<" fspl:" << fspl;
+        qDebug() << "[" << iRow << "]"<< cm <<" distance:" << distance <<" fspl:" << fspl;
         aiptype = getModuleType(iRow+1 ,GPScols::AIP1);
         if (aiptype==AIP::ModuleType::Cyntec) {
             if (mCyntec){
@@ -1695,7 +1697,7 @@ void DlgJIO::onAttInit(bool checked)
 
             }
         }else if (aiptype==AIP::ModuleType::Hanwha) {
-            qDebug() << "[onAttInit] Hanwha";
+            // qDebug() << "[onAttInit] Hanwha";
             if (mHanwha){
                 targetEIRP = mHanwha->getTargetEIRP(distance);
                 qDebug() << iRow << " targetEIRP:" << targetEIRP;
