@@ -71,6 +71,7 @@ SOURCES += \
     ../src/gps/iplocationprovider.cpp \
     ../src/map/dlggeoosm.cpp \
     ../src/map/frmaddrectangle.cpp \
+    ../src/memmonitor.cpp \
     ../src/myfunc.cpp \
     ../src/pipeclient.cpp \
     ../src/endpoint.cpp \
@@ -156,6 +157,7 @@ HEADERS += \
     ../src/gps/iplocationprovider.h \
     ../src/map/dlggeoosm.h \
     ../src/map/frmaddrectangle.h \
+    ../src/memmonitor.h \
     ../src/pipeclient.h \
     ../src/comm.h \
     ../src/endpoint.h \

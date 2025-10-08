@@ -32,7 +32,9 @@ public slots:
     void onTPUnitChanged(QString sunit);
     void updateFontStyle(QString fontfamily);
     void onCpuCheckClicked(bool checked);
+    void onMemCheckClicked(bool checked);
     void onCpuCheckIntervalValueChanged(int value);
+    void onMemCheckIntervalValueChanged(int value);
 signals:
     // void ipaddressUpdated(QString ipaddress, int port);
     void widthChanged(int width);
@@ -42,6 +44,7 @@ signals:
     void updateTPUnit(QString sunit);
     void updateOpenStreetMapTile(QString tile);
     void updateCpuCheckInterval(int interval);
+    void updateMemCheckInterval(int interval);
 protected:
     void changeEvent(QEvent *e) override;
     void hidetab(QString tabname);

@@ -33,7 +33,9 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     connect(ui->cb_TPUnit, &QComboBox::currentTextChanged, this, &dlgOption::onTPUnitChanged);
     ui->tabWidget->setCurrentIndex(0);
     connect(ui->cbCpuCheck, &QCheckBox::clicked, this, &dlgOption::onCpuCheckClicked);
+    connect(ui->cbMemCheck, &QCheckBox::clicked, this, &dlgOption::onMemCheckClicked);
     connect(ui->sbCpuCheckInterval, &QSpinBox::valueChanged, this, &dlgOption::onCpuCheckIntervalValueChanged);
+    connect(ui->sbMemCheckInterval, &QSpinBox::valueChanged, this, &dlgOption::onMemCheckIntervalValueChanged);
 }
 
 dlgOption::~dlgOption()
@@ -242,9 +244,24 @@ void dlgOption::onCpuCheckClicked(bool checked)
     emit updateCpuCheckInterval(value);
 }
 
+void dlgOption::onMemCheckClicked(bool checked)
+{
+    int value=0;
+    ui->sbMemCheckInterval->setEnabled(checked);
+    if (checked){
+        value = ui->sbMemCheckInterval->value();
+    }
+    emit updateMemCheckInterval(value);
+}
+
 void dlgOption::onCpuCheckIntervalValueChanged(int value)
 {
     emit updateCpuCheckInterval(value);
+}
+
+void dlgOption::onMemCheckIntervalValueChanged(int value)
+{
+    emit updateMemCheckInterval(value);
 }
 
 // void dlgOption::setTPsize(int width, int heigth)
