@@ -1031,7 +1031,7 @@ void QIperfC::loadSettings()
         QVariant value = m_settings->value(key);
         qDebug() << key << "=" << value;
 #ifdef Q_OS_WIN
-        mPluginNames.append(QString("lib%1.dll".arg(value.toString()));
+        mPluginNames.append(QString("lib%1.dll").arg(value.toString()));
 #elif defined(Q_OS_UNIX)
         mPluginNames.append(QString("lib%1.so").arg(value.toString()));
 #endif
