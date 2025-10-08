@@ -66,7 +66,10 @@ public:
         P2Tx1Att=11,
         P2Tx2Att=12,
         P2BFRx1Att=13,
+        P2CRx1Att=13,
         P2BFRx2Att=14,
+        P2CRx2Att=14,
+        P2CLnaAtt=15,
         P2Rx1Att=15,
         P2Rx2Att=16,
         P2RxLnaAtt=17
@@ -82,7 +85,10 @@ public:
         Tx1Att=6,
         Tx2Att=7,
         BFRx1Att=8,
+        CRx1Att=8, //Cyntec Rx1Att
         BFRx2Att=9,
+        CRx2Att=9,  //Cyntec Rx2Att
+        CLnaAtt=10, //Cyntec Lna
         Rx1Att=10,
         Rx2Att=11,
         RxLnaAtt=12
@@ -109,13 +115,18 @@ public:
                        QList<QTableWidgetItem*> cm7rs, double maxDistance=0.0);
     int findClosestBeamID(double targetAz, double targetEl,
                           QString beamtype="Narrow", int beamfactor=1);
-    void initBeamCMD(QString c, QString antarraymode="8x8", QString cmName="");
-    void initBeamIdCMD(QString c, QString beamid, QString cmName="");
-    void initBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
+    void initHanwhaBeamCMD(QString c, QString antarraymode="8x8", QString cmName="");
+    void initHanwhaBeamIdCMD(QString c, QString beamid, QString cmName="");
+    void initHanwhaBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
                           QString Tx1att, QString Tx2att, QString cmName="");
-    void initBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
+    void initHanwhaBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
                           QString Rx1att, QString Rx2att, QString RxLan,
                           QString cmName="");
+    void initCyntecBeamCMD(QString c, QString antarraymode="8x8", QString cmName="");
+    void initCyntecBeamIdCMD(QString c, QString beamid, QString cmName="");
+    void initCyntecBeamTxAttCMD(QString c, QString Tx1att, QString Tx2att, QString cmName="");
+    void initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
+                                QString Rx1iip3, QString Rx2iip3, QString cmName="");
 
     void initResultHeader(AIP::ModuleType aip1type);
 

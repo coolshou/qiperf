@@ -38,12 +38,15 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
                                   << "P1 Az(°)" << "P2 Az(°)" << "P1 El(°)" << "P2 El(°)"
                                   << "P2\nAz Diff" << "P2\nEl Diff" << "P2\nBeamDir ID";
     mHeaderAIP = QStringList() << "Azimuth(°)" << "Elevation(°)" << "Azdiff" << "BeamDir ID";
-    mHeaderHanwha = QStringList() << "BFTx1\nAtt" << "BFTx2\nAtt" << "Tx1\nAtt" << "Tx2\nAtt"
-                    << "BFRx1\nAtt" << "BFRx2\nAtt" << "Rx1\nAtt" << "Rx2\nAtt"
-                    << "RxLna\nAtt";
-    mHeaderCyntec = QStringList() << "Tx1\nAtt" << "Tx2\nAtt"
+    mHeaderHanwha = QStringList() << "BFTx1\nAtt" << "BFTx2\nAtt"
+                                  << "Tx1\nAtt" << "Tx2\nAtt"
+                                  << "BFRx1\nAtt" << "BFRx2\nAtt"
                                   << "Rx1\nAtt" << "Rx2\nAtt"
-                                  << "BF1\nATT" << "BF2\nATT";
+                                  << "RxLna\nAtt";
+    mHeaderCyntec = QStringList() << "BF1\nATT" << "BF2\nATT"
+                                  << "Tx1\nAtt" << "Tx2\nAtt"
+                                  << "Rx1\nAtt" << "Rx2\nAtt"
+                                  << "Lna\nAtt";
     jiocmdObj = QJsonObject();
     m_InquireTimer= new QTimer(this);
     connect(m_InquireTimer, &QTimer::timeout, this, &DlgJIO::onInquireTimerTimeout);
@@ -671,15 +674,6 @@ void DlgJIO::initTableWidget()
     ui->twResult->setColumnWidth(AZEIcols::P2AzDiff, 50);
     ui->twResult->setColumnWidth(AZEIcols::P2ElDiff, 50);
     ui->twResult->setColumnWidth(AZEIcols::BeamDirID, 80);
-    // ui->twResult->setColumnWidth(AZEIcols::P2BFTx1Att, 65);
-    // ui->twResult->setColumnWidth(AZEIcols::P2BFTx2Att, 65);
-    // ui->twResult->setColumnWidth(AZEIcols::P2Tx1Att, 65);
-    // ui->twResult->setColumnWidth(AZEIcols::P2Tx2Att, 65);
-    // ui->twResult->setColumnWidth(AZEIcols::P2BFRx1Att, 65);
-    // ui->twResult->setColumnWidth(AZEIcols::P2BFRx2Att, 65);
-    // ui->twResult->setColumnWidth(AZEIcols::P2Rx1Att, 65);
-    // ui->twResult->setColumnWidth(AZEIcols::P2Rx2Att, 65);
-    // ui->twResult->setColumnWidth(AZEIcols::P2RxLnaAtt, 65);
 
     // Only accept Double
     NumberDelegate *dDelegate = new NumberDelegate(NumberDelegate::Double,
@@ -945,7 +939,7 @@ void DlgJIO::onSaveCliecked(bool checked)
     }
 }
 
-void DlgJIO::initBeamCMD(QString c, QString antarraymode, QString cmName)
+void DlgJIO::initHanwhaBeamCMD(QString c, QString antarraymode, QString cmName)
 {
     QString cmd = mHanwha->getCmd("POWER_OFF").arg(c);
     if(cmName.isEmpty()){
@@ -996,7 +990,7 @@ void DlgJIO::initBeamCMD(QString c, QString antarraymode, QString cmName)
     }
 }
 
-void DlgJIO::initBeamIdCMD(QString c, QString beamid, QString cmName)
+void DlgJIO::initHanwhaBeamIdCMD(QString c, QString beamid, QString cmName)
 {
     QString cmd="";
     if (beamid.contains("TODO")){
@@ -1011,7 +1005,7 @@ void DlgJIO::initBeamIdCMD(QString c, QString beamid, QString cmName)
     }
 }
 
-void DlgJIO::initBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
+void DlgJIO::initHanwhaBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
                               QString Tx1att, QString Tx2att, QString cmName)
 {
     QString cmd = mHanwha->getCmd("SET_TxTotalAttn").arg(c, bfTx1, bfTx2);
@@ -1029,7 +1023,7 @@ void DlgJIO::initBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
     }
 }
 
-void DlgJIO::initBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
+void DlgJIO::initHanwhaBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
                               QString Rx1att, QString Rx2att, QString RxLan,
                               QString cmName)
 {
@@ -1051,6 +1045,120 @@ void DlgJIO::initBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
         emit addBeamIDCmd(cmd);
     }else{
         emit addCMBeamIDCmd(cmName, cmd);
+    }
+}
+
+void DlgJIO::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
+{
+    if (c.isEmpty()){
+        c="/dev/spidev2.0";
+    }
+    QString cmd ="";
+/*
+    QString cmd = mCyntec->getCmd("POWER_OFF").arg(c);
+    if(cmName.isEmpty()){
+        emit addBeamIDCmd(cmd);
+    }else{
+        emit addCMBeamIDCmd(cmName, cmd);
+    }
+*/
+    cmd = mCyntec->getCmd("POWER_ON").arg(c);
+    if(cmName.isEmpty()){
+        emit addBeamIDCmd(cmd);
+    }else{
+        emit addCMBeamIDCmd(cmName, cmd);
+    }
+
+    cmd = mCyntec->getCmd("INIT").arg(c);
+    if(cmName.isEmpty()){
+        emit addBeamIDCmd(cmd);
+    }else{
+        emit addCMBeamIDCmd(cmName, cmd);
+    }
+
+    double freq = ui->cbRFFreq->currentText().toDouble();
+    cmd = mCyntec->getCmd("SET_Freq").arg(c, QString::number(freq*10000000, 'f', 0));
+    if(cmName.isEmpty()){
+        emit addBeamIDCmd(cmd);
+    }else{
+        emit addCMBeamIDCmd(cmName, cmd);
+    }
+
+    QString ant="1";
+    if (antarraymode=="8x8"){
+        qDebug() << "TODO: initCyntecBeamCMD other ant array mode";
+        // 8x8, Att=0dB
+        ant="1";
+    }
+
+    cmd = mCyntec->getCmd("SET_AntArrayMode").arg(c, ant, ant, ant, ant);
+    if(cmName.isEmpty()){
+        emit addBeamIDCmd(cmd);
+    }else{
+        emit addCMBeamIDCmd(cmName, cmd);
+    }
+
+}
+
+void DlgJIO::initCyntecBeamIdCMD(QString c, QString beamid, QString cmName)
+{
+    if (c.isEmpty()){
+        c="/dev/spidev2.0";
+    }
+    QString cmd = mCyntec->getCmd("SET_BeamID").arg(c, beamid, beamid, beamid, beamid);
+    if(cmName.isEmpty()){
+        emit addBeamIDCmd(cmd);
+    }else{
+        emit addCMBeamIDCmd(cmName, cmd);
+    }
+}
+
+void DlgJIO::initCyntecBeamTxAttCMD(QString c, QString Tx1att, QString Tx2att, QString cmName)
+{
+    if (c.isEmpty()){
+        c="/dev/spidev2.0";
+    }
+    int tx1 = Tx1att.toInt()*4;
+    int tx2 = Tx2att.toInt()*4;
+    QString cmd = mCyntec->getCmd("SET_TxAttn").arg(c,
+                                                    QString::number(tx1),
+                                                    QString::number(tx2));
+    if(cmName.isEmpty()){
+        emit addBeamIDCmd(cmd);
+    }else{
+        emit addCMBeamIDCmd(cmName, cmd);
+    }
+}
+
+void DlgJIO::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att, QString Rx1iip3, QString Rx2iip3, QString cmName)
+{
+    if (c.isEmpty()){
+        c="/dev/spidev2.0";
+    }
+    //
+    int rx1 = Rx1att.toInt()*4;
+    int rx2 = Rx2att.toInt()*4;
+    QString cmd = mCyntec->getCmd("SET_RxAttn").arg(c, QString::number(rx1),
+                                                    QString::number(rx2));
+    if(cmName.isEmpty()){
+        emit addBeamIDCmd(cmd);
+    }else{
+        emit addCMBeamIDCmd(cmName, cmd);
+    }
+
+    QList<int> ls = mCyntec->getIntList("RxIP3");
+    if ((ls.contains(Rx1iip3.toInt())) && (ls.contains(Rx2iip3.toInt()))){
+        //
+        QString cmd = mCyntec->getCmd("SET_LnaAttn").arg(c,
+                                                        Rx1iip3,
+                                                        Rx2iip3);
+        if(cmName.isEmpty()){
+            emit addBeamIDCmd(cmd);
+        }else{
+            emit addCMBeamIDCmd(cmName, cmd);
+        }
+    }else{
+        qDebug() << " not supported Rx IIP3 value: " << Rx1iip3 << " , " << Rx2iip3;
     }
 }
 
@@ -1094,6 +1202,7 @@ void DlgJIO::getBestBeamID(int idx,
     //Get best Cyntec/Hanwha AM7 id
     emit addBeamIDCmd("#AM7 AIP-"+ QString::number(idx));
     qDebug() << "AIP:" << idx << " Max az:" << maxaz << " Min Az:" << minaz;
+    QString c=""; //cmd name diff to AIP1/AIP2
     QVector<double> ds;
     QString bfTx1="";
     QString bfTx2="";
@@ -1106,57 +1215,76 @@ void DlgJIO::getBestBeamID(int idx,
     QString RxLan="0";
     int beamid=-1;
     if (aiptype==AIP::ModuleType::Cyntec){
-        //TODO: Cyntec getBestBeamID
-        // ui->twAIP->setItem(idx, AIPcols::BeamDirectionID,
-        //                    new QTableWidgetItem("99"));
-    }else if (aiptype==AIP::ModuleType::Hanwha){
-        QString c=""; //cmd name diff to AIP1/AIP2
+        if (idx==0){
+            c = mCyntec->getCmd("AIP1");
+        }else if (idx==1){
+            c = mCyntec->getCmd("AIP2");
+        }
+        initCyntecBeamCMD(c);
+
+        beamid = mCyntec->getBestBeamID(minaz, maxaz , 0, 0);
+        if (idx==1){
+            beamid=beamid+1;
+        }
+        initCyntecBeamIdCMD(c, QString::number(beamid));
+
+        ds = mCyntec->getTxAtt(maxDistance);
+        if (ds.length()>=2){
+            Tx1 = QString::number(ds[0]);
+            Tx2 = QString::number(ds[1]);
+        }
+        ds = mCyntec->getRxAtt(maxDistance);
+        if (ds.length()>=2){
+            Rx1 = QString::number(ds[0]);
+            Rx2 = QString::number(ds[1]);
+        }
+        ds = mCyntec->getBFAtt(maxDistance);
+        if (ds.length()>=2){
+            bfTx1 = QString::number(ds[0]);
+            bfTx2 = QString::number(ds[1]);
+        }
+        qDebug()<< "TODO: Cyntec Lna ";
+        RxLan="0";
+        initCyntecBeamTxAttCMD(c, Tx1, Tx2, "");
+        initCyntecBeamRxAttCMD(c, Rx1, Rx2, bfTx1, bfTx2, "");
+        emit addBeamIDCmd("#----------------------------------------------------------------------");
+        emit addBeamIDCmd(mCyntec->getCmd("GET_STATUS").arg(c));
+        emit addBeamIDCmd("#======================================================================");
+
+    } else if (aiptype==AIP::ModuleType::Hanwha){
         if (idx==0){
             //
         }else if (idx==1){
             c="2";
         }
-        initBeamCMD(c);
+        initHanwhaBeamCMD(c);
         // Hanwha getBestBeamID
         beamid = mHanwha->getBestBeamID(minaz, maxaz , 0, 0);
         if (idx==1){
             beamid = beamid - 1;
         }
-        initBeamIdCMD(c, QString::number(beamid));
-        qDebug() << "// TODO: get Att value by distance (use The most remote CM's distance)" << maxDistance;
-
+        initHanwhaBeamIdCMD(c, QString::number(beamid));
+        // qDebug() << "// TODO: get Att value by distance (use The most remote CM's distance)" << maxDistance;
         ds = mHanwha->getBFTxAtt(maxDistance);
         if (ds.length()>=2){
             bfTx1 = QString::number(ds[0]);
             bfTx2 = QString::number(ds[1]);
         }
-        // ds = mHanwha->getBFRxAtt(maxDistance);
-        // if (ds.length()>=2){
-        //     bfRx1 = QString::number(ds[0]);
-        //     bfRx2 = QString::number(ds[1]);
-        // }
 
         ds = mHanwha->getTxAtt(maxDistance);
         if (ds.length()>=2){
             Tx1 = QString::number(ds[0]);
             Tx2 = QString::number(ds[1]);
         }
-        // ds = mHanwha->getRxAtt(maxDistance);
-        // if (ds.length()>=3){
-        //     Rx1 = QString::number(ds[0]);
-        //     Rx2 = QString::number(ds[1]);
-        //     RxLan = QString::number(ds[2]);
-
-        // }
         if (maxDistance<=50){
             Rx1 = "30.0";
             Rx2 = "30.0";
             RxLan = "12";
         }
         // Tx att
-        initBeamTxAttCMD(c, bfTx1, bfTx2, Tx1, Tx2);
+        initHanwhaBeamTxAttCMD(c, bfTx1, bfTx2, Tx1, Tx2);
         // Rx att
-        initBeamRxAttCMD(c, bfRx1, bfRx2, Rx1, Rx2, RxLan);
+        initHanwhaBeamRxAttCMD(c, bfRx1, bfRx2, Rx1, Rx2, RxLan);
         //
         emit addBeamIDCmd(mHanwha->getCmd("ATC_ON").arg(c));
         //
@@ -1173,12 +1301,18 @@ void DlgJIO::getBestBeamID(int idx,
     ui->twAIP->setItem(idx, AIPcols::BFTx2Att, new QTableWidgetItem(bfTx2));
     ui->twAIP->setItem(idx, AIPcols::Tx1Att, new QTableWidgetItem(Tx1));
     ui->twAIP->setItem(idx, AIPcols::Tx2Att, new QTableWidgetItem(Tx2));
+    if (aiptype==AIP::ModuleType::Cyntec){
+        ui->twAIP->setItem(idx, AIPcols::CRx1Att, new QTableWidgetItem(Rx1));
+        ui->twAIP->setItem(idx, AIPcols::CRx2Att, new QTableWidgetItem(Rx2));
+        ui->twAIP->setItem(idx, AIPcols::CLnaAtt, new QTableWidgetItem(RxLan));
+    }else{
+        ui->twAIP->setItem(idx, AIPcols::BFRx1Att, new QTableWidgetItem(bfRx1));
+        ui->twAIP->setItem(idx, AIPcols::BFRx2Att, new QTableWidgetItem(bfRx2));
+        ui->twAIP->setItem(idx, AIPcols::Rx1Att, new QTableWidgetItem(Rx1));
+        ui->twAIP->setItem(idx, AIPcols::Rx2Att, new QTableWidgetItem(Rx2));
+        ui->twAIP->setItem(idx, AIPcols::RxLnaAtt, new QTableWidgetItem(RxLan));
+    }
 
-    ui->twAIP->setItem(idx, AIPcols::BFRx1Att, new QTableWidgetItem(bfRx1));
-    ui->twAIP->setItem(idx, AIPcols::BFRx2Att, new QTableWidgetItem(bfRx2));
-    ui->twAIP->setItem(idx, AIPcols::Rx1Att, new QTableWidgetItem(Rx1));
-    ui->twAIP->setItem(idx, AIPcols::Rx2Att, new QTableWidgetItem(Rx2));
-    ui->twAIP->setItem(idx, AIPcols::RxLnaAtt, new QTableWidgetItem(RxLan));
 }
 
 void DlgJIO::initResultHeader(AIP::ModuleType aip1type)
@@ -1189,7 +1323,8 @@ void DlgJIO::initResultHeader(AIP::ModuleType aip1type)
         ui->twResult->setColumnCount(18);
         hls << mHeaderHanwha;
     }else if (aip1type == AIP::ModuleType::Cyntec){
-        qDebug() << "Change twAIP column header name to fit Cyntec";
+        ui->twResult->setColumnCount(16);
+        hls << mHeaderCyntec;
     }
     ui->twResult->setHorizontalHeaderLabels(hls);
 }
@@ -1370,7 +1505,8 @@ void DlgJIO::onCalcCliecked(bool checked)
         ui->twAIP->setColumnCount(13);
         hls << mHeaderHanwha;
     }else if (aip1type == AIP::ModuleType::Cyntec){
-        qDebug() << "Change twAIP column header name to fit Cyntec";
+        ui->twAIP->setColumnCount(11);
+        hls << mHeaderCyntec;
     }
     ui->twAIP->setHorizontalHeaderLabels(hls);
     //AM7 AIP1 Az, TODO El
@@ -1644,16 +1780,30 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
                                   new QTableWidgetItem(QString::number(diffPitch)));
             //get beam Direction ID
             emit addCMBeamIDCmd(cm, "# "+cm);
-            initBeamCMD("", "8x8", cm);
+            if (aiptype == AIP::ModuleType::Cyntec){
+
+            }else if (aiptype == AIP::ModuleType::Hanwha){
+                initHanwhaBeamCMD("", "8x8", cm);
+            }else {
+                emit addCMBeamIDCmd(cm, "# Unknown  AIP::ModuleType"+cm);
+            }
             initID = getNearestBeamDirectionID(cm, aiptype, diffHead, diffPitch);
             QTableWidgetItem *itm = new QTableWidgetItem(QString::number(initID));
+            QString id="";
             if (initID<0){
                 itm->setBackground(QBrush(Qt::red));
-                initBeamIdCMD("", "## TODO: Did not get init Beam Direction ID", cm);
+                id = "## TODO: Did not get init Beam Direction ID";
             }else{
-                initBeamIdCMD("", QString::number(initID), cm);
+                id = QString::number(initID);
             }
             ui->twResult->setItem(iRow, AZEIcols::BeamDirID, itm);
+            if (aiptype == AIP::ModuleType::Cyntec){
+
+            }else if (aiptype == AIP::ModuleType::Hanwha){
+                initHanwhaBeamIdCMD("", id, cm);
+            }else {
+                emit addCMBeamIDCmd(cm, "#BeamDirID: Unknown  AIP::ModuleType"+cm);
+            }
 
             //Use ID's deg+ phy deg draw arrow
         }
@@ -1680,24 +1830,47 @@ void DlgJIO::onAttInit(bool checked)
         aiptype = getModuleType(iRow+1 ,GPScols::AIP1);
         if (aiptype==AIP::ModuleType::Cyntec) {
             if (mCyntec){
+                QString Tx1="";
+                QString Tx2="";
+                QString bfRx1="";
+                QString bfRx2="";
+                QString Rx1="";
+                QString Rx2="";
+                QString Lan="";
+
                 targetEIRP = mCyntec->getTargetEIRP(distance);
                 qDebug() <<"mCyntec: " << iRow << " targetEIRP:" << targetEIRP;
-                qDebug() <<"TODO mCyntec  TxAtt";
+                ds = mCyntec->getTxAtt(distance);
+                if (ds.length()>=2){
+                    Tx1 = QString::number(ds[0]);
+                    Tx2 = QString::number(ds[1]);
+                    ui->twResult->setItem(iRow, AZEIcols::P2Tx1Att,
+                                          new QTableWidgetItem(Tx1));
+                    ui->twResult->setItem(iRow, AZEIcols::P2Tx2Att,
+                                          new QTableWidgetItem(Tx2));
+                }
                 ds = mCyntec->getRxAtt(distance);
                 if (ds.length()>=2){
-                    ui->twResult->setItem(iRow, AZEIcols::P2Rx1Att,
-                                          new QTableWidgetItem(QString::number(ds[0])));
-                    ui->twResult->setItem(iRow, AZEIcols::P2Rx2Att,
-                                          new QTableWidgetItem(QString::number(ds[1])));
+                    Rx1 = QString::number(ds[0]);
+                    Rx2 = QString::number(ds[1]);
+                    ui->twResult->setItem(iRow, AZEIcols::P2CRx1Att,
+                                          new QTableWidgetItem(Rx1));
+                    ui->twResult->setItem(iRow, AZEIcols::P2CRx2Att,
+                                          new QTableWidgetItem(Rx2));
                 }
                 ds = mCyntec->getBFAtt(distance);
                 if (ds.length()>=2){
-                    ui->twResult->setItem(iRow, AZEIcols::P2BFRx1Att,
-                                          new QTableWidgetItem(QString::number(ds[0])));
-                    ui->twResult->setItem(iRow, AZEIcols::P2BFRx2Att,
-                                          new QTableWidgetItem(QString::number(ds[1])));
+                    bfRx1 = QString::number(ds[0]);
+                    bfRx2 = QString::number(ds[1]);
+                    ui->twResult->setItem(iRow, AZEIcols::P2BFTx1Att,
+                                          new QTableWidgetItem(bfRx1));
+                    ui->twResult->setItem(iRow, AZEIcols::P2BFTx2Att,
+                                          new QTableWidgetItem(bfRx2));
                 }
-
+                qDebug() << "//TODO: Cyntec Lna ";
+                Lan = "0";
+                ui->twResult->setItem(iRow, AZEIcols::P2CLnaAtt,
+                                      new QTableWidgetItem(Lan));
             }
         }else if (aiptype==AIP::ModuleType::Hanwha) {
             // qDebug() << "[onAttInit] Hanwha";
@@ -1744,8 +1917,8 @@ void DlgJIO::onAttInit(bool checked)
                     ui->twResult->setItem(iRow, AZEIcols::P2RxLnaAtt, new QTableWidgetItem(RxLan));
                 }
 
-                initBeamTxAttCMD("", bfTx1, bfTx2, Tx1, Tx2, cm);
-                initBeamRxAttCMD("", bfRx1, bfRx2, Rx1, Rx2, RxLan, cm);
+                initHanwhaBeamTxAttCMD("", bfTx1, bfTx2, Tx1, Tx2, cm);
+                initHanwhaBeamRxAttCMD("", bfRx1, bfRx2, Rx1, Rx2, RxLan, cm);
                 emit addCMBeamIDCmd(cm, mHanwha->getCmd("ATC_ON").arg(""));
                 emit addCMBeamIDCmd(cm, "#----------------------------------------------------------------------");
             }

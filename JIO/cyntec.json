@@ -11,7 +11,7 @@
         "3":273300000
     },
     "GET_STATUS":"spidev_test -D %1 -S 0",
-    "SET_Freq":"spidev_test -D %1 -f 266700000",
+    "SET_Freq":"spidev_test -D %1 -f %2",
     "GET_Freq":"spidev_test -D %1 -S 3",
 
     "SET_AntArrayMode":"spidev_test -D %1 -F \"%2 %3 %4 %5\"",

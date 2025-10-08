@@ -474,6 +474,42 @@ double Cyntec::getTargetEIRP(double dist)
     return eirp;
 }
 
+int Cyntec::getBestBeamID(double minaz, double maxaz, double minel, double maxel)
+{
+    Q_UNUSED(minel)
+    Q_UNUSED(maxel)
+    double spAz = maxaz - minaz;
+    if (spAz > 180){
+        spAz = 360 - spAz;
+    }
+    qDebug() << "//TODO:Hanwha getBestBeamID" ;
+    return 99;
+}
+
+QVector<double> Cyntec::getTxAtt(double dist)
+{
+    QVector<double> ds;
+    double att1=0.0;
+    double att2=0.0;
+    if (!mRangeDataObj.isEmpty()){
+        QStringList skeys = sorted(mRangeDataObj.keys());
+        foreach(const QString& key, skeys) {
+            if (dist > key.toDouble()){
+                auto d = mRangeDataObj.value(key).toObject();
+                att1 = d.value("TX1ATT").toDouble();
+                att2 = d.value("TX2ATT").toDouble();
+            }else {
+                break;
+            }
+        }
+    }else {
+        qDebug() << "getTxAtt: No mRangeDataObj";
+    }
+    ds.append(att1);
+    ds.append(att2);
+    return ds;
+}
+
 QVector<double> Cyntec::getRxAtt(double dist)
 {
     QVector<double> ds;
@@ -520,4 +556,31 @@ QVector<double> Cyntec::getBFAtt(double dist)
     ds.append(att1);
     ds.append(att2);
     return ds;
+}
+
+QString Cyntec::getCmd(QString key)
+{
+    if (cmdObj.contains(key)){
+        return cmdObj.value(key).toString();
+    }else{
+        qDebug() << "Cyntec::getCmd: NO command of " << key;
+        return "";
+    }
+}
+
+QList<int> Cyntec::getIntList(QString key)
+{
+    if (cmdObj.contains(key)){
+        QList<int> intList;
+        QJsonArray jsonArray = cmdObj.value(key).toArray();
+        for (const QJsonValue &value : jsonArray) {
+            if (value.isDouble()) {
+                intList.append(value.toInt());
+            }
+        }
+        return intList;
+    }else{
+        qDebug() << "Cyntec::getCmd: NO command of " << key;
+        return QList<int>();
+    }
 }

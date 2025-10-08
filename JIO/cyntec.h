@@ -34,8 +34,13 @@ public:
                                       int neighborGroup = 1);
     double getAz(int BeamID);
     double getTargetEIRP(double dist);
+    int getBestBeamID(double minaz, double maxaz, double minel, double maxel);
+    QVector<double> getTxAtt(double dist);
     QVector<double> getRxAtt(double dist);
     QVector<double> getBFAtt(double dist);
+    QString getCmd(QString key);
+    QList<int> getIntList(QString key);
+
 signals:
     void updateRefFile(QString filename);
     void newBeamFactorIDs(QStringList keys);
