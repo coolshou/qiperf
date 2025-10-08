@@ -40,7 +40,10 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     mHeaderAIP = QStringList() << "Azimuth(°)" << "Elevation(°)" << "Azdiff" << "BeamDir ID";
     mHeaderHanwha = QStringList() << "BFTx1\nAtt" << "BFTx2\nAtt" << "Tx1\nAtt" << "Tx2\nAtt"
                     << "BFRx1\nAtt" << "BFRx2\nAtt" << "Rx1\nAtt" << "Rx2\nAtt"
-                    << "RxLan\nAtt";
+                    << "RxLna\nAtt";
+    mHeaderCyntec = QStringList() << "Tx1\nAtt" << "Tx2\nAtt"
+                                  << "Rx1\nAtt" << "Rx2\nAtt"
+                                  << "BF1\nATT" << "BF2\nATT";
     jiocmdObj = QJsonObject();
     m_InquireTimer= new QTimer(this);
     connect(m_InquireTimer, &QTimer::timeout, this, &DlgJIO::onInquireTimerTimeout);

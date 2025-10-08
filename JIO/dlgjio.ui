@@ -419,7 +419,7 @@
            </column>
            <column>
             <property name="text">
-             <string>RxLanAtt</string>
+             <string>RxLnaAtt</string>
             </property>
            </column>
           </widget>
