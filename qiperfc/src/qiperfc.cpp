@@ -20,6 +20,7 @@
 #include <QCursor>
 #include <QDir>
 #include <QVBoxLayout>
+#include <utility> // for std::as_const
 
 #include "endpointact.h"
 #include "tp.h"
@@ -862,7 +863,7 @@ void QIperfC::loadPlugins()
 void QIperfC::unloadPlugins()
 {
     // Unload plugins
-    for (QPluginLoader* loader : qAsConst(pluginLoaders)) {
+    for (QPluginLoader* loader : std::as_const(pluginLoaders)) {
         if (loader->isLoaded()) {
             loader->unload();
         }
@@ -928,7 +929,7 @@ void QIperfC::loadTools()
 void QIperfC::unloadTools()
 {
     // Unload plugins
-    for (QPluginLoader* loader : qAsConst(mToolpluginLoaders)) {
+    for (QPluginLoader* loader : std::as_const(mToolpluginLoaders)) {
         if (loader->isLoaded()) {
             loader->unload();
         }
