@@ -57,6 +57,7 @@ if "%BUILDAPP%"=="1" (
     echo qmake...
     qmake
     echo nmake...
+    nmake clean
     nmake
     windeployqt6.exe qiperfc_x86_64\qiperfc.exe
     windeployqt6.exe qiperfd_x86_64\qiperfd.exe
