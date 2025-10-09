@@ -711,7 +711,7 @@ void DlgJIO::initTableWidget()
 
     ui->twAIP->setColumnWidth(AIPcols::Azimuth, 80);
     ui->twAIP->setColumnWidth(AIPcols::Elevation, 80);
-    ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 110);
+    ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 90);
 
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
             this, &DlgJIO::showContextMenu);
