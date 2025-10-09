@@ -203,7 +203,10 @@ void DlgCyntec::onCyntecBeamTableIDChanged(QString newBeamTableID)
         if (mCyntec){
             mCyntec->getBeamTableData(newBeamTableID.toInt());
         }
-        emit SelectEllipse(newBeamTableID, true, Qt::red);
+        QString scolor = ui->cbIDColor->currentText();
+        QColor color(scolor);
+        bool clear = ui->cbClear->isChecked();
+        emit SelectEllipse(newBeamTableID, clear, color);
     }
 }
 void DlgCyntec::onCyntecElementMapChanged(QString newElementMap)
@@ -281,7 +284,9 @@ void DlgCyntec::onSelectAroundID(bool checked)
     if (ui->cbClear->checkState()==Qt::CheckState::Checked){
         doClear = true;
     }
-
+    QString sColor = ui->cbAroundColor->currentText();
+    bool clear = ui->cbClear->isChecked();
+    QColor color(sColor);
     int id = ui->CyntecBeamTableID->currentText().toInt();
     QString beamtype = ui->CyntecBeamType->currentText();
     int glimit = ui->sbAroundLimit->value();
@@ -293,7 +298,7 @@ void DlgCyntec::onSelectAroundID(bool checked)
             beamtable->clearEllipseSelection();
         }
         foreach (int idx, ds){
-            emit SelectEllipse(QString::number(idx), false, Qt::blue);
+            emit SelectEllipse(QString::number(idx), clear, color);
         }
     }
 
