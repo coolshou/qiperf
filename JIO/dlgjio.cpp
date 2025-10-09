@@ -711,7 +711,7 @@ void DlgJIO::initTableWidget()
 
     ui->twAIP->setColumnWidth(AIPcols::Azimuth, 80);
     ui->twAIP->setColumnWidth(AIPcols::Elevation, 80);
-    ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 120);
+    ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 110);
 
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
             this, &DlgJIO::showContextMenu);
@@ -1130,7 +1130,8 @@ void DlgJIO::initCyntecBeamTxAttCMD(QString c, QString Tx1att, QString Tx2att, Q
     }
 }
 
-void DlgJIO::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att, QString Rx1iip3, QString Rx2iip3, QString cmName)
+void DlgJIO::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
+                                    QString Rx1iip3, QString Rx2iip3, QString cmName)
 {
     if (c.isEmpty()){
         c="/dev/spidev2.0";
@@ -1781,7 +1782,7 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
             //get beam Direction ID
             emit addCMBeamIDCmd(cm, "# "+cm);
             if (aiptype == AIP::ModuleType::Cyntec){
-
+                initCyntecBeamCMD("", "8x8", cm);
             }else if (aiptype == AIP::ModuleType::Hanwha){
                 initHanwhaBeamCMD("", "8x8", cm);
             }else {
@@ -1798,7 +1799,7 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
             }
             ui->twResult->setItem(iRow, AZEIcols::BeamDirID, itm);
             if (aiptype == AIP::ModuleType::Cyntec){
-
+                initCyntecBeamIdCMD("", id, cm);
             }else if (aiptype == AIP::ModuleType::Hanwha){
                 initHanwhaBeamIdCMD("", id, cm);
             }else {
@@ -1814,6 +1815,7 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
 
 void DlgJIO::onAttInit(bool checked)
 {
+    //init all CM's Att value
     Q_UNUSED(checked)
     QString cm="";
     AIP::ModuleType aiptype = AIP::ModuleType::Unknown;
@@ -1871,9 +1873,13 @@ void DlgJIO::onAttInit(bool checked)
                 Lan = "0";
                 ui->twResult->setItem(iRow, AZEIcols::P2CLnaAtt,
                                       new QTableWidgetItem(Lan));
+                initCyntecBeamTxAttCMD("", Tx1, Tx2, cm);
+                initCyntecBeamRxAttCMD("", Rx1, Rx2, bfRx1, bfRx2, cm);
+                emit addCMBeamIDCmd(cm, "#----------------------------------------------------------------------");
+                emit addCMBeamIDCmd(cm, mCyntec->getCmd("GET_STATUS").arg("/dev/spidev2.0"));
+                emit addCMBeamIDCmd(cm, "#----------------------------------------------------------------------");
             }
         }else if (aiptype==AIP::ModuleType::Hanwha) {
-            // qDebug() << "[onAttInit] Hanwha";
             if (mHanwha){
                 targetEIRP = mHanwha->getTargetEIRP(distance);
                 qDebug() << iRow << " targetEIRP:" << targetEIRP;
