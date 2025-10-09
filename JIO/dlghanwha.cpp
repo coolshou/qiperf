@@ -111,7 +111,10 @@ void DlgHanwha::onHanwhaBeamDirectionIDChanged(QString newBeamTableID)
         if (mHanwha){
             mHanwha->getBeamTableData(newBeamTableID.toInt());
         }
-        emit SelectEllipse(newBeamTableID, true, Qt::red);
+        bool clear = ui->cbClearMark->isChecked();
+        QString scolor = ui->cbIDColor->currentText();
+        QColor color(scolor);
+        emit SelectEllipse(newBeamTableID, clear, color);
     }
 }
 
@@ -200,6 +203,8 @@ void DlgHanwha::onSelectAroundID(bool checked)
     if (ui->cbClearMark->checkState()==Qt::CheckState::Checked){
         doClear = true;
     }
+    QString scolor = ui->cbAroundColor->currentText();
+    QColor color(scolor);
 
     int id = ui->HanwhaBeamDirectionID->currentText().toInt();
     QString beamtype = ui->HanwhaBeamType->currentText();
@@ -212,7 +217,7 @@ void DlgHanwha::onSelectAroundID(bool checked)
             beamtable->clearEllipseSelection();
         }
         foreach (int idx, ds){
-            emit SelectEllipse(QString::number(idx), false, Qt::blue);
+            emit SelectEllipse(QString::number(idx), doClear, color);
         }
     }
 }
