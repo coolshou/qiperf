@@ -18,6 +18,9 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     m_cfg = cfg;
 //    ui->cb_minterfaces->addItems(interfaces);
     loadcfg(cfg);
+    connect(ui->sbCpuCheckInterval, &QSpinBox::valueChanged, this , &dlgOption::onCpuCheckIntervalValueChanged);
+    connect(ui->sbMemCheckInterval, &QSpinBox::valueChanged, this , &dlgOption::onMemCheckIntervalValueChanged);
+
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &dlgOption::onAccept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &dlgOption::onReject);
     connect(ui->sb_width_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onWidthChange);
@@ -34,8 +37,6 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
     connect(ui->cbCpuCheck, &QCheckBox::clicked, this, &dlgOption::onCpuCheckClicked);
     connect(ui->cbMemCheck, &QCheckBox::clicked, this, &dlgOption::onMemCheckClicked);
-    connect(ui->sbCpuCheckInterval, &QSpinBox::valueChanged, this, &dlgOption::onCpuCheckIntervalValueChanged);
-    connect(ui->sbMemCheckInterval, &QSpinBox::valueChanged, this, &dlgOption::onMemCheckIntervalValueChanged);
 }
 
 dlgOption::~dlgOption()
@@ -47,6 +48,17 @@ void dlgOption::loadcfg(QSettings *cfg)
 {
     int midx=0;
     //load cfg to ui
+    cfg->beginGroup("MainWindow");
+    ui->sbCpuCheckInterval->setValue(cfg->value("CpuCheckInterval", 1).toInt());
+    if (ui->sbCpuCheckInterval->value()>0){
+        ui->cbCpuCheck->setChecked(true);
+    }
+    ui->sbMemCheckInterval->setValue(cfg->value("MemCheckInterval", 1).toInt());
+    if (ui->sbMemCheckInterval->value()>0){
+        ui->cbMemCheck->setChecked(true);
+    }
+    cfg->endGroup();
+
     cfg->beginGroup("Iperf");
     ui->sb_WaitServerReady->setValue(cfg->value("WaitServerReady", 10).toInt());
     ui->sb_width_tp->setValue(cfg->value("TPExportWidth", 1280).toInt());
@@ -239,7 +251,10 @@ void dlgOption::onCpuCheckClicked(bool checked)
     int value=0;
     ui->sbCpuCheckInterval->setEnabled(checked);
     if (checked){
-        value = ui->sbCpuCheckInterval->value();
+        if(ui->sbCpuCheckInterval->value()==0){
+            value=1;
+            ui->sbCpuCheckInterval->setValue(value);
+        }
     }
     emit updateCpuCheckInterval(value);
 }
@@ -249,7 +264,10 @@ void dlgOption::onMemCheckClicked(bool checked)
     int value=0;
     ui->sbMemCheckInterval->setEnabled(checked);
     if (checked){
-        value = ui->sbMemCheckInterval->value();
+        if(ui->sbMemCheckInterval->value()==0){
+            value=1;
+            ui->sbMemCheckInterval->setValue(value);
+        }
     }
     emit updateMemCheckInterval(value);
 }
@@ -257,11 +275,25 @@ void dlgOption::onMemCheckClicked(bool checked)
 void dlgOption::onCpuCheckIntervalValueChanged(int value)
 {
     emit updateCpuCheckInterval(value);
+    if (value==0){
+        ui->cbCpuCheck->setChecked(false);
+        ui->sbCpuCheckInterval->setEnabled(false);
+    }else{
+        ui->cbCpuCheck->setChecked(true);
+        ui->sbCpuCheckInterval->setEnabled(true);
+    }
 }
 
 void dlgOption::onMemCheckIntervalValueChanged(int value)
 {
     emit updateMemCheckInterval(value);
+    if (value==0){
+        ui->cbMemCheck->setChecked(false);
+        ui->sbMemCheckInterval->setEnabled(false);
+    }else{
+        ui->cbMemCheck->setChecked(true);
+        ui->sbMemCheckInterval->setEnabled(true);
+    }
 }
 
 // void dlgOption::setTPsize(int width, int heigth)
