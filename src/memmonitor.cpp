@@ -59,6 +59,7 @@ void MemMonitor::updateMemoryUsage() {
     qint64 memKB = getMemoryUsageKB();
     qint64 memMB = round(memKB/1000);
     emit memoryUsageUpdated(memMB);
+    //TODO: free/Total memory
 }
 
 qint64 MemMonitor::getMemoryUsageKB() {
