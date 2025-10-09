@@ -665,6 +665,11 @@ void DlgJIO::initTableWidget()
     ui->tableWidget->setItemDelegateForColumn(GPScols::Pitch, dPitchDelegate);
 
     //
+    QStringList rls;
+    rls << mHeaderResult << mHeaderCyntec;
+    ui->twResult->setColumnCount(rls.count());
+    ui->twResult->setHorizontalHeaderLabels(rls);
+
     ui->twResult->setColumnWidth(AZEIcols::Name, 80);
     ui->twResult->setColumnWidth(AZEIcols::Distance, 90);
     ui->twResult->setColumnWidth(AZEIcols::P1Azimuth, 50);
@@ -706,11 +711,17 @@ void DlgJIO::initTableWidget()
                                                       ui->twResult);
     ui->twResult->setItemDelegateForColumn(AZEIcols::P2RxLnaAtt, dLanAttDelegate);
 
+    QStringList hls;
+    hls << mHeaderAIP << mHeaderCyntec;
+    ui->twAIP->setColumnCount(hls.count());
+    ui->twAIP->setHorizontalHeaderLabels(hls);
+
     ui->twAIP->setItemDelegateForColumn(AIPcols::Azimuth, dAziDelegate);
     ui->twAIP->setItemDelegateForColumn(AIPcols::Elevation, dElDelegate);
 
     ui->twAIP->setColumnWidth(AIPcols::Azimuth, 80);
     ui->twAIP->setColumnWidth(AIPcols::Elevation, 80);
+    ui->twAIP->setColumnWidth(AIPcols::Azdiff, 60);
     ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 90);
 
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
