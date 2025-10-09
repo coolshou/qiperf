@@ -283,9 +283,6 @@ void Cyntec::getBeamTableData(int beamTableID)
     if (!mBeamTableData->isEmpty()){
         if (mBeamTableData->contains(beamTableID)){
             CyntecBeamTableData data = mBeamTableData->value(beamTableID);
-            // qDebug() << "getBeamTableData:" << beamTableID
-            //          << " azDeg:" << data.azDeg << " elDeg:" << data.elDeg
-            //          << " azBW:" << data.azimuth3dB_BW << " elBW:" << data.elevation3dB_BW;
             emit updateBeamTableData(data.azDeg, data.elDeg,
                                      data.azimuth3dB_BW, data.elevation3dB_BW);
         }else{
