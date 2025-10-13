@@ -111,9 +111,14 @@ void dlgOption::loadcfg(QSettings *cfg)
 void dlgOption::updatecfg()
 {
     //save ui value to cfg
+    m_cfg->beginGroup("MainWindow");
+    m_cfg->setValue("CpuCheckInterval", ui->sbCpuCheckInterval->value());
+    m_cfg->setValue("MemCheckInterval", ui->sbMemCheckInterval->value());
+    m_cfg->endGroup();
+
     m_cfg->beginGroup("Iperf");
-    QString args;
-    m_cfg->setValue("args", args);
+    // QString args;
+    // m_cfg->setValue("args", args);
     m_cfg->setValue("WaitServerReady", ui->sb_WaitServerReady->value());
     m_cfg->setValue("TPExportWidth", ui->sb_width_tp->value());
     m_cfg->setValue("TPExportHeigth", ui->sb_heigth_tp->value());

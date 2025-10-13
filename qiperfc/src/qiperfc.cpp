@@ -722,6 +722,11 @@ void QIperfC::onAddIperf(QString cfg)
     m_throughputview->AddIperf(cfg);
 }
 
+void QIperfC::onClearIperf()
+{
+    doClear();
+}
+
 void QIperfC::closeEvent(QCloseEvent *event)
 {
     if (trayIcon->isVisible() && m_closetosystray) {
@@ -1629,6 +1634,7 @@ void QIperfC::initJIO()
     dlg_jio = new DlgJIO(m_settings);
     connect(this, &QIperfC::closeAll, dlg_jio, &DlgJIO::close);
     connect(dlg_jio, &DlgJIO::sigAddIperf, this, &QIperfC::onAddIperf);
+    connect(dlg_jio, &DlgJIO::sigClearIperf, this, &QIperfC::onClearIperf);
     connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onJIO);
 }
 
