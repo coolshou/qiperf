@@ -112,8 +112,16 @@ void dlgOption::updatecfg()
 {
     //save ui value to cfg
     m_cfg->beginGroup("MainWindow");
-    m_cfg->setValue("CpuCheckInterval", ui->sbCpuCheckInterval->value());
-    m_cfg->setValue("MemCheckInterval", ui->sbMemCheckInterval->value());
+    int cpuinterval=0;
+    if (ui->cbCpuCheck->isChecked()){
+        cpuinterval = ui->sbCpuCheckInterval->value();
+    }
+    int meminterval=0;
+    if (ui->cbMemCheck->isChecked()){
+        meminterval = ui->sbMemCheckInterval->value();
+    }
+    m_cfg->setValue("CpuCheckInterval", cpuinterval);
+    m_cfg->setValue("MemCheckInterval", meminterval);
     m_cfg->endGroup();
 
     m_cfg->beginGroup("Iperf");
