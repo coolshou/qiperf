@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1141</width>
-    <height>671</height>
+    <height>705</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -749,11 +749,14 @@
          <item>
           <widget class="QGroupBox" name="gbFormula">
            <property name="title">
-            <string>formula:</string>
+            <string>Distance calculation Formula:</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
              <widget class="QRadioButton" name="rbHaversine">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;_3vvtaMzeE5X41e8PzpPZ4Ag_60&quot;/&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;半&lt;/span&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;正矢公式:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;根據兩點的經度和緯度來確定大圓上兩點之間距離的計算方法&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Haversine(誤差約0.5-2%)</string>
               </property>
@@ -767,11 +770,14 @@
             </item>
             <item>
              <widget class="QRadioButton" name="rbVincenty">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;文森特公式:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;將地球視為一個略微扁平的橢球體&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Vincenty(誤差&lt;0.5毫米)</string>
               </property>
               <property name="checked">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <attribute name="buttonGroup">
                <string notr="true">buttonGroup</string>
@@ -786,8 +792,8 @@
            <property name="title">
             <string>Group:</string>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_5">
-            <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
              <widget class="QRadioButton" name="rbAvg">
               <property name="text">
                <string>Average</string>
@@ -797,7 +803,7 @@
               </attribute>
              </widget>
             </item>
-            <item>
+            <item row="1" column="0">
              <widget class="QRadioButton" name="rbKmeans">
               <property name="text">
                <string>Kmeans</string>
@@ -1033,7 +1039,7 @@
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

@@ -802,6 +802,9 @@ void DlgJIO::onDelete(bool checked)
     if (!name.isEmpty()){
         emit deleteItm(name);
     }
+    if (ui->twResult->rowCount()>(iRow-1)){
+        ui->twResult->removeRow(iRow-1);
+    }
 }
 
 void DlgJIO::onGetGPS(bool checked)
@@ -1121,7 +1124,12 @@ void DlgJIO::initCyntecBeamIdCMD(QString c, QString beamid, QString cmName)
     if (c.isEmpty()){
         c="/dev/spidev2.0";
     }
-    QString cmd = mCyntec->getCmd("SET_BeamID").arg(c, beamid, beamid, beamid, beamid);
+    QString cmd = "";
+    if (beamid.contains("TODO")){
+        cmd = beamid;
+    }else{
+        cmd = mCyntec->getCmd("SET_BeamID").arg(c, beamid, beamid, beamid, beamid);
+    }
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
@@ -1397,7 +1405,12 @@ void DlgJIO::onCalcCliecked(bool checked)
         ui->tableWidget->selectRow(0);
         return;
     }
-
+    if ((!ui->rbVincenty->isChecked())&&(!ui->rbHaversine->isChecked())){
+        QString errmsg = "Please select distance calcation formula";
+        QMessageBox::warning(this, "Error", errmsg, QMessageBox::Ok);
+        ui->rbVincenty->setFocus();
+        return;
+    }
     // double msl1 = GeoTranslate::convertEllipsoidToMSL(lat1, lon1, alt1);
     // qDebug() << " Pos:" << pos1 << " Elevation hight:" << QString::number(msl1);
 
@@ -1410,7 +1423,8 @@ void DlgJIO::onCalcCliecked(bool checked)
     // double msl=0.0;
     double distance = 0;
     double azimuth = 0;
-    QList<double> azbearings;
+    QVector<double> azbearings;  //store all AM7 to CM7's az
+    QVector<double> distances; //store all AM7 to CM7's distance in km
     // QList<double> elbearings;
     double azimuth2 = 0;
     double el1=0.0;
@@ -1442,6 +1456,7 @@ void DlgJIO::onCalcCliecked(bool checked)
             azimuth2 = calcBearing(lat, lon, lat1, lon1);
         }
         azbearings.append(azimuth);
+        distances.append(distance);
         ui->twResult->setItem(i-1, AZEIcols::Name, new QTableWidgetItem(pos1 + " : " + pos));
         ui->twResult->setItem(i-1, AZEIcols::Distance, new QTableWidgetItem(QString::number(distance)));
         ui->twResult->setItem(i-1, AZEIcols::P1Azimuth, new QTableWidgetItem(QString::number(azimuth, 'f', 1)));
@@ -1458,64 +1473,8 @@ void DlgJIO::onCalcCliecked(bool checked)
         // elbearings.append(el1);
         totalel = totalel + el1;
     }
-    // AM7 heading
-    double azimuthDegree = averageBearing(azbearings);
-    // qDebug() << " azimuthDegree:" << QString::number(azimuthDegree);
-    ui->leAM7az->setText(QString::number(azimuthDegree, 'f', 1));
-    // AM7 Pitch
-    double elDegree = totalel/ui->twResult->rowCount();
-    ui->leAM7el->setText(QString::number(elDegree, 'f', 1));
 
-    //group CM7 by Azimuth2
-    QColor lColor = QColor(144, 238, 144); //light green
-    QColor rColor = QColor(173, 216, 230); //light blue
-    QColor nColor = QColor(Qt::lightGray);
-    double relative;
-    double cmaz;
-    double distMaxR=0.0;
-    double distR=0.0;
-    double distMaxL=0.0;
-    double distL=0.0;
-    QList<QTableWidgetItem*> cm7rs;
-    QList<QTableWidgetItem*> cm7ls;
-    for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
-        QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::Distance);
-        QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
-        if (itm){
-            cmaz = itm->text().toDouble();// + 180;
-            relative = fmod((cmaz - azimuthDegree + 360), 360);
-            // qDebug() << "cmaz:" << cmaz << "  relative:" << relative;
-            if (relative > 0 && relative < 90){
-                //azimuthDegree 的第一象限
-                itm->setBackground(QBrush(lColor));
-                itm->setToolTip("CM7-FirstQuadrant");
-                itm->setData(Qt::UserRole, "AIP1");
-                cm7rs.append(itm);
-                distR =ditm->text().toDouble()*1000;
-                if (distR>distMaxR){
-                    distMaxR = distR;
-                }
-            }else if (relative > 270 && relative < 360){
-                //azimuthDegree 的第四象限
-                itm->setBackground(QBrush(rColor));
-                itm->setToolTip("CM7-FourthQuadrant");
-                itm->setData(Qt::UserRole, "AIP2");
-                cm7ls.append(itm);
-                distL =ditm->text().toDouble()*1000;
-                if (distL>distMaxL){
-                    distMaxL = distL;
-                }
-            }else{
-                qDebug() << "No in Coverage range";
-                itm->setBackground(QBrush(nColor));
-            }
-        }
-    }
-    // 1. get cm7rs Max and Min value
-    // diff = |Max - Min|
-    // check diff < 3dB Az BW
-    // Max, Min should not over AM7az ± dirBW ± 3dB_AzBW/2
-    // ui->tableWidget->item(0, GPScols::AIP1); //cyntec or hanwha
+    //set twAIP Column header
     QStringList hls;
     hls << mHeaderAIP;
     if (aip1type == AIP::ModuleType::Hanwha){
@@ -1526,10 +1485,130 @@ void DlgJIO::onCalcCliecked(bool checked)
         hls << mHeaderCyntec;
     }
     ui->twAIP->setHorizontalHeaderLabels(hls);
+
+    // AM7 heading az degree
+    double am7azDeg= 0;
+    double distMaxR=0.0;
+    double distMaxL=0.0;
+    double distR=0.0;
+    double distL=0.0;
+
+    QColor lColor = QColor(144, 238, 144); //light green
+    QColor rColor = QColor(173, 216, 230); //light blue
+    QColor nColor = QColor(Qt::lightGray);
+    QList<QTableWidgetItem*> cm7rs;
+    QList<QTableWidgetItem*> cm7ls;
+
+    if (ui->rbKmeans->isChecked()) {
+        QVector<QPointF> points = polarToXY(azbearings, distances);
+        // qDebug() << "points:" << points;
+        QVector<int> labels = kMeansCluster(points);
+
+        for (int i = 0; i < azbearings.size(); ++i) {
+            qDebug() << "Azimuth:" << azbearings[i]
+                     << "Distance:" << distances[i]
+                     << "-> Group" << labels[i];
+        }
+        for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
+            QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::Distance);
+            QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
+            if (itm){
+                int g = labels[iRow];
+                if (g==0){
+                    itm->setBackground(QBrush(lColor));
+                    itm->setToolTip("CM7-FirstQuadrant");
+                    itm->setData(Qt::UserRole, "AIP1");
+                    cm7rs.append(itm);
+                    distR =ditm->text().toDouble()*1000;
+                    if (distR>distMaxR){
+                        distMaxR = distR;
+                    }
+                }else if (g==1){
+                    itm->setBackground(QBrush(rColor));
+                    itm->setToolTip("CM7-FourthQuadrant");
+                    itm->setData(Qt::UserRole, "AIP2");
+                    cm7ls.append(itm);
+                    distL =ditm->text().toDouble()*1000;
+                    if (distL>distMaxL){
+                        distMaxL = distL;
+                    }
+                }else {
+                    itm->setBackground(QBrush(nColor));
+                }
+            }
+        }
+        QVector<double> azbears;
+        foreach(auto itm, cm7rs){
+            azbears.append(itm->text().toDouble());
+        }
+        double am7r = averageBearing(azbears);
+        azbears.clear();
+        foreach(auto itm, cm7ls){
+            azbears.append(itm->text().toDouble());
+        }
+        double am7l = averageBearing(azbears);
+        azbears.clear();
+        azbears.append(am7r);
+        azbears.append(am7l);
+        am7azDeg  = averageBearing(azbears);
+    }
+    if (ui->rbAvg->isChecked()) {
+        // AM7 az
+        am7azDeg = averageBearing(azbearings);
+
+        // use AM7 azimuth Degree divide CM into Quadrant 1 or Quadrant 4
+        double relative;
+        double cmaz;
+        for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
+            QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::Distance);
+            QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
+            if (itm){
+                cmaz = itm->text().toDouble();// + 180;
+                relative = fmod((cmaz - am7azDeg + 360), 360);
+                // qDebug() << "cmaz:" << cmaz << "  relative:" << relative;
+                if (relative > 0 && relative < 90){
+                    //azimuthDegree 的第一象限
+                    itm->setBackground(QBrush(lColor));
+                    itm->setToolTip("CM7-FirstQuadrant");
+                    itm->setData(Qt::UserRole, "AIP1");
+                    cm7rs.append(itm);
+                    distR =ditm->text().toDouble()*1000;
+                    if (distR>distMaxR){
+                        distMaxR = distR;
+                    }
+                }else if (relative > 270 && relative < 360){
+                    //azimuthDegree 的第四象限
+                    itm->setBackground(QBrush(rColor));
+                    itm->setToolTip("CM7-FourthQuadrant");
+                    itm->setData(Qt::UserRole, "AIP2");
+                    cm7ls.append(itm);
+                    distL =ditm->text().toDouble()*1000;
+                    if (distL>distMaxL){
+                        distMaxL = distL;
+                    }
+                }else{
+                    qDebug() << "No in Coverage range";
+                    itm->setBackground(QBrush(nColor));
+                }
+            }
+        }
+        // 1. get cm7rs Max and Min value
+        // diff = |Max - Min|
+        // check diff < 3dB Az BW
+        // Max, Min should not over AM7az ± dirBW ± 3dB_AzBW/2
+        // ui->tableWidget->item(0, GPScols::AIP1); //cyntec or hanwha
+
+    }
+    //show on UI
+    ui->leAM7az->setText(QString::number(am7azDeg, 'f', 1));
+    // AM7 Pitch
+    double elDegree = totalel/ui->twResult->rowCount();
+    ui->leAM7el->setText(QString::number(elDegree, 'f', 1));
+
     //AM7 AIP1 Az, TODO El
-    getBestBeamID(0, azimuthDegree, aip1type, cm7rs, distMaxR);
+    getBestBeamID(0, am7azDeg, aip1type, cm7rs, distMaxR);
     //AM7 AIP2
-    getBestBeamID(1, azimuthDegree, aip2type, cm7ls, distMaxL);
+    getBestBeamID(1, am7azDeg, aip2type, cm7ls, distMaxL);
 
 }
 
@@ -1770,6 +1849,7 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
         double expectPitch=0.0;
         double diffHead=0.0;
         double diffPitch=0.0;
+        bool bErr=false;
         for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
             cm = ui->tableWidget->item(iRow+1, GPScols::PositionName)->text();
 
@@ -1780,6 +1860,7 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
                 QString errmsg = "Please setup ModuleType";
                 QMessageBox::warning(this, "Error", errmsg, QMessageBox::Ok);
                 ui->tableWidget->selectRow(iRow+1);
+                bErr = true;
                 break;
             }
 
@@ -1824,7 +1905,9 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
 
             //Use ID's deg+ phy deg draw arrow
         }
-        onAttInit();
+        if (!bErr){
+            onAttInit();
+        }
     }
 
 }
@@ -2477,7 +2560,7 @@ void DlgJIO::setStateIcon(int row, int column, QString state)
 }
 
 double DlgJIO::averageBearing(const QList<double> &bearings)
-{
+{   //average Bearing
     if (bearings.isEmpty()) return -1.0; // 或者 return NaN
 
     double sumX = 0.0;
@@ -2598,6 +2681,63 @@ void DlgJIO::savecfg()
     m_cfg->endGroup();
     m_cfg->sync();
 
+}
+
+QVector<QPointF> DlgJIO::polarToXY(const QVector<double> &anglesDeg, const QVector<double> &distances)
+{
+    //convert anglesDeg & distance to polar coordinate point
+    QVector<QPointF> points;
+    for (int i = 0; i < anglesDeg.size(); ++i) {
+        double mathAngleDeg = std::fmod(90.0 - anglesDeg[i]+ 360.0, 360.0); // 將方位角轉為數學角度, 避免負角度(+360), 結果限制在 0–360° 範圍內
+        // qDebug() << "anglesDeg:" << anglesDeg[i] << " == " << mathAngleDeg;
+        double rad = qDegreesToRadians(mathAngleDeg);
+        Q_UNUSED(distances)
+        // if consider distances, it will cause wrong group when two point distance is close
+        // double r = distances[i];
+        // points.append(QPointF(r * std::cos(rad), r * std::sin(rad)));
+        points.append(QPointF( std::cos(rad), std::sin(rad)));
+    }
+    return points;
+}
+
+QVector<int> DlgJIO::kMeansCluster(const QVector<QPointF> &points, int k, int maxIter)
+{
+    // k :
+    QVector<QPointF> centroids;
+    QVector<int> labels(points.size(), 0);
+
+    // 初始化：選前兩點為初始中心
+    centroids << points[0] << points[1];
+
+    for (int iter = 0; iter < maxIter; ++iter) {
+        // 分配群組
+        for (int i = 0; i < points.size(); ++i) {
+            double minDist = std::numeric_limits<double>::max();
+            int bestCluster = 0;
+            for (int c = 0; c < k; ++c) {
+                double dist = QLineF(points[i], centroids[c]).length();
+                if (dist < minDist) {
+                    minDist = dist;
+                    bestCluster = c;
+                }
+            }
+            labels[i] = bestCluster;
+        }
+
+        // 更新中心
+        QVector<QPointF> newCentroids(k, QPointF(0, 0));
+        QVector<int> counts(k, 0);
+        for (int i = 0; i < points.size(); ++i) {
+            newCentroids[labels[i]] += points[i];
+            counts[labels[i]]++;
+        }
+        for (int c = 0; c < k; ++c) {
+            if (counts[c] > 0)
+                centroids[c] = newCentroids[c] / counts[c];
+        }
+    }
+
+    return labels;
 }
 
 int DlgJIO::getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, double diffHead, double diffPitch)

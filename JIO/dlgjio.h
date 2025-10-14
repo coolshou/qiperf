@@ -230,6 +230,8 @@ private:
     void debug(QString msg, int lv=3);
     void loadcfg();
     void savecfg();
+    QVector<QPointF> polarToXY(const QVector<double>& anglesDeg, const QVector<double>& distances);
+    QVector<int> kMeansCluster(const QVector<QPointF>& points, int k = 2, int maxIter = 100);
     // double bearing(double lat1, double lon1, double lat2, double lon2);
     Ui::DlgJIO *ui;
     QSettings *m_cfg;
