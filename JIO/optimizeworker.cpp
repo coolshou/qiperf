@@ -52,7 +52,7 @@ void OptimizeWorker::work()
         QCoreApplication::processEvents(QEventLoop::AllEvents);
         QThread::sleep(1); // sleep 1 sec
     }
-    // emit stoped();
+    emit stoped(0);
 }
 
 void OptimizeWorker::Stop()
@@ -62,7 +62,7 @@ void OptimizeWorker::Stop()
 
 void OptimizeWorker::log(QString msg, int lv)
 {
-    if (lv>mDebugLv){
+    if (lv>=mDebugLv){
         emit debugMsg(msg);;
     }
 }

@@ -160,21 +160,9 @@
            <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
             <bool>false</bool>
            </attribute>
-           <row>
-            <property name="text">
-             <string>1</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>2</string>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string>3</string>
-            </property>
-           </row>
+           <row/>
+           <row/>
+           <row/>
            <column>
             <property name="text">
              <string>Position</string>
@@ -233,6 +221,11 @@
            <column>
             <property name="text">
              <string>IPAddress</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Mac Addr</string>
             </property>
            </column>
            <item row="0" column="0">
@@ -754,7 +747,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox">
+          <widget class="QGroupBox" name="gbFormula">
            <property name="title">
             <string>formula:</string>
            </property>
@@ -778,21 +771,53 @@
                <string>Vincenty(誤差&lt;0.5毫米)</string>
               </property>
               <property name="checked">
-               <bool>true</bool>
+               <bool>false</bool>
               </property>
               <attribute name="buttonGroup">
                <string notr="true">buttonGroup</string>
               </attribute>
              </widget>
             </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="gbGroup">
+           <property name="title">
+            <string>Group:</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
             <item>
-             <widget class="QPushButton" name="pbCalc">
+             <widget class="QRadioButton" name="rbAvg">
               <property name="text">
-               <string>Manual Calc</string>
+               <string>Average</string>
               </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup_2</string>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="rbKmeans">
+              <property name="text">
+               <string>Kmeans</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup_2</string>
+              </attribute>
              </widget>
             </item>
            </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbCalc">
+           <property name="text">
+            <string>Manual Calc</string>
+           </property>
           </widget>
          </item>
          <item>
@@ -1009,5 +1034,6 @@
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

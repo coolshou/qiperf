@@ -385,6 +385,10 @@ QJsonObject DlgJIO::createInitData()
             if (item) {
                 posdata["IPAddr"] = item->text();
             }
+            item = ui->tableWidget->item(i, GPScols::MacAddr);
+            if (item) {
+                posdata["MacAddr"] = item->text();
+            }
             pos.append(posdata);
         }
         rootObject["positions"] = pos;
@@ -508,6 +512,7 @@ void DlgJIO::doRequestExec(QString targetIP, QString idx, QString sCmd)
 
 void DlgJIO::onStartOptimiz()
 {
+    emit sigClearIperf();
     if (mOptThread){
         qDebug() << "Start Optimize";
         mOptThread->start();
@@ -517,11 +522,11 @@ void DlgJIO::onStartOptimiz()
 void DlgJIO::onStopOptimiz()
 {
     //TODO: DlgJIO::onStopOptimiz()
-    // if (mOptWorker){
+    if (mOptWorker){
     //     qDebug() <<"stop Optimize";
-    //     // mOptWorker->setStop(true);
+        mOptWorker->setStop(true);
     //     // emit stopOptimiz(); // cause loop (with connect())
-    // }
+    }
 }
 
 void DlgJIO::initHanwha()

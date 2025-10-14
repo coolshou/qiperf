@@ -48,7 +48,8 @@ public:
         Pitch=5,
         AIP1=6,
         AIP2=7,
-        IPAddr=8
+        IPAddr=8,
+        MacAddr=9
     };
     Q_ENUM(GPScols)
     enum AZEIcols{
@@ -142,6 +143,7 @@ signals:
     void startOptimiz();//
     void stopOptimiz();//
     void sigAddIperf(QString cfg);
+    void sigClearIperf();
     void addBeamIDCmd(QString cmd);
     void addCMBeamIDCmd(QString name, QString cmd);
     void clearBeamIDCmd();

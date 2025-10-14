@@ -10,6 +10,7 @@ class OptimizeWorker : public QObject
     Q_OBJECT
 public:
     explicit OptimizeWorker(QJsonObject initdata, QObject *parent = nullptr);
+    void setStop(bool stop);
 public slots:
     void work();
     void Stop();
@@ -22,7 +23,6 @@ signals:
     void sigAddIperf(QString cfg);
     void sigStartIperf(QString cfg);
 private:
-    void setStop(bool stop);
     int mDebugLv;
     QJsonObject mInitData;
     QJsonArray mPosArr;
