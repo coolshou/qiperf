@@ -109,7 +109,7 @@ public slots:
     //cmd pass to ws client
     void onRequestExec(QString targetIP, QString idx, QString sCmd);
     void onAddIperf(QString cfg);
-
+    void onClearIperf();
 signals:
     void updateEndpointNum(int n);
     void updateStarttime(QDateTime stime);
