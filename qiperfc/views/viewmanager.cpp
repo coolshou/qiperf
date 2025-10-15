@@ -129,7 +129,6 @@ void ViewManager::addView(AbstractView *view, bool closeable)
     qint64 idx = m_views->keys().count();
     QString title = view->title();
     QDockWidget *dock = new QDockWidget(title, m_window);
-    qDebug() << "ViewManager::addView dock title:" << dock->windowTitle();
     dock->installEventFilter(this);
     // connect(dock, &QDockWidget::visibilityChanged, this, &ViewManager::onVisibilityChanged);
     if (!closeable){
