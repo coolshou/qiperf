@@ -30,6 +30,14 @@
 #include "aip.h"
 #include "../src/wsclient.h"
 
+enum PointLabel { UNCLASSIFIED = -1, NOISE = -2 };
+
+struct DBPoint {
+    QPointF pos;
+    int label = UNCLASSIFIED;
+};
+
+
 namespace Ui {
 class DlgJIO;
 }
@@ -175,7 +183,7 @@ private slots:
     void onClear(bool checked);
     void onLoadCliecked(bool checked);
     void onSaveCliecked(bool checked);
-    void onCalcCliecked(bool checked);
+    void onCalcClicked(bool checked);
     void onSet(bool checked);
     void onInquireClicked(bool checked);
     void onOptimizeClicked(bool checked);
@@ -232,7 +240,13 @@ private:
     void savecfg();
     QVector<QPointF> polarToXY(const QVector<double>& anglesDeg, const QVector<double>& distances);
     QVector<int> kMeansCluster(const QVector<QPointF>& points, int k = 2, int maxIter = 100);
+    bool isAzimuthClose(double a1, double a2, double thresholdDeg = 3.5);
     // double bearing(double lat1, double lon1, double lat2, double lon2);
+    // DBSCAN
+    double euclideanDistance(const QPointF& a, const QPointF& b);
+    QVector<int> regionQuery(const QVector<DBPoint>& points, int index, double eps);
+    bool expandCluster(QVector<DBPoint>& points, int index, int clusterId, double eps, int minPts);
+    QVector<int> dbscan(const QVector<QPointF>& inputPoints, double eps, int minPts);
     Ui::DlgJIO *ui;
     QSettings *m_cfg;
     QMenu *m_contextMenu;

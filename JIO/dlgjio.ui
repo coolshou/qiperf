@@ -793,6 +793,19 @@
             <string>Group:</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_2">
+            <item row="1" column="0">
+             <widget class="QRadioButton" name="rbKmeans">
+              <property name="text">
+               <string>Kmeans</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup_2</string>
+              </attribute>
+             </widget>
+            </item>
             <item row="0" column="0">
              <widget class="QRadioButton" name="rbAvg">
               <property name="text">
@@ -803,10 +816,13 @@
               </attribute>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QRadioButton" name="rbKmeans">
+            <item row="0" column="1">
+             <widget class="QRadioButton" name="rbDBSCAN">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Density-Based Spatial Clustering of Applications with Noise&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
-               <string>Kmeans</string>
+               <string>DBSCAN</string>
               </property>
               <property name="checked">
                <bool>true</bool>

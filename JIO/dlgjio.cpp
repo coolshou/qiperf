@@ -758,7 +758,7 @@ void DlgJIO::initAction()
 
     connect(ui->pbLoad, &QPushButton::clicked, this, &DlgJIO::onLoadCliecked);
     connect(ui->pbSave, &QPushButton::clicked, this, &DlgJIO::onSaveCliecked);
-    connect(ui->pbCalc, &QPushButton::clicked, this, &DlgJIO::onCalcCliecked);
+    connect(ui->pbCalc, &QPushButton::clicked, this, &DlgJIO::onCalcClicked);
     // connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgJIO::onShowMap);
     connect(ui->pbShowGeo, &QPushButton::clicked, this, &DlgJIO::onShowGeo);
     connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgJIO::onShow3D);
@@ -1354,7 +1354,7 @@ void DlgJIO::initResultHeader(AIP::ModuleType aip1type)
     ui->twResult->setHorizontalHeaderLabels(hls);
 }
 
-void DlgJIO::onCalcCliecked(bool checked)
+void DlgJIO::onCalcClicked(bool checked)
 {
     Q_UNUSED(checked)
     emit clearBeamIDCmd();
@@ -1492,31 +1492,69 @@ void DlgJIO::onCalcCliecked(bool checked)
     double distMaxL=0.0;
     double distR=0.0;
     double distL=0.0;
-
+    double amcmaz;
+    double relative;
     QColor lColor = QColor(144, 238, 144); //light green
     QColor rColor = QColor(173, 216, 230); //light blue
     QColor nColor = QColor(Qt::lightGray);
     QList<QTableWidgetItem*> cm7rs;
     QList<QTableWidgetItem*> cm7ls;
 
-    if (ui->rbKmeans->isChecked()) {
-        QVector<QPointF> points = polarToXY(azbearings, distances);
-        // qDebug() << "points:" << points;
-        QVector<int> labels = kMeansCluster(points);
+    if ((ui->rbDBSCAN->isChecked())||
+        (ui->rbKmeans->isChecked())  ){
+        QVector<int> labels;
+        if (ui->rbDBSCAN->isChecked()) {
+            QVector<QPointF> polarPoints;
 
-        for (int i = 0; i < azbearings.size(); ++i) {
-            qDebug() << "Azimuth:" << azbearings[i]
-                     << "Distance:" << distances[i]
-                     << "-> Group" << labels[i];
+            for (int i = 0; i < azbearings.size(); ++i) {
+                double mathAngle = std::fmod(90.0 - azbearings[i] + 360.0, 360.0);
+                double rad = qDegreesToRadians(mathAngle);
+                double r = distances[i];
+                polarPoints.append(QPointF(r * std::cos(rad), r * std::sin(rad)));
+            }
+
+            labels = dbscan(polarPoints, 0.2, 2); // eps=0.2, minPts=2
+
+            for (int i = 0; i < labels.size(); ++i) {
+                qDebug() << "Azimuth:" << azbearings[i]
+                         << "-> Group:" << labels[i];
+            }
+
+            // for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
+            //     QTableWidgetItem *nitm = ui->twResult->item(iRow, AZEIcols::Name);
+            //     int g = labels[iRow];
+            //     if (g==0){
+            //         nitm->setBackground(QBrush(lColor));
+            //         nitm->setToolTip("CM7-FirstQuadrant");
+            //     }else if (g==1){
+            //         nitm->setBackground(QBrush(rColor));
+            //         nitm->setToolTip("CM7-FourthQuadrant");
+            //         // itm->setData(Qt::UserRole, "AIP2");
+            //     }else {
+            //         nitm->setBackground(QBrush(nColor));
+            //     }
+            // }
+        }
+        if (ui->rbKmeans->isChecked()) {
+            QVector<QPointF> points = polarToXY(azbearings, distances);
+            // qDebug() << "points:" << points;
+            labels = kMeansCluster(points);
+
+            for (int i = 0; i < azbearings.size(); ++i) {
+                qDebug() << "Azimuth:" << azbearings[i]
+                         << "Distance:" << distances[i]
+                         << "-> Group" << labels[i];
+            }
         }
         for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
+            QTableWidgetItem *nitm = ui->twResult->item(iRow, AZEIcols::Name);
             QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::Distance);
             QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
             if (itm){
                 int g = labels[iRow];
                 if (g==0){
-                    itm->setBackground(QBrush(lColor));
-                    itm->setToolTip("CM7-FirstQuadrant");
+                    nitm->setBackground(QBrush(lColor));
+                    nitm->setToolTip("CM7-FirstQuadrant");
                     itm->setData(Qt::UserRole, "AIP1");
                     cm7rs.append(itm);
                     distR =ditm->text().toDouble()*1000;
@@ -1524,8 +1562,8 @@ void DlgJIO::onCalcCliecked(bool checked)
                         distMaxR = distR;
                     }
                 }else if (g==1){
-                    itm->setBackground(QBrush(rColor));
-                    itm->setToolTip("CM7-FourthQuadrant");
+                    nitm->setBackground(QBrush(rColor));
+                    nitm->setToolTip("CM7-FourthQuadrant");
                     itm->setData(Qt::UserRole, "AIP2");
                     cm7ls.append(itm);
                     distL =ditm->text().toDouble()*1000;
@@ -1533,20 +1571,23 @@ void DlgJIO::onCalcCliecked(bool checked)
                         distMaxL = distL;
                     }
                 }else {
-                    itm->setBackground(QBrush(nColor));
+                    nitm->setBackground(QBrush(nColor));
                 }
             }
         }
+        // AM7 right CMs
         QVector<double> azbears;
         foreach(auto itm, cm7rs){
             azbears.append(itm->text().toDouble());
         }
         double am7r = averageBearing(azbears);
+        // AM7 Left CMs
         azbears.clear();
         foreach(auto itm, cm7ls){
             azbears.append(itm->text().toDouble());
         }
         double am7l = averageBearing(azbears);
+        // center of left & right
         azbears.clear();
         azbears.append(am7r);
         azbears.append(am7l);
@@ -1555,21 +1596,19 @@ void DlgJIO::onCalcCliecked(bool checked)
     if (ui->rbAvg->isChecked()) {
         // AM7 az
         am7azDeg = averageBearing(azbearings);
-
         // use AM7 azimuth Degree divide CM into Quadrant 1 or Quadrant 4
-        double relative;
-        double cmaz;
         for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
+            QTableWidgetItem *nitm = ui->twResult->item(iRow, AZEIcols::Name);
             QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::Distance);
             QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
             if (itm){
-                cmaz = itm->text().toDouble();// + 180;
-                relative = fmod((cmaz - am7azDeg + 360), 360);
-                // qDebug() << "cmaz:" << cmaz << "  relative:" << relative;
+                amcmaz = itm->text().toDouble();
+                relative = fmod((amcmaz - am7azDeg + 360), 360);
+                // qDebug() << "amcmaz:" << amcmaz << "  relative:" << relative;
                 if (relative > 0 && relative < 90){
                     //azimuthDegree 的第一象限
-                    itm->setBackground(QBrush(lColor));
-                    itm->setToolTip("CM7-FirstQuadrant");
+                    nitm->setBackground(QBrush(lColor));
+                    nitm->setToolTip("CM7-FirstQuadrant");
                     itm->setData(Qt::UserRole, "AIP1");
                     cm7rs.append(itm);
                     distR =ditm->text().toDouble()*1000;
@@ -1578,8 +1617,8 @@ void DlgJIO::onCalcCliecked(bool checked)
                     }
                 }else if (relative > 270 && relative < 360){
                     //azimuthDegree 的第四象限
-                    itm->setBackground(QBrush(rColor));
-                    itm->setToolTip("CM7-FourthQuadrant");
+                    nitm->setBackground(QBrush(rColor));
+                    nitm->setToolTip("CM7-FourthQuadrant");
                     itm->setData(Qt::UserRole, "AIP2");
                     cm7ls.append(itm);
                     distL =ditm->text().toDouble()*1000;
@@ -1588,7 +1627,7 @@ void DlgJIO::onCalcCliecked(bool checked)
                     }
                 }else{
                     qDebug() << "No in Coverage range";
-                    itm->setBackground(QBrush(nColor));
+                    nitm->setBackground(QBrush(nColor));
                 }
             }
         }
@@ -1599,13 +1638,26 @@ void DlgJIO::onCalcCliecked(bool checked)
         // ui->tableWidget->item(0, GPScols::AIP1); //cyntec or hanwha
 
     }
+    //TODO check if any CM7 in AM7's guard band (+-3.5)
+    for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
+        // QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::P2Azimuth);
+        QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
+        if (itm){
+            amcmaz = itm->text().toDouble();
+            if (isAzimuthClose(amcmaz, am7azDeg)){
+                itm->setBackground(QBrush("red"));
+            }
+        }
+    }
+    //TODO check if any CM7 is outside AM7 beamID's HPAz/HPEl range
+
     //show on UI
     ui->leAM7az->setText(QString::number(am7azDeg, 'f', 1));
     // AM7 Pitch
     double elDegree = totalel/ui->twResult->rowCount();
     ui->leAM7el->setText(QString::number(elDegree, 'f', 1));
 
-    //AM7 AIP1 Az, TODO El
+    //AM7 AIP1 Az, El
     getBestBeamID(0, am7azDeg, aip1type, cm7rs, distMaxR);
     //AM7 AIP2
     getBestBeamID(1, am7azDeg, aip2type, cm7ls, distMaxL);
@@ -2737,6 +2789,79 @@ QVector<int> DlgJIO::kMeansCluster(const QVector<QPointF> &points, int k, int ma
         }
     }
 
+    return labels;
+}
+
+bool DlgJIO::isAzimuthClose(double a1, double a2, double thresholdDeg)
+{
+    double diff = std::fabs(a1 - a2);
+    double angularDiff = std::min(diff, 360.0 - diff); // 考慮循環性
+    qDebug() << "a1:" << a1 << " a2:" << a2 << " = " << angularDiff;
+    return angularDiff <= thresholdDeg;
+}
+
+double DlgJIO::euclideanDistance(const QPointF &a, const QPointF &b)
+{
+    return QLineF(a, b).length();
+}
+
+QVector<int> DlgJIO::regionQuery(const QVector<DBPoint> &points, int index, double eps)
+{
+    QVector<int> neighbors;
+    for (int i = 0; i < points.size(); ++i) {
+        if (euclideanDistance(points[index].pos, points[i].pos) <= eps)
+            neighbors.append(i);
+    }
+    return neighbors;
+}
+
+bool DlgJIO::expandCluster(QVector<DBPoint> &points, int index, int clusterId, double eps, int minPts)
+{
+    QVector<int> seeds = regionQuery(points, index, eps);
+    if (seeds.size() < minPts) {
+        points[index].label = NOISE;
+        return false;
+    }
+
+    for (int i : seeds)
+        points[i].label = clusterId;
+
+    seeds.removeAll(index);
+
+    while (!seeds.isEmpty()) {
+        int current = seeds.takeFirst();
+        QVector<int> result = regionQuery(points, current, eps);
+        if (result.size() >= minPts) {
+            for (int i : result) {
+                if (points[i].label == UNCLASSIFIED || points[i].label == NOISE) {
+                    points[i].label = clusterId;
+                    if (!seeds.contains(i))
+                        seeds.append(i);
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+QVector<int> DlgJIO::dbscan(const QVector<QPointF> &inputPoints, double eps, int minPts)
+{
+    QVector<DBPoint> points;
+    for (const QPointF& p : inputPoints)
+        points.append({p, UNCLASSIFIED});
+
+    int clusterId = 0;
+    for (int i = 0; i < points.size(); ++i) {
+        if (points[i].label == UNCLASSIFIED) {
+            if (expandCluster(points, i, clusterId, eps, minPts))
+                clusterId++;
+        }
+    }
+
+    QVector<int> labels;
+    for (const DBPoint& p : points)
+        labels.append(p.label);
     return labels;
 }
 
