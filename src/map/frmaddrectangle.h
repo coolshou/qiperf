@@ -48,8 +48,13 @@ public:
     void setPos(double lat, double lon);
     QGV::GeoPos getPos();
     QString getLable();
+    void setLabel(QString label);
     QSize getSize();
+    void setSize(QPointF size);
     QColor getColor();
+    void setColor(QColor color);
+    bool getEditMode();
+    void setEditMode(bool bEdit);
 
 public slots:
     void onAccepted();
@@ -60,6 +65,8 @@ private:
     Ui::FrmAddRectangle *ui;
     double mlatitide;
     double mlontitude;
+    bool mEditMode;
+    QString mtitle;
 };
 
 #endif // FRMADDRECTANGLE_H

@@ -23,6 +23,7 @@ show:
 #include <helpers.h>
 #include "../lib/geoview/placemark.h"
 #include "frmaddrectangle.h"
+#include "beamitem.h"
 
 namespace Ui {
 class DlgGeoOSM;
@@ -47,6 +48,8 @@ public:
                       QColor color=QColor(Qt::red), bool init=false,
                       qreal linewidth=3, double arrowLength = 20.0,
                       double arrowAngleDeg = 30.0 );
+    void addBeamItem(QGV::GeoPos origin, double azimuthDeg, double hpbwDeg,
+                     double rangeMeters, const QColor& color);
     void clearMarker();
     void clearPolyLines();
     void clearLinkLines();
@@ -66,6 +69,8 @@ protected slots:
     void showHeadingLine(bool show);
     void showInitHeadingLine(bool show);
     void onAddArrowLine(bool checked);
+    void onAddBeam(bool checked);
+    void onClearBeam(bool checked);
     void onMapStateChanged(QGV::MapState state);
     void onScaleChanged();
     void onAddRectangleAccepted();
@@ -78,11 +83,13 @@ private:
     void addPolylines(const QVector<QGV::GeoPos>& linePts, QColor color,
                      qreal linewidth=1);
     void onAddPosition(bool checked);
+    void onEditPosition(bool checked);
     void onCopyMousePosition(bool checked);
     QGroupBox* createOptionsList(bool addCheckbox=false);
 
     Ui::DlgGeoOSM *ui;
     QGVMap *mMap;
+    QGVLayer* mBeamLayer;
     QGVLayer* mLinkLineLayer;
     QGVLayer* mItemsLayer;
     QGVLayer* mPolysLayer;
@@ -91,6 +98,9 @@ private:
     QGV::GeoPos *currentMousePos;
     QClipboard *clipboard;
     FrmAddRectangle *mfrmAddRect;
+    QAction *actAddPosition;
+    QAction *actEditPosition;
+    QAction *actPosition;
 };
 
 #endif // DLGGEOOSM_H

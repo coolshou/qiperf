@@ -69,6 +69,7 @@ SOURCES += \
     ../src/gps/geotranslate.cpp \
     ../src/gps/gpsfunc.cpp \
     ../src/gps/iplocationprovider.cpp \
+    ../src/map/beamitem.cpp \
     ../src/map/dlggeoosm.cpp \
     ../src/map/frmaddrectangle.cpp \
     ../src/memmonitor.cpp \
@@ -155,6 +156,7 @@ HEADERS += \
     ../src/gps/geotranslate.h \
     ../src/gps/gpsfunc.h \
     ../src/gps/iplocationprovider.h \
+    ../src/map/beamitem.h \
     ../src/map/dlggeoosm.h \
     ../src/map/frmaddrectangle.h \
     ../src/memmonitor.h \

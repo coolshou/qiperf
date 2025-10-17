@@ -27,12 +27,15 @@ DlgGeoOSM::DlgGeoOSM(QWidget *parent)
     Helpers::setupCachedNetworkAccessManager(this);
 
     mMap = new QGVMap(this);
+
     // connect(mMap, &QGVMap::scaleChanged, this , &DlgGeoOSM::onScaleChanged);
     // connect(mMap, &QGVMap::stateChanged, this, &DlgGeoOSM::onMapStateChanged);
     // Background layer
     auto osmLayer = new QGVLayerOSM();
     mMap->addItem(osmLayer);
 
+    mBeamLayer = new QGVLayer();
+    mMap->addItem(mBeamLayer);
     //link line
     mLinkLineLayer = new QGVLayer();
     mMap->addItem(mLinkLineLayer);
@@ -62,6 +65,8 @@ DlgGeoOSM::DlgGeoOSM(QWidget *parent)
     connect(ui->pbClearMark, &QPushButton::clicked, this, &DlgGeoOSM::onClearMark);
     connect(ui->pbAddPolyline, &QPushButton::clicked, this, &DlgGeoOSM::onAddPolylines);
     connect(ui->pbAddArrowLine, &QPushButton::clicked, this, &DlgGeoOSM::onAddArrowLine);
+    connect(ui->pbAddBeam, &QPushButton::clicked, this, &DlgGeoOSM::onAddBeam);
+    connect(ui->pbClearBeam, &QPushButton::clicked, this, &DlgGeoOSM::onClearBeam);
     connect(ui->cbShowLinkLine, &QCheckBox::clicked, this, &DlgGeoOSM::showLinkline);
     connect(ui->cbShowHeadingLine, &QCheckBox::clicked, this, &DlgGeoOSM::showHeadingLine);
     connect(ui->cbShowInitHeadingLine, &QCheckBox::clicked, this, &DlgGeoOSM::showInitHeadingLine);
@@ -204,7 +209,7 @@ void DlgGeoOSM::setItmHighlight(QString label)
     for(int i=0;i<mPolysLayer->countItems();i++)
     {
         QGVItem *itm = mPolysLayer->getItem(i);
-        qDebug() << "TODO: mPolysLayer itm:" << itm;
+        qDebug() << "TODO:[setItmHighlight] mPolysLayer itm:" << itm;
     }
 }
 
@@ -269,6 +274,21 @@ void DlgGeoOSM::onAddArrowLine(bool checked)
                  QColor(Qt::red), ui->ArrowLineWidth->value());
 }
 
+void DlgGeoOSM::onAddBeam(bool checked)
+{
+    Q_UNUSED(checked)
+    QGV::GeoPos org= QGV::GeoPos{ui->BeamLatitude->value(),
+                                  ui->BeamLongitude->value()};
+    addBeamItem(org, ui->sbAzDegree->value(), ui->sbHPAz->value(),
+                ui->sbRange->value(), QColor(ui->beamColor->currentText()));
+}
+
+void DlgGeoOSM::onClearBeam(bool checked)
+{
+    Q_UNUSED(checked)
+    mBeamLayer->deleteItems();
+}
+
 void DlgGeoOSM::onMapStateChanged(QGV::MapState state)
 {
     qDebug() << "onMapStateChanged:" << QString::number(static_cast<int>(state));
@@ -292,23 +312,34 @@ void DlgGeoOSM::onScaleChanged()
 
 void DlgGeoOSM::onAddRectangleAccepted()
 {
+    bool editmode = mfrmAddRect->getEditMode();
     QGV::GeoPos pos = mfrmAddRect->getPos();
     QString label = mfrmAddRect->getLable();
     QSize size = mfrmAddRect->getSize();
     QColor c= mfrmAddRect->getColor();
-    addRectangle(pos, QPointF(size.width(), size.height()), c, label);
-    emit addPosition(label, pos.latitude(), pos.longitude());
+    if (editmode){
+        qDebug() << "TODO: edit current Rectangle";
+    }else{
+        addRectangle(pos, QPointF(size.width(), size.height()), c, label);
+        emit addPosition(label, pos.latitude(), pos.longitude());
+    }
 }
 
 void DlgGeoOSM::createContextMenu()
 {
-    QAction *actAddPosition = new QAction("Add Position", this);
+    actAddPosition = new QAction("Add Position", this);
     connect(actAddPosition, &QAction::triggered, this, &DlgGeoOSM::onAddPosition);
 
-    QAction *actPosition = new QAction("Copy current mouse position", this);
-    connect(actPosition, &QAction::triggered, this, &DlgGeoOSM::onCopyMousePosition);
-    mMap->addAction(actAddPosition);
+    actEditPosition = new QAction("Edit Position", this);
+    // actEditPosition->setEnabled(false);
+    actEditPosition->setVisible(false);
+    connect(actEditPosition, &QAction::triggered, this, &DlgGeoOSM::onEditPosition);
 
+    actPosition = new QAction("Copy current mouse position", this);
+    connect(actPosition, &QAction::triggered, this, &DlgGeoOSM::onCopyMousePosition);
+
+    mMap->addAction(actAddPosition);
+    mMap->addAction(actEditPosition);
     mMap->addAction(actPosition);
 
 }
@@ -340,7 +371,37 @@ void DlgGeoOSM::onAddPosition(bool checked)
 {
     Q_UNUSED(checked)
     // add a device at current mouse pos
+    mfrmAddRect->setEditMode(false);
     mfrmAddRect->setPos(currentMousePos->latitude(), currentMousePos->longitude());
+    mfrmAddRect->show();
+}
+
+void DlgGeoOSM::onEditPosition(bool checked)
+{
+    Q_UNUSED(checked)
+    QString label="";
+    QColor  color=QColor(Qt::red);
+    QPointF size= QPointF(10,10);
+    // QGV::GeoRect pos;
+    // mItemsLayer;
+    for(int i=0;i<mItemsLayer->countItems();i++)
+    {
+        RectangleText *itm = static_cast<RectangleText*>(mItemsLayer->getItem(i));
+        if(itm){
+            if (itm->isSelected()){
+                label = itm->getText();
+                color = itm->getColor();
+                size = itm->getSize();
+                // pos = itm->getPos();
+                break;
+            }
+        }
+    }
+    mfrmAddRect->setEditMode(true);
+    mfrmAddRect->setLabel(label);
+    mfrmAddRect->setColor(color);
+    mfrmAddRect->setSize(size);
+    // mfrmAddRect->setPos(pos.);
     mfrmAddRect->show();
 }
 
@@ -400,4 +461,10 @@ QGroupBox* DlgGeoOSM::createOptionsList(bool addCheckbox)
     }
     return nullptr;
 
+}
+
+void DlgGeoOSM::addBeamItem(QGV::GeoPos origin, double azimuthDeg, double hpbwDeg, double rangeMeters, const QColor &color)
+{
+    BeamItem* beam1 = new BeamItem(origin, azimuthDeg, hpbwDeg, rangeMeters, color);
+    mBeamLayer->addItem(beam1);
 }

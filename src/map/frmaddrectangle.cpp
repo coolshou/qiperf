@@ -8,6 +8,8 @@ FrmAddRectangle::FrmAddRectangle(QWidget *parent)
     , ui(new Ui::FrmAddRectangle)
 {
     ui->setupUi(this);
+    mtitle="Rectangle";
+    setEditMode(false);
     ui->cbColor->setItemDelegate(new ColorDelegate(ui->cbColor));
     ui->cbColor->addItem("Red", QColor(Qt::red));
     ui->cbColor->addItem("Yellow", QColor(Qt::yellow));
@@ -18,6 +20,7 @@ FrmAddRectangle::FrmAddRectangle(QWidget *parent)
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &FrmAddRectangle::onAccepted);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &FrmAddRectangle::close);
+
 }
 
 FrmAddRectangle::~FrmAddRectangle()
@@ -44,15 +47,51 @@ QString FrmAddRectangle::getLable()
     return ui->leLabel->text();
 }
 
+void FrmAddRectangle::setLabel(QString label)
+{
+    ui->leLabel->setText(label);
+}
+
 QSize FrmAddRectangle::getSize()
 {
     return QSize(ui->sbSizeWidth->value(), ui->sbSizeHight->value());
+}
+
+void FrmAddRectangle::setSize(QPointF size)
+{
+    ui->sbSizeWidth->setValue(size.x());
+    ui->sbSizeHight->setValue(size.y());
 }
 
 QColor FrmAddRectangle::getColor()
 {
     QColor selectedColor = ui->cbColor->currentData(Qt::UserRole).value<QColor>();
     return selectedColor;
+}
+
+void FrmAddRectangle::setColor(QColor color)
+{
+    int idx= ui->cbColor->findData(color);
+    if (idx>0){
+       ui->cbColor->setCurrentIndex(idx);
+    }
+}
+
+bool FrmAddRectangle::getEditMode()
+{
+    return mEditMode;
+}
+
+void FrmAddRectangle::setEditMode(bool bEdit)
+{
+    mEditMode = bEdit;
+    QString title;
+    if (mEditMode){
+        title=QString("Edit %1").arg(mtitle);
+    }else{
+        title=QString("Add %1").arg(mtitle);
+    }
+    setWindowTitle(title);
 }
 
 void FrmAddRectangle::onAccepted()

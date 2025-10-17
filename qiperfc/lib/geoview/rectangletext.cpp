@@ -4,15 +4,31 @@
 
 RectangleText::RectangleText(QString label, const QGV::GeoRect &geoRect,
                              QPointF fsize, QColor color, QGVMap *map)
-    :Rectangle(geoRect, color), mGeoRect(geoRect), mLabel(label), mColor(color),
+    :Rectangle(geoRect, color), mGeoRect(geoRect), mSize(fsize),
+    mLabel(label), mColor(color),
     mMap(map)
 {
-    Q_UNUSED(fsize)
+
 }
 
 QString RectangleText::getText()
 {
     return mLabel;
+}
+
+QColor RectangleText::getColor()
+{
+    return mColor;
+}
+
+QPointF RectangleText::getSize()
+{
+    return mSize;
+}
+
+QGV::GeoRect RectangleText::getPos()
+{
+    return mGeoRect;
 }
 
 QString RectangleText::projTooltip(const QPointF &projPos) const
