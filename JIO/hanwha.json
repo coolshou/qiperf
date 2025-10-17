@@ -93,7 +93,7 @@
             "BFTX1ATT":0,"BFTX2ATT":0,"IFTX1ATT":18,"IFTX2ATT":18,
             "BFRX1ATT":0,"BFRX2ATT":0,"IFRX1ATT":18,"IFRX2ATT":18,"LNARXATT":0}
     },
-    "BEAMTYPE":{
+    "BeamTypeData":{
         "NARROW":{
             "RxTotalGain":80,
             "AntGain":23.5
