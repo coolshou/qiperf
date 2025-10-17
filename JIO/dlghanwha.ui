@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>402</width>
-    <height>300</height>
+    <width>543</width>
+    <height>312</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -211,72 +211,148 @@
       </item>
       <item row="3" column="3">
        <widget class="QComboBox" name="cbIDColor">
-       <item>
-        <property name="text">
-         <string>red</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>pink</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>blue</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>cyan</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>yellow</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>purple</string>
-        </property>
-       </item>
+        <item>
+         <property name="text">
+          <string>red</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>pink</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>blue</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>cyan</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>yellow</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>purple</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="3" column="4" colspan="2">
        <widget class="QComboBox" name="cbAroundColor">
-       <item>
-        <property name="text">
-         <string>blue</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>cyan</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>yellow</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>red</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>pink</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>purple</string>
-        </property>
-       </item>
+        <item>
+         <property name="text">
+          <string>blue</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>cyan</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>yellow</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>red</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>pink</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>purple</string>
+         </property>
+        </item>
        </widget>
-       </item>
+      </item>
+      <item row="3" column="6" rowspan="5" colspan="2">
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Triangle</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Az:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QDoubleSpinBox" name="sbTriangleX">
+           <property name="decimals">
+            <number>1</number>
+           </property>
+           <property name="minimum">
+            <double>-100.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>El:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QDoubleSpinBox" name="sbTriangleY">
+           <property name="decimals">
+            <number>1</number>
+           </property>
+           <property name="minimum">
+            <double>-100.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Size:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="sbTriangleSize">
+           <property name="decimals">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <double>10.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QPushButton" name="pbTriangle">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Add</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

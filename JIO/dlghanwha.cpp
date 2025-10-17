@@ -22,6 +22,7 @@ DlgHanwha::DlgHanwha(QSettings *cfg, Hanwha *hanwha, QWidget *parent)
     connect(ui->HanwhaBeamType, &QComboBox::currentTextChanged, this, &DlgHanwha::onHanwhaBeamTypeTextChanged);
     connect(ui->pbHanwhaBeamTable, &QPushButton::clicked, this, &DlgHanwha::onHanwhaBeamTableClicked);
     connect(ui->pbAround, &QPushButton::clicked, this, &DlgHanwha::onSelectAroundID);
+    connect(ui->pbTriangle, &QPushButton::clicked, this, &DlgHanwha::onAddTriangle);
     loadcfg();
 }
 
@@ -221,6 +222,16 @@ void DlgHanwha::onSelectAroundID(bool checked)
         }
     }
 }
+
+void DlgHanwha::onAddTriangle(bool checked)
+{
+    Q_UNUSED(checked)
+    double x = ui->sbTriangleX->value();
+    double y = ui->sbTriangleY->value();
+    double s = ui->sbTriangleSize->value();
+    AddTriangle(x, y, s);
+
+}
 void DlgHanwha::loadcfg()
 {
     m_cfg->beginGroup("AIP");
@@ -236,4 +247,13 @@ void DlgHanwha::savecfg()
     m_cfg->beginGroup("AIP");
     m_cfg->setValue("selrefpath", m_oldsavepath);
     m_cfg->endGroup();
+}
+
+void DlgHanwha::AddTriangle(double xpos, double ypos, double size)
+{
+    FrmBeamTable *beamtable;
+    beamtable = getBeamTable();
+    if (beamtable){
+        beamtable->addTriangleTarget(QPointF(xpos, ypos), size);
+    }
 }

@@ -39,10 +39,12 @@ private slots:
     void onHanwhaBeamTableClicked(bool checked);
     void onNewHanwhaBeamTableIDs(QStringList keys);
     void onSelectAroundID(bool checked);
+    void onAddTriangle(bool checked);
 private:
     void onCloseHanwhaBeamTable(int code);
     void loadcfg();
     void savecfg();
+    void AddTriangle(double xpos, double ypos, double size);
 private:
     Ui::DlgHanwha *ui;
     QSettings *m_cfg;
