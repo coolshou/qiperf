@@ -247,6 +247,8 @@ private:
     QVector<int> regionQuery(const QVector<DBPoint>& points, int index, double eps);
     bool expandCluster(QVector<DBPoint>& points, int index, int clusterId, double eps, int minPts);
     QVector<int> dbscan(const QVector<QPointF>& inputPoints, double eps, int minPts);
+    QVector<double> computeKDistances(const QVector<QPointF>& points, int k);
+    double detectElbow(const QVector<double>& sortedDistances);
     Ui::DlgJIO *ui;
     QSettings *m_cfg;
     QMenu *m_contextMenu;

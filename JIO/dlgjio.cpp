@@ -1512,28 +1512,20 @@ void DlgJIO::onCalcClicked(bool checked)
                 double r = distances[i];
                 polarPoints.append(QPointF(r * std::cos(rad), r * std::sin(rad)));
             }
-
-            labels = dbscan(polarPoints, 0.2, 2); // eps=0.2, minPts=2
+            int minPts = 1;
+            if (polarPoints.size()<=4){
+                minPts = 2;
+            }
+            QVector<double> kDistances = computeKDistances(polarPoints, minPts);
+            qDebug() << "kDistances:" << kDistances;
+            double eps = detectElbow(kDistances);
+            qDebug() << "eps:" << eps;
+            labels = dbscan(polarPoints, eps, minPts); // eps=0.2, minPts=1 (mini points)
 
             for (int i = 0; i < labels.size(); ++i) {
                 qDebug() << "Azimuth:" << azbearings[i]
                          << "-> Group:" << labels[i];
             }
-
-            // for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
-            //     QTableWidgetItem *nitm = ui->twResult->item(iRow, AZEIcols::Name);
-            //     int g = labels[iRow];
-            //     if (g==0){
-            //         nitm->setBackground(QBrush(lColor));
-            //         nitm->setToolTip("CM7-FirstQuadrant");
-            //     }else if (g==1){
-            //         nitm->setBackground(QBrush(rColor));
-            //         nitm->setToolTip("CM7-FourthQuadrant");
-            //         // itm->setData(Qt::UserRole, "AIP2");
-            //     }else {
-            //         nitm->setBackground(QBrush(nColor));
-            //     }
-            // }
         }
         if (ui->rbKmeans->isChecked()) {
             QVector<QPointF> points = polarToXY(azbearings, distances);
@@ -2863,6 +2855,63 @@ QVector<int> DlgJIO::dbscan(const QVector<QPointF> &inputPoints, double eps, int
     for (const DBPoint& p : points)
         labels.append(p.label);
     return labels;
+}
+
+QVector<double> DlgJIO::computeKDistances(const QVector<QPointF> &points, int k)
+{
+    //helper to select DBSCAN's eps arg
+    QVector<double> kDistances;
+
+    for (const QPointF& p : points) {
+        QVector<double> distances;
+
+        for (const QPointF& other : points) {
+            if (p == other) continue;
+            double d = qSqrt(qPow(p.x() - other.x(), 2) + qPow(p.y() - other.y(), 2));
+            distances.append(d);
+        }
+
+        std::sort(distances.begin(), distances.end());
+
+        if (distances.size() >= k)
+            kDistances.append(distances[k - 1]); // 第 k 個最近鄰居
+        else
+            kDistances.append(distances.last()); // fallback
+    }
+
+    std::sort(kDistances.begin(), kDistances.end()); // 用於繪圖
+    return kDistances;
+}
+
+double DlgJIO::detectElbow(const QVector<double> &sortedDistances)
+{
+    int n = sortedDistances.size();
+    if (n < 3) return sortedDistances.last(); // fallback
+
+    QPointF firstPoint(0, sortedDistances.first());
+    QPointF lastPoint(n - 1, sortedDistances.last());
+
+    double maxDistance = -1;
+    int elbowIndex = -1;
+
+    for (int i = 1; i < n - 1; ++i) {
+        QPointF current(i, sortedDistances[i]);
+
+        // 向量法計算點到線段的垂直距離
+        double dx = lastPoint.x() - firstPoint.x();
+        double dy = lastPoint.y() - firstPoint.y();
+
+        double numerator = qAbs(dy * current.x() - dx * current.y() + lastPoint.x() * firstPoint.y() - lastPoint.y() * firstPoint.x());
+        double denominator = qSqrt(dx * dx + dy * dy);
+        double distance = numerator / denominator;
+
+        if (distance > maxDistance) {
+            maxDistance = distance;
+            elbowIndex = i;
+        }
+    }
+
+    return sortedDistances[elbowIndex];
 }
 
 int DlgJIO::getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, double diffHead, double diffPitch)
