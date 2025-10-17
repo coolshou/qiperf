@@ -24,6 +24,7 @@ private:
     void testdata2();
     void testdata3();
     void testdata4();
+    void testdata5();
     Ui::DlgOptimize *ui;
     OptimizeModel *model;
 };

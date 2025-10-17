@@ -38,6 +38,7 @@ DlgOptimize::DlgOptimize(QWidget *parent)
     // testdata2();
     // testdata3();
     // testdata4();
+    // testdata5();
 
     // qDebug() << "rowcount:" << model->rowCount(QModelIndex());     // Should be > 0
     // qDebug() << "columnCount:" << model->columnCount(QModelIndex());  // Should match your header count
@@ -64,13 +65,13 @@ void DlgOptimize::testdata1()
 {
     OptimizeData newTest(QDateTime::currentDateTime());
     QModelIndex midx = model->addEntry(newTest);  // Adds under root
-    OptimizeData newRec1(QDateTime(), 99, 11, -45.4, 20, "CM7-1", 21, 11, -46, 23 , 990, 965);
+    OptimizeData newRec1(QDateTime(), 477, 11, -45.4, 20, "CM7-1", 64, 11, -46, 23 , 990, 965);
     model->addEntry(newRec1, midx);  // Adds under root
-    OptimizeData newRec2(QDateTime(), 99, 11, -47.4, 20, "CM7-2", 0, 10, -48, 22, 924, 913);
+    OptimizeData newRec2(QDateTime(), 477, 11, -47.4, 20, "CM7-2", 66, 10, -48, 22, 924, 913);
     model->addEntry(newRec2, midx);  // Adds under root
-    OptimizeData newRec3(QDateTime(), 100, 11, -49, 20, "CM7-3", 43, 10, -49, 23, 914, 901);
+    OptimizeData newRec3(QDateTime(), 476, 11, -49, 20, "CM7-3", 64, 10, -49, 23, 914, 901);
     model->addEntry(newRec3, midx);  // Adds under root
-    OptimizeData newRec4(QDateTime(), 100, 11, -47, 20, "CM7-4", 42, 11, -46, 23, 965, 954);
+    OptimizeData newRec4(QDateTime(), 476, 11, -47, 20, "CM7-4", 64, 11, -46, 23, 965, 954);
     model->addEntry(newRec4, midx);  // Adds under root
 }
 
@@ -78,7 +79,7 @@ void DlgOptimize::testdata2()
 {
     OptimizeData newTest(QDateTime::currentDateTime().addSecs(60));
     QModelIndex midx = model->addEntry(newTest);  // Adds under root
-    OptimizeData newRec1(QDateTime(), 99, 11, -45.4, 20, "CM7-1", 23, 11, -45, 23, 967, 945);
+    OptimizeData newRec1(QDateTime(), 477, 11, -45.4, 20, "CM7-1", 85, 11, -47, 23, 967, 945);
     model->addEntry(newRec1, midx);  // Adds under root
 
 }
@@ -87,7 +88,7 @@ void DlgOptimize::testdata3()
 {
     OptimizeData newTest(QDateTime::currentDateTime().addSecs(120));
     QModelIndex midx = model->addEntry(newTest);  // Adds under root
-    OptimizeData newRec1(QDateTime(), 99, 11, -45.4, 20, "CM7-1", 1, 11, -48, 21, 956, 934);
+    OptimizeData newRec1(QDateTime(), 477, 11, -45.4, 20, "CM7-1", 86, 11, -48, 21, 956, 934);
     model->addEntry(newRec1, midx);  // Adds under root
 
 }
@@ -95,7 +96,13 @@ void DlgOptimize::testdata4()
 {
     OptimizeData newTest(QDateTime::currentDateTime().addSecs(180));
     QModelIndex midx = model->addEntry(newTest);  // Adds under root
-    OptimizeData newRec1(QDateTime(), 99, 11, -45.4, 20, "CM7-1", 43, 11, -48, 21);
+    OptimizeData newRec1(QDateTime(), 477, 11, -45.4, 20, "CM7-1", 107, 11, -47, 21, 966, 944);
     model->addEntry(newRec1, midx);  // Adds under root
-
+}
+void DlgOptimize::testdata5()
+{
+    OptimizeData newTest(QDateTime::currentDateTime().addSecs(240));
+    QModelIndex midx = model->addEntry(newTest);  // Adds under root
+    OptimizeData newRec1(QDateTime(), 477, 11, -45.4, 20, "CM7-1", 108, 11, -48, 21, 926, 932);
+    model->addEntry(newRec1, midx);  // Adds under root
 }
