@@ -6,6 +6,9 @@
 #include <QHostAddress>
 #include <QAbstractSocket>
 #include <QString>
+#if defined(Q_OS_WIN)
+#include <windows.h>
+#endif
 
 // Version that returns individual components
 struct TimeComponents {
@@ -28,6 +31,9 @@ public:
     static double calculateFSPL(double distanceMeters, double frequencyHz);
     static double euclideanDistance(double az1, double el1, double az2, double el2);
     static QStringList getAllIPAddress(bool onlyIPv4=true);
+    #if defined(Q_OS_WIN)
+    static QString getErrorString(DWORD errorCode);
+    #endif
 };
 
 #endif // MYFUNC_H

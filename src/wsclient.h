@@ -90,7 +90,7 @@ signals:
     void iperfExtendWait(QString refrow, qint64 iwait, int exitCode, int restarttimes);
     void serialopened(QString refrow, QString serveraddress, QString serveraPort);
     void sshopened(QString refrow, QString serveraddress, QString serveraPort);
-    void ntpsynced(bool bOK, QString target);
+    void ntpsynced(bool bOK, QString target, QString msg="");
     void ntpstarted(bool started, QString fromAddress);
     void requestResult(QString refrow, QString serveraddress, QString cmd, QString msg);
     void debuginfo(QString msg);

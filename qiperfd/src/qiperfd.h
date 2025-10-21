@@ -105,7 +105,7 @@ public slots:
     void onSSHTaskFinished(QString target);
     void onSSHTaskStarted(QString idx, quint16 port);
     void onSSHTaskError(QString idx, QString errormsg);
-    void onTimeSynced(QString target, bool synced);
+    void onTimeSynced(QString target, bool synced, QString errormsg);
 signals:
     void setMgrIfname(QString ifname);
     void iperfStarted(QString bindkey); // iperf thrad started

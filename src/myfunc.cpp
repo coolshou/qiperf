@@ -2,7 +2,6 @@
 
 #include <QtMath>
 #include <QNetworkInterface>
-
 // MyFunc::MyFunc(QObject *parent): QObject(parent)
 // {
 
@@ -188,3 +187,28 @@ QStringList MyFunc::getAllIPAddress(bool onlyIPv4)
     }
     return ds;
 }
+#if defined(Q_OS_WIN)
+QString MyFunc::getErrorString(DWORD errorCode)
+{
+    LPVOID msgBuffer;
+    DWORD size = FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        nullptr,
+        errorCode,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR)&msgBuffer,
+        0,
+        nullptr
+        );
+
+    QString errorMsg;
+    if (size && msgBuffer) {
+        errorMsg = QString::fromWCharArray((wchar_t*)msgBuffer).trimmed();
+        LocalFree(msgBuffer);
+    } else {
+        errorMsg = QString("Unknown error code: %1").arg(errorCode);
+    }
+
+    return errorMsg;
+}
+#endif

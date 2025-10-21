@@ -943,7 +943,7 @@ void QIperfd::onSSHTaskError(QString idx, QString errormsg)
     informMessage(QString("%1:%2:%3").arg(CMD_SSH_FAIL, idx, errormsg));
 }
 
-void QIperfd::onTimeSynced(QString target, bool synced)
+void QIperfd::onTimeSynced(QString target, bool synced, QString errormsg)
 {
     Q_UNUSED(target)
     QString cmd="";
@@ -951,7 +951,7 @@ void QIperfd::onTimeSynced(QString target, bool synced)
     if (synced){
         cmd = QString("%1").arg(CMD_NTP_SYNC_OK);
     }else{
-        cmd = QString("%1").arg(CMD_NTP_SYNC_FAIL);
+        cmd = QString("%1:%2").arg(CMD_NTP_SYNC_FAIL, errormsg);
     }
     rc = m_wsserver->sendTextMessage(cmd);
     if (rc<=0){
