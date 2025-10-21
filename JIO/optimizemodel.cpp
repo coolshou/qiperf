@@ -255,3 +255,17 @@ QModelIndex OptimizeModel::addEntry(const OptimizeData &data, const QModelIndex 
     endInsertRows();
     return createIndex(row, 0, newItem);  // Return index for column 0
 }
+
+QModelIndex OptimizeModel::findEntry(QDateTime testdate)
+{
+    QModelIndex midx= QModelIndex();
+    for(int row=0; row < m_rootItem->childCount(); row++){
+        OptimizeItem* citm = m_rootItem->child(row);
+        if (citm->getTestDate() == testdate){
+            midx = index(row, 0);
+            break;
+        }
+    }
+
+    return midx;
+}

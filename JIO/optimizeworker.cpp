@@ -21,18 +21,25 @@ void OptimizeWorker::work()
     log("update item info to DlgOptimize");
     int port=5201;
     QString client;
+    QDateTime sTime(QDateTime::currentDateTime());
     //create iperf test pair to each client on qiperf console
     for (QJsonArray::const_iterator it=mPosArr.constBegin(); it!=mPosArr.constEnd(); ++it) {
         QJsonObject jObj= it->toObject();
         if (jObj.value("type").toInt()==1){
             client = jObj.value("IPAddr").toString();
-
+            log("// create iperf test pair in qiperfc:" +mLocalAddr+ " <=> " + client);
             addIperf(mLocalAddr, client, 30, port);
+            //show test data on DlgOptimize
+            emit sigAddData(sTime, jObj.value("AM7BeamID").toInt(),
+                            jObj.value("name").toString(),
+                            jObj.value("BeamID").toInt());
+
         }
         port++;
     }
     //
-    log("// create iperf test pair in qiperfc");
+
+
 
     while (!mStop){
 

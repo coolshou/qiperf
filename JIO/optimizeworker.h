@@ -22,6 +22,8 @@ signals:
     void debugMsg(QString msg);
     void sigAddIperf(QString cfg);
     void sigStartIperf(QString cfg);
+    void sigAddData(QDateTime testtime, int am7beamid,
+                 QString cm7name, int cm7beamid);
 private:
     int mDebugLv;
     QJsonObject mInitData;

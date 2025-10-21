@@ -36,6 +36,7 @@ public:
     }
 
     const OptimizeData& data() const { return m_data; }
+    QDateTime getTestDate() { return m_data.testdate();}
 
 private:
     OptimizeData m_data;

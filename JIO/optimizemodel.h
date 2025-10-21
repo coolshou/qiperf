@@ -51,6 +51,8 @@ public:
 
     //
     QModelIndex addEntry(const OptimizeData& data, const QModelIndex& parentIndex = QModelIndex());
+    QModelIndex findEntry(QDateTime testdate);
+
 private:
     OptimizeItem* m_rootItem;
 

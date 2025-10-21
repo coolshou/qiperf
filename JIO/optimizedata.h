@@ -11,7 +11,16 @@ public:
         m_id(-1), m_mcs(-1.0), m_rssi(0.0), m_snr(0.0),
         m_cmName(""), m_cmId(-1), m_cmMcs(-1.0), m_cmRssi(0.0), m_cmSnr(0.0),
         m_ul(-1.0), m_dl(-1.0){}
-
+    OptimizeData(QDateTime time, int id, QString cmName, int cmId)
+        : m_testdate(time), m_id(id), m_cmName(cmName), m_cmId(cmId)
+    {
+        m_mcs = 0.0;
+        m_rssi = 0.0;
+        m_snr = 0.0;
+        m_cmMcs = 0.0;
+        m_cmRssi = 0.0;
+        m_cmSnr = 0.0;
+    }
     OptimizeData(QDateTime time, int id, double mcs, double rssi, double snr,
                  QString cmName, int cmId, double cmMcs, double cmRssi, double cmSnr,
                  double ul=0.0, double dl=0.0)

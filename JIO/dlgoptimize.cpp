@@ -49,6 +49,28 @@ DlgOptimize::~DlgOptimize()
     delete ui;
 }
 
+void DlgOptimize::onAddData(QDateTime testtime, int am7beamid, QString cm7name, int cm7beamid)
+{
+    QModelIndex midx = model->findEntry(testtime);
+    if (!midx.isValid()){
+        OptimizeData newTest(testtime);
+        midx = model->addEntry(newTest);  // Adds under root
+    }
+    qDebug() << "am7beamid:" << am7beamid << " cm7beamid:" << cm7beamid;
+    OptimizeData newRec1(QDateTime(), am7beamid, cm7name, cm7beamid);
+    model->addEntry(newRec1, midx);  // Adds under testtime item
+}
+
+void DlgOptimize::onUpdateSignal(QDateTime testtime, double am7mcs, double am7rssi, double am7snr, QString cm7name, double cm7mcs, double cm7rssi, double cm7snr)
+{
+    qDebug() << "TODO: onUpdateSignal ";
+}
+
+void DlgOptimize::onUpdateTP(QDateTime testtime, QString cm7name, double ul, double dl)
+{
+    qDebug() << "TODO: onUpdateTP ";
+}
+
 void DlgOptimize::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
