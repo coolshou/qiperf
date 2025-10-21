@@ -1,6 +1,7 @@
 #include "ntpsync.h"
 
 #include <QDebug>
+#include "../src/myfunc.h"
 
 NtpSync::NtpSync(QObject *parent)
     : QObject{parent}
