@@ -32,7 +32,7 @@ bool NtpSync::setSystemTime(const QDateTime &dateTime, QString &msg)
     // Set the system time
     if (!SetSystemTime(&st)) {
         DWORD errorCode = GetLastError();
-        msg = myfunc::getErrorString(errorCode);
+        msg = MyFunc::getErrorString(errorCode);
         qWarning() << "Failed to set system time(" << errorCode << "):" << msg;
         return false;
     }
