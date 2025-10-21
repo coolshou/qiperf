@@ -6,6 +6,8 @@
 #include <QHostAddress>
 #include <QAbstractSocket>
 #include <QString>
+#include <QtCore/qglobal.h>
+
 #if defined(Q_OS_WIN)
 #include <windows.h>
 #endif

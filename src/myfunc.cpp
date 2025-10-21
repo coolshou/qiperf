@@ -2,6 +2,7 @@
 
 #include <QtMath>
 #include <QNetworkInterface>
+
 // MyFunc::MyFunc(QObject *parent): QObject(parent)
 // {
 
