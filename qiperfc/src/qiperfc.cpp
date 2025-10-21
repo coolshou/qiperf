@@ -1740,7 +1740,7 @@ void QIperfC::initStatusbar()
             m_mem_label, [&](qint64 memMB) {
                 QString msg = QString("MEM Usage: %1 MB").arg(memMB);
                 m_mem_label->setText(msg);
-                qDebug() << msg;
+                qInfo() << msg;
             });
     // statusbar of endpints (qiperfd list)
     m_label_qiperfd = new QLabel(this);
