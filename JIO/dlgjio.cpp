@@ -2295,7 +2295,7 @@ void DlgJIO::handleButtonClicked(int row, int col)
     QTableWidgetItem *item = ui->tableWidget->item(row, col);
     if (item){
         QVariant v = item->data(Qt::UserRole);
-        qDebug() << "AIP data:"
+        qDebug() << "handleButtonClicked AIP data:"
                  << QString::number(row) << "," <<  QString::number(col)
                  << " = " << v;
         if (v.canConvert<QJsonObject>()){
