@@ -12,11 +12,11 @@ SOURCES += \
     $$PWD/agmsensor.cpp \
     $$PWD/aip.cpp \
     $$PWD/cyntec.cpp \
+    $$PWD/dlgaas.cpp \
     $$PWD/dlgaip.cpp \
     $$PWD/dlgbeamcmd.cpp \
     $$PWD/dlgcyntec.cpp \
     $$PWD/dlghanwha.cpp \
-    $$PWD/dlgjio.cpp \
     $$PWD/dlgoptimize.cpp \
     $$PWD/dlgset.cpp \
     $$PWD/frmbeamtable.cpp \
@@ -35,11 +35,11 @@ HEADERS += \
     $$PWD/cyntec.h \
     $$PWD/cyntecbeamfactordata.h \
     $$PWD/cyntecbeamtabledata.h \
+    $$PWD/dlgaas.h \
     $$PWD/dlgaip.h \
     $$PWD/dlgbeamcmd.h \
     $$PWD/dlgcyntec.h \
     $$PWD/dlghanwha.h \
-    $$PWD/dlgjio.h \
     $$PWD/dlgoptimize.h \
     $$PWD/dlgset.h \
     $$PWD/frmbeamtable.h \
@@ -55,11 +55,11 @@ HEADERS += \
     # $$PWD/../qiperfc/lib/qcpitemtriangle.h
 
 FORMS += \
+    $$PWD/dlgaas.ui \
     $$PWD/dlgaip.ui \
     $$PWD/dlgbeamcmd.ui \
     $$PWD/dlgcyntec.ui \
     $$PWD/dlghanwha.ui \
-    $$PWD/dlgjio.ui \
     $$PWD/dlgoptimize.ui \
     $$PWD/dlgset.ui \
     $$PWD/frmbeamtable.ui

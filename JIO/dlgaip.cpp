@@ -10,7 +10,7 @@
 #include <QJsonDocument>
 #include <QResource>
 
-#include "dlgjio.h"
+#include "dlgaas.h"
 
 #include <QDebug>
 
@@ -117,7 +117,7 @@ void DlgAIP::setRowCol(int row, int col)
     mRow=row;
     mCol=col;
     if (mRow==0){
-        if (mCol==DlgJIO::GPScols::AIP1){
+        if (mCol==DlgAAS::GPScols::AIP1){
             ui->cbPreSetPos->setCurrentIndex(2);
         }else{
             ui->cbPreSetPos->setCurrentIndex(3);

@@ -37,7 +37,7 @@
 #include "../views/viewmanager.h"
 #include "../views/throughputview.h"
 #include "../views/serialview.h"
-#include "../JIO/dlgjio.h"
+#include "../JIO/dlgaas.h"
 #include "../views/serialdata.h"
 #include "../views/sshdata.h"
 #include "plugin/plugininterface.h"
@@ -279,7 +279,7 @@ private:
     QString _logfilename;
     bool _logtimestemp;
     QString _logtimestempformat;
-    DlgJIO *dlg_jio;
+    DlgAAS *dlg_jio;
     QString m_OpenStreetMapTile;
 
     // throughput worker

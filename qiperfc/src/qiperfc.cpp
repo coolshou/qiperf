@@ -696,7 +696,7 @@ void QIperfC::onRequestExec(QString targetIP, QString idx, QString sCmd)
     WSClient *wsc=new WSClient(targetIP, QUrl(url), "");
     //TODO: when disconnected do waht?
     if (dlg_jio){
-        connect(wsc, &WSClient::requestResult, dlg_jio, &DlgJIO::onRequestResult);
+        connect(wsc, &WSClient::requestResult, dlg_jio, &DlgAAS::onRequestResult);
     }
     //wait connect
     int timeout=0;
@@ -1631,10 +1631,10 @@ void QIperfC::onAddSSH()
 
 void QIperfC::initJIO()
 {
-    dlg_jio = new DlgJIO(m_settings);
-    connect(this, &QIperfC::closeAll, dlg_jio, &DlgJIO::close);
-    connect(dlg_jio, &DlgJIO::sigAddIperf, this, &QIperfC::onAddIperf);
-    connect(dlg_jio, &DlgJIO::sigClearIperf, this, &QIperfC::onClearIperf);
+    dlg_jio = new DlgAAS(m_settings);
+    connect(this, &QIperfC::closeAll, dlg_jio, &DlgAAS::close);
+    connect(dlg_jio, &DlgAAS::sigAddIperf, this, &QIperfC::onAddIperf);
+    connect(dlg_jio, &DlgAAS::sigClearIperf, this, &QIperfC::onClearIperf);
     connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onJIO);
 }
 

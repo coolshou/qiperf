@@ -8,5 +8,6 @@
         <file alias="OK.png">images/sOK.png</file>
         <file alias="command.png">images/command.png</file>
         <file alias="Jio.png">images/Jio.png</file>
+        <file alias="AAS.png">images/AntennaAlignmentSystem.png</file>
     </qresource>
 </RCC>

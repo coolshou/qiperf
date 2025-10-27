@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DlgJIO</class>
- <widget class="QDialog" name="DlgJIO">
+ <class>DlgAAS</class>
+ <widget class="QDialog" name="DlgAAS">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,11 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>JIO</string>
+   <string>Antenna Alignment System</string>
   </property>
   <property name="windowIcon">
    <iconset resource="jio.qrc">
-    <normaloff>:/jio/Jio.png</normaloff>:/jio/Jio.png</iconset>
+    <normaloff>:/jio/AAS.png</normaloff>:/jio/AAS.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
    <property name="spacing">
@@ -230,7 +230,7 @@
            </column>
            <item row="0" column="0">
             <property name="text">
-             <string>AM7</string>
+             <string>AP</string>
             </property>
            </item>
            <item row="0" column="1">
@@ -250,7 +250,7 @@
            </item>
            <item row="1" column="0">
             <property name="text">
-             <string>CM7-1</string>
+             <string>Client-1</string>
             </property>
            </item>
            <item row="1" column="1">
@@ -270,7 +270,7 @@
            </item>
            <item row="2" column="0">
             <property name="text">
-             <string>CM7-2</string>
+             <string>Client-2</string>
             </property>
            </item>
            <item row="2" column="1">
@@ -432,7 +432,7 @@
             </size>
            </property>
            <property name="title">
-            <string>AM7:</string>
+            <string>AP:</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_6">
             <property name="spacing">
@@ -851,7 +851,7 @@
             <item row="0" column="0">
              <widget class="QLabel" name="label_4">
               <property name="text">
-               <string>AM7 az(°):</string>
+               <string>AP az(°):</string>
               </property>
              </widget>
             </item>
@@ -865,7 +865,7 @@
             <item row="0" column="1">
              <widget class="QLabel" name="label_5">
               <property name="text">
-               <string>AM7 el(°):</string>
+               <string>AP el(°):</string>
               </property>
              </widget>
             </item>

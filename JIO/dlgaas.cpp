@@ -1,5 +1,5 @@
-#include "dlgjio.h"
-#include "ui_dlgjio.h"
+#include "dlgaas.h"
+#include "ui_dlgaas.h"
 
 #include "../src/gps/gpsfunc.h"
 
@@ -29,9 +29,9 @@
 #include <QDebug>
 
 
-DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
+DlgAAS::DlgAAS(QSettings *cfg, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DlgJIO), m_cfg(cfg)
+    ui(new Ui::DlgAAS), m_cfg(cfg)
 {
     m_debuglv=3;
     mHeaderResult = QStringList() << "P1 : P2" << "Distance(KM)"
@@ -49,7 +49,7 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
                                   << "Lna\nAtt";
     jiocmdObj = QJsonObject();
     m_InquireTimer= new QTimer(this);
-    connect(m_InquireTimer, &QTimer::timeout, this, &DlgJIO::onInquireTimerTimeout);
+    connect(m_InquireTimer, &QTimer::timeout, this, &DlgAAS::onInquireTimerTimeout);
     ui->setupUi(this);
     loadcfg();
     ui->pbShow3D->setVisible(false);
@@ -59,50 +59,50 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     // m_dlgOSM = new DlgOpenStreetMap();
     // connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgJIO::onLoadFinished);
     m_dlgGeo = new DlgGeoOSM();
-    connect(m_dlgGeo, &DlgGeoOSM::loadFinished, this, &DlgJIO::onLoadFinished);
-    connect(m_dlgGeo, &DlgGeoOSM::addPosition, this, &DlgJIO::onAddPosition);
+    connect(m_dlgGeo, &DlgGeoOSM::loadFinished, this, &DlgAAS::onLoadFinished);
+    connect(m_dlgGeo, &DlgGeoOSM::addPosition, this, &DlgAAS::onAddPosition);
     // connect(this, &DlgJIO::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
-    connect(this, &DlgJIO::closeAll, m_dlgGeo, &DlgGeoOSM::close);
-    connect(this, &DlgJIO::highlightItm, m_dlgGeo, &DlgGeoOSM::setItmHighlight);
-    connect(this, &DlgJIO::deleteItm, m_dlgGeo, &DlgGeoOSM::onDeleteItm);
+    connect(this, &DlgAAS::closeAll, m_dlgGeo, &DlgGeoOSM::close);
+    connect(this, &DlgAAS::highlightItm, m_dlgGeo, &DlgGeoOSM::setItmHighlight);
+    connect(this, &DlgAAS::deleteItm, m_dlgGeo, &DlgGeoOSM::onDeleteItm);
 
     isTileAvailable();
     provider = new IpLocationProvider(this);
-    connect(provider, &IpLocationProvider::locationReady, this, &DlgJIO::onLocationReady);
+    connect(provider, &IpLocationProvider::locationReady, this, &DlgAAS::onLocationReady);
     connect(provider, &IpLocationProvider::locationError, this, [](const QString& err) {
         qWarning() << "Location fetch failed:" << err;
     });
     getSelfIpLocation();
 
     m_dlgaip = new DlgAIP(m_cfg, this);
-    connect(m_dlgaip, &DlgAIP::updateData, this, &DlgJIO::onUpdateData);
+    connect(m_dlgaip, &DlgAIP::updateData, this, &DlgAAS::onUpdateData);
     connect(m_dlgaip, &DlgAIP::updateModelType, this,
-            static_cast<void (DlgJIO::*)(int, int, QString)>(&DlgJIO::onUpdateModelType));
-    connect(this, &DlgJIO::closeAll, m_dlgaip, &DlgAIP::close);
+            static_cast<void (DlgAAS::*)(int, int, QString)>(&DlgAAS::onUpdateModelType));
+    connect(this, &DlgAAS::closeAll, m_dlgaip, &DlgAIP::close);
 
     m_dlgset = new DlgSet(this);
-    connect(m_dlgset, &DlgSet::updateSetting, this, &DlgJIO::onUpdateSetting);
-    connect(this, &DlgJIO::closeAll, m_dlgset, &DlgSet::close);
+    connect(m_dlgset, &DlgSet::updateSetting, this, &DlgAAS::onUpdateSetting);
+    connect(this, &DlgAAS::closeAll, m_dlgset, &DlgSet::close);
     mDlgBeamCmd= new DlgBeamCmd(this);
-    connect(this,&DlgJIO::addBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddBeamIDCmd);
-    connect(this,&DlgJIO::addCMBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddCMBeamIDCmd);
-    connect(this,&DlgJIO::clearBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::clear);
-    connect(this,&DlgJIO::clearCMBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::clearCM);
-    connect(this, &DlgJIO::closeAll, mDlgBeamCmd, &DlgBeamCmd::close);
+    connect(this,&DlgAAS::addBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddBeamIDCmd);
+    connect(this,&DlgAAS::addCMBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddCMBeamIDCmd);
+    connect(this,&DlgAAS::clearBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::clear);
+    connect(this,&DlgAAS::clearCMBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::clearCM);
+    connect(this, &DlgAAS::closeAll, mDlgBeamCmd, &DlgBeamCmd::close);
     mDlgOptimize = new DlgOptimize(this);
-    connect(this, &DlgJIO::closeAll, mDlgOptimize, &DlgOptimize::close);
+    connect(this, &DlgAAS::closeAll, mDlgOptimize, &DlgOptimize::close);
     //ssh
     mSSHRemoteRunner = new QSsh::SshRemoteProcessRunner(this);
     connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::connectionError,
-            this, &DlgJIO::handleSSHConnectionError);
+            this, &DlgAAS::handleSSHConnectionError);
     connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::processStarted,
-            this, &DlgJIO::handleSSHProcessStarted);
+            this, &DlgAAS::handleSSHProcessStarted);
     connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::readyReadStandardOutput,
-            this, &DlgJIO::handleSSHProcessStdout);
+            this, &DlgAAS::handleSSHProcessStdout);
     connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::readyReadStandardError,
-            this, &DlgJIO::handleSSHProcessStderr);
+            this, &DlgAAS::handleSSHProcessStderr);
     connect(mSSHRemoteRunner, &QSsh::SshRemoteProcessRunner::processClosed,
-            this, &DlgJIO::handleSSHProcessClosed);
+            this, &DlgAAS::handleSSHProcessClosed);
     m_state = Inactive;
     m_started = false;
 
@@ -113,19 +113,19 @@ DlgJIO::DlgJIO(QSettings *cfg, QWidget *parent) :
     initCyntec();
     initCmds();
 
-    connect(this, &DlgJIO::requestExec, this, &DlgJIO::doRequestExec);
-    connect(this, &DlgJIO::startOptimiz, this, &DlgJIO::onStartOptimiz);
-    connect(this, &DlgJIO::stopOptimiz, this, &DlgJIO::onStopOptimiz);
+    connect(this, &DlgAAS::requestExec, this, &DlgAAS::doRequestExec);
+    connect(this, &DlgAAS::startOptimiz, this, &DlgAAS::onStartOptimiz);
+    connect(this, &DlgAAS::stopOptimiz, this, &DlgAAS::onStopOptimiz);
 
     initResultHeader(AIP::ModuleType::Hanwha);
 }
 
-DlgJIO::~DlgJIO()
+DlgAAS::~DlgAAS()
 {
     delete ui;
 }
 
-void DlgJIO::isTileAvailable()
+void DlgAAS::isTileAvailable()
 {
     // check if OpenStreetMapTile can be access
     // QString tile = getTile();
@@ -140,11 +140,11 @@ void DlgJIO::isTileAvailable()
     QNetworkRequest request(nurl);
     reply = manager->get(request);
 
-    connect(reply, &QNetworkReply::finished, this, &DlgJIO::onCheckTileFinished);
+    connect(reply, &QNetworkReply::finished, this, &DlgAAS::onCheckTileFinished);
 
 }
 
-QString DlgJIO::getTile()
+QString DlgAAS::getTile()
 {
     m_cfg->beginGroup("gps");
     QString tile = m_cfg->value("OpenStreetMapTile").toString();
@@ -152,12 +152,12 @@ QString DlgJIO::getTile()
     return tile;
 }
 
-void DlgJIO::setShowLine(bool show)
+void DlgAAS::setShowLine(bool show)
 {
     showline = show;
 }
 
-void DlgJIO::clearData()
+void DlgAAS::clearData()
 {
     //TODO: ask before clear
     if (ui->tableWidget->rowCount()>0){
@@ -180,7 +180,7 @@ void DlgJIO::clearData()
     emit clearBeamIDCmd();
 }
 
-QString DlgJIO::getStMotion(QString target)
+QString DlgAAS::getStMotion(QString target)
 {
     //TODO: check sensor Calibration
     Q_UNUSED(target)
@@ -203,7 +203,7 @@ Calibration_status_of_the_Sensors = 2
     return result;
 }
 
-QString DlgJIO::getGpsInfo(QString refrow, QString target)
+QString DlgAAS::getGpsInfo(QString refrow, QString target)
 {
     // get GPS info
     QString result="";
@@ -219,7 +219,7 @@ QString DlgJIO::getGpsInfo(QString refrow, QString target)
     return result;
 }
 
-QString DlgJIO::getSensorInfo(QString refrow, QString target)
+QString DlgAAS::getSensorInfo(QString refrow, QString target)
 {
     // get Sensor info
     QString result="";
@@ -235,7 +235,7 @@ QString DlgJIO::getSensorInfo(QString refrow, QString target)
     return result;
 }
 
-void DlgJIO::getAPInfo(QString refrow, QString target)
+void DlgAAS::getAPInfo(QString refrow, QString target)
 {
     if (mControlBy==DlgSet::ControlBy::SSH){
         //TODO: getAPInfo (RSSI/SNR/MCS) by ssh
@@ -247,7 +247,7 @@ void DlgJIO::getAPInfo(QString refrow, QString target)
     }
 }
 
-AIP::ModuleType DlgJIO::getModuleType(int row, int col)
+AIP::ModuleType DlgAAS::getModuleType(int row, int col)
 {
     if ((row<0) || (row >= ui->tableWidget->rowCount())){
         qDebug() << "getModuleType row out of range";
@@ -273,7 +273,7 @@ AIP::ModuleType DlgJIO::getModuleType(int row, int col)
     }
 }
 
-QJsonObject DlgJIO::createInitData()
+QJsonObject DlgAAS::createInitData()
 {
     //create Init Data for Optimize use
     QJsonObject rootObject;
@@ -430,7 +430,7 @@ QJsonObject DlgJIO::createInitData()
     return rootObject;
 }
 
-void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg)
+void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg)
 {
     Q_UNUSED(serveraddress)
     // qDebug() << "onRequestResult refrow:" << refrow << " from: " << serveraddress
@@ -497,7 +497,7 @@ void DlgJIO::onRequestResult(QString refrow, QString serveraddress, QString cmd,
     }
 }
 
-void DlgJIO::setTableWidgetBGColor(QTableWidget *tw, int row, int col, QColor color)
+void DlgAAS::setTableWidgetBGColor(QTableWidget *tw, int row, int col, QColor color)
 {
     QTableWidgetItem *itm = tw->item(row, col);
     if (itm){
@@ -507,7 +507,7 @@ void DlgJIO::setTableWidgetBGColor(QTableWidget *tw, int row, int col, QColor co
     }
 }
 
-void DlgJIO::changeEvent(QEvent *e)
+void DlgAAS::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
     switch (e->type()) {
@@ -519,19 +519,19 @@ void DlgJIO::changeEvent(QEvent *e)
     }
 }
 
-void DlgJIO::closeEvent(QCloseEvent *event)
+void DlgAAS::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event)
     savecfg();
     emit closeAll();
 }
 
-void DlgJIO::onAddIperf(QString cfg)
+void DlgAAS::onAddIperf(QString cfg)
 {
     emit sigAddIperf(cfg);
 }
 
-void DlgJIO::doRequestExec(QString targetIP, QString idx, QString sCmd)
+void DlgAAS::doRequestExec(QString targetIP, QString idx, QString sCmd)
 {
     WSClient *wsc= mWScs[targetIP];
     //ask remote create serialport and start tcp server on port
@@ -544,7 +544,7 @@ void DlgJIO::doRequestExec(QString targetIP, QString idx, QString sCmd)
     }
 }
 
-void DlgJIO::onStartOptimiz()
+void DlgAAS::onStartOptimiz()
 {
     emit sigClearIperf();
     if (mOptThread){
@@ -553,7 +553,7 @@ void DlgJIO::onStartOptimiz()
     }
 }
 
-void DlgJIO::onStopOptimiz()
+void DlgAAS::onStopOptimiz()
 {
     //TODO: DlgJIO::onStopOptimiz()
     if (mOptWorker){
@@ -563,9 +563,9 @@ void DlgJIO::onStopOptimiz()
     }
 }
 
-void DlgJIO::initHanwha()
+void DlgAAS::initHanwha()
 {
-    connect(ui->pbHanwha, &QPushButton::clicked, this, &DlgJIO::showHanwha);
+    connect(ui->pbHanwha, &QPushButton::clicked, this, &DlgAAS::showHanwha);
     mHanwha = new Hanwha();
     mDlgHanwha = new DlgHanwha(m_cfg, mHanwha);
     // connect(mHanwha, &Hanwha::newBeamTableIDs, mDlgHanwha, &DlgHanwha::onNewHanwhaBeamTableIDs);
@@ -574,7 +574,7 @@ void DlgJIO::initHanwha()
     connect(mHanwha, &Hanwha::updateBeamTypeGroup, mDlgHanwha, &DlgHanwha::onUpdateBeamTypeGroup);
     connect(mHanwha, &Hanwha::updateRefFile, mDlgHanwha, &DlgHanwha::setRefFileName);
     connect(mDlgHanwha, &DlgHanwha::reffilechanged, mHanwha, QOverload<QString>::of(&Hanwha::initBeamData));
-    connect(this, &DlgJIO::closeAll, mDlgHanwha, &DlgHanwha::close);
+    connect(this, &DlgAAS::closeAll, mDlgHanwha, &DlgHanwha::close);
 
     QResource resHanwha(":/AIP/Hanwha.xlsx");
     QString filename = resHanwha.fileName();
@@ -588,7 +588,7 @@ void DlgJIO::initHanwha()
     }
 }
 
-void DlgJIO::showHanwha(bool checked)
+void DlgAAS::showHanwha(bool checked)
 {
     Q_UNUSED(checked)
     if (mDlgHanwha){
@@ -599,9 +599,9 @@ void DlgJIO::showHanwha(bool checked)
     }
 }
 
-void DlgJIO::initCyntec()
+void DlgAAS::initCyntec()
 {
-    connect(ui->pbCyntec, &QPushButton::clicked, this, &DlgJIO::showCyntec);
+    connect(ui->pbCyntec, &QPushButton::clicked, this, &DlgAAS::showCyntec);
     mCyntec = new Cyntec();
     mDlgCyntec = new DlgCyntec(m_cfg, mCyntec);
     connect(mCyntec, &Cyntec::newBeamFactorIDs, mDlgCyntec, &DlgCyntec::onNewCyntecBeamFactorIDs);
@@ -613,7 +613,7 @@ void DlgJIO::initCyntec()
     connect(mCyntec, &Cyntec::updateBeamTypeGroup, mDlgCyntec, &DlgCyntec::onUpdateBeamTypeGroup);
     connect(mCyntec, &Cyntec::updateBeamFactorSupport, mDlgCyntec, &DlgCyntec::onUpdateBeamFactorSupport);
     connect(mDlgCyntec, &DlgCyntec::reffilechanged, mCyntec, QOverload<QString>::of(&Cyntec::initBeamData));
-    connect(this, &DlgJIO::closeAll, mDlgCyntec, &DlgCyntec::close);
+    connect(this, &DlgAAS::closeAll, mDlgCyntec, &DlgCyntec::close);
 
     QResource resCyntec(":/AIP/Cyntec.xlsx");
     QString filename = resCyntec.fileName();
@@ -628,7 +628,7 @@ void DlgJIO::initCyntec()
     }
 }
 
-void DlgJIO::showCyntec(bool checked)
+void DlgAAS::showCyntec(bool checked)
 {
     Q_UNUSED(checked);
     if (mDlgCyntec){
@@ -639,7 +639,7 @@ void DlgJIO::showCyntec(bool checked)
     }
 }
 
-void DlgJIO::initCmds()
+void DlgAAS::initCmds()
 {
     QFile fJio(":/jio/jiocmd");
     if (fJio.open(QIODevice::ReadOnly)) {
@@ -668,7 +668,7 @@ void DlgJIO::initCmds()
 
 }
 
-void DlgJIO::initTableWidget()
+void DlgAAS::initTableWidget()
 {
     ui->tableWidget->setColumnWidth(GPScols::Latitude, 90);
     ui->tableWidget->setColumnWidth(GPScols::Longitude, 90);
@@ -764,64 +764,64 @@ void DlgJIO::initTableWidget()
     ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 90);
 
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
-            this, &DlgJIO::showContextMenu);
+            this, &DlgAAS::showContextMenu);
     connect(ui->tableWidget, &QTableWidget::currentCellChanged,
-            this, &DlgJIO::onDeviceCellChanged);
+            this, &DlgAAS::onDeviceCellChanged);
 }
 
-void DlgJIO::initAction()
+void DlgAAS::initAction()
 {
     //tableWidget right menu
     m_contextMenu = new QMenu(this);
     m_insertAction = m_contextMenu->addAction("Insert");
-    connect(m_insertAction, &QAction::triggered, this , &DlgJIO::onInsert);
+    connect(m_insertAction, &QAction::triggered, this , &DlgAAS::onInsert);
     m_deleteAction = m_contextMenu->addAction("Delete");
-    connect(m_deleteAction, &QAction::triggered, this , &DlgJIO::onDelete);
+    connect(m_deleteAction, &QAction::triggered, this , &DlgAAS::onDelete);
     m_contextMenu->addSeparator();
     // get GPS info
     m_GPSAction = m_contextMenu->addAction("Get GPS");
-    connect(m_GPSAction, &QAction::triggered, this , &DlgJIO::onGetGPS);
+    connect(m_GPSAction, &QAction::triggered, this , &DlgAAS::onGetGPS);
     // get Sensor info
     m_SensorAction = m_contextMenu->addAction("Get Sensor");
-    connect(m_SensorAction, &QAction::triggered, this , &DlgJIO::onGetSensor);
+    connect(m_SensorAction, &QAction::triggered, this , &DlgAAS::onGetSensor);
 
 
     m_clearAction = new QAction("clear");
         // m_contextMenu->addAction("clear");
-    connect(m_clearAction, &QAction::triggered, this , &DlgJIO::onClear);
+    connect(m_clearAction, &QAction::triggered, this , &DlgAAS::onClear);
 
-    connect(ui->pbLoad, &QPushButton::clicked, this, &DlgJIO::onLoadCliecked);
-    connect(ui->pbSave, &QPushButton::clicked, this, &DlgJIO::onSaveCliecked);
-    connect(ui->pbCalc, &QPushButton::clicked, this, &DlgJIO::onCalcClicked);
+    connect(ui->pbLoad, &QPushButton::clicked, this, &DlgAAS::onLoadCliecked);
+    connect(ui->pbSave, &QPushButton::clicked, this, &DlgAAS::onSaveCliecked);
+    connect(ui->pbCalc, &QPushButton::clicked, this, &DlgAAS::onCalcClicked);
     // connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgJIO::onShowMap);
-    connect(ui->pbShowGeo, &QPushButton::clicked, this, &DlgJIO::onShowGeo);
-    connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgJIO::onShow3D);
+    connect(ui->pbShowGeo, &QPushButton::clicked, this, &DlgAAS::onShowGeo);
+    connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgAAS::onShow3D);
     connect(ui->pbClear, &QPushButton::clicked, m_clearAction, &QAction::triggered);
-    connect(ui->pbToDMS, &QPushButton::clicked, this, &DlgJIO::onToDMS);
-    connect(ui->pbToDegree, &QPushButton::clicked, this, &DlgJIO::onToDegree);
-    connect(ui->pbSet, &QPushButton::clicked, this, &DlgJIO::onSet);
+    connect(ui->pbToDMS, &QPushButton::clicked, this, &DlgAAS::onToDMS);
+    connect(ui->pbToDegree, &QPushButton::clicked, this, &DlgAAS::onToDegree);
+    connect(ui->pbSet, &QPushButton::clicked, this, &DlgAAS::onSet);
     // keep quire device
-    connect(ui->pbInquire, &QPushButton::clicked, this, &DlgJIO::onInquireClicked);
+    connect(ui->pbInquire, &QPushButton::clicked, this, &DlgAAS::onInquireClicked);
     // Do Optimiz
 
-    connect(ui->pbOptimize, &QPushButton::clicked, this, &DlgJIO::onOptimizeClicked);
-    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DlgJIO::close); // close button click
+    connect(ui->pbOptimize, &QPushButton::clicked, this, &DlgAAS::onOptimizeClicked);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &DlgAAS::close); // close button click
 
-    connect(this, &DlgJIO::TileAvailable, this , &DlgJIO::onTileAvailable);
+    connect(this, &DlgAAS::TileAvailable, this , &DlgAAS::onTileAvailable);
 
-    connect(ui->pbCMBeamDirIDInit, &QPushButton::clicked, this, &DlgJIO::onCMBeamDirIDInit);
+    connect(ui->pbCMBeamDirIDInit, &QPushButton::clicked, this, &DlgAAS::onCMBeamDirIDInit);
     ui->pbAttInit->setVisible(false);
-    connect(ui->pbAttInit, &QPushButton::clicked, this, &DlgJIO::onAttInit);
-    connect(ui->pbBeamDirIDCmd, &QPushButton::clicked, this, &DlgJIO::onBeamDirIDCmd);
+    connect(ui->pbAttInit, &QPushButton::clicked, this, &DlgAAS::onAttInit);
+    connect(ui->pbBeamDirIDCmd, &QPushButton::clicked, this, &DlgAAS::onBeamDirIDCmd);
 }
 
-void DlgJIO::onInsert(bool checked)
+void DlgAAS::onInsert(bool checked)
 {
     Q_UNUSED(checked)
     onAddRow("New", 0.0, 0.0, 0.0, 0.0, 0.0);
 }
 
-void DlgJIO::onDelete(bool checked)
+void DlgAAS::onDelete(bool checked)
 {
     Q_UNUSED(checked)
     int iRow = ui->tableWidget->currentRow();//->selectRow();
@@ -841,7 +841,7 @@ void DlgJIO::onDelete(bool checked)
     }
 }
 
-void DlgJIO::onGetGPS(bool checked)
+void DlgAAS::onGetGPS(bool checked)
 {
     Q_UNUSED(checked)
     QMap<int, QString> data;
@@ -862,7 +862,7 @@ void DlgJIO::onGetGPS(bool checked)
     }
 }
 
-void DlgJIO::onGetSensor(bool checked)
+void DlgAAS::onGetSensor(bool checked)
 {
     Q_UNUSED(checked)
     QMap<int, QString> data;
@@ -883,7 +883,7 @@ void DlgJIO::onGetSensor(bool checked)
     }
 }
 
-void DlgJIO::onAddRow(QString name, double latitude, double longitude,
+void DlgAAS::onAddRow(QString name, double latitude, double longitude,
                       double altitude, double heading, double pitch,
                       QJsonObject aip1, QJsonObject aip2, QString ipaddr)
 {
@@ -941,13 +941,13 @@ void DlgJIO::onAddRow(QString name, double latitude, double longitude,
     ui->tableWidget->setSortingEnabled(true);
 }
 
-void DlgJIO::onClear(bool checked)
+void DlgAAS::onClear(bool checked)
 {
     Q_UNUSED(checked)
     clearData();
 }
 
-void DlgJIO::onLoadCliecked(bool checked)
+void DlgAAS::onLoadCliecked(bool checked)
 {
     Q_UNUSED(checked)
     QString path;
@@ -967,7 +967,7 @@ void DlgJIO::onLoadCliecked(bool checked)
     }
 }
 
-void DlgJIO::onSaveCliecked(bool checked)
+void DlgAAS::onSaveCliecked(bool checked)
 {
     Q_UNUSED(checked)
     QString path;
@@ -992,7 +992,7 @@ void DlgJIO::onSaveCliecked(bool checked)
     }
 }
 
-void DlgJIO::initHanwhaBeamCMD(QString c, QString antarraymode, QString cmName)
+void DlgAAS::initHanwhaBeamCMD(QString c, QString antarraymode, QString cmName)
 {
     QString cmd = mHanwha->getCmd("POWER_OFF").arg(c);
     if(cmName.isEmpty()){
@@ -1043,7 +1043,7 @@ void DlgJIO::initHanwhaBeamCMD(QString c, QString antarraymode, QString cmName)
     }
 }
 
-void DlgJIO::initHanwhaBeamIdCMD(QString c, QString beamid, QString cmName)
+void DlgAAS::initHanwhaBeamIdCMD(QString c, QString beamid, QString cmName)
 {
     QString cmd="";
     if (beamid.contains("TODO")){
@@ -1058,7 +1058,7 @@ void DlgJIO::initHanwhaBeamIdCMD(QString c, QString beamid, QString cmName)
     }
 }
 
-void DlgJIO::initHanwhaBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
+void DlgAAS::initHanwhaBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
                               QString Tx1att, QString Tx2att, QString cmName)
 {
     QString cmd = mHanwha->getCmd("SET_TxTotalAttn").arg(c, bfTx1, bfTx2);
@@ -1076,7 +1076,7 @@ void DlgJIO::initHanwhaBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
     }
 }
 
-void DlgJIO::initHanwhaBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
+void DlgAAS::initHanwhaBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
                               QString Rx1att, QString Rx2att, QString RxLan,
                               QString cmName)
 {
@@ -1101,7 +1101,7 @@ void DlgJIO::initHanwhaBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
     }
 }
 
-void DlgJIO::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
+void DlgAAS::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
 {
     if (c.isEmpty()){
         c="/dev/spidev2.0";
@@ -1153,7 +1153,7 @@ void DlgJIO::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
 
 }
 
-void DlgJIO::initCyntecBeamIdCMD(QString c, QString beamid, QString cmName)
+void DlgAAS::initCyntecBeamIdCMD(QString c, QString beamid, QString cmName)
 {
     if (c.isEmpty()){
         c="/dev/spidev2.0";
@@ -1171,7 +1171,7 @@ void DlgJIO::initCyntecBeamIdCMD(QString c, QString beamid, QString cmName)
     }
 }
 
-void DlgJIO::initCyntecBeamTxAttCMD(QString c, QString Tx1att, QString Tx2att, QString cmName)
+void DlgAAS::initCyntecBeamTxAttCMD(QString c, QString Tx1att, QString Tx2att, QString cmName)
 {
     if (c.isEmpty()){
         c="/dev/spidev2.0";
@@ -1188,7 +1188,7 @@ void DlgJIO::initCyntecBeamTxAttCMD(QString c, QString Tx1att, QString Tx2att, Q
     }
 }
 
-void DlgJIO::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
+void DlgAAS::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
                                     QString Rx1iip3, QString Rx2iip3, QString cmName)
 {
     if (c.isEmpty()){
@@ -1221,7 +1221,7 @@ void DlgJIO::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
     }
 }
 
-void DlgJIO::getBestBeamID(int idx,
+void DlgAAS::getBestBeamID(int idx,
                            double azimuthDegree,
                            AIP::ModuleType aiptype, QList<QTableWidgetItem*> cm7rs,
                            double maxDistance)
@@ -1374,7 +1374,7 @@ void DlgJIO::getBestBeamID(int idx,
 
 }
 
-void DlgJIO::initResultHeader(AIP::ModuleType aip1type)
+void DlgAAS::initResultHeader(AIP::ModuleType aip1type)
 {
     QStringList hls;
     hls << mHeaderResult;
@@ -1388,7 +1388,7 @@ void DlgJIO::initResultHeader(AIP::ModuleType aip1type)
     ui->twResult->setHorizontalHeaderLabels(hls);
 }
 
-void DlgJIO::onCalcClicked(bool checked)
+void DlgAAS::onCalcClicked(bool checked)
 {
     Q_UNUSED(checked)
     emit clearBeamIDCmd();
@@ -1690,7 +1690,7 @@ void DlgJIO::onCalcClicked(bool checked)
 
 }
 
-void DlgJIO::onSet(bool checked)
+void DlgAAS::onSet(bool checked)
 {
     Q_UNUSED(checked)
     //show config of ssh username/password
@@ -1701,7 +1701,7 @@ void DlgJIO::onSet(bool checked)
     }
 }
 
-void DlgJIO::onInquireClicked(bool checked)
+void DlgAAS::onInquireClicked(bool checked)
 {
     if (checked){
         m_sshParams.setUserName(mSshUsername);
@@ -1721,7 +1721,7 @@ void DlgJIO::onInquireClicked(bool checked)
     }
 }
 
-void DlgJIO::onOptimizeClicked(bool checked)
+void DlgAAS::onOptimizeClicked(bool checked)
 {
     if (checked){
         qDebug() <<"//do Optimiz to get All device's Beam Direction ID/ Att value";
@@ -1730,16 +1730,16 @@ void DlgJIO::onOptimizeClicked(bool checked)
         // Optimiz worker run in thread
         // worker
         mOptWorker = new OptimizeWorker(dataobj);
-        connect(mOptWorker, &OptimizeWorker::started, this, &DlgJIO::onOptimizeStarted);
-        connect(mOptWorker, &OptimizeWorker::debugMsg, this, &DlgJIO::onOptimizeWorkerDebug);
-        connect(mOptWorker, &OptimizeWorker::sigAddIperf, this, &DlgJIO::onAddIperf);
+        connect(mOptWorker, &OptimizeWorker::started, this, &DlgAAS::onOptimizeStarted);
+        connect(mOptWorker, &OptimizeWorker::debugMsg, this, &DlgAAS::onOptimizeWorkerDebug);
+        connect(mOptWorker, &OptimizeWorker::sigAddIperf, this, &DlgAAS::onAddIperf);
         connect(mOptWorker, &OptimizeWorker::sigAddData, mDlgOptimize, &DlgOptimize::onAddData);
-        connect(this, &DlgJIO::stopOptimiz, mOptWorker, &OptimizeWorker::Stop);
+        connect(this, &DlgAAS::stopOptimiz, mOptWorker, &OptimizeWorker::Stop);
         // thread
         mOptThread = new QThread();
         connect(mOptThread, &QThread::started, mOptWorker, &OptimizeWorker::work);
         // connect(mOptWorker, &OptimizeWorker::stoped, mOptThread, &QThread::deleteLater);
-        connect(mOptWorker, &OptimizeWorker::stoped, this, &DlgJIO::onOptimizeStoped);
+        connect(mOptWorker, &OptimizeWorker::stoped, this, &DlgAAS::onOptimizeStoped);
 
         mOptWorker->moveToThread(mOptThread);
 
@@ -1753,7 +1753,7 @@ void DlgJIO::onOptimizeClicked(bool checked)
     }
 }
 
-void DlgJIO::onInquireTimerTimeout()
+void DlgAAS::onInquireTimerTimeout()
 {
     if (ui->tableWidget->rowCount()>0){
         qDebug() << "do Inquire";
@@ -1768,9 +1768,9 @@ void DlgJIO::onInquireTimerTimeout()
                     if (!mWScs.contains(target)){
                         QString s = "ws://"+target+":"+QString::number(QIPERFD_WSPORT);
                         client = new WSClient(target, QUrl(s), "", true);
-                        connect(client, &WSClient::connected, this, &DlgJIO::onConnected);
-                        connect(client, &WSClient::disconnected, this, &DlgJIO::onDisconnected);
-                        connect(client, &WSClient::requestResult, this, &DlgJIO::onRequestResult);
+                        connect(client, &WSClient::connected, this, &DlgAAS::onConnected);
+                        connect(client, &WSClient::disconnected, this, &DlgAAS::onDisconnected);
+                        connect(client, &WSClient::requestResult, this, &DlgAAS::onRequestResult);
                         mWScs[target] = client;
                     }else{
                         client = mWScs[target];
@@ -1799,7 +1799,7 @@ void DlgJIO::onInquireTimerTimeout()
     }
 }
 
-void DlgJIO::onDisconnected(QString from)
+void DlgAAS::onDisconnected(QString from)
 {
     if (mWScs.contains(from)){
         mWScs.remove(from);
@@ -1807,7 +1807,7 @@ void DlgJIO::onDisconnected(QString from)
     updateStats(from, "NG");
 }
 
-void DlgJIO::onConnected(QString from)
+void DlgAAS::onConnected(QString from)
 {
     updateStats(from, "OK");
 }
@@ -1843,7 +1843,7 @@ void DlgJIO::onConnected(QString from)
 //     }
 // }
 
-void DlgJIO::onShowGeo(bool checked)
+void DlgAAS::onShowGeo(bool checked)
 {
     Q_UNUSED(checked)
     QString tile = getTile();
@@ -1868,14 +1868,14 @@ void DlgJIO::onShowGeo(bool checked)
     }
 }
 
-void DlgJIO::onShow3D(bool checked)
+void DlgAAS::onShow3D(bool checked)
 {
     Q_UNUSED(checked)
     qDebug() << "TODO Show 3D plot";
 
 }
 
-void DlgJIO::onToDMS(bool checked)
+void DlgAAS::onToDMS(bool checked)
 {
     Q_UNUSED(checked)
     //convert degree to DDD MM.MMMMS SS.SSSSS
@@ -1891,7 +1891,7 @@ void DlgJIO::onToDMS(bool checked)
 
 }
 
-void DlgJIO::onToDegree(bool checked)
+void DlgAAS::onToDegree(bool checked)
 {
     Q_UNUSED(checked)
     double degree = 0.0;
@@ -1911,7 +1911,7 @@ void DlgJIO::onToDegree(bool checked)
     }
 }
 
-void DlgJIO::onCMBeamDirIDInit(bool checked)
+void DlgAAS::onCMBeamDirIDInit(bool checked)
 {   Q_UNUSED(checked)
     //calc all CM7 beam Direction ID by Az/El diff
     if (ui->twResult->rowCount()>0){
@@ -1991,7 +1991,7 @@ void DlgJIO::onCMBeamDirIDInit(bool checked)
 
 }
 
-void DlgJIO::onAttInit(bool checked)
+void DlgAAS::onAttInit(bool checked)
 {
     //init all CM's Att value
     Q_UNUSED(checked)
@@ -2116,7 +2116,7 @@ void DlgJIO::onAttInit(bool checked)
     }
 }
 
-void DlgJIO::onBeamDirIDCmd(bool checked)
+void DlgAAS::onBeamDirIDCmd(bool checked)
 {
     Q_UNUSED(checked)
     if (mDlgBeamCmd){
@@ -2126,7 +2126,7 @@ void DlgJIO::onBeamDirIDCmd(bool checked)
     }
 }
 
-void DlgJIO::showContextMenu(const QPoint &pos)
+void DlgAAS::showContextMenu(const QPoint &pos)
 {
     if (ui->tableWidget->rowCount()<1){
         m_deleteAction->setEnabled(false);
@@ -2149,7 +2149,7 @@ void DlgJIO::showContextMenu(const QPoint &pos)
     // m_contextMenu->show();
 }
 
-void DlgJIO::onDeviceCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
+void DlgAAS::onDeviceCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
 {
     Q_UNUSED(currentColumn)
     Q_UNUSED(previousRow)
@@ -2161,7 +2161,7 @@ void DlgJIO::onDeviceCellChanged(int currentRow, int currentColumn, int previous
     }
 }
 
-void DlgJIO::onLoadFinished(bool ok)
+void DlgAAS::onLoadFinished(bool ok)
 {
     if (ok){
         if (m_dlgGeo){
@@ -2257,18 +2257,18 @@ void DlgJIO::onLoadFinished(bool ok)
     }
 }
 
-void DlgJIO::onAddPosition(QString label, double lat, double lon)
+void DlgAAS::onAddPosition(QString label, double lat, double lon)
 {
     onAddRow(label, lat, lon, 0.0, 0.0, 0.0);
 }
 
-void DlgJIO::onTileAvailable(bool ok)
+void DlgAAS::onTileAvailable(bool ok)
 {
     // ui->pbShowMap->setEnabled(ok);
     ui->pbShowGeo->setEnabled(ok);
 }
 
-void DlgJIO::onCheckTileFinished()
+void DlgAAS::onCheckTileFinished()
 {
     if (reply->error() == QNetworkReply::NoError) {
         // QByteArray response = reply->readAll();
@@ -2282,12 +2282,12 @@ void DlgJIO::onCheckTileFinished()
     }
 }
 
-void DlgJIO::onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode)
+void DlgAAS::onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode)
 {
     qDebug() << errorcode << " onCheckTileErrorOccurred: " << reply->errorString();
 }
 
-void DlgJIO::handleButtonClicked(int row, int col)
+void DlgAAS::handleButtonClicked(int row, int col)
 {
     // qDebug() << "handleButtonClicked: " << QString::number(row) << " col:" << QString::number(col);
     //open AIP module setting dialog, after setting, set correct AIP value back to cell
@@ -2308,7 +2308,7 @@ void DlgJIO::handleButtonClicked(int row, int col)
     m_dlgaip->show();
 }
 
-void DlgJIO::onAcceptedAIP()
+void DlgAAS::onAcceptedAIP()
 {
     // qDebug() << "onAcceptedAIP:" << sender();
     QJsonObject data = m_dlgaip->getData();
@@ -2322,7 +2322,7 @@ void DlgJIO::onAcceptedAIP()
     // qDebug() << "onAcceptedAIP: ModuleType: " << daip.getModuleType();
 }
 
-void DlgJIO::onUpdateData(int row, int col, QJsonObject data)
+void DlgAAS::onUpdateData(int row, int col, QJsonObject data)
 {
     QTableWidgetItem *item = ui->tableWidget->item(row, col);
     qDebug() << row << "," << col << " DlgJIO::onUpdateData" <<data;
@@ -2333,7 +2333,7 @@ void DlgJIO::onUpdateData(int row, int col, QJsonObject data)
     onUpdateModelType(row, col, data.value("moduletype").toInt());
 }
 
-void DlgJIO::onUpdateModelType(int row, int col, QString smodel)
+void DlgAAS::onUpdateModelType(int row, int col, QString smodel)
 {
     QWidget *cell = ui->tableWidget->cellWidget(row, col);
     if (cell != nullptr){
@@ -2347,7 +2347,7 @@ void DlgJIO::onUpdateModelType(int row, int col, QString smodel)
     }
 }
 
-void DlgJIO::onUpdateModelType(int row, int col, int model)
+void DlgAAS::onUpdateModelType(int row, int col, int model)
 {
     if (static_cast<AIP::ModuleType>(model) == AIP::ModuleType::Cyntec){
         onUpdateModelType(row, col, "C");
@@ -2358,7 +2358,7 @@ void DlgJIO::onUpdateModelType(int row, int col, int model)
     }
 }
 
-void DlgJIO::onUpdateSetting(QString sshusername, QString sshpassword,
+void DlgAAS::onUpdateSetting(QString sshusername, QString sshpassword,
                              QString webusername, QString webpassword,
                              DlgSet::ControlBy ctl)
 {
@@ -2369,18 +2369,18 @@ void DlgJIO::onUpdateSetting(QString sshusername, QString sshpassword,
     mControlBy = ctl;
 }
 
-void DlgJIO::onLocationReady(const IpLocation &location)
+void DlgAAS::onLocationReady(const IpLocation &location)
 {
     // qDebug() << "Coordinates:" << location.latitude << "," << location.longitude;
     mIpLocation = location;
 }
 
-void DlgJIO::handleSSHConnectionError()
+void DlgAAS::handleSSHConnectionError()
 {
     qDebug() << "SSHConnectionError: " << mSSHRemoteRunner->lastConnectionErrorString();
 }
 
-void DlgJIO::handleSSHProcessStarted()
+void DlgAAS::handleSSHProcessStarted()
 {
     if (m_started)
     {
@@ -2394,7 +2394,7 @@ void DlgJIO::handleSSHProcessStarted()
     }
 }
 
-void DlgJIO::handleSSHProcessStdout()
+void DlgAAS::handleSSHProcessStdout()
 {
     if (!m_started)
     {
@@ -2410,7 +2410,7 @@ void DlgJIO::handleSSHProcessStdout()
     }
 }
 
-void DlgJIO::handleSSHProcessStderr()
+void DlgAAS::handleSSHProcessStderr()
 {
     if (!m_started)
     {
@@ -2426,7 +2426,7 @@ void DlgJIO::handleSSHProcessStderr()
     }
 }
 
-void DlgJIO::handleSSHProcessClosed(int exitStatus)
+void DlgAAS::handleSSHProcessClosed(int exitStatus)
 {
     switch (exitStatus)
     {
@@ -2579,12 +2579,12 @@ void DlgJIO::handleSSHProcessClosed(int exitStatus)
     }
 }
 
-void DlgJIO::onOptimizeStarted()
+void DlgAAS::onOptimizeStarted()
 {
     ui->pbOptimize->setText("Stop");
 }
 
-void DlgJIO::onOptimizeStoped(int error)
+void DlgAAS::onOptimizeStoped(int error)
 {
     qDebug() << "onOptimizeStoped: error:" << error;
     ui->pbOptimize->setText("Optimiz");
@@ -2595,12 +2595,12 @@ void DlgJIO::onOptimizeStoped(int error)
     }
 }
 
-void DlgJIO::onOptimizeWorkerDebug(QString msg)
+void DlgAAS::onOptimizeWorkerDebug(QString msg)
 {
     debug("OptimizeWorker:"+ msg);
 }
 
-QIcon DlgJIO::iconForState(const QString &state)
+QIcon DlgAAS::iconForState(const QString &state)
 {
     if (state == "init")
         return QIcon(":/jio/INIT.png");
@@ -2612,7 +2612,7 @@ QIcon DlgJIO::iconForState(const QString &state)
         return QIcon();  // fallback
 }
 
-void DlgJIO::updateStats(QString target, QString state)
+void DlgAAS::updateStats(QString target, QString state)
 {
     for (int row=0; row< ui->tableWidget->rowCount(); row++){
         auto itm = ui->tableWidget->item(row, GPScols::IPAddr);
@@ -2626,7 +2626,7 @@ void DlgJIO::updateStats(QString target, QString state)
     }
 }
 
-void DlgJIO::setStateIcon(int row, int column, QString state)
+void DlgAAS::setStateIcon(int row, int column, QString state)
 {
     QTableWidgetItem *item = ui->tableWidget->item(row, column);
     if (!item) {
@@ -2638,7 +2638,7 @@ void DlgJIO::setStateIcon(int row, int column, QString state)
     item->setData(Qt::UserRole, state);  // Store state for later use
 }
 
-double DlgJIO::averageBearing(const QList<double> &bearings)
+double DlgAAS::averageBearing(const QList<double> &bearings)
 {   //average Bearing
     if (bearings.isEmpty()) return -1.0; // 或者 return NaN
 
@@ -2657,14 +2657,14 @@ double DlgJIO::averageBearing(const QList<double> &bearings)
     return avgDeg;
 }
 
-void DlgJIO::getSelfIpLocation()
+void DlgAAS::getSelfIpLocation()
 {
     // accroading IP address to get Location
     // when ready it will store at mIpLocation
     provider->fetchLocation();
 }
 
-void DlgJIO::onLoad(QString filename)
+void DlgAAS::onLoad(QString filename)
 {
     // qDebug() << "onLoad file:" << filename;
     QFile file(filename);
@@ -2717,7 +2717,7 @@ void DlgJIO::onLoad(QString filename)
     }
 }
 
-bool DlgJIO::onSave(QString filename)
+bool DlgAAS::onSave(QString filename)
 {
     debug("onSave file:" + filename, 6);
     QFile file(filename);
@@ -2737,14 +2737,14 @@ bool DlgJIO::onSave(QString filename)
     return true;
 }
 
-void DlgJIO::debug(QString msg, int lv)
+void DlgAAS::debug(QString msg, int lv)
 {
     if (lv<=m_debuglv){
         qDebug() << "[DlgJIO]" << msg;
     }
 }
 
-void DlgJIO::loadcfg()
+void DlgAAS::loadcfg()
 {
     m_cfg->beginGroup("GpsCalc");
     // m_cfg->setValue("oldsavepath", m_oldsavepath);
@@ -2753,7 +2753,7 @@ void DlgJIO::loadcfg()
     m_cfg->endGroup();
 }
 
-void DlgJIO::savecfg()
+void DlgAAS::savecfg()
 {
     m_cfg->beginGroup("GpsCalc");
     m_cfg->setValue("oldsavepath", m_oldsavepath);
@@ -2762,7 +2762,7 @@ void DlgJIO::savecfg()
 
 }
 
-QVector<QPointF> DlgJIO::polarToXY(const QVector<double> &anglesDeg, const QVector<double> &distances)
+QVector<QPointF> DlgAAS::polarToXY(const QVector<double> &anglesDeg, const QVector<double> &distances)
 {
     //convert anglesDeg & distance to polar coordinate point
     QVector<QPointF> points;
@@ -2779,7 +2779,7 @@ QVector<QPointF> DlgJIO::polarToXY(const QVector<double> &anglesDeg, const QVect
     return points;
 }
 
-QVector<int> DlgJIO::kMeansCluster(const QVector<QPointF> &points, int k, int maxIter)
+QVector<int> DlgAAS::kMeansCluster(const QVector<QPointF> &points, int k, int maxIter)
 {
     // k :
     QVector<QPointF> centroids;
@@ -2819,7 +2819,7 @@ QVector<int> DlgJIO::kMeansCluster(const QVector<QPointF> &points, int k, int ma
     return labels;
 }
 
-bool DlgJIO::isAzimuthClose(double a1, double a2, double thresholdDeg)
+bool DlgAAS::isAzimuthClose(double a1, double a2, double thresholdDeg)
 {
     double diff = std::fabs(a1 - a2);
     double angularDiff = std::min(diff, 360.0 - diff); // 考慮循環性
@@ -2827,12 +2827,12 @@ bool DlgJIO::isAzimuthClose(double a1, double a2, double thresholdDeg)
     return angularDiff <= thresholdDeg;
 }
 
-double DlgJIO::euclideanDistance(const QPointF &a, const QPointF &b)
+double DlgAAS::euclideanDistance(const QPointF &a, const QPointF &b)
 {
     return QLineF(a, b).length();
 }
 
-QVector<int> DlgJIO::regionQuery(const QVector<DBPoint> &points, int index, double eps)
+QVector<int> DlgAAS::regionQuery(const QVector<DBPoint> &points, int index, double eps)
 {
     QVector<int> neighbors;
     for (int i = 0; i < points.size(); ++i) {
@@ -2842,7 +2842,7 @@ QVector<int> DlgJIO::regionQuery(const QVector<DBPoint> &points, int index, doub
     return neighbors;
 }
 
-bool DlgJIO::expandCluster(QVector<DBPoint> &points, int index, int clusterId, double eps, int minPts)
+bool DlgAAS::expandCluster(QVector<DBPoint> &points, int index, int clusterId, double eps, int minPts)
 {
     QVector<int> seeds = regionQuery(points, index, eps);
     if (seeds.size() < minPts) {
@@ -2872,7 +2872,7 @@ bool DlgJIO::expandCluster(QVector<DBPoint> &points, int index, int clusterId, d
     return true;
 }
 
-QVector<int> DlgJIO::dbscan(const QVector<QPointF> &inputPoints, double eps, int minPts)
+QVector<int> DlgAAS::dbscan(const QVector<QPointF> &inputPoints, double eps, int minPts)
 {
     QVector<DBPoint> points;
     for (const QPointF& p : inputPoints)
@@ -2892,7 +2892,7 @@ QVector<int> DlgJIO::dbscan(const QVector<QPointF> &inputPoints, double eps, int
     return labels;
 }
 
-QVector<double> DlgJIO::computeKDistances(const QVector<QPointF> &points, int k)
+QVector<double> DlgAAS::computeKDistances(const QVector<QPointF> &points, int k)
 {
     //helper to select DBSCAN's eps arg
     QVector<double> kDistances;
@@ -2918,7 +2918,7 @@ QVector<double> DlgJIO::computeKDistances(const QVector<QPointF> &points, int k)
     return kDistances;
 }
 
-double DlgJIO::detectElbow(const QVector<double> &sortedDistances)
+double DlgAAS::detectElbow(const QVector<double> &sortedDistances)
 {
     int n = sortedDistances.size();
     if (n < 3) return sortedDistances.last(); // fallback
@@ -2949,7 +2949,7 @@ double DlgJIO::detectElbow(const QVector<double> &sortedDistances)
     return sortedDistances[elbowIndex];
 }
 
-int DlgJIO::getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, double diffHead, double diffPitch)
+int DlgAAS::getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, double diffHead, double diffPitch)
 {
     // qDebug() << "getNearestBeamDirectionID:" << name
     //          << " az diff:" << diffHead
@@ -2966,7 +2966,7 @@ int DlgJIO::getNearestBeamDirectionID(QString name, AIP::ModuleType aiptype, dou
     return id;
 }
 
-double DlgJIO::getAz(AIP::ModuleType aiptype, int BeamID)
+double DlgAAS::getAz(AIP::ModuleType aiptype, int BeamID)
 {
     if (aiptype==AIP::ModuleType::Cyntec){
         return mCyntec->getAz(BeamID);

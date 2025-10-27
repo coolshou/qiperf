@@ -1,5 +1,5 @@
-#ifndef DLGJIO_H
-#define DLGJIO_H
+#ifndef DLGAAS_H
+#define DLGAAS_H
 
 #include <QDialog>
 #include <QPoint>
@@ -39,10 +39,10 @@ struct DBPoint {
 
 
 namespace Ui {
-class DlgJIO;
+class DlgAAS;
 }
 
-class DlgJIO : public QDialog
+class DlgAAS : public QDialog
 {
     Q_OBJECT
 
@@ -108,8 +108,8 @@ public:
         TestingProcessChannels
     };
     Q_ENUM(State)
-    explicit DlgJIO(QSettings *cfg, QWidget *parent = nullptr);
-    ~DlgJIO() override;
+    explicit DlgAAS(QSettings *cfg, QWidget *parent = nullptr);
+    ~DlgAAS() override;
     void isTileAvailable();
     QString getTile();
     void setShowLine(bool show);
@@ -249,7 +249,7 @@ private:
     QVector<int> dbscan(const QVector<QPointF>& inputPoints, double eps, int minPts);
     QVector<double> computeKDistances(const QVector<QPointF>& points, int k);
     double detectElbow(const QVector<double>& sortedDistances);
-    Ui::DlgJIO *ui;
+    Ui::DlgAAS *ui;
     QSettings *m_cfg;
     QMenu *m_contextMenu;
     QAction *m_insertAction;
@@ -296,4 +296,4 @@ private:
     QStringList mHeaderCyntec;
 };
 
-#endif // DLGJIO_H
+#endif // DLGAAS_H
