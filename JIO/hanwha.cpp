@@ -26,7 +26,7 @@ Hanwha::Hanwha(QObject *parent)
 
 void Hanwha::initCmds()
 {
-    QFile fobj(":/jio/hanwha");
+    QFile fobj(":/aas/hanwha");
     if (fobj.open(QIODevice::ReadOnly)) {
         QByteArray jsonData = fobj.readAll();
         fobj.close();

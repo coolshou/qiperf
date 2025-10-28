@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>552</width>
+    <width>553</width>
     <height>386</height>
    </rect>
   </property>
@@ -131,17 +131,17 @@
               </item>
               <item>
                <property name="text">
-                <string>CM7 AIP0</string>
+                <string>Client AIP0</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>AM7 AIP1</string>
+                <string>AP AIP1</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>AM7 AIP2</string>
+                <string>AP AIP2</string>
                </property>
               </item>
              </widget>

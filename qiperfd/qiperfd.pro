@@ -268,4 +268,4 @@ DISTFILES += \
 
 RESOURCES += \
     src/qiperfd.qrc \
-    ../JIO/jio.qrc
+    ../JIO/aas.qrc

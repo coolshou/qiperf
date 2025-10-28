@@ -16,7 +16,7 @@
 #include "../src/comm.h"
 #include "../src/versions.h"
 
-#include "../JIO/jiocmd.h"
+#include "../JIO/aascmd.h"
 
 #if defined(Q_OS_WIN32)
 #include <comdef.h>
@@ -2039,7 +2039,7 @@ void QIperfd::initJIOOpenWRT()
 {
     if (bIsJIOOpenWRT){
         //
-        QFile fJio(":/jio/jiocmd");
+        QFile fJio(":/aas/aascmd");
         if (fJio.open(QIODevice::ReadOnly)) {
             //basic commands
             QByteArray jsonData = fJio.readAll();

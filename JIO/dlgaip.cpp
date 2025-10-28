@@ -197,11 +197,11 @@ void DlgAIP::onPreSetPosTextChanged(QString newtext)
     double x = 0;
     double y = 0;
     double z = 0;
-    if (newtext.startsWith("CM7 AIP0")){
+    if (newtext.startsWith("Client AIP0")){
 
-    }else if (newtext.startsWith("AM7 AIP0")){
+    }else if (newtext.startsWith("AP AIP0")){
 
-    }else if (newtext.startsWith("AM7 AIP1")){
+    }else if (newtext.startsWith("AP AIP1")){
 
     }
     ui->sbX->setValue(x);

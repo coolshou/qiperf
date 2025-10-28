@@ -21,7 +21,7 @@
 #include "../src/wsclient.h"
 
 #include "comm.h"
-#include "jiocmd.h"
+#include "aascmd.h"
 #include "myfunc.h"
 
 #include "../src/numberdelegate.h"
@@ -294,14 +294,14 @@ QJsonObject DlgAAS::createInitData()
     QTableWidgetItem *itemam7;
     QTableWidgetItem *item;
     if (ui->tableWidget->rowCount()>0){
-        //collect CM7 data and relative AM7's AIP data
-        for(int i=1; i< ui->tableWidget->rowCount(); i++){
+        //collect client data and relative AP's AIP data
+        for(int i=0; i< ui->tableWidget->rowCount(); i++){
             QJsonObject posdata;
-            // if (i==0){
-            //     posdata["type"]=0; // AP (AM7)
-            // }else{
-            posdata["type"]=1; // client (CM7)
-            // }
+            if (i==0){
+                posdata["type"]=0; // AP
+            }else{
+                posdata["type"]=1; // client
+            }
             item = ui->tableWidget->item(i, GPScols::PositionName);
             if (item) {
                 posdata["name"] = item->text();
@@ -343,7 +343,7 @@ QJsonObject DlgAAS::createInitData()
                     //     }
                     // }else
                     {
-                        //CM7
+                        //Client
                         if (ui->twResult->rowCount()>0){
                             item = ui->twResult->item(i-1, AZEIcols::P1Azimuth);
                             if (item){
@@ -352,13 +352,13 @@ QJsonObject DlgAAS::createInitData()
                                 aipObj["aipgroup"] = aipgroup;
                                 if (aipgroup.contains("AIP1")){
                                     itemam7 = ui->twAIP->item(0, AIPcols::BeamDirectionID);
-                                    qDebug() << "AIP1 AM7BeamID:" << itemam7->text();
-                                    aipObj["AM7BeamID"] = itemam7->text().toInt();
+                                    qDebug() << "AIP1 APBeamID:" << itemam7->text();
+                                    aipObj["APBeamID"] = itemam7->text().toInt();
                                     //TODO: am7 AIP1 att
                                 }else if (aipgroup.contains("AIP2")){
                                     itemam7 = ui->twAIP->item(1, AIPcols::BeamDirectionID);
-                                    qDebug() << "AIP2 AM7BeamID:" << itemam7->text();
-                                    aipObj["AM7BeamID"] = itemam7->text().toInt();
+                                    qDebug() << "AIP2 APBeamID:" << itemam7->text();
+                                    aipObj["APBeamID"] = itemam7->text().toInt();
                                     //TODO: am7 AIP2 att
                                 }else{
                                     qDebug() << "Not support AIP group:" << aipgroup;
@@ -384,28 +384,30 @@ QJsonObject DlgAAS::createInitData()
                     qDebug() << "Wrong API1 data:";
                 }
             }
-            //CM7 do not have AIP2
-            // item = ui->tableWidget->item(i, GPScols::AIP2);
-            // if (item) {
-            //     QVariant varAIP2 =  item->data(Qt::UserRole);
-            //     if (varAIP2.canConvert<QVariantMap>()){
-            //         // qDebug() << "AIP2 data:" << varAIP2.toMap() ;
-            //         aipObj = QJsonObject::fromVariantMap(varAIP2.toMap());
-            //         if (i==0){
-            //             if (ui->twAIP->rowCount()>1){
-            //                 item = ui->twAIP->item(1, AIPcols::BeamDirectionID);
-            //                 if (item){
-            //                     aipObj["BeamID"] = item->text().toInt();
-            //                 }
-            //             }
-            //         }
-            //         posdata["AIP2"] = aipObj;
-            //     }else{
-            //         if (i==0){
-            //             qDebug() << "Row:" << QString::number(i) << " Wrong API2 data";
-            //         }
-            //     }
-            // }
+            if (i==0){
+            //AP  AIP2
+                item = ui->tableWidget->item(i, GPScols::AIP2);
+                if (item) {
+                    QVariant varAIP2 =  item->data(Qt::UserRole);
+                    if (varAIP2.canConvert<QVariantMap>()){
+                        // qDebug() << "AIP2 data:" << varAIP2.toMap() ;
+                        aipObj = QJsonObject::fromVariantMap(varAIP2.toMap());
+                        if (i==0){
+                            if (ui->twAIP->rowCount()>1){
+                                item = ui->twAIP->item(1, AIPcols::BeamDirectionID);
+                                if (item){
+                                    aipObj["BeamID"] = item->text().toInt();
+                                }
+                            }
+                        }
+                        posdata["AIP2"] = aipObj;
+                    }else{
+                        if (i==0){
+                            qDebug() << "Row:" << QString::number(i) << " Wrong API2 data";
+                        }
+                    }
+                }
+            }
             item = ui->tableWidget->item(i, GPScols::IPAddr);
             if (item) {
                 posdata["IPAddr"] = item->text();
@@ -414,15 +416,17 @@ QJsonObject DlgAAS::createInitData()
             if (item) {
                 posdata["MacAddr"] = item->text();
             }
-            //AM7
-            item = ui->tableWidget->item(0, GPScols::IPAddr);
-            if (item) {
-                posdata["AM7IPAddr"] = item->text();
-            }
-            item = ui->tableWidget->item(0, GPScols::MacAddr);
-            if (item) {
-                posdata["AM7MacAddr"] = item->text();
-            }
+            // if (i==0){
+            //     //AP
+            //     item = ui->tableWidget->item(0, GPScols::IPAddr);
+            //     if (item) {
+            //         posdata["AM7IPAddr"] = item->text();
+            //     }
+            //     item = ui->tableWidget->item(0, GPScols::MacAddr);
+            //     if (item) {
+            //         posdata["AM7MacAddr"] = item->text();
+            //     }
+            // }
             pos.append(posdata);
         }
         rootObject["positions"] = pos;
@@ -641,7 +645,7 @@ void DlgAAS::showCyntec(bool checked)
 
 void DlgAAS::initCmds()
 {
-    QFile fJio(":/jio/jiocmd");
+    QFile fJio(":/aas/aascmd");
     if (fJio.open(QIODevice::ReadOnly)) {
         //basic commands
         QByteArray jsonData = fJio.readAll();
@@ -659,7 +663,7 @@ void DlgAAS::initCmds()
     }else {
         qDebug() << "Failed to open " << fJio.fileName() << " for reading:" << fJio.errorString();
     }
-    QFile fHanwha(":/jio/hanwha");
+    QFile fHanwha(":/aas/hanwha");
     if (fHanwha.open(QIODevice::ReadOnly)) {
 
     }else {
@@ -885,7 +889,8 @@ void DlgAAS::onGetSensor(bool checked)
 
 void DlgAAS::onAddRow(QString name, double latitude, double longitude,
                       double altitude, double heading, double pitch,
-                      QJsonObject aip1, QJsonObject aip2, QString ipaddr)
+                      QJsonObject aip1, QJsonObject aip2, QString ipaddr,
+                      QString macaddr)
 {
     int iRow = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(iRow);
@@ -937,6 +942,8 @@ void DlgAAS::onAddRow(QString name, double latitude, double longitude,
         ui->tableWidget->setItem(iRow, GPScols::AIP2, disableItem);
     }
     ui->tableWidget->setItem(iRow, GPScols::IPAddr, new QTableWidgetItem(ipaddr));
+    ui->tableWidget->setItem(iRow, GPScols::MacAddr, new QTableWidgetItem(macaddr));
+
 
     ui->tableWidget->setSortingEnabled(true);
 }
@@ -2603,11 +2610,11 @@ void DlgAAS::onOptimizeWorkerDebug(QString msg)
 QIcon DlgAAS::iconForState(const QString &state)
 {
     if (state == "init")
-        return QIcon(":/jio/INIT.png");
+        return QIcon(":/aas/INIT.png");
     else if (state == "OK")
-        return QIcon(":/jio/OK.png");
+        return QIcon(":/aas/OK.png");
     else if (state == "NG")
-        return QIcon(":/jio/NG.png");
+        return QIcon(":/aas/NG.png");
     else
         return QIcon();  // fallback
 }

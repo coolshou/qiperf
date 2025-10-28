@@ -3,6 +3,7 @@ QT += network
 QT += positioning # for QGeoCoordinate
 greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat # requite by QT6 QTextCodec
 
+# Antenna Alignment System
 
 INCLUDEPATH += \
     ../qiperfc \
@@ -28,6 +29,7 @@ SOURCES += \
     #$$PWD/../qiperfc/lib/qcpitemtriangle.cpp
 
 HEADERS += \
+    $$PWD/aascmd.h \
     $$PWD/agmsensor.h \
     $$PWD/aip.h \
     $$PWD/beamdistance.h \
@@ -45,7 +47,6 @@ HEADERS += \
     $$PWD/frmbeamtable.h \
     $$PWD/hanwha.h \
     $$PWD/hanwhabeamtabledata.h \
-    $$PWD/jiocmd.h \
     $$PWD/lbrrestclient.h \
     $$PWD/optimizedata.h \
     $$PWD/optimizeitem.h \
@@ -65,8 +66,8 @@ FORMS += \
     $$PWD/frmbeamtable.ui
 
 RESOURCES += \
-    $$PWD/aip.qrc \
-    $$PWD/jio.qrc
+    $$PWD/aas.qrc \
+    $$PWD/aip.qrc
 
 DISTFILES += \
     $$PWD/cyntec.json \

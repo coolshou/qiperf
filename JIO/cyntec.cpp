@@ -26,7 +26,7 @@ Cyntec::Cyntec(QObject *parent)
 
 void Cyntec::initCmds()
 {
-    QFile fCyntec(":/jio/cyntec");
+    QFile fCyntec(":/aas/cyntec");
     if (fCyntec.open(QIODevice::ReadOnly)) {
         QByteArray jsonData = fCyntec.readAll();
         fCyntec.close();

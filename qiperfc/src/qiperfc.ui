@@ -557,8 +557,8 @@
   </action>
   <action name="actionJIO">
    <property name="icon">
-    <iconset resource="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/JIO/jio.qrc">
-     <normaloff>:/jio/AAS.png</normaloff>:/jio/AAS.png</iconset>
+    <iconset resource="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/JIO/aas.qrc">
+     <normaloff>:/aas/AAS.png</normaloff>:/aas/AAS.png</iconset>
    </property>
    <property name="text">
     <string>Antenna Alignment System</string>
@@ -581,7 +581,7 @@
  </widget>
  <resources>
   <include location="../../qiperf.qrc"/>
-  <include location="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/JIO/jio.qrc"/>
+  <include location="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/JIO/aas.qrc"/>
  </resources>
  <connections/>
 </ui>

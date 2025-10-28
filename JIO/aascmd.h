@@ -1,5 +1,5 @@
-#ifndef JIOCMD_H
-#define JIOCMD_H
+#ifndef AASCMD_H
+#define AASCMD_H
 
 #define JIO_GET_SENSORS "GET_SENSORS"  // ask to get sensor data by sensors_call_so
 #define JIO_SENSORS_DATA "SENSORS_DATA"  // return sensor data
@@ -52,4 +52,4 @@
 
 
 
-#endif // JIOCMD_H
+#endif // AASCMD_H

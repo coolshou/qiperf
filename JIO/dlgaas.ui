@@ -14,8 +14,8 @@
    <string>Antenna Alignment System</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="jio.qrc">
-    <normaloff>:/jio/AAS.png</normaloff>:/jio/AAS.png</iconset>
+   <iconset resource="aas.qrc">
+    <normaloff>:/aas/AAS.png</normaloff>:/aas/AAS.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
    <property name="spacing">
@@ -922,8 +922,8 @@
                </size>
               </property>
               <property name="icon">
-               <iconset resource="jio.qrc">
-                <normaloff>:/jio/command.png</normaloff>:/jio/command.png</iconset>
+               <iconset resource="aas.qrc">
+                <normaloff>:/aas/command.png</normaloff>:/aas/command.png</iconset>
               </property>
              </widget>
             </item>
@@ -1050,12 +1050,12 @@
   </layout>
  </widget>
  <resources>
+  <include location="aas.qrc"/>
   <include location="aip.qrc"/>
-  <include location="jio.qrc"/>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

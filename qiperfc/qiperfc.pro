@@ -51,7 +51,7 @@ QXLSX_SOURCEPATH=$$PWD/lib/QXlsx/QXlsx/source/  # current QXlsx source path is .
 include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
 include($$PWD/lib/qcustomplot.pri)
 include($$PWD/../lib/qssh.pri)
-include($$PWD/../JIO/jio.pri)
+include($$PWD/../JIO/aas.pri)
 include($$PWD/../lib/httpd/httpd.pri)
 
 # debug

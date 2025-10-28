@@ -30,7 +30,7 @@ void OptimizeWorker::work()
             log("// create iperf test pair in qiperfc:" +mLocalAddr+ " <=> " + client);
             addIperf(mLocalAddr, client, 30, port);
             //show test data on DlgOptimize
-            emit sigAddData(sTime, jObj.value("AM7BeamID").toInt(),
+            emit sigAddData(sTime, jObj.value("APBeamID").toInt(),
                             jObj.value("name").toString(),
                             jObj.value("BeamID").toInt());
 

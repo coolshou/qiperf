@@ -1,6 +1,6 @@
 <RCC>
-    <qresource prefix="/jio">
-        <file alias="jiocmd">jiocmd.json</file>
+    <qresource prefix="/aas">
+        <file alias="aascmd">aascmd.json</file>
         <file alias="hanwha">hanwha.json</file>
         <file alias="cyntec">cyntec.json</file>
         <file alias="INIT.png">images/sInit.png</file>

@@ -179,7 +179,8 @@ private slots:
     void onGetSensor(bool checked);
     void onAddRow(QString name, double latitude, double longitude,
                   double altitude, double heading, double pitch,
-                  QJsonObject aip1=QJsonObject(), QJsonObject aip2=QJsonObject(), QString ipaddr="");
+                  QJsonObject aip1=QJsonObject(), QJsonObject aip2=QJsonObject(),
+                  QString ipaddr="", QString macaddr="");
     void onClear(bool checked);
     void onLoadCliecked(bool checked);
     void onSaveCliecked(bool checked);
