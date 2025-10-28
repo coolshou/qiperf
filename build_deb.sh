@@ -14,10 +14,12 @@ BUILDPACKAGES="qiperfd qiperftray"
 machine_arch=$(uname -m)
 if [ "$machine_arch" = "x86_64" ]; then
 export QT_SELECT=qt6
+QMAKE=qmake6
 BUILDPACKAGES+=" qiperfc"
 cp -f qiperfc/debian/control.qt6 qiperfc/debian/control
 else
 export QT_SELECT=qt5
+QMAKE=qmake
 cp -f qiperfc/debian/control.qt5 qiperfc/debian/control
 fi
 
@@ -57,7 +59,7 @@ fi
 if [ ! -e lib/qssh/lib/libQSsh.a ]; then
   cd lib/qssh
   #dpkg-buildpackage -b --no-sign
-  qmake
+  $QMAKE
   make
   cd ../../
 fi
