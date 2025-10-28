@@ -558,10 +558,10 @@
   <action name="actionJIO">
    <property name="icon">
     <iconset resource="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/JIO/jio.qrc">
-     <normaloff>:/jio/Jio.png</normaloff>:/jio/Jio.png</iconset>
+     <normaloff>:/jio/AAS.png</normaloff>:/jio/AAS.png</iconset>
    </property>
    <property name="text">
-    <string>JIO</string>
+    <string>Antenna Alignment System</string>
    </property>
   </action>
   <action name="actionTelnet">
