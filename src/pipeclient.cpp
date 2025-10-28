@@ -1,5 +1,7 @@
 #include "pipeclient.h"
 
+#include <QDebug>
+
 PipeClient::PipeClient(QString remoteServername, QObject *parent)
     : QObject{parent}
 {
