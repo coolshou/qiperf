@@ -3,6 +3,8 @@
 #include <QtMath>
 #include <QNetworkInterface>
 
+#include <QDebug>
+
 // MyFunc::MyFunc(QObject *parent): QObject(parent)
 // {
 
