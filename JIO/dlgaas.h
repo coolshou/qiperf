@@ -153,9 +153,9 @@ signals:
     void sigAddIperf(QString cfg);
     void sigClearIperf();
     void addBeamIDCmd(QString cmd);
-    void addCMBeamIDCmd(QString name, QString cmd);
+    void addClientBeamIDCmd(QString name, QString cmd);
     void clearBeamIDCmd();
-    void clearCMBeamIDCmd();
+    void clearClientBeamIDCmd();
 
 protected:
     void changeEvent(QEvent *e) override;
@@ -196,7 +196,7 @@ private slots:
     void onShow3D(bool checked);
     void onToDMS(bool checked);
     void onToDegree(bool checked);
-    void onCMBeamDirIDInit(bool checked);
+    void onClientBeamDirIDInit(bool checked);
     void onAttInit(bool checked=false);
     void onBeamDirIDCmd(bool checked);
     void showContextMenu(const QPoint &pos);

@@ -85,9 +85,9 @@ DlgAAS::DlgAAS(QSettings *cfg, QWidget *parent) :
     connect(this, &DlgAAS::closeAll, m_dlgset, &DlgSet::close);
     mDlgBeamCmd= new DlgBeamCmd(this);
     connect(this,&DlgAAS::addBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddBeamIDCmd);
-    connect(this,&DlgAAS::addCMBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddCMBeamIDCmd);
+    connect(this,&DlgAAS::addClientBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddCMBeamIDCmd);
     connect(this,&DlgAAS::clearBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::clear);
-    connect(this,&DlgAAS::clearCMBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::clearCM);
+    connect(this,&DlgAAS::clearClientBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::clearCM);
     connect(this, &DlgAAS::closeAll, mDlgBeamCmd, &DlgBeamCmd::close);
     mDlgOptimize = new DlgOptimize(this);
     connect(this, &DlgAAS::closeAll, mDlgOptimize, &DlgOptimize::close);
@@ -175,8 +175,8 @@ void DlgAAS::clearData()
     if (m_dlgGeo){
         m_dlgGeo->clearAllPlot();
     }
-    ui->leAM7az->setText("");
-    ui->leAM7el->setText("");
+    ui->leAPaz->setText("");
+    ui->leAPel->setText("");
     emit clearBeamIDCmd();
 }
 
@@ -813,7 +813,7 @@ void DlgAAS::initAction()
 
     connect(this, &DlgAAS::TileAvailable, this , &DlgAAS::onTileAvailable);
 
-    connect(ui->pbCMBeamDirIDInit, &QPushButton::clicked, this, &DlgAAS::onCMBeamDirIDInit);
+    connect(ui->pbCMBeamDirIDInit, &QPushButton::clicked, this, &DlgAAS::onClientBeamDirIDInit);
     ui->pbAttInit->setVisible(false);
     connect(ui->pbAttInit, &QPushButton::clicked, this, &DlgAAS::onAttInit);
     connect(ui->pbBeamDirIDCmd, &QPushButton::clicked, this, &DlgAAS::onBeamDirIDCmd);
@@ -1005,28 +1005,28 @@ void DlgAAS::initHanwhaBeamCMD(QString c, QString antarraymode, QString cmName)
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 
     cmd =mHanwha->getCmd("POWER_ON").arg(c);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 
     cmd = mHanwha->getCmd("INIT").arg(c);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 
     cmd = mHanwha->getCmd("REG").arg(c);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 
     double freq = ui->cbRFFreq->currentText().toDouble();
@@ -1036,7 +1036,7 @@ void DlgAAS::initHanwhaBeamCMD(QString c, QString antarraymode, QString cmName)
         if(cmName.isEmpty()){
             emit addBeamIDCmd(cmd);
         }else{
-            emit addCMBeamIDCmd(cmName, cmd);
+            emit addClientBeamIDCmd(cmName, cmd);
         }
     }else {
         qDebug() << "Did not get freq id :" << freq;
@@ -1046,7 +1046,7 @@ void DlgAAS::initHanwhaBeamCMD(QString c, QString antarraymode, QString cmName)
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 }
 
@@ -1061,7 +1061,7 @@ void DlgAAS::initHanwhaBeamIdCMD(QString c, QString beamid, QString cmName)
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 }
 
@@ -1072,14 +1072,14 @@ void DlgAAS::initHanwhaBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 
     cmd = mHanwha->getCmd("SET_TxAttn").arg(c, Tx1att, Tx2att);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 }
 
@@ -1091,20 +1091,20 @@ void DlgAAS::initHanwhaBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
     cmd = mHanwha->getCmd("SET_RxAttn").arg(c, Rx1att,Rx2att);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
     // Rx lan att
     cmd = mHanwha->getCmd("SET_LnaAttn").arg(c, RxLan);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 }
 
@@ -1126,14 +1126,14 @@ void DlgAAS::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 
     cmd = mCyntec->getCmd("INIT").arg(c);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 
     double freq = ui->cbRFFreq->currentText().toDouble();
@@ -1141,7 +1141,7 @@ void DlgAAS::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 
     QString ant="1";
@@ -1155,7 +1155,7 @@ void DlgAAS::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 
 }
@@ -1174,7 +1174,7 @@ void DlgAAS::initCyntecBeamIdCMD(QString c, QString beamid, QString cmName)
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 }
 
@@ -1191,7 +1191,7 @@ void DlgAAS::initCyntecBeamTxAttCMD(QString c, QString Tx1att, QString Tx2att, Q
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 }
 
@@ -1209,7 +1209,7 @@ void DlgAAS::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
-        emit addCMBeamIDCmd(cmName, cmd);
+        emit addClientBeamIDCmd(cmName, cmd);
     }
 
     QList<int> ls = mCyntec->getIntList("RxIP3");
@@ -1221,7 +1221,7 @@ void DlgAAS::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
         if(cmName.isEmpty()){
             emit addBeamIDCmd(cmd);
         }else{
-            emit addCMBeamIDCmd(cmName, cmd);
+            emit addClientBeamIDCmd(cmName, cmd);
         }
     }else{
         qDebug() << " not supported Rx IIP3 value: " << Rx1iip3 << " , " << Rx2iip3;
@@ -1262,7 +1262,7 @@ void DlgAAS::getBestBeamID(int idx,
     ui->twAIP->setItem(idx, AIPcols::Azimuth,
                        new QTableWidgetItem(QString::number(aipaz)));
     ui->twAIP->setItem(idx, AIPcols::Elevation,
-                       new QTableWidgetItem(ui->leAM7el->text()));
+                       new QTableWidgetItem(ui->leAPel->text()));
     ui->twAIP->setItem(idx, AIPcols::Azdiff,
                        new QTableWidgetItem(QString::number(aipazdiff)));
     //Get best Cyntec/Hanwha AM7 id
@@ -1428,9 +1428,9 @@ void DlgAAS::onCalcClicked(bool checked)
     double lat1 = ui->tableWidget->item(0,GPScols::Latitude)->text().toDouble();
     double lon1 = ui->tableWidget->item(0,GPScols::Longitude)->text().toDouble();
     double altmsl1 = ui->tableWidget->item(0,GPScols::Altitude)->text().toDouble();
-    //AM7 head
-    //AM7 Pitch
-    //AM7 AIP1 type
+    //AP head
+    //AP Pitch
+    //AP AIP1 type
     AIP::ModuleType aip1type = getModuleType(0, static_cast<int>(GPScols::AIP1));
     if (aip1type == AIP::ModuleType::Unknown){
         QString errmsg = "Please setup ModuleType of AIP1";
@@ -1438,7 +1438,7 @@ void DlgAAS::onCalcClicked(bool checked)
         ui->tableWidget->selectRow(0);
         return;
     }
-    //AM7 AIP2
+    //AP AIP2
     AIP::ModuleType aip2type = getModuleType(0, static_cast<int>(GPScols::AIP2));
     if (aip2type == AIP::ModuleType::Unknown){
         QString errmsg = "Please setup ModuleType of AIP2";
@@ -1528,7 +1528,7 @@ void DlgAAS::onCalcClicked(bool checked)
     ui->twAIP->setHorizontalHeaderLabels(hls);
 
     // AM7 heading az degree
-    double am7azDeg= 0;
+    double apAzDeg= 0;
     double distMaxR=0.0;
     double distMaxL=0.0;
     double distR=0.0;
@@ -1538,8 +1538,8 @@ void DlgAAS::onCalcClicked(bool checked)
     QColor lColor = QColor(144, 238, 144); //light green
     QColor rColor = QColor(173, 216, 230); //light blue
     QColor nColor = QColor(Qt::lightGray);
-    QList<QTableWidgetItem*> cm7rs;
-    QList<QTableWidgetItem*> cm7ls;
+    QList<QTableWidgetItem*> clientRs;
+    QList<QTableWidgetItem*> clientLs;
 
     if ((ui->rbDBSCAN->isChecked())||
         (ui->rbKmeans->isChecked())  ){
@@ -1587,18 +1587,18 @@ void DlgAAS::onCalcClicked(bool checked)
                 int g = labels[iRow];
                 if (g==0){
                     nitm->setBackground(QBrush(lColor));
-                    nitm->setToolTip("CM7-FirstQuadrant");
+                    nitm->setToolTip("Client-FirstQuadrant");
                     itm->setData(Qt::UserRole, "AIP1");
-                    cm7rs.append(itm);
+                    clientRs.append(itm);
                     distR =ditm->text().toDouble()*1000;
                     if (distR>distMaxR){
                         distMaxR = distR;
                     }
                 }else if (g==1){
                     nitm->setBackground(QBrush(rColor));
-                    nitm->setToolTip("CM7-FourthQuadrant");
+                    nitm->setToolTip("Client-FourthQuadrant");
                     itm->setData(Qt::UserRole, "AIP2");
-                    cm7ls.append(itm);
+                    clientLs.append(itm);
                     distL =ditm->text().toDouble()*1000;
                     if (distL>distMaxL){
                         distMaxL = distL;
@@ -1608,42 +1608,42 @@ void DlgAAS::onCalcClicked(bool checked)
                 }
             }
         }
-        // AM7 right CMs
+        // AP right Clients
         QVector<double> azbears;
-        foreach(auto itm, cm7rs){
+        foreach(auto itm, clientRs){
             azbears.append(itm->text().toDouble());
         }
-        double am7r = averageBearing(azbears);
-        // AM7 Left CMs
+        double apr = averageBearing(azbears);
+        // AP Left Clients
         azbears.clear();
-        foreach(auto itm, cm7ls){
+        foreach(auto itm, clientLs){
             azbears.append(itm->text().toDouble());
         }
-        double am7l = averageBearing(azbears);
+        double apl = averageBearing(azbears);
         // center of left & right
         azbears.clear();
-        azbears.append(am7r);
-        azbears.append(am7l);
-        am7azDeg  = averageBearing(azbears);
+        azbears.append(apr);
+        azbears.append(apl);
+        apAzDeg  = averageBearing(azbears);
     }
     if (ui->rbAvg->isChecked()) {
-        // AM7 az
-        am7azDeg = averageBearing(azbearings);
-        // use AM7 azimuth Degree divide CM into Quadrant 1 or Quadrant 4
+        // AP az
+        apAzDeg = averageBearing(azbearings);
+        // use AP azimuth Degree divide Client into Quadrant 1 or Quadrant 4
         for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
             QTableWidgetItem *nitm = ui->twResult->item(iRow, AZEIcols::Name);
             QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::Distance);
             QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
             if (itm){
                 amcmaz = itm->text().toDouble();
-                relative = fmod((amcmaz - am7azDeg + 360), 360);
+                relative = fmod((amcmaz - apAzDeg + 360), 360);
                 // qDebug() << "amcmaz:" << amcmaz << "  relative:" << relative;
                 if (relative > 0 && relative < 90){
                     //azimuthDegree 的第一象限
                     nitm->setBackground(QBrush(lColor));
-                    nitm->setToolTip("CM7-FirstQuadrant");
+                    nitm->setToolTip("Client-FirstQuadrant");
                     itm->setData(Qt::UserRole, "AIP1");
-                    cm7rs.append(itm);
+                    clientRs.append(itm);
                     distR =ditm->text().toDouble()*1000;
                     if (distR>distMaxR){
                         distMaxR = distR;
@@ -1651,9 +1651,9 @@ void DlgAAS::onCalcClicked(bool checked)
                 }else if (relative > 270 && relative < 360){
                     //azimuthDegree 的第四象限
                     nitm->setBackground(QBrush(rColor));
-                    nitm->setToolTip("CM7-FourthQuadrant");
+                    nitm->setToolTip("Client-FourthQuadrant");
                     itm->setData(Qt::UserRole, "AIP2");
-                    cm7ls.append(itm);
+                    clientLs.append(itm);
                     distL =ditm->text().toDouble()*1000;
                     if (distL>distMaxL){
                         distMaxL = distL;
@@ -1664,36 +1664,36 @@ void DlgAAS::onCalcClicked(bool checked)
                 }
             }
         }
-        // 1. get cm7rs Max and Min value
+        // 1. get clientRs Max and Min value
         // diff = |Max - Min|
         // check diff < 3dB Az BW
         // Max, Min should not over AM7az ± dirBW ± 3dB_AzBW/2
         // ui->tableWidget->item(0, GPScols::AIP1); //cyntec or hanwha
 
     }
-    //TODO check if any CM7 in AM7's guard band (+-3.5)
+    //TODO check if any client in AP's guard band (+-3.5)
     for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
         // QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::P2Azimuth);
         QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
         if (itm){
             amcmaz = itm->text().toDouble();
-            if (isAzimuthClose(amcmaz, am7azDeg)){
+            if (isAzimuthClose(amcmaz, apAzDeg)){
                 itm->setBackground(QBrush("red"));
             }
         }
     }
-    //TODO check if any CM7 is outside AM7 beamID's HPAz/HPEl range
+    //TODO check if any Client is outside AP beamID's HPAz/HPEl range
 
     //show on UI
-    ui->leAM7az->setText(QString::number(am7azDeg, 'f', 1));
+    ui->leAPaz->setText(QString::number(apAzDeg, 'f', 1));
     // AM7 Pitch
     double elDegree = totalel/ui->twResult->rowCount();
-    ui->leAM7el->setText(QString::number(elDegree, 'f', 1));
+    ui->leAPel->setText(QString::number(elDegree, 'f', 1));
 
     //AM7 AIP1 Az, El
-    getBestBeamID(0, am7azDeg, aip1type, cm7rs, distMaxR);
+    getBestBeamID(0, apAzDeg, aip1type, clientRs, distMaxR);
     //AM7 AIP2
-    getBestBeamID(1, am7azDeg, aip2type, cm7ls, distMaxL);
+    getBestBeamID(1, apAzDeg, aip2type, clientLs, distMaxL);
 
 }
 
@@ -1918,12 +1918,12 @@ void DlgAAS::onToDegree(bool checked)
     }
 }
 
-void DlgAAS::onCMBeamDirIDInit(bool checked)
+void DlgAAS::onClientBeamDirIDInit(bool checked)
 {   Q_UNUSED(checked)
-    //calc all CM7 beam Direction ID by Az/El diff
+    //calc all Client beam Direction ID by Az/El diff
     if (ui->twResult->rowCount()>0){
-        emit clearCMBeamIDCmd();
-        QString cm="";
+        emit clearClientBeamIDCmd();
+        QString client="";
         //TODO: AIP type
         AIP::ModuleType aiptype = AIP::ModuleType::Unknown;
         // QString aipn;
@@ -1937,7 +1937,7 @@ void DlgAAS::onCMBeamDirIDInit(bool checked)
         double diffPitch=0.0;
         bool bErr=false;
         for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
-            cm = ui->tableWidget->item(iRow+1, GPScols::PositionName)->text();
+            client = ui->tableWidget->item(iRow+1, GPScols::PositionName)->text();
 
             realHeading = ui->tableWidget->item(iRow+1, GPScols::Heading)->text().toDouble();
             realPitch = ui->tableWidget->item(iRow+1, GPScols::Pitch)->text().toDouble();
@@ -1963,15 +1963,15 @@ void DlgAAS::onCMBeamDirIDInit(bool checked)
             ui->twResult->setItem(iRow, AZEIcols::P2ElDiff,
                                   new QTableWidgetItem(QString::number(diffPitch)));
             //get beam Direction ID
-            emit addCMBeamIDCmd(cm, "# "+cm);
+            emit addClientBeamIDCmd(client, "# "+client);
             if (aiptype == AIP::ModuleType::Cyntec){
-                initCyntecBeamCMD("", "8x8", cm);
+                initCyntecBeamCMD("", "8x8", client);
             }else if (aiptype == AIP::ModuleType::Hanwha){
-                initHanwhaBeamCMD("", "8x8", cm);
+                initHanwhaBeamCMD("", "8x8", client);
             }else {
-                emit addCMBeamIDCmd(cm, "# Unknown  AIP::ModuleType"+cm);
+                emit addClientBeamIDCmd(client, "# Unknown  AIP::ModuleType"+client);
             }
-            initID = getNearestBeamDirectionID(cm, aiptype, diffHead, diffPitch);
+            initID = getNearestBeamDirectionID(client, aiptype, diffHead, diffPitch);
             QTableWidgetItem *itm = new QTableWidgetItem(QString::number(initID));
             QString id="";
             if (initID<0){
@@ -1982,11 +1982,11 @@ void DlgAAS::onCMBeamDirIDInit(bool checked)
             }
             ui->twResult->setItem(iRow, AZEIcols::BeamDirID, itm);
             if (aiptype == AIP::ModuleType::Cyntec){
-                initCyntecBeamIdCMD("", id, cm);
+                initCyntecBeamIdCMD("", id, client);
             }else if (aiptype == AIP::ModuleType::Hanwha){
-                initHanwhaBeamIdCMD("", id, cm);
+                initHanwhaBeamIdCMD("", id, client);
             }else {
-                emit addCMBeamIDCmd(cm, "#BeamDirID: Unknown  AIP::ModuleType"+cm);
+                emit addClientBeamIDCmd(client, "#BeamDirID: Unknown  AIP::ModuleType"+client);
             }
 
             //Use ID's deg+ phy deg draw arrow
@@ -2000,9 +2000,9 @@ void DlgAAS::onCMBeamDirIDInit(bool checked)
 
 void DlgAAS::onAttInit(bool checked)
 {
-    //init all CM's Att value
+    //init all Client's Att value
     Q_UNUSED(checked)
-    QString cm="";
+    QString client="";
     AIP::ModuleType aiptype = AIP::ModuleType::Unknown;
     double freq= ui->cbRFFreq->currentText().toDouble() * 1000000000;
     double distance=0.0;
@@ -2010,10 +2010,10 @@ void DlgAAS::onAttInit(bool checked)
     double targetEIRP=0;
     QVector<double> ds;
     for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
-        cm = ui->tableWidget->item(iRow+1, GPScols::PositionName)->text();
+        client = ui->tableWidget->item(iRow+1, GPScols::PositionName)->text();
         distance = ui->twResult->item(iRow, AZEIcols::Distance)->text().toDouble()*1000;
         fspl = MyFunc::calculateFSPL(distance, freq);
-        qDebug() << "[" << iRow << "]"<< cm <<" distance:" << distance <<" fspl:" << fspl;
+        qDebug() << "[" << iRow << "]"<< client <<" distance:" << distance <<" fspl:" << fspl;
         aiptype = getModuleType(iRow+1 ,GPScols::AIP1);
         if (aiptype==AIP::ModuleType::Cyntec) {
             if (mCyntec){
@@ -2058,11 +2058,11 @@ void DlgAAS::onAttInit(bool checked)
                 Lan = "0";
                 ui->twResult->setItem(iRow, AZEIcols::P2CLnaAtt,
                                       new QTableWidgetItem(Lan));
-                initCyntecBeamTxAttCMD("", Tx1, Tx2, cm);
-                initCyntecBeamRxAttCMD("", Rx1, Rx2, bfRx1, bfRx2, cm);
-                emit addCMBeamIDCmd(cm, "#----------------------------------------------------------------------");
-                emit addCMBeamIDCmd(cm, mCyntec->getCmd("GET_STATUS").arg("/dev/spidev2.0"));
-                emit addCMBeamIDCmd(cm, "#----------------------------------------------------------------------");
+                initCyntecBeamTxAttCMD("", Tx1, Tx2, client);
+                initCyntecBeamRxAttCMD("", Rx1, Rx2, bfRx1, bfRx2, client);
+                emit addClientBeamIDCmd(client, "#----------------------------------------------------------------------");
+                emit addClientBeamIDCmd(client, mCyntec->getCmd("GET_STATUS").arg("/dev/spidev2.0"));
+                emit addClientBeamIDCmd(client, "#----------------------------------------------------------------------");
             }
         }else if (aiptype==AIP::ModuleType::Hanwha) {
             if (mHanwha){
@@ -2108,10 +2108,10 @@ void DlgAAS::onAttInit(bool checked)
                     ui->twResult->setItem(iRow, AZEIcols::P2RxLnaAtt, new QTableWidgetItem(RxLan));
                 }
 
-                initHanwhaBeamTxAttCMD("", bfTx1, bfTx2, Tx1, Tx2, cm);
-                initHanwhaBeamRxAttCMD("", bfRx1, bfRx2, Rx1, Rx2, RxLan, cm);
-                emit addCMBeamIDCmd(cm, mHanwha->getCmd("ATC_ON").arg(""));
-                emit addCMBeamIDCmd(cm, "#----------------------------------------------------------------------");
+                initHanwhaBeamTxAttCMD("", bfTx1, bfTx2, Tx1, Tx2, client);
+                initHanwhaBeamRxAttCMD("", bfRx1, bfRx2, Rx1, Rx2, RxLan, client);
+                emit addClientBeamIDCmd(client, mHanwha->getCmd("ATC_ON").arg(""));
+                emit addClientBeamIDCmd(client, "#----------------------------------------------------------------------");
             }
         }else{
             QString errmsg = "[onAttInit]Please setup ModuleType";
@@ -2184,8 +2184,8 @@ void DlgAAS::onLoadFinished(bool ok)
             double azdeg;
             QRgb rgb1 = 0xFF6C6CF1; //Warm Blue
             QRgb rgbaz = 0xFF6CBCF1; //中等亮度的藏青色
-            QGV::GeoPos am7;
-            QGV::GeoPos cm;
+            QGV::GeoPos ap;
+            QGV::GeoPos client;
             // marker & phy arrow line
             for(int row=0;row<ui->tableWidget->rowCount();row++){
                 label = ui->tableWidget->item(row, GPScols::PositionName)->text();
@@ -2194,39 +2194,39 @@ void DlgAAS::onLoadFinished(bool ok)
                 heading = ui->tableWidget->item(row, GPScols::Heading)->text().toDouble();
                 aiptype = getModuleType(row ,GPScols::AIP1);
                 if (row==0){
-                    //AM7
+                    //AP
                     lat0 = lat;
                     lon0 = lon;
-                    am7 = QGV::GeoPos{lat0, lon0};
-                    m_dlgGeo->addRectangle(am7, QPointF(20.0, 10.0), Qt::red, label);
+                    ap = QGV::GeoPos{lat0, lon0};
+                    m_dlgGeo->addRectangle(ap, QPointF(20.0, 10.0), Qt::red, label);
                     //draw Main Arrow line
-                    if (!ui->leAM7az->text().isEmpty()){
+                    if (!ui->leAPaz->text().isEmpty()){
                         // expects
-                        azdeg = ui->leAM7az->text().toDouble();
+                        azdeg = ui->leAPaz->text().toDouble();
                         //TODO: length should not over range
-                        m_dlgGeo->addArrowLine(am7, azdeg, 20, QColor(Qt::red), false, 1, 5);
+                        m_dlgGeo->addArrowLine(ap, azdeg, 20, QColor(Qt::red), false, 1, 5);
                     }else{
                         //draw init Arrow Line
                         //TODO: length should not over range
-                        m_dlgGeo->addArrowLine(am7, heading,
+                        m_dlgGeo->addArrowLine(ap, heading,
                                                30, QColor(Qt::blue), true, 2, 5);
                     }
                 }else{
-                    //CM7
+                    //Client
                     // marker
-                    cm = QGV::GeoPos{lat, lon};
+                    client = QGV::GeoPos{lat, lon};
                     //m_dlgGeo->addMarker(lat, lon, label);
-                    m_dlgGeo->addRectangle(cm, QPointF(20.0, 10.0), Qt::yellow, label);
+                    m_dlgGeo->addRectangle(client, QPointF(20.0, 10.0), Qt::yellow, label);
 
                     if (ui->twResult->rowCount()>0){
                         // Link Lines
-                        m_dlgGeo->addLinkline(am7, cm, Qt::yellow, 2);
+                        m_dlgGeo->addLinkline(ap, client, Qt::yellow, 2);
                         itm = ui->twResult->item(row-1, AZEIcols::P2Azimuth);
                         if (itm){
                             //draw Arrow line, expect
                             azdeg = itm->text().toDouble();
                             //TODO: length should not over range
-                            m_dlgGeo->addArrowLine(cm, azdeg, 20, QColor(Qt::red), false, 1, 5);
+                            m_dlgGeo->addArrowLine(client, azdeg, 20, QColor(Qt::red), false, 1, 5);
                         }
                         // add later will be on top
                         itmId = ui->twResult->item(row-1, AZEIcols::BeamDirID);
@@ -2234,14 +2234,14 @@ void DlgAAS::onLoadFinished(bool ok)
                             qDebug() << "have BeamDirID data:" << itmId->text();
                             azdeg = heading + getAz(aiptype,itmId->text().toInt());
                             //Beam Direction ID's az deg: (TODO:length should not over range)
-                            m_dlgGeo->addArrowLine(cm, azdeg, 12, QColor(rgb1), false, 1, 3);
+                            m_dlgGeo->addArrowLine(client, azdeg, 12, QColor(rgb1), false, 1, 3);
                         }
 
 
                     }else{
                         //draw init Arrow Line
                         //TODO: length should not over range
-                        m_dlgGeo->addArrowLine(cm, heading,
+                        m_dlgGeo->addArrowLine(client, heading,
                                                30, QColor(Qt::blue), true, 2, 5);
                     }
                 }
@@ -2254,7 +2254,7 @@ void DlgAAS::onLoadFinished(bool ok)
                         if (!itm->text().isEmpty()){
                             azdeg = itm->text().toDouble();
                             //TODO: length should not over range
-                            m_dlgGeo->addArrowLine(am7, azdeg, 15,
+                            m_dlgGeo->addArrowLine(ap, azdeg, 15,
                                                    QColor(rgbaz), false, 1, 5);
                         }
                     }
