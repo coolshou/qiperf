@@ -207,8 +207,7 @@ private slots:
     void onCheckTileFinished();
     void onCheckTileErrorOccurred(QNetworkReply::NetworkError errorcode);
     void handleButtonClicked(int row, int col);
-    void onAcceptedAIP();
-    // void onUpdateData(int row, int col, QString data);
+    // void onAcceptedAIP();
     void onUpdateData(int row, int col, QJsonObject data);
     void onUpdateModelType(int row, int col, QString smodel);
     void onUpdateModelType(int row, int col, int model);

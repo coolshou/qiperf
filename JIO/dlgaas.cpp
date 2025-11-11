@@ -278,6 +278,7 @@ QJsonObject DlgAAS::createInitData()
     //create Init Data for Optimize use
     QJsonObject rootObject;
     QJsonObject aipObj;
+    // TODO: should we use AP's IP ? current use qiperf console's setting local ip
     rootObject["LocalAddr"]= ui->leLocalAddr->text();
     rootObject["ControlBy"]= mControlBy;
     //ssh
@@ -291,7 +292,7 @@ QJsonObject DlgAAS::createInitData()
     webObj["password"] = mWebpassword;
     rootObject["web"] = webObj;
     QJsonArray pos;
-    QTableWidgetItem *itemam7;
+    QTableWidgetItem *itemAP;
     QTableWidgetItem *item;
     if (ui->tableWidget->rowCount()>0){
         //collect client data and relative AP's AIP data
@@ -333,36 +334,35 @@ QJsonObject DlgAAS::createInitData()
                 if (varAIP1.canConvert<QVariantMap>()){
                     // qDebug() << "AIP1 data:" << varAIP1.toMap() ;
                     aipObj = QJsonObject::fromVariantMap(varAIP1.toMap());
-                    // if (i==0){
-                    //     //AM7
-                    //     if (ui->twAIP->rowCount()>0){
-                    //         item = ui->twAIP->item(0, AIPcols::BeamDirectionID);
-                    //         if (item){
-                    //             aipObj["BeamID"] = item->text().toInt();
-                    //         }
-                    //     }
-                    // }else
+                    qDebug() << "aipObj:" << aipObj;
                     {
-                        //Client
+                        if (i==0){
+                            // only AP need APBeamID
+                            // if (aipgroup.contains("AIP1")){
+                            if (ui->twAIP->rowCount()>0){
+                                itemAP = ui->twAIP->item(0, AIPcols::BeamDirectionID);
+                                if (itemAP){
+                                    qDebug() << "AIP1 APBeamID:" << itemAP->text();
+                                    aipObj["APBeamID"] = itemAP->text().toInt();
+                                }
+                            }
+                                //TODO: AP AIP1 att
+                            // }else if (aipgroup.contains("AIP2")){
+                                // itemAP = ui->twAIP->item(1, AIPcols::BeamDirectionID);
+                                // qDebug() << "AIP2 APBeamID:" << itemAP->text();
+                                // aipObj["APBeamID"] = itemAP->text().toInt();
+                                //TODO: AP AIP2 att
+                            // }else{
+                            //     qDebug() << "Not support AIP group:" << aipgroup;
+                            // }
+                        }
                         if (ui->twResult->rowCount()>0){
+                            // only client (row>1)
                             item = ui->twResult->item(i-1, AZEIcols::P1Azimuth);
                             if (item){
-                                //AIP group of AM7
+                                //AIP group of AP
                                 QString aipgroup = item->data(Qt::UserRole).toString();
                                 aipObj["aipgroup"] = aipgroup;
-                                if (aipgroup.contains("AIP1")){
-                                    itemam7 = ui->twAIP->item(0, AIPcols::BeamDirectionID);
-                                    qDebug() << "AIP1 APBeamID:" << itemam7->text();
-                                    aipObj["APBeamID"] = itemam7->text().toInt();
-                                    //TODO: am7 AIP1 att
-                                }else if (aipgroup.contains("AIP2")){
-                                    itemam7 = ui->twAIP->item(1, AIPcols::BeamDirectionID);
-                                    qDebug() << "AIP2 APBeamID:" << itemam7->text();
-                                    aipObj["APBeamID"] = itemam7->text().toInt();
-                                    //TODO: am7 AIP2 att
-                                }else{
-                                    qDebug() << "Not support AIP group:" << aipgroup;
-                                }
                             }
                             item = ui->twResult->item(i-1, AZEIcols::P2AzDiff);
                             if (item){
@@ -374,9 +374,20 @@ QJsonObject DlgAAS::createInitData()
                             }
                             item = ui->twResult->item(i-1, AZEIcols::BeamDirID);
                             if (item){
-                                qDebug() << "BeamID:" << item->text();
-                                aipObj["BeamID"] = item->text().toInt();
+                                qDebug() << "ClientBeamID:" << item->text();
+                                aipObj["ClientBeamID"] = item->text().toInt();
                             }
+                        }else{
+                            if (i==0){
+                                aipObj["APBeamID"] = 0;
+                            }else{
+                                aipObj["ClientBeamID"] = 0;
+                                aipObj["AzDiff"] = 0.0;
+                                aipObj["ElDiff"] = 0.0;
+                                aipObj["aipgroup"] = "";
+                            }
+                            aipObj["moduletype"] = 2;
+                            aipObj["offset"] = "0.00,0.00,0.00,0";
                         }
                     }
                     posdata["AIP1"] = aipObj;
@@ -384,6 +395,7 @@ QJsonObject DlgAAS::createInitData()
                     qDebug() << "Wrong API1 data:";
                 }
             }
+            // AIP2
             if (i==0){
             //AP  AIP2
                 item = ui->tableWidget->item(i, GPScols::AIP2);
@@ -396,7 +408,7 @@ QJsonObject DlgAAS::createInitData()
                             if (ui->twAIP->rowCount()>1){
                                 item = ui->twAIP->item(1, AIPcols::BeamDirectionID);
                                 if (item){
-                                    aipObj["BeamID"] = item->text().toInt();
+                                    aipObj["APBeamID"] = item->text().toInt();
                                 }
                             }
                         }
@@ -416,17 +428,7 @@ QJsonObject DlgAAS::createInitData()
             if (item) {
                 posdata["MacAddr"] = item->text();
             }
-            // if (i==0){
-            //     //AP
-            //     item = ui->tableWidget->item(0, GPScols::IPAddr);
-            //     if (item) {
-            //         posdata["AM7IPAddr"] = item->text();
-            //     }
-            //     item = ui->tableWidget->item(0, GPScols::MacAddr);
-            //     if (item) {
-            //         posdata["AM7MacAddr"] = item->text();
-            //     }
-            // }
+
             pos.append(posdata);
         }
         rootObject["positions"] = pos;
@@ -835,7 +837,7 @@ void DlgAAS::onDelete(bool checked)
         name = itm->text();
     }
     // QString name =
-    qDebug() << "onDelete:" <<  QString::number(iRow);
+    // qDebug() << "onDelete:" <<  QString::number(iRow);
     ui->tableWidget->removeRow(iRow);
     if (!name.isEmpty()){
         emit deleteItm(name);
@@ -915,6 +917,7 @@ void DlgAAS::onAddRow(QString name, double latitude, double longitude,
     });
     ui->tableWidget->setCellWidget(iRow, GPScols::AIP1, btn1);
     QTableWidgetItem *aip1item = new QTableWidgetItem("");
+    qDebug() << "aip1:" << aip1;
     aip1item->setData(Qt::UserRole, aip1.toVariantMap());
     // qDebug() << "AIP1:" << aip1;
     ui->tableWidget->setItem(iRow, GPScols::AIP1, aip1item);
@@ -1265,8 +1268,8 @@ void DlgAAS::getBestBeamID(int idx,
                        new QTableWidgetItem(ui->leAPel->text()));
     ui->twAIP->setItem(idx, AIPcols::Azdiff,
                        new QTableWidgetItem(QString::number(aipazdiff)));
-    //Get best Cyntec/Hanwha AM7 id
-    emit addBeamIDCmd("#AM7 AIP-"+ QString::number(idx));
+    //Get best Cyntec/Hanwha AP id
+    emit addBeamIDCmd("#AP AIP-"+ QString::number(idx));
     qDebug() << "AIP:" << idx << " Max az:" << maxaz << " Min Az:" << minaz;
     QString c=""; //cmd name diff to AIP1/AIP2
     QVector<double> ds;
@@ -1386,12 +1389,11 @@ void DlgAAS::initResultHeader(AIP::ModuleType aip1type)
     QStringList hls;
     hls << mHeaderResult;
     if (aip1type == AIP::ModuleType::Hanwha){
-        ui->twResult->setColumnCount(18);
         hls << mHeaderHanwha;
     }else if (aip1type == AIP::ModuleType::Cyntec){
-        ui->twResult->setColumnCount(16);
         hls << mHeaderCyntec;
     }
+    ui->twResult->setColumnCount(hls.count());
     ui->twResult->setHorizontalHeaderLabels(hls);
 }
 
@@ -1402,7 +1404,7 @@ void DlgAAS::onCalcClicked(bool checked)
     int iRow = ui->tableWidget->rowCount();
     if (iRow<2){
         QMessageBox::warning(this, tr("WARNING!!"),
-                             tr("Please add at last two GPS location record"),
+                             tr("Please add at last two GPS location record, First record will act as AP"),
                              QMessageBox::Ok);
         return;
     }
@@ -1423,7 +1425,7 @@ void DlgAAS::onCalcClicked(bool checked)
             }
         }
     }
-
+    //AP's Pos, lat, lon, altmsl
     QString pos1 = ui->tableWidget->item(0,GPScols::PositionName)->text();
     double lat1 = ui->tableWidget->item(0,GPScols::Latitude)->text().toDouble();
     double lon1 = ui->tableWidget->item(0,GPScols::Longitude)->text().toDouble();
@@ -1461,11 +1463,10 @@ void DlgAAS::onCalcClicked(bool checked)
     double lat=0.0;
     double lon=0.0;
     double altmsl=0.0;
-    // double msl=0.0;
     double distance = 0;
     double azimuth = 0;
-    QVector<double> azbearings;  //store all AM7 to CM7's az
-    QVector<double> distances; //store all AM7 to CM7's distance in km
+    QVector<double> azbearings;  //store all AP to Client's az
+    QVector<double> distances; //store all AP to Client's distance in km
     // QList<double> elbearings;
     double azimuth2 = 0;
     double el1=0.0;
@@ -1506,9 +1507,6 @@ void DlgAAS::onCalcClicked(bool checked)
         // totalazimuth = totalazimuth + azimuth;
         el1 = GeoTranslate::calcElevationAngle(altmsl1, altmsl, distance*1000);
         el2 = GeoTranslate::calcElevationAngle(altmsl, altmsl1, distance*1000);
-        // qDebug() << " " << QString::number(altmsl1) << " - "  << QString::number(altmsl)
-        //          << " distance:" << QString::number(distance)
-        //          << " el1:" << QString::number(el1) << " el2:" << QString::number(el2);
         ui->twResult->setItem(i-1, AZEIcols::P1Elevation, new QTableWidgetItem(QString::number(el1, 'f', 1)));
         ui->twResult->setItem(i-1, AZEIcols::P2Elevation, new QTableWidgetItem(QString::number(el2, 'f', 1)));
         // elbearings.append(el1);
@@ -1519,15 +1517,14 @@ void DlgAAS::onCalcClicked(bool checked)
     QStringList hls;
     hls << mHeaderAIP;
     if (aip1type == AIP::ModuleType::Hanwha){
-        ui->twAIP->setColumnCount(13);
         hls << mHeaderHanwha;
     }else if (aip1type == AIP::ModuleType::Cyntec){
-        ui->twAIP->setColumnCount(11);
         hls << mHeaderCyntec;
     }
+    ui->twAIP->setColumnCount(hls.count());
     ui->twAIP->setHorizontalHeaderLabels(hls);
 
-    // AM7 heading az degree
+    // AP heading az degree
     double apAzDeg= 0;
     double distMaxR=0.0;
     double distMaxL=0.0;
@@ -1571,7 +1568,8 @@ void DlgAAS::onCalcClicked(bool checked)
         if (ui->rbKmeans->isChecked()) {
             QVector<QPointF> points = polarToXY(azbearings, distances);
             // qDebug() << "points:" << points;
-            labels = kMeansCluster(points);
+            int k = ui->sbKmeansKFactor->value();
+            labels = kMeansCluster(points, k);
 
             for (int i = 0; i < azbearings.size(); ++i) {
                 qDebug() << "Azimuth:" << azbearings[i]
@@ -1686,13 +1684,15 @@ void DlgAAS::onCalcClicked(bool checked)
 
     //show on UI
     ui->leAPaz->setText(QString::number(apAzDeg, 'f', 1));
-    // AM7 Pitch
+    // AP Pitch
     double elDegree = totalel/ui->twResult->rowCount();
     ui->leAPel->setText(QString::number(elDegree, 'f', 1));
 
-    //AM7 AIP1 Az, El
+    //AP AIP1 Az, El
+    // TODO: AIP1 Az offset
     getBestBeamID(0, apAzDeg, aip1type, clientRs, distMaxR);
-    //AM7 AIP2
+    //AP AIP2
+    // TODO: AIP2 Az offset
     getBestBeamID(1, apAzDeg, aip2type, clientLs, distMaxL);
 
 }
@@ -1734,6 +1734,7 @@ void DlgAAS::onOptimizeClicked(bool checked)
         qDebug() <<"//do Optimiz to get All device's Beam Direction ID/ Att value";
         // init data
         QJsonObject dataobj = createInitData();
+        qDebug() << "dataobj:" << dataobj;
         // Optimiz worker run in thread
         // worker
         mOptWorker = new OptimizeWorker(dataobj);
@@ -2322,19 +2323,35 @@ void DlgAAS::handleButtonClicked(int row, int col)
     m_dlgaip->show();
 }
 
-void DlgAAS::onAcceptedAIP()
-{
-    // qDebug() << "onAcceptedAIP:" << sender();
-    QJsonObject data = m_dlgaip->getData();
-    qDebug() << "onAcceptedAIP:" << data.value("moduletype").toInt()
-             << " x:" << data.value("X_Offset").toDouble()
-             << " y:" << data.value("Y_Offset").toDouble()
-             << " z:" << data.value("Z_Offset").toDouble();
+// void DlgAAS::onAcceptedAIP()
+// {
+//     QJsonObject data = m_dlgaip->getData();
+//     QString offset = data.value("offset").toString();
+//     QStringList ls = offset.split(",");
+//     double x=0.0;
+//     double y=0.0;
+//     double z=0.0;
+//     int az=0;
+//     if (ls.length()>0){
+//        x = ls[0].toDouble();
+//     }
+//     if (ls.length()>1){
+//        y = ls[1].toDouble();
+//     }
+//     if (ls.length()>2){
+//        z = ls[2].toDouble();
+//     }
+//     if (ls.length()>3){
+//        az = ls[3].toInt();
+//     }
+//     qDebug() << "onAcceptedAIP:" << data.value("moduletype").toInt()
+//              << " x:" << x << " y:" << y << " z:" << z
+//              << " Az:" << az;
 
-    //TODO: update to row/col
-    // DlgAIP daip = static_cast<DlgAIP>(sender());
-    // qDebug() << "onAcceptedAIP: ModuleType: " << daip.getModuleType();
-}
+//     //TODO: update to row/col
+//     // DlgAIP daip = static_cast<DlgAIP>(sender());
+
+// }
 
 void DlgAAS::onUpdateData(int row, int col, QJsonObject data)
 {
