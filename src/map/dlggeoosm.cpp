@@ -221,15 +221,29 @@ void DlgGeoOSM::onDeleteItm(QString label)
         if(itm){
             if (label.compare(itm->getText())==0){
                 mItemsLayer->removeItem(itm);
-                // itm->setSelected(true); // show item selected
             }
         }
     }
-    // for(int i=0;i<mPolysLayer->countItems();i++)
-    // {
-    //     QGVItem *itm = mPolysLayer->getItem(i);
-    //     qDebug() << "TODO: mPolysLayer itm:" << itm;
-    // }
+    // TODO: also remove relative arrow
+    for(int i=0;i<mInitLayer->countItems();i++)
+    {
+        DirectionArrow *itm = static_cast<DirectionArrow*>(mInitLayer->getItem(i));
+        if(itm){
+            if (label.compare(itm->getLabel())==0){
+                mInitLayer->removeItem(itm);
+            }
+        }
+    }
+
+    for(int i=0;i<mPolysLayer->countItems();i++)
+    {
+        DirectionArrow *itm = static_cast<DirectionArrow*>(mPolysLayer->getItem(i));
+        if(itm){
+            if (label.compare(itm->getLabel())==0){
+                mPolysLayer->removeItem(itm);
+            }
+        }
+    }
 }
 
 void DlgGeoOSM::onSetCenter(bool checked)
@@ -414,11 +428,13 @@ void DlgGeoOSM::onCopyMousePosition(bool checked)
 
 void DlgGeoOSM::addArrowLine(QGV::GeoPos origin, double azimuthDeg, double length,
                              QColor color, bool init, qreal linewidth,
-                             double arrowLength, double arrowAngleDeg)
+                             double arrowLength, double arrowAngleDeg,
+                             QString lable)
 {
     DirectionArrow *arrowline = new DirectionArrow(origin, azimuthDeg, length,
                                                    color, linewidth,
-                                                   arrowLength, arrowAngleDeg);
+                                                   arrowLength, arrowAngleDeg,
+                                                   lable);
     if (init){
         mInitLayer->addItem(arrowline);
     }else{

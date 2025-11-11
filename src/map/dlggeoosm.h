@@ -47,7 +47,8 @@ public:
     void addArrowLine(QGV::GeoPos origin, double azimuthDeg, double length,
                       QColor color=QColor(Qt::red), bool init=false,
                       qreal linewidth=3, double arrowLength = 20.0,
-                      double arrowAngleDeg = 30.0 );
+                      double arrowAngleDeg = 30.0,
+                      QString lable="");
     void addBeamItem(QGV::GeoPos origin, double azimuthDeg, double hpbwDeg,
                      double rangeMeters, const QColor& color);
     void clearMarker();

@@ -2204,12 +2204,14 @@ void DlgAAS::onLoadFinished(bool ok)
                         // expects
                         azdeg = ui->leAPaz->text().toDouble();
                         //TODO: length should not over range
-                        m_dlgGeo->addArrowLine(ap, azdeg, 20, QColor(Qt::red), false, 1, 5);
+                        m_dlgGeo->addArrowLine(ap, azdeg, 20, QColor(Qt::red),
+                                               false, 1, 5, 30, label);
                     }else{
                         //draw init Arrow Line
                         //TODO: length should not over range
                         m_dlgGeo->addArrowLine(ap, heading,
-                                               30, QColor(Qt::blue), true, 2, 5);
+                                               30, QColor(Qt::blue),
+                                               true, 2, 5, 30, label);
                     }
                 }else{
                     //Client
@@ -2226,7 +2228,9 @@ void DlgAAS::onLoadFinished(bool ok)
                             //draw Arrow line, expect
                             azdeg = itm->text().toDouble();
                             //TODO: length should not over range
-                            m_dlgGeo->addArrowLine(client, azdeg, 20, QColor(Qt::red), false, 1, 5);
+                            m_dlgGeo->addArrowLine(client, azdeg, 20,
+                                                   QColor(Qt::red),
+                                                   false, 1, 5, 30, label);
                         }
                         // add later will be on top
                         itmId = ui->twResult->item(row-1, AZEIcols::BeamDirID);
@@ -2234,7 +2238,8 @@ void DlgAAS::onLoadFinished(bool ok)
                             qDebug() << "have BeamDirID data:" << itmId->text();
                             azdeg = heading + getAz(aiptype,itmId->text().toInt());
                             //Beam Direction ID's az deg: (TODO:length should not over range)
-                            m_dlgGeo->addArrowLine(client, azdeg, 12, QColor(rgb1), false, 1, 3);
+                            m_dlgGeo->addArrowLine(client, azdeg, 12, QColor(rgb1),
+                                                   false, 1, 3, 30, label);
                         }
 
 
@@ -2242,7 +2247,8 @@ void DlgAAS::onLoadFinished(bool ok)
                         //draw init Arrow Line
                         //TODO: length should not over range
                         m_dlgGeo->addArrowLine(client, heading,
-                                               30, QColor(Qt::blue), true, 2, 5);
+                                               30, QColor(Qt::blue),
+                                               true, 2, 5, 30, label);
                     }
                 }
             }
@@ -2255,7 +2261,8 @@ void DlgAAS::onLoadFinished(bool ok)
                             azdeg = itm->text().toDouble();
                             //TODO: length should not over range
                             m_dlgGeo->addArrowLine(ap, azdeg, 15,
-                                                   QColor(rgbaz), false, 1, 5);
+                                                   QColor(rgbaz),
+                                                   false, 1, 5, 30, label);
                         }
                     }
                 }

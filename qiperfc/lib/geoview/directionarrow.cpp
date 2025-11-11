@@ -6,9 +6,10 @@
 
 DirectionArrow::DirectionArrow(QGV::GeoPos origin, double azimuthDeg, double length,
                                QColor color, qreal linewidth,
-                               double arrowLength, double arrowAngleDeg):
+                               double arrowLength, double arrowAngleDeg,
+                               QString label):
     mStartPos(origin), mAzimuthDeg(azimuthDeg), mLength(length),
-    mColor(color), mLineWidth(linewidth)
+    mColor(color), mLineWidth(linewidth), mLabel(label)
 {
     mPen = QPen(QBrush(mColor), mLineWidth,
                          Qt::PenStyle::SolidLine,
@@ -36,6 +37,11 @@ DirectionArrow::DirectionArrow(QGV::GeoPos origin, double azimuthDeg, double len
         arrowLength, backAzimuth + arrowAngleDeg);
     mRightPos.setLat(rightWing.latitude());
     mRightPos.setLon(rightWing.longitude());
+}
+
+QString DirectionArrow::getLabel()
+{
+    return mLabel;
 }
 
 void DirectionArrow::onProjection(QGVMap *geoMap)

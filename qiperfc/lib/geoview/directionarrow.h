@@ -4,6 +4,7 @@
 #include <QGeoView/QGVDrawItem.h>
 #include <QObject>
 #include <QPen>
+#include <QString>
 
 class DirectionArrow : public QGVDrawItem
 {
@@ -11,7 +12,9 @@ class DirectionArrow : public QGVDrawItem
 public:
     explicit DirectionArrow(QGV::GeoPos origin, double azimuthDeg, double length,
                             QColor color, qreal linewidth=3,
-                            double arrowLength = 10.0, double arrowAngleDeg = 30.0);
+                            double arrowLength = 10.0, double arrowAngleDeg = 30.0,
+                            QString label="");
+    QString getLabel();
 private:
     void onProjection(QGVMap* geoMap) override;
     QPainterPath projShape() const override;
@@ -26,7 +29,7 @@ private:
     QColor mColor;
     qreal mLineWidth;
     QPen mPen;
-
+    QString mLabel;
     QPolygonF mMainLinePoints;
     QPolygonF mLeftWingPoints;
     QPolygonF mRightWingPoints;
