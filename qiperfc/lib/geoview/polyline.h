@@ -19,6 +19,8 @@
 #pragma once
 
 #include <QGeoView/QGVDrawItem.h>
+#include <QString>
+#include <QColor>
 
 class Polyline : public QGVDrawItem
 {
@@ -27,8 +29,9 @@ class Polyline : public QGVDrawItem
 public:
     explicit Polyline(const QString& geoJsonStr);
     explicit Polyline(const QVector<QGV::GeoPos>& linePts, QColor color,
-                      qreal linewidth=1);
-
+                      qreal linewidth=1, QString label="");
+    QVector<QGV::GeoPos> getPosList();
+    QString getLabel();
 private:
     void onProjection(QGVMap* geoMap) override;
     QPainterPath projShape() const override;
@@ -48,4 +51,5 @@ private:
 
     QColor mColor;
     qreal mLineWidth;
+    QString mLabel;
 };

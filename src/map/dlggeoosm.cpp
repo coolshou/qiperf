@@ -116,10 +116,11 @@ void DlgGeoOSM::addMarker(double lat, double lon, QString label,
     item->setSelectable(true);
 }
 
-void DlgGeoOSM::addLinkline(QGV::GeoPos pos1, QGV::GeoPos pos2, QColor color, qreal linewidth)
+void DlgGeoOSM::addLinkline(QGV::GeoPos pos1, QGV::GeoPos pos2, QColor color,
+                            qreal linewidth, QString label)
 {
     QVector<QGV::GeoPos> linePoints{pos1, pos2};
-    addPolylines(linePoints, color, linewidth);
+    addPolylines(linePoints, color, linewidth, label);
 }
 
 void DlgGeoOSM::showLinkline(bool show)
@@ -206,11 +207,11 @@ void DlgGeoOSM::setItmHighlight(QString label)
             }
         }
     }
-    for(int i=0;i<mPolysLayer->countItems();i++)
-    {
-        QGVItem *itm = mPolysLayer->getItem(i);
-        qDebug() << "TODO:[setItmHighlight] mPolysLayer itm:" << itm;
-    }
+    // for(int i=0;i<mPolysLayer->countItems();i++)
+    // {
+    //     QGVItem *itm = mPolysLayer->getItem(i);
+    //     qDebug() << "TODO:[setItmHighlight] mPolysLayer itm:" << itm;
+    // }
 }
 
 void DlgGeoOSM::onDeleteItm(QString label)
@@ -224,7 +225,7 @@ void DlgGeoOSM::onDeleteItm(QString label)
             }
         }
     }
-    // TODO: also remove relative arrow
+    // also remove relative arrow
     for(int i=0;i<mInitLayer->countItems();i++)
     {
         DirectionArrow *itm = static_cast<DirectionArrow*>(mInitLayer->getItem(i));
@@ -234,13 +235,21 @@ void DlgGeoOSM::onDeleteItm(QString label)
             }
         }
     }
-
     for(int i=0;i<mPolysLayer->countItems();i++)
     {
         DirectionArrow *itm = static_cast<DirectionArrow*>(mPolysLayer->getItem(i));
         if(itm){
             if (label.compare(itm->getLabel())==0){
                 mPolysLayer->removeItem(itm);
+            }
+        }
+    }
+    // TODO: also remove relative LinkLine
+    for(int i=0;i<mLinkLineLayer->countItems();i++){
+        Polyline *itm = static_cast<Polyline*>(mLinkLineLayer->getItem(i));
+        if(itm){
+            if (label.compare(itm->getLabel())==0){
+                mLinkLineLayer->removeItem(itm);
             }
         }
     }
@@ -275,8 +284,7 @@ void DlgGeoOSM::onAddPolylines(bool checked)
     QGV::GeoPos pos1{ui->sbLat->value(), ui->sbLon->value()};
     QGV::GeoPos pos2{ui->sbMarkLat->value(), ui->sbMarkLon->value()};
 
-    QVector<QGV::GeoPos> linePoints{pos1, pos2};
-    addPolylines(linePoints, Qt::GlobalColor::red, 5);
+    addLinkline(pos1, pos2, Qt::GlobalColor::red, 5);
 }
 
 void DlgGeoOSM::onAddArrowLine(bool checked)
@@ -376,9 +384,11 @@ void DlgGeoOSM::createTrackingWidget()
     });
 }
 
-void DlgGeoOSM::addPolylines(const QVector<QGV::GeoPos> &linePts, QColor color, qreal linewidth)
+void DlgGeoOSM::addPolylines(const QVector<QGV::GeoPos> &linePts, QColor color,
+                             qreal linewidth, QString label)
 {
-    mLinkLineLayer->addItem(new Polyline(linePts, color, linewidth));
+    Polyline *itm = new Polyline(linePts, color, linewidth, label);
+    mLinkLineLayer->addItem(itm);
 }
 
 void DlgGeoOSM::onAddPosition(bool checked)

@@ -26,11 +26,21 @@
 #include <QPen>
 
 Polyline::Polyline(const QVector<QGV::GeoPos>& linePts, QColor color,
-                   qreal linewidth)
+                   qreal linewidth, QString label)
     : mGeoPosList(linePts)
-    , mColor(color), mLineWidth(linewidth)
+    , mColor(color), mLineWidth(linewidth), mLabel(label)
 {
     setSelectable(false);
+}
+
+QVector<QGV::GeoPos> Polyline::getPosList()
+{
+    return mGeoPosList;
+}
+
+QString Polyline::getLabel()
+{
+    return mLabel;
 }
 
 Polyline::Polyline(const QString& geoJsonStr)

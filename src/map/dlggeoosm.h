@@ -41,7 +41,8 @@ public:
     void addMarker(double lat, double lon, QString label="lable",
                    Placemark::MarkColor color=Placemark::MarkColor::Yellow);
     void addLinkline(QGV::GeoPos pos1, QGV::GeoPos pos2,
-                     QColor color=Qt::GlobalColor::yellow, qreal linewidth=5);
+                     QColor color=Qt::GlobalColor::yellow, qreal linewidth=5,
+                     QString label="");
     void addRectangle(QGV::GeoPos pos1, QPointF size=QPointF(20.0, 10.0),
                       QColor color=Qt::GlobalColor::yellow, QString label="");
     void addArrowLine(QGV::GeoPos origin, double azimuthDeg, double length,
@@ -82,7 +83,7 @@ private:
     void createContextMenu();
     void createTrackingWidget();
     void addPolylines(const QVector<QGV::GeoPos>& linePts, QColor color,
-                     qreal linewidth=1);
+                     qreal linewidth=1, QString label="");
     void onAddPosition(bool checked);
     void onEditPosition(bool checked);
     void onCopyMousePosition(bool checked);

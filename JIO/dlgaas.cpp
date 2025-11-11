@@ -2222,7 +2222,7 @@ void DlgAAS::onLoadFinished(bool ok)
 
                     if (ui->twResult->rowCount()>0){
                         // Link Lines
-                        m_dlgGeo->addLinkline(ap, client, Qt::yellow, 2);
+                        m_dlgGeo->addLinkline(ap, client, Qt::yellow, 2, label);
                         itm = ui->twResult->item(row-1, AZEIcols::P2Azimuth);
                         if (itm){
                             //draw Arrow line, expect
