@@ -43,6 +43,7 @@ private slots:
     void onXValueChanged(double value);
     void onYValueChanged(double value);
     void onZValueChanged(double value);
+    void onAZValueChanged(int value);
 
 private:
     void loadcfg();
@@ -53,6 +54,7 @@ private:
     int mCol;
     AIP::ModuleType mModuleType;
     QVector3D mPosOffset; // module center position relative to device center (m)
+    int mAZOffset;
 };
 
 #endif // DLGAIP_H

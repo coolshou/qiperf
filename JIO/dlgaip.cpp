@@ -30,6 +30,7 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     connect(ui->sbX, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onXValueChanged);
     connect(ui->sbY, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onYValueChanged);
     connect(ui->sbZ, &QDoubleSpinBox::valueChanged, this, &DlgAIP::onZValueChanged);
+    connect(ui->sbAZ, &QSpinBox::valueChanged, this,  &DlgAIP::onAZValueChanged);
     connect(ui->cbPreSetPos, &QComboBox::currentTextChanged, this, &DlgAIP::onPreSetPosTextChanged);
     loadcfg();
 }
@@ -77,12 +78,14 @@ void DlgAIP::loadData(QJsonObject data)
     double x=0.0;
     double y=0.0;
     double z=0.0;
+    int az=0;
     if (!soffset.isEmpty()){
         QStringList ds = soffset.split(",");
-        if (ds.length()==3){
+        if (ds.length()==4){
             x = ds[0].toDouble();
             y = ds[1].toDouble();
             z = ds[2].toDouble();
+            az = ds[3].toInt();
         }
     }
     // qDebug() << "loadData, x,y,z=" << QString::number(x) << " , "
@@ -90,6 +93,7 @@ void DlgAIP::loadData(QJsonObject data)
     ui->sbX->setValue(x);
     ui->sbY->setValue(y);
     ui->sbZ->setValue(z);
+    ui->sbAZ->setValue(az);
 }
 
 QJsonObject DlgAIP::getData()
@@ -97,9 +101,10 @@ QJsonObject DlgAIP::getData()
     // get UI's value and turn into JSON format
     QJsonObject jobj;
     jobj["moduletype"] = static_cast<int>(mModuleType);
-    jobj["offset"] = QString("%1,%2,%3").arg(QString::number(mPosOffset.x(), 'f' ,2),
-                                             QString::number(mPosOffset.y(), 'f' ,2),
-                                             QString::number(mPosOffset.z(), 'f' ,2));
+    jobj["offset"] = QString("%1,%2,%3,%4").arg(QString::number(mPosOffset.x(), 'f' ,2),
+                                                QString::number(mPosOffset.y(), 'f' ,2),
+                                                QString::number(mPosOffset.z(), 'f' ,2),
+                                                QString::number(mAZOffset));
     qDebug() << "get Json data" << jobj;
     return jobj;
 }
@@ -225,6 +230,11 @@ void DlgAIP::onZValueChanged(double value)
 {
     // qDebug() << " Z ValueChanged:" << value;
     mPosOffset.setZ(value);
+}
+
+void DlgAIP::onAZValueChanged(int value)
+{
+    mAZOffset = value;
 }
 
 void DlgAIP::loadcfg()
