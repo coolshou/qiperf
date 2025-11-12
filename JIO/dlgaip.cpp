@@ -14,9 +14,6 @@
 
 #include <QDebug>
 
-
-// #include "comm.h"
-
 DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::DlgAIP), m_cfg(cfg)
@@ -80,23 +77,7 @@ void DlgAIP::loadData(QJsonObject data)
     double y= data.value("offsetY").toDouble();
     double z= data.value("offsetZ").toDouble();
     int   az= data.value("offsetAz").toInt();
-    // if (!soffset.isEmpty()){
-    //     QStringList ds = soffset.split(",");
-    //     if (ds.length()>=1){
-    //         x = ds[0].toDouble();
-    //     }
-    //     if (ds.length()>=2){
-    //         y = ds[1].toDouble();
-    //     }
-    //     if (ds.length()>=3){
-    //         z = ds[2].toDouble();
-    //     }
-    //     if (ds.length()>=4){
-    //         az = ds[3].toInt();
-    //     }
-    // }
-    // qDebug() << "loadData, x,y,z=" << QString::number(x) << " , "
-    //          << QString::number(y) << " , " << QString::number(z);
+
     ui->sbX->setValue(x);
     ui->sbY->setValue(y);
     ui->sbZ->setValue(z);
@@ -108,10 +89,6 @@ QJsonObject DlgAIP::getData()
     // get UI's value and turn into JSON format
     QJsonObject jobj;
     jobj["moduletype"] = static_cast<int>(mModuleType);
-    // jobj["offset"] = QString("%1,%2,%3,%4").arg(QString::number(mPosOffset.x(), 'f' ,2),
-    //                                             QString::number(mPosOffset.y(), 'f' ,2),
-    //                                             QString::number(mPosOffset.z(), 'f' ,2),
-    //                                             QString::number(mAZOffset));
     jobj["offsetX"] = std::round(static_cast<double>(mPosOffset.x()) * 100.0) / 100.0;
     jobj["offsetY"] = std::round(static_cast<double>(mPosOffset.y()) * 100.0) / 100.0;
     jobj["offsetZ"] = std::round(static_cast<double>(mPosOffset.z()) * 100.0) / 100.0;;
