@@ -74,13 +74,13 @@ DlgAAS::DlgAAS(QSettings *cfg, QWidget *parent) :
     });
     getSelfIpLocation();
 
-    m_dlgaip = new DlgAIP(m_cfg, this);
+    m_dlgaip = new DlgAIP(m_cfg, this); // AIP setting dialog
     connect(m_dlgaip, &DlgAIP::updateData, this, &DlgAAS::onUpdateData);
     connect(m_dlgaip, &DlgAIP::updateModelType, this,
             static_cast<void (DlgAAS::*)(int, int, QString)>(&DlgAAS::onUpdateModelType));
     connect(this, &DlgAAS::closeAll, m_dlgaip, &DlgAIP::close);
 
-    m_dlgset = new DlgSet(this);
+    m_dlgset = new DlgSet(this); //setting dialog
     connect(m_dlgset, &DlgSet::updateSetting, this, &DlgAAS::onUpdateSetting);
     connect(this, &DlgAAS::closeAll, m_dlgset, &DlgSet::close);
     mDlgBeamCmd= new DlgBeamCmd(this);
@@ -378,10 +378,20 @@ QJsonObject DlgAAS::createInitData()
                                 aipObj["ElDiff"] = 0.0;
                                 aipObj["aipgroup"] = "";
                             }
+                        }
+                        if (!aipObj.contains("moduletype")){
                             aipObj["moduletype"] = 2;
+                        }
+                        if (!aipObj.contains("offsetX")){
                             aipObj["offsetX"] = 0.00;
+                        }
+                        if (!aipObj.contains("offsetY")){
                             aipObj["offsetY"] = 0.00;
+                        }
+                        if (!aipObj.contains("offsetZ")){
                             aipObj["offsetZ"] = 0.00;
+                        }
+                        if (!aipObj.contains("offsetAz")){
                             aipObj["offsetAz"] = 0;
                         }
                     }
@@ -408,7 +418,7 @@ QJsonObject DlgAAS::createInitData()
                         }
                     }
                     //init value
-                    if (!aipObj2.contains("moduletype")){
+                    if (!aipObj2.contains("APBeamID")){
                         aipObj2["APBeamID"] = 0;
                     }
                     if (!aipObj2.contains("moduletype")){
@@ -2323,7 +2333,6 @@ void DlgAAS::handleButtonClicked(int row, int col)
                  << QString::number(row) << "," <<  QString::number(col)
                  << " = " << v;
         if (v.canConvert<QJsonObject>()){
-            // QJsonObject j = v.toObject();
             m_dlgaip->loadData(qvariant_cast<QJsonObject>(v));
         }else{
             qDebug() << "data from " << item << " can not convert to QJsonObject format";
@@ -2331,36 +2340,6 @@ void DlgAAS::handleButtonClicked(int row, int col)
     }
     m_dlgaip->show();
 }
-
-// void DlgAAS::onAcceptedAIP()
-// {
-//     QJsonObject data = m_dlgaip->getData();
-//     QString offset = data.value("offset").toString();
-//     QStringList ls = offset.split(",");
-//     double x=0.0;
-//     double y=0.0;
-//     double z=0.0;
-//     int az=0;
-//     if (ls.length()>0){
-//        x = ls[0].toDouble();
-//     }
-//     if (ls.length()>1){
-//        y = ls[1].toDouble();
-//     }
-//     if (ls.length()>2){
-//        z = ls[2].toDouble();
-//     }
-//     if (ls.length()>3){
-//        az = ls[3].toInt();
-//     }
-//     qDebug() << "onAcceptedAIP:" << data.value("moduletype").toInt()
-//              << " x:" << x << " y:" << y << " z:" << z
-//              << " Az:" << az;
-
-//     //TODO: update to row/col
-//     // DlgAIP daip = static_cast<DlgAIP>(sender());
-
-// }
 
 void DlgAAS::onUpdateData(int row, int col, QJsonObject data)
 {
@@ -2378,8 +2357,6 @@ void DlgAAS::onUpdateModelType(int row, int col, QString smodel)
     QWidget *cell = ui->tableWidget->cellWidget(row, col);
     if (cell != nullptr){
         QPushButton *pb = static_cast<QPushButton*>(cell);
-        // qDebug() << "onUpdateModelType: " << QString::number(row) << ","
-        //          <<  QString::number(col) << " model:" << smodel;
         pb->setText(smodel);
     } else {
         qDebug() << "no QPushButton in cell "  << QString::number(row) << ","
