@@ -335,7 +335,7 @@ QJsonObject DlgAAS::createInitData()
                 if (varAIP1.canConvert<QVariantMap>()){
                     // qDebug() << "AIP1 data:" << varAIP1.toMap() ;
                     aipObj = QJsonObject::fromVariantMap(varAIP1.toMap());
-                    qDebug() << "AIP1 aipObj:" << aipObj;
+                    // qDebug() << "AIP1 aipObj:" << aipObj;
                     {
                         if (i==0){
                             // only AP need APBeamID
@@ -366,7 +366,7 @@ QJsonObject DlgAAS::createInitData()
                             }
                             item = ui->twResult->item(i-1, AZEIcols::BeamDirID);
                             if (item){
-                                qDebug() << "ClientBeamID:" << item->text();
+                                // qDebug() << "ClientBeamID:" << item->text();
                                 aipObj["ClientBeamID"] = item->text().toInt();
                             }
                         }else{
@@ -409,7 +409,7 @@ QJsonObject DlgAAS::createInitData()
                     if (varAIP2.canConvert<QVariantMap>()){
                         // qDebug() << "AIP2 data:" << varAIP2.toMap() ;
                         aipObj2 = QJsonObject::fromVariantMap(varAIP2.toMap());
-                        qDebug() << "AIP2 aipObj:" << aipObj2;
+                        // qDebug() << "AIP2 aipObj:" << aipObj2;
                         if (ui->twAIP->rowCount()>1){
                             item = ui->twAIP->item(1, AIPcols::BeamDirectionID);
                             if (item){
@@ -936,7 +936,6 @@ void DlgAAS::onAddRow(QString name, double latitude, double longitude,
     });
     ui->tableWidget->setCellWidget(iRow, GPScols::AIP1, btn1);
     QTableWidgetItem *aip1item = new QTableWidgetItem("");
-    qDebug() << "aip1:" << aip1;
     aip1item->setData(Qt::UserRole, aip1.toVariantMap());
     // qDebug() << "AIP1:" << aip1;
     ui->tableWidget->setItem(iRow, GPScols::AIP1, aip1item);
@@ -1750,12 +1749,63 @@ void DlgAAS::onInquireClicked(bool checked)
 void DlgAAS::onOptimizeClicked(bool checked)
 {
     if (checked){
-        qDebug() <<"//do Optimiz to get All device's Beam Direction ID/ Att value";
+        if (ui->twResult->rowCount()<=0) {
+            QMessageBox::warning(this, tr("WARNING!!"),
+                                 tr("Please calc beam data before start Optimize"),
+                                 QMessageBox::Ok);
+            ui->pbCalc->setFocus();
+            ui->pbOptimize->setChecked(false);
+            return;
+        }
+
+        //check all beam direction id is correct
+        for (int i=0;i<ui->twResult->rowCount();i++){
+            QTableWidgetItem *itm= ui->twResult->item(i, AZEIcols::BeamDirID);
+            if (itm){
+                if (itm->text().toInt()<0){
+                    QMessageBox::warning(this, tr("ERROR!!"),
+                                         tr("Wrong Client Beam Direction ID"),
+                                         QMessageBox::Ok);
+                    ui->twResult->setCurrentItem(itm);
+                    ui->pbOptimize->setChecked(false);
+                    return;
+                }
+            }else{
+                QMessageBox::warning(this, tr("ERROR!!"),
+                                     tr("No Client Beam Direction ID"),
+                                     QMessageBox::Ok);
+                ui->twResult->selectRow(i);
+                ui->pbOptimize->setChecked(false);
+                return;
+            }
+        }
+        for (int i=0;i<ui->twAIP->rowCount();i++){
+            QTableWidgetItem *itm= ui->twAIP->item(i, AIPcols::BeamDirectionID);
+            if (itm){
+                if (itm->text().toInt()<0){
+                    QMessageBox::warning(this, tr("ERROR!!"),
+                                         tr("Wrong AP Beam Direction ID"),
+                                         QMessageBox::Ok);
+                    ui->twAIP->setCurrentItem(itm);
+                    ui->pbOptimize->setChecked(false);
+                    return;
+                }
+            }else{
+                QMessageBox::warning(this, tr("ERROR!!"),
+                                     tr("No AP Beam Direction ID"),
+                                     QMessageBox::Ok);
+                ui->twAIP->selectRow(i);
+                ui->pbOptimize->setChecked(false);
+                return;
+            }
+        }
+        // emit sigClearIperf(); // clear iperf setting before start
+
         // init data
         QJsonObject dataobj = createInitData();
+        dataobj["TPDuration"] = mDuration;
         qDebug() << "dataobj:" << dataobj;
-        // Optimiz worker run in thread
-        // worker
+        // OptimizeWorker run in thread
         mOptWorker = new OptimizeWorker(dataobj);
         connect(mOptWorker, &OptimizeWorker::started, this, &DlgAAS::onOptimizeStarted);
         connect(mOptWorker, &OptimizeWorker::debugMsg, this, &DlgAAS::onOptimizeWorkerDebug);
@@ -2033,7 +2083,7 @@ void DlgAAS::onAttInit(bool checked)
         client = ui->tableWidget->item(iRow+1, GPScols::PositionName)->text();
         distance = ui->twResult->item(iRow, AZEIcols::Distance)->text().toDouble()*1000;
         fspl = MyFunc::calculateFSPL(distance, freq);
-        qDebug() << "[" << iRow << "]"<< client <<" distance:" << distance <<" fspl:" << fspl;
+        // qDebug() << "[" << iRow << "]"<< client <<" distance:" << distance <<" fspl:" << fspl;
         aiptype = getModuleType(iRow+1 ,GPScols::AIP1);
         if (aiptype==AIP::ModuleType::Cyntec) {
             if (mCyntec){
@@ -2087,7 +2137,8 @@ void DlgAAS::onAttInit(bool checked)
         }else if (aiptype==AIP::ModuleType::Hanwha) {
             if (mHanwha){
                 targetEIRP = mHanwha->getTargetEIRP(distance);
-                qDebug() << iRow << " targetEIRP:" << targetEIRP;
+                qDebug() << iRow << "mHanwha distance:" << distance
+                         << " targetEIRP:" << targetEIRP;
                 QString bfTx1="";
                 QString bfTx2="";
                 QString Tx1="";
@@ -2377,13 +2428,14 @@ void DlgAAS::onUpdateModelType(int row, int col, int model)
 
 void DlgAAS::onUpdateSetting(QString sshusername, QString sshpassword,
                              QString webusername, QString webpassword,
-                             DlgSet::ControlBy ctl)
+                             DlgSet::ControlBy ctl, int duration)
 {
     mSshUsername = sshusername;
     mSshPassword = sshpassword;
     mWebusername = webusername;
     mWebpassword = webpassword;
     mControlBy = ctl;
+    mDuration = duration;
 }
 
 void DlgAAS::onLocationReady(const IpLocation &location)
@@ -2607,6 +2659,7 @@ void DlgAAS::onOptimizeStoped(int error)
     ui->pbOptimize->setText("Optimiz");
 
     if (mOptThread){
+        qDebug() << "TODO: stop mOptThread";
         // mOptThread->deleteLater();
         // mOptThread->stop();
     }
@@ -2768,6 +2821,11 @@ void DlgAAS::loadcfg()
     m_oldsavepath = m_cfg->value("oldsavepath",
                                  QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).toString();
     m_cfg->endGroup();
+
+    m_cfg->beginGroup("AAS");
+    mDuration = m_cfg->value("TPDuration", 30).toInt();
+
+    m_cfg->endGroup();
 }
 
 void DlgAAS::savecfg()
@@ -2775,6 +2833,11 @@ void DlgAAS::savecfg()
     m_cfg->beginGroup("GpsCalc");
     m_cfg->setValue("oldsavepath", m_oldsavepath);
     m_cfg->endGroup();
+
+    m_cfg->beginGroup("AAS");
+    m_cfg->setValue("TPDuration", mDuration);
+    m_cfg->endGroup();
+
     m_cfg->sync();
 
 }

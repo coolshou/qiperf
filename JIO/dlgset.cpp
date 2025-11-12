@@ -52,6 +52,6 @@ void DlgSet::onAccepted()
     }
     emit updateSetting(ui->leSSHUsername->text(), ui->leSSHPassword->text(),
                        ui->leWebUsername->text(), ui->leWebPassword->text(),
-                       ctl);
+                       ctl, ui->sbDuration->value());
 }
 

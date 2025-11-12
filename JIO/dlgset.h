@@ -26,7 +26,7 @@ public:
 signals:
     void updateSetting(QString sshusername, QString sshpassword,
                        QString webusername, QString webpassword,
-                       ControlBy control);
+                       ControlBy control, int duration);
 protected:
     void changeEvent(QEvent *e);
 private slots:

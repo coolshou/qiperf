@@ -213,7 +213,7 @@ private slots:
     void onUpdateModelType(int row, int col, int model);
     void onUpdateSetting(QString sshusername, QString sshpassword,
                          QString webusername, QString webpassword,
-                         DlgSet::ControlBy ctl);
+                         DlgSet::ControlBy ctl, int duration);
     void onLocationReady(const IpLocation& location);
     // SSH
     void handleSSHConnectionError();
@@ -273,6 +273,7 @@ private:
     QString mWebusername;
     QString mWebpassword;
     DlgSet::ControlBy  mControlBy; //1 : ssh, 2: qiperfd
+    int mDuration;
     IpLocationProvider* provider;
     IpLocation mIpLocation;
     QSsh::SshConnectionParameters m_sshParams;
