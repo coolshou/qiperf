@@ -283,7 +283,8 @@ else: unix:!android: target.path = /opt/qiperf/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    ../qiperf.qrc \
+    $$PWD/../JIO/aas.qrc \
+    $$PWD/../qiperf.qrc \
     lib/geoview/placemark.qrc
 
 
@@ -371,19 +372,19 @@ unix:!android {
         "/usr/share/mime/packages/"
 
     ICONS.files += \
-        ../images/qiperfc.png \
-        ../images/qiperfcs.png
+        $$PWD/../images/qiperfc.png \
+        $$PWD/../images/qiperfcs.png
     ICONS.path += \
         "/usr/share/icons/"
 
     DESKTOP.files += \
-        qiperfc.desktop
+        $$PWD/qiperfc.desktop
     DESKTOP.path += \
         "/usr/share/applications/"
 
     IMAGES.files += \
-        ../images/qiperfc.png \
-        ../images/qiperfcs.png
+        $$PWD/../images/qiperfc.png \
+        $$PWD/../images/qiperfcs.png
     IMAGES.path += \
         "/usr/share/pixmaps/"
 
