@@ -278,6 +278,7 @@ QJsonObject DlgAAS::createInitData()
     //create Init Data for Optimize use
     QJsonObject rootObject;
     QJsonObject aipObj;
+    QJsonObject aipObj2;
     // TODO: should we use AP's IP ? current use qiperf console's setting local ip
     rootObject["LocalAddr"]= ui->leLocalAddr->text();
     rootObject["ControlBy"]= mControlBy;
@@ -334,11 +335,10 @@ QJsonObject DlgAAS::createInitData()
                 if (varAIP1.canConvert<QVariantMap>()){
                     // qDebug() << "AIP1 data:" << varAIP1.toMap() ;
                     aipObj = QJsonObject::fromVariantMap(varAIP1.toMap());
-                    qDebug() << "aipObj:" << aipObj;
+                    qDebug() << "AIP1 aipObj:" << aipObj;
                     {
                         if (i==0){
                             // only AP need APBeamID
-                            // if (aipgroup.contains("AIP1")){
                             if (ui->twAIP->rowCount()>0){
                                 itemAP = ui->twAIP->item(0, AIPcols::BeamDirectionID);
                                 if (itemAP){
@@ -346,15 +346,7 @@ QJsonObject DlgAAS::createInitData()
                                     aipObj["APBeamID"] = itemAP->text().toInt();
                                 }
                             }
-                                //TODO: AP AIP1 att
-                            // }else if (aipgroup.contains("AIP2")){
-                                // itemAP = ui->twAIP->item(1, AIPcols::BeamDirectionID);
-                                // qDebug() << "AIP2 APBeamID:" << itemAP->text();
-                                // aipObj["APBeamID"] = itemAP->text().toInt();
-                                //TODO: AP AIP2 att
-                            // }else{
-                            //     qDebug() << "Not support AIP group:" << aipgroup;
-                            // }
+                            //TODO: AP AIP1 att
                         }
                         if (ui->twResult->rowCount()>0){
                             // only client (row>1)
@@ -387,7 +379,10 @@ QJsonObject DlgAAS::createInitData()
                                 aipObj["aipgroup"] = "";
                             }
                             aipObj["moduletype"] = 2;
-                            aipObj["offset"] = "0.00,0.00,0.00,0";
+                            aipObj["offsetX"] = 0.00;
+                            aipObj["offsetY"] = 0.00;
+                            aipObj["offsetZ"] = 0.00;
+                            aipObj["offsetAz"] = 0;
                         }
                     }
                     posdata["AIP1"] = aipObj;
@@ -403,21 +398,35 @@ QJsonObject DlgAAS::createInitData()
                     QVariant varAIP2 =  item->data(Qt::UserRole);
                     if (varAIP2.canConvert<QVariantMap>()){
                         // qDebug() << "AIP2 data:" << varAIP2.toMap() ;
-                        aipObj = QJsonObject::fromVariantMap(varAIP2.toMap());
-                        if (i==0){
-                            if (ui->twAIP->rowCount()>1){
-                                item = ui->twAIP->item(1, AIPcols::BeamDirectionID);
-                                if (item){
-                                    aipObj["APBeamID"] = item->text().toInt();
-                                }
+                        aipObj2 = QJsonObject::fromVariantMap(varAIP2.toMap());
+                        qDebug() << "AIP2 aipObj:" << aipObj2;
+                        if (ui->twAIP->rowCount()>1){
+                            item = ui->twAIP->item(1, AIPcols::BeamDirectionID);
+                            if (item){
+                                aipObj2["APBeamID"] = item->text().toInt();
                             }
                         }
-                        posdata["AIP2"] = aipObj;
-                    }else{
-                        if (i==0){
-                            qDebug() << "Row:" << QString::number(i) << " Wrong API2 data";
-                        }
                     }
+                    //init value
+                    if (!aipObj2.contains("moduletype")){
+                        aipObj2["APBeamID"] = 0;
+                    }
+                    if (!aipObj2.contains("moduletype")){
+                        aipObj2["moduletype"] = getModuleType(0, static_cast<int>(GPScols::AIP2));
+                    }
+                    if (!aipObj2.contains("offsetX")){
+                        aipObj2["offsetX"] = 0.00;
+                    }
+                    if (!aipObj2.contains("offsetY")){
+                        aipObj2["offsetY"] = 0.00;
+                    }
+                    if (!aipObj2.contains("offsetZ")){
+                        aipObj2["offsetZ"] = 0.00;
+                    }
+                    if (!aipObj2.contains("offsetAz")){
+                        aipObj2["offsetAz"] = 0;
+                    }
+                    posdata["AIP2"] = aipObj2;
                 }
             }
             item = ui->tableWidget->item(i, GPScols::IPAddr);

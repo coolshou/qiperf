@@ -22,6 +22,7 @@ DlgAIP::DlgAIP(QSettings *cfg, QWidget *parent)
     , ui(new Ui::DlgAIP), m_cfg(cfg)
 {
     mPosOffset=QVector3D(0.0, 0.0, 10.0);
+    mAZOffset=0;
     ui->setupUi(this);
     connect(this, &DlgAIP::accepted, this, &DlgAIP::onAccepted);
     mModuleType = AIP::ModuleType::Unknown;
@@ -74,20 +75,26 @@ void DlgAIP::loadData(QJsonObject data)
         }
         emit updateModelType(mRow, mCol, smodel);
     }
-    QString soffset = data.value("offset").toString();
-    double x=0.0;
-    double y=0.0;
-    double z=0.0;
-    int az=0;
-    if (!soffset.isEmpty()){
-        QStringList ds = soffset.split(",");
-        if (ds.length()==4){
-            x = ds[0].toDouble();
-            y = ds[1].toDouble();
-            z = ds[2].toDouble();
-            az = ds[3].toInt();
-        }
-    }
+    // QString soffset = data.value("offset").toString();
+    double x= data.value("offsetX").toDouble();
+    double y= data.value("offsetY").toDouble();
+    double z= data.value("offsetZ").toDouble();
+    int   az= data.value("offsetAz").toInt();
+    // if (!soffset.isEmpty()){
+    //     QStringList ds = soffset.split(",");
+    //     if (ds.length()>=1){
+    //         x = ds[0].toDouble();
+    //     }
+    //     if (ds.length()>=2){
+    //         y = ds[1].toDouble();
+    //     }
+    //     if (ds.length()>=3){
+    //         z = ds[2].toDouble();
+    //     }
+    //     if (ds.length()>=4){
+    //         az = ds[3].toInt();
+    //     }
+    // }
     // qDebug() << "loadData, x,y,z=" << QString::number(x) << " , "
     //          << QString::number(y) << " , " << QString::number(z);
     ui->sbX->setValue(x);
@@ -101,10 +108,14 @@ QJsonObject DlgAIP::getData()
     // get UI's value and turn into JSON format
     QJsonObject jobj;
     jobj["moduletype"] = static_cast<int>(mModuleType);
-    jobj["offset"] = QString("%1,%2,%3,%4").arg(QString::number(mPosOffset.x(), 'f' ,2),
-                                                QString::number(mPosOffset.y(), 'f' ,2),
-                                                QString::number(mPosOffset.z(), 'f' ,2),
-                                                QString::number(mAZOffset));
+    // jobj["offset"] = QString("%1,%2,%3,%4").arg(QString::number(mPosOffset.x(), 'f' ,2),
+    //                                             QString::number(mPosOffset.y(), 'f' ,2),
+    //                                             QString::number(mPosOffset.z(), 'f' ,2),
+    //                                             QString::number(mAZOffset));
+    jobj["offsetX"] = mPosOffset.x();
+    jobj["offsetY"] = mPosOffset.y();
+    jobj["offsetZ"] = mPosOffset.z();
+    jobj["offsetAz"] = mAZOffset;
     qDebug() << "get Json data" << jobj;
     return jobj;
 }
@@ -173,18 +184,18 @@ void DlgAIP::onChangeModule(QString newtext)
     // qDebug() << "onChangeModule:" << newtext;
     if (newtext.startsWith("Cyntec")){
         mModuleType = AIP::ModuleType::Cyntec;
-
-        ui->twBeam->setColumnCount(5);
         QStringList hb;
         hb << "Name" << "TxA" << "TxB" << "RxA" << "RxB" ;
+        ui->twBeam->setColumnCount(hb.count());
         ui->twBeam->setHorizontalHeaderLabels(hb);
         ui->twBeam->setRowCount(2);
         ui->twBeam->setItem(0,0, new QTableWidgetItem("BeamDirection"));
         ui->twBeam->setItem(1,0, new QTableWidgetItem("BeamFactor"));
         //
-        ui->twATT->setColumnCount(3);
+
         QStringList hs;
         hs << "Name" << "A" << "B";
+        ui->twATT->setColumnCount(hs.count());
         ui->twATT->setHorizontalHeaderLabels(hs);
         ui->twATT->setRowCount(3);
         ui->twATT->setItem(0,0, new QTableWidgetItem("TxAtt"));
@@ -216,19 +227,16 @@ void DlgAIP::onPreSetPosTextChanged(QString newtext)
 
 void DlgAIP::onXValueChanged(double value)
 {
-    // qDebug() << " X ValueChanged:" << value;
     mPosOffset.setX(value);
 }
 
 void DlgAIP::onYValueChanged(double value)
 {
-    // qDebug() << " Y ValueChanged:" << value;
     mPosOffset.setY(value);
 }
 
 void DlgAIP::onZValueChanged(double value)
 {
-    // qDebug() << " Z ValueChanged:" << value;
     mPosOffset.setZ(value);
 }
 
