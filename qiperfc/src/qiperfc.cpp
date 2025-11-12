@@ -157,7 +157,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_serialviews = new QMap<QString, SerialData>();
     m_sshviews = new QMap<QString, SSHData>();
 
-    initJIO();
+    initAAS();
 
     createTrayIcon();
 }
@@ -695,8 +695,8 @@ void QIperfC::onRequestExec(QString targetIP, QString idx, QString sCmd)
     QString url = "ws://"+targetIP+":"+QString::number(QIPERFD_WSPORT);
     WSClient *wsc=new WSClient(targetIP, QUrl(url), "");
     //TODO: when disconnected do waht?
-    if (dlg_jio){
-        connect(wsc, &WSClient::requestResult, dlg_jio, &DlgAAS::onRequestResult);
+    if (dlg_aas){
+        connect(wsc, &WSClient::requestResult, dlg_aas, &DlgAAS::onRequestResult);
     }
     //wait connect
     int timeout=0;
@@ -1629,21 +1629,21 @@ void QIperfC::onAddSSH()
     }
 }
 
-void QIperfC::initJIO()
+void QIperfC::initAAS()
 {
-    dlg_jio = new DlgAAS(m_settings);
-    connect(this, &QIperfC::closeAll, dlg_jio, &DlgAAS::close);
-    connect(dlg_jio, &DlgAAS::sigAddIperf, this, &QIperfC::onAddIperf);
-    connect(dlg_jio, &DlgAAS::sigClearIperf, this, &QIperfC::onClearIperf);
-    connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onJIO);
+    dlg_aas = new DlgAAS(m_settings);
+    connect(this, &QIperfC::closeAll, dlg_aas, &DlgAAS::close);
+    connect(dlg_aas, &DlgAAS::sigAddIperf, this, &QIperfC::onAddIperf);
+    connect(dlg_aas, &DlgAAS::sigClearIperf, this, &QIperfC::onClearIperf);
+    connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onAAS);
 }
 
-void QIperfC::onJIO()
+void QIperfC::onAAS()
 {
-    if (dlg_jio){
-        dlg_jio->clearData();
-        dlg_jio->activateWindow();
-        dlg_jio->show();
+    if (dlg_aas){
+        dlg_aas->clearData();
+        dlg_aas->activateWindow();
+        dlg_aas->show();
     }
 }
 

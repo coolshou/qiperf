@@ -164,8 +164,8 @@ private slots:
 
     void onAddSerial();
     void onAddSSH();
-    void initJIO();
-    void onJIO();
+    void initAAS();
+    void onAAS();
     void onAddPing();
     void onWlanSTA();
     void onError(QString msg);
@@ -279,7 +279,7 @@ private:
     QString _logfilename;
     bool _logtimestemp;
     QString _logtimestempformat;
-    DlgAAS *dlg_jio;
+    DlgAAS *dlg_aas;
     QString m_OpenStreetMapTile;
 
     // throughput worker
