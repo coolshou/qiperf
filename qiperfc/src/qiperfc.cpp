@@ -283,12 +283,12 @@ void QIperfC::onNew()
 {
     ui->actionSave->setEnabled(false);
     on_Clear();
-    if (m_throughputview->rootChildCount()>0) {
-        //this will clear all item include root!!
-        m_throughputview->reset();
-    }/*else{
-        qDebug() << "onNew rootChildCount No child";
-    }*/
+    // if (m_throughputview->rootChildCount()>0) {
+    //     //this will clear all item include root!!
+    //     m_throughputview->reset();
+    // }/*else{
+        // qDebug() << "onNew rootChildCount No child";
+    // }*/
 }
 
 void QIperfC::onOpen()
@@ -393,7 +393,13 @@ void QIperfC::onImportIperf2Log()
 bool QIperfC::on_Clear(bool showNotice)
 {
     // this will clean iperf test pair config
-    return onClear(showNotice);
+    if (onClear(showNotice)){
+        if (m_throughputview->rootChildCount()>0) {
+            //this will clear all item include root!!
+            m_throughputview->reset();
+        }
+    }
+    return true;
 }
 
 void QIperfC::onStart(bool showNotice)
@@ -724,7 +730,10 @@ void QIperfC::onAddIperf(QString cfg)
 
 void QIperfC::onClearIperf()
 {
-    doClear();
+    //clear all iperf setting (include config)
+    // doClear();
+    qDebug() << "onClearIperf";
+    on_Clear(false);
 }
 
 void QIperfC::closeEvent(QCloseEvent *event)
@@ -1635,7 +1644,7 @@ void QIperfC::initAAS()
     connect(this, &QIperfC::closeAll, dlg_aas, &DlgAAS::close);
     connect(dlg_aas, &DlgAAS::sigAddIperf, this, &QIperfC::onAddIperf);
     connect(dlg_aas, &DlgAAS::sigClearIperf, this, &QIperfC::onClearIperf);
-    connect(ui->actionJIO, &QAction::triggered, this, &QIperfC::onAAS);
+    connect(ui->actionAAS, &QAction::triggered, this, &QIperfC::onAAS);
 }
 
 void QIperfC::onAAS()

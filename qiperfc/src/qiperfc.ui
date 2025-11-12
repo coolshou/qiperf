@@ -144,7 +144,7 @@
     <property name="title">
      <string>Tools</string>
     </property>
-    <addaction name="actionJIO"/>
+    <addaction name="actionAAS"/>
    </widget>
    <widget class="QMenu" name="menuDevice">
     <property name="title">
@@ -377,7 +377,7 @@
      <normaloff>:/new</normaloff>:/new</iconset>
    </property>
    <property name="text">
-    <string>New(TODO)</string>
+    <string>New</string>
    </property>
   </action>
   <action name="actionExport">
@@ -555,9 +555,9 @@
     <string>Iperf2 log</string>
    </property>
   </action>
-  <action name="actionJIO">
+  <action name="actionAAS">
    <property name="icon">
-    <iconset resource="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/JIO/aas.qrc">
+    <iconset resource="../../../../../work/qiperf/JIO/aas.qrc">
      <normaloff>:/aas/AAS.png</normaloff>:/aas/AAS.png</iconset>
    </property>
    <property name="text">
@@ -580,8 +580,8 @@
   </action>
  </widget>
  <resources>
+  <include location="../../../../../work/qiperf/JIO/aas.qrc"/>
   <include location="../../qiperf.qrc"/>
-  <include location="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/JIO/aas.qrc"/>
  </resources>
  <connections/>
 </ui>
