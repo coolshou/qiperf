@@ -27,6 +27,28 @@ void DlgSet::setWeb(QString username, QString password)
 
 }
 
+void DlgSet::setDuration(int duration)
+{
+    ui->sbDuration->setValue(duration);
+}
+
+void DlgSet::setCalc(QString distance, QString group, int kmeansfactor)
+{
+    if (distance.contains("Vincenty")){
+        ui->rbVincenty->setChecked(true);
+    }else{
+        ui->rbHaversine->setChecked(true);
+    }
+    if (group.contains("Kmeans")){
+        ui->rbKmeans->setChecked(true);
+    }else if (group.contains("DBSCAN")){
+        ui->rbDBSCAN->setChecked(true);
+    }else{
+        ui->rbAvg->setChecked(true);
+    }
+    ui->sbKmeansKFactor->setValue(kmeansfactor);
+}
+
 void DlgSet::changeEvent(QEvent *e)
 {
     QDialog::changeEvent(e);
@@ -53,5 +75,20 @@ void DlgSet::onAccepted()
     emit updateSetting(ui->leSSHUsername->text(), ui->leSSHPassword->text(),
                        ui->leWebUsername->text(), ui->leWebPassword->text(),
                        ctl, ui->sbDuration->value());
+    QString calcDistance;
+    if (ui->rbVincenty->isChecked()){
+        calcDistance = "Vincenty";
+    } else {
+        calcDistance = "Haversine";
+    }
+    QString calcGroup;
+    if (ui->rbKmeans->isChecked()){
+        calcGroup = "Kmeans";
+    }else if(ui->rbDBSCAN->isChecked()){
+        calcGroup = "DBSCAN";
+    }else{
+        calcGroup = "Avg";
+    }
+    emit updateCalc(calcDistance, calcGroup, ui->sbKmeansKFactor->value());
 }
 

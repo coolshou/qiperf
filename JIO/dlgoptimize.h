@@ -16,11 +16,13 @@ public:
     explicit DlgOptimize(QWidget *parent = nullptr);
     ~DlgOptimize();
 public slots:
-    void onAddData(QDateTime testtime, int am7beamid,
-                 QString cm7name, int cm7beamid);
-    void onUpdateSignal(QDateTime testtime, double am7mcs, double am7rssi, double am7snr,
-                QString cm7name, double cm7mcs, double cm7rssi, double cm7snr);
-    void onUpdateTP(QDateTime testtime, QString cm7name, double ul, double dl);
+    void onAddData(QDateTime testtime, int apbeamid,
+                   QString clientname, int clientbeamid);
+    void onUpdateSignal(QDateTime testtime,
+                        double apmcs, double aprssi, double apsnr,
+                        QString cname,
+                        double cmcs, double crssi, double csnr);
+    void onUpdateTP(QDateTime testtime, QString cname, double ul, double dl);
 
 protected:
     void changeEvent(QEvent *e);

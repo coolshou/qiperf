@@ -24,7 +24,7 @@ QVariant OptimizeModel::headerData(int section, Qt::Orientation orientation, int
 
     static const QStringList headers = {
         "Date", "BeamID", "MCS", "RSSI", "SNR",
-        "CM\nName", "CM\nBeamID", "CM\nMCS", "CM\nRSSI", "CM\nSNR",
+        "Client\nName", "Client\nBeamID", "Client\nMCS", "Client\nRSSI", "Client\nSNR",
         "UL", "DL"
     };
 
@@ -104,17 +104,21 @@ void OptimizeModel::fetchMore(const QModelIndex &parent)
 
 QVariant OptimizeModel::data(const QModelIndex &index, int role) const
 {
+    if ((role == Qt::TextAlignmentRole) &&
+        ((index.column() >= OptimizeColumn::ID))){
+        return Qt::AlignCenter;
+    }
+
     if (!index.isValid() || role != Qt::DisplayRole){
         return QVariant();
     }
-    if ((role == Qt::TextAlignmentRole) && (index.column() >= ID)){
-        return Qt::AlignCenter;
-    }
+
     const OptimizeItem* item = static_cast<OptimizeItem*>(index.internalPointer());
     const OptimizeData& d = item->data();
 
     switch (index.column()) {
-    case TESTDATE: return d.testdate().toString("yyyyMMdd_hhmmss");
+    case TESTDATE:
+        return d.testdate().toString("yyyyMMdd_hhmmss");
     case ID:     {
         if (d.id()>=0){
             return d.id();
@@ -143,33 +147,33 @@ QVariant OptimizeModel::data(const QModelIndex &index, int role) const
             return d.snr();
         }
     }
-    case CM_NAME:  return d.cmName();
-    case CM_ID:  {
-        if (d.cmId()>=0){
-            return d.cmId();
+    case C_NAME:  return d.cName();
+    case C_ID:  {
+        if (d.cId()>=0){
+            return d.cId();
         }else{
             return QVariant();
         }
     }
-    case CM_MCS: {
-        if (d.cmMcs()>=0){
-            return d.cmMcs();
+    case C_MCS: {
+        if (d.cMcs()>=0){
+            return d.cMcs();
         }else{
             return QVariant();
         }
     }
-    case CM_RSSI: {
-        if (d.cmRssi()==0){
+    case C_RSSI: {
+        if (d.cRssi()==0){
             return QVariant();
         }else{
-            return d.cmRssi();
+            return d.cRssi();
         }
     }
-    case CM_SNR: {
-        if (d.cmSnr()==0){
+    case C_SNR: {
+        if (d.cSnr()==0){
             return QVariant();
         }else{
-            return d.cmSnr();
+            return d.cSnr();
         }
     }
     case UL: {
@@ -186,7 +190,8 @@ QVariant OptimizeModel::data(const QModelIndex &index, int role) const
             return QVariant();
         }
     }
-    default:     return QVariant();
+    default:
+        return QVariant();
     }
     return QVariant();
 }

@@ -108,12 +108,12 @@ public:
         TestingProcessChannels
     };
     Q_ENUM(State)
-    explicit DlgAAS(QSettings *cfg, QWidget *parent = nullptr);
+    explicit DlgAAS(QWidget *parent = nullptr);
     ~DlgAAS() override;
     void isTileAvailable();
     QString getTile();
     void setShowLine(bool show);
-    void clearData();
+    void clearData(bool askclear=false);
     QString getStMotion(QString target);
     QString getGpsInfo(QString refrow, QString target);
     QString getSensorInfo(QString refrow, QString target);
@@ -163,6 +163,7 @@ protected:
 
 private slots:
     void onAddIperf(QString cfg);
+    void onClearIperf();
     void doRequestExec(QString targetIP, QString idx, QString sCmd);
     void onStartOptimiz();
     void onStopOptimiz();
@@ -214,7 +215,9 @@ private slots:
     void onUpdateSetting(QString sshusername, QString sshpassword,
                          QString webusername, QString webpassword,
                          DlgSet::ControlBy ctl, int duration);
+    void onUpdateCalc(QString distance, QString group, int kmeansfactor);
     void onLocationReady(const IpLocation& location);
+
     // SSH
     void handleSSHConnectionError();
     void handleSSHProcessStarted();
@@ -274,6 +277,9 @@ private:
     QString mWebpassword;
     DlgSet::ControlBy  mControlBy; //1 : ssh, 2: qiperfd
     int mDuration;
+    QString mCalcDistance;
+    QString mCalcGroup;
+    int mCalcKmeansFactor;
     IpLocationProvider* provider;
     IpLocation mIpLocation;
     QSsh::SshConnectionParameters m_sshParams;

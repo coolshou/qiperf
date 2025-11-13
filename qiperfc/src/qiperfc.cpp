@@ -1640,7 +1640,7 @@ void QIperfC::onAddSSH()
 
 void QIperfC::initAAS()
 {
-    dlg_aas = new DlgAAS(m_settings);
+    dlg_aas = new DlgAAS();
     connect(this, &QIperfC::closeAll, dlg_aas, &DlgAAS::close);
     connect(dlg_aas, &DlgAAS::sigAddIperf, this, &QIperfC::onAddIperf);
     connect(dlg_aas, &DlgAAS::sigClearIperf, this, &QIperfC::onClearIperf);

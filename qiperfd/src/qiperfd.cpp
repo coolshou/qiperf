@@ -2039,11 +2039,11 @@ void QIperfd::initJIOOpenWRT()
 {
     if (bIsJIOOpenWRT){
         //
-        QFile fJio(":/aas/aascmd");
-        if (fJio.open(QIODevice::ReadOnly)) {
+        QFile fAas(":/aas/aascmd");
+        if (fAas.open(QIODevice::ReadOnly)) {
             //basic commands
-            QByteArray jsonData = fJio.readAll();
-            fJio.close();
+            QByteArray jsonData = fAas.readAll();
+            fAas.close();
 
             QJsonParseError parseError;
             QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &parseError);
@@ -2057,16 +2057,16 @@ void QIperfd::initJIOOpenWRT()
             jiocmdRespObj = jiocmdObj.value("RESPONSE").toObject();
             qDebug() << "jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
         }else {
-            qDebug() << "Failed to open " << fJio.fileName() << " for reading:" << fJio.errorString();
+            qDebug() << "Failed to open " << fAas.fileName() << " for reading:" << fAas.errorString();
         }
 
         QString scmd="";
         if (bIsAM7){
             //AP
-            scmd = JIO_SET_AM7_IPERF_BETTER;
+            scmd = AAS_SET_AP_IPERF_BETTER;
         }else{
             //STA
-            scmd = JIO_SET_CM7_IPERF_BETTER;
+            scmd = AAS_SET_STA_IPERF_BETTER;
         }
         QProcess process;
         onLog("Exec cmd: " + scmd);

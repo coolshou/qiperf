@@ -9,8 +9,22 @@ OptimizeWorker::OptimizeWorker(QJsonObject initdata, QObject *parent)
 {
     mDebugLv = 3;
     mStop=false;
-    mLocalAddr = mInitData["LocalAddr"].toString();
-    mPosArr = mInitData["positions"].toArray();
+    mLocalAddr = mInitData.value("LocalAddr").toString();
+    mPosArr = mInitData.value("positions").toArray();
+    mDuration = mInitData.value("TPDuration").toInt(30);
+    //AP data
+
+    for (QJsonArray::const_iterator it=mPosArr.constBegin(); it!=mPosArr.constEnd(); ++it) {
+        QJsonObject jObj= it->toObject();
+        if (jObj.value("type").toInt()==0){
+            mAPAddr = jObj.value("IPAddr").toString();
+            mAPMac = jObj.value("MacAddr").toString();
+            QJsonObject jAIP1 = jObj.value("AIP1").toObject();
+            mAIP1BeamID = jAIP1.value("APBeamID").toInt();
+            QJsonObject jAIP2 = jObj.value("AIP2").toObject();
+            mAIP2BeamID = jAIP2.value("APBeamID").toInt();
+        }
+    }
 }
 
 void OptimizeWorker::work()
@@ -20,25 +34,39 @@ void OptimizeWorker::work()
     emit started();
     log("update item info to DlgOptimize");
     int port=5201;
-    QString client;
-    QDateTime sTime(QDateTime::currentDateTime());
+    QString clientaddr;
+    QString clientname;
+    int apbeamid=0;
+    currentDateTime = QDateTime(QDateTime::currentDateTime());
     //create iperf test pair to each client on qiperf console
     for (QJsonArray::const_iterator it=mPosArr.constBegin(); it!=mPosArr.constEnd(); ++it) {
         QJsonObject jObj= it->toObject();
         if (jObj.value("type").toInt()==1){
-            client = jObj.value("IPAddr").toString();
-            log("// create iperf test pair in qiperfc:" +mLocalAddr+ " <=> " + client);
-            addIperf(mLocalAddr, client, 30, port);
+            //client
+            clientaddr = jObj.value("IPAddr").toString();
+            log("// create iperf test pair in qiperfc:" +mLocalAddr+ " <=> " + clientaddr);
+            clientname = jObj.value("name").toString();
+            addIperf(mLocalAddr, clientaddr, mDuration, port);
+            QJsonObject jAIP1 = jObj.value("AIP1").toObject();
+            QString aipgp = jAIP1.value("aipgroup").toString();
+            if (aipgp.contains("AIP1")){
+                apbeamid = mAIP1BeamID;
+            }else{
+                apbeamid = mAIP2BeamID;
+            }
+            int clientbeamid = jAIP1.value("ClientBeamID").toInt();
             //show test data on DlgOptimize
-            emit sigAddData(sTime, jObj.value("APBeamID").toInt(),
-                            jObj.value("name").toString(),
-                            jObj.value("BeamID").toInt());
+            emit sigAddData(currentDateTime, apbeamid, clientname, clientbeamid);
 
         }
         port++;
     }
-    //
+    qDebug() << "//ask run iperf";
 
+    qDebug() << "//wait iperf result";
+
+    //clean iperf
+    emit sigClearIperf();
 
 
     while (!mStop){

@@ -10,7 +10,7 @@ DlgOptimize::DlgOptimize(QWidget *parent)
 {
     ui->setupUi(this);
 
-    model= new OptimizeModel(ui->treeView);
+    model= new OptimizeModel();
     ui->treeView->setModel(model);
     ui->treeView->setHeaderHidden(false);           // Show headers
     ui->treeView->setRootIsDecorated(true);         // Show expand/collapse arrows
@@ -24,10 +24,10 @@ DlgOptimize::DlgOptimize(QWidget *parent)
     ui->treeView->setColumnWidth(OptimizeColumn::RSSI, 50);
     ui->treeView->setColumnWidth(OptimizeColumn::SNR, 50);
     // ui->treeView->setColumnWidth(OptimizeColumn::CM_NAME, 80);
-    ui->treeView->setColumnWidth(OptimizeColumn::CM_ID, 50);
-    ui->treeView->setColumnWidth(OptimizeColumn::CM_MCS, 50);
-    ui->treeView->setColumnWidth(OptimizeColumn::CM_RSSI, 50);
-    ui->treeView->setColumnWidth(OptimizeColumn::CM_SNR, 50);
+    ui->treeView->setColumnWidth(OptimizeColumn::C_ID, 50);
+    ui->treeView->setColumnWidth(OptimizeColumn::C_MCS, 50);
+    ui->treeView->setColumnWidth(OptimizeColumn::C_RSSI, 50);
+    ui->treeView->setColumnWidth(OptimizeColumn::C_SNR, 50);
     NumberDelegate *dDelegate = new NumberDelegate(NumberDelegate::Double,
                                                       0.0, 9999.0, 6,
                                                       ui->treeView);
@@ -35,10 +35,6 @@ DlgOptimize::DlgOptimize(QWidget *parent)
     ui->treeView->setItemDelegateForColumn(OptimizeColumn::DL, dDelegate);
     //test data
     // testdata1();
-    // testdata2();
-    // testdata3();
-    // testdata4();
-    // testdata5();
 
     // qDebug() << "rowcount:" << model->rowCount(QModelIndex());     // Should be > 0
     // qDebug() << "columnCount:" << model->columnCount(QModelIndex());  // Should match your header count
@@ -49,24 +45,32 @@ DlgOptimize::~DlgOptimize()
     delete ui;
 }
 
-void DlgOptimize::onAddData(QDateTime testtime, int am7beamid, QString cm7name, int cm7beamid)
+void DlgOptimize::onAddData(QDateTime testtime, int apbeamid,
+                            QString clientname, int clientbeamid)
 {
     QModelIndex midx = model->findEntry(testtime);
     if (!midx.isValid()){
         OptimizeData newTest(testtime);
         midx = model->addEntry(newTest);  // Adds under root
     }
-    qDebug() << "am7beamid:" << am7beamid << " cm7beamid:" << cm7beamid;
-    OptimizeData newRec1(QDateTime(), am7beamid, cm7name, cm7beamid);
-    model->addEntry(newRec1, midx);  // Adds under testtime item
+    // qDebug() << "apbeamid:" << apbeamid << " clientbeamid:" << clientbeamid;
+    OptimizeData newRec1(QDateTime(), apbeamid, clientname, clientbeamid);
+    QModelIndex newidx = model->addEntry(newRec1, midx);  // Adds under testtime item
+    if (newidx.isValid()){
+        ui->treeView->expand(midx);
+    }
+
 }
 
-void DlgOptimize::onUpdateSignal(QDateTime testtime, double am7mcs, double am7rssi, double am7snr, QString cm7name, double cm7mcs, double cm7rssi, double cm7snr)
+void DlgOptimize::onUpdateSignal(QDateTime testtime,
+                                 double apmcs, double aprssi, double apsnr,
+                                 QString cname,
+                                 double cmcs, double crssi, double csnr)
 {
     qDebug() << "TODO: onUpdateSignal ";
 }
 
-void DlgOptimize::onUpdateTP(QDateTime testtime, QString cm7name, double ul, double dl)
+void DlgOptimize::onUpdateTP(QDateTime testtime, QString cname, double ul, double dl)
 {
     qDebug() << "TODO: onUpdateTP ";
 }
@@ -87,44 +91,13 @@ void DlgOptimize::testdata1()
 {
     OptimizeData newTest(QDateTime::currentDateTime());
     QModelIndex midx = model->addEntry(newTest);  // Adds under root
-    OptimizeData newRec1(QDateTime(), 477, 11, -45.4, 20, "CM7-1", 64, 11, -46, 23 , 990, 965);
+    OptimizeData newRec1(QDateTime(), 477, 11, -45.4, 20, "Client-1", 64, 11, -46, 23 , 990, 965);
     model->addEntry(newRec1, midx);  // Adds under root
-    OptimizeData newRec2(QDateTime(), 477, 11, -47.4, 20, "CM7-2", 66, 10, -48, 22, 924, 913);
+    OptimizeData newRec2(QDateTime(), 477, 11, -47.4, 20, "Client-2", 66, 10, -48, 22, 924, 913);
     model->addEntry(newRec2, midx);  // Adds under root
-    OptimizeData newRec3(QDateTime(), 476, 11, -49, 20, "CM7-3", 64, 10, -49, 23, 914, 901);
+    OptimizeData newRec3(QDateTime(), 476, 11, -49, 20, "Client-3", 64, 10, -49, 23, 914, 901);
     model->addEntry(newRec3, midx);  // Adds under root
-    OptimizeData newRec4(QDateTime(), 476, 11, -47, 20, "CM7-4", 64, 11, -46, 23, 965, 954);
+    OptimizeData newRec4(QDateTime(), 476, 11, -47, 20, "Client-4", 64, 11, -46, 23, 965, 954);
     model->addEntry(newRec4, midx);  // Adds under root
 }
 
-void DlgOptimize::testdata2()
-{
-    OptimizeData newTest(QDateTime::currentDateTime().addSecs(60));
-    QModelIndex midx = model->addEntry(newTest);  // Adds under root
-    OptimizeData newRec1(QDateTime(), 477, 11, -45.4, 20, "CM7-1", 85, 11, -47, 23, 967, 945);
-    model->addEntry(newRec1, midx);  // Adds under root
-
-}
-
-void DlgOptimize::testdata3()
-{
-    OptimizeData newTest(QDateTime::currentDateTime().addSecs(120));
-    QModelIndex midx = model->addEntry(newTest);  // Adds under root
-    OptimizeData newRec1(QDateTime(), 477, 11, -45.4, 20, "CM7-1", 86, 11, -48, 21, 956, 934);
-    model->addEntry(newRec1, midx);  // Adds under root
-
-}
-void DlgOptimize::testdata4()
-{
-    OptimizeData newTest(QDateTime::currentDateTime().addSecs(180));
-    QModelIndex midx = model->addEntry(newTest);  // Adds under root
-    OptimizeData newRec1(QDateTime(), 477, 11, -45.4, 20, "CM7-1", 107, 11, -47, 21, 966, 944);
-    model->addEntry(newRec1, midx);  // Adds under root
-}
-void DlgOptimize::testdata5()
-{
-    OptimizeData newTest(QDateTime::currentDateTime().addSecs(240));
-    QModelIndex midx = model->addEntry(newTest);  // Adds under root
-    OptimizeData newRec1(QDateTime(), 477, 11, -45.4, 20, "CM7-1", 108, 11, -48, 21, 926, 932);
-    model->addEntry(newRec1, midx);  // Adds under root
-}

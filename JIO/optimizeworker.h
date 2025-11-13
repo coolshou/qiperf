@@ -5,6 +5,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include "perfmetricsstore.h"
+
 class OptimizeWorker : public QObject
 {
     Q_OBJECT
@@ -22,14 +24,24 @@ signals:
     void debugMsg(QString msg);
     void sigAddIperf(QString cfg);
     void sigStartIperf(QString cfg);
-    void sigAddData(QDateTime testtime, int am7beamid,
-                 QString cm7name, int cm7beamid);
+    void sigClearIperf();
+    void sigAddData(QDateTime testtime, int apbeamid,
+                 QString clientname, int clientbeamid);
 private:
     int mDebugLv;
+    QDateTime currentDateTime;
     QJsonObject mInitData;
     QJsonArray mPosArr;
+    int mDuration;
     bool mStop;
     QString mLocalAddr;
+    QString mAPAddr;
+    QString mAPMac;
+    int mAIP1BeamID;
+    int mAIP2BeamID;
+    // QJsonObject mRecord;
+    PerfMetricsStore mRecord; // store test record
+
 };
 
 #endif // OPTIMIZEWORKER_H

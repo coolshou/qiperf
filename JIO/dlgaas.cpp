@@ -29,15 +29,18 @@
 #include <QDebug>
 
 
-DlgAAS::DlgAAS(QSettings *cfg, QWidget *parent) :
+DlgAAS::DlgAAS(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DlgAAS), m_cfg(cfg)
+    ui(new Ui::DlgAAS)
 {
+    QString settingfilename = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)
+                              + QDir::separator() + "AAS.ini";
+    m_cfg = new QSettings(settingfilename, QSettings::IniFormat);
     m_debuglv=3;
     mHeaderResult = QStringList() << "P1 : P2" << "Distance(KM)"
                                   << "P1 Az(°)" << "P2 Az(°)" << "P1 El(°)" << "P2 El(°)"
                                   << "P2\nAz Diff" << "P2\nEl Diff" << "P2\nBeamDir ID";
-    mHeaderAIP = QStringList() << "Azimuth(°)" << "Elevation(°)" << "Azdiff" << "BeamDir ID";
+    mHeaderAIP = QStringList() << "Azimuth(°)" << "Elevation(°)" << "Azdiff" << "BeamDir\nID";
     mHeaderHanwha = QStringList() << "BFTx1\nAtt" << "BFTx2\nAtt"
                                   << "Tx1\nAtt" << "Tx2\nAtt"
                                   << "BFRx1\nAtt" << "BFRx2\nAtt"
@@ -56,12 +59,9 @@ DlgAAS::DlgAAS(QSettings *cfg, QWidget *parent) :
     // ui->pbShowMap->setVisible(false);//html base map. not good to show correct position
     initTableWidget();
     initAction();
-    // m_dlgOSM = new DlgOpenStreetMap();
-    // connect(m_dlgOSM, &DlgOpenStreetMap::loadFinished, this, &DlgJIO::onLoadFinished);
     m_dlgGeo = new DlgGeoOSM();
     connect(m_dlgGeo, &DlgGeoOSM::loadFinished, this, &DlgAAS::onLoadFinished);
     connect(m_dlgGeo, &DlgGeoOSM::addPosition, this, &DlgAAS::onAddPosition);
-    // connect(this, &DlgJIO::closeAll, m_dlgOSM, &DlgOpenStreetMap::close);
     connect(this, &DlgAAS::closeAll, m_dlgGeo, &DlgGeoOSM::close);
     connect(this, &DlgAAS::highlightItm, m_dlgGeo, &DlgGeoOSM::setItmHighlight);
     connect(this, &DlgAAS::deleteItm, m_dlgGeo, &DlgGeoOSM::onDeleteItm);
@@ -82,10 +82,11 @@ DlgAAS::DlgAAS(QSettings *cfg, QWidget *parent) :
 
     m_dlgset = new DlgSet(this); //setting dialog
     connect(m_dlgset, &DlgSet::updateSetting, this, &DlgAAS::onUpdateSetting);
+    connect(m_dlgset, &DlgSet::updateCalc, this, &DlgAAS::onUpdateCalc);
     connect(this, &DlgAAS::closeAll, m_dlgset, &DlgSet::close);
     mDlgBeamCmd= new DlgBeamCmd(this);
     connect(this,&DlgAAS::addBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddBeamIDCmd);
-    connect(this,&DlgAAS::addClientBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddCMBeamIDCmd);
+    connect(this,&DlgAAS::addClientBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddClientBeamIDCmd);
     connect(this,&DlgAAS::clearBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::clear);
     connect(this,&DlgAAS::clearClientBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::clearCM);
     connect(this, &DlgAAS::closeAll, mDlgBeamCmd, &DlgBeamCmd::close);
@@ -157,9 +158,18 @@ void DlgAAS::setShowLine(bool show)
     showline = show;
 }
 
-void DlgAAS::clearData()
+void DlgAAS::clearData(bool askclear)
 {
-    //TODO: ask before clear
+    if (askclear){
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::warning(this, tr("WARNING!!"),
+                                     tr("Currently Position and calculated data will be clear, Are you sure?"),
+                                     QMessageBox::Ok|QMessageBox::Cancel);
+        if (reply == QMessageBox::Cancel){
+            return;
+        }
+    }
+
     if (ui->tableWidget->rowCount()>0){
         ui->tableWidget->clearContents();
         ui->tableWidget->setRowCount(0);
@@ -212,7 +222,7 @@ QString DlgAAS::getGpsInfo(QString refrow, QString target)
         m_sshParams.setHost(target);
         mSSHRemoteRunner->run("gps_call_so", m_sshParams);
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
-        QString cmd = QString("%1:%2").arg(JIO_GET_GPS, jiocmdObj.value(JIO_GET_GPS).toString());
+        QString cmd = QString("%1:%2").arg(AAS_GET_GPS, jiocmdObj.value(AAS_GET_GPS).toString());
         // qDebug() << "JIO_GET_GPS=" << target << " cmd=> "  << cmd;
         emit requestExec(target, refrow, cmd);
     }
@@ -228,8 +238,8 @@ QString DlgAAS::getSensorInfo(QString refrow, QString target)
         //TODO:
 
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
-        QString cmd = QString("%1:%2").arg(JIO_GET_SENSORS, jiocmdObj.value(JIO_GET_SENSORS).toString());
-        // qDebug() << "JIO_GET_SENSORS=" << target << " cmd=> " << cmd;
+        QString cmd = QString("%1:%2").arg(AAS_GET_SENSORS, jiocmdObj.value(AAS_GET_SENSORS).toString());
+        // qDebug() << "AAS_GET_SENSORS=" << target << " cmd=> " << cmd;
         emit requestExec(target, refrow, cmd);
     }
     return result;
@@ -241,7 +251,7 @@ void DlgAAS::getAPInfo(QString refrow, QString target)
         //TODO: getAPInfo (RSSI/SNR/MCS) by ssh
 
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
-        QString cmd = QString("%1:%2").arg(JIO_GET_AP_INFO, jiocmdObj.value(JIO_GET_AP_INFO).toString());
+        QString cmd = QString("%1:%2").arg(AAS_GET_AP_INFO, jiocmdObj.value(AAS_GET_AP_INFO).toString());
         // qDebug() << "JIO_GET_GPS=" << target << " cmd=> "  << cmd;
         emit requestExec(target, refrow, cmd);
     }
@@ -282,6 +292,7 @@ QJsonObject DlgAAS::createInitData()
     // TODO: should we use AP's IP ? current use qiperf console's setting local ip
     rootObject["LocalAddr"]= ui->leLocalAddr->text();
     rootObject["ControlBy"]= mControlBy;
+    rootObject["TPDuration"] = mDuration;
     //ssh
     QJsonObject sshObj;
     sshObj["username"] = mSshUsername;
@@ -342,7 +353,6 @@ QJsonObject DlgAAS::createInitData()
                             if (ui->twAIP->rowCount()>0){
                                 itemAP = ui->twAIP->item(0, AIPcols::BeamDirectionID);
                                 if (itemAP){
-                                    qDebug() << "AIP1 APBeamID:" << itemAP->text();
                                     aipObj["APBeamID"] = itemAP->text().toInt();
                                 }
                             }
@@ -462,7 +472,7 @@ void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd,
     //          << " cmd: " << cmd << " msg: " << msg;
     QJsonParseError error;
     QJsonDocument doc;
-    if (cmd.contains(JIO_GPS_DATA)){
+    if (cmd.contains(AAS_GPS_DATA)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
             qDebug() << "JIO_GPS_DATA: " << msg;
@@ -489,10 +499,10 @@ void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd,
         }else{
             qDebug() << "Wrong format of JIO_GPS_DATA msg:(" << error.errorString() << ")\n";
         }
-    }else if (cmd.contains(JIO_SENSORS_DATA)){
+    }else if (cmd.contains(AAS_SENSORS_DATA)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
-            qDebug() << "JIO_SENSORS_DATA: " << msg;
+            qDebug() << "AAS_SENSORS_DATA: " << msg;
             QJsonObject obj = doc.object();
             QTableWidgetItem *itm;
             foreach (QString key, obj.keys()){
@@ -506,9 +516,9 @@ void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd,
                 }
             }
         }else{
-            qDebug() << "Wrong format of JIO_SENSORS_DATA msg:(" << error.errorString() << ")\n";
+            qDebug() << "Wrong format of AAS_SENSORS_DATA msg:(" << error.errorString() << ")\n";
         }
-    }else if (cmd.contains(JIO_AP_INFO)){
+    }else if (cmd.contains(AAS_AP_INFO)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
             qDebug() << "JIO_AP_INFO: " << msg;
@@ -556,6 +566,11 @@ void DlgAAS::onAddIperf(QString cfg)
     emit sigAddIperf(cfg);
 }
 
+void DlgAAS::onClearIperf()
+{
+    emit sigClearIperf();
+}
+
 void DlgAAS::doRequestExec(QString targetIP, QString idx, QString sCmd)
 {
     WSClient *wsc= mWScs[targetIP];
@@ -580,11 +595,9 @@ void DlgAAS::onStartOptimiz()
 
 void DlgAAS::onStopOptimiz()
 {
-    //TODO: DlgJIO::onStopOptimiz()
     if (mOptWorker){
         qDebug() <<"onStopOptimiz";
         mOptWorker->setStop(true);
-    //     // emit stopOptimiz(); // cause loop (with connect())
     }
 }
 
@@ -786,7 +799,7 @@ void DlgAAS::initTableWidget()
     ui->twAIP->setColumnWidth(AIPcols::Azimuth, 80);
     ui->twAIP->setColumnWidth(AIPcols::Elevation, 80);
     ui->twAIP->setColumnWidth(AIPcols::Azdiff, 60);
-    ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 90);
+    ui->twAIP->setColumnWidth(AIPcols::BeamDirectionID, 60);
 
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested,
             this, &DlgAAS::showContextMenu);
@@ -818,7 +831,6 @@ void DlgAAS::initAction()
     connect(ui->pbLoad, &QPushButton::clicked, this, &DlgAAS::onLoadCliecked);
     connect(ui->pbSave, &QPushButton::clicked, this, &DlgAAS::onSaveCliecked);
     connect(ui->pbCalc, &QPushButton::clicked, this, &DlgAAS::onCalcClicked);
-    // connect(ui->pbShowMap, &QPushButton::clicked, this, &DlgJIO::onShowMap);
     connect(ui->pbShowGeo, &QPushButton::clicked, this, &DlgAAS::onShowGeo);
     connect(ui->pbShow3D, &QPushButton::clicked, this, &DlgAAS::onShow3D);
     connect(ui->pbClear, &QPushButton::clicked, m_clearAction, &QAction::triggered);
@@ -972,7 +984,7 @@ void DlgAAS::onAddRow(QString name, double latitude, double longitude,
 void DlgAAS::onClear(bool checked)
 {
     Q_UNUSED(checked)
-    clearData();
+    clearData(true);
 }
 
 void DlgAAS::onLoadCliecked(bool checked)
@@ -1466,12 +1478,12 @@ void DlgAAS::onCalcClicked(bool checked)
         ui->tableWidget->selectRow(0);
         return;
     }
-    if ((!ui->rbVincenty->isChecked())&&(!ui->rbHaversine->isChecked())){
-        QString errmsg = "Please select distance calcation formula";
-        QMessageBox::warning(this, "Error", errmsg, QMessageBox::Ok);
-        ui->rbVincenty->setFocus();
-        return;
-    }
+    // if ((!ui->rbVincenty->isChecked())&&(!ui->rbHaversine->isChecked())){
+    //     QString errmsg = "Please select distance calcation formula";
+    //     QMessageBox::warning(this, "Error", errmsg, QMessageBox::Ok);
+    //     ui->rbVincenty->setFocus();
+    //     return;
+    // }
     // double msl1 = GeoTranslate::convertEllipsoidToMSL(lat1, lon1, alt1);
     // qDebug() << " Pos:" << pos1 << " Elevation hight:" << QString::number(msl1);
 
@@ -1500,7 +1512,7 @@ void DlgAAS::onCalcClicked(bool checked)
         altmsl = ui->tableWidget->item(i,GPScols::Altitude)->text().toDouble();
         // msl =  GeoTranslate::convertEllipsoidToMSL(lat, lon, alt);
         // qDebug() << " Pos:" << pos << " Elevation hight:" << QString::number(msl);
-        if (ui->rbVincenty->isChecked()){
+        if (mCalcDistance.contains("Vincenty")){
             VincentyResult vrs = vincentyInverse(lat1, lon1, lat, lon);
             distance = vrs.distance/1000; // m -> KM
             azimuth = vrs.finalBearing;
@@ -1510,7 +1522,7 @@ void DlgAAS::onCalcClicked(bool checked)
                 azimuth2 = azimuth+180;
             }
         }
-        if (ui->rbHaversine->isChecked()){
+        if (mCalcDistance.contains("Haversine")){
             distance = haversine(lat1, lon1, lat, lon);
             azimuth = calcBearing(lat1, lon1, lat, lon);
             azimuth2 = calcBearing(lat, lon, lat1, lon1);
@@ -1556,10 +1568,10 @@ void DlgAAS::onCalcClicked(bool checked)
     QList<QTableWidgetItem*> clientRs;
     QList<QTableWidgetItem*> clientLs;
 
-    if ((ui->rbDBSCAN->isChecked())||
-        (ui->rbKmeans->isChecked())  ){
+    if ((mCalcGroup.contains("DBSCAN"))||
+        (mCalcGroup.contains("Kmeans"))  ){
         QVector<int> labels;
-        if (ui->rbDBSCAN->isChecked()) {
+        if (mCalcGroup.contains("DBSCAN")) {
             QVector<QPointF> polarPoints;
 
             for (int i = 0; i < azbearings.size(); ++i) {
@@ -1583,11 +1595,11 @@ void DlgAAS::onCalcClicked(bool checked)
                          << "-> Group:" << labels[i];
             }
         }
-        if (ui->rbKmeans->isChecked()) {
+        if (mCalcGroup.contains("Kmeans")) {
             QVector<QPointF> points = polarToXY(azbearings, distances);
             // qDebug() << "points:" << points;
-            int k = ui->sbKmeansKFactor->value();
-            labels = kMeansCluster(points, k);
+            // int k = ui->sbKmeansKFactor->value();
+            labels = kMeansCluster(points, mCalcKmeansFactor);
 
             for (int i = 0; i < azbearings.size(); ++i) {
                 qDebug() << "Azimuth:" << azbearings[i]
@@ -1642,7 +1654,7 @@ void DlgAAS::onCalcClicked(bool checked)
         azbears.append(apl);
         apAzDeg  = averageBearing(azbears);
     }
-    if (ui->rbAvg->isChecked()) {
+    if (mCalcGroup.contains("Avg")) {
         // AP az
         apAzDeg = averageBearing(azbearings);
         // use AP azimuth Degree divide Client into Quadrant 1 or Quadrant 4
@@ -1722,6 +1734,7 @@ void DlgAAS::onSet(bool checked)
     if (m_dlgset){
         m_dlgset->setSSH(mSshUsername, mSshPassword);
         m_dlgset->setWeb(mWebusername, mWebpassword);
+        m_dlgset->setDuration(mDuration);
         m_dlgset->show();
     }
 }
@@ -1803,13 +1816,13 @@ void DlgAAS::onOptimizeClicked(bool checked)
 
         // init data
         QJsonObject dataobj = createInitData();
-        dataobj["TPDuration"] = mDuration;
         qDebug() << "dataobj:" << dataobj;
         // OptimizeWorker run in thread
         mOptWorker = new OptimizeWorker(dataobj);
         connect(mOptWorker, &OptimizeWorker::started, this, &DlgAAS::onOptimizeStarted);
         connect(mOptWorker, &OptimizeWorker::debugMsg, this, &DlgAAS::onOptimizeWorkerDebug);
         connect(mOptWorker, &OptimizeWorker::sigAddIperf, this, &DlgAAS::onAddIperf);
+        connect(mOptWorker, &OptimizeWorker::sigClearIperf, this, &DlgAAS::onClearIperf);
         connect(mOptWorker, &OptimizeWorker::sigAddData, mDlgOptimize, &DlgOptimize::onAddData);
         connect(this, &DlgAAS::stopOptimiz, mOptWorker, &OptimizeWorker::Stop);
         // thread
@@ -1856,8 +1869,9 @@ void DlgAAS::onInquireTimerTimeout()
                         // qDebug() << "onInquireTimerTimeout //TODO Inquire:" << target;
                         getGpsInfo(QString::number(row), target);
                         getSensorInfo(QString::number(row), target);
+                        //getQualityInfo();
                     }else{
-                        qDebug() << "onInquireTimerTimeout: WSClient not connect, ICON NG";
+                        qDebug() << "onInquireTimerTimeout: " << target << " not connected";
                         setStateIcon(row, GPScols::PositionName, "NG");
                     }
 
@@ -1888,37 +1902,6 @@ void DlgAAS::onConnected(QString from)
 {
     updateStats(from, "OK");
 }
-
-// void DlgJIO::onShowMap(bool checked)
-// {
-//     Q_UNUSED(checked)
-//     QString errmsg ="";
-//     //TODO: check openstreetmap can be accessable
-//     QString tile = getTile();
-//     if (tile.isEmpty()){
-//         errmsg = "Require OpenStreetMapTile set eq: https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-//         qDebug() << errmsg;
-//         QMessageBox::warning(this, "ERROR", errmsg, QMessageBox::Ok);
-//         return;
-//     }
-
-//     if (ui->tableWidget->rowCount()<1){
-//         QMessageBox::information(this, "Info",
-//                                  "Require at last one GPS locaton",
-//                                  QMessageBox::Ok);
-//         return;
-//     }
-
-//     if (m_dlgOSM){
-//         // QString pos1 = ui->tableWidget->item(0,0)->text();
-//         QString lat1 = ui->tableWidget->item(0,1)->text();
-//         QString lon1 = ui->tableWidget->item(0,2)->text();
-//         m_dlgOSM->load(tile , lat1, lon1);
-//         m_dlgOSM->raise();
-//         m_dlgOSM->activateWindow();
-//         m_dlgOSM->show();
-//     }
-// }
 
 void DlgAAS::onShowGeo(bool checked)
 {
@@ -2083,7 +2066,7 @@ void DlgAAS::onAttInit(bool checked)
         client = ui->tableWidget->item(iRow+1, GPScols::PositionName)->text();
         distance = ui->twResult->item(iRow, AZEIcols::Distance)->text().toDouble()*1000;
         fspl = MyFunc::calculateFSPL(distance, freq);
-        // qDebug() << "[" << iRow << "]"<< client <<" distance:" << distance <<" fspl:" << fspl;
+        qDebug() << "[" << iRow << "]"<< client <<" distance:" << distance <<" fspl:" << fspl;
         aiptype = getModuleType(iRow+1 ,GPScols::AIP1);
         if (aiptype==AIP::ModuleType::Cyntec) {
             if (mCyntec){
@@ -2395,7 +2378,7 @@ void DlgAAS::handleButtonClicked(int row, int col)
 void DlgAAS::onUpdateData(int row, int col, QJsonObject data)
 {
     QTableWidgetItem *item = ui->tableWidget->item(row, col);
-    qDebug() << row << "," << col << " DlgJIO::onUpdateData" <<data;
+    qDebug() << row << "," << col << " DlgAAS::onUpdateData" <<data;
     if (!item){
         item = new QTableWidgetItem();
     }
@@ -2436,6 +2419,13 @@ void DlgAAS::onUpdateSetting(QString sshusername, QString sshpassword,
     mWebpassword = webpassword;
     mControlBy = ctl;
     mDuration = duration;
+}
+
+void DlgAAS::onUpdateCalc(QString distance, QString group, int kmeansfactor)
+{
+    mCalcDistance = distance;
+    mCalcGroup = group;
+    mCalcKmeansFactor = kmeansfactor;
 }
 
 void DlgAAS::onLocationReady(const IpLocation &location)
@@ -2761,7 +2751,7 @@ void DlgAAS::onLoad(QString filename)
     // For example, if it's an object:
     if (jsonDoc.isObject()) {
         //clear old contents
-        clearData();
+        clearData(false);
 
         QJsonObject rootObject = jsonDoc.object();
         QString localaddr= rootObject.value("LocalAddr").toString();
@@ -2810,7 +2800,7 @@ bool DlgAAS::onSave(QString filename)
 void DlgAAS::debug(QString msg, int lv)
 {
     if (lv<=m_debuglv){
-        qDebug() << "[DlgJIO]" << msg;
+        qDebug() << "[DlgAAS]" << msg;
     }
 }
 
@@ -2824,7 +2814,12 @@ void DlgAAS::loadcfg()
 
     m_cfg->beginGroup("AAS");
     mDuration = m_cfg->value("TPDuration", 30).toInt();
+    m_cfg->endGroup();
 
+    m_cfg->beginGroup("Calc");
+    mCalcDistance = m_cfg->value("Distance", "Vincenty").toString();
+    mCalcGroup = m_cfg->value("Group", "Kmeans").toString();
+    mCalcKmeansFactor = m_cfg->value("KmeansFactor", 2).toInt();
     m_cfg->endGroup();
 }
 
@@ -2836,6 +2831,12 @@ void DlgAAS::savecfg()
 
     m_cfg->beginGroup("AAS");
     m_cfg->setValue("TPDuration", mDuration);
+    m_cfg->endGroup();
+
+    m_cfg->beginGroup("Calc");
+    m_cfg->setValue("Distance", mCalcDistance);
+    m_cfg->setValue("Group", mCalcGroup);
+    m_cfg->setValue("KmeansFactor", mCalcKmeansFactor);
     m_cfg->endGroup();
 
     m_cfg->sync();
@@ -3058,16 +3059,3 @@ double DlgAAS::getAz(AIP::ModuleType aiptype, int BeamID)
         return 0.0;
     }
 }
-
-// double DlgJIO::bearing(double lat1, double lon1, double lat2, double lon2)
-// {
-//     double p1 = qDegreesToRadians(lat1);
-//     double p2 = qDegreesToRadians(lat2);
-//     double dl = qDegreesToRadians(lon2 - lon1);
-
-//     double y = sin(dl) * cos(p2);
-//     double x = cos(p1) * sin(p2) - sin(p1) * cos(p2) * cos(dl);
-//     double theta = atan2(y, x);
-//     double bearingDeg = fmod(qRadiansToDegrees(theta) + 360.0, 360.0);
-//     return bearingDeg;
-// }

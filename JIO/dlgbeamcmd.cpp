@@ -21,8 +21,8 @@ void DlgBeamCmd::clear()
 
 void DlgBeamCmd::clearCM()
 {
-    foreach (auto key, mCMCmds.keys()) {
-        mCMCmds.value(key)->clear();
+    foreach (auto key, mClientCmds.keys()) {
+        mClientCmds.value(key)->clear();
     }
 }
 
@@ -31,19 +31,19 @@ void DlgBeamCmd::onAddBeamIDCmd(QString cmd)
     ui->textEdit->append(cmd);
 }
 
-void DlgBeamCmd::onAddCMBeamIDCmd(QString name, QString cmd)
+void DlgBeamCmd::onAddClientBeamIDCmd(QString name, QString cmd)
 {
     QTextEdit *ed=nullptr;
-    if (!mCMCmds.contains(name)){
+    if (!mClientCmds.contains(name)){
         QWidget *page = new QWidget();
         ed = new QTextEdit(page);
         QVBoxLayout *layout = new QVBoxLayout(page);
         layout->addWidget(ed);
         page->setLayout(layout);
         ui->tabWidget->addTab(page, name);
-        mCMCmds.insert(name, ed);
+        mClientCmds.insert(name, ed);
     }else{
-        ed = mCMCmds.value(name);
+        ed = mClientCmds.value(name);
     }
     ed->append(cmd);
 }

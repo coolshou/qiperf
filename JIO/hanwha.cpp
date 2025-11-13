@@ -212,7 +212,10 @@ int Hanwha::findClosestBeamID(double targetAz, double targetEl, QString beamtype
     double minDistance = std::numeric_limits<double>::max();
     // Narrow beam
     BeamTypeRange r= getBeamTypeRange(beamtype);
-    qDebug() << "//TODO: [findClosestBeamID] azimuth3dB_BW , elevation3dB_BW";
+    qDebug() << "//TODO: [findClosestBeamID] azimuth3dB_BW , elevation3dB_BW:"
+             << "beamtype:" << beamtype
+             << "maxAz:" << r.maxAz << " minAz:" << r.minAz
+             << "maxEl:" << r.maxEl << " minEl:" << r.minEl;
     double azBW=0;
     double elBW=0;
 

@@ -20,13 +20,13 @@ public slots:
     void clear();
     void clearCM();
     void onAddBeamIDCmd(QString cmd);
-    void onAddCMBeamIDCmd(QString name, QString cmd);
+    void onAddClientBeamIDCmd(QString name, QString cmd);
 protected:
     void changeEvent(QEvent *e);
 
 private:
     Ui::DlgBeamCmd *ui;
-    QMap<QString, QTextEdit*> mCMCmds; // tab name, textedit to hold command
+    QMap<QString, QTextEdit*> mClientCmds; // tab name, textedit to hold command
 };
 
 #endif // DLGBEAMCMD_H

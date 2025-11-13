@@ -9,23 +9,25 @@ class OptimizeData
 public:
     OptimizeData(QDateTime time=QDateTime()) : m_testdate(time),
         m_id(-1), m_mcs(-1.0), m_rssi(0.0), m_snr(0.0),
-        m_cmName(""), m_cmId(-1), m_cmMcs(-1.0), m_cmRssi(0.0), m_cmSnr(0.0),
+        m_cName(""), m_cId(-1), m_cMcs(-1.0), m_cRssi(0.0), m_cSnr(0.0),
         m_ul(-1.0), m_dl(-1.0){}
-    OptimizeData(QDateTime time, int id, QString cmName, int cmId)
-        : m_testdate(time), m_id(id), m_cmName(cmName), m_cmId(cmId)
+    OptimizeData(QDateTime time, int id, QString cName, int cmId)
+        : m_testdate(time), m_id(id), m_cName(cName), m_cId(cmId)
     {
-        m_mcs = 0.0;
+        m_mcs = -1.0;
         m_rssi = 0.0;
         m_snr = 0.0;
-        m_cmMcs = 0.0;
-        m_cmRssi = 0.0;
-        m_cmSnr = 0.0;
+        m_cMcs = -1.0;
+        m_cRssi = 0.0;
+        m_cSnr = 0.0;
+        m_ul = -1.0;
+        m_dl = -1.0;
     }
     OptimizeData(QDateTime time, int id, double mcs, double rssi, double snr,
-                 QString cmName, int cmId, double cmMcs, double cmRssi, double cmSnr,
+                 QString cName, int cId, double cMcs, double cRssi, double cSnr,
                  double ul=0.0, double dl=0.0)
         : m_testdate(time), m_id(id), m_mcs(mcs), m_rssi(rssi), m_snr(snr),
-        m_cmName(cmName), m_cmId(cmId), m_cmMcs(cmMcs), m_cmRssi(cmRssi), m_cmSnr(cmSnr),
+        m_cName(cName), m_cId(cId), m_cMcs(cMcs), m_cRssi(cRssi), m_cSnr(cSnr),
         m_ul(ul), m_dl(dl) {}
 
     bool isEmpty() const {
@@ -38,11 +40,11 @@ public:
     double mcs() const { return m_mcs; }
     double rssi() const { return m_rssi; }
     double snr() const { return m_snr; }
-    QString cmName() const { return m_cmName; }
-    int cmId() const { return m_cmId; }
-    double cmMcs() const { return m_cmMcs; }
-    double cmRssi() const { return m_cmRssi; }
-    double cmSnr() const { return m_cmSnr; }
+    QString cName() const { return m_cName; }
+    int cId() const { return m_cId; }
+    double cMcs() const { return m_cMcs; }
+    double cRssi() const { return m_cRssi; }
+    double cSnr() const { return m_cSnr; }
     double ul() const { return m_ul; }
     double dl() const { return m_dl; }
 
@@ -52,11 +54,11 @@ public:
     void setMcs(double mcs) { m_mcs = mcs; }
     void setRssi(double rssi) { m_rssi = rssi; }
     void setSnr(double snr) { m_snr = snr; }
-    void setCmName(QString cmName) { m_cmName = cmName; }
-    void setCmId(int cmId) { m_cmId = cmId; }
-    void setCmMcs(double cmMcs) { m_cmMcs = cmMcs; }
-    void setCmRssi(double cmRssi) { m_cmRssi = cmRssi; }
-    void setCmSnr(double cmSnr) { m_cmSnr = cmSnr; }
+    void setCName(QString cName) { m_cName = cName; }
+    void setCId(int cmId) { m_cId = cmId; }
+    void setCMcs(double cMcs) { m_cMcs = cMcs; }
+    void setCRssi(double cRssi) { m_cRssi = cRssi; }
+    void setCSnr(double cSnr) { m_cSnr = cSnr; }
     void setUl(double ul) { m_ul = ul; }
     void setDl(double dl) { m_dl = dl; }
 
@@ -66,11 +68,11 @@ private:
     double m_mcs;
     double m_rssi;
     double m_snr;
-    QString m_cmName;
-    int m_cmId;
-    double m_cmMcs;
-    double m_cmRssi;
-    double m_cmSnr;
+    QString m_cName;
+    int m_cId;
+    double m_cMcs;
+    double m_cRssi;
+    double m_cSnr;
     double m_ul;
     double m_dl;
 };

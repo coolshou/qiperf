@@ -51,7 +51,8 @@ HEADERS += \
     $$PWD/optimizedata.h \
     $$PWD/optimizeitem.h \
     $$PWD/optimizemodel.h \
-    $$PWD/optimizeworker.h
+    $$PWD/optimizeworker.h \
+    $$PWD/perfmetricsstore.h
     # $$PWD/../src/wsclient.h
     # $$PWD/../qiperfc/lib/qcpitemtriangle.h
 

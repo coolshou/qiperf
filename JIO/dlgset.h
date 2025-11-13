@@ -23,10 +23,13 @@ public:
     ~DlgSet();
     void setSSH(QString username, QString password);
     void setWeb(QString username, QString password);
+    void setDuration(int duration);
+    void setCalc(QString distance, QString group, int kmeansfactor);
 signals:
     void updateSetting(QString sshusername, QString sshpassword,
                        QString webusername, QString webpassword,
                        ControlBy control, int duration);
+    void updateCalc(QString distance, QString group, int kmeansfactor);
 protected:
     void changeEvent(QEvent *e);
 private slots:
