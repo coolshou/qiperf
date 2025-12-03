@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tabAdmin">
       <attribute name="title">
@@ -140,20 +140,40 @@
        <string>Throughput</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout_3">
-       <item row="0" column="0">
+       <item row="1" column="0">
         <widget class="QLabel" name="label_5">
          <property name="text">
           <string>Duration(sec):</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="1" column="1">
         <widget class="QSpinBox" name="sbDuration">
          <property name="maximum">
           <number>864000</number>
          </property>
          <property name="value">
           <number>30</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="toolTip">
+          <string>Inquire Device Interval</string>
+         </property>
+         <property name="text">
+          <string>Inquire Interval(sec):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="sbInquireInterval">
+         <property name="toolTip">
+          <string>Inquire Device Interval</string>
+         </property>
+         <property name="value">
+          <number>3</number>
          </property>
         </widget>
        </item>
@@ -269,7 +289,7 @@
              <item>
               <widget class="QSpinBox" name="sbKmeansKFactor">
                <property name="minimum">
-                <number>2</number>
+                <number>1</number>
                </property>
                <property name="value">
                 <number>2</number>
@@ -307,6 +327,50 @@
           </size>
          </property>
         </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>default</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>Interface name</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout_4">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>AP:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="leAPIfname">
+            <property name="text">
+             <string>apx0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Client:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="leClientIfname">
+            <property name="text">
+             <string>apclix0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>

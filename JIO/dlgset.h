@@ -24,12 +24,15 @@ public:
     void setSSH(QString username, QString password);
     void setWeb(QString username, QString password);
     void setDuration(int duration);
+    void setInquireInterval(int interval);
     void setCalc(QString distance, QString group, int kmeansfactor);
+    void setIfname(QString apifname, QString clientifname);
 signals:
     void updateSetting(QString sshusername, QString sshpassword,
                        QString webusername, QString webpassword,
-                       ControlBy control, int duration);
+                       DlgSet::ControlBy control, int duration, int interval);
     void updateCalc(QString distance, QString group, int kmeansfactor);
+    void updateIfname(QString apifname, QString clientifname);
 protected:
     void changeEvent(QEvent *e);
 private slots:

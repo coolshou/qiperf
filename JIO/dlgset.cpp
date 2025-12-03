@@ -32,6 +32,11 @@ void DlgSet::setDuration(int duration)
     ui->sbDuration->setValue(duration);
 }
 
+void DlgSet::setInquireInterval(int interval)
+{
+    ui->sbInquireInterval->setValue(interval);
+}
+
 void DlgSet::setCalc(QString distance, QString group, int kmeansfactor)
 {
     if (distance.contains("Vincenty")){
@@ -47,6 +52,12 @@ void DlgSet::setCalc(QString distance, QString group, int kmeansfactor)
         ui->rbAvg->setChecked(true);
     }
     ui->sbKmeansKFactor->setValue(kmeansfactor);
+}
+
+void DlgSet::setIfname(QString apifname, QString clientifname)
+{
+    ui->leAPIfname->setText(apifname);
+    ui->leClientIfname->setText(clientifname);
 }
 
 void DlgSet::changeEvent(QEvent *e)
@@ -74,7 +85,7 @@ void DlgSet::onAccepted()
     }
     emit updateSetting(ui->leSSHUsername->text(), ui->leSSHPassword->text(),
                        ui->leWebUsername->text(), ui->leWebPassword->text(),
-                       ctl, ui->sbDuration->value());
+                       ctl, ui->sbDuration->value(), ui->sbInquireInterval->value());
     QString calcDistance;
     if (ui->rbVincenty->isChecked()){
         calcDistance = "Vincenty";
@@ -90,5 +101,6 @@ void DlgSet::onAccepted()
         calcGroup = "Avg";
     }
     emit updateCalc(calcDistance, calcGroup, ui->sbKmeansKFactor->value());
+    emit updateIfname(ui->leAPIfname->text(), ui->leClientIfname->text());
 }
 
