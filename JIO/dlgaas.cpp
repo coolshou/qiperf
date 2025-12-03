@@ -51,6 +51,7 @@ DlgAAS::DlgAAS(QWidget *parent) :
                                   << "Rx1\nAtt" << "Rx2\nAtt"
                                   << "Lna\nAtt";
     jiocmdObj = QJsonObject();
+    mInquireInterval = 3; //sec
     m_InquireTimer= new QTimer(this);
     connect(m_InquireTimer, &QTimer::timeout, this, &DlgAAS::onInquireTimerTimeout);
     ui->setupUi(this);
@@ -83,6 +84,7 @@ DlgAAS::DlgAAS(QWidget *parent) :
     m_dlgset = new DlgSet(this); //setting dialog
     connect(m_dlgset, &DlgSet::updateSetting, this, &DlgAAS::onUpdateSetting);
     connect(m_dlgset, &DlgSet::updateCalc, this, &DlgAAS::onUpdateCalc);
+    connect(m_dlgset, &DlgSet::updateIfname, this, &DlgAAS::onUpdateIfname);
     connect(this, &DlgAAS::closeAll, m_dlgset, &DlgSet::close);
     mDlgBeamCmd= new DlgBeamCmd(this);
     connect(this,&DlgAAS::addBeamIDCmd, mDlgBeamCmd, &DlgBeamCmd::onAddBeamIDCmd);
@@ -208,7 +210,9 @@ Calibration_status_of_the_Sensors = 2
 
 */
     if (mControlBy==DlgSet::ControlBy::SSH){
-
+        qDebug() << "//TODO: getStMotion by SSH";
+    }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
+        qDebug() << "//TODO: getStMotion by QIPERFD";
     }
     return result;
 }
@@ -218,7 +222,7 @@ QString DlgAAS::getGpsInfo(QString refrow, QString target)
     // get GPS info
     QString result="";
     if (mControlBy==DlgSet::ControlBy::SSH){
-        //TODO:
+        qDebug() << "//TODO: getGpsInfo by SSH";
         m_sshParams.setHost(target);
         mSSHRemoteRunner->run("gps_call_so", m_sshParams);
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
@@ -235,11 +239,46 @@ QString DlgAAS::getSensorInfo(QString refrow, QString target)
     QString result="";
     //   sensor_call_so
     if (mControlBy==DlgSet::ControlBy::SSH){
-        //TODO:
+        qDebug() << "//TODO: getSensorInfo by SSH";
 
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
         QString cmd = QString("%1:%2").arg(AAS_GET_SENSORS, jiocmdObj.value(AAS_GET_SENSORS).toString());
         // qDebug() << "AAS_GET_SENSORS=" << target << " cmd=> " << cmd;
+        emit requestExec(target, refrow, cmd);
+    }
+    return result;
+}
+
+QString DlgAAS::getMacInfo(QString refrow, QString target, QString ifname)
+{
+    //get Mac address
+    QString result="";
+    if (mControlBy==DlgSet::ControlBy::SSH){
+        qDebug() << "//TODO: getMacInfo by SSH";
+
+    }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
+        QString cmd = QString("%1:%2").arg(AAS_GET_MACADDR,
+                                           jiocmdObj.value(AAS_GET_MACADDR).toString().arg(ifname));
+        // qDebug() << "AAS_GET_SENSORS=" << target << " cmd=> " << cmd;
+        emit requestExec(target, refrow, cmd);
+    }
+    return result;
+
+}
+
+QString DlgAAS::getWiFiQualityInfo(QString refrow, QString target, QString macaddr, int devtype)
+{
+    // get WiFi Quality info: MCS/RSSI/SNR
+    QString result="";
+    if (mControlBy==DlgSet::ControlBy::SSH){
+        //TODO:
+
+    }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
+        QString rcmd = jiocmdObj.value(AAS_GET_WIFI_QUALITY).toString();
+        QString cmd = QString("%1:%2:%3").arg(AAS_GET_WIFI_QUALITY,
+                                              macaddr,
+                                              rcmd);
+        // qDebug() << "AAS_GET_WIFI_QUALITY=" << target << " cmd=> " << cmd;
         emit requestExec(target, refrow, cmd);
     }
     return result;
@@ -252,7 +291,6 @@ void DlgAAS::getAPInfo(QString refrow, QString target)
 
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
         QString cmd = QString("%1:%2").arg(AAS_GET_AP_INFO, jiocmdObj.value(AAS_GET_AP_INFO).toString());
-        // qDebug() << "JIO_GET_GPS=" << target << " cmd=> "  << cmd;
         emit requestExec(target, refrow, cmd);
     }
 }
@@ -293,6 +331,7 @@ QJsonObject DlgAAS::createInitData()
     rootObject["LocalAddr"]= ui->leLocalAddr->text();
     rootObject["ControlBy"]= mControlBy;
     rootObject["TPDuration"] = mDuration;
+    rootObject["InquireInterval"] = mInquireInterval;
     //ssh
     QJsonObject sshObj;
     sshObj["username"] = mSshUsername;
@@ -410,7 +449,7 @@ QJsonObject DlgAAS::createInitData()
                     qDebug() << "Wrong API1 data:";
                 }
             }
-            // AIP2
+
             if (i==0){
             //AP  AIP2
                 item = ui->tableWidget->item(i, GPScols::AIP2);
@@ -457,7 +496,16 @@ QJsonObject DlgAAS::createInitData()
             if (item) {
                 posdata["MacAddr"] = item->text();
             }
-
+            item = ui->tableWidget->item(i, GPScols::IfName);
+            if (item) {
+                posdata["IfName"] = item->text();
+            }else {
+                if (i==0){
+                    posdata["IfName"] = mAPIfname;
+                }else{
+                    posdata["IfName"] = mClientIfname;
+                }
+            }
             pos.append(posdata);
         }
         rootObject["positions"] = pos;
@@ -470,12 +518,13 @@ void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd,
     Q_UNUSED(serveraddress)
     // qDebug() << "onRequestResult refrow:" << refrow << " from: " << serveraddress
     //          << " cmd: " << cmd << " msg: " << msg;
+
     QJsonParseError error;
     QJsonDocument doc;
     if (cmd.contains(AAS_GPS_DATA)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
-            qDebug() << "JIO_GPS_DATA: " << msg;
+            qDebug() << "AAS_GPS_DATA: " << msg;
             QJsonObject obj = doc.object();
             QTableWidgetItem *itm;
             foreach (QString key, obj.keys()){
@@ -497,7 +546,7 @@ void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd,
                 // }
             }
         }else{
-            qDebug() << "Wrong format of JIO_GPS_DATA msg:(" << error.errorString() << ")\n";
+            qDebug() << "Wrong format of AAS_GPS_DATA msg:(" << error.errorString() << ")\n";
         }
     }else if (cmd.contains(AAS_SENSORS_DATA)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
@@ -518,14 +567,16 @@ void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd,
         }else{
             qDebug() << "Wrong format of AAS_SENSORS_DATA msg:(" << error.errorString() << ")\n";
         }
+    }else if (cmd.contains(AAS_MACADDR_DATA)){
+        qDebug() << "AAS_MACADDR_DATA: " << msg;
     }else if (cmd.contains(AAS_AP_INFO)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
-            qDebug() << "JIO_AP_INFO: " << msg;
+            qDebug() << "AAS_AP_INFO: " << msg;
             QJsonObject obj = doc.object();
             qDebug() << "AP_INFO:" << obj.toVariantMap();
         }else{
-            qDebug() << "Wrong format of JIO_AP_INFO msg:(" << error.errorString() << ")\n";
+            qDebug() << "Wrong format of AAS_AP_INFO msg:(" << error.errorString() << ")\n";
         }
     }else {
         qDebug() << "TODO: Not support cmd: " << cmd;
@@ -923,7 +974,7 @@ void DlgAAS::onGetSensor(bool checked)
 void DlgAAS::onAddRow(QString name, double latitude, double longitude,
                       double altitude, double heading, double pitch,
                       QJsonObject aip1, QJsonObject aip2, QString ipaddr,
-                      QString macaddr)
+                      QString macaddr, QString ifname)
 {
     int iRow = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(iRow);
@@ -976,7 +1027,14 @@ void DlgAAS::onAddRow(QString name, double latitude, double longitude,
     }
     ui->tableWidget->setItem(iRow, GPScols::IPAddr, new QTableWidgetItem(ipaddr));
     ui->tableWidget->setItem(iRow, GPScols::MacAddr, new QTableWidgetItem(macaddr));
-
+    if(ifname.isEmpty()){
+        if (iRow==0){
+            ifname = mAPIfname;
+        }else{
+            ifname = mClientIfname;
+        }
+    }
+    ui->tableWidget->setItem(iRow, GPScols::IfName, new QTableWidgetItem(ifname));
 
     ui->tableWidget->setSortingEnabled(true);
 }
@@ -1472,12 +1530,15 @@ void DlgAAS::onCalcClicked(bool checked)
     }
     //AP AIP2
     AIP::ModuleType aip2type = getModuleType(0, static_cast<int>(GPScols::AIP2));
+    /* TODO: allow AP AIP2 not set
     if (aip2type == AIP::ModuleType::Unknown){
         QString errmsg = "Please setup ModuleType of AIP2";
         QMessageBox::warning(this, "Error", errmsg, QMessageBox::Ok);
         ui->tableWidget->selectRow(0);
         return;
     }
+    */
+
     // if ((!ui->rbVincenty->isChecked())&&(!ui->rbHaversine->isChecked())){
     //     QString errmsg = "Please select distance calcation formula";
     //     QMessageBox::warning(this, "Error", errmsg, QMessageBox::Ok);
@@ -1599,6 +1660,15 @@ void DlgAAS::onCalcClicked(bool checked)
             QVector<QPointF> points = polarToXY(azbearings, distances);
             // qDebug() << "points:" << points;
             // int k = ui->sbKmeansKFactor->value();
+            if (points.count() < mCalcKmeansFactor){
+                qDebug() << "polarToXY points: " << points.count()
+                         << " mCalcKmeansFactor: " << mCalcKmeansFactor ;
+                QMessageBox::warning(this, tr("WARNING!!"),
+                                     QString(tr("KmeansFactor %1 > %2(polarToXY count)").arg(mCalcKmeansFactor,
+                                                                                             points.count())),
+                                     QMessageBox::Ok);
+                return;
+            }
             labels = kMeansCluster(points, mCalcKmeansFactor);
 
             for (int i = 0; i < azbearings.size(); ++i) {
@@ -1735,6 +1805,8 @@ void DlgAAS::onSet(bool checked)
         m_dlgset->setSSH(mSshUsername, mSshPassword);
         m_dlgset->setWeb(mWebusername, mWebpassword);
         m_dlgset->setDuration(mDuration);
+        m_dlgset->setInquireInterval(mInquireInterval);
+        m_dlgset->setIfname(mAPIfname, mClientIfname);
         m_dlgset->show();
     }
 }
@@ -1746,7 +1818,7 @@ void DlgAAS::onInquireClicked(bool checked)
         m_sshParams.setPassword(mSshPassword);
 
         qDebug() << "Inquire start after 3 sec";
-        m_InquireTimer->start(3000);// 3sec
+        m_InquireTimer->start(mInquireInterval*1000);
 
     }else{
         if (m_InquireTimer->isActive()){
@@ -1869,7 +1941,24 @@ void DlgAAS::onInquireTimerTimeout()
                         // qDebug() << "onInquireTimerTimeout //TODO Inquire:" << target;
                         getGpsInfo(QString::number(row), target);
                         getSensorInfo(QString::number(row), target);
-                        //getQualityInfo();
+                        QTableWidgetItem *itmmac= ui->tableWidget->item(row, GPScols::MacAddr);
+                        QString macaddr = itmmac->text();
+                        if (macaddr.isEmpty()) {
+                            QString ifname="";
+                            QTableWidgetItem *itmifname= ui->tableWidget->item(row, GPScols::IfName);
+                            if (itmifname){
+                                ifname = itmifname->text();
+                            }else{
+                                if (row==0){
+                                    ifname = mAPIfname;
+                                }else{
+                                    ifname = mClientIfname;
+                                }
+                            }
+                            getMacInfo(QString::number(row), target, ifname);
+                        }else{
+                            //TODO getWiFiQualityInfo(QString::number(row), target, );
+                        }
                     }else{
                         qDebug() << "onInquireTimerTimeout: " << target << " not connected";
                         setStateIcon(row, GPScols::PositionName, "NG");
@@ -2411,7 +2500,8 @@ void DlgAAS::onUpdateModelType(int row, int col, int model)
 
 void DlgAAS::onUpdateSetting(QString sshusername, QString sshpassword,
                              QString webusername, QString webpassword,
-                             DlgSet::ControlBy ctl, int duration)
+                             DlgSet::ControlBy ctl, int duration,
+                             int interval)
 {
     mSshUsername = sshusername;
     mSshPassword = sshpassword;
@@ -2419,6 +2509,7 @@ void DlgAAS::onUpdateSetting(QString sshusername, QString sshpassword,
     mWebpassword = webpassword;
     mControlBy = ctl;
     mDuration = duration;
+    mInquireInterval = interval;
 }
 
 void DlgAAS::onUpdateCalc(QString distance, QString group, int kmeansfactor)
@@ -2426,6 +2517,12 @@ void DlgAAS::onUpdateCalc(QString distance, QString group, int kmeansfactor)
     mCalcDistance = distance;
     mCalcGroup = group;
     mCalcKmeansFactor = kmeansfactor;
+}
+
+void DlgAAS::onUpdateIfname(QString apifname, QString clientifname)
+{
+    mAPIfname = apifname;
+    mClientIfname = clientifname;
 }
 
 void DlgAAS::onLocationReady(const IpLocation &location)
@@ -2814,12 +2911,18 @@ void DlgAAS::loadcfg()
 
     m_cfg->beginGroup("AAS");
     mDuration = m_cfg->value("TPDuration", 30).toInt();
+    mInquireInterval = m_cfg->value("InquireInterval", 3).toInt();
     m_cfg->endGroup();
 
     m_cfg->beginGroup("Calc");
     mCalcDistance = m_cfg->value("Distance", "Vincenty").toString();
     mCalcGroup = m_cfg->value("Group", "Kmeans").toString();
     mCalcKmeansFactor = m_cfg->value("KmeansFactor", 2).toInt();
+    m_cfg->endGroup();
+
+    m_cfg->beginGroup("default");
+    mAPIfname = m_cfg->value("apifname", "apx0").toString();
+    mClientIfname = m_cfg->value("clientifname", "apclix0").toString();
     m_cfg->endGroup();
 }
 
@@ -2831,12 +2934,18 @@ void DlgAAS::savecfg()
 
     m_cfg->beginGroup("AAS");
     m_cfg->setValue("TPDuration", mDuration);
+    m_cfg->setValue("InquireInterval", mInquireInterval);
     m_cfg->endGroup();
 
     m_cfg->beginGroup("Calc");
     m_cfg->setValue("Distance", mCalcDistance);
     m_cfg->setValue("Group", mCalcGroup);
     m_cfg->setValue("KmeansFactor", mCalcKmeansFactor);
+    m_cfg->endGroup();
+
+    m_cfg->beginGroup("default");
+    m_cfg->setValue("apifname", mAPIfname);
+    m_cfg->setValue("clientifname", mClientIfname);
     m_cfg->endGroup();
 
     m_cfg->sync();
@@ -2866,8 +2975,10 @@ QVector<int> DlgAAS::kMeansCluster(const QVector<QPointF> &points, int k, int ma
     QVector<QPointF> centroids;
     QVector<int> labels(points.size(), 0);
 
-    // 初始化：選前兩點為初始中心
-    centroids << points[0] << points[1];
+    // 初始化：選前k點為初始中心
+    for(int i=0;i<k;i++){
+        centroids << points[i]; // << points[1];
+    }
 
     for (int iter = 0; iter < maxIter; ++iter) {
         // 分配群組

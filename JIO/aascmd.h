@@ -1,6 +1,9 @@
 #ifndef AASCMD_H
 #define AASCMD_H
 
+#define AAS_GET_MACADDR "GET_MACADDR" // ask to get wifi MAC addr
+#define AAS_MACADDR_DATA "MACADDR_DATA"  // return MAC addr data
+
 #define AAS_GET_SENSORS "GET_SENSORS"  // ask to get sensor data by sensors_call_so
 #define AAS_SENSORS_DATA "SENSORS_DATA"  // return sensor data
 
@@ -9,6 +12,9 @@
 
 #define AAS_GET_AP_INFO "GET_AP_INFO"
 #define AAS_AP_INFO "AP_INFO"
+
+#define AAS_GET_WIFI_QUALITY "GET_WIFI_QUALITY"
+#define AAS_WIFI_QUALITY "WIFI_QUALITY"
 
 #define AAS_GET_BEAMFACTOR "GET_BEAMFACTOR" // get BEAMFACTOR/BEAMType
 #define AAS_SET_BEAMFACTOR "21" // set BEAMFACTOR/BEAMType

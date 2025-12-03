@@ -12,7 +12,7 @@
     "GET_compassPitch":"uci get system.@system[0].compassPitch",
     "GET_SENSORS":"sensors_call_so",
     "GET_GPS":"gps_call_so",
-    "MONOTOR_STA_INFO":"iwpriv rax0 show stainfo",
+    "MONOTOR_STA_INFO":"mwctl rax0 show stainfo",
     "MONOTOR_STA_DATA":{
         "RegExp":"R(^\\s*(?:[0-9a-f]{2}:){5}[0-9a-f]{2}\\s+\\S+\\s+\\d+\\s+\\d+\\s+\\d+/\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+(?<RSSI>\\d+/\\d+/--/--)\\s+(?<SNR>\\d+/\\d+/--/--)\\s+\\S+\\s+\\S+\\s+(?<MCS>\\d+/\\d+)\\s+NA/NA)",
         "Key":"STA "
@@ -33,14 +33,14 @@
     "SET_AP_MU_OFDMA_DL":"",
     "SET_AP_MU_OFDMA_UL":"",
     "IFNAME":["apclix0"],
-    "GET_MAC":"ifconfig %1",
+    "GET_MACADDR":"ifconfig %1",
     "MONOTOR_LOG":"logread -f",
     "RESPONSE":{
         "GET_GPS":"GPS_DATA",
         "GET_RSSI":"RSSI_DATA",
         "GET_MCS":"MCS_DATA",
         "GET_SENSORS":"SENSORS_DATA",
-        "GET_MAC":"MAC_DATA",
+        "GET_MACADDR":"MACADDR_DATA",
         "GET_PRODUCTTYPE":"PRODUCTTYPE",
         "GET_AP_INFO":"AP_INFO_MONITOR"
     },
@@ -56,7 +56,7 @@
         "out_rotation[1]:":"\\s*(-?\\d+\\.\\d+)",
         "Calibration_status_of_the_Sensors:":"\\s*(-?\\d+\\.\\d+)"
     },
-    "MAC_DATA":{
+    "MACADDR_DATA":{
         "HWaddr":"\\s+([0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5})"
     },
     "PRODUCTTYPE":{

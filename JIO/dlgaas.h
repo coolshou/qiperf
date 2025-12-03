@@ -57,7 +57,8 @@ public:
         AIP1=6,
         AIP2=7,
         IPAddr=8,
-        MacAddr=9
+        MacAddr=9,
+        IfName=10
     };
     Q_ENUM(GPScols)
     enum AZEIcols{
@@ -117,6 +118,8 @@ public:
     QString getStMotion(QString target);
     QString getGpsInfo(QString refrow, QString target);
     QString getSensorInfo(QString refrow, QString target);
+    QString getMacInfo(QString refrow, QString target, QString ifname);
+    QString getWiFiQualityInfo(QString refrow, QString target, QString macaddr, int devtype=0); // 0: AP, 1: STA
     void getAPInfo(QString refrow, QString target);
     AIP::ModuleType getModuleType(int row, int col);
     QJsonObject createInitData();
@@ -181,7 +184,7 @@ private slots:
     void onAddRow(QString name, double latitude, double longitude,
                   double altitude, double heading, double pitch,
                   QJsonObject aip1=QJsonObject(), QJsonObject aip2=QJsonObject(),
-                  QString ipaddr="", QString macaddr="");
+                  QString ipaddr="", QString macaddr="", QString ifname="");
     void onClear(bool checked);
     void onLoadCliecked(bool checked);
     void onSaveCliecked(bool checked);
@@ -214,8 +217,9 @@ private slots:
     void onUpdateModelType(int row, int col, int model);
     void onUpdateSetting(QString sshusername, QString sshpassword,
                          QString webusername, QString webpassword,
-                         DlgSet::ControlBy ctl, int duration);
+                         DlgSet::ControlBy ctl, int duration, int interval);
     void onUpdateCalc(QString distance, QString group, int kmeansfactor);
+    void onUpdateIfname(QString apifname, QString clientifname);
     void onLocationReady(const IpLocation& location);
 
     // SSH
@@ -277,9 +281,12 @@ private:
     QString mWebpassword;
     DlgSet::ControlBy  mControlBy; //1 : ssh, 2: qiperfd
     int mDuration;
+    int mInquireInterval;
     QString mCalcDistance;
     QString mCalcGroup;
     int mCalcKmeansFactor;
+    QString mAPIfname;
+    QString mClientIfname;
     IpLocationProvider* provider;
     IpLocation mIpLocation;
     QSsh::SshConnectionParameters m_sshParams;
