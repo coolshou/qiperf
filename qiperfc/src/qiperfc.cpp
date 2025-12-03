@@ -711,7 +711,7 @@ void QIperfC::onRequestExec(QString targetIP, QString idx, QString sCmd)
         QCoreApplication::processEvents(QEventLoop::AllEvents);
         timeout++;
     }
-    //ask remote create serialport and start tcp server on port
+    //ask remote CMD_REQUEST_EXEC
     QString sendstr = QString("%1:%2:%3").arg(CMD_REQUEST_EXEC,
                                               idx,
                                               sCmd);
