@@ -141,6 +141,7 @@ public:
                                 QString Rx1iip3, QString Rx2iip3, QString cmName="");
 
     void initResultHeader(AIP::ModuleType aip1type);
+    void initAIPHeader(AIP::ModuleType aip1type);
 
 public slots:
     void onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg);
@@ -189,9 +190,12 @@ private slots:
     void onLoadCliecked(bool checked);
     void onSaveCliecked(bool checked);
     void onCalcClicked(bool checked);
-    void onSet(bool checked);
+    void onClientBeamDirIDInit(bool checked);
+    void onBeamDirIDCmd(bool checked);
     void onInquireClicked(bool checked);
+    void onAttInit(bool checked=false);
     void onOptimizeClicked(bool checked);
+    void onSet(bool checked);
     void onInquireTimerTimeout();
     void onDisconnected(QString from);
     void onConnected(QString from);
@@ -200,9 +204,6 @@ private slots:
     void onShow3D(bool checked);
     void onToDMS(bool checked);
     void onToDegree(bool checked);
-    void onClientBeamDirIDInit(bool checked);
-    void onAttInit(bool checked=false);
-    void onBeamDirIDCmd(bool checked);
     void showContextMenu(const QPoint &pos);
     void onDeviceCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
     void onLoadFinished(bool ok);

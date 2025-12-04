@@ -1213,20 +1213,21 @@ void DlgAAS::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
         emit addCMBeamIDCmd(cmName, cmd);
     }
 */
+    emit addBeamIDCmd("#---POWER_ON---");
     cmd = mCyntec->getCmd("POWER_ON").arg(c);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
-
+    emit addBeamIDCmd("#---INIT---");
     cmd = mCyntec->getCmd("INIT").arg(c);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
-
+    emit addBeamIDCmd("#---SET_Freq---");
     double freq = ui->cbRFFreq->currentText().toDouble();
     cmd = mCyntec->getCmd("SET_Freq").arg(c, QString::number(freq*10000000, 'f', 0));
     if(cmName.isEmpty()){
@@ -1241,7 +1242,7 @@ void DlgAAS::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
         // 8x8, Att=0dB
         ant="1";
     }
-
+    emit addBeamIDCmd("#---SET_AntArrayMode---");
     cmd = mCyntec->getCmd("SET_AntArrayMode").arg(c, ant, ant, ant, ant);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
@@ -1262,6 +1263,7 @@ void DlgAAS::initCyntecBeamIdCMD(QString c, QString beamid, QString cmName)
     }else{
         cmd = mCyntec->getCmd("SET_BeamID").arg(c, beamid, beamid, beamid, beamid);
     }
+    emit addBeamIDCmd("#---SET_BeamID---");
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
@@ -1276,6 +1278,7 @@ void DlgAAS::initCyntecBeamTxAttCMD(QString c, QString Tx1att, QString Tx2att, Q
     }
     int tx1 = Tx1att.toInt()*4;
     int tx2 = Tx2att.toInt()*4;
+    emit addBeamIDCmd("#---SET_TxAttn---");
     QString cmd = mCyntec->getCmd("SET_TxAttn").arg(c,
                                                     QString::number(tx1),
                                                     QString::number(tx2));
@@ -1295,6 +1298,7 @@ void DlgAAS::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
     //
     int rx1 = Rx1att.toInt()*4;
     int rx2 = Rx2att.toInt()*4;
+    emit addBeamIDCmd("#---SET_RxAttn---");
     QString cmd = mCyntec->getCmd("SET_RxAttn").arg(c, QString::number(rx1),
                                                     QString::number(rx2));
     if(cmName.isEmpty()){
@@ -1305,7 +1309,7 @@ void DlgAAS::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
 
     QList<int> ls = mCyntec->getIntList("RxIP3");
     if ((ls.contains(Rx1iip3.toInt())) && (ls.contains(Rx2iip3.toInt()))){
-        //
+        emit addBeamIDCmd("#---SET_LnaAttn---");
         QString cmd = mCyntec->getCmd("SET_LnaAttn").arg(c,
                                                         Rx1iip3,
                                                         Rx2iip3);
@@ -1404,7 +1408,7 @@ void DlgAAS::getBestBeamID(int idx,
         RxLan="0";
         initCyntecBeamTxAttCMD(c, Tx1, Tx2, "");
         initCyntecBeamRxAttCMD(c, Rx1, Rx2, bfTx1, bfTx2, "");
-        emit addBeamIDCmd("#----------------------------------------------------------------------");
+        emit addBeamIDCmd("#---GET_STATUS---------------------------------------------------------");
         emit addBeamIDCmd(mCyntec->getCmd("GET_STATUS").arg(c));
         emit addBeamIDCmd("#======================================================================");
 
@@ -1485,6 +1489,21 @@ void DlgAAS::initResultHeader(AIP::ModuleType aip1type)
     ui->twResult->setHorizontalHeaderLabels(hls);
 }
 
+void DlgAAS::initAIPHeader(AIP::ModuleType aip1type)
+{
+    //set twAIP Column header
+    QStringList hls;
+    hls << mHeaderAIP;
+    if (aip1type == AIP::ModuleType::Hanwha){
+        hls << mHeaderHanwha;
+    }else if (aip1type == AIP::ModuleType::Cyntec){
+        hls << mHeaderCyntec;
+    }
+    ui->twAIP->setColumnCount(hls.count());
+    ui->twAIP->setHorizontalHeaderLabels(hls);
+}
+
+// 1. Manual Calc
 void DlgAAS::onCalcClicked(bool checked)
 {
     Q_UNUSED(checked)
@@ -1604,16 +1623,7 @@ void DlgAAS::onCalcClicked(bool checked)
         totalel = totalel + el1;
     }
 
-    //set twAIP Column header
-    QStringList hls;
-    hls << mHeaderAIP;
-    if (aip1type == AIP::ModuleType::Hanwha){
-        hls << mHeaderHanwha;
-    }else if (aip1type == AIP::ModuleType::Cyntec){
-        hls << mHeaderCyntec;
-    }
-    ui->twAIP->setColumnCount(hls.count());
-    ui->twAIP->setHorizontalHeaderLabels(hls);
+    initAIPHeader(aip1type);
 
     // AP heading az degree
     double apAzDeg= 0;
@@ -1793,7 +1803,9 @@ void DlgAAS::onCalcClicked(bool checked)
     getBestBeamID(0, apAzDeg, aip1type, clientRs, distMaxR);
     //AP AIP2
     // TODO: AIP2 Az offset
-    getBestBeamID(1, apAzDeg, aip2type, clientLs, distMaxL);
+    if (aip2type != AIP::ModuleType::Unknown){
+        getBestBeamID(1, apAzDeg, aip2type, clientLs, distMaxL);
+    }
 
 }
 
@@ -1811,6 +1823,7 @@ void DlgAAS::onSet(bool checked)
     }
 }
 
+// 4. Inquire Devices
 void DlgAAS::onInquireClicked(bool checked)
 {
     if (checked){
@@ -1831,6 +1844,7 @@ void DlgAAS::onInquireClicked(bool checked)
     }
 }
 
+// 5. Optimize
 void DlgAAS::onOptimizeClicked(bool checked)
 {
     if (checked){
@@ -2060,6 +2074,7 @@ void DlgAAS::onToDegree(bool checked)
     }
 }
 
+// 2. Beam Direction ID/Att init
 void DlgAAS::onClientBeamDirIDInit(bool checked)
 {   Q_UNUSED(checked)
     //calc all Client beam Direction ID by Az/El diff
@@ -2140,6 +2155,7 @@ void DlgAAS::onClientBeamDirIDInit(bool checked)
 
 }
 
+// Att Init
 void DlgAAS::onAttInit(bool checked)
 {
     //init all Client's Att value
@@ -2266,6 +2282,7 @@ void DlgAAS::onAttInit(bool checked)
     }
 }
 
+// 3. Show init command
 void DlgAAS::onBeamDirIDCmd(bool checked)
 {
     Q_UNUSED(checked)
