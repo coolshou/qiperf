@@ -32,7 +32,7 @@
     "SET_RxAttn":"spidev_test -D %1 -A \"1:%2:%3\"",
     "GET_RxAttn":"spidev_test -D %1 -S 2",
     "RxIP3":[0, 2, 4, 6, 8, 10, 12],
-    "SET_LnaAttn":"spidev_test –D %1 –r “%2:%3”",
+    "SET_LnaAttn":"spidev_test –D %1 –r \"%2:%3\"",
     "GET_LnaAttn":"spidev_test -D %1 -S 2",
     "ATC_OFF":"",
     "ATC_ON":"",
