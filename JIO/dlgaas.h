@@ -127,17 +127,17 @@ public:
                        QList<QTableWidgetItem*> cm7rs, double maxDistance=0.0);
     int findClosestBeamID(double targetAz, double targetEl,
                           QString beamtype="Narrow", int beamfactor=1);
-    void initHanwhaBeamCMD(QString c, QString antarraymode="8x8", QString cmName="");
-    void initHanwhaBeamIdCMD(QString c, QString beamid, QString cmName="");
-    void initHanwhaBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
+    void initHanwhaBeamCMD(QString devicename, QString antarraymode="8x8", QString cmName="");
+    void initHanwhaBeamIdCMD(QString devicename, QString beamid, QString cmName="");
+    void initHanwhaBeamTxAttCMD(QString devicename, QString bfTx1, QString bfTx2,
                           QString Tx1att, QString Tx2att, QString cmName="");
-    void initHanwhaBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
+    void initHanwhaBeamRxAttCMD(QString devicename, QString bfRx1, QString bfRx2,
                           QString Rx1att, QString Rx2att, QString RxLan,
                           QString cmName="");
-    void initCyntecBeamCMD(QString c, QString antarraymode="8x8", QString cmName="");
-    void initCyntecBeamIdCMD(QString c, QString beamid, QString cmName="");
-    void initCyntecBeamTxAttCMD(QString c, QString Tx1att, QString Tx2att, QString cmName="");
-    void initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
+    void initCyntecBeamCMD(QString devicename, QString antarraymode="8x8", QString cmName="");
+    void initCyntecBeamIdCMD(QString devicename, QString beamid, QString cmName="");
+    void initCyntecBeamTxAttCMD(QString devicename, QString Tx1att, QString Tx2att, QString cmName="");
+    void initCyntecBeamRxAttCMD(QString devicename, QString Rx1att, QString Rx2att,
                                 QString Rx1iip3, QString Rx2iip3, QString cmName="");
 
     void initResultHeader(AIP::ModuleType aip1type);

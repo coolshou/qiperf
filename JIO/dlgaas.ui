@@ -475,6 +475,9 @@
               <property name="horizontalScrollBarPolicy">
                <enum>Qt::ScrollBarAsNeeded</enum>
               </property>
+              <property name="rowCount">
+               <number>0</number>
+              </property>
               <attribute name="horizontalHeaderDefaultSectionSize">
                <number>50</number>
               </attribute>
@@ -484,19 +487,12 @@
               <attribute name="verticalHeaderDefaultSectionSize">
                <number>30</number>
               </attribute>
+              <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+               <bool>false</bool>
+              </attribute>
               <attribute name="verticalHeaderStretchLastSection">
                <bool>false</bool>
               </attribute>
-              <row>
-               <property name="text">
-                <string>AIP1</string>
-               </property>
-              </row>
-              <row>
-               <property name="text">
-                <string>AIP2</string>
-               </property>
-              </row>
               <column>
                <property name="text">
                 <string>Azimuth(°)</string>

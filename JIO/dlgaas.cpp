@@ -182,7 +182,8 @@ void DlgAAS::clearData(bool askclear)
     }
     if (ui->twAIP->rowCount()>0){
         ui->twAIP->clearContents();
-        ui->twAIP->setRowCount(2);
+        // ui->twAIP->setRowCount(2);
+        ui->twAIP->setRowCount(0);
     }
     if (m_dlgGeo){
         m_dlgGeo->clearAllPlot();
@@ -1090,30 +1091,30 @@ void DlgAAS::onSaveCliecked(bool checked)
     }
 }
 
-void DlgAAS::initHanwhaBeamCMD(QString c, QString antarraymode, QString cmName)
+void DlgAAS::initHanwhaBeamCMD(QString devicename, QString antarraymode, QString cmName)
 {
-    QString cmd = mHanwha->getCmd("POWER_OFF").arg(c);
+    QString cmd = mHanwha->getCmd("POWER_OFF").arg(devicename);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
 
-    cmd =mHanwha->getCmd("POWER_ON").arg(c);
+    cmd =mHanwha->getCmd("POWER_ON").arg(devicename);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
 
-    cmd = mHanwha->getCmd("INIT").arg(c);
+    cmd = mHanwha->getCmd("INIT").arg(devicename);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
 
-    cmd = mHanwha->getCmd("REG").arg(c);
+    cmd = mHanwha->getCmd("REG").arg(devicename);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
@@ -1123,7 +1124,7 @@ void DlgAAS::initHanwhaBeamCMD(QString c, QString antarraymode, QString cmName)
     double freq = ui->cbRFFreq->currentText().toDouble();
     QString fidx = mHanwha->getFreqIdx(freq);
     if (fidx != "") {
-        cmd = mHanwha->getCmd("SET_Freq").arg(c, fidx);
+        cmd = mHanwha->getCmd("SET_Freq").arg(devicename, fidx);
         if(cmName.isEmpty()){
             emit addBeamIDCmd(cmd);
         }else{
@@ -1133,7 +1134,7 @@ void DlgAAS::initHanwhaBeamCMD(QString c, QString antarraymode, QString cmName)
         qDebug() << "Did not get freq id :" << freq;
     }
 
-    cmd = mHanwha->getCmd("SET_AntArrayMode").arg(c, antarraymode);
+    cmd = mHanwha->getCmd("SET_AntArrayMode").arg(devicename, antarraymode);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
@@ -1141,13 +1142,13 @@ void DlgAAS::initHanwhaBeamCMD(QString c, QString antarraymode, QString cmName)
     }
 }
 
-void DlgAAS::initHanwhaBeamIdCMD(QString c, QString beamid, QString cmName)
+void DlgAAS::initHanwhaBeamIdCMD(QString devicename, QString beamid, QString cmName)
 {
     QString cmd="";
     if (beamid.contains("TODO")){
         cmd = beamid;
     }else {
-        cmd = mHanwha->getCmd("SET_BeamID").arg(c, beamid);
+        cmd = mHanwha->getCmd("SET_BeamID").arg(devicename, beamid);
     }
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
@@ -1156,17 +1157,17 @@ void DlgAAS::initHanwhaBeamIdCMD(QString c, QString beamid, QString cmName)
     }
 }
 
-void DlgAAS::initHanwhaBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
+void DlgAAS::initHanwhaBeamTxAttCMD(QString devicename, QString bfTx1, QString bfTx2,
                               QString Tx1att, QString Tx2att, QString cmName)
 {
-    QString cmd = mHanwha->getCmd("SET_TxTotalAttn").arg(c, bfTx1, bfTx2);
+    QString cmd = mHanwha->getCmd("SET_TxTotalAttn").arg(devicename, bfTx1, bfTx2);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
 
-    cmd = mHanwha->getCmd("SET_TxAttn").arg(c, Tx1att, Tx2att);
+    cmd = mHanwha->getCmd("SET_TxAttn").arg(devicename, Tx1att, Tx2att);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
@@ -1174,24 +1175,24 @@ void DlgAAS::initHanwhaBeamTxAttCMD(QString c, QString bfTx1, QString bfTx2,
     }
 }
 
-void DlgAAS::initHanwhaBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
+void DlgAAS::initHanwhaBeamRxAttCMD(QString devicename, QString bfRx1, QString bfRx2,
                               QString Rx1att, QString Rx2att, QString RxLan,
                               QString cmName)
 {
-    QString cmd = mHanwha->getCmd("SET_RxTotalAttn").arg(c, bfRx1, bfRx2);
+    QString cmd = mHanwha->getCmd("SET_RxTotalAttn").arg(devicename, bfRx1, bfRx2);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
-    cmd = mHanwha->getCmd("SET_RxAttn").arg(c, Rx1att,Rx2att);
+    cmd = mHanwha->getCmd("SET_RxAttn").arg(devicename, Rx1att,Rx2att);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
     // Rx lan att
-    cmd = mHanwha->getCmd("SET_LnaAttn").arg(c, RxLan);
+    cmd = mHanwha->getCmd("SET_LnaAttn").arg(devicename, RxLan);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
@@ -1199,14 +1200,14 @@ void DlgAAS::initHanwhaBeamRxAttCMD(QString c, QString bfRx1, QString bfRx2,
     }
 }
 
-void DlgAAS::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
+void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString cmName)
 {
-    if (c.isEmpty()){
-        c="/dev/spidev2.0";
+    if (devicename.isEmpty()){
+        devicename="/dev/spidev2.0";
     }
     QString cmd ="";
 /*
-    QString cmd = mCyntec->getCmd("POWER_OFF").arg(c);
+    QString cmd = mCyntec->getCmd("POWER_OFF").arg(devicename);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
@@ -1214,14 +1215,14 @@ void DlgAAS::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
     }
 */
     emit addBeamIDCmd("#---POWER_ON---");
-    cmd = mCyntec->getCmd("POWER_ON").arg(c);
+    cmd = mCyntec->getCmd("POWER_ON").arg(devicename);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
     emit addBeamIDCmd("#---INIT---");
-    cmd = mCyntec->getCmd("INIT").arg(c);
+    cmd = mCyntec->getCmd("INIT").arg(devicename);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
@@ -1229,7 +1230,7 @@ void DlgAAS::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
     }
     emit addBeamIDCmd("#---SET_Freq---");
     double freq = ui->cbRFFreq->currentText().toDouble();
-    cmd = mCyntec->getCmd("SET_Freq").arg(c, QString::number(freq*10000000, 'f', 0));
+    cmd = mCyntec->getCmd("SET_Freq").arg(devicename, QString::number(freq*10000000, 'f', 0));
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
@@ -1243,7 +1244,7 @@ void DlgAAS::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
         ant="1";
     }
     emit addBeamIDCmd("#---SET_AntArrayMode---");
-    cmd = mCyntec->getCmd("SET_AntArrayMode").arg(c, ant, ant, ant, ant);
+    cmd = mCyntec->getCmd("SET_AntArrayMode").arg(devicename, ant, ant, ant, ant);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
     }else{
@@ -1252,16 +1253,16 @@ void DlgAAS::initCyntecBeamCMD(QString c, QString antarraymode, QString cmName)
 
 }
 
-void DlgAAS::initCyntecBeamIdCMD(QString c, QString beamid, QString cmName)
+void DlgAAS::initCyntecBeamIdCMD(QString devicename, QString beamid, QString cmName)
 {
-    if (c.isEmpty()){
-        c="/dev/spidev2.0";
+    if (devicename.isEmpty()){
+        devicename="/dev/spidev2.0";
     }
     QString cmd = "";
     if (beamid.contains("TODO")){
         cmd = beamid;
     }else{
-        cmd = mCyntec->getCmd("SET_BeamID").arg(c, beamid, beamid, beamid, beamid);
+        cmd = mCyntec->getCmd("SET_BeamID").arg(devicename, beamid, beamid, beamid, beamid);
     }
     emit addBeamIDCmd("#---SET_BeamID---");
     if(cmName.isEmpty()){
@@ -1271,15 +1272,15 @@ void DlgAAS::initCyntecBeamIdCMD(QString c, QString beamid, QString cmName)
     }
 }
 
-void DlgAAS::initCyntecBeamTxAttCMD(QString c, QString Tx1att, QString Tx2att, QString cmName)
+void DlgAAS::initCyntecBeamTxAttCMD(QString devicename, QString Tx1att, QString Tx2att, QString cmName)
 {
-    if (c.isEmpty()){
-        c="/dev/spidev2.0";
+    if (devicename.isEmpty()){
+        devicename="/dev/spidev2.0";
     }
     int tx1 = Tx1att.toInt()*4;
     int tx2 = Tx2att.toInt()*4;
     emit addBeamIDCmd("#---SET_TxAttn---");
-    QString cmd = mCyntec->getCmd("SET_TxAttn").arg(c,
+    QString cmd = mCyntec->getCmd("SET_TxAttn").arg(devicename,
                                                     QString::number(tx1),
                                                     QString::number(tx2));
     if(cmName.isEmpty()){
@@ -1289,17 +1290,17 @@ void DlgAAS::initCyntecBeamTxAttCMD(QString c, QString Tx1att, QString Tx2att, Q
     }
 }
 
-void DlgAAS::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
+void DlgAAS::initCyntecBeamRxAttCMD(QString devicename, QString Rx1att, QString Rx2att,
                                     QString Rx1iip3, QString Rx2iip3, QString cmName)
 {
-    if (c.isEmpty()){
-        c="/dev/spidev2.0";
+    if (devicename.isEmpty()){
+        devicename="/dev/spidev2.0";
     }
     //
     int rx1 = Rx1att.toInt()*4;
     int rx2 = Rx2att.toInt()*4;
     emit addBeamIDCmd("#---SET_RxAttn---");
-    QString cmd = mCyntec->getCmd("SET_RxAttn").arg(c, QString::number(rx1),
+    QString cmd = mCyntec->getCmd("SET_RxAttn").arg(devicename, QString::number(rx1),
                                                     QString::number(rx2));
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
@@ -1310,7 +1311,7 @@ void DlgAAS::initCyntecBeamRxAttCMD(QString c, QString Rx1att, QString Rx2att,
     QList<int> ls = mCyntec->getIntList("RxIP3");
     if ((ls.contains(Rx1iip3.toInt())) && (ls.contains(Rx2iip3.toInt()))){
         emit addBeamIDCmd("#---SET_LnaAttn---");
-        QString cmd = mCyntec->getCmd("SET_LnaAttn").arg(c,
+        QString cmd = mCyntec->getCmd("SET_LnaAttn").arg(devicename,
                                                         Rx1iip3,
                                                         Rx2iip3);
         if(cmName.isEmpty()){
@@ -1669,14 +1670,12 @@ void DlgAAS::onCalcClicked(bool checked)
         if (mCalcGroup.contains("Kmeans")) {
             QVector<QPointF> points = polarToXY(azbearings, distances);
             // qDebug() << "points:" << points;
-            // int k = ui->sbKmeansKFactor->value();
             if (points.count() < mCalcKmeansFactor){
                 qDebug() << "polarToXY points: " << points.count()
                          << " mCalcKmeansFactor: " << mCalcKmeansFactor ;
-                QMessageBox::warning(this, tr("WARNING!!"),
-                                     QString(tr("KmeansFactor %1 > %2(polarToXY count)").arg(mCalcKmeansFactor,
-                                                                                             points.count())),
-                                     QMessageBox::Ok);
+                QString msg= QString("KmeansFactor %1 > %2 (polarToXY count)").arg(mCalcKmeansFactor,
+                                                                           points.count());
+                QMessageBox::warning(this, tr("WARNING!!"), msg, QMessageBox::Ok);
                 return;
             }
             labels = kMeansCluster(points, mCalcKmeansFactor);
@@ -1800,10 +1799,12 @@ void DlgAAS::onCalcClicked(bool checked)
 
     //AP AIP1 Az, El
     // TODO: AIP1 Az offset
+    ui->twAIP->setRowCount(1);
     getBestBeamID(0, apAzDeg, aip1type, clientRs, distMaxR);
     //AP AIP2
     // TODO: AIP2 Az offset
     if (aip2type != AIP::ModuleType::Unknown){
+        ui->twAIP->setRowCount(2);
         getBestBeamID(1, apAzDeg, aip2type, clientLs, distMaxL);
     }
 
@@ -1819,6 +1820,7 @@ void DlgAAS::onSet(bool checked)
         m_dlgset->setDuration(mDuration);
         m_dlgset->setInquireInterval(mInquireInterval);
         m_dlgset->setIfname(mAPIfname, mClientIfname);
+        m_dlgset->setCalc(mCalcDistance, mCalcGroup, mCalcKmeansFactor);
         m_dlgset->show();
     }
 }
