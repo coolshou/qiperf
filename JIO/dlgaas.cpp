@@ -258,9 +258,10 @@ QString DlgAAS::getMacInfo(QString refrow, QString target, QString ifname)
         qDebug() << "//TODO: getMacInfo by SSH";
 
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
-        QString cmd = QString("%1:%2").arg(AAS_GET_MACADDR,
-                                           jiocmdObj.value(AAS_GET_MACADDR).toString().arg(ifname));
+        QString tcmd = jiocmdObj.value(AAS_GET_MACADDR).toString().arg(ifname);
+        QString cmd = QString("%1:%2").arg(AAS_GET_MACADDR, tcmd);
         // qDebug() << "AAS_GET_SENSORS=" << target << " cmd=> " << cmd;
+        qDebug() << "target " << target << " getMacInfo:" << cmd;
         emit requestExec(target, refrow, cmd);
     }
     return result;
@@ -1325,7 +1326,7 @@ void DlgAAS::initCyntecBeamRxAttCMD(QString devicename, QString Rx1att, QString 
 }
 
 void DlgAAS::getBestBeamID(int idx,
-                           double azimuthDegree,
+                           double azimuthDegree, double elDegree,
                            AIP::ModuleType aiptype, QList<QTableWidgetItem*> cm7rs,
                            double maxDistance)
 {
@@ -1358,7 +1359,8 @@ void DlgAAS::getBestBeamID(int idx,
     ui->twAIP->setItem(idx, AIPcols::Azimuth,
                        new QTableWidgetItem(QString::number(aipaz)));
     ui->twAIP->setItem(idx, AIPcols::Elevation,
-                       new QTableWidgetItem(ui->leAPel->text()));
+                       new QTableWidgetItem(QString::number(elDegree)));
+                       // new QTableWidgetItem(ui->leAPel->text()));
     ui->twAIP->setItem(idx, AIPcols::Azdiff,
                        new QTableWidgetItem(QString::number(aipazdiff)));
     //Get best Cyntec/Hanwha AP id
@@ -1628,6 +1630,7 @@ void DlgAAS::onCalcClicked(bool checked)
 
     // AP heading az degree
     double apAzDeg= 0;
+    double elDegree = 0;
     double distMaxR=0.0;
     double distMaxL=0.0;
     double distR=0.0;
@@ -1640,173 +1643,201 @@ void DlgAAS::onCalcClicked(bool checked)
     QList<QTableWidgetItem*> clientRs;
     QList<QTableWidgetItem*> clientLs;
 
-    if ((mCalcGroup.contains("DBSCAN"))||
-        (mCalcGroup.contains("Kmeans"))  ){
-        QVector<int> labels;
-        if (mCalcGroup.contains("DBSCAN")) {
-            QVector<QPointF> polarPoints;
+    int iClient = ui->twResult->rowCount();
+    //AP El(Pitch)
+    elDegree = totalel/iClient;
+    ui->leAPel->setText(QString::number(elDegree, 'f', 1));
 
-            for (int i = 0; i < azbearings.size(); ++i) {
-                double mathAngle = std::fmod(90.0 - azbearings[i] + 360.0, 360.0);
-                double rad = qDegreesToRadians(mathAngle);
-                double r = distances[i];
-                polarPoints.append(QPointF(r * std::cos(rad), r * std::sin(rad)));
-            }
-            int minPts = 1;
-            if (polarPoints.size()<=4){
-                minPts = 2;
-            }
-            QVector<double> kDistances = computeKDistances(polarPoints, minPts);
-            qDebug() << "kDistances:" << kDistances;
-            double eps = detectElbow(kDistances);
-            qDebug() << "eps:" << eps;
-            labels = dbscan(polarPoints, eps, minPts); // eps=0.2, minPts=1 (mini points)
-
-            for (int i = 0; i < labels.size(); ++i) {
-                qDebug() << "Azimuth:" << azbearings[i]
-                         << "-> Group:" << labels[i];
-            }
+    if (iClient==1){
+        ui->twAIP->setRowCount(1);
+        // if we have only one Client, use AIP1 with nerrow beam to focus client
+        QTableWidgetItem *elitm = ui->twResult->item(0, AZEIcols::P1Elevation);
+        QTableWidgetItem *ditm = ui->twResult->item(0, AZEIcols::Distance);
+        QTableWidgetItem *itm = ui->twResult->item(0, AZEIcols::P1Azimuth);
+        if (itm){
+            apAzDeg = itm->text().toDouble();
+            qDebug() << "AP az:" << apAzDeg;
+            elDegree = elitm->text().toDouble();
+            qDebug() << "AP el:" << elDegree;
+            distMaxR = ditm->text().toDouble();
+            qDebug() << "AP Distance:" << distMaxR;
+            clientRs.append(itm);
+            getBestBeamID(0, apAzDeg, elDegree, aip1type, clientRs, distMaxR);
         }
-        if (mCalcGroup.contains("Kmeans")) {
-            QVector<QPointF> points = polarToXY(azbearings, distances);
-            // qDebug() << "points:" << points;
-            if (points.count() < mCalcKmeansFactor){
-                qDebug() << "polarToXY points: " << points.count()
-                         << " mCalcKmeansFactor: " << mCalcKmeansFactor ;
-                QString msg= QString("KmeansFactor %1 > %2 (polarToXY count)").arg(mCalcKmeansFactor,
-                                                                           points.count());
-                QMessageBox::warning(this, tr("WARNING!!"), msg, QMessageBox::Ok);
-                return;
-            }
-            labels = kMeansCluster(points, mCalcKmeansFactor);
+    }else {
 
-            for (int i = 0; i < azbearings.size(); ++i) {
-                qDebug() << "Azimuth:" << azbearings[i]
-                         << "Distance:" << distances[i]
-                         << "-> Group" << labels[i];
-            }
-        }
-        for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
-            QTableWidgetItem *nitm = ui->twResult->item(iRow, AZEIcols::Name);
-            QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::Distance);
-            QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
-            if (itm){
-                int g = labels[iRow];
-                if (g==0){
-                    nitm->setBackground(QBrush(lColor));
-                    nitm->setToolTip("Client-FirstQuadrant");
-                    itm->setData(Qt::UserRole, "AIP1");
-                    clientRs.append(itm);
-                    distR =ditm->text().toDouble()*1000;
-                    if (distR>distMaxR){
-                        distMaxR = distR;
-                    }
-                }else if (g==1){
-                    nitm->setBackground(QBrush(rColor));
-                    nitm->setToolTip("Client-FourthQuadrant");
-                    itm->setData(Qt::UserRole, "AIP2");
-                    clientLs.append(itm);
-                    distL =ditm->text().toDouble()*1000;
-                    if (distL>distMaxL){
-                        distMaxL = distL;
-                    }
-                }else {
-                    nitm->setBackground(QBrush(nColor));
+        // client >= 2
+        // check if clients can fit into a AIP's beam
+        // no -> require use two AIP
+        ui->twAIP->setRowCount(2);
+        //       setup each AIP for clients
+
+
+        if ((mCalcGroup.contains("DBSCAN"))||
+            (mCalcGroup.contains("Kmeans"))  ){
+            QVector<int> labels;
+            if (mCalcGroup.contains("DBSCAN")) {
+                QVector<QPointF> polarPoints;
+
+                for (int i = 0; i < azbearings.size(); ++i) {
+                    double mathAngle = std::fmod(90.0 - azbearings[i] + 360.0, 360.0);
+                    double rad = qDegreesToRadians(mathAngle);
+                    double r = distances[i];
+                    polarPoints.append(QPointF(r * std::cos(rad), r * std::sin(rad)));
+                }
+                int minPts = 1;
+                if (polarPoints.size()<=4){
+                    minPts = 2;
+                }
+                QVector<double> kDistances = computeKDistances(polarPoints, minPts);
+                qDebug() << "kDistances:" << kDistances;
+                double eps = detectElbow(kDistances);
+                qDebug() << "eps:" << eps;
+                labels = dbscan(polarPoints, eps, minPts); // eps=0.2, minPts=1 (mini points)
+
+                for (int i = 0; i < labels.size(); ++i) {
+                    qDebug() << "Azimuth:" << azbearings[i]
+                             << "-> Group:" << labels[i];
                 }
             }
+            if (mCalcGroup.contains("Kmeans")) {
+                QVector<QPointF> points = polarToXY(azbearings, distances);
+                // qDebug() << "points:" << points;
+                if (points.count() < mCalcKmeansFactor){
+                    qDebug() << "polarToXY points: " << points.count()
+                    << " mCalcKmeansFactor: " << mCalcKmeansFactor ;
+                    QString msg= QString("KmeansFactor %1 > %2 (polarToXY count)").arg(mCalcKmeansFactor,
+                                                                                        points.count());
+                    QMessageBox::warning(this, tr("WARNING!!"), msg, QMessageBox::Ok);
+                    return;
+                }
+                labels = kMeansCluster(points, mCalcKmeansFactor);
+
+                for (int i = 0; i < azbearings.size(); ++i) {
+                    qDebug() << "Azimuth:" << azbearings[i]
+                             << "Distance:" << distances[i]
+                             << "-> Group" << labels[i];
+                }
+            }
+            for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
+                QTableWidgetItem *nitm = ui->twResult->item(iRow, AZEIcols::Name);
+                QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::Distance);
+                QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
+                if (itm){
+                    int g = labels[iRow];
+                    if (g==0){
+                        nitm->setBackground(QBrush(lColor));
+                        nitm->setToolTip("Client-FirstQuadrant");
+                        itm->setData(Qt::UserRole, "AIP1");
+                        clientRs.append(itm);
+                        distR =ditm->text().toDouble()*1000;
+                        if (distR>distMaxR){
+                            distMaxR = distR;
+                        }
+                    }else if (g==1){
+                        nitm->setBackground(QBrush(rColor));
+                        nitm->setToolTip("Client-FourthQuadrant");
+                        itm->setData(Qt::UserRole, "AIP2");
+                        clientLs.append(itm);
+                        distL =ditm->text().toDouble()*1000;
+                        if (distL>distMaxL){
+                            distMaxL = distL;
+                        }
+                    }else {
+                        nitm->setBackground(QBrush(nColor));
+                    }
+                }
+            }
+            // AP right Clients
+            QVector<double> azbears;
+            foreach(auto itm, clientRs){
+                azbears.append(itm->text().toDouble());
+            }
+            double apr = averageBearing(azbears);
+            // AP Left Clients
+            azbears.clear();
+            foreach(auto itm, clientLs){
+                azbears.append(itm->text().toDouble());
+            }
+            double apl = averageBearing(azbears);
+            // center of left & right
+            azbears.clear();
+            azbears.append(apr);
+            azbears.append(apl);
+            apAzDeg  = averageBearing(azbears);
         }
-        // AP right Clients
-        QVector<double> azbears;
-        foreach(auto itm, clientRs){
-            azbears.append(itm->text().toDouble());
+        if (mCalcGroup.contains("Avg")) {
+            // AP az
+            apAzDeg = averageBearing(azbearings);
+            // use AP azimuth Degree divide Client into Quadrant 1 or Quadrant 4
+            for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
+                QTableWidgetItem *nitm = ui->twResult->item(iRow, AZEIcols::Name);
+                QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::Distance);
+                QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
+                if (itm){
+                    amcmaz = itm->text().toDouble();
+                    relative = fmod((amcmaz - apAzDeg + 360), 360);
+                    // qDebug() << "amcmaz:" << amcmaz << "  relative:" << relative;
+                    if (relative > 0 && relative < 90){
+                        //azimuthDegree 的第一象限
+                        nitm->setBackground(QBrush(lColor));
+                        nitm->setToolTip("Client-FirstQuadrant");
+                        itm->setData(Qt::UserRole, "AIP1");
+                        clientRs.append(itm);
+                        distR =ditm->text().toDouble()*1000;
+                        if (distR>distMaxR){
+                            distMaxR = distR;
+                        }
+                    }else if (relative > 270 && relative < 360){
+                        //azimuthDegree 的第四象限
+                        nitm->setBackground(QBrush(rColor));
+                        nitm->setToolTip("Client-FourthQuadrant");
+                        itm->setData(Qt::UserRole, "AIP2");
+                        clientLs.append(itm);
+                        distL =ditm->text().toDouble()*1000;
+                        if (distL>distMaxL){
+                            distMaxL = distL;
+                        }
+                    }else{
+                        qDebug() << "No in Coverage range";
+                        nitm->setBackground(QBrush(nColor));
+                    }
+                }
+            }
+            // 1. get clientRs Max and Min value
+            // diff = |Max - Min|
+            // check diff < 3dB Az BW
+            // Max, Min should not over AM7az ± dirBW ± 3dB_AzBW/2
+            // ui->tableWidget->item(0, GPScols::AIP1); //cyntec or hanwha
+
         }
-        double apr = averageBearing(azbears);
-        // AP Left Clients
-        azbears.clear();
-        foreach(auto itm, clientLs){
-            azbears.append(itm->text().toDouble());
-        }
-        double apl = averageBearing(azbears);
-        // center of left & right
-        azbears.clear();
-        azbears.append(apr);
-        azbears.append(apl);
-        apAzDeg  = averageBearing(azbears);
-    }
-    if (mCalcGroup.contains("Avg")) {
-        // AP az
-        apAzDeg = averageBearing(azbearings);
-        // use AP azimuth Degree divide Client into Quadrant 1 or Quadrant 4
+        //TODO check if any client in AP's guard band (+-3.5)
         for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
-            QTableWidgetItem *nitm = ui->twResult->item(iRow, AZEIcols::Name);
-            QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::Distance);
+            // QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::P2Azimuth);
             QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
             if (itm){
                 amcmaz = itm->text().toDouble();
-                relative = fmod((amcmaz - apAzDeg + 360), 360);
-                // qDebug() << "amcmaz:" << amcmaz << "  relative:" << relative;
-                if (relative > 0 && relative < 90){
-                    //azimuthDegree 的第一象限
-                    nitm->setBackground(QBrush(lColor));
-                    nitm->setToolTip("Client-FirstQuadrant");
-                    itm->setData(Qt::UserRole, "AIP1");
-                    clientRs.append(itm);
-                    distR =ditm->text().toDouble()*1000;
-                    if (distR>distMaxR){
-                        distMaxR = distR;
-                    }
-                }else if (relative > 270 && relative < 360){
-                    //azimuthDegree 的第四象限
-                    nitm->setBackground(QBrush(rColor));
-                    nitm->setToolTip("Client-FourthQuadrant");
-                    itm->setData(Qt::UserRole, "AIP2");
-                    clientLs.append(itm);
-                    distL =ditm->text().toDouble()*1000;
-                    if (distL>distMaxL){
-                        distMaxL = distL;
-                    }
-                }else{
-                    qDebug() << "No in Coverage range";
-                    nitm->setBackground(QBrush(nColor));
+                if (isAzimuthClose(amcmaz, apAzDeg)){
+                    itm->setBackground(QBrush("red"));
                 }
             }
         }
-        // 1. get clientRs Max and Min value
-        // diff = |Max - Min|
-        // check diff < 3dB Az BW
-        // Max, Min should not over AM7az ± dirBW ± 3dB_AzBW/2
-        // ui->tableWidget->item(0, GPScols::AIP1); //cyntec or hanwha
+        //TODO check if any Client is outside AP beamID's HPAz/HPEl range
 
-    }
-    //TODO check if any client in AP's guard band (+-3.5)
-    for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
-        // QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::P2Azimuth);
-        QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
-        if (itm){
-            amcmaz = itm->text().toDouble();
-            if (isAzimuthClose(amcmaz, apAzDeg)){
-                itm->setBackground(QBrush("red"));
-            }
+
+        //AP AIP1 Az, El
+        // TODO: AIP1 Az offset
+
+        getBestBeamID(0, apAzDeg, elDegree, aip1type, clientRs, distMaxR);
+        //AP AIP2
+        // TODO: AIP2 Az offset
+        if (aip2type != AIP::ModuleType::Unknown){
+
+            getBestBeamID(1, apAzDeg, elDegree, aip2type, clientLs, distMaxL);
         }
     }
-    //TODO check if any Client is outside AP beamID's HPAz/HPEl range
-
-    //show on UI
+    //AP AZ show on UI
     ui->leAPaz->setText(QString::number(apAzDeg, 'f', 1));
-    // AP Pitch
-    double elDegree = totalel/ui->twResult->rowCount();
-    ui->leAPel->setText(QString::number(elDegree, 'f', 1));
-
-    //AP AIP1 Az, El
-    // TODO: AIP1 Az offset
-    ui->twAIP->setRowCount(1);
-    getBestBeamID(0, apAzDeg, aip1type, clientRs, distMaxR);
-    //AP AIP2
-    // TODO: AIP2 Az offset
-    if (aip2type != AIP::ModuleType::Unknown){
-        ui->twAIP->setRowCount(2);
-        getBestBeamID(1, apAzDeg, aip2type, clientLs, distMaxL);
-    }
 
 }
 
@@ -1934,7 +1965,6 @@ void DlgAAS::onOptimizeClicked(bool checked)
 void DlgAAS::onInquireTimerTimeout()
 {
     if (ui->tableWidget->rowCount()>0){
-        qDebug() << "do Inquire";
         WSClient *client;
         for (int row=0; row < ui->tableWidget->rowCount(); row++){
             QCoreApplication::processEvents(QEventLoop::AllEvents);
@@ -2124,7 +2154,7 @@ void DlgAAS::onClientBeamDirIDInit(bool checked)
             //get beam Direction ID
             emit addClientBeamIDCmd(client, "# "+client);
             if (aiptype == AIP::ModuleType::Cyntec){
-                initCyntecBeamCMD("", "8x8", client);
+                initCyntecBeamCMD("", "8x8", client); // TODO: nerrow's 8x8
             }else if (aiptype == AIP::ModuleType::Hanwha){
                 initHanwhaBeamCMD("", "8x8", client);
             }else {

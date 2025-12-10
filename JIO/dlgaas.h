@@ -123,7 +123,8 @@ public:
     void getAPInfo(QString refrow, QString target);
     AIP::ModuleType getModuleType(int row, int col);
     QJsonObject createInitData();
-    void getBestBeamID(int idx, double azimuthDegree, AIP::ModuleType aip1type,
+    void getBestBeamID(int idx, double azimuthDegree, double elDegree,
+                       AIP::ModuleType aip1type,
                        QList<QTableWidgetItem*> cm7rs, double maxDistance=0.0);
     int findClosestBeamID(double targetAz, double targetEl,
                           QString beamtype="Narrow", int beamfactor=1);
