@@ -1538,6 +1538,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
     }else if (act.startsWith(CMD_DEBUG_LV)){
         emit setDebugLv(msg.toInt());
     }else if (act.startsWith(CMD_REQUEST_EXEC)){
+        // REQUEST_EXEC:refid:reqcmd:msg
         cut = msg.indexOf(':', 0);
         QString refid = msg.left(cut); //
         msg = msg.right(msg.length()-cut-1);
@@ -2096,8 +2097,8 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
              << " reqcmd:" << reqcmd
              << " exec cmd:" << cmds;
     QString rpcmd="";
-    // qDebug() << "runRequest jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
-
+    qDebug() << "runRequest reqcmd:" << reqcmd << " cmds:" << cmds;
+    qDebug() << "jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
     if (jiocmdRespObj.contains(reqcmd)){
         rpcmd = jiocmdRespObj.value(reqcmd).toString();
     }else {
