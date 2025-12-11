@@ -568,7 +568,6 @@ void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd,
             qDebug() << "Wrong format of AAS_SENSORS_DATA msg:(" << error.errorString() << ")\n";
         }
     }else if (cmd.contains(AAS_MACADDR_DATA)){
-        qDebug() << "AAS_MACADDR_DATA: " << msg;
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
             QJsonObject obj = doc.object();
@@ -577,10 +576,11 @@ void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd,
                 QJsonObject d = jiocmdObj.value(AAS_MACADDR_DATA).toObject();
                 QStringList keys = d.keys();
                 if (keys.count()>=1){
-                    // qDebug() << "AAS_MACADDR_DATA: " << keys.value(0);//.toStdString();
                     itm->setText(obj.value(keys.value(0)).toString());
                 }
             }
+        }else{
+            qDebug() << "Wrong format of AAS_MACADDR_DATA msg:(" << error.errorString() << ")\n";
         }
     }else if (cmd.contains(AAS_AP_INFO)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
@@ -1252,7 +1252,7 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
 
     QString ant="1";
     if (antarraymode=="8x8"){
-        qDebug() << "TODO: initCyntecBeamCMD other ant array mode";
+        qDebug() << "TODO: initCyntecBeamCMD other ant array mode: " << antarraymode;
         // 8x8, Att=0dB
         ant="1";
     }
@@ -2202,7 +2202,7 @@ void DlgAAS::onClientBeamDirIDInit(bool checked)
 // Att Init
 void DlgAAS::onAttInit(bool checked)
 {
-    //init all Client's Att value
+    //init all Client's Att value, NOT USING?
     Q_UNUSED(checked)
     QString client="";
     AIP::ModuleType aiptype = AIP::ModuleType::Unknown;
