@@ -35,9 +35,9 @@ public:
     double getAz(int BeamID);
     double getTargetEIRP(double dist);
     int getBestBeamID(double minaz, double maxaz, double minel, double maxel);
-    QVector<double> getTxAtt(double dist);
-    QVector<double> getRxAtt(double dist);
-    QVector<double> getBFAtt(double dist);
+    QVector<double> getTxAtt(double distance);
+    QVector<double> getRxAtt(double distance);
+    QVector<double> getBFAtt(double distance);
     QString getCmd(QString key);
     QList<int> getIntList(QString key);
 

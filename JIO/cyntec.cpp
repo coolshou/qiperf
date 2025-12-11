@@ -479,11 +479,13 @@ int Cyntec::getBestBeamID(double minaz, double maxaz, double minel, double maxel
     if (spAz > 180){
         spAz = 360 - spAz;
     }
-    qDebug() << "//TODO:Hanwha getBestBeamID" ;
+    qDebug() << "//TODO:Cyntec getBestBeamID: minaz" << minaz
+             << " maxaz:" << maxaz << " minel:" << minel
+             << " maxel:" << maxel;
     return 99;
 }
 
-QVector<double> Cyntec::getTxAtt(double dist)
+QVector<double> Cyntec::getTxAtt(double distance)
 {
     QVector<double> ds;
     double att1=0.0;
@@ -491,7 +493,7 @@ QVector<double> Cyntec::getTxAtt(double dist)
     if (!mRangeDataObj.isEmpty()){
         QStringList skeys = sorted(mRangeDataObj.keys());
         foreach(const QString& key, skeys) {
-            if (dist > key.toDouble()){
+            if (distance > key.toDouble()){
                 auto d = mRangeDataObj.value(key).toObject();
                 att1 = d.value("TX1ATT").toDouble();
                 att2 = d.value("TX2ATT").toDouble();
@@ -507,7 +509,7 @@ QVector<double> Cyntec::getTxAtt(double dist)
     return ds;
 }
 
-QVector<double> Cyntec::getRxAtt(double dist)
+QVector<double> Cyntec::getRxAtt(double distance)
 {
     QVector<double> ds;
     double att1=0.0;
@@ -515,7 +517,7 @@ QVector<double> Cyntec::getRxAtt(double dist)
     if (!mRangeDataObj.isEmpty()){
         QStringList skeys = sorted(mRangeDataObj.keys());
         foreach(const QString& key, skeys) {
-            if (dist > key.toDouble()){
+            if (distance > key.toDouble()){
                 auto d = mRangeDataObj.value(key).toObject();
                 att1 = d.value("RX1ATT").toDouble();
                 att2 = d.value("RX2ATT").toDouble();
@@ -531,7 +533,7 @@ QVector<double> Cyntec::getRxAtt(double dist)
     return ds;
 }
 
-QVector<double> Cyntec::getBFAtt(double dist)
+QVector<double> Cyntec::getBFAtt(double distance)
 {
     QVector<double> ds;
     double att1=0.0;
@@ -539,7 +541,7 @@ QVector<double> Cyntec::getBFAtt(double dist)
     if (!mRangeDataObj.isEmpty()){
         QStringList skeys = sorted(mRangeDataObj.keys());
         foreach(const QString& key, skeys) {
-            if (dist > key.toDouble()){
+            if (distance > key.toDouble()){
                 auto d = mRangeDataObj.value(key).toObject();
                 att1 = d.value("BF1ATT").toDouble();
                 att2 = d.value("BF2ATT").toDouble();
