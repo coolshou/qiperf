@@ -2176,7 +2176,7 @@ QString QIperfd::parserResponse(QString rpcmd, QString data)
                             // qDebug() << "Failed to convert value to double. SOURCE: " << capStr;
                         }
                     }else{
-                        qDebug() << "not match of line: " << line;
+                        // qDebug() << "not match of line: " << line;
                     }
                 }
             }
