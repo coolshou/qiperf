@@ -2160,9 +2160,10 @@ QString QIperfd::parserResponse(QString rpcmd, QString data)
                         reg = pasObj.value(key).toString();
                         //eq "Latitude:\\s*(-?\\d+\\.\\d+)"
                         //
+                        //pattern was dynamic, QRegularExpression should not use static!!
                         pattern = QString("%1%2").arg(QRegularExpression::escape(key), reg);
                         qDebug() << "parserResponse pattern: " << pattern;
-                        static const QRegularExpression regex(pattern);
+                        QRegularExpression regex(pattern);
                         QRegularExpressionMatch match = regex.match(line);
                         if (match.hasMatch()) {
                             QString capStr = match.captured(1);
@@ -2190,8 +2191,9 @@ QString QIperfd::parserResponse(QString rpcmd, QString data)
 
 void QIperfd::processMonitor(QString from, QString reqcmd, QString rpcmd)
 {
+    Q_UNUSED(from)
     if (jiocmdObj.contains(rpcmd)){
-        QJsonObject rObj; //response obj
+        // QJsonObject rObj; //response obj
         QProcess process;
         QJsonObject monObj = jiocmdObj.value(rpcmd).toObject();
         QString reg = monObj.value("RegExp").toString();
@@ -2210,7 +2212,7 @@ void QIperfd::processMonitor(QString from, QString reqcmd, QString rpcmd)
                 QString erroutput = process.readAllStandardError();
                 qDebug() << "' "  << reqcmd << " ' runRequest erroutput:" << erroutput;
             }
-            QRegularExpression regex(reg);
+            static const QRegularExpression regex(reg);
             QRegularExpressionMatch match = regex.match(output);
 
             if (match.hasMatch()) {
