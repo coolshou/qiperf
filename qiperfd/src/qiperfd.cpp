@@ -2154,22 +2154,26 @@ QString QIperfd::parserResponse(QString rpcmd, QString data)
         QJsonObject pasObj = jiocmdObj.value(rpcmd).toObject();
         qDebug() << "parserResponse: pasObj:" << pasObj;
         foreach(QString line, data.split("\n")){
-            qDebug() << "parserResponse: " << line;
-            foreach(QString key, pasObj.keys()){
-                if (line.contains(key)){
-                    reg = pasObj.value(key).toString();
-                    //eq "Latitude:\\s*(-?\\d+\\.\\d+)"
-                    pattern = QString("%1%2").arg(QRegularExpression::escape(key), reg);
-                    static const QRegularExpression regex(pattern);
-                    QRegularExpressionMatch match = regex.match(line);
-                    if (match.hasMatch()) {
-                        QString capStr = match.captured(1);
-                        rObj.insert(key, capStr.toDouble());
+            if (!line.isEmpty()){
+                foreach(QString key, pasObj.keys()){
+                    if (line.contains(key)){
+                        reg = pasObj.value(key).toString();
+                        //eq "Latitude:\\s*(-?\\d+\\.\\d+)"
+                        //
+                        pattern = QString("%1%2").arg(QRegularExpression::escape(key), reg);
+                        qDebug() << "parserResponse pattern: " << pattern;
+                        static const QRegularExpression regex(pattern);
+                        QRegularExpressionMatch match = regex.match(line);
+                        if (match.hasMatch()) {
+                            QString capStr = match.captured(1);
+                            rObj.insert(key, capStr.toDouble());
+                        }else{
+                            qDebug() << "not match of line: " << line
+                                     << " with pattern: " << pattern;
+                        }
                     }else{
-                        qDebug() << "not match of line: " << line;
+                        // qDebug() << "Line: '" << line << "' unexpected to " << key;
                     }
-                }else{
-                    // qDebug() << "Line: '" << line << "' unexpected to " << key;
                 }
             }
         }
