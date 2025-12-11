@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1141</width>
-    <height>705</height>
+    <width>1169</width>
+    <height>694</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <iconset resource="aas.qrc">
     <normaloff>:/aas/AAS.png</normaloff>:/aas/AAS.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
    <property name="spacing">
     <number>2</number>
    </property>
@@ -107,863 +107,869 @@
       <item>
        <widget class="QLineEdit" name="leDegree"/>
       </item>
+      <item>
+       <widget class="QPushButton" name="pbSet">
+        <property name="maximumSize">
+         <size>
+          <width>25</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
    <item>
     <widget class="QWidget" name="wCalc" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,0">
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <property name="leftMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="topMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>2</number>
+       <number>0</number>
       </property>
       <item>
-       <widget class="QWidget" name="widgetPos" native="true">
-        <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0">
-         <property name="spacing">
-          <number>2</number>
-         </property>
-         <property name="leftMargin">
-          <number>2</number>
-         </property>
-         <property name="topMargin">
-          <number>2</number>
-         </property>
-         <property name="rightMargin">
-          <number>2</number>
-         </property>
-         <property name="bottomMargin">
-          <number>2</number>
-         </property>
-         <item>
-          <widget class="QTableWidget" name="tableWidget">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>150</height>
-            </size>
-           </property>
-           <property name="contextMenuPolicy">
-            <enum>Qt::CustomContextMenu</enum>
-           </property>
-           <attribute name="horizontalHeaderDefaultSectionSize">
-            <number>80</number>
-           </attribute>
-           <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-            <bool>false</bool>
-           </attribute>
-           <row/>
-           <row/>
-           <row/>
-           <column>
-            <property name="text">
-             <string>Position</string>
+       <widget class="QSplitter" name="splitter">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <widget class="QWidget" name="widgetPos" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QTableWidget" name="tableWidget">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>150</height>
+             </size>
             </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Latitude</string>
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
             </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;緯度&lt;br/&gt;&lt;a href=&quot;https://zh.wikipedia.org/wiki/%E8%B5%A4%E9%81%93&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;赤道&lt;/span&gt;&lt;/a&gt;的0度到南北極的90度&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <attribute name="horizontalHeaderDefaultSectionSize">
+             <number>80</number>
+            </attribute>
+            <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+             <bool>false</bool>
+            </attribute>
+            <row/>
+            <row/>
+            <row/>
+            <column>
+             <property name="text">
+              <string>Position</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Latitude</string>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;緯度&lt;br/&gt;&lt;a href=&quot;https://zh.wikipedia.org/wiki/%E8%B5%A4%E9%81%93&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;赤道&lt;/span&gt;&lt;/a&gt;的0度到南北極的90度&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Longitude</string>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;經度&lt;/p&gt;&lt;p&gt;子午線，是0度經線所在地。其他位置的經度是通過測量其從本初子午向東至180°向西至180° W&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Altitude</string>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;海平面高度 (m)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;MSL: Mean Sea Level 平均海平面&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Head(°)</string>
+             </property>
+             <property name="toolTip">
+              <string>磁北度數</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Pitch(°)</string>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;俯仰度數&lt;br/&gt;面朝上 -90, 面朝下 +90&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>AIP1</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>AIP2</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>IPAddress</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Mac Addr</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>IfName</string>
+             </property>
+            </column>
+            <item row="0" column="0">
+             <property name="text">
+              <string>AP</string>
+             </property>
+            </item>
+            <item row="0" column="1">
+             <property name="text">
+              <string>24.804162</string>
+             </property>
+            </item>
+            <item row="0" column="2">
+             <property name="text">
+              <string>121.027736</string>
+             </property>
+            </item>
+            <item row="0" column="3">
+             <property name="text">
+              <string>40</string>
+             </property>
+            </item>
+            <item row="1" column="0">
+             <property name="text">
+              <string>Client-1</string>
+             </property>
+            </item>
+            <item row="1" column="1">
+             <property name="text">
+              <string>24.802636</string>
+             </property>
+            </item>
+            <item row="1" column="2">
+             <property name="text">
+              <string>121.022431</string>
+             </property>
+            </item>
+            <item row="1" column="3">
+             <property name="text">
+              <string>31</string>
+             </property>
+            </item>
+            <item row="2" column="0">
+             <property name="text">
+              <string>Client-2</string>
+             </property>
+            </item>
+            <item row="2" column="1">
+             <property name="text">
+              <string>24.799918</string>
+             </property>
+            </item>
+            <item row="2" column="2">
+             <property name="text">
+              <string>121.026686</string>
+             </property>
+            </item>
+            <item row="2" column="3">
+             <property name="text">
+              <string>32</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="twResult">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>150</height>
+             </size>
             </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Longitude</string>
+            <attribute name="horizontalHeaderDefaultSectionSize">
+             <number>40</number>
+            </attribute>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>false</bool>
+            </attribute>
+            <column>
+             <property name="text">
+              <string>P1 : P2</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Distance(KM)</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string extracomment="從北方順時針轉度數">P1 Az(°)</string>
+             </property>
+             <property name="toolTip">
+              <string>P1 從北方順時針轉度數</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string extracomment="從北方順時針轉度數">P2 Az(°)</string>
+             </property>
+             <property name="toolTip">
+              <string>P2 從北方順時針轉度數</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>P1 El(°)</string>
+             </property>
+             <property name="toolTip">
+              <string>P1 俯仰角度(+俯視, -仰視)</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>P2 El(°)</string>
+             </property>
+             <property name="toolTip">
+              <string>P2 俯仰角度(+俯視, -仰視)</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>P2 Az Diff</string>
+             </property>
+             <property name="toolTip">
+              <string>P2 Az 差值</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>P2 El Diff</string>
+             </property>
+             <property name="toolTip">
+              <string>P2 El 差值</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>P2 BeamDir ID</string>
+             </property>
+             <property name="toolTip">
+              <string>Beam Direction ID</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>BFTx1Att</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>BFTx2Att</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Tx1Att</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Tx2Att</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>BFRx1Att</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>BFRx2Att</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Rx1Att</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Rx2Att</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>RxLnaAtt</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox_3">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>155</height>
+             </size>
             </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;經度&lt;/p&gt;&lt;p&gt;子午線，是0度經線所在地。其他位置的經度是通過測量其從本初子午向東至180°向西至180° W&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>155</height>
+             </size>
             </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Altitude</string>
+            <property name="title">
+             <string>AP:</string>
             </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;海平面高度 (m)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;MSL: Mean Sea Level 平均海平面&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Head(°)</string>
-            </property>
-            <property name="toolTip">
-             <string>磁北度數</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Pitch(°)</string>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;俯仰度數&lt;br/&gt;面朝上 -90, 面朝下 +90&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>AIP1</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>AIP2</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>IPAddress</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Mac Addr</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>IfName</string>
-            </property>
-           </column>
-           <item row="0" column="0">
-            <property name="text">
-             <string>AP</string>
-            </property>
-           </item>
-           <item row="0" column="1">
-            <property name="text">
-             <string>24.804162</string>
-            </property>
-           </item>
-           <item row="0" column="2">
-            <property name="text">
-             <string>121.027736</string>
-            </property>
-           </item>
-           <item row="0" column="3">
-            <property name="text">
-             <string>40</string>
-            </property>
-           </item>
-           <item row="1" column="0">
-            <property name="text">
-             <string>Client-1</string>
-            </property>
-           </item>
-           <item row="1" column="1">
-            <property name="text">
-             <string>24.802636</string>
-            </property>
-           </item>
-           <item row="1" column="2">
-            <property name="text">
-             <string>121.022431</string>
-            </property>
-           </item>
-           <item row="1" column="3">
-            <property name="text">
-             <string>31</string>
-            </property>
-           </item>
-           <item row="2" column="0">
-            <property name="text">
-             <string>Client-2</string>
-            </property>
-           </item>
-           <item row="2" column="1">
-            <property name="text">
-             <string>24.799918</string>
-            </property>
-           </item>
-           <item row="2" column="2">
-            <property name="text">
-             <string>121.026686</string>
-            </property>
-           </item>
-           <item row="2" column="3">
-            <property name="text">
-             <string>32</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <widget class="QTableWidget" name="twResult">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>150</height>
-            </size>
-           </property>
-           <attribute name="horizontalHeaderDefaultSectionSize">
-            <number>40</number>
-           </attribute>
-           <attribute name="horizontalHeaderStretchLastSection">
-            <bool>false</bool>
-           </attribute>
-           <column>
-            <property name="text">
-             <string>P1 : P2</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Distance(KM)</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string extracomment="從北方順時針轉度數">P1 Az(°)</string>
-            </property>
-            <property name="toolTip">
-             <string>P1 從北方順時針轉度數</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string extracomment="從北方順時針轉度數">P2 Az(°)</string>
-            </property>
-            <property name="toolTip">
-             <string>P2 從北方順時針轉度數</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>P1 El(°)</string>
-            </property>
-            <property name="toolTip">
-             <string>P1 俯仰角度(+俯視, -仰視)</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>P2 El(°)</string>
-            </property>
-            <property name="toolTip">
-             <string>P2 俯仰角度(+俯視, -仰視)</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>P2 Az Diff</string>
-            </property>
-            <property name="toolTip">
-             <string>P2 Az 差值</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>P2 El Diff</string>
-            </property>
-            <property name="toolTip">
-             <string>P2 El 差值</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>P2 BeamDir ID</string>
-            </property>
-            <property name="toolTip">
-             <string>Beam Direction ID</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>BFTx1Att</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>BFTx2Att</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Tx1Att</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Tx2Att</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>BFRx1Att</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>BFRx2Att</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Rx1Att</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Rx2Att</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>RxLnaAtt</string>
-            </property>
-           </column>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_3">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>155</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>155</height>
-            </size>
-           </property>
-           <property name="title">
-            <string>AP:</string>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="1,0">
-            <property name="spacing">
-             <number>2</number>
-            </property>
-            <property name="leftMargin">
-             <number>2</number>
-            </property>
-            <property name="topMargin">
-             <number>2</number>
-            </property>
-            <property name="rightMargin">
-             <number>2</number>
-            </property>
-            <property name="bottomMargin">
-             <number>2</number>
-            </property>
-            <item>
-             <widget class="QTableWidget" name="twAIP">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="verticalScrollBarPolicy">
-               <enum>Qt::ScrollBarAlwaysOff</enum>
-              </property>
-              <property name="horizontalScrollBarPolicy">
-               <enum>Qt::ScrollBarAsNeeded</enum>
-              </property>
-              <property name="rowCount">
-               <number>0</number>
-              </property>
-              <attribute name="horizontalHeaderDefaultSectionSize">
-               <number>50</number>
-              </attribute>
-              <attribute name="horizontalHeaderStretchLastSection">
-               <bool>false</bool>
-              </attribute>
-              <attribute name="verticalHeaderDefaultSectionSize">
-               <number>30</number>
-              </attribute>
-              <attribute name="verticalHeaderShowSortIndicator" stdset="0">
-               <bool>false</bool>
-              </attribute>
-              <attribute name="verticalHeaderStretchLastSection">
-               <bool>false</bool>
-              </attribute>
-              <column>
-               <property name="text">
-                <string>Azimuth(°)</string>
+            <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="1,0">
+             <property name="spacing">
+              <number>2</number>
+             </property>
+             <property name="leftMargin">
+              <number>2</number>
+             </property>
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="rightMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>2</number>
+             </property>
+             <item>
+              <widget class="QTableWidget" name="twAIP">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
                </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Elevation(°)</string>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
                </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Azdiff</string>
+               <property name="verticalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOff</enum>
                </property>
-              </column>
-              <column>
+               <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarAsNeeded</enum>
+               </property>
+               <property name="rowCount">
+                <number>0</number>
+               </property>
+               <attribute name="horizontalHeaderDefaultSectionSize">
+                <number>50</number>
+               </attribute>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>false</bool>
+               </attribute>
+               <attribute name="verticalHeaderDefaultSectionSize">
+                <number>30</number>
+               </attribute>
+               <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+                <bool>false</bool>
+               </attribute>
+               <attribute name="verticalHeaderStretchLastSection">
+                <bool>false</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>Azimuth(°)</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Elevation(°)</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Azdiff</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>BeamDir ID</string>
+                </property>
+                <property name="toolTip">
+                 <string>Beam Direction ID</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_2">
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="title">
+                <string>Expect physics</string>
+               </property>
+               <layout class="QFormLayout" name="formLayout">
+                <property name="horizontalSpacing">
+                 <number>2</number>
+                </property>
+                <property name="leftMargin">
+                 <number>2</number>
+                </property>
+                <property name="topMargin">
+                 <number>2</number>
+                </property>
+                <property name="rightMargin">
+                 <number>2</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>2</number>
+                </property>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label_4">
+                  <property name="text">
+                   <string>Az(°):</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QLineEdit" name="leAPaz">
+                  <property name="inputMethodHints">
+                   <set>Qt::ImhFormattedNumbersOnly</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_5">
+                  <property name="text">
+                   <string>El(°):</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QLineEdit" name="leAPel">
+                  <property name="inputMethodHints">
+                   <set>Qt::ImhFormattedNumbersOnly</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="widget" native="true">
+         <property name="maximumSize">
+          <size>
+           <width>230</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QFrame" name="frame">
+            <property name="frameShape">
+             <enum>QFrame::Box</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <property name="lineWidth">
+             <number>2</number>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0">
+             <property name="spacing">
+              <number>4</number>
+             </property>
+             <property name="leftMargin">
+              <number>2</number>
+             </property>
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="rightMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>2</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_7">
                <property name="text">
-                <string>BeamDir ID</string>
+                <string>Position:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pbLoad">
+               <property name="text">
+                <string>Load</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pbSave">
+               <property name="text">
+                <string>Save</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pbClear">
+               <property name="text">
+                <string>Clear</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="frame_2">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <item>
+              <widget class="QPushButton" name="pbHanwha">
+               <property name="maximumSize">
+                <size>
+                 <width>40</width>
+                 <height>16777215</height>
+                </size>
                </property>
                <property name="toolTip">
-                <string>Beam Direction ID</string>
+                <string>Hanwha</string>
                </property>
-              </column>
-             </widget>
-            </item>
-            <item>
-             <widget class="QGroupBox" name="groupBox_2">
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="title">
-               <string>Expect physics</string>
-              </property>
-              <layout class="QFormLayout" name="formLayout">
-               <property name="horizontalSpacing">
-                <number>2</number>
-               </property>
-               <property name="leftMargin">
-                <number>2</number>
-               </property>
-               <property name="topMargin">
-                <number>2</number>
-               </property>
-               <property name="rightMargin">
-                <number>2</number>
-               </property>
-               <property name="bottomMargin">
-                <number>2</number>
-               </property>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_4">
-                 <property name="text">
-                  <string>Az(°):</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QLineEdit" name="leAPaz">
-                 <property name="inputMethodHints">
-                  <set>Qt::ImhFormattedNumbersOnly</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_5">
-                 <property name="text">
-                  <string>El(°):</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QLineEdit" name="leAPel">
-                 <property name="inputMethodHints">
-                  <set>Qt::ImhFormattedNumbersOnly</set>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QWidget" name="widget" native="true">
-        <property name="maximumSize">
-         <size>
-          <width>220</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <property name="spacing">
-          <number>2</number>
-         </property>
-         <property name="leftMargin">
-          <number>2</number>
-         </property>
-         <property name="topMargin">
-          <number>2</number>
-         </property>
-         <property name="rightMargin">
-          <number>2</number>
-         </property>
-         <property name="bottomMargin">
-          <number>2</number>
-         </property>
-         <item>
-          <widget class="QFrame" name="frame">
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <property name="lineWidth">
-            <number>2</number>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,1,0">
-            <property name="spacing">
-             <number>4</number>
-            </property>
-            <property name="leftMargin">
-             <number>4</number>
-            </property>
-            <property name="topMargin">
-             <number>4</number>
-            </property>
-            <property name="rightMargin">
-             <number>4</number>
-            </property>
-            <property name="bottomMargin">
-             <number>4</number>
-            </property>
-            <item>
-             <widget class="QLabel" name="label_7">
-              <property name="text">
-               <string>Position:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pbLoad">
-              <property name="text">
-               <string>Load</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pbSave">
-              <property name="text">
-               <string>Save</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pbSet">
-              <property name="maximumSize">
-               <size>
-                <width>25</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QFrame" name="frame_2">
-           <property name="frameShape">
-            <enum>QFrame::StyledPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
-             <widget class="QPushButton" name="pbHanwha">
-              <property name="maximumSize">
-               <size>
-                <width>40</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>Hanwha</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="icon">
-               <iconset resource="aip.qrc">
-                <normaloff>:/AIP/hanwha</normaloff>:/AIP/hanwha</iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>24</width>
-                <height>24</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pbCyntec">
-              <property name="maximumSize">
-               <size>
-                <width>40</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>Cyntec</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="icon">
-               <iconset resource="aip.qrc">
-                <normaloff>:/AIP/cyntec</normaloff>:/AIP/cyntec</iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>24</width>
-                <height>24</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbShowGeo">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Show Map</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbShow3D">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Show 3D</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbClear">
-           <property name="text">
-            <string>Clear Data</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QWidget" name="widget_4" native="true">
-           <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0">
-            <property name="leftMargin">
-             <number>2</number>
-            </property>
-            <property name="topMargin">
-             <number>2</number>
-            </property>
-            <property name="rightMargin">
-             <number>2</number>
-            </property>
-            <property name="bottomMargin">
-             <number>2</number>
-            </property>
-            <item>
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>RF Freq(GHz):</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="cbRFFreq">
-              <item>
                <property name="text">
-                <string>27.33</string>
+                <string/>
                </property>
-              </item>
-              <item>
+               <property name="icon">
+                <iconset resource="aip.qrc">
+                 <normaloff>:/AIP/hanwha</normaloff>:/AIP/hanwha</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pbCyntec">
+               <property name="maximumSize">
+                <size>
+                 <width>40</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Cyntec</string>
+               </property>
                <property name="text">
-                <string>27.00</string>
+                <string/>
                </property>
-              </item>
-              <item>
+               <property name="icon">
+                <iconset resource="aip.qrc">
+                 <normaloff>:/AIP/cyntec</normaloff>:/AIP/cyntec</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbShowGeo">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Show Map</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbShow3D">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Show 3D</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="widget_4" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0">
+             <property name="leftMargin">
+              <number>2</number>
+             </property>
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="rightMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>2</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_6">
                <property name="text">
-                <string>26.67</string>
+                <string>RF Freq(GHz):</string>
                </property>
-              </item>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QFrame" name="frame_3">
-           <property name="frameShape">
-            <enum>QFrame::StyledPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_7">
-            <property name="leftMargin">
-             <number>2</number>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cbRFFreq">
+               <item>
+                <property name="text">
+                 <string>27.33</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>27.00</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>26.67</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="frame_3">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
             </property>
-            <property name="topMargin">
-             <number>2</number>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
             </property>
-            <property name="rightMargin">
-             <number>2</number>
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <property name="leftMargin">
+              <number>2</number>
+             </property>
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="rightMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
+              <number>2</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Local Addr:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="leLocalAddr"/>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbCalc">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>24</height>
+             </size>
             </property>
-            <property name="bottomMargin">
-             <number>2</number>
+            <property name="styleSheet">
+             <string notr="true">padding-left: 15px;text-align: left;</string>
             </property>
-            <item>
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Local Addr:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="leLocalAddr"/>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbCalc">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>24</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">padding-left: 15px;text-align: left;</string>
-           </property>
-           <property name="text">
-            <string>1. Manual Calc</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbCMBeamDirIDInit">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>24</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">padding-left: 15px;text-align: left;</string>
-           </property>
-           <property name="text">
-            <string>2. Beam Direction ID/Att Init</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbBeamDirIDCmd">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>24</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">padding-left: 15px;text-align: left;</string>
-           </property>
-           <property name="text">
-            <string>3. Show init commands</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbInquire">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>24</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;keeps getting device's GPS, 3D accelerometer, 3D gyroscope and 3-axis magnetometer value&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">padding-left: 15px;text-align: left;</string>
-           </property>
-           <property name="text">
-            <string>4. Inquire Devices</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbAttInit">
-           <property name="text">
-            <string>Init Att</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbOptimize">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>24</height>
-            </size>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">padding-left: 15px;text-align: left;</string>
-           </property>
-           <property name="text">
-            <string>5. Optimiz</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
+            <property name="text">
+             <string>1. Manual Calc</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbCMBeamDirIDInit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">padding-left: 15px;text-align: left;</string>
+            </property>
+            <property name="text">
+             <string>2. Beam Direction ID/Att Init</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbBeamDirIDCmd">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">padding-left: 15px;text-align: left;</string>
+            </property>
+            <property name="text">
+             <string>3. Show init commands</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbInquire">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;keeps getting device's GPS, 3D accelerometer, 3D gyroscope and 3-axis magnetometer value&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">padding-left: 15px;text-align: left;</string>
+            </property>
+            <property name="text">
+             <string>4. Inquire Devices</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbAttInit">
+            <property name="text">
+             <string>Init Att</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbOptimize">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">padding-left: 15px;text-align: left;</string>
+            </property>
+            <property name="text">
+             <string>5. Optimiz</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
      </layout>
