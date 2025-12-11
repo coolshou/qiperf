@@ -520,15 +520,14 @@ void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd,
     Q_UNUSED(serveraddress)
     // qDebug() << "onRequestResult refrow:" << refrow << " from: " << serveraddress
     //          << " cmd: " << cmd << " msg: " << msg;
-
+    QTableWidgetItem *itm;
     QJsonParseError error;
     QJsonDocument doc;
     if (cmd.contains(AAS_GPS_DATA)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
-            qDebug() << "AAS_GPS_DATA: " << msg;
+            // qDebug() << "AAS_GPS_DATA: " << msg;
             QJsonObject obj = doc.object();
-            QTableWidgetItem *itm;
             foreach (QString key, obj.keys()){
                 if (key.contains("Latitude:")){
                     itm = ui->tableWidget->item(refrow.toInt(), GPScols::Latitude);
@@ -553,9 +552,8 @@ void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd,
     }else if (cmd.contains(AAS_SENSORS_DATA)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
-            qDebug() << "AAS_SENSORS_DATA: " << msg;
+            // qDebug() << "AAS_SENSORS_DATA: " << msg;
             QJsonObject obj = doc.object();
-            QTableWidgetItem *itm;
             foreach (QString key, obj.keys()){
                 if (key.contains("out_heading:")){
                     itm = ui->tableWidget->item(refrow.toInt(), GPScols::Heading);
@@ -571,6 +569,19 @@ void DlgAAS::onRequestResult(QString refrow, QString serveraddress, QString cmd,
         }
     }else if (cmd.contains(AAS_MACADDR_DATA)){
         qDebug() << "AAS_MACADDR_DATA: " << msg;
+        doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
+        if (error.error == QJsonParseError::NoError) {
+            QJsonObject obj = doc.object();
+            itm = ui->tableWidget->item(refrow.toInt(), GPScols::MacAddr);
+            if (itm) {
+                QJsonObject d = jiocmdObj.value(AAS_MACADDR_DATA).toObject();
+                QStringList keys = d.keys();
+                if (keys.count()>=1){
+                    // qDebug() << "AAS_MACADDR_DATA: " << keys.value(0);//.toStdString();
+                    itm->setText(obj.value(keys.value(0)).toString());
+                }
+            }
+        }
     }else if (cmd.contains(AAS_AP_INFO)){
         doc=QJsonDocument::fromJson(msg.toUtf8(), &error);
         if (error.error == QJsonParseError::NoError) {
