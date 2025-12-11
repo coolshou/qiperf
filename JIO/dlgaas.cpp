@@ -779,6 +779,7 @@ void DlgAAS::initTableWidget()
     ui->tableWidget->setColumnWidth(GPScols::Pitch, 50);
     ui->tableWidget->setColumnWidth(GPScols::AIP1, 40);
     ui->tableWidget->setColumnWidth(GPScols::AIP2, 40);
+    ui->tableWidget->setColumnWidth(GPScols::MacAddr, 110);
     // Only accept Double
     NumberDelegate *dLatDelegate = new NumberDelegate(NumberDelegate::Double,
                                                       -90.0, 90.0, 6,
