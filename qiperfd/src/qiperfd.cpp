@@ -2056,7 +2056,7 @@ void QIperfd::initJIOOpenWRT()
             // qDebug() << "jiocmdObj:" << jiocmdObj.toVariantMap();
             // rootObject.keys()
             jiocmdRespObj = jiocmdObj.value("RESPONSE").toObject();
-            qDebug() << "jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
+            // qDebug() << "jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
         }else {
             qDebug() << "Failed to open " << fAas.fileName() << " for reading:" << fAas.errorString();
         }
@@ -2098,7 +2098,7 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
              << " exec cmd:" << cmds;
     QString rpcmd="";
     qDebug() << "runRequest reqcmd:" << reqcmd << " cmds:" << cmds;
-    qDebug() << "jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
+    // qDebug() << "jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
     if (jiocmdRespObj.contains(reqcmd)){
         rpcmd = jiocmdRespObj.value(reqcmd).toString();
     }else {
@@ -2152,13 +2152,15 @@ QString QIperfd::parserResponse(QString rpcmd, QString data)
     //parse data
     if (jiocmdObj.contains(rpcmd)){
         QJsonObject pasObj = jiocmdObj.value(rpcmd).toObject();
+        qDebug() << "parserResponse: pasObj:" << pasObj;
         foreach(QString line, data.split("\n")){
+            qDebug() << "parserResponse: " << line;
             foreach(QString key, pasObj.keys()){
                 if (line.contains(key)){
                     reg = pasObj.value(key).toString();
                     //eq "Latitude:\\s*(-?\\d+\\.\\d+)"
                     pattern = QString("%1%2").arg(QRegularExpression::escape(key), reg);
-                    QRegularExpression regex(pattern);
+                    static const QRegularExpression regex(pattern);
                     QRegularExpressionMatch match = regex.match(line);
                     if (match.hasMatch()) {
                         QString capStr = match.captured(1);
