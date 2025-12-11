@@ -2097,8 +2097,6 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
              << " reqcmd:" << reqcmd
              << " exec cmd:" << cmds;
     QString rpcmd="";
-    qDebug() << "runRequest reqcmd:" << reqcmd << " cmds:" << cmds;
-    // qDebug() << "jiocmdRespObj:" << jiocmdRespObj.toVariantMap();
     if (jiocmdRespObj.contains(reqcmd)){
         rpcmd = jiocmdRespObj.value(reqcmd).toString();
     }else {
@@ -2165,33 +2163,21 @@ QString QIperfd::parserResponse(QString rpcmd, QString data)
         foreach(QString line, data.split("\n")){
             if (!line.isEmpty()){
                 foreach(QString key, pasObj.keys()){
-                    // if (line.contains(key)){
-                        // reg = pasObj.value(key).toString();
-                        //eq "Latitude:\\s*(-?\\d+\\.\\d+)"
-                        //
-                        //pattern was dynamic, QRegularExpression should not use static!!
-                        // pattern = QString("%1%2").arg(QRegularExpression::escape(key), reg);
-                        // qDebug() << "parserResponse pattern: " << pattern;
-                        // QRegularExpression regex(pattern);
-                        // Use the pre-compiled regex
-                        const QRegularExpression &regex = regexMap.value(key);
-                        QRegularExpressionMatch match = regex.match(line);
-                        if (match.hasMatch() && match.capturedTexts().size() > 1) {
-                            QString capStr = match.captured(1);
-                            bool ok;
-                            double val = capStr.toDouble(&ok);
-                            if (ok) {
-                                rObj.insert(key, val);
-                            } else{
-                                qDebug() << "Failed to convert value to double. SOURCE: " << capStr;
-                            }
-                        }else{
-                            qDebug() << "not match of line: " << line
-                                     << " with pattern: " << pattern;
+                    const QRegularExpression &regex = regexMap.value(key);
+                    QRegularExpressionMatch match = regex.match(line);
+                    if (match.hasMatch() && match.capturedTexts().size() > 1) {
+                        QString capStr = match.captured(1);
+                        bool ok;
+                        double val = capStr.toDouble(&ok); // not all value can convert to Double!!
+                        if (ok) {
+                            rObj.insert(key, val);
+                        } else{
+                            rObj.insert(key, capStr);
+                            // qDebug() << "Failed to convert value to double. SOURCE: " << capStr;
                         }
-                    // }else{
-                    //     // qDebug() << "Line: '" << line << "' unexpected to " << key;
-                    // }
+                    }else{
+                        qDebug() << "not match of line: " << line;
+                    }
                 }
             }
         }
