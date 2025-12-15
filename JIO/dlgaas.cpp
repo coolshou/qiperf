@@ -1237,10 +1237,10 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
-    emit addBeamIDCmd("#---INIT---");
+    emit addBeamIDCmd("#---INIT---this will cause all setting become init value");
     cmd = mCyntec->getCmd("INIT").arg(devicename);
     if(cmName.isEmpty()){
-        emit addBeamIDCmd(cmd);
+        emit addBeamIDCmd("#"+cmd);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
