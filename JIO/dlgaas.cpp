@@ -1216,8 +1216,12 @@ void DlgAAS::initHanwhaBeamRxAttCMD(QString devicename, QString bfRx1, QString b
 
 void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString cmName)
 {
+    QString ucipath="";
     if (devicename.isEmpty()){
         devicename="/dev/spidev2.0";
+        ucipath = "aip1";
+    }else{
+        ucipath = "aip2";
     }
     QString cmd ="";
 /*
@@ -1250,11 +1254,8 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
     cmd = mCyntec->getCmd("SET_Freq").arg(devicename, QString::number(freq, 'f', 0));
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
-        if (devicename.isEmpty()){
-            emit addBeamIDCmd(QString("uci set wireless.MT7990_1_2.channel=\"%1\"").arg(channel), true);
-        }else{
-            emit addBeamIDCmd(QString("uci set wireless.MT7990_1_2.channel=\"%1\"").arg(channel), true);
-        }
+        emit addBeamIDCmd(QString("uci set aip.%1.rf_freq=\"%2\"").arg(ucipath, QString::number(freq, 'f', 0)), true);
+        emit addBeamIDCmd(QString("uci set wireless.MT7990_1_2.channel=\"%1\"").arg(channel), true);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
@@ -1277,8 +1278,12 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
 
 void DlgAAS::initCyntecBeamIdCMD(QString devicename, QString beamid, QString cmName)
 {
+    QString ucipath="";
     if (devicename.isEmpty()){
         devicename="/dev/spidev2.0";
+        ucipath="aip1";
+    }else{
+        ucipath="aip2";
     }
     QString cmd = "";
     if (beamid.contains("TODO")){
@@ -1289,11 +1294,7 @@ void DlgAAS::initCyntecBeamIdCMD(QString devicename, QString beamid, QString cmN
     emit addBeamIDCmd("#---SET_BeamID---");
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
-        if (devicename.isEmpty()){
-            emit addBeamIDCmd(QString("uci set aip.aip1.beam_id=\"%1\"").arg(beamid), true);
-        }else{
-            emit addBeamIDCmd(QString("uci set aip.aip2.beam_id=\"%1\"").arg(beamid), true);
-        }
+        emit addBeamIDCmd(QString("uci set aip.%1.beam_id=\"%2\"").arg(ucipath, beamid), true);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
