@@ -13,7 +13,7 @@
     "GET_SENSORS":"sensors_call_so",
     "GET_GPS":"gps_call_so",
     "GET_SITESURVEY":"iw dev apclix0 scan",
-    "MONOTOR_STA_INFO":"mwctl rax0 show stainfo|dmesg -c|grep STA",
+    "MONOTOR_STA_INFO":"mwctl rax0 show stainfo;dmesg -c|grep 'STA ';",
     "MONOTOR_STA_DATA":{
         "RegExp":"R(^\\s*(?:[0-9a-f]{2}:){5}[0-9a-f]{2}\\s+\\S+\\s+\\d+\\s+\\d+\\s+\\d+/\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+(?<RSSI>\\d+/\\d+/--/--)\\s+(?<SNR>\\d+/\\d+/--/--)\\s+\\S+\\s+\\S+\\s+(?<MCS>\\d+/\\d+)\\s+NA/NA)",
         "Key":"STA "
