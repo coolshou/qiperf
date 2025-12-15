@@ -23,7 +23,7 @@
    <string>Iperf Pair config</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../qiperf.qrc">
+   <iconset resource="../../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/qiperf.qrc">
     <normaloff>:/pair-add</normaloff>:/pair-add</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -492,7 +492,7 @@
          <number>999</number>
         </property>
         <property name="value">
-         <number>256</number>
+         <number>0</number>
         </property>
        </widget>
       </item>
@@ -988,7 +988,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../qiperf.qrc"/>
+  <include location="../../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/qiperf.qrc"/>
  </resources>
  <connections/>
 </ui>
