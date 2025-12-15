@@ -398,7 +398,7 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
     {
         QMutexLocker locker(&m_mutex); // Locks m_mutex,
 
-            double sumydata = ydata;
+        double sumydata = ydata;
 
         // do not double lock in following functions!!, it will cause app hang!!
         MyQCPGraph *myGraph = getGraph(refrowidx);
@@ -411,7 +411,8 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
                 myGraph->addData(xdata, ydata);
             }else{
                 //Total TP?
-                sumydata = myGraph->sumValue(xdata, ydata);
+                myGraph->addData(xdata, ydata);
+                // sumydata = myGraph->sumValue(xdata, ydata);//this will cause double y value?
                 // qDebug() << "addData" << refrowidx << " xdata:" << xdata
                 //          << " TP:"<< ydata  << " sum:" << sumydata;
             }
