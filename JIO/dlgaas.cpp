@@ -270,6 +270,7 @@ QString DlgAAS::getMacInfo(QString refrow, QString target, QString ifname)
 
 QString DlgAAS::getWiFiQualityInfo(QString refrow, QString target, QString macaddr, int devtype)
 {
+    Q_UNUSED(devtype)
     // get WiFi Quality info: MCS/RSSI/SNR
     QString result="";
     if (mControlBy==DlgSet::ControlBy::SSH){
@@ -1231,6 +1232,8 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
     cmd = mCyntec->getCmd("POWER_ON").arg(devicename);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
+        //mfc set aip_power_onoff on
+        emit addBeamIDCmd(QString("mfc set aip_power_onoff on"), true);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
@@ -1242,10 +1245,16 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
         emit addClientBeamIDCmd(cmName, cmd);
     }
     emit addBeamIDCmd("#---SET_Freq---");
-    double freq = ui->cbRFFreq->currentText().toDouble();
-    cmd = mCyntec->getCmd("SET_Freq").arg(devicename, QString::number(freq*10000000, 'f', 0));
+    double freq = ui->cbRFFreq->currentText().toDouble()*10000000;
+    int channel = freqToChannel(freq);
+    cmd = mCyntec->getCmd("SET_Freq").arg(devicename, QString::number(freq, 'f', 0));
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
+        if (devicename.isEmpty()){
+            emit addBeamIDCmd(QString("uci set wireless.MT7990_1_2.channel=\"%1\"").arg(channel), true);
+        }else{
+            emit addBeamIDCmd(QString("uci set wireless.MT7990_1_2.channel=\"%1\"").arg(channel), true);
+        }
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
@@ -1280,6 +1289,11 @@ void DlgAAS::initCyntecBeamIdCMD(QString devicename, QString beamid, QString cmN
     emit addBeamIDCmd("#---SET_BeamID---");
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
+        if (devicename.isEmpty()){
+            emit addBeamIDCmd(QString("uci set aip.aip1.beam_id=\"%1\"").arg(beamid), true);
+        }else{
+            emit addBeamIDCmd(QString("uci set aip.aip2.beam_id=\"%1\"").arg(beamid), true);
+        }
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
@@ -1292,7 +1306,8 @@ void DlgAAS::initCyntecBeamTxAttCMD(QString devicename, QString Tx1att, QString 
     }
     int tx1 = Tx1att.toInt()*4;
     int tx2 = Tx2att.toInt()*4;
-    emit addBeamIDCmd("#---SET_TxAttn---");
+    emit addBeamIDCmd(QString("#---SET_TxAttn--%1dB=%2--%3dB=%4").arg(Tx1att, QString::number(tx1),
+                                                                  Tx2att, QString::number(tx2)));
     QString cmd = mCyntec->getCmd("SET_TxAttn").arg(devicename,
                                                     QString::number(tx1),
                                                     QString::number(tx2));
@@ -1518,6 +1533,21 @@ void DlgAAS::initAIPHeader(AIP::ModuleType aip1type)
     ui->twAIP->setHorizontalHeaderLabels(hls);
 }
 
+int DlgAAS::freqToChannel(int freq)
+{
+    //convert freq to 6G channel
+    if (freq == 266700000){
+        return 33;
+    }else if (freq == 270000000){
+        return 97;
+    }else if (freq == 273300000){
+        return 161;
+    }else{
+        qDebug() << "Not support freq:" << freq;
+        return -1;
+    }
+}
+
 // 1. Manual Calc
 void DlgAAS::onCalcClicked(bool checked)
 {
@@ -1671,7 +1701,7 @@ void DlgAAS::onCalcClicked(bool checked)
             qDebug() << "AP az:" << apAzDeg;
             elDegree = elitm->text().toDouble();
             qDebug() << "AP el:" << elDegree;
-            distMaxR = ditm->text().toDouble();
+            distMaxR = ditm->text().toDouble()*1000;
             qDebug() << "AP Distance:" << distMaxR;
             clientRs.append(itm);
             getBestBeamID(0, apAzDeg, elDegree, aip1type, clientRs, distMaxR);
@@ -2014,8 +2044,6 @@ void DlgAAS::onInquireTimerTimeout()
                                 }
                             }
                             getMacInfo(QString::number(row), target, ifname);
-                        }else{
-                            //TODO getWiFiQualityInfo(QString::number(row), target, );
                         }
                     }else{
                         qDebug() << "onInquireTimerTimeout: " << target << " not connected";

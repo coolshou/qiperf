@@ -16,6 +16,7 @@ DlgBeamCmd::~DlgBeamCmd()
 void DlgBeamCmd::clear()
 {
     ui->textEdit->clear();
+    ui->teUCI->clear();
     clearCM();
 }
 
@@ -24,28 +25,45 @@ void DlgBeamCmd::clearCM()
     foreach (auto key, mClientCmds.keys()) {
         mClientCmds.value(key)->clear();
     }
+    foreach (auto key, mClientUCICmds.keys()) {
+        mClientUCICmds.value(key)->clear();
+    }
 }
 
-void DlgBeamCmd::onAddBeamIDCmd(QString cmd)
+void DlgBeamCmd::onAddBeamIDCmd(QString cmd, bool bUCI)
 {
-    ui->textEdit->append(cmd);
+    if (bUCI){
+        //TODO : uci command
+        ui->teUCI->append(cmd);
+    }else{
+        ui->textEdit->append(cmd);
+    }
+
+
 }
 
 void DlgBeamCmd::onAddClientBeamIDCmd(QString name, QString cmd)
 {
     QTextEdit *ed=nullptr;
+    QTextEdit *edUCI=nullptr;
     if (!mClientCmds.contains(name)){
         QWidget *page = new QWidget();
         ed = new QTextEdit(page);
-        QVBoxLayout *layout = new QVBoxLayout(page);
+        edUCI = new QTextEdit(page);
+        QHBoxLayout *layout = new QHBoxLayout(page);
         layout->addWidget(ed);
+        layout->addWidget(edUCI);
+        layout->setStretch(0,1);
         page->setLayout(layout);
         ui->tabWidget->addTab(page, name);
         mClientCmds.insert(name, ed);
+        mClientUCICmds.insert(name, edUCI);
     }else{
         ed = mClientCmds.value(name);
+        edUCI = mClientUCICmds.value(name);
     }
     ed->append(cmd);
+    // TODO client UCI command
 }
 
 void DlgBeamCmd::changeEvent(QEvent *e)

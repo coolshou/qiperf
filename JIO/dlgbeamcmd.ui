@@ -23,9 +23,12 @@
       <attribute name="title">
        <string>AP</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
        <item>
         <widget class="QTextEdit" name="textEdit"/>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="teUCI"/>
        </item>
       </layout>
      </widget>

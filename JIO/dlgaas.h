@@ -143,6 +143,7 @@ public:
 
     void initResultHeader(AIP::ModuleType aip1type);
     void initAIPHeader(AIP::ModuleType aip1type);
+    int freqToChannel(int freq);
 
 public slots:
     void onRequestResult(QString refrow, QString serveraddress, QString cmd, QString msg);
@@ -157,7 +158,7 @@ signals:
     void stopOptimiz();//
     void sigAddIperf(QString cfg);
     void sigClearIperf();
-    void addBeamIDCmd(QString cmd);
+    void addBeamIDCmd(QString cmd, bool bUCI=false);
     void addClientBeamIDCmd(QString name, QString cmd);
     void clearBeamIDCmd();
     void clearClientBeamIDCmd();
@@ -190,12 +191,12 @@ private slots:
     void onClear(bool checked);
     void onLoadCliecked(bool checked);
     void onSaveCliecked(bool checked);
-    void onCalcClicked(bool checked);
-    void onClientBeamDirIDInit(bool checked);
-    void onBeamDirIDCmd(bool checked);
-    void onInquireClicked(bool checked);
+    void onCalcClicked(bool checked);  // 1. manual Calc
+    void onClientBeamDirIDInit(bool checked); // 2. Client Beam Direction ID/att init
+    void onBeamDirIDCmd(bool checked); // 3. show init command
+    void onInquireClicked(bool checked);  // 4. Inquire device
     void onAttInit(bool checked=false);
-    void onOptimizeClicked(bool checked);
+    void onOptimizeClicked(bool checked);  // 5. Optimize
     void onSet(bool checked);
     void onInquireTimerTimeout();
     void onDisconnected(QString from);
