@@ -244,13 +244,13 @@
             <item>
              <widget class="QSpinBox" name="sbAZ">
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;-180 ~ 180&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;-90 ~90&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="minimum">
-               <number>-180</number>
+               <number>-90</number>
               </property>
               <property name="maximum">
-               <number>180</number>
+               <number>90</number>
               </property>
              </widget>
             </item>
