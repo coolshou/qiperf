@@ -12,7 +12,7 @@ struct CyntecBeamFactorData
     int beamFactorId;
 
     QString elementMap;
-    double attDb; // Assuming Att (dB) is an integer
+    double attDb; // Assuming Att (dB) is a double
     double azimuth3dB_BW; // Assuming Azimuth 3dB BW (°) is a double
     double elevation3dB_BW; // Assuming Elevation 3dB BW (°) is a double
 

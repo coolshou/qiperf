@@ -125,9 +125,12 @@ public:
     QJsonObject createInitData();
     void getBestBeamID(int idx, double azimuthDegree, double elDegree,
                        AIP::ModuleType aip1type,
-                       QList<QTableWidgetItem*> cm7rs, double maxDistance=0.0);
-    int findClosestBeamID(double targetAz, double targetEl,
-                          QString beamtype="Narrow", int beamfactor=1);
+                       QList<QTableWidgetItem*> clientAzList,
+                       QList<QTableWidgetItem*> clientElList,
+                       double maxDistance=0.0);
+    // not use?
+    // int findClosestBeamID(double targetAz, double targetEl,
+    //                       QString beamtype="Narrow", int beamfactor=1);
     void initHanwhaBeamCMD(QString devicename, QString antarraymode="8x8", QString cmName="");
     void initHanwhaBeamIdCMD(QString devicename, QString beamid, QString cmName="");
     void initHanwhaBeamTxAttCMD(QString devicename, QString bfTx1, QString bfTx2,

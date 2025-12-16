@@ -1233,6 +1233,7 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
     }
 */
     emit addBeamIDCmd("#---POWER_ON---");
+    //spidev_test -D /dev/spidev2.0 -m 1
     cmd = mCyntec->getCmd("POWER_ON").arg(devicename);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
@@ -1242,6 +1243,7 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
         emit addClientBeamIDCmd(cmName, cmd);
     }
     emit addBeamIDCmd("#---INIT---this will cause all setting become init value");
+    //spidev_test -D /dev/spidev2.0 -i
     cmd = mCyntec->getCmd("INIT").arg(devicename);
     if(cmName.isEmpty()){
         emit addBeamIDCmd("#"+cmd);
@@ -1249,6 +1251,7 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
         emit addClientBeamIDCmd(cmName, cmd);
     }
     emit addBeamIDCmd("#---SET_Freq---");
+    //spidev_test -D /dev/spidev2.0 -f 273300000
     double freq = ui->cbRFFreq->currentText().toDouble()*10000000;
     int channel = freqToChannel(freq);
     cmd = mCyntec->getCmd("SET_Freq").arg(devicename, QString::number(freq, 'f', 0));
@@ -1267,6 +1270,7 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
         ant="1";
     }
     emit addBeamIDCmd("#---SET_AntArrayMode---");
+    //spidev_test -D /dev/spidev2.0 -F "1 1 1 1"
     cmd = mCyntec->getCmd("SET_AntArrayMode").arg(devicename, ant, ant, ant, ant);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
@@ -1292,6 +1296,7 @@ void DlgAAS::initCyntecBeamIdCMD(QString devicename, QString beamid, QString cmN
         cmd = mCyntec->getCmd("SET_BeamID").arg(devicename, beamid, beamid, beamid, beamid);
     }
     emit addBeamIDCmd("#---SET_BeamID---");
+    //spidev_test -D /dev/spidev2.0 -T "99 99 99 99"
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
         emit addBeamIDCmd(QString("uci set aip.%1.beam_id=\"%2\"").arg(ucipath, beamid), true);
@@ -1309,6 +1314,7 @@ void DlgAAS::initCyntecBeamTxAttCMD(QString devicename, QString Tx1att, QString 
     int tx2 = Tx2att.toInt()*4;
     emit addBeamIDCmd(QString("#---SET_TxAttn--%1dB=%2--%3dB=%4").arg(Tx1att, QString::number(tx1),
                                                                   Tx2att, QString::number(tx2)));
+    //spidev_test -D /dev/spidev2.0 -A "0:80:80"
     QString cmd = mCyntec->getCmd("SET_TxAttn").arg(devicename,
                                                     QString::number(tx1),
                                                     QString::number(tx2));
@@ -1329,6 +1335,7 @@ void DlgAAS::initCyntecBeamRxAttCMD(QString devicename, QString Rx1att, QString 
     int rx1 = Rx1att.toInt()*4;
     int rx2 = Rx2att.toInt()*4;
     emit addBeamIDCmd("#---SET_RxAttn---");
+    //spidev_test -D /dev/spidev2.0 -A "1:80:80"
     QString cmd = mCyntec->getCmd("SET_RxAttn").arg(devicename, QString::number(rx1),
                                                     QString::number(rx2));
     if(cmName.isEmpty()){
@@ -1340,6 +1347,7 @@ void DlgAAS::initCyntecBeamRxAttCMD(QString devicename, QString Rx1att, QString 
     QList<int> ls = mCyntec->getIntList("RxIP3");
     if ((ls.contains(Rx1iip3.toInt())) && (ls.contains(Rx2iip3.toInt()))){
         emit addBeamIDCmd("#---SET_LnaAttn---");
+        //spidev_test -D /dev/spidev2.0 -r "12:12"
         QString cmd = mCyntec->getCmd("SET_LnaAttn").arg(devicename,
                                                         Rx1iip3,
                                                         Rx2iip3);
@@ -1352,21 +1360,40 @@ void DlgAAS::initCyntecBeamRxAttCMD(QString devicename, QString Rx1att, QString 
         qDebug() << " not supported Rx IIP3 value: " << Rx1iip3 << " , " << Rx2iip3;
     }
 }
-
+/*
+ idx: 0, 1
+ azimuthDegree: AP az
+ elDegree: AP el
+ aiptype: Cyntec or Hanwha
+ clientAzList : client itm list az
+ clientElList : client itm list el
+ minDistance: min distance between AP and clients
+*/
 void DlgAAS::getBestBeamID(int idx,
                            double azimuthDegree, double elDegree,
-                           AIP::ModuleType aiptype, QList<QTableWidgetItem*> cm7rs,
-                           double maxDistance)
+                           AIP::ModuleType aiptype,
+                           QList<QTableWidgetItem*> clientAzList,
+                           QList<QTableWidgetItem*> clientElList,
+                           double minDistance)
 {
+    // TODO  minDistance <100m, minDistance > 100m
+    // TODO: STA in AP's Narrow beam range
+    // TODO: in AP's tri beam range
+
     // idx: 0: AIP1, 1:AIP2
     QList<double> aipDs;
     double minaz=360;
     double maxaz=0;
     double az;
-    double aipaz=0;
-    double aipazdiff=0;
-    if (cm7rs.length()>1){
-        for(auto azitm: cm7rs){
+    double aipaz=0; // AIP's az
+    double aipazdiff=0; // AP & AIP's az diff
+    double aipel=0; // AIP's el
+    double aipeldiff=0; // AP & AIP's el diff
+    double minel=-90;
+    double maxel=90;
+
+    if (clientAzList.length()>1){
+        for(auto azitm: clientAzList){
             az = azitm->text().toDouble();
             if (az>maxaz){
                 maxaz = az;
@@ -1377,13 +1404,21 @@ void DlgAAS::getBestBeamID(int idx,
             aipDs.append(az);
         }
         aipaz = averageBearing(aipDs);
-    }else if (cm7rs.length()==1){
-        aipaz = cm7rs.value(0)->text().toDouble();
+        //el
+    }else if (clientAzList.length()==1){
+        // only one client
+        aipaz = clientAzList.value(0)->text().toDouble();
+        minaz = maxaz = aipaz;
+        aipel = clientElList.value(0)->text().toDouble();
+        minel = maxel = aipel;
     }else {
-        qDebug() << "No AIP"<< idx << " AZ value";
+        qDebug() << "[getBestBeamID]("<< idx << ") No client list";
+        return;
     }
+    //el
     aipazdiff = aipaz-azimuthDegree;
-    //AIP1
+    aipeldiff = aipel-elDegree;
+    //AIP
     ui->twAIP->setItem(idx, AIPcols::Azimuth,
                        new QTableWidgetItem(QString::number(aipaz)));
     ui->twAIP->setItem(idx, AIPcols::Elevation,
@@ -1393,7 +1428,9 @@ void DlgAAS::getBestBeamID(int idx,
                        new QTableWidgetItem(QString::number(aipazdiff)));
     //Get best Cyntec/Hanwha AP id
     emit addBeamIDCmd("#AP AIP-"+ QString::number(idx));
-    qDebug() << "AIP:" << idx << " Max az:" << maxaz << " Min Az:" << minaz;
+    qDebug() << "AIP:" << idx << " Max az:" << maxaz << " Min Az:" << minaz
+             << " Max el:" << maxel << " Min el:" << minel
+             << " aipazdiff:" << aipazdiff << " aipeldiff:" << aipeldiff;
     QString devicename=""; //cmd name diff to AIP1/AIP2
     QVector<double> ds;
     QString bfTx1="";
@@ -1414,31 +1451,35 @@ void DlgAAS::getBestBeamID(int idx,
         }
         initCyntecBeamCMD(devicename);
 
-        beamid = mCyntec->getBestBeamID(minaz, maxaz , 0, 0);
+        beamid = mCyntec->getBestBeamID(minaz, maxaz , minel, maxel);
         if (idx==1){
+            //this only for ID 99,100 use!!
             beamid=beamid+1;
         }
         initCyntecBeamIdCMD(devicename, QString::number(beamid));
 
-        ds = mCyntec->getTxAtt(maxDistance);
+        //init Tx att
+        ds = mCyntec->getTxAtt(minDistance);
         if (ds.length()>=2){
             Tx1 = QString::number(ds[0]);
             Tx2 = QString::number(ds[1]);
         }
-        ds = mCyntec->getRxAtt(maxDistance);
+        //init Rx att
+        ds = mCyntec->getRxAtt(minDistance);
         if (ds.length()>=2){
             Rx1 = QString::number(ds[0]);
             Rx2 = QString::number(ds[1]);
         }
-        ds = mCyntec->getBFAtt(maxDistance);
+        // init BF att
+        ds = mCyntec->getBFAtt(minDistance);
         if (ds.length()>=2){
             bfTx1 = QString::number(ds[0]);
             bfTx2 = QString::number(ds[1]);
         }
-        qDebug()<< "TODO: Cyntec Lna ";
-        RxLan="0";
-        initCyntecBeamTxAttCMD(devicename, Tx1, Tx2, "");
-        initCyntecBeamRxAttCMD(devicename, Rx1, Rx2, bfTx1, bfTx2, "");
+        // qDebug()<< "TODO: Cyntec Lna ";
+        // RxLan="0";
+        initCyntecBeamTxAttCMD(devicename, Tx1, Tx2);
+        initCyntecBeamRxAttCMD(devicename, Rx1, Rx2, bfTx1, bfTx2);
         emit addBeamIDCmd("#---GET_STATUS---------------------------------------------------------");
         emit addBeamIDCmd(mCyntec->getCmd("GET_STATUS").arg(devicename));
         emit addBeamIDCmd("#======================================================================");
@@ -1457,18 +1498,18 @@ void DlgAAS::getBestBeamID(int idx,
         }
         initHanwhaBeamIdCMD(devicename, QString::number(beamid));
         // qDebug() << "// TODO: get Att value by distance (use The most remote CM's distance)" << maxDistance;
-        ds = mHanwha->getBFTxAtt(maxDistance);
+        ds = mHanwha->getBFTxAtt(minDistance);
         if (ds.length()>=2){
             bfTx1 = QString::number(ds[0]);
             bfTx2 = QString::number(ds[1]);
         }
 
-        ds = mHanwha->getTxAtt(maxDistance);
+        ds = mHanwha->getTxAtt(minDistance);
         if (ds.length()>=2){
             Tx1 = QString::number(ds[0]);
             Tx2 = QString::number(ds[1]);
         }
-        if (maxDistance<=50){
+        if (minDistance<=50){
             Rx1 = "30.0";
             Rx2 = "30.0";
             RxLan = "12";
@@ -1674,8 +1715,8 @@ void DlgAAS::onCalcClicked(bool checked)
     // AP heading az degree
     double apAzDeg= 0;
     double elDegree = 0;
-    double distMaxR=0.0;
-    double distMaxL=0.0;
+    double distMinR=0.0;
+    double distMinL=0.0;
     double distR=0.0;
     double distL=0.0;
     double amcmaz;
@@ -1683,32 +1724,37 @@ void DlgAAS::onCalcClicked(bool checked)
     QColor lColor = QColor(144, 238, 144); //light green
     QColor rColor = QColor(173, 216, 230); //light blue
     QColor nColor = QColor(Qt::lightGray);
-    QList<QTableWidgetItem*> clientRs;
-    QList<QTableWidgetItem*> clientLs;
+    QList<QTableWidgetItem*> clientRsAz;
+    QList<QTableWidgetItem*> clientRsEl;
+    QList<QTableWidgetItem*> clientLsAz;
+    QList<QTableWidgetItem*> clientLsEl;
 
     int iClient = ui->twResult->rowCount();
     //AP El(Pitch)
     elDegree = totalel/iClient;
     ui->leAPel->setText(QString::number(elDegree, 'f', 1));
 
+    QStringList vhlable;
     if (iClient==1){
         ui->twAIP->setRowCount(1);
+        vhlable << "AIP1";
+        ui->twAIP->setVerticalHeaderLabels(vhlable);
         // if we have only one Client
         QTableWidgetItem *elitm = ui->twResult->item(0, AZEIcols::P1Elevation);
         QTableWidgetItem *ditm = ui->twResult->item(0, AZEIcols::Distance);
         QTableWidgetItem *itm = ui->twResult->item(0, AZEIcols::P1Azimuth);
         if (itm){
             apAzDeg = itm->text().toDouble();
-            qDebug() << "AP az:" << apAzDeg;
             elDegree = elitm->text().toDouble();
-            qDebug() << "AP el:" << elDegree;
-            distMaxR = ditm->text().toDouble()*1000;
-            qDebug() << "AP Distance:" << distMaxR;
-            clientRs.append(itm);
-            // TODO  distMaxR <100m, distMaxR > 100m
-            // TODO: STA in AP's Narrow beam range
-            // TODO: in AP's tri beam range
-            getBestBeamID(0, apAzDeg, elDegree, aip1type, clientRs, distMaxR);
+            distMinR = ditm->text().toDouble()*1000;
+            qDebug() << "AP az:" << apAzDeg
+                     << " AP el:" << elDegree
+                     << " AP Distance:" << distMinR;
+
+            clientRsAz.append(itm);
+            clientRsEl.append(elitm);
+
+            getBestBeamID(0, apAzDeg, elDegree, aip1type, clientRsAz, clientRsEl, distMinR);
         }
     }else {
 
@@ -1717,7 +1763,8 @@ void DlgAAS::onCalcClicked(bool checked)
         // no -> require use two AIP
         ui->twAIP->setRowCount(2);
         //       setup each AIP for clients
-
+        vhlable << "AIP1" << "AIP2";
+        ui->twAIP->setVerticalHeaderLabels(vhlable);
 
         if ((mCalcGroup.contains("DBSCAN"))||
             (mCalcGroup.contains("Kmeans"))  ){
@@ -1751,7 +1798,7 @@ void DlgAAS::onCalcClicked(bool checked)
                 // qDebug() << "points:" << points;
                 if (points.count() < mCalcKmeansFactor){
                     qDebug() << "polarToXY points: " << points.count()
-                    << " mCalcKmeansFactor: " << mCalcKmeansFactor ;
+                             << " mCalcKmeansFactor: " << mCalcKmeansFactor ;
                     QString msg= QString("KmeansFactor %1 > %2 (polarToXY count)").arg(mCalcKmeansFactor,
                                                                                         points.count());
                     QMessageBox::warning(this, tr("WARNING!!"), msg, QMessageBox::Ok);
@@ -1767,6 +1814,7 @@ void DlgAAS::onCalcClicked(bool checked)
             }
             for (int iRow=0;iRow<ui->twResult->rowCount();iRow++){
                 QTableWidgetItem *nitm = ui->twResult->item(iRow, AZEIcols::Name);
+                QTableWidgetItem *elitm = ui->twResult->item(iRow, AZEIcols::P1Elevation);
                 QTableWidgetItem *ditm = ui->twResult->item(iRow, AZEIcols::Distance);
                 QTableWidgetItem *itm = ui->twResult->item(iRow, AZEIcols::P1Azimuth);
                 if (itm){
@@ -1775,34 +1823,39 @@ void DlgAAS::onCalcClicked(bool checked)
                         nitm->setBackground(QBrush(lColor));
                         nitm->setToolTip("Client-FirstQuadrant");
                         itm->setData(Qt::UserRole, "AIP1");
-                        clientRs.append(itm);
+                        elitm->setData(Qt::UserRole, "AIP1");
+                        clientRsAz.append(itm);
+                        clientRsEl.append(elitm);
+
                         distR =ditm->text().toDouble()*1000;
-                        if (distR>distMaxR){
-                            distMaxR = distR;
+                        if (distR>distMinR){
+                            distMinR = distR;
                         }
                     }else if (g==1){
                         nitm->setBackground(QBrush(rColor));
                         nitm->setToolTip("Client-FourthQuadrant");
                         itm->setData(Qt::UserRole, "AIP2");
-                        clientLs.append(itm);
+                        elitm->setData(Qt::UserRole, "AIP2");
+                        clientLsAz.append(itm);
+                        clientLsEl.append(elitm);
                         distL =ditm->text().toDouble()*1000;
-                        if (distL>distMaxL){
-                            distMaxL = distL;
+                        if (distL>distMinL){
+                            distMinL = distL;
                         }
                     }else {
                         nitm->setBackground(QBrush(nColor));
                     }
                 }
             }
-            // AP right Clients
+            // AP right Clients, TODO: AIP module az offset
             QVector<double> azbears;
-            foreach(auto itm, clientRs){
+            foreach(auto itm, clientRsAz){
                 azbears.append(itm->text().toDouble());
             }
             double apr = averageBearing(azbears);
-            // AP Left Clients
+            // AP Left Clients, TODO: AIP module az offset
             azbears.clear();
-            foreach(auto itm, clientLs){
+            foreach(auto itm, clientLsAz){
                 azbears.append(itm->text().toDouble());
             }
             double apl = averageBearing(azbears);
@@ -1811,6 +1864,7 @@ void DlgAAS::onCalcClicked(bool checked)
             azbears.append(apr);
             azbears.append(apl);
             apAzDeg  = averageBearing(azbears);
+            //TODO: AP patch
         }
         if (mCalcGroup.contains("Avg")) {
             // AP az
@@ -1829,20 +1883,20 @@ void DlgAAS::onCalcClicked(bool checked)
                         nitm->setBackground(QBrush(lColor));
                         nitm->setToolTip("Client-FirstQuadrant");
                         itm->setData(Qt::UserRole, "AIP1");
-                        clientRs.append(itm);
+                        clientRsAz.append(itm);
                         distR =ditm->text().toDouble()*1000;
-                        if (distR>distMaxR){
-                            distMaxR = distR;
+                        if (distR>distMinR){
+                            distMinR = distR;
                         }
                     }else if (relative > 270 && relative < 360){
                         //azimuthDegree 的第四象限
                         nitm->setBackground(QBrush(rColor));
                         nitm->setToolTip("Client-FourthQuadrant");
                         itm->setData(Qt::UserRole, "AIP2");
-                        clientLs.append(itm);
+                        clientLsAz.append(itm);
                         distL =ditm->text().toDouble()*1000;
-                        if (distL>distMaxL){
-                            distMaxL = distL;
+                        if (distL>distMinL){
+                            distMinL = distL;
                         }
                     }else{
                         qDebug() << "No in Coverage range";
@@ -1874,12 +1928,12 @@ void DlgAAS::onCalcClicked(bool checked)
         //AP AIP1 Az, El
         // TODO: AIP1 Az offset
 
-        getBestBeamID(0, apAzDeg, elDegree, aip1type, clientRs, distMaxR);
+        getBestBeamID(0, apAzDeg, elDegree, aip1type, clientRsAz, clientRsEl, distMinR);
         //AP AIP2
         // TODO: AIP2 Az offset
         if (aip2type != AIP::ModuleType::Unknown){
 
-            getBestBeamID(1, apAzDeg, elDegree, aip2type, clientLs, distMaxL);
+            getBestBeamID(1, apAzDeg, elDegree, aip2type, clientLsAz, clientLsEl, distMinL);
         }
     }
     //AP AZ show on UI

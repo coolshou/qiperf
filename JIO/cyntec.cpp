@@ -479,9 +479,10 @@ int Cyntec::getBestBeamID(double minaz, double maxaz, double minel, double maxel
     if (spAz > 180){
         spAz = 360 - spAz;
     }
-    qDebug() << "//TODO:Cyntec getBestBeamID: minaz" << minaz
-             << " maxaz:" << maxaz << " minel:" << minel
-             << " maxel:" << maxel;
+    qDebug() << "//TODO:Cyntec getBestBeamID: min-az" << minaz
+             << " max-az:" << maxaz
+             << " min-el:" << minel
+             << " max-el:" << maxel;
     return 99;
 }
 

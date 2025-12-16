@@ -51,8 +51,8 @@ signals:
     void updateBeamTypeGroup(QMap<QString, QList<int>> data);
     void updateBeamFactorSupport(QMap<QString, QList<int>> data);
 private:
-    QMap<int, CyntecBeamFactorData> *mBeamFactorData;
-    QMap<int, CyntecBeamTableData> *mBeamTableData;
+    QMap<int, CyntecBeamFactorData> *mBeamFactorData; // id, CyntecBeamFactorData (FactorId, map, att, HPAz, HPEl)
+    QMap<int, CyntecBeamTableData> *mBeamTableData; // id, CyntecBeamTableData (BeamID, Az, El, HPAz, HPEl, BeamType)
     // QStringList mBeamtypes;
     QMap<QString, QList<int>> mBeamTypeData; // beam type (Narrow, Spoiled, Tri) => list of ID
     QMap<QString, BeamTypeRange> mBeamTypeRangeData;
