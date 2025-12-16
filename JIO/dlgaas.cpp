@@ -1394,7 +1394,7 @@ void DlgAAS::getBestBeamID(int idx,
     //Get best Cyntec/Hanwha AP id
     emit addBeamIDCmd("#AP AIP-"+ QString::number(idx));
     qDebug() << "AIP:" << idx << " Max az:" << maxaz << " Min Az:" << minaz;
-    QString c=""; //cmd name diff to AIP1/AIP2
+    QString devicename=""; //cmd name diff to AIP1/AIP2
     QVector<double> ds;
     QString bfTx1="";
     QString bfTx2="";
@@ -1408,17 +1408,17 @@ void DlgAAS::getBestBeamID(int idx,
     int beamid=-1;
     if (aiptype==AIP::ModuleType::Cyntec){
         if (idx==0){
-            c = mCyntec->getCmd("AIP1");
+            devicename = mCyntec->getCmd("AIP1");
         }else if (idx==1){
-            c = mCyntec->getCmd("AIP2");
+            devicename = mCyntec->getCmd("AIP2");
         }
-        initCyntecBeamCMD(c);
+        initCyntecBeamCMD(devicename);
 
         beamid = mCyntec->getBestBeamID(minaz, maxaz , 0, 0);
         if (idx==1){
             beamid=beamid+1;
         }
-        initCyntecBeamIdCMD(c, QString::number(beamid));
+        initCyntecBeamIdCMD(devicename, QString::number(beamid));
 
         ds = mCyntec->getTxAtt(maxDistance);
         if (ds.length()>=2){
@@ -1437,25 +1437,25 @@ void DlgAAS::getBestBeamID(int idx,
         }
         qDebug()<< "TODO: Cyntec Lna ";
         RxLan="0";
-        initCyntecBeamTxAttCMD(c, Tx1, Tx2, "");
-        initCyntecBeamRxAttCMD(c, Rx1, Rx2, bfTx1, bfTx2, "");
+        initCyntecBeamTxAttCMD(devicename, Tx1, Tx2, "");
+        initCyntecBeamRxAttCMD(devicename, Rx1, Rx2, bfTx1, bfTx2, "");
         emit addBeamIDCmd("#---GET_STATUS---------------------------------------------------------");
-        emit addBeamIDCmd(mCyntec->getCmd("GET_STATUS").arg(c));
+        emit addBeamIDCmd(mCyntec->getCmd("GET_STATUS").arg(devicename));
         emit addBeamIDCmd("#======================================================================");
 
     } else if (aiptype==AIP::ModuleType::Hanwha){
         if (idx==0){
             //
         }else if (idx==1){
-            c="2";
+            devicename="2";
         }
-        initHanwhaBeamCMD(c);
+        initHanwhaBeamCMD(devicename);
         // Hanwha getBestBeamID
         beamid = mHanwha->getBestBeamID(minaz, maxaz , 0, 0);
         if (idx==1){
             beamid = beamid - 1;
         }
-        initHanwhaBeamIdCMD(c, QString::number(beamid));
+        initHanwhaBeamIdCMD(devicename, QString::number(beamid));
         // qDebug() << "// TODO: get Att value by distance (use The most remote CM's distance)" << maxDistance;
         ds = mHanwha->getBFTxAtt(maxDistance);
         if (ds.length()>=2){
@@ -1474,15 +1474,15 @@ void DlgAAS::getBestBeamID(int idx,
             RxLan = "12";
         }
         // Tx att
-        initHanwhaBeamTxAttCMD(c, bfTx1, bfTx2, Tx1, Tx2);
+        initHanwhaBeamTxAttCMD(devicename, bfTx1, bfTx2, Tx1, Tx2);
         // Rx att
-        initHanwhaBeamRxAttCMD(c, bfRx1, bfRx2, Rx1, Rx2, RxLan);
+        initHanwhaBeamRxAttCMD(devicename, bfRx1, bfRx2, Rx1, Rx2, RxLan);
         //
-        emit addBeamIDCmd(mHanwha->getCmd("ATC_ON").arg(c));
+        emit addBeamIDCmd(mHanwha->getCmd("ATC_ON").arg(devicename));
         //
         emit addBeamIDCmd("#----------------------------------------------------------------------");
-        emit addBeamIDCmd(mHanwha->getCmd("GET_EIRP").arg(c, QString::number(1)));
-        emit addBeamIDCmd(mHanwha->getCmd("GET_EIRP").arg(c, QString::number(2)));
+        emit addBeamIDCmd(mHanwha->getCmd("GET_EIRP").arg(devicename, QString::number(1)));
+        emit addBeamIDCmd(mHanwha->getCmd("GET_EIRP").arg(devicename, QString::number(2)));
         emit addBeamIDCmd("#======================================================================");
     }else{
         qDebug() << "Unknown AIP" << idx << " type:" << aiptype;
@@ -1693,7 +1693,7 @@ void DlgAAS::onCalcClicked(bool checked)
 
     if (iClient==1){
         ui->twAIP->setRowCount(1);
-        // if we have only one Client, use AIP1 with nerrow beam to focus client
+        // if we have only one Client
         QTableWidgetItem *elitm = ui->twResult->item(0, AZEIcols::P1Elevation);
         QTableWidgetItem *ditm = ui->twResult->item(0, AZEIcols::Distance);
         QTableWidgetItem *itm = ui->twResult->item(0, AZEIcols::P1Azimuth);
@@ -1705,6 +1705,9 @@ void DlgAAS::onCalcClicked(bool checked)
             distMaxR = ditm->text().toDouble()*1000;
             qDebug() << "AP Distance:" << distMaxR;
             clientRs.append(itm);
+            // TODO  distMaxR <100m, distMaxR > 100m
+            // TODO: STA in AP's Narrow beam range
+            // TODO: in AP's tri beam range
             getBestBeamID(0, apAzDeg, elDegree, aip1type, clientRs, distMaxR);
         }
     }else {
