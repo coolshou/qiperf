@@ -351,7 +351,14 @@ int Cyntec::db2att(double db)
     // spidev_test -D /dev/spidev2.0 -A "0:4:4"
     return qRound(db/0.25);
 }
-
+/*
+ * targetAz:
+ * targetEl:
+ * beamtype:
+ * beamfactor:
+ *
+ * return: beam id, -1 = not found
+ */
 int Cyntec::findClosestBeamID(double targetAz, double targetEl,
                               QString beamtype, int beamfactor)
 {

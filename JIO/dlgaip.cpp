@@ -93,7 +93,7 @@ QJsonObject DlgAIP::getData()
     jobj["offsetY"] = std::round(static_cast<double>(mPosOffset.y()) * 100.0) / 100.0;
     jobj["offsetZ"] = std::round(static_cast<double>(mPosOffset.z()) * 100.0) / 100.0;;
     jobj["offsetAz"] = mAZOffset;
-    qDebug() << "get Json data" << jobj;
+    // qDebug() << "get Json data" << jobj;
     return jobj;
 }
 
