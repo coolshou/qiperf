@@ -594,7 +594,7 @@ void QIperfC::onNotice(QString send_addr, QString msg)
                     int itry=0;
                     if (m_ntpfail.contains(send_addr)){
                         itry=m_ntpfail[send_addr];
-                        if (itry>5){
+                        if (itry>=4){
                             return;
                         }else{
                             m_ntpfail[send_addr] = itry+1;
