@@ -71,18 +71,18 @@ public:
         P2AzDiff=6,
         P2ElDiff=7,
         BeamDirID=8,
-        P2BFTx1Att=9,
-        P2BFTx2Att=10,
-        P2Tx1Att=11,
-        P2Tx2Att=12,
-        P2BFRx1Att=13,
-        P2CRx1Att=13,
-        P2BFRx2Att=14,
-        P2CRx2Att=14,
+        P2BFTx1Att=9, // Hanwha
+        P2BFTx2Att=10, // Hanwha
+        P2Tx1Att=11, // Hanwha/Cyntec
+        P2Tx2Att=12, // Hanwha/Cyntec
+        P2BFRx1Att=13, // Hanwha
+        P2BFRx2Att=14, // Hanwha
+        P2CRx1Att=13, //Cyntec
+        P2CRx2Att=14, //Cyntec
         P2CLnaAtt=15,
-        P2Rx1Att=15,
-        P2Rx2Att=16,
-        P2RxLnaAtt=17
+        P2Rx1Att=15, // Hanwha
+        P2Rx2Att=16, // Hanwha
+        P2RxLnaAtt=17 // Hanwha
     };
     Q_ENUM(AZEIcols)
     enum AIPcols{
@@ -90,18 +90,21 @@ public:
         Elevation=1,
         Azdiff=2,
         BeamDirectionID=3,
-        BFTx1Att=4,
-        BFTx2Att=5,
-        Tx1Att=6,
-        Tx2Att=7,
-        BFRx1Att=8,
-        CRx1Att=8, //Cyntec Rx1Att
-        BFRx2Att=9,
-        CRx2Att=9,  //Cyntec Rx2Att
-        CLnaAtt=10, //Cyntec Lna
-        Rx1Att=10,
-        Rx2Att=11,
-        RxLnaAtt=12
+        BFTx1Att=4, // Hanwha
+        BFTx2Att=5, // Hanwha
+        Tx1Att=6,   // Hanwha
+        Tx2Att=7,   // Hanwha
+        BFRx1Att=8, // Hanwha
+        BFRx2Att=9, // Hanwha
+        Rx1Att=10,  // Hanwha
+        Rx2Att=11,   // Hanwha
+        RxLnaAtt=12, // Hanwha
+        CTx1Att=4,   // Cyntec
+        CTx2Att=5,   // Cyntec
+        CRx1Att=6,  //Cyntec Rx1Att
+        CRx2Att=7,  //Cyntec Rx2Att
+        CLna1Att=8, //Cyntec RxIP3_A
+        CLna2Att=9, //Cyntec RxIP3_B
     };
     Q_ENUM(AIPcols)
     enum State {
@@ -314,6 +317,8 @@ private:
     QStringList mHeaderAIP;
     QStringList mHeaderHanwha;
     QStringList mHeaderCyntec;
+    int aip1azoffset = 0;
+    int aip2azoffset = 0;
 };
 
 #endif // DLGAAS_H

@@ -46,10 +46,9 @@ DlgAAS::DlgAAS(QWidget *parent) :
                                   << "BFRx1\nAtt" << "BFRx2\nAtt"
                                   << "Rx1\nAtt" << "Rx2\nAtt"
                                   << "RxLna\nAtt";
-    mHeaderCyntec = QStringList() << "BF1\nATT" << "BF2\nATT"
-                                  << "Tx1\nAtt" << "Tx2\nAtt"
+    mHeaderCyntec = QStringList() << "Tx1\nAtt" << "Tx2\nAtt"
                                   << "Rx1\nAtt" << "Rx2\nAtt"
-                                  << "Lna\nAtt";
+                                  << "Rx1IP3\nAtt"<< "Rx2IP3\nAtt";
     jiocmdObj = QJsonObject();
     mInquireInterval = 3; //sec
     m_InquireTimer= new QTimer(this);
@@ -1235,11 +1234,11 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
     emit addBeamIDCmd("#---POWER_ON---");
     //spidev_test -D /dev/spidev2.0 -m 1
     cmd = mCyntec->getCmd("POWER_ON").arg(devicename);
-    if(cmName.isEmpty()){
+    if(cmName.isEmpty()){ //AP
         emit addBeamIDCmd(cmd);
         //mfc set aip_power_onoff on
-        emit addBeamIDCmd(QString("mfc set aip_power_onoff on"), true);
-    }else{
+        emit addBeamIDCmd(QString("mfc set aip_power_onoff on"), true);// uci command
+    }else{ //Client
         emit addClientBeamIDCmd(cmName, cmd);
     }
     emit addBeamIDCmd("#---INIT---this will cause all setting become init value");
@@ -1361,16 +1360,16 @@ void DlgAAS::initCyntecBeamRxAttCMD(QString devicename, QString Rx1att, QString 
     }
 }
 /*
- idx: 0, 1
- azimuthDegree: AP az
- elDegree: AP el
+ idx: 0=AIP1, 1=AIP2
+ apAzDeg: current device az
+ apElDeg: current device el
  aiptype: Cyntec or Hanwha
- clientAzList : client itm list az
- clientElList : client itm list el
+ clientAzList : client itm list of az
+ clientElList : client itm list of el
  minDistance: min distance between AP and clients
 */
 void DlgAAS::getBestBeamID(int idx,
-                           double azimuthDegree, double elDegree,
+                           double apAzDeg, double apElDeg,
                            AIP::ModuleType aiptype,
                            QList<QTableWidgetItem*> clientAzList,
                            QList<QTableWidgetItem*> clientElList,
@@ -1385,9 +1384,9 @@ void DlgAAS::getBestBeamID(int idx,
     double minaz=360;
     double maxaz=0;
     double az;
-    double aipaz=0; // AIP's az
+    double targetAz=0; // AIP's az
     double aipazdiff=0; // AP & AIP's az diff
-    double aipel=0; // AIP's el
+    double targetEl=0; // AIP's el
     double aipeldiff=0; // AP & AIP's el diff
     double minel=-90;
     double maxel=90;
@@ -1403,26 +1402,33 @@ void DlgAAS::getBestBeamID(int idx,
             }
             aipDs.append(az);
         }
-        aipaz = averageBearing(aipDs);
-        //el
+        targetAz = averageBearing(aipDs);
+        //TODO: el
     }else if (clientAzList.length()==1){
         // only one client
-        aipaz = clientAzList.value(0)->text().toDouble();
-        minaz = maxaz = aipaz;
-        aipel = clientElList.value(0)->text().toDouble();
-        minel = maxel = aipel;
+        targetAz = clientAzList.value(0)->text().toDouble();
+        minaz = maxaz = targetAz;
+        targetEl = clientElList.value(0)->text().toDouble();
+        minel = maxel = targetEl;
     }else {
         qDebug() << "[getBestBeamID]("<< idx << ") No client list";
         return;
     }
-    //el
-    aipazdiff = aipaz-azimuthDegree;
-    aipeldiff = aipel-elDegree;
+    //TODO: el
+    qDebug() << "aip1azoffset: " << aip1azoffset
+             << " aip2azoffset: " << aip2azoffset;
+    if (idx==0){
+        apAzDeg = apAzDeg + aip1azoffset;
+    }else {
+        apAzDeg = apAzDeg + aip2azoffset;
+    }
+    aipazdiff = targetAz - apAzDeg;
+    aipeldiff = targetEl - apElDeg;
     //AIP
     ui->twAIP->setItem(idx, AIPcols::Azimuth,
-                       new QTableWidgetItem(QString::number(aipaz)));
+                       new QTableWidgetItem(QString::number(apAzDeg)));
     ui->twAIP->setItem(idx, AIPcols::Elevation,
-                       new QTableWidgetItem(QString::number(elDegree)));
+                       new QTableWidgetItem(QString::number(apElDeg)));
                        // new QTableWidgetItem(ui->leAPel->text()));
     ui->twAIP->setItem(idx, AIPcols::Azdiff,
                        new QTableWidgetItem(QString::number(aipazdiff)));
@@ -1442,6 +1448,8 @@ void DlgAAS::getBestBeamID(int idx,
     QString Rx1="20.0";
     QString Rx2="20.0";
     QString RxLan="0";
+    QString Rx1iip3="";
+    QString Rx2iip3="";
     int beamid=-1;
     if (aiptype==AIP::ModuleType::Cyntec){
         if (idx==0){
@@ -1451,7 +1459,8 @@ void DlgAAS::getBestBeamID(int idx,
         }
         initCyntecBeamCMD(devicename);
 
-        beamid = mCyntec->getBestBeamID(minaz, maxaz , minel, maxel);
+        // beamid = mCyntec->getBestBeamID(minaz, maxaz , minel, maxel);
+        beamid = mCyntec->findClosestBeamID(aipazdiff, aipeldiff);
         if (idx==1){
             //this only for ID 99,100 use!!
             beamid=beamid+1;
@@ -1473,13 +1482,13 @@ void DlgAAS::getBestBeamID(int idx,
         // init BF att
         ds = mCyntec->getBFAtt(minDistance);
         if (ds.length()>=2){
-            bfTx1 = QString::number(ds[0]);
-            bfTx2 = QString::number(ds[1]);
+            Rx1iip3 = QString::number(ds[0]);
+            Rx2iip3 = QString::number(ds[1]);
         }
         // qDebug()<< "TODO: Cyntec Lna ";
         // RxLan="0";
         initCyntecBeamTxAttCMD(devicename, Tx1, Tx2);
-        initCyntecBeamRxAttCMD(devicename, Rx1, Rx2, bfTx1, bfTx2);
+        initCyntecBeamRxAttCMD(devicename, Rx1, Rx2, Rx1iip3, Rx2iip3);
         emit addBeamIDCmd("#---GET_STATUS---------------------------------------------------------");
         emit addBeamIDCmd(mCyntec->getCmd("GET_STATUS").arg(devicename));
         emit addBeamIDCmd("#======================================================================");
@@ -1528,17 +1537,24 @@ void DlgAAS::getBestBeamID(int idx,
     }else{
         qDebug() << "Unknown AIP" << idx << " type:" << aiptype;
     }
-    ui->twAIP->setItem(idx, AIPcols::BeamDirectionID,
-                       new QTableWidgetItem(QString::number(beamid)));
-    ui->twAIP->setItem(idx, AIPcols::BFTx1Att, new QTableWidgetItem(bfTx1));
-    ui->twAIP->setItem(idx, AIPcols::BFTx2Att, new QTableWidgetItem(bfTx2));
-    ui->twAIP->setItem(idx, AIPcols::Tx1Att, new QTableWidgetItem(Tx1));
-    ui->twAIP->setItem(idx, AIPcols::Tx2Att, new QTableWidgetItem(Tx2));
+    // show on UI
+    QTableWidgetItem *itm = new QTableWidgetItem(QString::number(beamid));
+    if (beamid<0){
+        itm->setBackground(QBrush(Qt::red));
+    }
+    ui->twAIP->setItem(idx, AIPcols::BeamDirectionID, itm);
     if (aiptype==AIP::ModuleType::Cyntec){
+        ui->twAIP->setItem(idx, AIPcols::CTx1Att, new QTableWidgetItem(Tx1));
+        ui->twAIP->setItem(idx, AIPcols::CTx2Att, new QTableWidgetItem(Tx2));
         ui->twAIP->setItem(idx, AIPcols::CRx1Att, new QTableWidgetItem(Rx1));
         ui->twAIP->setItem(idx, AIPcols::CRx2Att, new QTableWidgetItem(Rx2));
-        ui->twAIP->setItem(idx, AIPcols::CLnaAtt, new QTableWidgetItem(RxLan));
+        ui->twAIP->setItem(idx, AIPcols::CLna1Att, new QTableWidgetItem(Rx1iip3));
+        ui->twAIP->setItem(idx, AIPcols::CLna2Att, new QTableWidgetItem(Rx2iip3));
     }else{
+        ui->twAIP->setItem(idx, AIPcols::BFTx1Att, new QTableWidgetItem(bfTx1));
+        ui->twAIP->setItem(idx, AIPcols::BFTx2Att, new QTableWidgetItem(bfTx2));
+        ui->twAIP->setItem(idx, AIPcols::Tx1Att, new QTableWidgetItem(Tx1));
+        ui->twAIP->setItem(idx, AIPcols::Tx2Att, new QTableWidgetItem(Tx2));
         ui->twAIP->setItem(idx, AIPcols::BFRx1Att, new QTableWidgetItem(bfRx1));
         ui->twAIP->setItem(idx, AIPcols::BFRx2Att, new QTableWidgetItem(bfRx2));
         ui->twAIP->setItem(idx, AIPcols::Rx1Att, new QTableWidgetItem(Rx1));
@@ -1624,6 +1640,7 @@ void DlgAAS::onCalcClicked(bool checked)
     double lat1 = ui->tableWidget->item(0,GPScols::Latitude)->text().toDouble();
     double lon1 = ui->tableWidget->item(0,GPScols::Longitude)->text().toDouble();
     double altmsl1 = ui->tableWidget->item(0,GPScols::Altitude)->text().toDouble();
+
     //AP head
     //AP Pitch
     //AP AIP1 type
@@ -1645,6 +1662,22 @@ void DlgAAS::onCalcClicked(bool checked)
     }
     */
 
+    QTableWidgetItem *aip1itm = ui->tableWidget->item(0,GPScols::AIP1);
+    if (aip1itm){
+        QVariant vAIP1 = aip1itm->data(Qt::UserRole);
+        if (vAIP1.canConvert<QJsonObject>()){
+            QJsonObject obj = vAIP1.toJsonObject();
+            aip1azoffset = obj.value("offsetAz").toInt();
+        }
+    }
+    QTableWidgetItem *aip2itm = ui->tableWidget->item(0,GPScols::AIP2);
+    if (aip2itm){
+        QVariant vAIP2 = aip2itm->data(Qt::UserRole);
+        if (vAIP2.canConvert<QJsonObject>()){
+            QJsonObject obj = vAIP2.toJsonObject();
+            aip2azoffset = obj.value("offsetAz").toInt();
+        }
+    }
     // if ((!ui->rbVincenty->isChecked())&&(!ui->rbHaversine->isChecked())){
     //     QString errmsg = "Please select distance calcation formula";
     //     QMessageBox::warning(this, "Error", errmsg, QMessageBox::Ok);
@@ -1661,13 +1694,13 @@ void DlgAAS::onCalcClicked(bool checked)
     double lon=0.0;
     double altmsl=0.0;
     double distance = 0;
-    double azimuth = 0;
+    double p1azimuth = 0;
     QVector<double> azbearings;  //store all AP to Client's az
     QVector<double> distances; //store all AP to Client's distance in km
     // QList<double> elbearings;
-    double azimuth2 = 0;
-    double el1=0.0;
-    double el2=0.0;
+    double p2azimuth = 0;
+    double p1el=0.0;
+    double p2el=0.0;
     double totalel=0.0;
 
     ui->twResult->setRowCount(iRow-1);
@@ -1682,43 +1715,45 @@ void DlgAAS::onCalcClicked(bool checked)
         if (mCalcDistance.contains("Vincenty")){
             VincentyResult vrs = vincentyInverse(lat1, lon1, lat, lon);
             distance = vrs.distance/1000; // m -> KM
-            azimuth = vrs.finalBearing;
-            if (azimuth>180){
-                azimuth2 = azimuth-180;
+            p1azimuth = vrs.finalBearing;
+            if (p1azimuth>180){
+                p2azimuth = p1azimuth-180;
             }else{
-                azimuth2 = azimuth+180;
+                p2azimuth = p1azimuth+180;
             }
         }
         if (mCalcDistance.contains("Haversine")){
             distance = haversine(lat1, lon1, lat, lon);
-            azimuth = calcBearing(lat1, lon1, lat, lon);
-            azimuth2 = calcBearing(lat, lon, lat1, lon1);
+            p1azimuth = calcBearing(lat1, lon1, lat, lon);
+            p2azimuth = calcBearing(lat, lon, lat1, lon1);
         }
-        azbearings.append(azimuth);
+        azbearings.append(p1azimuth);
         distances.append(distance);
         ui->twResult->setItem(i-1, AZEIcols::Name, new QTableWidgetItem(pos1 + " : " + pos));
         ui->twResult->setItem(i-1, AZEIcols::Distance, new QTableWidgetItem(QString::number(distance)));
-        ui->twResult->setItem(i-1, AZEIcols::P1Azimuth, new QTableWidgetItem(QString::number(azimuth, 'f', 1)));
-        ui->twResult->setItem(i-1, AZEIcols::P2Azimuth, new QTableWidgetItem(QString::number(azimuth2, 'f', 1)));
+        ui->twResult->setItem(i-1, AZEIcols::P1Azimuth, new QTableWidgetItem(QString::number(p1azimuth, 'f', 1)));
+        ui->twResult->setItem(i-1, AZEIcols::P2Azimuth, new QTableWidgetItem(QString::number(p2azimuth, 'f', 1)));
 
         // totalazimuth = totalazimuth + azimuth;
-        el1 = GeoTranslate::calcElevationAngle(altmsl1, altmsl, distance*1000);
-        el2 = GeoTranslate::calcElevationAngle(altmsl, altmsl1, distance*1000);
-        ui->twResult->setItem(i-1, AZEIcols::P1Elevation, new QTableWidgetItem(QString::number(el1, 'f', 1)));
-        ui->twResult->setItem(i-1, AZEIcols::P2Elevation, new QTableWidgetItem(QString::number(el2, 'f', 1)));
+        p1el = GeoTranslate::calcElevationAngle(altmsl1, altmsl, distance*1000);
+        p2el = GeoTranslate::calcElevationAngle(altmsl, altmsl1, distance*1000);
+        ui->twResult->setItem(i-1, AZEIcols::P1Elevation, new QTableWidgetItem(QString::number(p1el, 'f', 1)));
+        ui->twResult->setItem(i-1, AZEIcols::P2Elevation, new QTableWidgetItem(QString::number(p2el, 'f', 1)));
         // elbearings.append(el1);
-        totalel = totalel + el1;
+        totalel = totalel + p1el;
     }
 
     initAIPHeader(aip1type);
 
     // AP heading az degree
-    double apAzDeg= 0;
-    double elDegree = 0;
-    double distMinR=0.0;
-    double distMinL=0.0;
-    double distR=0.0;
-    double distL=0.0;
+    double apAzDeg = 0;
+    double phyAzDeg = 0; //device az
+    double apElDeg = 0;
+    double phyElDeg = 0; //device el
+    double distMinR = 0.0;
+    double distMinL = 0.0;
+    double distR = 0.0;
+    double distL = 0.0;
     double amcmaz;
     double relative;
     QColor lColor = QColor(144, 238, 144); //light green
@@ -1731,8 +1766,8 @@ void DlgAAS::onCalcClicked(bool checked)
 
     int iClient = ui->twResult->rowCount();
     //AP El(Pitch)
-    elDegree = totalel/iClient;
-    ui->leAPel->setText(QString::number(elDegree, 'f', 1));
+    apElDeg = totalel/iClient;
+    ui->leAPel->setText(QString::number(apElDeg, 'f', 1));
 
     QStringList vhlable;
     if (iClient==1){
@@ -1740,21 +1775,24 @@ void DlgAAS::onCalcClicked(bool checked)
         vhlable << "AIP1";
         ui->twAIP->setVerticalHeaderLabels(vhlable);
         // if we have only one Client
-        QTableWidgetItem *elitm = ui->twResult->item(0, AZEIcols::P1Elevation);
+        QTableWidgetItem *elItm = ui->twResult->item(0, AZEIcols::P1Elevation);
         QTableWidgetItem *ditm = ui->twResult->item(0, AZEIcols::Distance);
-        QTableWidgetItem *itm = ui->twResult->item(0, AZEIcols::P1Azimuth);
-        if (itm){
-            apAzDeg = itm->text().toDouble();
-            elDegree = elitm->text().toDouble();
+        QTableWidgetItem *azItm = ui->twResult->item(0, AZEIcols::P1Azimuth);
+        QTableWidgetItem *phyAzItm = ui->tableWidget->item(0, GPScols::Heading);
+        QTableWidgetItem *phyElItm = ui->tableWidget->item(0, GPScols::Pitch);
+        if (azItm){
+            phyAzDeg = phyAzItm->text().toDouble();
+            apAzDeg = azItm->text().toDouble();
+            phyElDeg = phyElItm->text().toDouble();
             distMinR = ditm->text().toDouble()*1000;
-            qDebug() << "AP az:" << apAzDeg
-                     << " AP el:" << elDegree
+            qDebug() << "AP phy az:" << phyAzDeg
+                     << " AP phy el:" << phyElDeg
                      << " AP Distance:" << distMinR;
 
-            clientRsAz.append(itm);
-            clientRsEl.append(elitm);
+            clientRsAz.append(azItm);
+            clientRsEl.append(elItm);
 
-            getBestBeamID(0, apAzDeg, elDegree, aip1type, clientRsAz, clientRsEl, distMinR);
+            getBestBeamID(0, phyAzDeg, phyElDeg, aip1type, clientRsAz, clientRsEl, distMinR);
         }
     }else {
 
@@ -1928,12 +1966,12 @@ void DlgAAS::onCalcClicked(bool checked)
         //AP AIP1 Az, El
         // TODO: AIP1 Az offset
 
-        getBestBeamID(0, apAzDeg, elDegree, aip1type, clientRsAz, clientRsEl, distMinR);
+        getBestBeamID(0, apAzDeg, apElDeg, aip1type, clientRsAz, clientRsEl, distMinR);
         //AP AIP2
         // TODO: AIP2 Az offset
         if (aip2type != AIP::ModuleType::Unknown){
 
-            getBestBeamID(1, apAzDeg, elDegree, aip2type, clientLsAz, clientLsEl, distMinL);
+            getBestBeamID(1, apAzDeg, apElDeg, aip2type, clientLsAz, clientLsEl, distMinL);
         }
     }
     //AP AZ show on UI
@@ -2599,9 +2637,6 @@ void DlgAAS::handleButtonClicked(int row, int col)
     QTableWidgetItem *item = ui->tableWidget->item(row, col);
     if (item){
         QVariant v = item->data(Qt::UserRole);
-        qDebug() << "handleButtonClicked AIP data:"
-                 << QString::number(row) << "," <<  QString::number(col)
-                 << " = " << v;
         if (v.canConvert<QJsonObject>()){
             m_dlgaip->loadData(qvariant_cast<QJsonObject>(v));
         }else{
@@ -2614,7 +2649,7 @@ void DlgAAS::handleButtonClicked(int row, int col)
 void DlgAAS::onUpdateData(int row, int col, QJsonObject data)
 {
     QTableWidgetItem *item = ui->tableWidget->item(row, col);
-    qDebug() << row << "," << col << " DlgAAS::onUpdateData" <<data;
+    // qDebug() << row << "," << col << " DlgAAS::onUpdateData" <<data;
     if (!item){
         item = new QTableWidgetItem();
     }
