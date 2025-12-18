@@ -18,22 +18,25 @@ public:
     void getBeamTableData(int beamTableID);
     BeamTypeRange getBeamTypeRange(QString beamtype);
     int findClosestBeamID(double targetAz, double targetEl,
-                          QString beamtype="NARROW", int beamfactor=1);
+                          QString beamtype="NARROW", int beamfactor=1) override;
+    int getBestBeamID(double minaz, double maxaz, double minel, double maxel) override;
+    QList<int> getIntList(QString key) override;
+    double getTargetEIRP(double dist);
+    QVector<double> getTxAtt(double dist) override;
+    QVector<double> getRxAtt(double dist) override;
+    QVector<double> getBFAtt(double distance) override;
+    QVector<double> getBFRxAtt(double dist);
+    QVector<double> getBFTxAtt(double dist);
+    QString getCmd(QString key) override;
+
+    QString getFreqIdx(double ghz);
     QVector<QVector<double>> getBeamTableDatas(int limitid=240);
     QVector<QVector<double>> getBeamTableDatas(QString beamtype);
     QVector<int> findNearestNeighbors(int targetID, QString beamtype="NARROW",
                                       int neighborGroup = 1);
-    int getBestBeamID(double minaz, double maxaz, double minel, double maxel);
-    double getTargetEIRP(double dist);
-    QVector<double> getRxAtt(double dist);
-    QVector<double> getBFRxAtt(double dist);
-    QVector<double> getTxAtt(double dist);
-    QVector<double> getBFTxAtt(double dist);
-    QString getCmd(QString key);
-    QString getFreqIdx(double ghz);
 
 public slots:
-    void initBeamData(QString filename);
+    void initBeamData(QString filename) override;
     void initBeamData(QIODevice *device);
 
 signals:

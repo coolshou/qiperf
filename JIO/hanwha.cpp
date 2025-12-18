@@ -351,6 +351,12 @@ int Hanwha::getBestBeamID(double minaz, double maxaz, double minel, double maxel
     return 477;
 }
 
+QList<int> Hanwha::getIntList(QString key)
+{
+    Q_UNUSED(key)
+    // TODO: getIntList?
+}
+
 double Hanwha::getTargetEIRP(double dist)
 {
     //expect EIRP by dist (meter)
@@ -396,6 +402,13 @@ QVector<double> Hanwha::getRxAtt(double dist)
     ds.append(att2);
     ds.append(lan);
     return ds;
+}
+
+QVector<double> Hanwha::getBFAtt(double distance)
+{
+    Q_UNUSED(distance)
+    //TODO getBFAtt, Tx/Rx?
+
 }
 
 QVector<double> Hanwha::getBFRxAtt(double dist)

@@ -4,6 +4,8 @@ AIP::AIP(QObject *parent)
     : QObject{parent}
 {}
 
+AIP::~AIP() {}
+
 void AIP::initBeamData(QString filename)
 {
     Q_UNUSED(filename)
