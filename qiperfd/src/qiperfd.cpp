@@ -15,6 +15,7 @@
 #include "qiperfd.h"
 #include "../src/comm.h"
 #include "../src/versions.h"
+#include "../src/myfunc.h"
 
 #include "../JIO/aascmd.h"
 
@@ -107,7 +108,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     m_filewatcher = new FileWatcher(qiperfdlog);
     connect(m_filewatcher, &FileWatcher::onNewLine, this, &QIperfd::onNewLine);
 
-    initJIOOpenWRT();
+    initOpenWRT();
 
     informMessage(INFO_QIPERFD_STARTED, true);
     checkFirewallStatus();
@@ -151,7 +152,7 @@ void QIperfd::loadcfg(QString apppath)
     cfg->endGroup();
     cfg->beginGroup("iperf");
     bUseSysIperf = cfg->value("UseSysIperf", false).toBool();
-    bIsJIOOpenWRT = cfg->value("JIOOpenWRT", false).toBool();
+    bIsOpenWRT = cfg->value("IsOpenWRT", false).toBool();
     bIsAM7 = cfg->value("IsAM7", false).toBool();
     cfg->endGroup();
 }
@@ -165,7 +166,7 @@ void QIperfd::savecfg()
     cfg->endGroup();
     cfg->beginGroup("iperf");
     cfg->setValue("UseSysIperf", bUseSysIperf);
-    cfg->setValue("JIOOpenWRT", bIsJIOOpenWRT);
+    cfg->setValue("IsOpenWRT", bIsOpenWRT);
     cfg->setValue("IsAM7", bIsAM7);
     cfg->endGroup();
     cfg->sync();
@@ -514,6 +515,11 @@ void QIperfd::startAll(bool bServer)
     QDir d(tmp);
     if (!d.exists()){
         d.mkpath(tmp);
+    }
+    if (bIsOpenWRT){
+        //on openwrt, remove old record to save space!
+        MyFunc::removeSubfolders(tmpfilepath);
+        //TODO  or Don't log iperf log to file
     }
     //TODO: this will not set logpath at right time
     emit setStartTime(s_starttime);
@@ -2036,9 +2042,9 @@ void QIperfd::getIperfVer(QString cmd, double ver)
     }
 }
 
-void QIperfd::initJIOOpenWRT()
+void QIperfd::initOpenWRT()
 {
-    if (bIsJIOOpenWRT){
+    if (bIsOpenWRT){
         //
         QFile fAas(":/aas/aascmd");
         if (fAas.open(QIODevice::ReadOnly)) {

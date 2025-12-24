@@ -130,7 +130,7 @@ private:
     void startNtpServer();
     void initIperf(QString apppath);
     void getIperfVer(QString cmd, double ver);
-    void initJIOOpenWRT();
+    void initOpenWRT();
     void runRequest(QString refid, QString from, QString reqcmd, QString cmds);
     QString parserResponse(QString rpcmd, QString data);
     void processMonitor(QString from, QString reqcmd, QString rpcmd);
@@ -187,7 +187,7 @@ private:
     IcmpPing *m_icmpping;
     bool bNtpserver; // enable NTP server
     bool bUseSysIperf;
-    bool bIsJIOOpenWRT; // JIO Openwrt device
+    bool bIsOpenWRT; // Openwrt device
     bool bIsAM7;
     NtpServer *m_ntpserver;
     NtpSync *m_ntpsync;

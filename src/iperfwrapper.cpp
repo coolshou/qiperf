@@ -348,10 +348,12 @@ void IperfWrapper::parserIperf2(QString linedata)
                 }
             }
 
-            if (m_ignorewronginterval && !linedata.contains("receiver") &&
-                qAbs(m_interval - interval) > 0.5) {
-                debug("["+idx+"] Ignore wrong interval: " + QString::number(interval), 4);
-                return;
+            if (m_ignorewronginterval){
+                if (!linedata.contains("receiver") &&
+                    qAbs(interval) < (m_interval*0.5)) {
+                    debug("["+idx+"] Ignore wrong interval: " + QString::number(interval), 4);
+                    return;
+                }
             }
 
             if (m_omit > 0) {

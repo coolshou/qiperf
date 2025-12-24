@@ -2,6 +2,7 @@
 
 #include <QtMath>
 #include <QNetworkInterface>
+#include <QDir>
 
 #include <QDebug>
 
@@ -189,6 +190,30 @@ QStringList MyFunc::getAllIPAddress(bool onlyIPv4)
         }
     }
     return ds;
+}
+
+void MyFunc::removeSubfolders(const QString &parentPath)
+{
+    QDir parentDir(parentPath);
+
+    if (!parentDir.exists()) {
+        qDebug() << "Parent directory does not exist.";
+        return;
+    }
+
+    // Filter for Directories only, and skip "." and ".."
+    QStringList subDirs = parentDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+    for (const QString &subDirName : subDirs) {
+        QString fullPath = parentDir.absoluteFilePath(subDirName);
+        QDir dirToDelete(fullPath);
+
+        if (dirToDelete.removeRecursively()) {
+            qDebug() << "Deleted:" << fullPath;
+        } else {
+            qDebug() << "Failed to delete:" << fullPath;
+        }
+    }
 }
 #if defined(Q_OS_WIN)
 QString MyFunc::getErrorString(DWORD errorCode)

@@ -33,6 +33,7 @@ public:
     static double calculateFSPL(double distanceMeters, double frequencyHz);
     static double euclideanDistance(double az1, double el1, double az2, double el2);
     static QStringList getAllIPAddress(bool onlyIPv4=true);
+    static void removeSubfolders(const QString &parentPath);
     #if defined(Q_OS_WIN)
     static QString getErrorString(DWORD errorCode);
     #endif
