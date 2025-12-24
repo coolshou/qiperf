@@ -1,4 +1,4 @@
-qiperf (0.18.11412.23-1) unstable; urgency=medium
+qiperf (0.18.11412.24-1) unstable; urgency=medium
 
   * Add Ctrl+a to select all iperf test pair
   * Add when iperf log file finished copy, delete it
