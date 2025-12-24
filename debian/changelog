@@ -1,3 +1,12 @@
+qiperf (0.18.11412.23-1) unstable; urgency=medium
+
+  * Add Ctrl+a to select all iperf test pair
+  * Add when iperf log file finished copy, delete it
+  * fix m_ignorewronginterval check
+  * add on Openwrt, remove old log path before start new Test
+
+ -- coolshou <coolshou2060@gmail.com>  Tue, 07 Oct 2025 14:04:37 +0800
+
 qiperf (0.17.11409.30-1) unstable; urgency=medium
 
   * JIO fix pos of Rectangle at center Instead topleft
