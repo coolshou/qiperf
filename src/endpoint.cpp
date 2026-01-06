@@ -111,9 +111,10 @@ void EndPoint::loadData(QString data)
         }
         updateTimeStemp();
 
-        //TODO: get address of each interface....
+        // TODO: get address of each interface....
         if (!jsonRoot.value("Net").isNull()){
-            oNet = jsonRoot.value("Net").toObject();
+            // qDebug() << m_HostName << " NET: " << jsonRoot.value("Net");
+            // oNet = jsonRoot.value("Net").toObject();
         }
     }/*else{
         qDebug() << "EndPoint::loadData wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;

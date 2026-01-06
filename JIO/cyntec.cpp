@@ -354,7 +354,7 @@ int Cyntec::db2att(double db)
 /*
  * targetAz:
  * targetEl:
- * beamtype:
+ * beamtype: "Narrow", "Tri", "Spoiled"
  * beamfactor:
  *
  * return: beam id, -1 = not found
@@ -366,21 +366,21 @@ int Cyntec::findClosestBeamID(double targetAz, double targetEl,
     int closestID = -1;
     double minDistance = std::numeric_limits<double>::max();
     // Narrow beam
-    BeamTypeRange r= getBeamTypeRange(beamtype);
+    BeamTypeRange rangedata= getBeamTypeRange(beamtype);
     // qDebug() << " beamtype: " << beamtype << " range:" << r.minAz << "," << r.maxAz;
     // << r.minEl << r.maxEl;
-    CyntecBeamFactorData f = getBeamFactorRange(beamfactor);
-    qDebug() << " HPBW az:" << f.azimuth3dB_BW << " el: " << f.elevation3dB_BW;
+    CyntecBeamFactorData beamfactordata = getBeamFactorRange(beamfactor);
+    qDebug() << " HPBW az:" << beamfactordata.azimuth3dB_BW << " el: " << beamfactordata.elevation3dB_BW;
 
     // check if targetAz/El out of range
-    double limitAz = r.minAz - f.azimuth3dB_BW/2;
-    double limitMaxAz = r.maxAz + f.azimuth3dB_BW/2;
+    double limitAz = rangedata.minAz - beamfactordata.azimuth3dB_BW/2;
+    double limitMaxAz = rangedata.maxAz + beamfactordata.azimuth3dB_BW/2;
     if ((targetAz < limitAz)|| (targetAz > limitMaxAz)){
         qDebug() << "Az out of range:" << limitAz << " < " << targetAz << " < " << limitMaxAz;
         return closestID;
     }
-    double limitEl = r.minEl - f.elevation3dB_BW/2;
-    double limitMaxEl = r.maxEl + f.elevation3dB_BW/2;
+    double limitEl = rangedata.minEl - beamfactordata.elevation3dB_BW/2;
+    double limitMaxEl = rangedata.maxEl + beamfactordata.elevation3dB_BW/2;
     if ((targetEl < limitEl)|| (targetEl > limitMaxEl)){
         qDebug() << "El out of range:" << limitEl << " < " << targetEl << " < " << limitMaxEl;
         return closestID;

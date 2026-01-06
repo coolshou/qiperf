@@ -22,11 +22,11 @@ public:
     int getBestBeamID(double minaz, double maxaz, double minel, double maxel) override;
     QList<int> getIntList(QString key) override;
     double getTargetEIRP(double dist);
-    QVector<double> getTxAtt(double dist) override;
-    QVector<double> getRxAtt(double dist) override;
+    QVector<double> getTxAtt(double distance) override;
+    QVector<double> getRxAtt(double distance) override;
     QVector<double> getBFAtt(double distance) override;
-    QVector<double> getBFRxAtt(double dist);
-    QVector<double> getBFTxAtt(double dist);
+    QVector<double> getBFRxAtt(double distance);
+    QVector<double> getBFTxAtt(double distance);
     QString getCmd(QString key) override;
 
     QString getFreqIdx(double ghz);

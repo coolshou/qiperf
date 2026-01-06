@@ -73,16 +73,20 @@ public:
         BeamDirID=8,
         P2BFTx1Att=9, // Hanwha
         P2BFTx2Att=10, // Hanwha
-        P2Tx1Att=11, // Hanwha/Cyntec
-        P2Tx2Att=12, // Hanwha/Cyntec
+        P2Tx1Att=11, // Hanwha
+        P2Tx2Att=12, // Hanwha
         P2BFRx1Att=13, // Hanwha
         P2BFRx2Att=14, // Hanwha
-        P2CRx1Att=13, //Cyntec
-        P2CRx2Att=14, //Cyntec
-        P2CLnaAtt=15,
         P2Rx1Att=15, // Hanwha
         P2Rx2Att=16, // Hanwha
-        P2RxLnaAtt=17 // Hanwha
+        P2RxLnaAtt=17, // Hanwha
+        P2CTx1Att=9, // Cyntec
+        P2CTx2Att=10, // Cyntec
+        P2CRx1Att=11, //Cyntec
+        P2CRx2Att=12, //Cyntec
+        P2CLna1Att=13, //Cyntec
+        P2CLna2Att=14, //Cyntec
+
     };
     Q_ENUM(AZEIcols)
     enum AIPcols{

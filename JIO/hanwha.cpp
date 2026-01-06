@@ -377,7 +377,7 @@ double Hanwha::getTargetEIRP(double dist)
     return eirp;
 }
 
-QVector<double> Hanwha::getRxAtt(double dist)
+QVector<double> Hanwha::getRxAtt(double distance)
 {
     QVector<double> ds;
     double att1 = 0.0;
@@ -386,7 +386,7 @@ QVector<double> Hanwha::getRxAtt(double dist)
     if (!mRangeDataObj.isEmpty()){
         QStringList skeys = sorted(mRangeDataObj.keys());
         foreach(const QString& key, skeys) {
-            if (dist > key.toDouble()){
+            if (distance > key.toDouble()){
                 auto d = mRangeDataObj.value(key).toObject();
                 att1 = d.value("IFRX1ATT").toDouble();
                 att2 = d.value("IFRX2ATT").toDouble();
@@ -406,12 +406,13 @@ QVector<double> Hanwha::getRxAtt(double dist)
 
 QVector<double> Hanwha::getBFAtt(double distance)
 {
-    Q_UNUSED(distance)
-    //TODO getBFAtt, Tx/Rx?
-
+    QVector<double> ds;
+    ds = getBFTxAtt(distance);
+    ds.append(getBFRxAtt(distance));
+    return ds;
 }
 
-QVector<double> Hanwha::getBFRxAtt(double dist)
+QVector<double> Hanwha::getBFRxAtt(double distance)
 {
     QVector<double> ds;
     double att1=0.0;
@@ -419,7 +420,7 @@ QVector<double> Hanwha::getBFRxAtt(double dist)
     if (!mRangeDataObj.isEmpty()){
         QStringList skeys = sorted(mRangeDataObj.keys());
         foreach(const QString& key, skeys) {
-            if (dist > key.toDouble()){
+            if (distance > key.toDouble()){
                 auto d = mRangeDataObj.value(key).toObject();
                 att1 = d.value("BFRX1ATT").toDouble();
                 att2 = d.value("BFRX2ATT").toDouble();
@@ -435,7 +436,7 @@ QVector<double> Hanwha::getBFRxAtt(double dist)
     return ds;
 }
 
-QVector<double> Hanwha::getTxAtt(double dist)
+QVector<double> Hanwha::getTxAtt(double distance)
 {
     QVector<double> ds;
     double att1 = 0.0;
@@ -443,7 +444,7 @@ QVector<double> Hanwha::getTxAtt(double dist)
     if (!mRangeDataObj.isEmpty()){
         QStringList skeys = sorted(mRangeDataObj.keys());
         foreach(const QString& key, skeys) {
-            if (dist > key.toDouble()){
+            if (distance > key.toDouble()){
                 auto d = mRangeDataObj.value(key).toObject();
                 att1 = d.value("IFTX1ATT").toDouble();
                 att2 = d.value("IFTX2ATT").toDouble();
@@ -459,7 +460,7 @@ QVector<double> Hanwha::getTxAtt(double dist)
     return ds;
 }
 
-QVector<double> Hanwha::getBFTxAtt(double dist)
+QVector<double> Hanwha::getBFTxAtt(double distance)
 {
     QVector<double> ds;
     double att1=0.0;
@@ -467,7 +468,7 @@ QVector<double> Hanwha::getBFTxAtt(double dist)
     if (!mRangeDataObj.isEmpty()){
         QStringList skeys = sorted(mRangeDataObj.keys());
         foreach(const QString& key, skeys) {
-            if (dist > key.toDouble()){
+            if (distance > key.toDouble()){
                 auto d = mRangeDataObj.value(key).toObject();
                 att1 = d.value("BFTX1ATT").toDouble();
                 att2 = d.value("BFTX2ATT").toDouble();

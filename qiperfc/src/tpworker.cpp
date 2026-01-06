@@ -287,6 +287,7 @@ void TpWorker::work()
                 return;
             }
             //tell server add iperf server
+            //CMD_IPERF_ADD:<num>:<ignore>:<iperf args>
             cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow);
             cmd = cmd + ":"+ (m_ignoreWrongInterval?"1":"0");
             cmd = cmd + ":"+ tp->getServerArgs();

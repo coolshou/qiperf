@@ -227,7 +227,6 @@ QString DlgAAS::getGpsInfo(QString refrow, QString target)
         mSSHRemoteRunner->run("gps_call_so", m_sshParams);
     }else if (mControlBy==DlgSet::ControlBy::QIPERFD){
         QString cmd = QString("%1:%2").arg(AAS_GET_GPS, jiocmdObj.value(AAS_GET_GPS).toString());
-        // qDebug() << "JIO_GET_GPS=" << target << " cmd=> "  << cmd;
         emit requestExec(target, refrow, cmd);
     }
     return result;
@@ -1216,10 +1215,11 @@ void DlgAAS::initHanwhaBeamRxAttCMD(QString devicename, QString bfRx1, QString b
 void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString cmName)
 {
     QString ucipath="";
-    if (devicename.isEmpty()){
+    if (devicename.isEmpty() || devicename.contains("/dev/spidev2.0")){
         devicename="/dev/spidev2.0";
         ucipath = "aip1";
     }else{
+        qDebug() << "initCyntecBeamCMD devicename:" <<devicename;
         ucipath = "aip2";
     }
     QString cmd ="";
@@ -1238,6 +1238,7 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
         emit addBeamIDCmd(cmd);
         //mfc set aip_power_onoff on
         emit addBeamIDCmd(QString("mfc set aip_power_onoff on"), true);// uci command
+        emit addBeamIDCmd(QString("uci set aip.%1.disabled='0'").arg(ucipath), true);// uci command
     }else{ //Client
         emit addClientBeamIDCmd(cmName, cmd);
     }
@@ -1268,7 +1269,7 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
         // 8x8, Att=0dB
         ant="1";
     }
-    emit addBeamIDCmd("#---SET_AntArrayMode---");
+    emit addBeamIDCmd("#---SET_BeamFactor (AntArrayMode)---");
     //spidev_test -D /dev/spidev2.0 -F "1 1 1 1"
     cmd = mCyntec->getCmd("SET_AntArrayMode").arg(devicename, ant, ant, ant, ant);
     if(cmName.isEmpty()){
@@ -1277,12 +1278,13 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
         emit addClientBeamIDCmd(cmName, cmd);
     }
 
+
 }
 
 void DlgAAS::initCyntecBeamIdCMD(QString devicename, QString beamid, QString cmName)
 {
     QString ucipath="";
-    if (devicename.isEmpty()){
+    if (devicename.isEmpty()|| devicename.contains("/dev/spidev2.0")){
         devicename="/dev/spidev2.0";
         ucipath="aip1";
     }else{
@@ -1296,9 +1298,14 @@ void DlgAAS::initCyntecBeamIdCMD(QString devicename, QString beamid, QString cmN
     }
     emit addBeamIDCmd("#---SET_BeamID---");
     //spidev_test -D /dev/spidev2.0 -T "99 99 99 99"
+
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
         emit addBeamIDCmd(QString("uci set aip.%1.beam_id=\"%2\"").arg(ucipath, beamid), true);
+        // TODO, az,el
+        //uci set aip.aip1.bt_az="$BEAM_AZ"
+        //uci set aip.aip1.bt_el="$BEAM_EL"
+
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
@@ -1311,7 +1318,7 @@ void DlgAAS::initCyntecBeamTxAttCMD(QString devicename, QString Tx1att, QString 
     }
     int tx1 = Tx1att.toInt()*4;
     int tx2 = Tx2att.toInt()*4;
-    emit addBeamIDCmd(QString("#---SET_TxAttn--%1dB=%2--%3dB=%4").arg(Tx1att, QString::number(tx1),
+    emit addBeamIDCmd(QString("#---SET_TxAttn--%1dB=%2--%3dB=%4 (Max:32db=128)").arg(Tx1att, QString::number(tx1),
                                                                   Tx2att, QString::number(tx2)));
     //spidev_test -D /dev/spidev2.0 -A "0:80:80"
     QString cmd = mCyntec->getCmd("SET_TxAttn").arg(devicename,
@@ -1423,6 +1430,7 @@ void DlgAAS::getBestBeamID(int idx,
         apAzDeg = apAzDeg + aip2azoffset;
     }
     aipazdiff = targetAz - apAzDeg;
+    //TODO: do we need this?
     aipeldiff = targetEl - apElDeg;
     //AIP
     ui->twAIP->setItem(idx, AIPcols::Azimuth,
@@ -1436,7 +1444,7 @@ void DlgAAS::getBestBeamID(int idx,
     emit addBeamIDCmd("#AP AIP-"+ QString::number(idx));
     qDebug() << "AIP:" << idx << " Max az:" << maxaz << " Min Az:" << minaz
              << " Max el:" << maxel << " Min el:" << minel
-             << " aipazdiff:" << aipazdiff << " aipeldiff:" << aipeldiff;
+             << " aipazdiff:" << aipazdiff ;//<< " aipeldiff:" << aipeldiff;
     QString devicename=""; //cmd name diff to AIP1/AIP2
     QVector<double> ds;
     QString bfTx1="";
@@ -1461,11 +1469,14 @@ void DlgAAS::getBestBeamID(int idx,
 
         // beamid = mCyntec->getBestBeamID(minaz, maxaz , minel, maxel);
         beamid = mCyntec->findClosestBeamID(aipazdiff, aipeldiff);
-        if (idx==1){
-            //this only for ID 99,100 use!!
-            beamid=beamid+1;
+        if (beamid < 0){
+            beamid = mCyntec->findClosestBeamID(aipazdiff, aipeldiff, "Tri");
         }
-        initCyntecBeamIdCMD(devicename, QString::number(beamid));
+        if (beamid>=0){
+            initCyntecBeamIdCMD(devicename, QString::number(beamid));
+        }else{
+            qDebug() << " Not supported beam ID:" << beamid;
+        }
 
         //init Tx att
         ds = mCyntec->getTxAtt(minDistance);
@@ -1492,6 +1503,23 @@ void DlgAAS::getBestBeamID(int idx,
         emit addBeamIDCmd("#---GET_STATUS---------------------------------------------------------");
         emit addBeamIDCmd(mCyntec->getCmd("GET_STATUS").arg(devicename));
         emit addBeamIDCmd("#======================================================================");
+        // uci
+        if (idx==0){
+            emit addBeamIDCmd(QString("uci commit aip.api1"), true);
+        }else{
+            emit addBeamIDCmd(QString("uci commit aip.api2"), true);
+        }
+        emit addBeamIDCmd(QString("uci commit wireless"), true);
+
+        emit addBeamIDCmd("#---UCI_STATUS---------------------------------------------------------", true);
+        emit addBeamIDCmd(QString("uci show wireless.MT7990_1_2"), true);
+        emit addBeamIDCmd(QString("uci show wireless.rax0"), true);
+        if (idx==0){
+            emit addBeamIDCmd(QString("uci show aip.aip1"), true);
+        }else{
+            emit addBeamIDCmd(QString("uci show aip.aip2"), true);
+        }
+        emit addBeamIDCmd("#======================================================================", true);
 
     } else if (aiptype==AIP::ModuleType::Hanwha){
         if (idx==0){
@@ -1970,7 +1998,7 @@ void DlgAAS::onCalcClicked(bool checked)
         //AP AIP2
         // TODO: AIP2 Az offset
         if (aip2type != AIP::ModuleType::Unknown){
-
+            qDebug() << "setup aip2type getBestBeamID";
             getBestBeamID(1, apAzDeg, apElDeg, aip2type, clientLsAz, clientLsEl, distMinL);
         }
     }
@@ -2326,7 +2354,7 @@ void DlgAAS::onClientBeamDirIDInit(bool checked)
 // Att Init
 void DlgAAS::onAttInit(bool checked)
 {
-    //init all Client's Att value, NOT USING?
+    //init all Client's Att value
     Q_UNUSED(checked)
     QString client="";
     AIP::ModuleType aiptype = AIP::ModuleType::Unknown;
@@ -2349,7 +2377,7 @@ void DlgAAS::onAttInit(bool checked)
                 QString bfRx2="";
                 QString Rx1="";
                 QString Rx2="";
-                QString Lan="";
+                // QString Lan="";
 
                 targetEIRP = mCyntec->getTargetEIRP(distance);
                 qDebug() <<"mCyntec: " << iRow << " targetEIRP:" << targetEIRP;
@@ -2375,15 +2403,15 @@ void DlgAAS::onAttInit(bool checked)
                 if (ds.length()>=2){
                     bfRx1 = QString::number(ds[0]);
                     bfRx2 = QString::number(ds[1]);
-                    ui->twResult->setItem(iRow, AZEIcols::P2BFTx1Att,
+                    ui->twResult->setItem(iRow, AZEIcols::P2CLna1Att,
                                           new QTableWidgetItem(bfRx1));
-                    ui->twResult->setItem(iRow, AZEIcols::P2BFTx2Att,
+                    ui->twResult->setItem(iRow, AZEIcols::P2CLna2Att,
                                           new QTableWidgetItem(bfRx2));
                 }
-                qDebug() << "//TODO: Cyntec Lna ";
-                Lan = "0";
-                ui->twResult->setItem(iRow, AZEIcols::P2CLnaAtt,
-                                      new QTableWidgetItem(Lan));
+                // qDebug() << "//TODO: Cyntec Lna ";
+                // Lan = "0";
+                // ui->twResult->setItem(iRow, AZEIcols::P2CLnaAtt,
+                //                       new QTableWidgetItem(Lan));
                 initCyntecBeamTxAttCMD("", Tx1, Tx2, client);
                 initCyntecBeamRxAttCMD("", Rx1, Rx2, bfRx1, bfRx2, client);
                 emit addClientBeamIDCmd(client, "#----------------------------------------------------------------------");
