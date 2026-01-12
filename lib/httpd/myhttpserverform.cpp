@@ -4,8 +4,9 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QNetworkInterface>
 
-#include "../src/myfunc.h"
+// #include "../src/myfunc.h"
 
 MyHttpServerForm::MyHttpServerForm(QSettings *cfg, QWidget *parent)
     : QWidget(parent)
@@ -105,7 +106,7 @@ void MyHttpServerForm::onSelectRootPath(bool checked)
 void MyHttpServerForm::onReflash(bool checked)
 {
     Q_UNUSED(checked)
-    QStringList ls = MyFunc::getAllIPAddress();
+    QStringList ls = getAllIPAddress();
     // qDebug() << "onReflash:" << ls.join(",");
     ui->cbHostAddress->clear();
     ui->cbHostAddress->insertItem(0, "Any");
@@ -167,4 +168,29 @@ void MyHttpServerForm::updateStatus(bool started)
         ui->sbPort->setEnabled(true);
         ui->pbSelRootPath->setEnabled(true);
     }
+}
+
+QStringList MyHttpServerForm::getAllIPAddress(bool onlyIPv4)
+{
+    const QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
+    QStringList ds;
+    for (const QNetworkInterface &interface : interfaces) {
+        // Skip down or loopback interfaces
+        if (!(interface.flags() & QNetworkInterface::IsUp) ||
+            (interface.flags() & QNetworkInterface::IsLoopBack)){
+            continue;
+        }
+
+        for (const QNetworkAddressEntry &entry : interface.addressEntries()) {
+            QHostAddress ip = entry.ip();
+            if (onlyIPv4){
+                if (ip.protocol() == QAbstractSocket::IPv4Protocol){
+                    ds.append(ip.toString());
+                }
+            }else{
+                ds.append(ip.toString());
+            }
+        }
+    }
+    return ds;
 }

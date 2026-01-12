@@ -37,6 +37,7 @@ private slots:
     void onRootPathChanged(QString path);
     void updateStatus(bool started);
 private:
+    QStringList getAllIPAddress(bool onlyIPv4=true);
     Ui::MyHttpServerForm *ui;
     QString mOldRootPath;
     QSettings *mCfg;
