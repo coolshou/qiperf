@@ -14,8 +14,8 @@
    <string>MyHttpd</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>images/http.png</normaloff>images/http.png</iconset>
+   <iconset resource="myhttpd.qrc">
+    <normaloff>:/myhttpd</normaloff>:/myhttpd</iconset>
   </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
@@ -30,6 +30,8 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
+ <resources>
+  <include location="myhttpd.qrc"/>
+ </resources>
  <connections/>
 </ui>

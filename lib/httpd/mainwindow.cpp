@@ -4,6 +4,7 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QVBoxLayout>
+#include <QIcon>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)

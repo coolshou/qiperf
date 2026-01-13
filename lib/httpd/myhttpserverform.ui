@@ -14,8 +14,8 @@
    <string>httpd</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="myhttpserver.qrc">
-    <normaloff>:/httpd</normaloff>:/httpd</iconset>
+   <iconset resource="../../../../../../../../../home/jimmy/work/qiperf/lib/httpd/myhttpd.qrc">
+    <normaloff>:/myhttpd</normaloff>:/myhttpd</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -167,7 +167,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="myhttpserver.qrc"/>
+  <include location="../../../../../../../../../home/jimmy/work/qiperf/lib/httpd/myhttpd.qrc"/>
  </resources>
  <connections/>
 </ui>
