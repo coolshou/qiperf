@@ -17,7 +17,7 @@ struct CyntecBeamFactorData
     double elevation3dB_BW; // Assuming Elevation 3dB BW (°) is a double
 
     // Optional: A constructor for easy initialization
-    CyntecBeamFactorData(int id = 0, const QString& map = "", int att = 0,
+    CyntecBeamFactorData(int id = 0, const QString& map = "", double att = 0,
                    double az = 0.0, double el = 0.0)
         : beamFactorId(id), elementMap(map), attDb(att),
         azimuth3dB_BW(az), elevation3dB_BW(el)

@@ -196,6 +196,7 @@ void Cyntec::initBeamData(QIODevice *filedevice)
             qDebug() << "sheet 'BeamTable' not found";
         }
         //BeamFactor
+        QVariant varElmMap, varAtt;
         if (xlsReader.selectSheet("BeamFactor")){
             mBeamFactorData->clear();
             irow=1;
@@ -212,11 +213,11 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                         varBeamID = cell->readValue();
                         cell = xlsReader.cellAt(irow, 3);
                         if (cell != NULL){
-                            varAz = cell->readValue(); // Element Map
+                            varElmMap = cell->readValue(); // Element Map
                         }
                         cell = xlsReader.cellAt(irow, 4);
                         if (cell != NULL){
-                            varEl = cell->readValue(); // Att (dB)
+                            varAtt = cell->readValue(); // Att (dB)
                         }
                         cell = xlsReader.cellAt(irow, 5);
                         if (cell != NULL){
@@ -231,8 +232,8 @@ void Cyntec::initBeamData(QIODevice *filedevice)
                         //          << "varE:" << varE << " varF:" << varF;
                         mBeamFactorData->insert(varBeamID.toInt(),
                                                 CyntecBeamFactorData(varBeamID.toInt(),
-                                                                     varAz.toString(),
-                                                                     varEl.toInt(),
+                                                                     varElmMap.toString(),
+                                                                     varAtt.toDouble(),
                                                                      varHPAz.toDouble(),
                                                                      varHPEl.toDouble()));
                     }else{
