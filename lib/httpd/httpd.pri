@@ -5,16 +5,16 @@ QT       += gui network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 INCLUDEPATH += \
-    $$PWD
+    $$PWD/src
 
 SOURCES += \
-    $$PWD/myhttpserverform.cpp
+    $$PWD/src/myhttpserverform.cpp
 
 HEADERS += \
-    $$PWD/myhttpserverform.h
+    $$PWD/src/myhttpserverform.h
 
 FORMS += \
-    $$PWD/myhttpserverform.ui
+    $$PWD/src/myhttpserverform.ui
 
 RESOURCES += \
     $$PWD/myhttpserver.qrc

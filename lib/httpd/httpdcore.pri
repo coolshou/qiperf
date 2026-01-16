@@ -1,7 +1,7 @@
 QT       += network
 
 INCLUDEPATH += \
-    $$PWD
+    $$PWD/src
 
 HEADERS += \
-    $$PWD/myhttpserver.h
+    $$PWD/src/myhttpserver.h

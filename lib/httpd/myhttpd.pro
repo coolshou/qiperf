@@ -5,14 +5,14 @@ QT += network
 include(httpd.pri)
 
 FORMS += \
-    mainwindow.ui
+    /srcmainwindow.ui
 
 HEADERS += \
-    mainwindow.h
+    /srcmainwindow.h
 
 SOURCES += \
-    main.cpp \
-    mainwindow.cpp
+    /srcmain.cpp \
+    /srcmainwindow.cpp
 
 RESOURCES += \
     myhttpd.qrc
@@ -39,14 +39,14 @@ win32 {
     DIST_DIRECTORY =  $$shell_quote($$shell_path($${PWD}/../$${TARGET}_$${QT_ARCH}))
     DIST_FILE = $$shell_quote($$shell_path($$DIST_DIRECTORY/$${TARGET}.exe))
     CONFIG(release, debug|release) {
-        release: iperfbin.commands = \
+        release: myhttpbin.commands = \
             $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Release/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
     } else {
-        debug: iperfbin.commands = \
+        debug: myhttpbin.commands = \
             $$QMAKE_COPY $$shell_quote($$shell_path($${PWD}/Debug/$${TARGET}.exe)) $$shell_quote($$shell_path($$DIST_FILE))
     }
-    first.depends = $(first) iperfbin
+    first.depends = $(first) myhttpbin
     export(first.depends)
-    export(iperfbin.commands)
-    QMAKE_EXTRA_TARGETS += first iperfbin
+    export(myhttpbin.commands)
+    QMAKE_EXTRA_TARGETS += first myhttpbin
 }
