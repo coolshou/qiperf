@@ -26,8 +26,8 @@
 #include "tp.h"
 #include "versions.h"
 #include "views/viewtype.h"
-#include "../lib/httpd/myhttpserver.h"
-#include "../lib/httpd/myhttpserverform.h"
+#include "myhttpserver.h"
+#include "myhttpserverform.h"
 
 #include <QDebug>
 
