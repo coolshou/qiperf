@@ -30,10 +30,12 @@ TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
         // m_LostRateLayer = layer(LAYER_LOSTRATE);
         qDebug() << "addLayer " << LAYER_LOSTRATE << " Fail";
     }
-    // replot();
     clear(); // this will let plot layout looks strange!!
     // setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     // TODO: init plot chart size not good to fit parent's rect
+    m_replottimer = new QTimer();
+    connect(m_replottimer, &QTimer::timeout, this, &TPPlot::doReplot);
+    m_replottimer->start(1000);//1 sec replot
 }
 
 void TPPlot::setStartTime(QDateTime startTime)
@@ -48,7 +50,6 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
     MyQCPGraph *myGraph = getGraph(refrow);
     connect(myGraph, &MyQCPGraph::datasSetted, this ,&TPPlot::onDatasSetted);
 
-    // QMutexLocker locker(&m_mutex); // Locks m_mutex
     double minT = *std::min_element(timedatas.begin(), timedatas.end());// x: min time
     double maxT = *std::max_element(timedatas.begin(), timedatas.end());// x: max time
     updateXAxisRange(minT, maxT);
@@ -71,7 +72,7 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
         // g_lostrate->setData(timedatas, lostrates);
         g_lostrate->setData(timedatas, packetlosts, packettotals);
     }
-    this->replot();
+    // this->replot();//20260122 tmp remove, use QTimer()
 }
 
 void TPPlot::setInterval(int interval)
@@ -256,9 +257,6 @@ void TPPlot::onVLegendScrollChanged(int value)
 
 void TPPlot::onDataAdded(double key, double value)
 {
-    // Use QMutexLocker for automatic locking and unlocking
-    // The mutex will be locked when the QMutexLocker object is created,
-    // and unlocked when it goes out of scope (e.g., function exit, return, exception).
     if (m_showgroup){
         //try calc Total Graph value form each Graphs
         if (mTotalGraph){
@@ -378,6 +376,11 @@ void TPPlot::selectionChanged()
     }
 }
 
+void TPPlot::doReplot()
+{
+    this->replot();
+}
+
 void TPPlot::onIperfTPdata(QString sInterval,
                            QString refrowidx, QString data, QString lostrate,
                            QString grouptag)
@@ -451,7 +454,7 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
         }
     }
     // locker.unlock();
-    replot();
+    // replot();//20260122 tmp remove, use QTimer()
 }
 
 void TPPlot::del(QString idx)
@@ -485,7 +488,6 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width)
     QPen graphPen;
     QCPGraph *g;
     MyQCPGraph *myGraph;
-    // QMutexLocker locker(&m_mutex); // Locks m_mutex
     if (!m_graphs.contains(refrowidx)){  // new graphs when not exist
         g = addGraph(xAxis, yAxis);
         // qDebug() << "=====idx:" << idx << " legend->itemCount: " << legend->itemCount();

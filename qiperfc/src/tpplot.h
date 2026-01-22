@@ -56,6 +56,7 @@ signals:
 
 private slots:
     void selectionChanged();
+    void doReplot();
 private:
     void initCustomPlot();
     QPen newColorPen(int r, int g, int b, int width);
@@ -88,6 +89,7 @@ private:
     QMap<double, double> mTotalData;
     // Add a mutex as a member variable
     QMutex m_mutex; // Protects access to mTotalGraph and related plot state
+    QTimer *m_replottimer;
 };
 
 #endif // TPPLOT_H
