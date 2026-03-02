@@ -1,18 +1,6 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        //noinspection AndroidGradlePluginVersion
-        classpath 'com.android.tools.build:gradle:8.6.0'
-    }
-}
-
-repositories {
-    google()
-    mavenCentral()
+plugins {
+    id 'com.android.application' version '8.13.0' apply false
+    id 'org.jetbrains.kotlin.android' version '2.1.0' apply false
 }
 
 apply plugin: qtGradlePluginType
@@ -22,6 +10,7 @@ dependencies {
     //noinspection GradleDependency
     implementation 'androidx.core:core:1.13.1'
 }
+
 
 android {
     /*******************************************************
@@ -38,13 +27,13 @@ android {
      * Changing them manually might break the compilation!
      *******************************************************/
 
-    namespace androidPackageName
+    namespace = "tw.idv.coolshou.qiperf"
     compileSdkVersion androidCompileSdkVersion
     buildToolsVersion androidBuildToolsVersion
-    ndkVersion androidNdkVersion
+    ndkVersion = androidNdkVersion
 
     // Extract native libraries from the APK
-    packagingOptions.jniLibs.useLegacyPackaging true
+    packagingOptions.jniLibs.useLegacyPackaging = true
 
     sourceSets {
         main {
@@ -64,12 +53,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     lintOptions {
-        abortOnError false
+        abortOnError = false
     }
 
     // Do not compress Qt binary resources file
@@ -78,6 +67,8 @@ android {
     }
 
     defaultConfig {
+        // old value, same as namespace
+        applicationId "tw.idv.coolshou.qiperf"
         resConfig "en"
         minSdkVersion qtMinSdkVersion
         targetSdkVersion qtTargetSdkVersion

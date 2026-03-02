@@ -54,4 +54,7 @@ android {
 RESOURCES += \
     qiperf.qrc
 
+DISTFILES += \
+    android/settings.gradle
+
 
