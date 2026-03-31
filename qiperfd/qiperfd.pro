@@ -5,7 +5,8 @@ QT += serialport
 
 
 # CONFIG += c++17
-CONFIG += c++11
+# CONFIG += c++11
+CONFIG += c++14 # for std::make_unique
 CONFIG += console
 CONFIG -= app_bundle
 
