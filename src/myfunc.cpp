@@ -11,22 +11,26 @@
 
 // }
 
-bool MyFunc::isValidIpAddress(const QString &ip, int &protocal) {
-    //check if ip is valid IPv4/IPv6 address, update protocal to correct value
+bool MyFunc::isValidIpAddress(const QString &ip, int &protocal)
+{
+    // check if ip is valid IPv4/IPv6 address, update protocal to correct value
     QHostAddress address;
-    if (address.setAddress(ip)) {
+    if (address.setAddress(ip))
+    {
         // Check if it's a valid IPv4 or IPv6 address
-        if (address.protocol() == QAbstractSocket::IPv4Protocol){
+        if (address.protocol() == QAbstractSocket::IPv4Protocol)
+        {
             protocal = QAbstractSocket::IPv4Protocol;
         }
-        if (address.protocol() == QAbstractSocket::IPv6Protocol){
+        if (address.protocol() == QAbstractSocket::IPv6Protocol)
+        {
             protocal = QAbstractSocket::IPv6Protocol;
         }
         return (address.protocol() == QAbstractSocket::IPv4Protocol ||
                 address.protocol() == QAbstractSocket::IPv6Protocol);
     }
     protocal = -1;
-    return false;  // Not a valid IP address
+    return false; // Not a valid IP address
 }
 
 QString MyFunc::formatUnit(QString val)
@@ -34,34 +38,51 @@ QString MyFunc::formatUnit(QString val)
     /*/convert val: Kbits/sec, Mbits/sec, Gbits/sec, Tbits/sec,
      *              KBytes/sec, MBytes/sec, GBytes/sec, TBytes/sec,
      * to Kbps, Mbps, Gbps, Tbps, KB/s, MB/s, GB/s, TB/s
-    */
-    QString rs="Mbps";
-    if ((val=="Kbits")||
-        (QString::compare(val, "Kbits/sec", Qt::CaseInsensitive) == 0)) {
-        rs="Kbps";
-    }else if ((val=="Mbits")||
-               (QString::compare(val, "Mbits/sec", Qt::CaseInsensitive) == 0)) {
-        rs="Mbps";
-    }else if ((val=="Gbits")||
-               (QString::compare(val, "Gbits/sec", Qt::CaseInsensitive) == 0)) {
-        rs="Gbps";
-    }else if ((val=="Tbits")||
-               (QString::compare(val, "Tbits/sec", Qt::CaseInsensitive) == 0)) {
-        rs="Tbps";
-    }else if ((val=="KBytes")||
-               (QString::compare(val, "KBytes/sec", Qt::CaseInsensitive) == 0)) {
-        rs="KB/s";
-    }else if ((val=="MBytes")||
-               (QString::compare(val, "MBytes/sec", Qt::CaseInsensitive) == 0)) {
-        rs="MB/s";
-    }else if ((val=="GBytes")||
-               (QString::compare(val, "GBytes/sec", Qt::CaseInsensitive) == 0)) {
-        rs="GB/s";
-    }else if ((val=="TBytes")||
-               (QString::compare(val, "TBytes/sec", Qt::CaseInsensitive) == 0)) {
-        rs="TB/s";
-    }else {
-        rs="Mbps";
+     */
+    QString rs = "Mbps";
+    if ((val == "Kbits") ||
+        (QString::compare(val, "Kbits/sec", Qt::CaseInsensitive) == 0))
+    {
+        rs = "Kbps";
+    }
+    else if ((val == "Mbits") ||
+             (QString::compare(val, "Mbits/sec", Qt::CaseInsensitive) == 0))
+    {
+        rs = "Mbps";
+    }
+    else if ((val == "Gbits") ||
+             (QString::compare(val, "Gbits/sec", Qt::CaseInsensitive) == 0))
+    {
+        rs = "Gbps";
+    }
+    else if ((val == "Tbits") ||
+             (QString::compare(val, "Tbits/sec", Qt::CaseInsensitive) == 0))
+    {
+        rs = "Tbps";
+    }
+    else if ((val == "KBytes") ||
+             (QString::compare(val, "KBytes/sec", Qt::CaseInsensitive) == 0))
+    {
+        rs = "KB/s";
+    }
+    else if ((val == "MBytes") ||
+             (QString::compare(val, "MBytes/sec", Qt::CaseInsensitive) == 0))
+    {
+        rs = "MB/s";
+    }
+    else if ((val == "GBytes") ||
+             (QString::compare(val, "GBytes/sec", Qt::CaseInsensitive) == 0))
+    {
+        rs = "GB/s";
+    }
+    else if ((val == "TBytes") ||
+             (QString::compare(val, "TBytes/sec", Qt::CaseInsensitive) == 0))
+    {
+        rs = "TB/s";
+    }
+    else
+    {
+        rs = "Mbps";
         qInfo() << "NOT SUPPORT Unit: " << val << " , return:" << rs;
     }
     return rs;
@@ -70,33 +91,42 @@ QString MyFunc::formatUnit(QString val)
 QString MyFunc::secToHumanReadable(long long seconds)
 {
     // Handle negative numbers
-    if (seconds < 0) {
+    if (seconds < 0)
+    {
         return "Invalid input: seconds cannot be negative";
     }
 
     // Handle zero
-    if (seconds == 0) {
+    if (seconds == 0)
+    {
         return "0 seconds";
     }
     TimeComponents tcompon = secondsToComponents((int)seconds);
-    QString result="";
-    if (tcompon.days>0){
+    QString result = "";
+    if (tcompon.days > 0)
+    {
         result = QString("%1 days").arg(QString::number(tcompon.days));
     }
-    if (tcompon.hours>0){
-        if (!result.isEmpty()){
+    if (tcompon.hours > 0)
+    {
+        if (!result.isEmpty())
+        {
             result = result + ", ";
         }
         result = result + QString("%1 hours").arg(QString::number(tcompon.hours));
     }
-    if (tcompon.minutes>0){
-        if (!result.isEmpty()){
+    if (tcompon.minutes > 0)
+    {
+        if (!result.isEmpty())
+        {
             result = result + ", ";
         }
         result = result + QString("%1 mins").arg(QString::number(tcompon.minutes));
     }
-    if (tcompon.seconds>0){
-        if (!result.isEmpty()){
+    if (tcompon.seconds > 0)
+    {
+        if (!result.isEmpty())
+        {
             result = result + ", ";
         }
         result = result + QString("%1 sec").arg(QString::number(tcompon.seconds));
@@ -119,8 +149,10 @@ TimeComponents MyFunc::secondsToComponents(int totalSeconds)
     return result;
 }
 
-QString MyFunc::closeCodeToString(QWebSocketProtocol::CloseCode code) {
-    switch (code) {
+QString MyFunc::closeCodeToString(QWebSocketProtocol::CloseCode code)
+{
+    switch (code)
+    {
     case QWebSocketProtocol::CloseCodeNormal:
         return "Normal Closure";
     case QWebSocketProtocol::CloseCodeGoingAway:
@@ -152,18 +184,17 @@ QString MyFunc::closeCodeToString(QWebSocketProtocol::CloseCode code) {
     }
 }
 
-
-double MyFunc::calculateFSPL(double distanceMeters, double frequencyHz) {
+double MyFunc::calculateFSPL(double distanceMeters, double frequencyHz)
+{
     // distanceMeters: m
     // frequencyHz: Hz
     // const double speedOfLight = 3e8; // m/s
-    double fspl = 20 * qLn(distanceMeters) / qLn(10)
-                  + 20 * qLn(frequencyHz) / qLn(10)
-                  - 147.55;
+    double fspl = 20 * qLn(distanceMeters) / qLn(10) + 20 * qLn(frequencyHz) / qLn(10) - 147.55;
     return fspl;
 }
-double MyFunc::euclideanDistance(double az1, double el1, double az2, double el2) {
-    //歐氏距離
+double MyFunc::euclideanDistance(double az1, double el1, double az2, double el2)
+{
+    // 歐氏距離
     return std::sqrt(std::pow(az1 - az2, 2) + std::pow(el1 - el2, 2));
 }
 
@@ -171,20 +202,27 @@ QStringList MyFunc::getAllIPAddress(bool onlyIPv4)
 {
     const QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
     QStringList ds;
-    for (const QNetworkInterface &interface : interfaces) {
+    for (const QNetworkInterface &iface : interfaces)
+    {
         // Skip down or loopback interfaces
-        if (!(interface.flags() & QNetworkInterface::IsUp) ||
-            (interface.flags() & QNetworkInterface::IsLoopBack)){
+        if (!(iface.flags() & QNetworkInterface::IsUp) ||
+            (iface.flags() & QNetworkInterface::IsLoopBack))
+        {
             continue;
         }
 
-        for (const QNetworkAddressEntry &entry : interface.addressEntries()) {
+        for (const QNetworkAddressEntry &entry : iface.addressEntries())
+        {
             QHostAddress ip = entry.ip();
-            if (onlyIPv4){
-                if (ip.protocol() == QAbstractSocket::IPv4Protocol){
+            if (onlyIPv4)
+            {
+                if (ip.protocol() == QAbstractSocket::IPv4Protocol)
+                {
                     ds.append(ip.toString());
                 }
-            }else{
+            }
+            else
+            {
                 ds.append(ip.toString());
             }
         }
@@ -196,7 +234,8 @@ void MyFunc::removeSubfolders(const QString &parentPath)
 {
     QDir parentDir(parentPath);
 
-    if (!parentDir.exists()) {
+    if (!parentDir.exists())
+    {
         qDebug() << "Parent directory does not exist.";
         return;
     }
@@ -204,13 +243,17 @@ void MyFunc::removeSubfolders(const QString &parentPath)
     // Filter for Directories only, and skip "." and ".."
     QStringList subDirs = parentDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    for (const QString &subDirName : subDirs) {
+    for (const QString &subDirName : subDirs)
+    {
         QString fullPath = parentDir.absoluteFilePath(subDirName);
         QDir dirToDelete(fullPath);
 
-        if (dirToDelete.removeRecursively()) {
+        if (dirToDelete.removeRecursively())
+        {
             qDebug() << "Deleted:" << fullPath;
-        } else {
+        }
+        else
+        {
             qDebug() << "Failed to delete:" << fullPath;
         }
     }
@@ -226,14 +269,16 @@ QString MyFunc::getErrorString(DWORD errorCode)
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
         (LPTSTR)&msgBuffer,
         0,
-        nullptr
-        );
+        nullptr);
 
     QString errorMsg;
-    if (size && msgBuffer) {
-        errorMsg = QString::fromWCharArray((wchar_t*)msgBuffer).trimmed();
+    if (size && msgBuffer)
+    {
+        errorMsg = QString::fromWCharArray((wchar_t *)msgBuffer).trimmed();
         LocalFree(msgBuffer);
-    } else {
+    }
+    else
+    {
         errorMsg = QString("Unknown error code: %1").arg(errorCode);
     }
 
