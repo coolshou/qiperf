@@ -37,7 +37,9 @@
 #include "../views/viewmanager.h"
 #include "../views/throughputview.h"
 #include "../views/serialview.h"
+#ifdef USE_AAS
 #include "../JIO/dlgaas.h"
+#endif
 #include "../views/serialdata.h"
 #include "../views/sshdata.h"
 #include "plugin/plugininterface.h"
@@ -45,18 +47,20 @@
 #include "cpumonitor.h"
 #include "memmonitor.h"
 
-#if (TEST_ICMP==1)
+#if (TEST_ICMP == 1)
 #include "../src/icmpping.h"
 #endif
-#if (TEST_WS==1)
+#if (TEST_WS == 1)
 #include "wsclient.h"
 #endif
 #include "tpworker.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui
+{
+    class MainWindow;
+}
 QT_END_NAMESPACE
-
 
 class QIperfC : public QMainWindow
 {
@@ -79,11 +83,11 @@ public slots:
     void onSave();
     void onImportIperf3Log();
     void onImportIperf2Log();
-    bool on_Clear(bool showNotice=true);
+    bool on_Clear(bool showNotice = true);
     // void initStart();
-    void onStart(bool showNotice=true);
+    void onStart(bool showNotice = true);
     void onStop();
-    bool onClear(bool showNotice=true);
+    bool onClear(bool showNotice = true);
     void onShowLog();
     void onConfig();
     void onSimpleMicro();
@@ -98,7 +102,7 @@ public slots:
     void setStartTime(QDateTime startTime);
     void setShowGroup(bool bShow);
     void onUpdateTPUnit(QString sunit);
-    //test
+    // test
     void onTestStarted();
     void onTestStoped(int err);
 
@@ -106,7 +110,7 @@ public slots:
     void onPaste();
     void onDelete();
     void onCopyText();
-    //cmd pass to ws client
+    // cmd pass to ws client
     void onRequestExec(QString targetIP, QString idx, QString sCmd);
     void onAddIperf(QString cfg);
     void onClearIperf();
@@ -114,9 +118,9 @@ signals:
     void updateEndpointNum(int n);
     void updateStarttime(QDateTime stime);
     void updateStatus(QString msg);
-    void testStarted(); // signal when test started
+    void testStarted();       // signal when test started
     void testStoped(int err); // signal when test stoped, 0: no error
-    void closeAll(); // send signal to close all dialog
+    void closeAll();          // send signal to close all dialog
     void setEndTime(double value);
     void updateInterval(int interval);
     void reportTP(int idx, double tp, double lostrate);
@@ -124,8 +128,9 @@ signals:
     void doNtpSync(QString target);
 
 protected:
-    void closeEvent(QCloseEvent *event)override;
+    void closeEvent(QCloseEvent *event) override;
     bool eventFilter(QObject *obj, QEvent *event) override;
+
 private:
     void createTrayIcon();
     void createTrayMenu();
@@ -157,15 +162,17 @@ private slots:
     void onUpdateActionsSave(bool bSave);
     void onUpdateActionsEdit(bool bDel, bool bEdit, bool bSwap, bool bSwapIP);
     void on_updateQIperfdNum(int n);
-    void onRPC_result(const QVariant& result);
-    void onRPC_error(int code, const QString& message);
+    void onRPC_result(const QVariant &result);
+    void onRPC_error(int code, const QString &message);
     void onUpdateDataPath(QString datapath);
     void onProgress(QString filename, int currentlineno);
 
     void onAddSerial();
     void onAddSSH();
+#ifdef USE_AAS
     void initAAS();
     void onAAS();
+#endif
     void onAddPing();
     void onWlanSTA();
     void onError(QString msg);
@@ -188,7 +195,7 @@ private slots:
     void onNtpsynced(bool bOK, QString target);
     void onClearNtpStatus(QString target);
     void onSetDebugLv(QString target, int lv);
-    void setNtpServer(int enable=1);
+    void setNtpServer(int enable = 1);
     void onNtpstarted(bool started, QString fromAddress);
     // Slot to handle system tray icon activation (e.g., clicks)
     void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
@@ -196,6 +203,7 @@ private slots:
     void showWindow();
     void hideWindow();
     void quitApplication();
+
 private:
     Ui::MainWindow *ui;
     QSystemTrayIcon *trayIcon;
@@ -204,10 +212,10 @@ private:
     QAction *hideAction;
     QAction *quitAction;
     QAction *httpdAction;
-    QList<QPluginLoader*> pluginLoaders;
-    QList<PluginInterface*> plugins;
-    QList<QPluginLoader*> mToolpluginLoaders;
-    QList<PluginInterface*> mToolplugins;
+    QList<QPluginLoader *> pluginLoaders;
+    QList<PluginInterface *> plugins;
+    QList<QPluginLoader *> mToolpluginLoaders;
+    QList<PluginInterface *> mToolplugins;
     // CustomHeaderView *header;
     QString settingfilepath;
     QString m_logpath;
@@ -215,19 +223,19 @@ private:
     FormQIperfds *m_frm_qiperfds;
     dlgOption *m_dlgoption;
     DlgTest *m_dlgtest;
-    DlgRecord *m_dlgrecord; //TODO: store final test result
+    DlgRecord *m_dlgrecord; // TODO: store final test result
     DlgSerial *m_dlgserial; // serial select dialog
-    DlgSSH *m_dlgssh; // ssh select dialog
+    DlgSSH *m_dlgssh;       // ssh select dialog
     PingPlot *m_pingplot;
     QSettings *m_settings;
     bool m_testping;
     int iExtraWait = 5;
 //    PipeClient *pclient;
-#if (TEST_WS==1)
+#if (TEST_WS == 1)
     // WSClient *m_ws;
-    QMap<QString, WSClient*> m_ws;
+    QMap<QString, WSClient *> m_ws;
     QList<QString> m_ntps; // collect of synced ntp clients
-    int m_maxntpsync=5;
+    int m_maxntpsync = 5;
     QMap<QString, int> m_ntpfail; // collesct of sync fail client, try times
 #endif
     UdpReceiver *m_receiver;
@@ -248,21 +256,21 @@ private:
     bool bUserStop;
     int iTimeout; // default wait websocket timeout 10
     QString m_ErrorMSG;
-    QString m_tpcfgname; //tp config file name
+    QString m_tpcfgname; // tp config file name
     QIPConfig *m_qipconfig;
     int m_WaitServerReady;
     int m_TPExportWidth;
     int m_TPExportHeigth;
-    bool m_TPGroup; // show throughput group
+    bool m_TPGroup;   // show throughput group
     QString m_TPUnit; // store throughput format unit,
     QString m_datapath;
     QStringList mPluginNames;
     FileServer *m_fileserver;
-    QString m_oldsavepath=nullptr;
-    bool m_closetosystray=false;
+    QString m_oldsavepath = nullptr;
+    bool m_closetosystray = false;
     DlgShowLog *m_dlgshowlog;
-#if (TEST_ICMP==1)
-    //TEST icmp
+#if (TEST_ICMP == 1)
+    // TEST icmp
     IcmpPing *m_icmpping;
     DlgPing *dp;
 #endif
@@ -273,21 +281,22 @@ private:
     ViewManager *m_views;
     bool m_IgnoreWrongInterval;
     QMap<QString, SerialData> *m_serialviews; // store serial view
-    QMap<QString, SSHData> *m_sshviews; // store serial view
-    //log info for serial view
+    QMap<QString, SSHData> *m_sshviews;       // store serial view
+    // log info for serial view
     bool _logtofile;
     QString _logfilename;
     bool _logtimestemp;
     QString _logtimestempformat;
+#ifdef USE_AAS
     DlgAAS *dlg_aas;
+#endif
     QString m_OpenStreetMapTile;
 
     // throughput worker
     TpWorker *m_tpworker;
     QThread *m_tpthread;
-    //automate: simple micro
+    // automate: simple micro
     int m_smicroIdx;
     DlgSimpleMicro *smicro;
-
 };
 #endif // QIPERFC_H

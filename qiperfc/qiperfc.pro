@@ -51,8 +51,14 @@ QXLSX_SOURCEPATH=$$PWD/lib/QXlsx/QXlsx/source/  # current QXlsx source path is .
 include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
 include($$PWD/lib/qcustomplot.pri)
 include($$PWD/../lib/qssh.pri)
-include($$PWD/../JIO/aas.pri)
+
 include($$PWD/../lib/httpd/httpd.pri)
+
+# CONFIG += enable_aas
+contains(CONFIG, enable_aas) {
+    include($$PWD/../JIO/aas.pri)
+    DEFINES += HAS_AAS
+}
 
 # debug
 #CONFIG += sanitizer
@@ -283,10 +289,13 @@ else: unix:!android: target.path = /opt/qiperf/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    $$PWD/../JIO/aas.qrc \
     $$PWD/../qiperf.qrc \
     lib/geoview/placemark.qrc
 
+contains(CONFIG, enable_aas) {
+    RESOURCES += \
+    $$PWD/../JIO/aas.qrc
+}
 
 # Define a function to extract the version
 defineReplace(extract_version) {
