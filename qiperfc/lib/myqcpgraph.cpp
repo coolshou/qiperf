@@ -27,7 +27,7 @@ int MyQCPGraph::getValueIdx(double key)
 {
     //get key's index
     for (int i=this->dataCount()-1; i>0; i--){
-        if (this->data()->at(i)->key == key){
+        if (qFuzzyCompare(this->data()->at(i)->key , key)){
             return i;
         }
     }
@@ -38,7 +38,7 @@ int MyQCPGraph::getValue(double key, double &value)
 {
     //get key's value
     for (int i=this->dataCount()-1; i>0; i--){
-        if (this->data()->at(i)->key == key){
+        if (qFuzzyCompare(this->data()->at(i)->key , key)){
             value = this->data()->at(i)->value;
             return i;
         }

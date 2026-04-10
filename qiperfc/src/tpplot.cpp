@@ -411,13 +411,16 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
             // myGraph->getMaxXValue();
             //throughput graph
             if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
-                myGraph->addData(xdata, ydata);
+                    myGraph->addData(xdata, ydata);
             }else{
-                //Total TP?
-                myGraph->addData(xdata, ydata);
-                // sumydata = myGraph->sumValue(xdata, ydata);//this will cause double y value?
-                // qDebug() << "addData" << refrowidx << " xdata:" << xdata
-                //          << " TP:"<< ydata  << " sum:" << sumydata;
+                //Total Throughput graph
+                double oldvalue = 0.0;
+                int rc = myGraph->getValue(xdata, oldvalue);
+                if (rc==-1){
+                    myGraph->addData(xdata, ydata);
+                }else {
+                    myGraph->updateValue(xdata, ydata + oldvalue);
+                }
             }
             if (!m_showgroup){
                 if (m_legends.contains(refrowidx)){
