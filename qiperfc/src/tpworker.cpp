@@ -522,7 +522,7 @@ void TpWorker::debug(QString msg, int debuglv)
 
 void TpWorker::onIperfStarted(QString smode, QString ipport)
 {
-    QMutexLocker locker(&m_mutex);
+    QMutexLocker<QMutex> locker(&m_mutex);
     debug("[TpWorker]onIperfStarted:" + smode + " : " + ipport, 4);
     if (smode.contains("S", Qt::CaseSensitive)){
         m_status_server[ipport] = TPStatus::started;
@@ -533,7 +533,7 @@ void TpWorker::onIperfStarted(QString smode, QString ipport)
 
 void TpWorker::onIperfReStarted(QString smode, QString ipport)
 {
-    QMutexLocker locker(&m_mutex);
+    QMutexLocker<QMutex> locker(&m_mutex);
     // debug("onIperfReStarted:" + smode + " : " + ipport, 3);
     if (smode.contains("S", Qt::CaseSensitive)){
         m_status_server[ipport] = TPStatus::restarted;
@@ -600,7 +600,7 @@ void TpWorker::onDisconnected(QString targetip)
 
 void TpWorker::onIperfTPdata(QString refrow, QString sInterval, QString datas)
 {
-    debug("[TpWorker]onIperfTPdata: " + refrow+ " sInterval:"+ sInterval + " datas:" + datas, 5);
+    // debug("[TpWorker]onIperfTPdata: " + refrow+ " sInterval:"+ sInterval + " datas:" + datas, 5);
     emit iperfTPdata(refrow, sInterval, datas);
 }
 

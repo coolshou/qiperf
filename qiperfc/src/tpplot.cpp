@@ -264,7 +264,7 @@ void TPPlot::onDataAdded(double key, double value)
 
             double orgvalue=0;
             // TODO : last record will be wrong!!??
-            QMutexLocker locker(&m_mutex); // Locks m_mutex, not work
+            QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex, not work
             int rc=mTotalGraph->getValue(key, orgvalue);
             qDebug() << "key:" << QString::number(key)
                      << " orgvalue:" << QString::number(orgvalue)
@@ -296,7 +296,7 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data)
 {
     //combine two data in to Total graph
     if(mTotalGraph){
-        QMutexLocker locker(&m_mutex); // Locks m_mutex
+        QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex
         QSharedPointer<QCPGraphDataContainer> data1 = mTotalGraph->data();
         QSharedPointer<QCPGraphDataContainer> data2 = data;
         QSharedPointer<QCPGraphDataContainer> sumdata;
@@ -319,7 +319,7 @@ void TPPlot::onLostRateDataAdded(double key, double value)
         if(mTotalLostGraph){
             //add all value to Total graph's value
             double orgvalue=-1;
-            QMutexLocker locker(&m_mutex); // Locks m_mutex
+            QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex
             int rc=mTotalLostGraph->getValue(key, orgvalue);
             if (rc>-1){
                 double sumvalue = orgvalue + value;
@@ -338,7 +338,7 @@ void TPPlot::onLostRateDataAdded(double key, double value)
 
 void TPPlot::onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data)
 {
-    QMutexLocker locker(&m_mutex); // Locks m_mutex
+    QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex
     if(mTotalLostGraph){
         QSharedPointer<QCPBarsDataContainer> data1 = mTotalLostGraph->data();
         QSharedPointer<QCPBarsDataContainer> data2 = data;
@@ -389,9 +389,9 @@ void TPPlot::onIperfTPdata(QString sInterval,
     int x = (int)sInterval.toDouble(); //ignore .0x Difference of xdata
     double y = data.toDouble();
     Q_UNUSED(grouptag) //TODO grouptag?
-    // qDebug() << "[TPPlot::onIperfTPdata]:" << refrowidx
-    //          << " sInterval:" << sInterval << " x:" << QString::number(x)
-    //          << " TP:" << QString::number(y);
+    qDebug() << "[TPPlot::onIperfTPdata]:" << refrowidx
+             << " sInterval:" << sInterval << " x:" << QString::number(x)
+             << " TP:" << QString::number(y);
     //          << " grouptag:" << grouptag;
     addTPData(refrowidx, x, y, lostrate.toDouble());
 }
@@ -399,7 +399,7 @@ void TPPlot::onIperfTPdata(QString sInterval,
 void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double lostrate)
 {
     {
-        QMutexLocker locker(&m_mutex); // Locks m_mutex,
+        QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex,
 
         double sumydata = ydata;
 

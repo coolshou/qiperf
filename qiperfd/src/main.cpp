@@ -57,7 +57,7 @@ static QTextStream output_ts;
 static QMutex logMutex;
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    QMutexLocker locker(&logMutex);  // Lock for thread safety
+    QMutexLocker<QMutex> locker(&logMutex);  // Lock for thread safety
     if (!logFile.isOpen())
         return;
 
