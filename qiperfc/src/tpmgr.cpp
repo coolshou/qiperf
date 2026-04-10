@@ -851,22 +851,22 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         QString unit="";
         QString ssum="";
         double sum=0;
-        quint64 sum_lost=0;
-        quint64 sum_total=0;
+        double sum_lost=0;
+        double sum_total=0;
         double lost_rate=0;
         bool isAvg=false;
+        QString value="";
         QString slost_rate = "0";
 //        foreach (QJsonObject jObj, jArr){
         for (QJsonArray::const_iterator it=jArr.constBegin(); it!=jArr.constEnd(); ++it) {
             QJsonObject jObj= it->toObject();
             idx = jObj.value("idx").toString();
             isAvg = jObj.value("AVG").toBool();
+            value = jObj.value("value").toString();
             if (!isAvg) {
-                QString value="";
                 if (!jObj.value("dir").isUndefined()){
                     dir=jObj.value("dir").toString();
                 }
-                value = jObj.value("value").toString();
                 unit = jObj.value("unit").toString();
                 if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) !=0){
                     qDebug() << "//TODO: base on unit, convert the value to correct value"
@@ -897,20 +897,23 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                                  slost_rate, dir);
             }else {
                 // TODO: this part TP data seems strange??
-                // qDebug() << "refrow:" << refrow << " idx:" << idx <<" Avg:" << value
+                qDebug() << "refrow:" << refrow << " idx:" << idx
+                         << " sInterval:" + sInterval <<" Avg:" << value;
                          // << " pkt_lost:" << pkt_lost << " pkt_total:" << pkt_total;
                 // TODO : each iperf test pair
             }
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
-        // signal data to tpplot for Group Total
-        if (sum_total>0){
-            slost_rate = QString::number((sum_lost/sum_total)*100, 'f', 4);
+        if (!isAvg) {
+            // signal data to tpplot for Group Total
+            if (sum_total>0){
+                slost_rate = QString::number((sum_lost/sum_total)*100, 'f', 4);
+            }
+            ssum = QString::number(sum, 'f', 3);
+            // qDebug() << " Total graph:" << sInterval << " sum:" << ssum
+            //          << " lost_rate:" << slost_rate << " dir:" << dir;
+            emit IperfTPdata(sInterval, GRAPH_TOTAL, ssum, slost_rate, dir);
         }
-        ssum = QString::number(sum, 'f', 3);
-        // qDebug() << " Total graph:" << sInterval << " sum:" << ssum
-        //          << " lost_rate:" << slost_rate << " dir:" << dir;
-        emit IperfTPdata(sInterval, GRAPH_TOTAL, ssum, slost_rate, dir);
         // TODO: signal data to tpplot for group Direction
         // TODO: signal data to tpplot for group comment
         // update  test pair config row's sum value
