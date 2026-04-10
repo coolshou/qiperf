@@ -166,7 +166,8 @@ private slots:
     void onRPC_error(int code, const QString &message);
     void onUpdateDataPath(QString datapath);
     void onProgress(QString filename, int currentlineno);
-
+    void onMemoryUsageUpdated(qint64 memMB);
+    void onCpuUsageChanged(double percentage);
     void onAddSerial();
     void onAddSSH();
 #ifdef USE_AAS
@@ -242,8 +243,10 @@ private:
     EndPointMgr *m_endpointmgr;
     QLabel *m_start_label;
     QLabel *m_status_label;
+    double m_oldCPUpercentage;
     QLabel *m_cpu_label;
     CpuMonitor *m_cpumonitor;
+    qint64 m_oldmemMB;
     QLabel *m_mem_label;
     MemMonitor *m_memmonitor;
     int mCpuCheckInterval;

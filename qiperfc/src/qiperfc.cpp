@@ -51,7 +51,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_settings = new QSettings(settingfilename, QSettings::IniFormat);
     m_clipboard = QApplication::clipboard();
     ui->setupUi(this);
-    mPluginNames = QStringList();
+    // mPluginNames = QStringList();
+    mPluginNames.clear();
     loadSettings();
     loadPlugins();
     loadTools();
@@ -240,7 +241,7 @@ bool QIperfC::save(QString filename)
     if (m_throughputview->rootChildCount() > 0)
     {
         QByteArray b = m_throughputview->savedata();
-        QStringList pcs = m_throughputview->getPCs();
+        QStringList pcs(m_throughputview->getPCs());
         QString env = m_endpointmgr->getPCsInfo(pcs);
         //        qDebug() << "env: " << env;
         QString starttime = "";
@@ -515,8 +516,8 @@ bool QIperfC::onClear(bool showNotice)
 
 void QIperfC::onAddPing()
 {
-    QString strJson;
 #if (TEST_ICMP == 1)
+    QString strJson;
     if (dp->exec() == QDialog::Accepted)
     {
         strJson = dp->getJsonstr();
@@ -797,7 +798,7 @@ void QIperfC::onRequestExec(QString targetIP, QString idx, QString sCmd)
     }
     // ask remote CMD_REQUEST_EXEC
     QString sendstr = QString("%1:%2:%3").arg(CMD_REQUEST_EXEC, idx, sCmd);
-    int rc = wsc->sendText(sendstr);
+    qint64 rc = wsc->sendText(sendstr);
     if (rc <= 0)
     {
         qDebug() << "send cmd Fail: " << sendstr;
@@ -1719,6 +1720,24 @@ void QIperfC::onProgress(QString filename, int currentlineno)
     }
 }
 
+void QIperfC::onMemoryUsageUpdated(qint64 memMB)
+{
+    if (m_oldmemMB != memMB){
+        m_oldmemMB = memMB;
+        QString msg = QString("MEM Usage: %1 MB").arg(memMB);
+        m_mem_label->setText(msg);
+        qInfo() << msg;
+    }
+}
+
+void QIperfC::onCpuUsageChanged(double percentage)
+{
+    if (!qFuzzyCompare(m_oldCPUpercentage, percentage)){
+        m_oldCPUpercentage = percentage;
+        m_cpu_label->setText(QString("CPU Usage: %1%").arg(percentage, 0, 'f', 2));
+    }
+}
+
 void QIperfC::onAddSerial()
 {
     m_dlgserial->setSerialData(m_endpointmgr->getSerials());
@@ -1940,20 +1959,15 @@ void QIperfC::initStatusbar()
     m_cpu_label = new QLabel();
     m_cpu_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
     ui->statusbar->addWidget(m_cpu_label, 0);
-    connect(m_cpumonitor, &CpuMonitor::cpuUsageChanged,
-            m_cpu_label, [&](double percentage)
-            { m_cpu_label->setText(QString("CPU Usage: %1%").arg(percentage, 0, 'f', 2)); });
+    connect(m_cpumonitor, &CpuMonitor::cpuUsageChanged, this, &QIperfC::onCpuUsageChanged);
+
     // Mem Usage
     m_memmonitor = new MemMonitor(mMemCheckInterval);
     m_mem_label = new QLabel();
     m_mem_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
     ui->statusbar->addWidget(m_mem_label, 0);
-    connect(m_memmonitor, &MemMonitor::memoryUsageUpdated,
-            m_mem_label, [&](qint64 memMB)
-            {
-                QString msg = QString("MEM Usage: %1 MB").arg(memMB);
-                m_mem_label->setText(msg);
-                qInfo() << msg; });
+    connect(m_memmonitor, &MemMonitor::memoryUsageUpdated, this, &QIperfC::onMemoryUsageUpdated);
+
     // statusbar of endpints (qiperfd list)
     m_label_qiperfd = new QLabel(this);
     m_label_qiperfd->installEventFilter(this);
