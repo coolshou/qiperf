@@ -48,7 +48,7 @@
      <x>0</x>
      <y>0</y>
      <width>984</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -338,7 +338,7 @@
     <string>Copy</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+C</string>
+    <string>Ctrl+C</string>
    </property>
   </action>
   <action name="actionPaste">
@@ -557,7 +557,7 @@
   </action>
   <action name="actionAAS">
    <property name="icon">
-    <iconset resource="../../../../../work/qiperf/JIO/aas.qrc">
+    <iconset resource="../../JIO/aas.qrc">
      <normaloff>:/aas/AAS.png</normaloff>:/aas/AAS.png</iconset>
    </property>
    <property name="text">
@@ -580,8 +580,9 @@
   </action>
  </widget>
  <resources>
-  <include location="../../../../../work/qiperf/JIO/aas.qrc"/>
+  <include location="../../JIO/aas.qrc"/>
   <include location="../../qiperf.qrc"/>
+  <include location="../../JIO/aas.qrc"/>
  </resources>
  <connections/>
 </ui>
