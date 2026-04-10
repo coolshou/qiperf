@@ -409,18 +409,23 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
         {
             //TODO: when xdata is not continious, should we fill up with 0?
             // myGraph->getMaxXValue();
-            //throughput graph
-            if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
-                    myGraph->addData(xdata, ydata);
-            }else{
+
+            if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
                 //Total Throughput graph
                 double oldvalue = 0.0;
                 int rc = myGraph->getValue(xdata, oldvalue);
                 if (rc==-1){
+                    qDebug() << "xdata:" << QString::number(xdata) <<
+                        " ydata: " << QString::number(ydata);
                     myGraph->addData(xdata, ydata);
                 }else {
+                    qDebug() << "updateValue xdata:" << QString::number(xdata) <<
+                        " Total: " << QString::number(ydata + oldvalue);
                     myGraph->updateValue(xdata, ydata + oldvalue);
                 }
+            }else{
+                //throughput graph
+                myGraph->addData(xdata, ydata);
             }
             if (!m_showgroup){
                 if (m_legends.contains(refrowidx)){
