@@ -1,9 +1,16 @@
-qiperf (0.18.11412.24-1) unstable; urgency=medium
+qiperf (0.18.11504.13-1) unstable; urgency=medium
 
   * Add Ctrl+a to select all iperf test pair
   * Add when iperf log file finished copy, delete it
   * fix m_ignorewronginterval check
   * add on Openwrt, remove old log path before start new Test
+  * fix GUI freeze by use QTimer to replot
+  * fix load large log file cause GUI freeze (still need improve)
+
+  * TODO: fix wrong Total TP value
+  * TODO: fix wrong Total plot chart value
+  * TODO: fix wrong record of --parallel
+  * TODO: update plot type: Detail, Total, ByDirection, ByComment
 
  -- coolshou <coolshou2060@gmail.com>  Tue, 07 Oct 2025 14:04:37 +0800
 
