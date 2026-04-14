@@ -98,6 +98,7 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
                     emit updateTPAvg(QString::number(midx), sInterval, jObj.value("idx").toString(), QString::number(tpvalue),
                                      unit, dir, QString::number(pkt_lost), QString::number(pkt_total));
                 } else {
+                    // collect all throughput datas
                     if ((m_datas.keys().length() > 0) && (m_datas.keys().contains(idx))){
                         tpdata = m_datas.value(idx);
                     }else {
@@ -126,7 +127,7 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
 
 void IperfFileWorker::onWorkFinished()
 {
-    // qDebug() << "onWorkFinished: m_filename: " << m_filename;
+    // when work finished, send throughput data to plot at once!
     QMap<QString, TPData*>::const_iterator iterator = m_datas.constBegin();
     while (iterator != m_datas.constEnd()) {
         QString idx = iterator.key();

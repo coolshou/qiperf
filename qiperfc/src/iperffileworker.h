@@ -62,6 +62,7 @@ private:
     TPData *tpdata;
     QMap<QString, TPData*> m_datas;
     bool m_ignoreWrongInterval;
+
 };
 
 #endif // IPERFFILEWORKER_H
