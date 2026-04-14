@@ -452,7 +452,10 @@ QString MyInfo::getCPUModel(int& corenum) {
         if (line.startsWith("processor")) {
             iCPUCores++;
         }
-        if (line.startsWith("model name")) {
+        if (line.startsWith("model name")||line.startsWith("Model")) {
+            //Raspberry Pi 4
+            //cat /proc/device-tree/compatible
+            //raspberrypi,4-model-bbrcm,bcm2711
             modelname = line.split(':').last().trimmed();
         }
         if (line.startsWith("Hardware")) {
