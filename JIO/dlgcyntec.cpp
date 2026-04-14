@@ -333,7 +333,9 @@ void DlgCyntec::updateCyntecBeamTableID(QString beamType, QString beamFactorID)
     if (mCyntecBeamTypeGroup.contains(beamType)){
         if (beamFactorID!="0"){
             QList<int> fs = mCyntecBeamFactorSupport.value(beamFactorID);
+            qDebug() << "beamFactorID:" << beamFactorID << " fs:" << fs;
             QList<int> dataList= mCyntecBeamTypeGroup.value(beamType);
+            qDebug() << "beamType:" << beamType << " dataList:" << dataList;
             QList<QString> stringList;
             for (int value : dataList) {
                 if (fs.contains(value)){

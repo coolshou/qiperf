@@ -1239,6 +1239,7 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
         //mfc set aip_power_onoff on
         emit addBeamIDCmd(QString("mfc set aip_power_onoff on"), true);// uci command
         emit addBeamIDCmd(QString("uci set aip.%1.disabled='0'").arg(ucipath), true);// uci command
+        emit addBeamIDCmd(QString("uci set aip.%1.mode=='1'").arg(ucipath), true);// uci command
     }else{ //Client
         emit addClientBeamIDCmd(cmName, cmd);
     }
@@ -1247,6 +1248,7 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
     cmd = mCyntec->getCmd("INIT").arg(devicename);
     if(cmName.isEmpty()){
         emit addBeamIDCmd("#"+cmd);
+        //
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
@@ -1274,6 +1276,7 @@ void DlgAAS::initCyntecBeamCMD(QString devicename, QString antarraymode, QString
     cmd = mCyntec->getCmd("SET_AntArrayMode").arg(devicename, ant, ant, ant, ant);
     if(cmName.isEmpty()){
         emit addBeamIDCmd(cmd);
+        emit addBeamIDCmd(QString("uci set aip.%1.ific_set_txattn_each='%2'").arg(ucipath, ant), true);
     }else{
         emit addClientBeamIDCmd(cmName, cmd);
     }
@@ -1318,7 +1321,7 @@ void DlgAAS::initCyntecBeamTxAttCMD(QString devicename, QString Tx1att, QString 
     }
     int tx1 = Tx1att.toInt()*4;
     int tx2 = Tx2att.toInt()*4;
-    emit addBeamIDCmd(QString("#---SET_TxAttn--%1dB=%2--%3dB=%4 (Max:32db=128)").arg(Tx1att, QString::number(tx1),
+    emit addBeamIDCmd(QString("#---SET_Tx1att-%1dB=%2,Tx2att-%3dB=%4 (Max:32db=128)").arg(Tx1att, QString::number(tx1),
                                                                   Tx2att, QString::number(tx2)));
     //spidev_test -D /dev/spidev2.0 -A "0:80:80"
     QString cmd = mCyntec->getCmd("SET_TxAttn").arg(devicename,
