@@ -57,6 +57,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QFile>
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -78,7 +79,7 @@ public:
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
-    void load(QString filename);
+    bool load(QString filename);
 signals:
     void Closing(QString filename);
 
@@ -86,6 +87,9 @@ protected:
     void closeEvent(QCloseEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
     void keyPressEvent(QKeyEvent * event) override;
+    // Override scroll events to detect when to load new data
+    void wheelEvent(QWheelEvent *e) override;
+    // void keyPressEvent(QKeyEvent *e) override;
 
 private slots:
     void updateLineNumberAreaWidth(int newBlockCount);
@@ -96,7 +100,7 @@ private slots:
     void performSearch();
     void pervSearch();
     void nextSearch();
-
+    void updateVisibleText();
 private:
     QWidget *lineNumberArea;
     QString m_filename;
@@ -106,7 +110,13 @@ private:
     QLabel *searchLabel;
     QPushButton *searchPrev;
     QPushButton *searchNext;
-
+    //"Lazy Loading"
+    QFile file;
+    uchar* mappedFile = nullptr;
+    qint64 fileSize = 0;
+    qint64 currentOffset = 0;
+    const int CHUNK_SIZE = 50000; // Load ~50KB at a time
+    bool m_isUpdating;
 };
 
 //![codeeditordefinition]

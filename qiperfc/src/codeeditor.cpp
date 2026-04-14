@@ -57,6 +57,7 @@
 #include <QTextCursor>
 #include <QIcon>
 #include <QtGlobal>
+#include <QScrollBar>
 
 #if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
 #include <QScreen>
@@ -74,6 +75,9 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent),
 {
     setWindowIcon(QIcon(":logfile"));
     setReadOnly(true);
+    setUndoRedoEnabled(false);
+    setLineWrapMode(QPlainTextEdit::NoWrap);
+
     int WIDTH = 1024;
     int HEIGHT = 768;
 //    setGeometry(0,0,1024,768);
@@ -100,7 +104,8 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent),
 //    setWindowFlags( Qt::Window | Qt::CustomizeWindowHint
 //                               | Qt::WindowTitleHint
 //                               | Qt::WindowCloseButtonHint );
-
+    // Connect scrollbar to our custom loader
+    connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &CodeEditor::updateVisibleText);
 }
 
 //![constructor]
@@ -121,16 +126,31 @@ int CodeEditor::lineNumberAreaWidth()
     return space;
 }
 
-void CodeEditor::load(QString filename)
+bool CodeEditor::load(QString filename)
 {
     m_filename = filename;
     setWindowTitle(filename);
-    QFile file(filename);
-    if (file.open(QIODevice::Text | QIODevice::ReadOnly)){
-        QString content = QString::fromUtf8(file.readAll());
-        this->setPlainText(content);
-        file.close();
+
+    if (true){
+        QFile file(filename);
+        if (file.open(QIODevice::Text | QIODevice::ReadOnly)){
+            QString content = QString::fromUtf8(file.readAll());
+            this->setPlainText(content);
+            file.close();
+        }
+    }else{
+        //TODO: "Lazy Loading" Strategy, do not load the file at once when the file is big!!
+        if (file.isOpen()) file.close();
+
+        file.setFileName(filename);
+        if (!file.open(QIODevice::ReadOnly)) return false;
+
+        fileSize = file.size();
+        // Memory map the file for instant access without reading into a QByteArray
+        mappedFile = file.map(0, fileSize);
+        updateVisibleText();
     }
+    return true;
 }
 
 void CodeEditor::closeEvent(QCloseEvent *event)
@@ -166,6 +186,7 @@ void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
 void CodeEditor::showSearchBar()
 {
     if (!m_search) {
+    //TODO: "Lazy Loading" Strategy
         m_search = new QWidget(this);
         m_search->setStyleSheet("background-color:#ebedf0;");
         m_hlsearch = new QHBoxLayout(this);
@@ -244,6 +265,39 @@ void CodeEditor::nextSearch()
     }
 }
 
+void CodeEditor::updateVisibleText()
+{
+    // 1. Calculate the target offset using a stable range.
+    // Instead of using the widget's dynamic max, use a fixed virtual scale.
+    int scrollValue = verticalScrollBar()->value();
+    int virtualMax = 10000; // A large constant or total line count
+
+    verticalScrollBar()->setRange(0, virtualMax);
+
+    double pct = (double)scrollValue / virtualMax;
+    qint64 targetOffset = static_cast<qint64>(pct * (fileSize - CHUNK_SIZE));
+
+    // 2. Snap to nearest line boundary (Crucial for UTF-8 and readability)
+    // You should scan backwards from targetOffset to the nearest '\n'
+    // to avoid starting a view in the middle of a line.
+
+    // 3. Update the view
+    currentOffset = qBound(0LL, targetOffset, fileSize - CHUNK_SIZE);
+
+    QByteArray chunk = QByteArray::fromRawData(
+        reinterpret_cast<const char*>(mappedFile + currentOffset),
+        qMin((qint64)CHUNK_SIZE, fileSize - currentOffset)
+        );
+
+    // Use a flag to prevent the scroll event from triggering itself
+    m_isUpdating = true;
+    setPlainText(QString::fromUtf8(chunk));
+    m_isUpdating = false;
+
+    // 4. Force the scrollbar to stay where the user put it
+    verticalScrollBar()->setValue(scrollValue);
+}
+
 void CodeEditor::performSearch()
 {
     if (!searchBar) return;
@@ -286,6 +340,12 @@ void CodeEditor::keyPressEvent(QKeyEvent *event)
     }else{
         QPlainTextEdit::keyPressEvent(event);
     }
+}
+
+void CodeEditor::wheelEvent(QWheelEvent *e)
+{
+    // Standard scroll behavior will trigger valueChanged -> updateVisibleText
+    QPlainTextEdit::wheelEvent(e);
 }
 
 //![resizeEvent]
