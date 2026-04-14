@@ -119,7 +119,7 @@ qint64 WSServer::sendTextMessage(QString msg, QString target)
             m_sendtype=WSServer::sendtype::text;
             rc= ws->sendTextMessage(msg);
             if (rc<=0){
-                qDebug() << "ERROR sendText to " << t
+                qDebug() << "ERROR sendText to " << target
                          << " size=" << QString::number(rc) << " : " << msg;
             }
             if (ws->flush() == 0){
