@@ -109,18 +109,13 @@ QList<QString> WSServer::getClients()
 
 qint64 WSServer::sendTextMessage(QString msg, QString target)
 {
+    qint64 rc=0;
     //send msg to target,
     // if target is null, send to all connected client => this may cause problem!!
     QList<QString> ts;
     if (!target.isNull()){
-        ts.append(target);
-    }else{
-        ts = m_clients.keys();
-    }
-    qint64 rc=0;
-    for(auto &t: as_const(ts)) {
-        if (m_clients.contains(t)) {
-            QWebSocket *ws = m_clients.value(t);
+        if (m_clients.contains(target)) {
+            QWebSocket *ws = m_clients.value(target);
             m_sendtype=WSServer::sendtype::text;
             rc= ws->sendTextMessage(msg);
             if (rc<=0){
@@ -131,10 +126,34 @@ qint64 WSServer::sendTextMessage(QString msg, QString target)
                 qDebug() << "No more data to flush";
             }
         }else{
-            qDebug() << "m_clients do not have:" << t;
+            qDebug() << "No " << target << " in m_clients:" << m_clients;
         }
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        // if (!ts.contains(target)){
+        //     ts.append(target);
+        //     qDebug() << "Report target:" << ts;
+        // }
+    }else{
+        ts = m_clients.keys();
+        for(auto &t: as_const(ts)) {
+            if (m_clients.contains(t)) {
+                QWebSocket *ws = m_clients.value(t);
+                m_sendtype=WSServer::sendtype::text;
+                rc= ws->sendTextMessage(msg);
+                if (rc<=0){
+                    qDebug() << "ERROR sendText to " << t
+                             << " size=" << QString::number(rc) << " : " << msg;
+                }
+                if (ws->flush() == 0){
+                    qDebug() << "No more data to flush";
+                }
+            }else{
+                qDebug() << "m_clients do not have:" << t;
+            }
+            QCoreApplication::processEvents(QEventLoop::AllEvents);
+        }
     }
+
+
     return rc;
 
 }
