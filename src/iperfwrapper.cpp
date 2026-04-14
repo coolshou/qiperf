@@ -23,6 +23,7 @@ IperfWrapper::IperfWrapper(bool ignorewronginterval, QObject *parent)
     m_debuglv=3;
     m_restarttimeoffset = 0;
     endcount = 0;
+    updatetimer = QElapsedTimer();
 }
 QString IperfWrapper::toIperf3args(QVariantMap jsondata)
 {
@@ -436,11 +437,10 @@ void IperfWrapper::parserIperf2(QString linedata)
 
 void IperfWrapper::parserIperf3(QString linedata)
 {
-    // try{
         QString idx = "";
         if (bWithtimestamp){
             linedata = linedata.mid(iTimestampLength);
-            debug("after trim time stamp:" + linedata, 3);
+            if (m_debuglv>=3) debug("after trim time stamp:" + linedata, 3);
         }
         if (linedata.startsWith("###")){
             //TODO: handle custom value
@@ -464,7 +464,7 @@ void IperfWrapper::parserIperf3(QString linedata)
             // ignore sender
         }else if(linedata.contains("error")){
             // ignore error line
-            debug("TODO: error message: " + linedata, 3);
+            if (m_debuglv>=3) debug("TODO: error message: " + linedata, 3);
         }else if(linedata.contains("warning:")){
             // ignore warning: line
         }else if (linedata.isEmpty()) {
@@ -500,7 +500,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                 sDir = m_bidirtag;
             }
             if (sDir.isEmpty()){
-                debug("Ignore Not sDir line data:" + linedata, 6);
+                if (m_debuglv>=6) debug("Ignore Not sDir line data:" + linedata, 6);
                 return;
             }
             // TCP:
@@ -527,12 +527,12 @@ void IperfWrapper::parserIperf3(QString linedata)
                     {
                         double diffint = qAbs(m_interval-interval);
                         QString msg = m_ignorewronginterval?"true":"false";
-                        debug("m_ignorewronginterval:" + msg+
+                        if (m_debuglv>=5) debug("m_ignorewronginterval:" + msg+
                               " diffint:" + QString::number(diffint), 5);
                         // check report interval value is correct (smallest value 1 sec)
                         if (diffint>0.0){
                             //interval value not match value of -i (--interval)
-                            debug(linedata + " =>>>>parserIperf3 ignorewronginterval value:" +
+                            if (m_debuglv>=4) debug(linedata + " =>>>>parserIperf3 ignorewronginterval value:" +
                                   QString::number(interval) + " expect:" + QString::number(m_interval), 4);
                             return;
                         }
@@ -547,7 +547,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                     QJsonObject irec = QJsonObject();
                     if (idx.contains("SUM", Qt::CaseInsensitive)){
                         // ignore [SUM] line
-                        debug("==linedata==SUM==  " + linedata, 5);
+                        if (m_debuglv>=5) debug("==linedata==SUM==  " + linedata, 5);
                     }else{
                         irec.insert("idx", QString("%1%2").arg(idx,sTag));  // parallel num
                         irec.insert("interval", interval);  // interval
@@ -568,10 +568,10 @@ void IperfWrapper::parserIperf3(QString linedata)
                                     irec.insert("packet_lost", pkts[0]);
                                     irec.insert("packet_total", pkts[1]);
                                 }else{
-                                    debug("Unknown data format of packet lost: " + data[8], 3);
+                                    if (m_debuglv>=3) debug("Unknown data format of packet lost: " + data[8], 3);
                                 }
                             }else{
-                                debug("Unknown data format: " + data.join(","), 3);
+                                if (m_debuglv>=3) debug("Unknown data format: " + data.join(","), 3);
                             }
                         }
                         if (!sDir.isNull()){
@@ -591,7 +591,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                 if ((m_tpdatas[sInterval].count()>=iparallel)&&
                      !idx.contains("SUM", Qt::CaseInsensitive)){
                     QJsonArray arr = m_tpdatas[sInterval];
-                    debug("sInterval:" + sInterval + " m_tpdatas:" + QString::number(arr.size()), 4);
+                    if (m_debuglv>=4) debug("sInterval:" + sInterval + " m_tpdatas:" + QString::number(arr.size()), 4);
                     QJsonDocument doc;
                     doc.setArray(arr);
                     if (sInterval.contains("-")){
@@ -599,7 +599,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                         if (ls_int.length()==2){
                             sInterval = ls_int[1];
                         }else{
-                            debug("unknown format of sInterval: " + sInterval, 3);
+                            if (m_debuglv>=3) debug("unknown format of sInterval: " + sInterval, 3);
                         }
                     }
                     if (m_delaytime>0){
@@ -616,15 +616,9 @@ void IperfWrapper::parserIperf3(QString linedata)
                     // debug("m_tpdatas:" + m_tpdatas);//when many data, this cause crash?
                 }
             } else {
-                debug("parserIperf3: unknown format of line: " + linedata, 2);
+                if (m_debuglv>=2) debug("parserIperf3: unknown format of line: " + linedata, 2);
             }
         }
-    // }catch (const std::exception &e) {
-    //     // Handle the exception and show an error message
-    //     debug("IperfWrapper::parserIperf3 Exception Caught" + QString(e.what()), 3);
-    // }catch (...){
-    //     debug("IperfWrapper::parserIperf3 Unknown ERROR", 3);
-    // }
 }
 
 QString IperfWrapper::getIdx(QString linedata, QString &idx)
@@ -737,28 +731,89 @@ void IperfWrapper::work()
     //log run
     QFile file(m_filename);
     if(file.exists()){
+        updatetimer.start();
         if (file.open(QIODevice::ReadOnly)){
-            QTextStream in(&file);
-            int lineNumber = 0;
-            while (!in.atEnd())
-            {
-                QString line = in.readLine();
-                lineNumber++;
-                emit progress(m_filename, lineNumber);
-                if (m_version=="3"){
-                    if (line!=""){
-                        parserIperf3(line);
-                    }
-                }else if (m_version=="2"){
-                    if (line!=""){
-                        parserIperf2(line);
-                    }
-                }else {
-                    debug("[IperfWrapper::work]: Not support iperf version:" +m_version, 3);
-                    break;
+            if (false){
+                // Use Memory-Mapped to speedup reading large file
+                // 1. Map the file into memory
+                uchar* data = file.map(0, file.size());
+                if (!data) {
+                    debug("Failed to map file", 3);
+                    return;
                 }
+                const uchar* end = data + file.size();
+                const uchar* lineStart = data;
+                int lineNumber = 0;
+
+                // Determine parser once to avoid conditional checks inside the loop
+                bool isVersion3 = (m_version == "3");
+                bool isVersion2 = (m_version == "2");
+
+                if (!isVersion3 && !isVersion2) {
+                    debug("[IperfWrapper::work]: Not supported iperf version: " + m_version, 3);
+                    file.unmap(data);
+                    return;
+                }
+
+                while (lineStart < end) {
+                    // 2. Find the next newline character efficiently
+                    const uchar* lineEnd = static_cast<const uchar*>(memchr(lineStart, '\n', end - lineStart));
+                    if (!lineEnd) lineEnd = end;
+
+                    // 3. Convert only the necessary segment to a QString
+                    // We use fromLatin1 or fromUtf8 for speed depending on your file encoding
+                    QString line = QString::fromLatin1(reinterpret_cast<const char*>(lineStart), lineEnd - lineStart).trimmed();
+
+                    if (!line.isEmpty()) {
+                        lineNumber++;
+                        if (isVersion3) parserIperf3(line);
+                        else parserIperf2(line);
+
+                        // 4. Optimization: Throttled progress updates
+                        // Emitting a signal every 1000 lines prevents UI thread saturation
+                        // if (lineNumber % 1000 == 0) {
+                        //     emit progress(m_filename, lineNumber);
+                        // }
+                        // Only update the UI every 100ms
+                        if (updatetimer.elapsed() > 1000) {
+                            emit progress(m_filename, lineNumber);
+                            updatetimer.restart();
+                        }
+                    }
+                    lineStart = lineEnd + 1;
+                }
+                // 5. Cleanup
+                file.unmap(data);
+                file.close();
+                // Final progress update
+                emit progress(m_filename, lineNumber);
+            }else {
+                // TODO: a progress bar for reading % ?
+                QTextStream in(&file);
+                int lineNumber = 0;
+                //TODO: following will take very long time to finish on GB log file!!
+                while (!in.atEnd())
+                {
+                    QString line = in.readLine();
+                    lineNumber++;
+                    emit progress(m_filename, lineNumber);
+                    if (m_version=="3"){
+                        if (line!=""){
+                            parserIperf3(line);
+                        }
+                    }else if (m_version=="2"){
+                        if (line!=""){
+                            parserIperf2(line);
+                        }
+                    }else {
+                        debug("[IperfWrapper::work]: Not support iperf version:" +m_version, 3);
+                        break;
+                    }
+                    //without this, GUI will freeze
+                    QThread::usleep(1); // 0.000001 , GUI still can work
+                }
+                file.close();
             }
-            file.close();
             emit progress(m_filename, -1);
         }else{
             debug("open file " + m_filename + " Fail!!", 3);
@@ -829,4 +884,50 @@ qint64 IperfWrapper::getTimeStempLength(const std::string& format_string)
 
     return formattedTime.length();
 */
+}
+
+long long IperfWrapper::countLines(const QString &fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) return 0;
+
+    long long lineCount = 0;
+    const int bufferSize = 65536; // 64KB 緩衝區，平衡效能與記憶體
+    char buffer[bufferSize];
+
+    while (true) {
+        long long bytesRead = file.read(buffer, bufferSize);
+        if (bytesRead <= 0) break;
+
+        for (int i = 0; i < bytesRead; ++i) {
+            if (buffer[i] == '\n') {
+                lineCount++;
+            }
+        }
+    }
+
+    // 如果檔案最後一行沒有換行符號，通常也算一行
+    if (lineCount > 0 || file.size() > 0) {
+        // 這裡可以根據邏輯決定是否需要 +1
+        lineCount++;
+    }
+
+    return lineCount;
+}
+
+long long IperfWrapper::countLinesFast(const QString &fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) return 0;
+
+    uchar *memory = file.map(0, file.size());
+    if (!memory) return countLines(fileName); // 如果 map 失敗，退回到方法 1
+
+    long long lineCount = 0;
+    for (long long i = 0; i < file.size(); ++i) {
+        if (memory[i] == '\n') lineCount++;
+    }
+
+    file.unmap(memory);
+    return lineCount;
 }

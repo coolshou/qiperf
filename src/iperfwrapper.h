@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QJsonArray>
 #include <QString>
+#include <QElapsedTimer>
 
 class IperfWrapper : public QObject
 {
@@ -42,6 +43,8 @@ signals:
 private:
     // int getTimeStempLength(QString timestempformat);
     qint64 getTimeStempLength(const std::string& format_string);
+    long long countLines(const QString &fileName);
+    long long countLinesFast(const QString &fileName);
 
 private:
     int m_refrow;  // ref row
@@ -66,6 +69,7 @@ private:
     QStringList m_arguments;  //iperf args
     int m_debuglv;
     int endcount;
+    QElapsedTimer updatetimer;
 };
 
 #endif // IPERFWRAPPER_H
