@@ -15,6 +15,7 @@
 
 #include "tp.h"
 #include "tpgroup.h"
+#include "tpdata.h"
 #include "../src/tpmgrdata.h"
 
 //class to manager all Throughput data
@@ -87,6 +88,8 @@ signals:
     void IperfTPdata(QString sInterval,
                      QString refrowidx, QString data, QString lostrate,
                      QString grouptag);//Notice iperf throughput value:  time, idx, throughput value, lost rate
+    // virtual void IperfTPdatas(TPDataGroup datagroup) override;
+    void IperfTPdatas(QString refrow, QString sInterval, const QJsonArray &dataarray);
     void debugMsg(QString msg);
 
 private slots:

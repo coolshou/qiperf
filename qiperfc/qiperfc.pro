@@ -4,7 +4,7 @@ QT += printsupport # require by qcustomplot
 QT += webenginewidgets
 QT += serialport
 QT += positioning # for QGeoCoordinate
-
+QT += sql # for QSqlDatabase
 
 #following setting will overwrite qtcreater's setting
 #CONFIG += release
@@ -95,6 +95,7 @@ SOURCES += \
     auto/simpleworker.cpp \
     src/codeeditor.cpp \
     src/customheaderview.cpp \
+    src/dbworker.cpp \
     src/dlgintbox.cpp \
     src/dlgiperf.cpp \
     src/dlgiperfrestartrule.cpp \
@@ -186,6 +187,7 @@ HEADERS += \
     auto/simpleworker.h \
     src/codeeditor.h \
     src/customheaderview.h \
+    src/dbworker.h \
     src/dlgintbox.h \
     src/dlgiperf.h \
     src/dlgiperfrestartrule.h \
@@ -210,6 +212,7 @@ HEADERS += \
     src/qipconfig.h \
     src/qiperfc.h \
     src/tp.h \
+    src/tpdata.h \
     src/tpflowmanager.h \
     src/tpfoldingdelegate.h \
     src/tpgroup.h \

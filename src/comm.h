@@ -20,6 +20,8 @@
 #define QIPERF_EXT_JSON "json"
 #define QIPERF_EXT_FILTER_JSON "json (*.json)"
 #define QIPERF_EXT_EXCEL "excel (*.xls *.xlsx)"
+#define QIPERF_TP_DATABASE "Throughput.sqlite"
+#define QIPERF_MAX_TP_SLICE_SAMPLES 100000
 
 #define ALL_EXT_FILTER "All (*.*)"
 #define HTML_EXT "html"

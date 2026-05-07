@@ -11,6 +11,7 @@
 #include "comm.h"
 #include "myqcpgraph.h"
 #include "myqcpbars.h"
+#include "tpdata.h"
 
 class TPPlot : public QCustomPlot
 {
@@ -39,6 +40,8 @@ public slots:
     void onIperfTPdata(QString sInterval,
                        QString refrowidx, QString data, QString lostrate,
                        QString grouptag);  //
+    void onIperfTPdatas(QString refrow, QString sInterval, const QJsonArray &dataarray);
+
     void setStartTime(QDateTime startTime);
     void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
                          QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates);
@@ -90,6 +93,10 @@ private:
     // Add a mutex as a member variable
     QMutex m_mutex; // Protects access to mTotalGraph and related plot state
     QTimer *m_replottimer;
+    double m_maxX;
+    double m_maxY;
+    QString m_TPUint;
+    double m_timeWindowThreshold;
 };
 
 #endif // TPPLOT_H

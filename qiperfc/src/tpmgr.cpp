@@ -14,6 +14,7 @@
 #include "../src/tpmgrdata.h"
 #include "../src/myfunc.h"
 
+
 TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QString tpunit, QObject *parent)
     : QAbstractItemModel(parent), m_showgroup(showgroup), m_treeview(treeview),
     m_TPUint(tpunit)
@@ -87,6 +88,9 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
                         return QVariant();
                     }else{
                         if (sum>0){
+                            if ((item->getDataType()==TPMgrData::group)) {
+                                qDebug() << "group value: " << sum;
+                            }
                             item->setThroughput(s.setNum(sum));
                             return sum;
                         }
@@ -108,6 +112,7 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
                 }
             }else{
                 // return QVariant(); //this will return nothing => cell show as empty!!
+                // qDebug() << "item ["<< item << "] have no child";
             }
         }
     }
@@ -843,9 +848,14 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
     QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError) {
         QJsonArray jArr = doc.array();//.object();
+        emit IperfTPdatas(refrow, sInterval, jArr);
         // qDebug() << "[TPMgr::onIperfTPdata]refrow(" << refrow << ") sInterval:" << sInterval
         //          << " QJsonArray size:" << jArr.size();
         //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
+        // QHash<double, TPDataGroup> storage;
+        // TPDataGroup storage;
+        // QHash<int, IntervalGroup> storage;
+        // array to hold all -P's rfidx , value & lost rate
         QString dir=nullptr;
         QString idx;
         QString unit="";
@@ -891,10 +901,18 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                               pkt_lost, pkt_total);
                     m_intervals[idx] = fInterval;
                 }
+                // storage[sInterval]
+                // TPData d;
+                // d.value = value.toDouble();
+                // d.lostRate = lost_rate;
+                // TPDataGroup group;
+                // // group.intervalId = fInterval;
+                // group.dataPoints[refrow + "_" + idx] = d;
+                // storage[fInterval] = group;
 
-                // signal data to tpplot to add plot data on each -P
-                emit IperfTPdata(sInterval, refrow + "_" + idx, value,
-                                 slost_rate, dir);
+                // signal data to tpplot to add plot data on each -P (one by one), not good
+                // emit IperfTPdata(sInterval, refrow + "_" + idx, value,
+                //                  slost_rate, dir);
             }else {
                 // TODO: this part TP data seems strange??
                 qDebug() << "refrow:" << refrow << " idx:" << idx
@@ -904,6 +922,8 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             }
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
+        // emit IperfTPdatas(storage);
+
         if (!isAvg) {
             // signal data to tpplot for Group Total
             if (sum_total>0){

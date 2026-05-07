@@ -47,7 +47,7 @@ IperfWorker::IperfWorker(QString returnAddress, qint64 idx, int version,
     m_debuglv = 3;
     m_restarttimes = 0;
     m_running = false;
-    mStdoutDetectTime = 5 + m_interval+ m_delaystart; //sec
+    mStdoutDetectTime = 19 + m_interval+ m_delaystart; //sec
     m_logfile = nullptr;
     m_logtextstream = nullptr;
     m_restartonErrorStop = false;

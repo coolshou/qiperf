@@ -27,6 +27,7 @@
 #include "dlgrecord.h"
 #include "dlgserial.h"
 #include "dlgssh.h"
+#include "dbworker.h"
 
 // #include "customheaderview.h"
 #include "fileserver.h"
@@ -298,6 +299,9 @@ private:
     // throughput worker
     TpWorker *m_tpworker;
     QThread *m_tpthread;
+    // db worker
+    DbWorker *m_dbworker; // database worker to write throughput record in background
+    QThread *m_dbthread;
     // automate: simple micro
     int m_smicroIdx;
     DlgSimpleMicro *smicro;

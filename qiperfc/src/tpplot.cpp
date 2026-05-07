@@ -13,8 +13,10 @@ TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     //              << " physicalSize(mm): " << screen->physicalSize()
     //              << " devicePixelRatio:" << screen->devicePixelRatio();
     // }
-
+    m_maxX = 60;
+    m_timeWindowThreshold = 120.0;
     setOpenGl(false);
+    setNoAntialiasingOnDrag(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_interval = 1;
     setTPUint(sunit);
@@ -35,7 +37,8 @@ TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     // TODO: init plot chart size not good to fit parent's rect
     m_replottimer = new QTimer();
     connect(m_replottimer, &QTimer::timeout, this, &TPPlot::doReplot);
-    m_replottimer->start(1000);//1 sec replot
+    // m_replottimer->start(500);//0.5 sec replot
+    m_replottimer->start(33);// 大約 30 FPS
 }
 
 void TPPlot::setStartTime(QDateTime startTime)
@@ -220,7 +223,9 @@ void TPPlot::setShowGroup(bool bShow)
 }
 
 void TPPlot::setTPUint(QString tpunit)
-{   //
+{
+    // conver iperf's unit to display string
+    m_TPUint = tpunit;
     QString sunit="Mbps";
     if (tpunit.contains("Kbits")){
         sunit="Kbps";
@@ -378,7 +383,27 @@ void TPPlot::selectionChanged()
 
 void TPPlot::doReplot()
 {
-    this->replot();
+    // 保護機制：確保 Mutex 鎖定，因為我們在讀取可能被 addTPData 修改的變數
+    QMutexLocker<QMutex> locker(&m_mutex);
+    // 更新 Y 軸：加上一點緩衝空間 (例如 1.1 倍)，視覺上比較舒服
+    // if (m_maxY > 0) {
+    //     this->yAxis->setRange(0, m_maxY * 1.1);
+    // }
+    updateYAxisRange(0, m_maxY);
+
+    // 更新 X 軸：典型的「滾動視窗」效果
+    // 顯示最新的 m_interval 長度的區間
+    // double windowSize = 60.0; // 顯示最近 60 秒
+    // this->xAxis->setRange(m_maxX, windowSize, Qt::AlignRight);
+    // int minx = 0;
+    // if (m_maxX > 60){
+    //     minx = m_maxX - 60;
+    // }
+    // updateXAxisRange(minx, m_maxX);
+    updateXAxisRange(0, m_maxX);
+
+    this->replot(QCustomPlot::rpQueuedReplot);
+    // this->rpQueuedReplot();
 }
 
 void TPPlot::onIperfTPdata(QString sInterval,
@@ -396,6 +421,42 @@ void TPPlot::onIperfTPdata(QString sInterval,
     addTPData(refrowidx, x, y, lostrate.toDouble());
 }
 
+void TPPlot::onIperfTPdatas(QString refrow, QString sInterval, const QJsonArray &dataarray)
+{
+    QString dir=nullptr;
+    QString idx;
+    bool isAvg=false;
+    QString value="";
+    QString unit="";
+    QString slost_rate = "0";
+    double lost_rate=0;
+    for (QJsonArray::const_iterator it=dataarray.constBegin(); it!=dataarray.constEnd(); ++it) {
+        QJsonObject jObj= it->toObject();
+        idx = jObj.value("idx").toString();
+        isAvg = jObj.value("AVG").toBool();
+        value = jObj.value("value").toString();
+        if (!isAvg) {
+            if (!jObj.value("dir").isUndefined()){
+                dir=jObj.value("dir").toString();
+            }
+            unit = jObj.value("unit").toString();
+            // if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) !=0){
+            //     qDebug() << "//TODO: base on unit, convert the value to correct value"
+            //              << " display unit:" << m_TPUint << " tp data unit:" << unit;
+            // }
+            // packet lost rate
+            QString pkt_lost = jObj.value("packet_lost").toString();
+            QString pkt_total = jObj.value("packet_total").toString();
+            if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
+                lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
+                qDebug() << "TPMgr::onIperfTPdata: lost_rate:" << lost_rate;
+                slost_rate = QString::number(lost_rate, 'f', 4);
+            }
+        }
+        onIperfTPdata(sInterval, refrow+ "_" + idx, value, slost_rate , dir);
+    }
+}
+
 void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double lostrate)
 {
     {
@@ -405,43 +466,49 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
 
         // do not double lock in following functions!!, it will cause app hang!!
         MyQCPGraph *myGraph = getGraph(refrowidx);
-        // if (!refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
-        {
-            //TODO: when xdata is not continious, should we fill up with 0?
-            // myGraph->getMaxXValue();
+        //TODO: time window threshold, if we need to scroll back?
+        // double lowerBound = xdata - m_timeWindowThreshold;
+        // remove old value
+        // myGraph->data()->removeBefore(lowerBound); // after exec this, data before lowerBound with not be show
+        // store old data
+        //show only recent m_timeWindowThreshold data
+        xAxis->setRange(xdata, m_timeWindowThreshold, Qt::AlignRight);
 
-            if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
-                //Total Throughput graph
-                double oldvalue = 0.0;
-                int rc = myGraph->getValue(xdata, oldvalue);
-                if (rc==-1){
-                    qDebug() << "xdata:" << QString::number(xdata) <<
-                        " ydata: " << QString::number(ydata);
-                    myGraph->addData(xdata, ydata);
-                }else {
-                    qDebug() << "updateValue xdata:" << QString::number(xdata) <<
-                        " Total: " << QString::number(ydata + oldvalue);
-                    myGraph->updateValue(xdata, ydata + oldvalue);
-                }
-            }else{
-                //throughput graph
+        bool isTotal = refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive);
+        if (isTotal) {
+            //Total Throughput graph
+            double oldvalue = 0.0;
+            if (myGraph->getValue(xdata, oldvalue)==-1){
+                qDebug() << "xdata:" << QString::number(xdata) <<
+                    " ydata: " << QString::number(ydata);
                 myGraph->addData(xdata, ydata);
-            }
-            if (!m_showgroup){
-                if (m_legends.contains(refrowidx)){
-                    QCPAbstractLegendItem *itm = m_legends.value(refrowidx);
-                    if (itm){
-                        itm->setVisible(true);
-                    }
-                }
-            } else {
-                mTotalLegendItem->setVisible(true);
-            }
-        }
-        // enlarge/shrink y range
-        updateYAxisRange(0, sumydata);
-        updateXAxisRange(0, xdata + m_interval);
+            }else {
+                sumydata = sumydata + oldvalue;
+                qDebug() << "updateValue xdata:" << QString::number(xdata) <<
+                    " Total: " << QString::number(sumydata);
 
+                myGraph->updateValue(xdata, sumydata);
+            }
+        }else{
+            //throughput graph
+            myGraph->addData(xdata, ydata);
+        }
+        if (!m_showgroup){
+            if (m_legends.contains(refrowidx)){
+                QCPAbstractLegendItem *itm = m_legends.value(refrowidx);
+                if (itm){
+                    itm->setVisible(true);
+                }
+            }
+        } else {
+            mTotalLegendItem->setVisible(true);
+        }
+
+        // enlarge/shrink y range
+        m_maxX = xdata + m_interval;
+        if (sumydata>m_maxY){
+            m_maxY = sumydata;
+        }
         //lost rate
         if (lostrate>0){
             MyQCPBars *g_lostrate = getLostRateGraph(refrowidx);
@@ -789,7 +856,7 @@ QPen TPPlot::newColorPen(int r, int g, int b, int width)
 
 void TPPlot::updateXAxisRange(double mintime, double maxtime)
 {
-    if (xAxis->range().lower < mintime){
+    if (xAxis->range().lower > mintime){
         mintime = xAxis->range().lower;
     }else{
         mintime = mintime *0.9;
@@ -800,6 +867,8 @@ void TPPlot::updateXAxisRange(double mintime, double maxtime)
         maxtime = maxtime *1.1;
     }
     xAxis->setRange(mintime, maxtime);
+    // xAxis->setRange(mintime, maxtime, Qt::AlignRight);
+    // xAxis->setRange(mintime, maxtime, Qt::AlignCenter);
 }
 
 void TPPlot::updateYAxisRange(double minvalue, double maxvalue)

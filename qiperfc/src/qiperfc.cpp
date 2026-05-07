@@ -463,6 +463,17 @@ void QIperfC::onStart(bool showNotice)
     }
     if (m_throughputview->rootChildCount() > 0)
     {
+        //
+        m_dbworker = new DbWorker();
+        m_dbthread = new QThread();
+        m_dbworker->moveToThread(m_dbthread);
+        // 連接初始化信號
+        connect(m_dbthread, &QThread::started, m_dbworker, &DbWorker::initDatabase);
+        // 連接數據傳遞 (使用 QueuedConnection 確保執行緒安全)
+        // connect(this, &Controller::sigNewData, m_dbworker, &DbWorker::handleData);
+        // 確保執行緒安全退出
+        connect(m_dbthread, &QThread::finished, m_dbworker, &QObject::deleteLater);
+
         // list of throughput test pair
         QList<TP *> tps = m_throughputview->getChilds();
         qDebug() << "onStart tps:" << tps;
@@ -486,6 +497,8 @@ void QIperfC::onStart(bool showNotice)
         connect(m_tpthread, &QThread::finished, m_tpworker, &TpWorker::deleteLater);
         m_tpworker->moveToThread(m_tpthread);
         m_tpthread->start();
+
+        m_dbthread->start();
     }
     else
     {

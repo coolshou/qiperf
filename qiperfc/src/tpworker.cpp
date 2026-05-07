@@ -205,10 +205,13 @@ void TpWorker::work()
     int itimeout;
     int refrow;
     bool isRunforever=false;
+    int iSliceWindowTime=0;
     // list of throughput test pair
     foreach (TP *tp, m_tps) {
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
         if (tp->getEnabled()){
+            tp->getParallel();
+
             if (tp->getInterval()> maxInterval){
                 maxInterval = tp->getInterval();
             }
