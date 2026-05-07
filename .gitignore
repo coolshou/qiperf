@@ -31,3 +31,4 @@
 /qiperfc_x86_64
 /qiperfd_x86_64
 /qiperftray_x86_64
+/lib/httpd/build/*
