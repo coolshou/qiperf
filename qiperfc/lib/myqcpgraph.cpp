@@ -4,6 +4,7 @@ MyQCPGraph::MyQCPGraph(QCPAxis *keyAxis, QCPAxis *valueAxis)
     :QCPGraph(keyAxis, valueAxis)
 {
     m_interval = 1;
+    setAdaptiveSampling(true);
 }
 
 void MyQCPGraph::setData(QSharedPointer<QCPGraphDataContainer> data)
