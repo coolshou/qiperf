@@ -1741,7 +1741,7 @@ void QIperfC::onMemoryUsageUpdated(qint64 memMB)
         m_oldmemMB = memMB;
         QString msg = QString("MEM Usage: %1 MB").arg(memMB);
         m_mem_label->setText(msg);
-        qInfo() << msg;
+        // qInfo() << msg;
     }
 }
 

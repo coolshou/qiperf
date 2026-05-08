@@ -50,6 +50,7 @@ QXLSX_HEADERPATH=$$PWD/lib/QXlsx/QXlsx/header/  # current QXlsx header path is .
 QXLSX_SOURCEPATH=$$PWD/lib/QXlsx/QXlsx/source/  # current QXlsx source path is ./source/
 include($$PWD/lib/QXlsx/QXlsx/QXlsx.pri)
 include($$PWD/lib/qcustomplot.pri)
+# we should clear this before build qiperfc
 include($$PWD/../lib/qssh.pri)
 
 include($$PWD/../lib/httpd/httpd.pri)
