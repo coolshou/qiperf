@@ -14,7 +14,9 @@ TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     //              << " devicePixelRatio:" << screen->devicePixelRatio();
     // }
     m_maxX = 60;
+    m_maxY = m_yAxisMaxDefault;
     m_timeWindowThreshold = 120.0;
+    //setOpenGl(true); // this will cause plot area looks strange??
     setOpenGl(false);
     setNoAntialiasingOnDrag(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
