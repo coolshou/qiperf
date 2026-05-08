@@ -537,7 +537,7 @@ void IperfWrapper::parserIperf3(QString linedata)
 
                 if (!m_tpdatas.contains(sInterval)){
                     QJsonArray lst =QJsonArray();
-                    debug("insert " + sInterval);
+                    debug("insert " + sInterval, 5);
                     m_tpdatas.insert(sInterval, lst);
                 }
                 auto &currentIntervalArray = m_tpdatas[sInterval];
@@ -601,7 +601,7 @@ void IperfWrapper::parserIperf3(QString linedata)
                     // 4. Emit the data
                     QJsonDocument doc(arr);
                     QString s = doc.toJson(QJsonDocument::Compact);
-                    debug("m_refrow:"+ QString::number(m_refrow)+ ", sFinalTime:" + sFinalTime + " data:" + s);
+                    debug("m_refrow:"+ QString::number(m_refrow)+ ", sFinalTime:" + sFinalTime + " data:" + s, 5);
                     emit sendThroughput(m_refrow, sFinalTime, s);
 
                 } else if (idx.contains("SUM", Qt::CaseInsensitive)) {
