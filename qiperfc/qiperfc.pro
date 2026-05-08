@@ -60,6 +60,14 @@ contains(CONFIG, enable_aas) {
     DEFINES += HAS_AAS
 }
 
+# CONFIG += enable_tpplot_database
+contains(CONFIG, enable_tpplot_database) {
+    DEFINES += USE_TPPLOT_DATABASE  # throughput plot use database
+    SOURCES += \
+        src/dbworker.cpp
+    HEADERS += \
+        src/dbworker.h
+}
 # debug
 #CONFIG += sanitizer
 #CONFIG += sanitize_address
@@ -95,7 +103,6 @@ SOURCES += \
     auto/simpleworker.cpp \
     src/codeeditor.cpp \
     src/customheaderview.cpp \
-    src/dbworker.cpp \
     src/dlgintbox.cpp \
     src/dlgiperf.cpp \
     src/dlgiperfrestartrule.cpp \
@@ -187,7 +194,6 @@ HEADERS += \
     auto/simpleworker.h \
     src/codeeditor.h \
     src/customheaderview.h \
-    src/dbworker.h \
     src/dlgintbox.h \
     src/dlgiperf.h \
     src/dlgiperfrestartrule.h \

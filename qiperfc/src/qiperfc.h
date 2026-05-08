@@ -27,8 +27,9 @@
 #include "dlgrecord.h"
 #include "dlgserial.h"
 #include "dlgssh.h"
+#ifdef USE_TPPLOT_DATABASE
 #include "dbworker.h"
-
+#endif
 // #include "customheaderview.h"
 #include "fileserver.h"
 #include "pingmgr.h"
@@ -299,9 +300,11 @@ private:
     // throughput worker
     TpWorker *m_tpworker;
     QThread *m_tpthread;
+#ifdef USE_TPPLOT_DATABASE
     // db worker
     DbWorker *m_dbworker; // database worker to write throughput record in background
     QThread *m_dbthread;
+#endif
     // automate: simple micro
     int m_smicroIdx;
     DlgSimpleMicro *smicro;

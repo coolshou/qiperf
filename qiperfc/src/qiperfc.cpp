@@ -464,6 +464,7 @@ void QIperfC::onStart(bool showNotice)
     if (m_throughputview->rootChildCount() > 0)
     {
         //
+#ifdef USE_TPPLOT_DATABASE
         m_dbworker = new DbWorker();
         m_dbthread = new QThread();
         m_dbworker->moveToThread(m_dbthread);
@@ -473,7 +474,7 @@ void QIperfC::onStart(bool showNotice)
         // connect(this, &Controller::sigNewData, m_dbworker, &DbWorker::handleData);
         // 確保執行緒安全退出
         connect(m_dbthread, &QThread::finished, m_dbworker, &QObject::deleteLater);
-
+#endif
         // list of throughput test pair
         QList<TP *> tps = m_throughputview->getChilds();
         qDebug() << "onStart tps:" << tps;
@@ -497,8 +498,9 @@ void QIperfC::onStart(bool showNotice)
         connect(m_tpthread, &QThread::finished, m_tpworker, &TpWorker::deleteLater);
         m_tpworker->moveToThread(m_tpthread);
         m_tpthread->start();
-
+#ifdef USE_TPPLOT_DATABASE
         m_dbthread->start();
+#endif
     }
     else
     {
