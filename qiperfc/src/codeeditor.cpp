@@ -131,8 +131,8 @@ bool CodeEditor::load(QString filename)
     m_filename = filename;
     setWindowTitle(filename);
 
+    QFile file(filename);
     if (true){
-        QFile file(filename);
         if (file.open(QIODevice::Text | QIODevice::ReadOnly)){
             QString content = QString::fromUtf8(file.readAll());
             this->setPlainText(content);
@@ -267,35 +267,36 @@ void CodeEditor::nextSearch()
 
 void CodeEditor::updateVisibleText()
 {
+    if (m_isUpdating || !mappedFile) return;
+
     // 1. Calculate the target offset using a stable range.
     // Instead of using the widget's dynamic max, use a fixed virtual scale.
     int scrollValue = verticalScrollBar()->value();
-    int virtualMax = 10000; // A large constant or total line count
+    int virtualMax = verticalScrollBar()->maximum();
 
-    verticalScrollBar()->setRange(0, virtualMax);
-
-    double pct = (double)scrollValue / virtualMax;
+    double pct = (virtualMax <= 0) ? 0 : static_cast<double>(scrollValue / virtualMax);
     qint64 targetOffset = static_cast<qint64>(pct * (fileSize - CHUNK_SIZE));
 
-    // 2. Snap to nearest line boundary (Crucial for UTF-8 and readability)
-    // You should scan backwards from targetOffset to the nearest '\n'
-    // to avoid starting a view in the middle of a line.
-
-    // 3. Update the view
-    currentOffset = qBound(0LL, targetOffset, fileSize - CHUNK_SIZE);
-
+    // Snap to line boundary to prevent cutting UTF-8 characters
+    if (targetOffset > 0) {
+        const char* ptr = reinterpret_cast<const char*>(mappedFile + targetOffset);
+        while (targetOffset > 0 && *ptr != '\n') {
+            ptr--;
+            targetOffset--;
+        }
+    }
+    m_isUpdating = true;
     QByteArray chunk = QByteArray::fromRawData(
         reinterpret_cast<const char*>(mappedFile + currentOffset),
         qMin((qint64)CHUNK_SIZE, fileSize - currentOffset)
         );
 
     // Use a flag to prevent the scroll event from triggering itself
-    m_isUpdating = true;
     setPlainText(QString::fromUtf8(chunk));
-    m_isUpdating = false;
 
     // 4. Force the scrollbar to stay where the user put it
     verticalScrollBar()->setValue(scrollValue);
+    m_isUpdating = false;
 }
 
 void CodeEditor::performSearch()
