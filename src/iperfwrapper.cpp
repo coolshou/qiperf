@@ -336,7 +336,7 @@ void IperfWrapper::parserIperf2(QString linedata)
                     interval = ds[1].toDouble() - ds[0].toDouble();
                     chkInterval = ds[1];
                     debug("idx:"+idx+"=> s:"+ds[0]+ " e:" + ds[1] + " mDuration:" +QString::number(mDuration), 7);
-                    float diff = qAbs(ds[1].toDouble() - mDuration);
+                    double diff = qAbs(ds[1].toDouble() - mDuration);
                     debug("diff: " + QString::number(diff), 7);
                     if ((ds[0].toDouble() == 0)&&
                         (diff >0.01) && (diff < m_interval) ){
@@ -482,7 +482,7 @@ void IperfWrapper::parserIperf3(QString linedata)
             if (m_bidir){
                 //bidir mode
                 // in bidir only get [Rx*]
-                int iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
+                qsizetype iS = linedata.indexOf("]",0, Qt::CaseInsensitive);
                 sDir = linedata.mid(1,iS-1).trimmed();// server:[TX-S][RX-S], client:[TX-C][RX-C]
                 linedata = linedata.right(linedata.length()-iS-1);
                 if (sDir.contains(TPDIRRx, Qt::CaseSensitivity::CaseInsensitive)){
@@ -522,28 +522,27 @@ void IperfWrapper::parserIperf3(QString linedata)
                         interval = ds[1].toDouble() - ds[0].toDouble();
                     }
                 }
-                if (m_ignorewronginterval){
-                    //if (!linedata.contains("receiver")) // very last recored may be not correct data
-                    {
-                        double diffint = qAbs(m_interval-interval);
-                        QString msg = m_ignorewronginterval?"true":"false";
-                        if (m_debuglv>=5) debug("m_ignorewronginterval:" + msg+
-                              " diffint:" + QString::number(diffint), 5);
-                        // check report interval value is correct (smallest value 1 sec)
-                        if (diffint>0.0){
-                            //interval value not match value of -i (--interval)
-                            if (m_debuglv>=4) debug(linedata + " =>>>>parserIperf3 ignorewronginterval value:" +
-                                  QString::number(interval) + " expect:" + QString::number(m_interval), 4);
-                            return;
-                        }
-                    }
+                bool intervalMatches = qFuzzyCompare(m_interval, interval) || qAbs(m_interval - interval) < 0.001;
+                if (m_ignorewronginterval && !intervalMatches) {
+                    return; // Ignore jittery interval reports
+                }
+
+                // 2. Handle the "SUM" line explicitly
+                bool isSumLine = idx.contains("SUM", Qt::CaseInsensitive);
+                if (isSumLine) {
+                    // Usually, for performance tools, the SUM line is what you actually want to graph.
+                    // If you only want raw streams, keep ignoring it, but ensure the map is cleaned.
+                    return;
                 }
 
                 if (!m_tpdatas.contains(sInterval)){
                     QJsonArray lst =QJsonArray();
+                    debug("insert " + sInterval);
                     m_tpdatas.insert(sInterval, lst);
                 }
-                if (m_tpdatas[sInterval].count()<iparallel){
+                auto &currentIntervalArray = m_tpdatas[sInterval];
+
+                if (currentIntervalArray.count() < iparallel) {
                     QJsonObject irec = QJsonObject();
                     if (idx.contains("SUM", Qt::CaseInsensitive)){
                         // ignore [SUM] line
@@ -551,12 +550,6 @@ void IperfWrapper::parserIperf3(QString linedata)
                     }else{
                         irec.insert("idx", QString("%1%2").arg(idx,sTag));  // parallel num
                         irec.insert("interval", interval);  // interval
-
-                        // debug("("+sInterval + ") " + idx + sTag +
-                        //       " interval:" + QString::number(interval) +
-                        //       " value:" + data[4] +
-                        //       " sDIR:" +  sDir);
-
                         irec.insert("value", data[4]);  // Bitrate
                         irec.insert("unit", data[5]);  // Bitrate unit
                         if (m_protocal.contains("UDP")){
@@ -575,45 +568,48 @@ void IperfWrapper::parserIperf3(QString linedata)
                             }
                         }
                         if (!sDir.isNull()){
-                            irec.insert("dir", sDir);  // direction
+                            irec.insert("dir", sDir.isEmpty() ? "unknown" : sDir);  // direction
                         }
 
                         if (linedata.contains("receiver")){
                             //final data is the average of throughput
                             irec.insert("AVG", true);
                         }
-                        m_tpdatas[sInterval].append(irec);
+                        // m_tpdatas[sInterval].append(irec);
+                        currentIntervalArray.append(irec);
                     }
                 }
-                //else {
-                //     m_tpdatas[sInterval].count();
-                // }
-                if ((m_tpdatas[sInterval].count()>=iparallel)&&
-                     !idx.contains("SUM", Qt::CaseInsensitive)){
-                    QJsonArray arr = m_tpdatas[sInterval];
-                    if (m_debuglv>=4) debug("sInterval:" + sInterval + " m_tpdatas:" + QString::number(arr.size()), 4);
-                    QJsonDocument doc;
-                    doc.setArray(arr);
-                    if (sInterval.contains("-")){
-                        QStringList ls_int = sInterval.split("-");
-                        if (ls_int.length()==2){
-                            sInterval = ls_int[1];
-                        }else{
-                            if (m_debuglv>=3) debug("unknown format of sInterval: " + sInterval, 3);
-                        }
+                QString originalKey = sInterval;
+
+                if (m_tpdatas[originalKey].count() == iparallel) {
+                    // We have all parallel streams for this interval
+                    QJsonArray arr = m_tpdatas[originalKey];
+
+                    // 2. Prepare the clean interval string for the signal
+                    QString emitInterval = originalKey;
+                    if (emitInterval.contains("-")) {
+                        // emitInterval = emitInterval.split("-").last();
+                        emitInterval = emitInterval.section('-', -1);
                     }
-                    if (m_delaytime>0){
-                        sInterval = QString::number(sInterval.toDouble()+ m_delaytime);
-                    }
-                    if (m_restarttimeoffset>0){
-                        sInterval = QString::number(sInterval.toDouble()+ m_restarttimeoffset);
-                    }
-                    //iperf3 throughput data
-                    emit sendThroughput(m_refrow, sInterval, doc.toJson(QJsonDocument::Compact));
-                    //clear record
-                    m_tpdatas.remove(sInterval);
-                }else{
-                    // debug("m_tpdatas:" + m_tpdatas);//when many data, this cause crash?
+
+                    qint64 finalTime = static_cast<qint64>(emitInterval.toDouble()) + m_delaytime + m_restarttimeoffset;
+                    QString sFinalTime = QString::number(finalTime);
+
+                    // 3. Always clear the record using the ORIGINAL key
+                    m_tpdatas.remove(originalKey);
+
+                    // 4. Emit the data
+                    QJsonDocument doc(arr);
+                    QString s = doc.toJson(QJsonDocument::Compact);
+                    debug("m_refrow:"+ QString::number(m_refrow)+ ", sFinalTime:" + sFinalTime + " data:" + s);
+                    emit sendThroughput(m_refrow, sFinalTime, s);
+
+                } else if (idx.contains("SUM", Qt::CaseInsensitive)) {
+                    // If we hit a SUM line but haven't reached 'iparallel' count,
+                    // it usually means some streams were dropped or the count is mismatched.
+                    // Clean up anyway to prevent memory leaks.
+                    if (m_debuglv >= 5) debug("Clearing incomplete interval on SUM: " + originalKey, 5);
+                    m_tpdatas.remove(originalKey);
                 }
             } else {
                 if (m_debuglv>=2) debug("parserIperf3: unknown format of line: " + linedata, 2);
@@ -624,8 +620,8 @@ void IperfWrapper::parserIperf3(QString linedata)
 QString IperfWrapper::getIdx(QString linedata, QString &idx)
 {
     QString result = linedata;
-    int iS = linedata.indexOf("[",0, Qt::CaseInsensitive);
-    int iE = linedata.indexOf("]",0, Qt::CaseInsensitive);
+    qsizetype iS = linedata.indexOf("[",0, Qt::CaseInsensitive);
+    qsizetype iE = linedata.indexOf("]",0, Qt::CaseInsensitive);
     QString tmp = linedata.mid(iS,iE-iS+1).trimmed();  // extract [ idx]
     if (!tmp.isEmpty()){
         //get number only

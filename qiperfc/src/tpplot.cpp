@@ -413,18 +413,19 @@ void TPPlot::onIperfTPdata(QString sInterval,
                            QString grouptag)
 {
     // double x = sInterval.toDouble();
-    int x = (int)sInterval.toDouble(); //ignore .0x Difference of xdata
+    int x = static_cast<int>(sInterval.toDouble()); //ignore .0x Difference of xdata
     double y = data.toDouble();
     Q_UNUSED(grouptag) //TODO grouptag?
     qDebug() << "[TPPlot::onIperfTPdata]:" << refrowidx
              << " sInterval:" << sInterval << " x:" << QString::number(x)
-             << " TP:" << QString::number(y);
-    //          << " grouptag:" << grouptag;
+             << " TP:" << QString::number(y)
+             << " grouptag:" << grouptag;
     addTPData(refrowidx, x, y, lostrate.toDouble());
 }
 
 void TPPlot::onIperfTPdatas(QString refrow, QString sInterval, const QJsonArray &dataarray)
 {
+    //add data by dataarray
     QString dir=nullptr;
     QString idx;
     bool isAvg=false;
@@ -432,6 +433,9 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval, const QJsonArray 
     QString unit="";
     QString slost_rate = "0";
     double lost_rate=0;
+    double sumvalue=0.0;
+    double sumlostrate=0.0;
+
     for (QJsonArray::const_iterator it=dataarray.constBegin(); it!=dataarray.constEnd(); ++it) {
         QJsonObject jObj= it->toObject();
         idx = jObj.value("idx").toString();
@@ -442,6 +446,7 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval, const QJsonArray 
                 dir=jObj.value("dir").toString();
             }
             unit = jObj.value("unit").toString();
+            sumvalue = sumvalue + value.toDouble();
             // if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) !=0){
             //     qDebug() << "//TODO: base on unit, convert the value to correct value"
             //              << " display unit:" << m_TPUint << " tp data unit:" << unit;
@@ -451,12 +456,17 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval, const QJsonArray 
             QString pkt_total = jObj.value("packet_total").toString();
             if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
                 lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
+                sumlostrate = sumlostrate + lost_rate;
                 qDebug() << "TPMgr::onIperfTPdata: lost_rate:" << lost_rate;
                 slost_rate = QString::number(lost_rate, 'f', 4);
             }
         }
+        //each pair's paraller data
         onIperfTPdata(sInterval, refrow+ "_" + idx, value, slost_rate , dir);
+
     }
+    // TOTAL data?
+    addTPData(GRAPH_TOTAL, static_cast<int>(sInterval.toDouble()), sumvalue, sumlostrate);
 }
 
 void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double lostrate)
@@ -481,7 +491,7 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
             //Total Throughput graph
             double oldvalue = 0.0;
             if (myGraph->getValue(xdata, oldvalue)==-1){
-                qDebug() << "xdata:" << QString::number(xdata) <<
+                qDebug() << "no old record, xdata:" << QString::number(xdata) <<
                     " ydata: " << QString::number(ydata);
                 myGraph->addData(xdata, ydata);
             }else {

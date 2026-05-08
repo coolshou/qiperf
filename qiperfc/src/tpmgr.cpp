@@ -88,9 +88,9 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
                         return QVariant();
                     }else{
                         if (sum>0){
-                            if ((item->getDataType()==TPMgrData::group)) {
-                                qDebug() << "group value: " << sum;
-                            }
+                            // if ((item->getDataType()==TPMgrData::group)) {
+                            //     qDebug() << "group value: " << sum;
+                            // }
                             item->setThroughput(s.setNum(sum));
                             return sum;
                         }
@@ -522,7 +522,7 @@ void TPMgr::clear(){
                 // tp->resetData();
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
             }
-            emit dataChanged(QModelIndex(),QModelIndex());
+            // emit dataChanged(QModelIndex(),QModelIndex());
         }
     }else {
         qDebug() << "clear: NO root item by getRootItem()";
@@ -848,9 +848,10 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
     QJsonDocument doc=QJsonDocument::fromJson(datas.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError) {
         QJsonArray jArr = doc.array();//.object();
-        emit IperfTPdatas(refrow, sInterval, jArr);
         // qDebug() << "[TPMgr::onIperfTPdata]refrow(" << refrow << ") sInterval:" << sInterval
         //          << " QJsonArray size:" << jArr.size();
+        emit IperfTPdatas(refrow, sInterval, jArr);
+
         //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
         // QHash<double, TPDataGroup> storage;
         // TPDataGroup storage;
@@ -922,7 +923,6 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             }
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
-        // emit IperfTPdatas(storage);
 
         if (!isAvg) {
             // signal data to tpplot for Group Total
@@ -932,7 +932,8 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             ssum = QString::number(sum, 'f', 3);
             // qDebug() << " Total graph:" << sInterval << " sum:" << ssum
             //          << " lost_rate:" << slost_rate << " dir:" << dir;
-            emit IperfTPdata(sInterval, GRAPH_TOTAL, ssum, slost_rate, dir);
+            // info update TOTAL plot data
+            // emit IperfTPdata(sInterval, GRAPH_TOTAL, ssum, slost_rate, dir);
         }
         // TODO: signal data to tpplot for group Direction
         // TODO: signal data to tpplot for group comment
@@ -951,7 +952,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         }
         //
         // signal dataChanged when all throughput data update!!
-        emit dataChanged(QModelIndex(),QModelIndex());
+        // emit dataChanged(QModelIndex(),QModelIndex());
     }else {
         qDebug() << "TPMgr::onIperfTPdata wrong format:(" << error.errorString() << "\n" << datas;
     }

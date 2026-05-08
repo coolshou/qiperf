@@ -40,6 +40,7 @@ int MyQCPGraph::getValue(double key, double &value)
     //get key's value
     for (int i=this->dataCount()-1; i>0; i--){
         if (qFuzzyCompare(this->data()->at(i)->key , key)){
+            //found key, store value to value
             value = this->data()->at(i)->value;
             return i;
         }
@@ -51,7 +52,8 @@ void MyQCPGraph::updateValue(double keyToUpdate, double newvalue)
 {
     QSharedPointer<QCPGraphDataContainer> dataContainer = data();
     // Iterate over the data points to find the specific key
-    for (auto it = dataContainer->begin(); it != dataContainer->end(); ++it) {
+    // for (auto it = dataContainer->begin(); it != dataContainer->end(); ++it) {
+    for (auto it = dataContainer->end(); it != dataContainer->begin(); --it) {
         if (qFuzzyCompare(it->key, keyToUpdate)) { // Check if the key matches
             it->value = newvalue; // Update the value
             break;

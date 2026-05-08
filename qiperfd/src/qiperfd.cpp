@@ -1020,7 +1020,7 @@ void QIperfd::onTimeSynced(QString target, bool synced, QString errormsg)
 {
     Q_UNUSED(target)
     QString cmd = "";
-    int rc;
+    qint64 rc;
     if (synced)
     {
         cmd = QString("%1").arg(CMD_NTP_SYNC_OK);
@@ -1538,7 +1538,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
             // No need to do NTP sync
 #if (TEST_WS == 1)
             onLog("===== Info NTP time is OK: " + target);
-            int rc = m_wsserver->sendTextMessage(QString("%1").arg(CMD_NTP_SYNC_OK), target);
+            qint64 rc = m_wsserver->sendTextMessage(QString("%1").arg(CMD_NTP_SYNC_OK), target);
             if (rc <= 0)
             {
                 debug(" Info " + target + " Fail!!", 2);
@@ -1799,7 +1799,7 @@ void QIperfd::onWSactMessage(QString msg, QHostAddress fromAddr, quint16 fromPor
     {
         QString cmd = QString("%1:%2:%3").arg(CMD_NOT_SUPPORT, act, msg);
         debug("send back: " + cmd);
-        int rc = m_wsserver->sendTextMessage(cmd, target);
+        qint64 rc = m_wsserver->sendTextMessage(cmd, target);
         if (rc <= 0)
         {
             debug(" Info " + target + " Fail!!");
@@ -2477,7 +2477,7 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
             // qDebug() << "erroutput:" << erroutput;
             QString res = QString("%1:%2:%3:%4").arg(CMD_REQUEST_RESULT, refid, rpcmd, rs);
             qDebug() << "Response res:" << res;
-            int rc = m_wsserver->sendTextMessage(res, from);
+            qint64 rc = m_wsserver->sendTextMessage(res, from);
             if (rc <= 0)
             {
                 debug(QString("error send %1").arg(res), 2);

@@ -705,7 +705,7 @@ void ThroughputView::initThroughputChart()
     m_tpmgr = new TPMgr(m_showgroupTotal, ui->tv_throughput, m_tpunit);
     // connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     // connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
-    connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
+    // connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);
     connect(m_tpmgr, &TPMgr::IperfTPdatas, m_tpplot, &TPPlot::onIperfTPdatas);
     connect(m_tpmgr, &TPMgr::debugMsg, this, &ThroughputView::onDebuginfo);
 

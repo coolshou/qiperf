@@ -206,12 +206,14 @@ void TpWorker::work()
     int refrow;
     bool isRunforever=false;
     int iSliceWindowTime=0;
+    double totalrecordrate=0.0;
+    double recordrate = 0.0;
     // list of throughput test pair
     foreach (TP *tp, m_tps) {
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
         if (tp->getEnabled()){
-            tp->getParallel();
-
+            recordrate = tp->getParallel()/tp->getInterval();
+            totalrecordrate = totalrecordrate + recordrate;
             if (tp->getInterval()> maxInterval){
                 maxInterval = tp->getInterval();
             }
@@ -376,6 +378,7 @@ void TpWorker::work()
         }
 
     }
+    qDebug() << "totalrecordrate:" << QString::number(totalrecordrate);
     emit updateInterval(maxInterval);
     if(bErrorStop>0){
         emit errorStop(4, "Unknown error happen!!("+QString::number(bErrorStop)+")");

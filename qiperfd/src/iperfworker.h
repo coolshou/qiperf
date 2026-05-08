@@ -98,7 +98,7 @@ private:
     bool m_bidir=false;
     bool m_reverse=false;
     int m_interval=1;  // report interval
-    int m_duration;
+    qint64 m_duration;
     int m_delaystart;
     bool m_ignoreWrongInterval;
     bool m_restartonerror;
@@ -130,6 +130,7 @@ private:
     bool m_restarttimes;  //count how many times it do restart
     QDateTime m_starttime; // test start time
     QMap<int, QDateTime> m_restarttimemap; //record each restart time stemp
+    QByteArray m_lineBuffer;
 };
 
 #endif // IPERFWORKER_H

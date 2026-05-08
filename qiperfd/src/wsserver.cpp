@@ -112,6 +112,7 @@ qint64 WSServer::sendTextMessage(QString msg, QString target)
     qint64 rc=0;
     //send msg to target,
     // if target is null, send to all connected client => this may cause problem!!
+    // qDebug() << "sendTextMessage: " << target ;//<< " msg" << msg;
     QList<QString> ts;
     if (!target.isNull()){
         if (m_clients.contains(target)) {

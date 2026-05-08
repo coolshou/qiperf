@@ -71,7 +71,7 @@ IperfWorker::IperfWorker(QString returnAddress, qint64 idx, int version,
     }
     m_omit=0;
     if (m_arguments.contains("--omit")){
-        int omitidx = m_arguments.indexOf("--omit");
+        qsizetype omitidx = m_arguments.indexOf("--omit");
         m_omit = m_arguments.value(omitidx+1, 0).toInt();
     }
     int extrawait = 0; //
@@ -105,9 +105,9 @@ IperfWorker::IperfWorker(QString returnAddress, qint64 idx, int version,
     }
     m_iperfwrapper = new IperfWrapper(m_ignoreWrongInterval);
     m_iperfwrapper->setDelaytime(delaystart);
-    m_iperfwrapper->setInterval(interval);
+    m_iperfwrapper->setInterval(static_cast<uint>(interval));
     m_iperfwrapper->setArgs(arg);
-    m_iperfwrapper->setDuration(duration);
+    m_iperfwrapper->setDuration(static_cast<uint>(duration));
     m_iperfwrapper->setOmit(m_omit);
     connect(m_iperfwrapper, &IperfWrapper::sendThroughput, this, &IperfWorker::onThroughputData);
     connect(m_iperfwrapper, &IperfWrapper::debuginfo, this, &IperfWorker::onDebuginfo);
@@ -174,7 +174,7 @@ void IperfWorker::work()
     if (m_delaystart > 0) {
         debug("m_delaystart: " + QString::number(m_delaystart));
         QDateTime waitStartTime = QDateTime::currentDateTime();
-        int iWait = 0;
+        qint64 iWait = 0;
         while (iWait < m_delaystart) {
             QCoreApplication::processEvents(QEventLoop::AllEvents);
             QThread::msleep(100);
@@ -454,21 +454,43 @@ void IperfWorker::onNoStdout()
 
 void IperfWorker::readyReadStdOut()
 {
-    QByteArray processOutput;
-    processOutput = m_iperf->readAllStandardOutput();
+    // Append new data to the persistent buffer
+    m_lineBuffer.append(m_iperf->readAllStandardOutput());
 
-    if (processOutput.length()>0){
+    if (!m_lineBuffer.isEmpty()){
         m_stdoutdetect->start();
-        toLogFile(processOutput);
-        foreach (auto line , QString(processOutput).split("\n")){
-            //ignore empty line
-            if (line.length()>0){
+        toLogFile(m_lineBuffer); // Note: logging raw chunks or full lines?
+
+        // Look for the last newline position
+        qsizetype lastNewline = m_lineBuffer.lastIndexOf('\n');
+
+        if (lastNewline != -1) {
+            // Extract only the complete lines
+            QByteArray completeData = m_lineBuffer.left(lastNewline + 1);
+            // Keep the remaining partial line in the buffer for next time
+            m_lineBuffer = m_lineBuffer.mid(lastNewline + 1);
+
+            QStringList lines = QString(completeData).split('\n', Qt::SkipEmptyParts);
+            for (const QString &line : lines) {
                 parserStdOut(line);
             }
-            // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
-
     }
+    // QByteArray processOutput;
+    // processOutput = m_iperf->readAllStandardOutput();
+
+    // if (processOutput.length()>0){
+    //     m_stdoutdetect->start();
+    //     toLogFile(processOutput);
+    //     foreach (auto line , QString(processOutput).split("\n")){
+    //         //ignore empty line
+    //         if (line.length()>0){
+    //             parserStdOut(line);
+    //         }
+    //         // QCoreApplication::processEvents(QEventLoop::AllEvents);
+    //     }
+
+    // }
 }
 
 void IperfWorker::readyReadStdErr()

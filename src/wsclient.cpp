@@ -197,9 +197,10 @@ void WSClient::onTextMessageReceived(QString message)
     if (error.error == QJsonParseError::NoError) {
 
     }else{
-        int cut2;
-
-        int cut = message.indexOf(':', 0);
+        qsizetype cut2=0;
+        qsizetype cut3=0;
+        qsizetype cut4=0;
+        qsizetype cut = message.indexOf(':', 0);
         QString act = message.left(cut); //action : CMD_IPERF_STARTED/CMD_IPERF_STOPED...
         message = message.right(message.length()-cut-1);
 
@@ -237,13 +238,13 @@ void WSClient::onTextMessageReceived(QString message)
             emit iperfStoped(m_idx, err_no, error, bindkey);
         } else if (act.startsWith(CMD_IPERF_TP_DATA)){
             // QJsonParseError error;
-            int cut3 = message.indexOf(':', 0);
+            cut3 = message.indexOf(':', 0);
             QString sInterval = message.left(cut3);
             message = message.right(message.length()-cut3-1);
 
             doc = QJsonDocument::fromJson(message.toUtf8(), &error);
             if (error.error == QJsonParseError::NoError){
-                debug("CMD_IPERF_TP_DATA from:"+from+" ,m_idx:"+m_idx+" ,sInterval:"+sInterval+"="+message, 5);
+                debug("CMD_IPERF_TP_DATA from:"+from+" ,m_idx:"+m_idx+" ,sInterval:"+sInterval+"="+message, 2);
                 emit iperfTPdata(m_idx, sInterval, message);
             }else{
                 debug("onWSactMessage: ERROR: " + error.errorString() + "\nparser json: " + message.toUtf8());
@@ -251,10 +252,10 @@ void WSClient::onTextMessageReceived(QString message)
             //        emit iperfStarted();
         } else if (act.startsWith(CMD_IPERF_EXTEND_WAIT)){
             // TODO: multi m_idx request to extent wait time, how to calc the time
-            int cut3 = message.indexOf(':', 0);
+            cut3 = message.indexOf(':', 0);
             QString sWait = message.left(cut3);
             message = message.right(message.length()-cut3-1);
-            int cut4 = message.indexOf(':', 0);
+            cut4 = message.indexOf(':', 0);
             QString errorcode = message.left(cut4);
             message = message.right(message.length()-cut4-1); // restart counts
 
