@@ -1,0 +1,38 @@
+FROM ubuntu:24.04
+
+# 更新套件列表並安裝編譯所需的基礎工具
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    iputils-ping net-tools iproute2 \
+    debhelper \
+    build-essential \
+    dpkg-dev \
+    devscripts \
+    libsystemd-dev \
+    libglut-dev \
+    libopengl-dev \
+    git cmake python3
+
+# 可以根據你的套件需求安裝額外的依賴項
+# 例如：
+RUN apt-get install -y --no-install-recommends \
+    qmake6 \
+    qt6-base-dev \
+    qt6-websockets-dev \
+    qt6-serialport-dev \
+    qt6-webengine-dev \
+    qt6-base-private-dev \
+    qt6-5compat-dev \
+    libqt5opengl5-dev
+
+# 清理 apt 快取以減小映像檔大小 (可選)
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN qtchooser -install qt6 /usr/bin/qmake6
+# 設定工作目錄（可選）
+WORKDIR /media/qiperf
+
+# 將原始碼複製到容器中（如果你有原始碼）使用-v map volumn
+# COPY . /build
+
+# 定義編譯命令（這會在容器啟動時執行，但我們通常會在容器內手動執行）
+# CMD ["debuild", "-us", "-uc", "-b"]
+CMD ["./build_deb.sh"]
