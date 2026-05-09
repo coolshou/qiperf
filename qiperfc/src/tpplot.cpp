@@ -862,8 +862,10 @@ void TPPlot::updateXAxisRange(double mintime, double maxtime)
     }else{
         maxtime = maxtime *1.1;
     }
-    xAxis->setRange(mintime, maxtime);
-    // xAxis->setRange(mintime, maxtime, Qt::AlignRight);
+    // qDebug() << "update xAxis min:" << QString::number(mintime)
+    //          << " ,max:" <<  QString::number(maxtime);
+    // xAxis->setRange(mintime, maxtime);
+    xAxis->setRange(maxtime, m_xAxisMaxDefault, Qt::AlignRight);
     // xAxis->setRange(mintime, maxtime, Qt::AlignCenter);
 }
 
