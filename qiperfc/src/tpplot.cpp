@@ -40,7 +40,8 @@ TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     m_replottimer = new QTimer();
     connect(m_replottimer, &QTimer::timeout, this, &TPPlot::doReplot);
     // m_replottimer->start(500);//0.5 sec replot
-    m_replottimer->start(33);// 大約 30 FPS
+    // m_replottimer->start(33);// 大約 30 FPS
+    m_replottimer->start(100);
 }
 
 void TPPlot::setStartTime(QDateTime startTime)
@@ -799,7 +800,6 @@ void TPPlot::initCustomPlot()
     xAxis->setTicker(timeTicker);
     //set axis Label
     xAxis->setLabel("Time(Sec)");
-    // yAxis->setLabel(m_tpunit);
     yAxis2->setLabel("Lost Rate(%)");
     yAxis2->setTickLabels(true);
     //set axis range
