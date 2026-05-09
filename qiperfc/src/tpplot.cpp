@@ -416,10 +416,10 @@ void TPPlot::onIperfTPdata(QString sInterval,
     int x = static_cast<int>(sInterval.toDouble()); //ignore .0x Difference of xdata
     double y = data.toDouble();
     Q_UNUSED(grouptag) //TODO grouptag?
-    qDebug() << "[TPPlot::onIperfTPdata]:" << refrowidx
-             << " sInterval:" << sInterval << " x:" << QString::number(x)
-             << " TP:" << QString::number(y)
-             << " grouptag:" << grouptag;
+    // qDebug() << "[TPPlot::onIperfTPdata]:" << refrowidx
+    //          << " sInterval:" << sInterval << " x:" << QString::number(x)
+    //          << " TP:" << QString::number(y)
+    //          << " grouptag:" << grouptag;
     addTPData(refrowidx, x, y, lostrate.toDouble());
 }
 
@@ -473,10 +473,7 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
 {
     {
         QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex,
-
         double sumydata = ydata;
-
-        // do not double lock in following functions!!, it will cause app hang!!
         MyQCPGraph *myGraph = getGraph(refrowidx);
         //TODO: time window threshold, if we need to scroll back?
         // double lowerBound = xdata - m_timeWindowThreshold;
@@ -491,14 +488,9 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
             //Total Throughput graph
             double oldvalue = 0.0;
             if (myGraph->getValue(xdata, oldvalue)==-1){
-                qDebug() << "no old record, xdata:" << QString::number(xdata) <<
-                    " ydata: " << QString::number(ydata);
                 myGraph->addData(xdata, ydata);
             }else {
                 sumydata = sumydata + oldvalue;
-                qDebug() << "updateValue xdata:" << QString::number(xdata) <<
-                    " Total: " << QString::number(sumydata);
-
                 myGraph->updateValue(xdata, sumydata);
             }
         }else{
@@ -530,18 +522,10 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
             }else{
                 mTotalLostLegendItem->setVisible(m_showgroup);
             }
-            // // qDebug() << "g_lostrate: " << xdata << " value:" << lostrate;
-            // if (m_showgroup){
-
-            // }else {
-            //     g_lostrate->setVisible(false);
-            // }
             qDebug() << "addTPData, x:" << xdata << " lostrate:" << lostrate;
             g_lostrate->addData(xdata, lostrate);
         }
     }
-    // locker.unlock();
-    // replot();//20260122 tmp remove, use QTimer()
 }
 
 void TPPlot::del(QString idx)
