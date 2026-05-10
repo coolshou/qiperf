@@ -59,6 +59,7 @@ signals:
 
 private slots:
     void selectionChanged();
+    void onXAxisRangeChanged(const QCPRange &newRange);
     void doReplot();
 private:
     void initCustomPlot();
@@ -97,6 +98,7 @@ private:
     double m_maxY;
     QString m_TPUint;
     double m_timeWindowThreshold;
+    bool m_autoScrollXAxis;
 };
 
 #endif // TPPLOT_H

@@ -16,6 +16,7 @@ TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     m_maxX = 60;
     m_maxY = m_yAxisMaxDefault;
     m_timeWindowThreshold = 120.0;
+    m_autoScrollXAxis = true;
     //setOpenGl(true); // this will cause plot area looks strange??
     setOpenGl(false);
     setNoAntialiasingOnDrag(true);
@@ -289,7 +290,7 @@ void TPPlot::onDataAdded(double key, double value)
                 mTotalGraph->updateValue(key,sumvalue);
                 mTotalGraph->rescaleAxes(true);
             }else{
-                qDebug() << ((MyQCPGraph*)sender())->name() << " (" << key << ")mTotalGraph Key not found";
+                qDebug() << (static_cast<MyQCPGraph*>(sender()))->name() << " (" << key << ")mTotalGraph Key not found";
                 mTotalGraph->addData(key,value);
             }
 
@@ -335,7 +336,7 @@ void TPPlot::onLostRateDataAdded(double key, double value)
                 mTotalLostGraph->updateValue(key,sumvalue);
                 mTotalLostGraph->rescaleAxes(true);
             }else{
-                qDebug() << ((MyQCPBars*)sender())->name() << " (" << key << ") mTotalLostGraph Key not found";
+                qDebug() << (static_cast<MyQCPBars*>(sender()))->name() << " (" << key << ") mTotalLostGraph Key not found";
                 mTotalLostGraph->addData(key,value);
             }
         }else {
@@ -384,6 +385,19 @@ void TPPlot::selectionChanged()
     }
 }
 
+void TPPlot::onXAxisRangeChanged(const QCPRange &newRange)
+{
+    //TODO: this will trigger on setting XAxis range by program?
+
+    if (newRange.upper < m_maxX - 0.5) {
+        // 使用者正在查看過去的數據，我們應該停止「自動捲動」
+        m_autoScrollXAxis = false;
+    } else {
+        // 使用者拉回到了最右側，恢復自動捲動
+        m_autoScrollXAxis = true;
+    }
+}
+
 void TPPlot::doReplot()
 {
     // 保護機制：確保 Mutex 鎖定，因為我們在讀取可能被 addTPData 修改的變數
@@ -403,7 +417,9 @@ void TPPlot::doReplot()
     //     minx = m_maxX - 60;
     // }
     // updateXAxisRange(minx, m_maxX);
-    updateXAxisRange(0, m_maxX);
+    if (m_autoScrollXAxis){
+        updateXAxisRange(0, m_maxX);
+    }
 
     this->replot(QCustomPlot::rpQueuedReplot);
     // this->rpQueuedReplot();
@@ -793,6 +809,9 @@ void TPPlot::initCustomPlot()
     this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                                   QCP::iSelectLegend | QCP::iSelectPlottables);
     this->axisRect()->setupFullAxesBox();
+    this->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
+    this->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
+
     // this->setAutoAddPlottableToLegend(true); // when adding a plottable, automatically adds the QCPAbstractLegendItem to the legend
     //x Axis
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
@@ -839,6 +858,8 @@ void TPPlot::initCustomPlot()
     // make left and bottom axes transfer their ranges to right and top axes:
 //    connect(xAxis, SIGNAL(rangeChanged(QCPRange)), xAxis2, SLOT(setRange(QCPRange)));
 //    connect(yAxis, SIGNAL(rangeChanged(QCPRange)), yAxis2, SLOT(setRange(QCPRange)));
+    //
+    connect(xAxis, qOverload<const QCPRange&>(&QCPAxis::rangeChanged), this, &TPPlot::onXAxisRangeChanged);
     connect(this, &QCustomPlot::selectionChangedByUser, this,  &TPPlot::selectionChanged);
 }
 
@@ -857,15 +878,19 @@ void TPPlot::updateXAxisRange(double mintime, double maxtime)
     }else{
         mintime = mintime *0.9;
     }
-    if ((xAxis->range().upper / maxtime)>1.1){
-        maxtime = xAxis->range().upper;
-    }else{
-        maxtime = maxtime *1.1;
+    // if ((xAxis->range().upper / maxtime)>1.1){
+    //     maxtime = xAxis->range().upper;
+    // }else{
+    //     maxtime = maxtime *1.1;
+    // }
+    if (maxtime <30){
+        maxtime = 30;
     }
     // qDebug() << "update xAxis min:" << QString::number(mintime)
     //          << " ,max:" <<  QString::number(maxtime);
-    // xAxis->setRange(mintime, maxtime);
-    xAxis->setRange(maxtime, m_xAxisMaxDefault, Qt::AlignRight);
+    xAxis->setRange(mintime, maxtime); // show all data on plot
+    // xAxis->setRange(maxtime, m_xAxisMaxDefault, Qt::AlignRight);// not good!!
+    // xAxis->setRange(0, maxtime, Qt::AlignRight); // bed, not show the graph
     // xAxis->setRange(mintime, maxtime, Qt::AlignCenter);
 }
 
@@ -1012,7 +1037,7 @@ QCPDataContainer<QCPGraphData>::const_iterator TPPlot::findKeyValue(const QCPDat
     // if (it != container.constEnd() && it->key == key) {
     if (it != container.constEnd()) {
         qDebug() << "it->key:" << it->key << " key:" << key;
-        if (it->key == key){
+        if (qFuzzyCompare(it->key, key)){
             return it; // Found the exact key
         }
     }
