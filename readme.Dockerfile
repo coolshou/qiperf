@@ -4,7 +4,8 @@
 sudo docker buildx build -t ubuntu-qt6:24.04 --file Dockerfile.ubuntu24.04 .
 
 # run when need new deb
-docker run --name ubuntu2404-qt6  -it \
+docker run --user 1000:1000 \
+    --name ubuntu2404-qt6  -it \
     --rm \
     --network host \
     -v /home/coolshou/work/qiperf:/media/qiperf \
