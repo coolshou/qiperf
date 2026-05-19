@@ -32,7 +32,7 @@ DEB_VERSION=$(shell grep -m1 -oP '(?<=\().*?(?=\))' debian/changelog)${DISTRO_NA
 #export QT_SELECT=qt6
 
 %:
-	dh $@
+	dh $@ --buildsystem=qmake6
 
 override_dh_shlibdeps:
 	dh_shlibdeps
