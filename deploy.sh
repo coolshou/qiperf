@@ -21,20 +21,39 @@ WDESTFILES+=(qiperf-setup-${WINVERSION}.exe)
 # ================================================
 UPDATE_LINUX=1
 declare -a IPS=()
-#IPS+=("192.168.70.11")
-#IPS+=("192.168.70.12")
-IPS+=("192.168.70.13")
-IPS+=("192.168.70.14")
-#IPS+=("192.168.70.21")
-IPS+=("192.168.70.23")
-IPS+=("192.168.70.24")
-#IPS+=("192.168.70.135")
-#IPS+=("192.168.70.31")
-#IPS+=("192.168.70.32")
-#IPS+=("192.168.70.154")
-#IPS+=("192.168.70.162")
-#IPS+=("192.168.70.147") # not test user
+INPUT_FILE="deploy.local"
+if [[ ! -f "$INPUT_FILE" ]]; then
+    #echo "Error: File '$INPUT_FILE' not found."
+    #IPS+=("192.168.70.11")
+    #IPS+=("192.168.70.12")
+    IPS+=("192.168.70.13")
+    IPS+=("192.168.70.14")
+    #IPS+=("192.168.70.21")
+    IPS+=("192.168.70.23")
+    IPS+=("192.168.70.24")
+    #IPS+=("192.168.70.135")
+    #IPS+=("192.168.70.31")
+    #IPS+=("192.168.70.32")
+    #IPS+=("192.168.70.154")
+    #IPS+=("192.168.70.162")
+    #IPS+=("192.168.70.147") # not test user
+else
+    # Read the file line by line
+    while IFS= read -r line; do
+        # 1. Strip everything from '#' to the end of the line
+        clean_line="${line%%#*}"
 
+        # 2. Trim leading/trailing whitespace (optional but highly recommended)
+        clean_line=$(echo "$clean_line" | xargs)
+
+        # 3. If the line is not empty, append it to the IPS array
+        if [[ -n "$clean_line" ]]; then
+            IPS+=("$clean_line")
+        fi
+    done < "$INPUT_FILE"
+fi
+echo "Total IPs loaded: ${#IPS[@]}"
+exit 0
 #windows remote
 declare -a WIPS=()
 #WIPS+=("192.168.70.21")
@@ -68,10 +87,10 @@ declare -a PORTS=()
 PORTS+=(55901)
 PORTS+=(55902)
 #PORTS+=(55903)
-#PORTS+=(55904)
+PORTS+=(55904)
 #PORTS+=(55905)
-PORTS+=(55906)
-#PORTS+=(55908)
+#PORTS+=(55906)
+PORTS+=(55908)
 #PORTS+=(55911) # LAN
 #PORTS+=(55912) # LAN2
 #PORTS+=(55920)
@@ -116,8 +135,8 @@ if [ "x$?" == "x0" ]; then
         do
             for DESTFILE in "${DESTFILES[@]}"
             do
-                echo "===== scp -P $PORT ${DESTFILE}  ${TARGET}/home/test/${DESTFILE}"
-                ERROR_OUTPUT=$(scp -P $PORT ${DESTFILE} ${TARGET}/home/test/${DESTFILE} 2>&1 >/dev/null)
+                echo "===== scp -P $PORT ${DESTFILE}  ${TARGET}:/home/test/${DESTFILE}"
+                ERROR_OUTPUT=$(scp -P $PORT ${DESTFILE} ${TARGET}:/home/test/${DESTFILE} 2>&1 >/dev/null)
                 INSTALL_STATUS=$?
                 if [ $INSTALL_STATUS -eq 0 ]; then
                     echo "===== ssh -p $PORT ${USERNAME}@${DOREMOTEIP} ${INSTCMD}"
