@@ -53,7 +53,7 @@ else
     done < "$INPUT_FILE"
 fi
 echo "Total IPs loaded: ${#IPS[@]}"
-exit 0
+
 #windows remote
 declare -a WIPS=()
 #WIPS+=("192.168.70.21")
