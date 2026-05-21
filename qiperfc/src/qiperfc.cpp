@@ -79,6 +79,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_throughputview, &ThroughputView::updateActionsEdit, this, &QIperfC::onUpdateActionsEdit);
     connect(this, &QIperfC::setEndTime, m_throughputview, &ThroughputView::setXRangeUpper);
     connect(this, &QIperfC::updateInterval, m_throughputview, &ThroughputView::setInterval);
+    connect(this, &QIperfC::testStarted, m_throughputview, &ThroughputView::onTestStarted);
+    connect(this, &QIperfC::testStoped, m_throughputview, &ThroughputView::onTestStoped);
 
     m_views = new ViewManager(&settingfilepath, m_throughputview, this);
     m_dlgtest = new DlgTest();
@@ -331,7 +333,8 @@ void QIperfC::onOpen()
         path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
     }
     QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Open QIperf file"), path, tr(QIPERF_EXT_FILTER));
+                                                    tr("Open QIperf file"),
+                                                    path, tr(QIPERF_EXT_FILTER));
     if (!fileName.isEmpty())
     {
         QFileInfo fi(fileName);

@@ -13,6 +13,7 @@ TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     //              << " physicalSize(mm): " << screen->physicalSize()
     //              << " devicePixelRatio:" << screen->devicePixelRatio();
     // }
+    m_isTestStarted = false;
     m_maxX = 60;
     m_maxY = m_yAxisMaxDefault;
     m_timeWindowThreshold = 120.0;
@@ -363,6 +364,11 @@ void TPPlot::onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data)
     }
 }
 
+void TPPlot::setTestStarted(bool start)
+{
+    m_isTestStarted = start;
+}
+
 void TPPlot::selectionChanged()
 {
     /* synchronize the selection of the graphs with the selection state of the respective
@@ -393,8 +399,8 @@ void TPPlot::onXAxisRangeChanged(const QCPRange &newRange)
         // 使用者正在查看過去的數據，我們應該停止「自動捲動」
         m_autoScrollXAxis = false;
     } else {
-        // 使用者拉回到了最右側，恢復自動捲動
-        m_autoScrollXAxis = true;
+        // 使用者拉回到了最右側，恢復自動捲動,
+        m_autoScrollXAxis = true & m_isTestStarted;
     }
 }
 
@@ -809,8 +815,10 @@ void TPPlot::initCustomPlot()
     this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                                   QCP::iSelectLegend | QCP::iSelectPlottables);
     this->axisRect()->setupFullAxesBox();
-    this->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
-    this->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
+    // this->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
+    this->axisRect()->setRangeDrag(Qt::Horizontal);
+    // this->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
+    this->axisRect()->setRangeZoom(Qt::Horizontal);
 
     // this->setAutoAddPlottableToLegend(true); // when adding a plottable, automatically adds the QCPAbstractLegendItem to the legend
     //x Axis

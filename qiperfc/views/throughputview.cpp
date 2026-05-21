@@ -386,6 +386,17 @@ void ThroughputView::setInterval(int interval)
     emit updateInterval(interval);
 }
 
+void ThroughputView::onTestStarted()
+{
+    emit startstop(true);
+}
+
+void ThroughputView::onTestStoped(int err)
+{
+    Q_UNUSED(err)
+    emit startstop(false);
+}
+
 void ThroughputView::initMenus()
 {
     m_aEnable = new QAction("Enable select item");
@@ -696,6 +707,7 @@ void ThroughputView::initThroughputChart()
     connect(m_tpplot, &TPPlot::selectedTPitem, this, &ThroughputView::onSelectedTPitem);
     connect(m_tpplot, &TPPlot::sigLegendCount, this ,&ThroughputView::onVLegendScrollBarRange);
     connect(this, &ThroughputView::updateInterval, m_tpplot, &TPPlot::setInterval);
+    connect(this, &ThroughputView::startstop, m_tpplot, &TPPlot::setTestStarted);
     ui->hl_console->addWidget(m_tpplot);
     ui->hl_console->addWidget(m_vLegendScrollBar);
     connect(m_vLegendScrollBar, &QScrollBar::valueChanged, m_tpplot, &TPPlot::onVLegendScrollChanged);

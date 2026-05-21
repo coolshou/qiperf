@@ -82,6 +82,8 @@ public slots:
     void onSaveImg(bool checked);
     void setXRangeUpper(double upper);
     void setInterval(int interval);
+    void onTestStarted();
+    void onTestStoped(int err);
 signals:
     void updateActions(bool bStart, bool bStop, bool bClear);
     void updateActionsSave(bool bStart);
@@ -89,7 +91,7 @@ signals:
     void deleteFiles(QStringList files);
     void updateInterval(int interval);
     void showGroup(bool bShow);
-
+    void startstop(bool start);
 private slots:
     void initMenus();
     void onPlotContextMenuRequest(QPoint pos);

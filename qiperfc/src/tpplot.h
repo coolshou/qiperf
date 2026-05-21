@@ -53,6 +53,7 @@ public slots:
     void onDatasSetted(QSharedPointer<QCPGraphDataContainer> data);
     void onLostRateDataAdded(double key, double value);
     void onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data);
+    void setTestStarted(bool start);
 signals:
     void selectedTPitem(QString idx);
     void sigLegendCount(int count);
@@ -99,6 +100,7 @@ private:
     QString m_TPUint;
     double m_timeWindowThreshold;
     bool m_autoScrollXAxis;
+    bool m_isTestStarted;
 };
 
 #endif // TPPLOT_H
