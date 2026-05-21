@@ -74,7 +74,7 @@ void dlgOption::loadcfg(QSettings *cfg)
     if (midx>=0){
         ui->cb_TPUnit->setCurrentIndex(midx);
     }
-    ui->cb_IgnoreWrongInterval->setChecked(cfg->value("IgnoreWrongInterval", false).toBool());
+    ui->cb_IgnoreWrongInterval->setChecked(cfg->value("IgnoreWrongInterval", true).toBool());
     cfg->endGroup();
 
     cfg->beginGroup("agent");
