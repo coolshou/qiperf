@@ -770,7 +770,7 @@ void IperfWrapper::work()
                         // if (lineNumber % 1000 == 0) {
                         //     emit progress(m_filename, lineNumber);
                         // }
-                        // Only update the UI every 100ms
+                        // Only update the UI every 1s
                         if (updatetimer.elapsed() > 1000) {
                             emit progress(m_filename, lineNumber);
                             updatetimer.restart();

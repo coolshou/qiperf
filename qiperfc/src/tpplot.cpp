@@ -14,7 +14,7 @@ TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     //              << " devicePixelRatio:" << screen->devicePixelRatio();
     // }
     m_isTestStarted = false;
-    m_maxX = 60;
+    m_maxX = 30;
     m_maxY = m_yAxisMaxDefault;
     m_timeWindowThreshold = 120.0;
     m_autoScrollXAxis = true;
@@ -60,6 +60,7 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
 
     double minT = *std::min_element(timedatas.begin(), timedatas.end());// x: min time
     double maxT = *std::max_element(timedatas.begin(), timedatas.end());// x: max time
+    qDebug() << "min:" << QString::number(minT) << " Max:" << QString::number(maxT);
     updateXAxisRange(minT, maxT);
 
     double minV = *std::min_element(valuedatas.begin(), valuedatas.end()); // y: min value
@@ -866,8 +867,8 @@ void TPPlot::initCustomPlot()
     // make left and bottom axes transfer their ranges to right and top axes:
 //    connect(xAxis, SIGNAL(rangeChanged(QCPRange)), xAxis2, SLOT(setRange(QCPRange)));
 //    connect(yAxis, SIGNAL(rangeChanged(QCPRange)), yAxis2, SLOT(setRange(QCPRange)));
-    //
-    connect(xAxis, qOverload<const QCPRange&>(&QCPAxis::rangeChanged), this, &TPPlot::onXAxisRangeChanged);
+    // following cause strange behavior
+    // connect(xAxis, qOverload<const QCPRange&>(&QCPAxis::rangeChanged), this, &TPPlot::onXAxisRangeChanged);
     connect(this, &QCustomPlot::selectionChangedByUser, this,  &TPPlot::selectionChanged);
 }
 
@@ -894,9 +895,11 @@ void TPPlot::updateXAxisRange(double mintime, double maxtime)
     if (maxtime <30){
         maxtime = 30;
     }
-    // qDebug() << "update xAxis min:" << QString::number(mintime)
-    //          << " ,max:" <<  QString::number(maxtime);
-    xAxis->setRange(mintime, maxtime); // show all data on plot
+    if (maxtime > (xAxis->range().upper + m_interval)) {
+        qDebug() << "update xAxis min:" << QString::number(mintime)
+             << " ,max:" <<  QString::number(maxtime);
+        xAxis->setRange(mintime, maxtime); // show all data on plot
+    }
     // xAxis->setRange(maxtime, m_xAxisMaxDefault, Qt::AlignRight);// not good!!
     // xAxis->setRange(0, maxtime, Qt::AlignRight); // bed, not show the graph
     // xAxis->setRange(mintime, maxtime, Qt::AlignCenter);

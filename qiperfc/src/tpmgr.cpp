@@ -874,6 +874,10 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             idx = jObj.value("idx").toString();
             isAvg = jObj.value("AVG").toBool();
             value = jObj.value("value").toString();
+            // packet lost rate
+            QString pkt_lost = jObj.value("packet_lost").toString();
+            QString pkt_total = jObj.value("packet_total").toString();
+
             if (!isAvg) {
                 if (!jObj.value("dir").isUndefined()){
                     dir=jObj.value("dir").toString();
@@ -883,9 +887,6 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                     qDebug() << "//TODO: base on unit, convert the value to correct value"
                              << " display unit:" << m_TPUint << " tp data unit:" << unit;
                 }
-                // packet lost rate
-                QString pkt_lost = jObj.value("packet_lost").toString();
-                QString pkt_total = jObj.value("packet_total").toString();
 
                 if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
                     lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
@@ -902,23 +903,13 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                               pkt_lost, pkt_total);
                     m_intervals[idx] = fInterval;
                 }
-                // storage[sInterval]
-                // TPData d;
-                // d.value = value.toDouble();
-                // d.lostRate = lost_rate;
-                // TPDataGroup group;
-                // // group.intervalId = fInterval;
-                // group.dataPoints[refrow + "_" + idx] = d;
-                // storage[fInterval] = group;
-
-                // signal data to tpplot to add plot data on each -P (one by one), not good
-                // emit IperfTPdata(sInterval, refrow + "_" + idx, value,
-                //                  slost_rate, dir);
             }else {
                 // TODO: this part TP data seems strange??
                 qDebug() << "refrow:" << refrow << " idx:" << idx
                          << " sInterval:" + sInterval <<" Avg:" << value;
                          // << " pkt_lost:" << pkt_lost << " pkt_total:" << pkt_total;
+                addTPdata(refrow, sInterval, idx, value, unit, dir,
+                          pkt_lost, pkt_total);
                 // TODO : each iperf test pair
             }
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
