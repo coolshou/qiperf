@@ -522,8 +522,11 @@ void IperfWrapper::parserIperf3(QString linedata)
                         interval = ds[1].toDouble() - ds[0].toDouble();
                     }
                 }
-                bool intervalMatches = qFuzzyCompare(m_interval, interval) || qAbs(m_interval - interval) < 0.001;
-                if (m_ignorewronginterval && !intervalMatches) {
+                // check interval = m_interval, or diff < 0.001
+                bool intervalMatches = qFuzzyCompare(m_interval, interval) ||
+                                       qAbs(m_interval - interval) < 0.001;
+                if (m_ignorewronginterval && !intervalMatches &&
+                    !linedata.contains("receiver")) {
                     return; // Ignore jittery interval reports
                 }
 
