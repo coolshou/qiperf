@@ -874,6 +874,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             idx = jObj.value("idx").toString();
             isAvg = jObj.value("AVG").toBool();
             value = jObj.value("value").toString();
+            unit = jObj.value("unit").toString();
             // packet lost rate
             QString pkt_lost = jObj.value("packet_lost").toString();
             QString pkt_total = jObj.value("packet_total").toString();
@@ -882,7 +883,6 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                 if (!jObj.value("dir").isUndefined()){
                     dir=jObj.value("dir").toString();
                 }
-                unit = jObj.value("unit").toString();
                 if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) !=0){
                     qDebug() << "//TODO: base on unit, convert the value to correct value"
                              << " display unit:" << m_TPUint << " tp data unit:" << unit;
