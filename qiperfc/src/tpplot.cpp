@@ -16,7 +16,7 @@ TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
     m_isTestStarted = false;
     m_maxX = 30;
     m_maxY = m_yAxisMaxDefault;
-    m_timeWindowThreshold = 120.0;
+    m_timeWindowThreshold = 30.0; // TODO: when total test time smaller then this, need update?
     m_autoScrollXAxis = true;
     //setOpenGl(true); // this will cause plot area looks strange??
     setOpenGl(false);
@@ -425,7 +425,7 @@ void TPPlot::doReplot()
     // }
     // updateXAxisRange(minx, m_maxX);
     if (m_autoScrollXAxis){
-        updateXAxisRange(0, m_maxX);
+        // updateXAxisRange(0, m_maxX);
     }
 
     this->replot(QCustomPlot::rpQueuedReplot);
@@ -499,13 +499,12 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
         QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex,
         double sumydata = ydata;
         MyQCPGraph *myGraph = getGraph(refrowidx);
-        //TODO: time window threshold, if we need to scroll back?
-        // double lowerBound = xdata - m_timeWindowThreshold;
-        // remove old value
-        // myGraph->data()->removeBefore(lowerBound); // after exec this, data before lowerBound with not be show
-        // store old data
-        //show only recent m_timeWindowThreshold data
-        xAxis->setRange(xdata, m_timeWindowThreshold, Qt::AlignRight);
+        //let xAxis range in m_timeWindowThreshold, scroll when xdata > m_timeWindowThreshold
+        if (xdata < m_timeWindowThreshold){
+            xAxis->setRange(0, m_timeWindowThreshold);
+        } else {
+            xAxis->setRange(xdata, m_timeWindowThreshold, Qt::AlignRight);
+        }
 
         bool isTotal = refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive);
         if (isTotal) {
@@ -830,12 +829,14 @@ void TPPlot::initCustomPlot()
     xAxis->setLabel("Time(Sec)");
     yAxis2->setLabel("Lost Rate(%)");
     yAxis2->setTickLabels(true);
+
     //set axis range
     // TODO: update range by throughput/time
     xAxis->setRange(0, m_xAxisMaxDefault);
     yAxis->setRange(0, m_yAxisMaxDefault);
     yAxis2->setRange(0, 100);
-
+    yAxis2->setTickLabelColor(Qt::blue);
+    yAxis2->setLabelColor(Qt::blue);
     // legend
     legend->setVisible(true);
     // connect(legend, &QCPLegend::layerChanged)
