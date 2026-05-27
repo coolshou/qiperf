@@ -511,24 +511,29 @@ void TPMgr::clear(){
             // itm->resetData();
             foreach(auto tp, itm->getChilds()){
                 if (tp->haveChilds()){
-                    // foreach(auto p, tp->getChilds()){ // parallel
-                    beginRemoveRows(indexFromItem(tp), 0 , tp->childCount()-1);
-                    tp->removeChildren(0, tp->childCount());
-                    // m_treeview->collapse(indexFromItem(tp));
+                    int childCount = tp->childCount();
+                    // 1. Get the proper index of 'tp' because its children are being removed
+                    QModelIndex tpIndex = indexFromItem(tp);
+                    // 2. Notify the view BEFORE removing data
+                    beginRemoveRows(tpIndex, 0, childCount - 1);
+                    // 3. Delete the actual backend data
+                    tp->removeChildren(0, childCount);
+                    // 4. Notify the view removal is finished
                     endRemoveRows();
-                    // }
+                    // 5. CRITICAL: Inform the view that 'tp' has changed (losing children alters its layout/hasChildren state)
+                    emit dataChanged(tpIndex, tpIndex);
                 }
                 tp->clearThroughput();
-                // tp->resetData();
-                QCoreApplication::processEvents(QEventLoop::AllEvents);
             }
-            // emit dataChanged(QModelIndex(),QModelIndex());
         }
     }else {
         qDebug() << "clear: NO root item by getRootItem()";
     }
 
     m_intervals.clear();
+    // Optional: If you modified text/values of 'itm' or 'tp' elements,
+    // emit a high-level layout change at the very end instead of processEvents
+    emit layoutChanged();
 }
 
 TP *TPMgr::getItem(const QModelIndex &index) const
@@ -601,7 +606,21 @@ int TPMgr::swapDirection(QModelIndex midx)
             t->setDirection(dir);
         }
     }
-    emit dataChanged(QModelIndex(),QModelIndex());
+    // 1. If it has children, the easiest way to update the parent row
+    //    and all nested rows underneath it is to use layoutChanged().
+    if (tp->haveChilds()) {
+        emit layoutChanged();
+    }
+    // 2. If it's just a single item without children changing,
+    //    notifying for its specific row range is more efficient.
+    else {
+        // Find the left-most column and right-most column for this item's row
+        QModelIndex topLeft = index(midx.row(), 0, midx.parent());
+        QModelIndex bottomRight = index(midx.row(), columnCount() - 1, midx.parent());
+
+        emit dataChanged(topLeft, bottomRight, {Qt::DisplayRole, Qt::EditRole});
+    }
+
     return 0;
 }
 
@@ -618,7 +637,14 @@ int TPMgr::swapIPDirection(QModelIndex midx)
     QString mgrclient =tp->getMgrClient();
     tp->swapServerClient(mgrclient, client, mgrServer, server);
 
-    emit dataChanged(QModelIndex(),QModelIndex());
+    if (midx.isValid()) {
+        // Find the boundary of the row that changed (from column 0 to your last column)
+        QModelIndex topLeft = index(midx.row(), 0, midx.parent());
+        QModelIndex bottomRight = index(midx.row(), columnCount() - 1, midx.parent());
+
+        // Notify the view to instantly redraw this specific row
+        emit dataChanged(topLeft, bottomRight, {Qt::DisplayRole, Qt::EditRole});
+    }
     return 0;
 }
 
@@ -629,9 +655,22 @@ void TPMgr::addComment(QString midx, QString comment)
         qDebug() << "addComment: no parrent iperf pair?? (midx=" << midx << ")";
         return;
     }
-//    qDebug() <<"TPMgr::addComment: " << tp << " midx:" << midx << " comment:" <<comment;
     tp->setComment(comment);
-    emit dataChanged(QModelIndex(),QModelIndex());
+    // 1. Convert the TP item into a valid QModelIndex
+    QModelIndex itemIndex = indexFromItem(tp);
+
+    if (itemIndex.isValid()) {
+        // 2. Calculate the boundaries for the entire row
+        QModelIndex topLeft = index(itemIndex.row(), 0, itemIndex.parent());
+        QModelIndex bottomRight = index(itemIndex.row(), columnCount() - 1, itemIndex.parent());
+
+        // 3. Tell the view to repaint the row with the new comment
+        emit dataChanged(topLeft, bottomRight, {Qt::DisplayRole, Qt::EditRole});
+    } else {
+        // Fallback: If you don't have an indexFromItem function yet,
+        // layoutChanged() will force a total view redraw as a temporary fix.
+        emit layoutChanged();
+    }
 }
 
 void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
@@ -817,7 +856,7 @@ void TPMgr::onPaste(QString data)
 void TPMgr::startUpdater()
 {
     if (!m_updater->isActive()){
-        m_updater->start(500); // 0.5 sec, TODO: why slow to show up the throughput/lost rate in cfg row??
+        m_updater->start(50); // 0.05 sec, TODO: 0.5 =>  why slow to show up the throughput/lost rate in cfg row??
     }
 }
 
@@ -941,9 +980,8 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                 m_intervals[refrow] = fInterval;
             }
         }
-        //
-        // signal dataChanged when all throughput data update!!
-        // emit dataChanged(QModelIndex(),QModelIndex());
+        // layoutChanged() will force a total view redraw as a temporary fix.
+        emit layoutChanged();
     }else {
         qDebug() << "TPMgr::onIperfTPdata wrong format:(" << error.errorString() << "\n" << datas;
     }
