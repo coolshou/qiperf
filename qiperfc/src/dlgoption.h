@@ -28,7 +28,8 @@ public:
     int getFontSize();
     // void setTPsize(int width, int heigth);
 public slots:
-    void setShowGroup(bool bShow);
+    // void setShowGroup(bool bShow);
+    void onSetTPGroupType(int grouptype);
     void onTPUnitChanged(QString sunit);
     void updateFontStyle(QString fontfamily);
     void onCpuCheckClicked(bool checked);
@@ -40,6 +41,7 @@ signals:
     void widthChanged(int width);
     void heigthChanged(int heigth);
     void showGroup(bool bShow);
+    void setTPGroupType(int group);
     void IgnoreWrongInterval(bool ignore);
     void updateTPUnit(QString sunit);
     void updateOpenStreetMapTile(QString tile);
@@ -57,6 +59,11 @@ private slots:
     void onWidthChange(int width);
     void onHeigthChange(int heigth);
     void onStateChanged(int state);
+#if QT_VERSION < QT_VERSION_CHECK(5,15,0)
+    void onTPGroupTypeChange(QAbstractButton *button);
+#else
+    void onTPGroupTypeChange(int id);
+#endif
     void onIgnoreWrongIntervalChanged(int state);
     QStringList getFontStyles(QString fontfamily);
 

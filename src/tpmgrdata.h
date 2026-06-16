@@ -16,7 +16,9 @@ public:
         root=0,  // root item
         config=1,  // config item
         TP=2,     // throughput data item
-        group=3  // group of all config item
+        group=3,  // total group of all config item
+        direction=4, // direction group
+        comment=5       // comment group
     };
     Q_ENUM(DataType)
 };

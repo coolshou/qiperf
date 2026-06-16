@@ -19,6 +19,7 @@
 #include "../src/tpfoldingdelegate.h"
 #include "../src/iperfwrapper.h"
 #include "../src/nowrapdelegate.h"
+#include "../src/tpgroup.h"
 
 #include "abstractview.h"
 
@@ -35,7 +36,7 @@ public:
     //explicit ThroughputView(QWidget *parent = nullptr);
     explicit ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
                             QAction *aCopyText, QSettings *cfg,
-                            bool showgroup=false, QString sunit="Mbps",
+                            int tpgroup = TPGroup::GroupMode::Detail, QString sunit="Mbps",
                             QWidget *parent = nullptr);
     ~ThroughputView() override;
 
@@ -78,6 +79,7 @@ public slots:
     void setShowGroupPair(bool bShow);
     void setShowGroupDir(bool bShow);
     void setShowGroupComment(bool bShow);
+    void setTPGroupType(int grouptype);
     void getRawData(bool checked);
     void onSaveImg(bool checked);
     void setXRangeUpper(double upper);
@@ -90,7 +92,8 @@ signals:
     void updateActionsEdit(bool bDel, bool bEdit, bool bSwap, bool bSwapIP);
     void deleteFiles(QStringList files);
     void updateInterval(int interval);
-    void showGroup(bool bShow);
+    // void showGroup(bool bShow);
+    void showGrouptype(int grouptype);
     void startstop(bool start);
 private slots:
     void initMenus();
@@ -137,10 +140,11 @@ private:
     TPFoldingDelegate *tpfoldingdelegate;
     NoWrapDelegate *nowrapdelegate;
     QDateTime m_starttime;
-    bool m_showgroupTotal=false;
-    bool m_showgroupPair=false;
-    bool m_showgroupDir=false;
-    bool m_showgroupComment=false;
+    // bool m_showgroupTotal=false;
+    // bool m_showgroupPair=false;
+    // bool m_showgroupDir=false;
+    // bool m_showgroupComment=false;
+    int m_tpgrouptype;
     QString m_tpunit;
     IperfWrapper *m_iperfwrapper;
     QScrollBar *m_vLegendScrollBar;

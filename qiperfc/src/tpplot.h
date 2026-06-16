@@ -27,7 +27,8 @@ public:
     Q_ENUM(GroupWidth)
 
 public:
-    explicit TPPlot(bool showgroup, QString sunit, QWidget *parent = nullptr);
+    // explicit TPPlot(bool showgroup, QString sunit, QWidget *parent = nullptr);
+    explicit TPPlot(int tpgroup, QString sunit, QWidget *parent = nullptr);
     void addTPData(QString refrowidx, double xdata, double ydata, double lostrate);  //
     void del(QString idx);
     // QCPGraph *getGraph(QString idx, int width=1); // get QCPGraph by index
@@ -82,6 +83,7 @@ private:
     int m_xAxisMaxDefault=30; // 30sec
     int m_interval;
     bool m_showgroup;
+    int m_tpgrouptype;
     QString m_tpunit;
     // QCPLayer *m_TotalLayer;
     // QCPLayer *m_LostRateLayer;

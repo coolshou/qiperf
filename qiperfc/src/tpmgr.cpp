@@ -10,21 +10,25 @@
 #include <QDebug>
 
 #include "comm.h"
+#include "tpgroup.h"
 #include "tp.h"
 #include "../src/tpmgrdata.h"
 #include "../src/myfunc.h"
 
 
-TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QString tpunit, QObject *parent)
-    : QAbstractItemModel(parent), m_showgroup(showgroup), m_treeview(treeview),
+TPMgr::TPMgr(int grouptype, QTreeView *treeview, QString tpunit, QObject *parent)
+    : QAbstractItemModel(parent), m_tpgrouptype(grouptype), m_treeview(treeview),
     m_TPUint(tpunit)
 {
     mDebug = 3;
     connect(this, &QAbstractItemModel::rowsInserted, this, &TPMgr::onRowsInserted);
     m_unit_bits << "Kbits/sec" << "Mbits/sec" << "Gbits/sec" << "Tbits/sec";
     m_unit_bytes << "KBytes/sec" << "MBytes/sec" << "GBytes/sec" << "TBytes/sec";
-    rootItem=nullptr;
+    rootItem = nullptr;
     groupItem = nullptr;
+    dirTxItem = nullptr;
+    dirRxItem = nullptr;
+    // commItem = nullptr;
 //    item = invisibleRootItem();
     reset();
     m_intervals.clear();
@@ -40,8 +44,19 @@ TPMgr::TPMgr(bool showgroup, QTreeView *treeview, QString tpunit, QObject *paren
 }
 TPMgr::~TPMgr()
 {
-    delete rootItem;
-    delete groupItem;
+    if (groupItem != nullptr) {
+        delete groupItem;
+    }
+    if (dirTxItem != nullptr) {
+        delete dirTxItem;
+    }
+    if (dirRxItem != nullptr) {
+        delete dirRxItem;
+    }
+    if (rootItem != nullptr) {
+        delete rootItem;
+    }
+
 }
 QVariant TPMgr::data(const QModelIndex &index, int role) const
 {
@@ -475,29 +490,49 @@ bool TPMgr::loaddata(QByteArray data)
 
 void TPMgr::reset(){
     //reset all data to none
-    // if (rootItem){
-    //     if (rootItem->childCount()>0){
-    //         // rootItem->removeChildren(0,rootItem->childCount());
-    //     }
-    //     // delete rootItem;
-    // }
-    if (m_showgroup){
-        if (groupItem){
-            if (groupItem->childCount()>0){
-                groupItem->removeChildren(0,groupItem->childCount());
-            }
-            // delete groupItem;//direct delete cause app crash??
+    if (groupItem){
+        if (groupItem->childCount()>0){
+            groupItem->removeChildren(0, groupItem->childCount());
+        }
+        // delete groupItem;//direct delete cause app crash??
+    }
+    if (dirTxItem){
+        if (dirTxItem->childCount()>0){
+            dirTxItem->removeChildren(0, dirTxItem->childCount());
         }
     }
+    if (dirRxItem){
+        if (dirRxItem->childCount()>0){
+            dirRxItem->removeChildren(0, dirRxItem->childCount());
+        }
+    }
+    // if (commItem){
+    //     if (commItem->childCount()>0){
+    //         commItem->removeChildren(0, commItem->childCount());
+    //     }
+    // }
     rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
     // QModelIndex midx = indexFromItem(rootItem);
     // qDebug() << "rootItem:" << rootItem << " midx:" << midx << " valid:" << midx.isValid();
     m_intervals.clear();
-    if (m_showgroup){
+    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){
        if (groupItem!=nullptr){
            rootItem->appendChild(groupItem);
         }
     }
+    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction)){
+        if (dirTxItem!=nullptr){
+            rootItem->appendChild(dirTxItem);
+        }
+        if (dirRxItem!=nullptr){
+            rootItem->appendChild(dirRxItem);
+        }
+    }
+    // if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Comment)){
+    //     if (commItem!=nullptr){
+    //         rootItem->appendChild(commItem);
+    //     }
+    // }
 }
 
 void TPMgr::clear(){
@@ -551,8 +586,12 @@ TP *TPMgr::getItem(const QModelIndex &index) const
 
 TP *TPMgr::getRootItem()
 {
-    if (m_showgroup){
+    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){
         return getGroupItem();
+    }else if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction)){
+        qDebug() << "//TODO Direction root";
+    }else if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Comment)){
+        qDebug() << "//TODO Comment root";
     }else{
         return rootItem;
     }
@@ -561,10 +600,8 @@ TP *TPMgr::getRootItem()
 TP *TPMgr::getGroupItem()
 {
     if (groupItem){
-        // qDebug() << "getGroupItem:" << groupItem;
         return groupItem;
     }else {
-        // qDebug() << "newGroupItem";
         return newGroupItem();
     }
 }
@@ -874,8 +911,6 @@ TP *TPMgr::newGroupItem()
     beginInsertRows(midx, 0, 0);
     groupItem = new TP("0", GRAPH_TOTAL, TPMgrData::group, rootItem);
     rootItem->appendChild(groupItem);
-    qDebug() << "newGroupItem: groupItem:" << groupItem << " root:" << rootItem;
-    qDebug() << "newGroupItem: groupItem idx: " << indexFromItem(groupItem);
     endInsertRows();
     return groupItem;
 }
@@ -999,11 +1034,11 @@ void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
 
 void TPMgr::setShowGroup(bool bShow)
 {
-    m_showgroup = bShow;
+    // m_showgroup = bShow;
     QModelIndex sourceparentidx;
     QModelIndex targetparentidx;
     int count =0;
-    if (m_showgroup){  // not Total to show Total
+    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){  // not Total to show Total
         // move root's child to group
         count = rootItem->childCount();
         if (count>0){
@@ -1030,6 +1065,23 @@ void TPMgr::setShowGroup(bool bShow)
                 rootItem->takeAt(groupItem->row());
             }
         }
+    }
+}
+
+void TPMgr::setTPGroupType(int grouptype)
+{
+    m_tpgrouptype = grouptype;
+    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Detail)){
+
+    }
+    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){
+
+    }
+    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction)){
+
+    }
+    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Comment)){
+
     }
 }
 

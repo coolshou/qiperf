@@ -3,6 +3,10 @@
 
 #include <QFontDatabase>
 #include <QStringList>
+
+#include "comm.h"
+#include "tpgroup.h"
+
 #include <QDebug>
 
 dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
@@ -25,11 +29,22 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &dlgOption::onReject);
     connect(ui->sb_width_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onWidthChange);
     connect(ui->sb_heigth_tp, QOverload<int>::of(&QSpinBox::valueChanged), this, &dlgOption::onHeigthChange);
+
+
+    ui->TPGroup->setId(ui->rbTPGroupAll, static_cast<int>(TPGroup::GroupMode::Total));
+    ui->TPGroup->setId(ui->rbTPGroupEach, static_cast<int>(TPGroup::GroupMode::Detail));
+    ui->TPGroup->setId(ui->rbTPGroupDirection, static_cast<int>(TPGroup::GroupMode::Direction));
+    ui->TPGroup->setId(ui->rbTPGroupComment, static_cast<int>(TPGroup::GroupMode::Comment));
+#if QT_VERSION < QT_VERSION_CHECK(5,15,0)
+    connect(ui->TPGroup, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this, &dlgOption::onTPGroupTypeChange);
+#else
+    connect(ui->TPGroup, &QButtonGroup::idClicked, this, &dlgOption::onTPGroupTypeChange);
+#endif
 #if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
-    connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
+    // connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
     connect(ui->cb_IgnoreWrongInterval, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onIgnoreWrongIntervalChanged);
 #else
-    connect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
+    // connect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
     connect(ui->cb_IgnoreWrongInterval, &QCheckBox::checkStateChanged, this, &dlgOption::onIgnoreWrongIntervalChanged);
 #endif
 
@@ -63,12 +78,20 @@ void dlgOption::loadcfg(QSettings *cfg)
     ui->sb_WaitServerReady->setValue(cfg->value("WaitServerReady", 10).toInt());
     ui->sb_width_tp->setValue(cfg->value("TPExportWidth", 1280).toInt());
     ui->sb_heigth_tp->setValue(cfg->value("TPExportHeigth", 500).toInt());
-    ui->cb_TPGroup->setChecked(cfg->value("TPGroup", false).toBool());
+    // ui->cb_TPGroup->setChecked(cfg->value("TPGroup", false).toBool());
     // ui->gbTPGroup->
-    ui->rbTPGroupAll->setChecked(cfg->value("TPGroupAll", false).toBool());
-    ui->rbTPGroupEach->setChecked(cfg->value("TPGroupEach", false).toBool());
-    ui->rbTPGroupDirection->setChecked(cfg->value("TPGroupDirection", false).toBool());
-    ui->rbTPGroupComment->setChecked(cfg->value("TPGroupComment", false).toBool());
+    int tpgrouptype = cfg->value("TPGroupType", 0).toInt();
+    if (tpgrouptype== static_cast<int>(TPGroup::GroupMode::Detail)) {
+        ui->rbTPGroupEach->setChecked(true);
+    }else if (tpgrouptype== static_cast<int>(TPGroup::GroupMode::Total)) {
+        ui->rbTPGroupAll->setChecked(true);
+    }else if (tpgrouptype== static_cast<int>(TPGroup::GroupMode::Direction)) {
+        ui->rbTPGroupDirection->setChecked(true);
+    }else if (tpgrouptype== static_cast<int>(TPGroup::GroupMode::Comment)) {
+        ui->rbTPGroupComment->setChecked(true);
+    }else {
+        ui->rbTPGroupEach->setChecked(true);
+    }
 
     midx = ui->cb_TPUnit->findText(cfg->value("TPUnit", "Mbits/sec").toString());
     if (midx>=0){
@@ -130,11 +153,18 @@ void dlgOption::updatecfg()
     m_cfg->setValue("WaitServerReady", ui->sb_WaitServerReady->value());
     m_cfg->setValue("TPExportWidth", ui->sb_width_tp->value());
     m_cfg->setValue("TPExportHeigth", ui->sb_heigth_tp->value());
-    m_cfg->setValue("TPGroup", ui->cb_TPGroup->isChecked());
-    m_cfg->setValue("TPGroupAll", ui->rbTPGroupAll->isChecked());
-    m_cfg->setValue("TPGroupEach", ui->rbTPGroupEach->isChecked());
-    m_cfg->setValue("TPGroupDirection", ui->rbTPGroupDirection->isChecked());
-    m_cfg->setValue("TPGroupComment", ui->rbTPGroupComment->isChecked());
+    // m_cfg->setValue("TPGroup", ui->cb_TPGroup->isChecked());
+    int tpgrouptype = 0;
+    if (ui->rbTPGroupAll->isChecked()){
+        tpgrouptype = static_cast<int>(TPGroup::GroupMode::Total);
+    }
+    if (ui->rbTPGroupDirection->isChecked()){
+        tpgrouptype = static_cast<int>(TPGroup::GroupMode::Direction);
+    }
+    if (ui->rbTPGroupComment->isChecked()){
+        tpgrouptype = static_cast<int>(TPGroup::GroupMode::Comment);
+    }
+    m_cfg->setValue("TPGroupType", tpgrouptype);
 
     m_cfg->setValue("TPUnit", ui->cb_TPUnit->currentText());
     m_cfg->setValue("IgnoreWrongInterval", ui->cb_IgnoreWrongInterval->isChecked());
@@ -228,20 +258,36 @@ QStringList dlgOption::getFontStyles(QString fontfamily)
 #endif
 }
 
-void dlgOption::setShowGroup(bool bShow)
-{
-#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
-    disconnect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
-#else
-    disconnect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
-#endif
+// void dlgOption::setShowGroup(bool bShow)
+// {
+// #if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
+//     disconnect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
+// #else
+//     disconnect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
 // #endif
-    ui->cb_TPGroup->setChecked(bShow);
-#if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
-    connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
-#else
-    connect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
-#endif
+// // #endif
+//     ui->cb_TPGroup->setChecked(bShow);
+// #if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
+//     connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
+// #else
+//     connect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
+// #endif
+// }
+
+void dlgOption::onSetTPGroupType(int grouptype)
+{
+    if (grouptype == static_cast<int>(TPGroup::GroupMode::Total)){
+        ui->rbTPGroupAll->setChecked(true);
+    }
+    if (grouptype == static_cast<int>(TPGroup::GroupMode::Detail)){
+        ui->rbTPGroupEach->setChecked(true);
+    }
+    if (grouptype == static_cast<int>(TPGroup::GroupMode::Direction)){
+        ui->rbTPGroupDirection->setChecked(true);
+    }
+    if (grouptype == static_cast<int>(TPGroup::GroupMode::Comment)){
+        ui->rbTPGroupComment->setChecked(true);
+    }
 }
 
 void dlgOption::onTPUnitChanged(QString sunit)
@@ -379,6 +425,21 @@ void dlgOption::onStateChanged(int state)
         emit showGroup(false);
         m_cfg->setValue("Iperf/TPGroup", false);
     }
+}
+#if QT_VERSION < QT_VERSION_CHECK(5,15,0)
+void dlgOption::onTPGroupTypeChange(QAbstractButton *button)
+#else
+void dlgOption::onTPGroupTypeChange(int id)
+#endif
+{
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
+    int id = 0;
+    qDebug() << "onTPGroupTypeChange: " << button;
+#else
+    qDebug() << "onTPGroupTypeChange: "  << QString::number(id);
+#endif
+    emit setTPGroupType(id);
+    m_cfg->setValue("Iperf/TPGroupType", id);
 }
 
 void dlgOption::onIgnoreWrongIntervalChanged(int state)

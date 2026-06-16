@@ -102,7 +102,7 @@ public slots:
     void onQuit();
     void notificationReceived(const QString key, const QVariant value);
     void setStartTime(QDateTime startTime);
-    void setShowGroup(bool bShow);
+    // void setShowGroup(bool bShow);
     void onUpdateTPUnit(QString sunit);
     // test
     void onTestStarted();
@@ -184,6 +184,7 @@ private slots:
     void onWidthChanged(int width);
     void onHeigthChanged(int heigth);
     void onShowGroup(bool bShow);
+    void onSetTPGroupType(int grouptype);
     void onIgnoreWrongInterval(bool bIgnore);
     void onUpdateOpenStreetMapTile(QString tile);
     void onUpdateCpuCheckInterval(int interval);
@@ -267,6 +268,7 @@ private:
     int m_TPExportWidth;
     int m_TPExportHeigth;
     bool m_TPGroup;   // show throughput group
+    int m_TPGrouptype;
     QString m_TPUnit; // store throughput format unit,
     QString m_datapath;
     QStringList mPluginNames;

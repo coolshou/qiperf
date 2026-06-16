@@ -3,8 +3,10 @@
 #include <numeric>
 #include <QScreen>
 
-TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
-    :QCustomPlot(parent), m_showgroup(showgroup)
+// TPPlot::TPPlot(bool showgroup, QString sunit, QWidget *parent)
+// :QCustomPlot(parent), m_showgroup(showgroup)
+TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
+    :QCustomPlot(parent), m_tpgrouptype(tpgroup)
 {
     //FIXME: under 4K monitor, use setOpenGl(true) cause the TPPlot look over the outer widget width&hight
     // const QList<QScreen*> screens = QGuiApplication::screens();
@@ -481,7 +483,7 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval, const QJsonArray 
             if ((pkt_total.toInt()>0) && (pkt_lost.toInt()>0)){
                 lost_rate = (pkt_lost.toDouble()/pkt_total.toDouble())*100;
                 sumlostrate = sumlostrate + lost_rate;
-                qDebug() << "TPMgr::onIperfTPdata: lost_rate:" << lost_rate;
+                qDebug() << "TPPlot::onIperfTPdata: lost_rate:" << lost_rate;
                 slost_rate = QString::number(lost_rate, 'f', 4);
             }
         }

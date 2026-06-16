@@ -17,14 +17,15 @@
 #include "comm.h"
 #include "../src/nmessagebox.h"
 
+
 // ThroughputView::ThroughputView(QIperfC *main, QWidget *parent) : AbstractView(parent)
 ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
                                QAction *aCopyText, QSettings *cfg,
-                               bool showgroup, QString sunit,
+                               int tpgroup, QString sunit,
                                QWidget *parent) :
     AbstractView(parent),
     ui(new Ui::ThroughputView), m_actionCopy(aCopy),m_actionPaste(aPaste),
-    m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_showgroupTotal(showgroup),
+    m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_tpgrouptype(tpgroup),
     m_tpunit(sunit)
 //, m_main(main)
 {
@@ -107,7 +108,7 @@ QDateTime ThroughputView::getStartTime()
 bool ThroughputView::getTP(QString &tpvalue, QString &lostrate)
 {
     // get throughput
-    if (m_showgroupTotal){
+    if (m_tpgrouptype ==  static_cast<int>(TPGroup::GroupMode::Total)){
         TP *tp = m_tpmgr->getRootItem();
         tpvalue = tp->getThroughput();
         lostrate = tp->getLostRate();
@@ -293,46 +294,44 @@ void ThroughputView::onUpdateTPUnit(QString suint)
 void ThroughputView::setShowGroupTotal(bool bShow)
 {
     //set show group Total
-    m_showgroupTotal = bShow;
-    m_showgroupPair = false;
-    m_showgroupDir = false;
-    m_showgroupComment = false;
-    m_tpmgr->setShowGroup(m_showgroupTotal);
+    m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Total);
+    m_tpmgr->setShowGroup(bShow);
     // TODO: m_tpplot
-    m_tpplot->setShowGroup(m_showgroupTotal);
-    emit showGroup(m_showgroupTotal);
+    m_tpplot->setShowGroup(bShow);
+    // emit showGroup(bShow);
+    emit showGrouptype(m_tpgrouptype);
 }
 
 void ThroughputView::setShowGroupPair(bool bShow)
 {
-    m_showgroupTotal = false;
-    m_showgroupPair = bShow;
-    m_showgroupDir = false;
-    m_showgroupComment = false;
-    //TODO: set show group iperf test pair
+    m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Detail);
+    // //TODO: set show group iperf test pair
     qDebug() << "//TODO: set show group iperf test pair";
+    emit showGrouptype(m_tpgrouptype);
 }
 
 void ThroughputView::setShowGroupDir(bool bShow)
 {
-    m_showgroupTotal = false;
-    m_showgroupPair = false;
-    m_showgroupDir = bShow;
-    m_showgroupComment = false;
+    m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Direction);
     //TODO: set show group direction
     qDebug() << "//TODO: set show group direction";
+    emit showGrouptype(m_tpgrouptype);
 
 }
 
 void ThroughputView::setShowGroupComment(bool bShow)
 {
-    m_showgroupTotal = false;
-    m_showgroupPair = false;
-    m_showgroupDir = false;
-    m_showgroupComment = bShow;
+    m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Comment);
     //TODO: set show group Comment
     qDebug() << "//TODO: set show group Comment";
+    emit showGrouptype(m_tpgrouptype);
+}
 
+void ThroughputView::setTPGroupType(int grouptype)
+{
+    m_tpgrouptype = grouptype;
+    m_tpmgr->setTPGroupType(grouptype);
+    // m_tpplot->setTPGroupType(grouptype);
 }
 
 void ThroughputView::getRawData(bool checked)
@@ -459,10 +458,26 @@ void ThroughputView::initMenus()
 
 void ThroughputView::onPlotContextMenuRequest(QPoint pos)
 {
-    m_actionGroupTotal->setChecked(m_showgroupTotal);
-    m_actionGroupPair->setChecked(m_showgroupPair);
-    m_actionGroupDir->setChecked(m_showgroupDir);
-    m_actionGroupComment->setChecked(m_showgroupComment);
+    if (m_tpgrouptype ==  static_cast<int>(TPGroup::GroupMode::Total)){
+        m_actionGroupTotal->setChecked(true);
+    }else {
+        m_actionGroupTotal->setChecked(false);
+    }
+    if (m_tpgrouptype ==  static_cast<int>(TPGroup::GroupMode::Detail)){
+        m_actionGroupPair->setChecked(true);
+    }else {
+        m_actionGroupPair->setChecked(false);
+    }
+    if (m_tpgrouptype ==  static_cast<int>(TPGroup::GroupMode::Direction)){
+        m_actionGroupDir->setChecked(true);
+    }else {
+        m_actionGroupDir->setChecked(false);
+    }
+    if (m_tpgrouptype ==  static_cast<int>(TPGroup::GroupMode::Comment)){
+        m_actionGroupComment->setChecked(true);
+    }else {
+        m_actionGroupComment->setChecked(false);
+    }
 
     if (m_tpplot->selectedGraphs().count()>0){
         m_rightmenu->insertAction(m_actionAbout, m_actionRawData);
@@ -699,7 +714,7 @@ void ThroughputView::initThroughputChart()
 {
     // throughput chart
     m_vLegendScrollBar = new QScrollBar(Qt::Vertical, this);
-    m_tpplot = new TPPlot(m_showgroupTotal, m_tpunit, ui->widget_console);
+    m_tpplot = new TPPlot(m_tpgrouptype, m_tpunit, ui->widget_console);
     // m_tpplot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     qDebug() << "enable openGl:" << m_tpplot->openGl();
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -714,7 +729,7 @@ void ThroughputView::initThroughputChart()
     // m_vLegendScrollBar->setRange(0, m_tpplot->legend->itemCount() - 10);
     onVLegendScrollBarRange(m_tpplot->legend->itemCount());
 
-    m_tpmgr = new TPMgr(m_showgroupTotal, ui->tv_throughput, m_tpunit);
+    m_tpmgr = new TPMgr(m_tpgrouptype, ui->tv_throughput, m_tpunit);
     // connect(m_tpmgr, &TPMgr::rowsInserted, this, &ThroughputView::onTPDataUpdate);
     // connect(m_tpmgr, &TPMgr::rowsRemoved, this, &ThroughputView::onTPDataUpdate);
     // connect(m_tpmgr, &TPMgr::IperfTPdata, m_tpplot, &TPPlot::onIperfTPdata);

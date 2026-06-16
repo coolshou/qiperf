@@ -73,7 +73,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_throughputview = new ThroughputView(ui->actionCopy, ui->actionPaste,
                                           ui->actionDelete, ui->actionCopyText,
                                           m_settings,
-                                          m_TPGroup, m_TPUnit);
+                                          m_TPGrouptype, m_TPUnit);
     connect(m_throughputview, &ThroughputView::updateActions, this, &QIperfC::onUpdateActions);
     connect(m_throughputview, &ThroughputView::updateActionsSave, this, &QIperfC::onUpdateActionsSave);
     connect(m_throughputview, &ThroughputView::updateActionsEdit, this, &QIperfC::onUpdateActionsEdit);
@@ -90,6 +90,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_dlgoption, &dlgOption::widthChanged, this, &QIperfC::onWidthChanged);
     connect(m_dlgoption, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);
     connect(m_dlgoption, &dlgOption::showGroup, this, &QIperfC::onShowGroup);
+    connect(m_dlgoption, &dlgOption::setTPGroupType, this, &QIperfC::onSetTPGroupType);
     connect(m_dlgoption, &dlgOption::IgnoreWrongInterval, this, &QIperfC::onIgnoreWrongInterval);
     connect(m_dlgoption, &dlgOption::updateTPUnit, this, &QIperfC::onUpdateTPUnit);
     connect(m_dlgoption, &dlgOption::updateTPUnit, m_throughputview, &ThroughputView::onUpdateTPUnit);
@@ -114,7 +115,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_qipconfig, &QIPConfig::updateTPAvg, m_throughputview, &ThroughputView::onAddTPdata); // this only set last avg, which may cause min/max value wrong!!
     connect(m_qipconfig, &QIPConfig::progress, this, &QIperfC::onProgress);
     connect(m_throughputview, &ThroughputView::deleteFiles, m_qipconfig, &QIPConfig::onDeleteFiles);
-    connect(m_throughputview, &ThroughputView::showGroup, this, &QIperfC::setShowGroup);
+    // connect(m_throughputview, &ThroughputView::showGroup, this, &QIperfC::setShowGroup);
 
     QString proxyhost = "";
     quint16 proxyport = 0;
@@ -1125,7 +1126,8 @@ void QIperfC::saveSettings()
     m_settings->setValue("WaitServerReady", m_WaitServerReady);
     m_settings->setValue("TPExportWidth", m_TPExportWidth);
     m_settings->setValue("TPExportHeigth", m_TPExportHeigth);
-    m_settings->setValue("TPGroup", m_TPGroup);
+    // m_settings->setValue("TPGroup", m_TPGroup);
+    m_settings->setValue("TPGroupType", m_TPGrouptype);
     m_settings->setValue("TPUnit", m_TPUnit);
     m_settings->setValue("IgnoreWrongInterval", m_IgnoreWrongInterval);
     m_settings->endGroup();
@@ -1161,7 +1163,8 @@ void QIperfC::loadSettings()
     m_WaitServerReady = m_settings->value("WaitServerReady", 10).toInt();
     m_TPExportWidth = m_settings->value("TPExportWidth", 1280).toInt();
     m_TPExportHeigth = m_settings->value("TPExportHeigth", 180).toInt();
-    m_TPGroup = m_settings->value("TPGroup", false).toBool();
+    // m_TPGroup = m_settings->value("TPGroup", false).toBool();
+    m_TPGrouptype = m_settings->value("TPGroupType", 0).toInt();
     m_TPUnit = m_settings->value("TPUnit", "Mbits/sec").toString();
     m_IgnoreWrongInterval = m_settings->value("IgnoreWrongInterval", false).toBool();
     //    m_frm_option->setWaitServerReady();
@@ -1402,12 +1405,17 @@ void QIperfC::onShowGroup(bool bShow)
     m_throughputview->setShowGroupTotal(bShow);
 }
 
-void QIperfC::setShowGroup(bool bShow)
+void QIperfC::onSetTPGroupType(int grouptype)
 {
-    m_TPGroup = bShow;
-    // TODO: update m_frm_option's cb_TPGroup check status.
-    m_dlgoption->setShowGroup(bShow);
+    m_throughputview->setTPGroupType(grouptype);
 }
+
+// void QIperfC::setShowGroup(bool bShow)
+// {
+//     // m_TPGroup = bShow;
+//     // TODO: update m_frm_option's cb_TPGroup check status.
+//     // m_dlgoption->setShowGroup(bShow);
+// }
 
 void QIperfC::onUpdateTPUnit(QString sunit)
 {

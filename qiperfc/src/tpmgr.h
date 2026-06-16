@@ -23,7 +23,8 @@ class TPMgr : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit TPMgr(bool showgroup=false, QTreeView *treeview=nullptr, QString tpunit="Mbits/sec", QObject *parent=nullptr);
+    explicit TPMgr(int grouptype=static_cast<int>(TPGroup::GroupMode::Total),
+                   QTreeView *treeview=nullptr, QString tpunit="Mbits/sec", QObject *parent=nullptr);
     ~TPMgr() override;
     // //basic read only data model
     QVariant data(const QModelIndex &idx, int role) const override;
@@ -81,6 +82,7 @@ public slots:
                        QString value, QString unit, QString dir,
                        QString pkt_lost, QString pkt_total);
     void setShowGroup(bool bShow);
+    void setTPGroupType(int grouptype);
     void onRowsInserted(const QModelIndex &parent, int first, int last);
     void setTPUint(QString tpunit);
 
@@ -98,14 +100,19 @@ private:
     void log(QString msg, int lv=3);
 private:
     int mDebug;
-    bool m_showgroup;
+    // bool m_showgroup;
+    int m_tpgrouptype;
     TPGroup::GroupMode m_groupmode;
     QTreeView *m_treeview; //relative treeview
     QString m_TPUint;
     QList<QString> m_unit_bits;
     QList<QString> m_unit_bytes;
     TP *rootItem;
-    TP *groupItem; //hold group item
+    TP *groupItem; //hold total group item
+    TP *dirTxItem;  // hold Tx direction group item: Tx, Rx
+    TP *dirRxItem;  // hold Rx direction group item: Tx, Rx
+    QMap<QString, TP> mCommentItems; // dict of commentItem
+    // TP *commItem; // hold comment group item, comment group item number is vary,
     // QList<TP*> m_tps; //QList of tp, data
     QFileIconProvider iconProvider;
     QMap<QString, double> m_intervals; // idx,

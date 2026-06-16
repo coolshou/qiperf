@@ -105,6 +105,14 @@
 #define CMD_NOT_SUPPORT  "CMD_NOT_SUPPORT"
 
 // plot
+// enum class TPGroupType {
+//     DETAIL = 0,
+//     PAIR = 0,
+//     TOTAL = 1,
+//     DIRECTION = 2,
+//     COMMENT = 3
+// };
+
 #define GRAPH_TOTAL      "TOTAL"
 #define GRAPH_PAIR      "PAIR"
 #define GRAPH_DIR      "DIRECTION"

@@ -9,10 +9,10 @@ class TPGroup: public QObject
 public:
     enum GroupMode{
         Detail=0,    // detail mode
+        Pair=0,      // Pair mode (each iperf test pair)
         Total=1,     // Total mode
-        Pair=2,      // Pair mode (each iperf test pair)
-        Direction=3, // Directiob mode (Tx & Rx)
-        Comment=4    // custom mode (group by test pair's comment)
+        Direction=2, // Directiob mode (Tx & Rx)
+        Comment=3    // custom mode (group by test pair's comment)
     };
     Q_ENUM(GroupMode)
 };
