@@ -205,7 +205,7 @@ void TpWorker::work()
     int itimeout;
     int refrow;
     bool isRunforever=false;
-    int iSliceWindowTime=0;
+    // int iSliceWindowTime=0;
     double totalrecordrate=0.0;
     double recordrate = 0.0;
     // list of throughput test pair
