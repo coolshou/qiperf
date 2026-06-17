@@ -269,13 +269,13 @@ int TPMgr::rowCount(const QModelIndex &parent) const
 
 }
 
-TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
+TP *TPMgr::add(QString strJson, QString note, TPMgrData::DataType datatype,  TP *parent)
 {   //add iperf config item
     TP *pitm = nullptr;
     if (parent){
         pitm = parent;
     }else{
-        pitm = getRootItem();
+        pitm = getRootItem(note);
         // qInfo() << "No parent, add:getRootItem " << pitm;
         // qInfo() << "datatype:" << datatype;
         // qInfo() << "TPMgr::add data:" << data;
@@ -283,8 +283,7 @@ TP *TPMgr::add(QString data, TPMgrData::DataType datatype,  TP *parent)
     QModelIndex midx = indexFromItem(pitm);
     int idx = getMaxIdx();
     beginInsertRows(midx, idx, idx);
-    TP *tp = new TP(QString::number(idx), data, datatype, pitm);
-    // qDebug() <<"Max idx:" << idx << " tp:" << tp << " add:"<< datatype << " pitm: " << pitm ;//<< " data:" << data;
+    TP *tp = new TP(QString::number(idx), strJson, datatype, pitm);
     pitm->appendChild(tp);
     endInsertRows();
     return tp;
@@ -315,9 +314,16 @@ void TPMgr::del(QModelIndex idx)
 {
     stopUpdater();
     int row = idx.row();
-    if (!removeRows(row, 1 , getRootItemIdx())){
+    TP *itm = getItem(idx);
+    qDebug() << " itm:" << itm
+             << " TxItm:" << dirTxItem
+             << " RxItm:" << dirRxItem;
+    QModelIndex pIdx = parent(idx);
+    // if (!removeRows(row, 1 , getRootItemIdx())){
+    if (!removeRows(row, 1 , pIdx)){
         qDebug() << "del fail("<< QString::number(row) << "): " << idx;
     }
+
     startUpdater();
 }
 
@@ -330,7 +336,9 @@ QList<TP *> TPMgr::getChilds(bool showAll)
 {
     QList<TP *> tps;
     // m_tps.clear();
-    TP *itm = getRootItem();
+    // TP *itm = getRootItem();
+    TP *itm = rootItem;
+    // TODO: direction, comm may
     // tps.append(itm);
     // qDebug() << "root child:" << itm->childCount() << " cuilds: " << itm->getChilds()  ;
     for(int i = 0; i<itm->childCount();i++){
@@ -344,12 +352,10 @@ QList<TP *> TPMgr::getChilds(bool showAll)
         tps.append(chitm);
         if (chitm->haveChilds()){
             for(int j = 0; j<chitm->childCount();j++){
-                // QCoreApplication::processEvents(QEventLoop::AllEvents);
                 TP *ccitm = chitm->child(j);
                 tps.append(ccitm);
             }
         }
-        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     // qDebug() << "getChilds tps:" << tps;
     return tps;
@@ -397,7 +403,7 @@ bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, 
     return true;
 }
 
-bool TPMgr::moveRow(const QModelIndex &sourceParent, int sourceRow, const QModelIndex &destinationParent, int destinationChild)
+bool TPMgr::moveRow(const QModelIndex &sourceParent, int sourceRow, const QModelIndex &destinationParent, int destinationRow)
 {
     TP *sourceParentItem;
     if (!sourceParent.isValid()){
@@ -414,18 +420,15 @@ bool TPMgr::moveRow(const QModelIndex &sourceParent, int sourceRow, const QModel
     }
 
     if (sourceRow < 0 || sourceRow > sourceParentItem->childCount() ||
-        destinationChild < 0 || destinationChild > destinationParentItem->childCount()){
+        destinationRow < 0 || destinationRow > destinationParentItem->childCount()){
         return false;
     }
     qDebug() << "sourceParent:" << sourceParent << " sourceRow:" << QString::number(sourceRow);
-    qDebug() << "destinationParent:" << destinationParent << " destinationChild:" << QString::number(destinationChild);
-    beginMoveRows(sourceParent, sourceRow, sourceRow, destinationParent, destinationChild);
-    // data.move(sourceRow, destinationChild);
-    sourceParentItem->removeChild(sourceParentItem);
-    // rootItem->removeChild(sourceParentItem);
-    // TP *item = sourceParentItem->child(sourceRow);
-    // sourceParentItem->removeChild(sourceRow);
-    destinationParentItem->insertChild(destinationChild, sourceParentItem);
+    qDebug() << "destinationParent:" << destinationParent << " destinationRow:" << QString::number(destinationRow);
+    beginMoveRows(sourceParent, sourceRow, sourceRow, destinationParent, destinationRow);
+    TP *itm = sourceParentItem->child(sourceRow);
+    sourceParentItem->removeChild(itm);
+    destinationParentItem->insertChild(destinationRow, itm);
     endMoveRows();
     return true;
 }
@@ -475,11 +478,14 @@ bool TPMgr::loaddata(QByteArray data)
         // foreach (const QJsonValue &value, jsonarr) {
         for (const auto value: jsonarr){
             QJsonObject obj = value.toObject();
+            QJsonObject o_client = obj["client"].toObject();
+            QString note = "Rx";
+            if (o_client["reverse"].toBool()){
+                note = "Tx";
+            }
             QJsonDocument doc(obj);
             QString strJson(doc.toJson(QJsonDocument::Compact));
-            // qDebug() << "add: " << strJson;
-            add(strJson);
-            // QCoreApplication::processEvents(QEventLoop::AllEvents);
+            add(strJson, note);
         }
         return true;
     }else{
@@ -562,7 +568,7 @@ void TPMgr::clear(){
             }
         }
     }else {
-        qDebug() << "clear: NO root item by getRootItem()";
+        qDebug() << "clear: NO root item";
     }
 
     m_intervals.clear();
@@ -584,14 +590,14 @@ TP *TPMgr::getItem(const QModelIndex &index) const
     return nullptr;
 }
 
-TP *TPMgr::getRootItem()
+TP *TPMgr::getRootItem(QString note)
 {
     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){
         return getGroupItem();
     }else if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction)){
-        qDebug() << "//TODO Direction root";
+        return getDirectionItem(note);
     }else if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Comment)){
-        qDebug() << "//TODO Comment root";
+        return getCommentItem(note);
     }else{
         return rootItem;
     }
@@ -604,6 +610,30 @@ TP *TPMgr::getGroupItem()
     }else {
         return newGroupItem();
     }
+}
+
+TP *TPMgr::getDirectionItem(QString dir)
+{
+    if (dir.contains(TPDIRTx)){
+        if (dirTxItem){
+            return dirTxItem;
+        } else {
+            return newDirectionItem(dir);
+        }
+    }else if (dir.contains(TPDIRRx)){
+        if (dirRxItem){
+            return dirRxItem;
+        } else {
+            return newDirectionItem(dir);
+        }
+    }else {
+        return rootItem;
+    }
+}
+
+TP *TPMgr::getCommentItem(QString comm)
+{
+    qDebug() << "TODO: getCommentItem" << comm;
 }
 
 QModelIndex TPMgr::getRootItemIdx()
@@ -632,9 +662,35 @@ int TPMgr::swapDirection(QModelIndex midx)
         log("[swapDirection]Wrong TP datatype: " + midx.data().toString(), 3);
         return 1;
     }
+    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction)) {
+        //should change parent item
+        TP *oldp;
+        TP *newp;
+        if (tp->getDirection().contains(TPDIRTx)){
+            oldp = getDirectionItem(TPDIRTx);
+            newp = getDirectionItem(TPDIRRx);
+        }else {
+            oldp = getDirectionItem(TPDIRRx);
+            newp = getDirectionItem(TPDIRTx);
+        }
+        QModelIndex srcIdx = indexFromItem(oldp); // source parent
+        QModelIndex newIdx = indexFromItem(newp); // destination parent
+        if (!newIdx.isValid()){
+            rootItem->appendChild(newp);
+            newIdx = indexFromItem(newp);
+        }
+        tp->setParent(newp);
+        moveRow(srcIdx, tp->row(), newIdx, newp->childCount());
+        if (!oldp->haveChilds()){
+            del(srcIdx);
+            oldp = nullptr;
+        }
+    }
     if (tp->getDirection().contains(TPDIRTx)){
+        //Tx => Rx
         dir = TPDIRRx;
     }else if (tp->getDirection().contains(TPDIRRx)){
+        //Rx => Tx
         dir = TPDIRTx;
     }
     tp->setDirection(dir);
@@ -870,6 +926,10 @@ void TPMgr::onPaste(QString data)
        QJsonObject jsonRoot = doc.object();
        if (jsonRoot.contains("client") &&jsonRoot.contains("server")){
            QJsonObject o_client = jsonRoot["client"].toObject();
+           QString note = "Rx";
+           if (o_client["reverse"].toBool()){
+               note = "Tx";
+           }
            QJsonObject o_server = jsonRoot["server"].toObject();
            // Get largest iperf port number!!
            int num = getMaxPort(o_server["manager"].toString(),
@@ -883,7 +943,7 @@ void TPMgr::onPaste(QString data)
            doc.setObject(jsonRoot);
            QString strJson(doc.toJson(QJsonDocument::Compact));
 //         qDebug() << "strJson:\n" << strJson;
-           add(strJson);
+           add(strJson, note);
        }else{
            qDebug() << "Wrong format of clipboard data: " << data;
        }
@@ -913,6 +973,25 @@ TP *TPMgr::newGroupItem()
     rootItem->appendChild(groupItem);
     endInsertRows();
     return groupItem;
+}
+
+TP *TPMgr::newDirectionItem(QString dir)
+{
+    QModelIndex midx = indexFromItem(rootItem);
+    beginInsertRows(midx, 0, 0);
+    if (dir.contains(TPDIRTx)){
+        dirTxItem = new TP("0", GRAPH_TX, TPMgrData::direction, rootItem);
+        rootItem->appendChild(dirTxItem);
+    }else{
+        dirRxItem = new TP("1", GRAPH_RX, TPMgrData::direction, rootItem);
+        rootItem->appendChild(dirRxItem);
+    }
+    endInsertRows();
+    if (dir.contains(TPDIRTx)){
+        return dirTxItem;
+    }else {
+        return dirRxItem;
+    }
 }
 
 void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
@@ -1032,41 +1111,42 @@ void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
     addTPdata(midx, sInterval, idx, value, unit, dir, pkt_lost, pkt_total);
 }
 
-void TPMgr::setShowGroup(bool bShow)
-{
-    // m_showgroup = bShow;
-    QModelIndex sourceparentidx;
-    QModelIndex targetparentidx;
-    int count =0;
-    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){  // not Total to show Total
-        // move root's child to group
-        count = rootItem->childCount();
-        if (count>0){
-            sourceparentidx = indexFromItem(rootItem);
-            if (groupItem==nullptr){
-                newGroupItem();
-            }else {
-                rootItem->appendChild(groupItem);
-            }
-            targetparentidx = indexFromItem(groupItem);
-            if (targetparentidx.isValid()){
-                moveRows(sourceparentidx, 0 , count, targetparentidx, 0);
-            }
-        }
-    }else{
-        // move group's child to root
-        if (groupItem){
-            count = groupItem->childCount();
-            if (count>0){
-                sourceparentidx = indexFromItem(groupItem);
-                targetparentidx = indexFromItem(rootItem);
-                moveRows(sourceparentidx, 0 , count, targetparentidx, 0);
-                //remove groupItem
-                rootItem->takeAt(groupItem->row());
-            }
-        }
-    }
-}
+// void TPMgr::setShowGroup(bool bShow)
+// {
+//     Q_UNUSED(bShow)
+//     // m_showgroup = bShow;
+//     QModelIndex sourceparentidx;
+//     QModelIndex targetparentidx;
+//     int count =0;
+//     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){  // not Total to show Total
+//         // move root's child to group
+//         count = rootItem->childCount();
+//         if (count>0){
+//             sourceparentidx = indexFromItem(rootItem);
+//             if (groupItem==nullptr){
+//                 newGroupItem();
+//             }else {
+//                 rootItem->appendChild(groupItem);
+//             }
+//             targetparentidx = indexFromItem(groupItem);
+//             if (targetparentidx.isValid()){
+//                 moveRows(sourceparentidx, 0 , count, targetparentidx, 0);
+//             }
+//         }
+//     }else{
+//         // move group's child to root
+//         if (groupItem){
+//             count = groupItem->childCount();
+//             if (count>0){
+//                 sourceparentidx = indexFromItem(groupItem);
+//                 targetparentidx = indexFromItem(rootItem);
+//                 moveRows(sourceparentidx, 0 , count, targetparentidx, 0);
+//                 //remove groupItem
+//                 rootItem->takeAt(groupItem->row());
+//             }
+//         }
+//     }
+// }
 
 void TPMgr::setTPGroupType(int grouptype)
 {

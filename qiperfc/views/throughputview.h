@@ -75,6 +75,7 @@ public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
     void onUpdateTPCfg(QByteArray tpcfg);
     void onUpdateTPUnit(QString suint);
+    void onGroupCopyItem(bool checked);
     void setShowGroupTotal(bool bShow);
     void setShowGroupPair(bool bShow);
     void setShowGroupDir(bool bShow);
@@ -111,6 +112,7 @@ private slots:
     void onVLegendScrollBarRange(int count);
     QString getGraphDataToJsonStr(QCPGraph *graph);
     void onDebuginfo(QString msg);
+    // void onShowGrouptype(int grouptype);
 private:
     Ui::ThroughputView *ui;
     // QIperfC *m_main;
@@ -118,6 +120,8 @@ private:
     TPMgr *m_tpmgr;
     QClipboard *m_clipboard;
     QMenu *m_tpmenu; //right menu for m_tpmgr
+    QMenu *m_tpgroupmenu;
+    QAction *m_actionGroupCopyItem;
     QAction *m_aEnable; //
     QAction *m_aDisable;
     QAction *m_actionCopy;

@@ -37,6 +37,7 @@ ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete
 
     dlgiperf = new DlgIperf(m_tpmgr, cfg, this); //add/edit iperf config dialog
     initMenus();
+    connect(this, &ThroughputView::showGrouptype, this, &ThroughputView::setTPGroupType);
 }
 
 ThroughputView::~ThroughputView()
@@ -291,47 +292,59 @@ void ThroughputView::onUpdateTPUnit(QString suint)
     m_tpplot->setTPUint(suint);
 }
 
+void ThroughputView::onGroupCopyItem(bool checked)
+{
+    Q_UNUSED(checked)
+    QList<QString> a;
+    QModelIndexList idxs= ui->tv_throughput->selectionModel()->selectedRows();
+    if (idxs.length()>0){
+        foreach (QModelIndex midx, idxs) {
+            QString idx = midx.data().toString(); // Rx, Tx ...
+            qDebug() << "idx: " << idx << " midx:" << midx;
+            TP *itm = m_tpmgr->getItemByIdx(idx);
+            if (itm){
+                a.append(idx + ":" + itm->data(0).toString());
+            }
+        }
+    }
+    m_clipboard->setText(a.join(", "));
+}
+
 void ThroughputView::setShowGroupTotal(bool bShow)
 {
+    Q_UNUSED(bShow)
     //set show group Total
-    m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Total);
-    m_tpmgr->setShowGroup(bShow);
-    // TODO: m_tpplot
-    m_tpplot->setShowGroup(bShow);
-    // emit showGroup(bShow);
-    emit showGrouptype(m_tpgrouptype);
+    // m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Total);
+    // m_tpplot->setShowGroup(bShow);
+    emit showGrouptype(static_cast<int>(TPGroup::GroupMode::Total));
 }
 
 void ThroughputView::setShowGroupPair(bool bShow)
 {
-    m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Detail);
-    // //TODO: set show group iperf test pair
-    qDebug() << "//TODO: set show group iperf test pair";
-    emit showGrouptype(m_tpgrouptype);
+    Q_UNUSED(bShow)
+    // m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Detail);
+    emit showGrouptype(static_cast<int>(TPGroup::GroupMode::Detail));
 }
 
 void ThroughputView::setShowGroupDir(bool bShow)
 {
-    m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Direction);
-    //TODO: set show group direction
-    qDebug() << "//TODO: set show group direction";
-    emit showGrouptype(m_tpgrouptype);
-
+    Q_UNUSED(bShow)
+    // m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Direction);
+    emit showGrouptype(static_cast<int>(TPGroup::GroupMode::Direction));
 }
 
 void ThroughputView::setShowGroupComment(bool bShow)
 {
-    m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Comment);
-    //TODO: set show group Comment
-    qDebug() << "//TODO: set show group Comment";
-    emit showGrouptype(m_tpgrouptype);
+    Q_UNUSED(bShow)
+    // m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Comment);
+    emit showGrouptype(static_cast<int>(TPGroup::GroupMode::Comment));
 }
 
 void ThroughputView::setTPGroupType(int grouptype)
 {
     m_tpgrouptype = grouptype;
     m_tpmgr->setTPGroupType(grouptype);
-    // m_tpplot->setTPGroupType(grouptype);
+    //TODO: m_tpplot->setTPGroupType(grouptype);
 }
 
 void ThroughputView::getRawData(bool checked)
@@ -422,6 +435,10 @@ void ThroughputView::initMenus()
     m_tpmenu->addAction(m_actionClientArgs);
     m_tpmenu->addAction(m_actionServerArgs);
 
+    m_tpgroupmenu = new QMenu(); //config group : total, direction, comm item
+    m_actionGroupCopyItem = new QAction("Copy Item");
+    connect(m_actionGroupCopyItem, &QAction::triggered, this, &ThroughputView::onGroupCopyItem);
+    m_tpgroupmenu->addAction(m_actionGroupCopyItem);
     //right menu
     m_rightmenu = new QMenu(this);
     m_menuGroup = new QMenu("Group", this);
@@ -430,10 +447,10 @@ void ThroughputView::initMenus()
     m_actionGroupTotal = new QAction("Total");
     m_actionGroupTotal->setCheckable(true);
     connect(m_actionGroupTotal, &QAction::triggered, this, &ThroughputView::setShowGroupTotal);
-    m_actionGroupPair = new QAction("Iperf Pair(TODO)");
+    m_actionGroupPair = new QAction("Iperf Pair");
     m_actionGroupPair->setCheckable(true);
     connect(m_actionGroupPair, &QAction::triggered, this, &ThroughputView::setShowGroupPair);
-    m_actionGroupDir = new QAction("Direction(TODO)");
+    m_actionGroupDir = new QAction("Direction");
     m_actionGroupDir->setCheckable(true);
     connect(m_actionGroupDir, &QAction::triggered, this, &ThroughputView::setShowGroupDir);
     m_actionGroupComment = new QAction("Comment(TODO)");
@@ -520,6 +537,7 @@ void ThroughputView::onTPUTContextMenu(QPoint pos)
                 // (tp->getDataType()!=TPMgrData::TP)){
             if (tp->getDataType()!=TPMgrData::config){
                 //don't show menu on not supported item
+                m_tpgroupmenu->popup(ui->tv_throughput->mapToGlobal(pos));
                 return;
             }
             if (tp->getDataType()!=TPMgrData::config){
@@ -709,6 +727,12 @@ void ThroughputView::onDebuginfo(QString msg)
 {
     qDebug() << "[ThroughputView]" << msg;
 }
+
+// void ThroughputView::onShowGrouptype(int grouptype)
+// {
+//     m_tpmgr->setTPGroupType(grouptype);
+//     //TODO: plot
+// }
 
 void ThroughputView::initThroughputChart()
 {

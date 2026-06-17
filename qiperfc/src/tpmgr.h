@@ -42,7 +42,7 @@ public:
     bool moveRow(const QModelIndex &sourceParent, int sourceRow,
                  const QModelIndex &destinationParent, int destinationChild) ;
     // ======
-    TP * add(QString data, TPMgrData::DataType datatype=TPMgrData::config, TP *parent=nullptr);
+    TP * add(QString strJson, QString note="", TPMgrData::DataType datatype=TPMgrData::config, TP *parent=nullptr);
     QModelIndex indexFromItem(TP *item);
     void del(QModelIndex idx);
     int rootChildCount();
@@ -53,9 +53,12 @@ public:
     void reset();
     void clear();
     TP *getItem(const QModelIndex& index) const;
-    TP *getRootItem();
+    TP *getRootItem(QString note="");
     TP *newGroupItem();
+    TP *newDirectionItem(QString dir="Tx");
     TP *getGroupItem();
+    TP *getDirectionItem(QString dir="Tx");
+    TP *getCommentItem(QString comm="Unknown");
 
     QModelIndex getRootItemIdx();
     void setItem(const QModelIndex& index, TP *item);
@@ -81,7 +84,7 @@ public slots:
     void onUpdateTPAvg(QString midx, QString sInterval, QString idx,
                        QString value, QString unit, QString dir,
                        QString pkt_lost, QString pkt_total);
-    void setShowGroup(bool bShow);
+    // void setShowGroup(bool bShow);
     void setTPGroupType(int grouptype);
     void onRowsInserted(const QModelIndex &parent, int first, int last);
     void setTPUint(QString tpunit);
