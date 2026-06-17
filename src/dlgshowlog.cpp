@@ -10,6 +10,7 @@ DlgShowLog::DlgShowLog(QWidget *parent):
     QDialog(parent),
     ui(new Ui::DlgShowLog)
 {
+    ui->te_log->document()->setMaximumBlockCount(50000);
     init();
 }
 
