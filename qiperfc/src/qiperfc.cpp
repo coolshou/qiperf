@@ -89,7 +89,6 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_dlgoption = new dlgOption(m_settings);
     connect(m_dlgoption, &dlgOption::widthChanged, this, &QIperfC::onWidthChanged);
     connect(m_dlgoption, &dlgOption::heigthChanged, this, &QIperfC::onHeigthChanged);
-    connect(m_dlgoption, &dlgOption::showGroup, this, &QIperfC::onShowGroup);
     connect(m_dlgoption, &dlgOption::setTPGroupType, this, &QIperfC::onSetTPGroupType);
     connect(m_dlgoption, &dlgOption::IgnoreWrongInterval, this, &QIperfC::onIgnoreWrongInterval);
     connect(m_dlgoption, &dlgOption::updateTPUnit, this, &QIperfC::onUpdateTPUnit);
@@ -115,7 +114,6 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     connect(m_qipconfig, &QIPConfig::updateTPAvg, m_throughputview, &ThroughputView::onAddTPdata); // this only set last avg, which may cause min/max value wrong!!
     connect(m_qipconfig, &QIPConfig::progress, this, &QIperfC::onProgress);
     connect(m_throughputview, &ThroughputView::deleteFiles, m_qipconfig, &QIPConfig::onDeleteFiles);
-    // connect(m_throughputview, &ThroughputView::showGroup, this, &QIperfC::setShowGroup);
 
     QString proxyhost = "";
     quint16 proxyport = 0;
@@ -1400,22 +1398,10 @@ void QIperfC::onHeigthChanged(int heigth)
     m_TPExportHeigth = heigth;
 }
 
-void QIperfC::onShowGroup(bool bShow)
-{
-    m_throughputview->setShowGroupTotal(bShow);
-}
-
 void QIperfC::onSetTPGroupType(int grouptype)
 {
     m_throughputview->setTPGroupType(grouptype);
 }
-
-// void QIperfC::setShowGroup(bool bShow)
-// {
-//     // m_TPGroup = bShow;
-//     // TODO: update m_frm_option's cb_TPGroup check status.
-//     // m_dlgoption->setShowGroup(bShow);
-// }
 
 void QIperfC::onUpdateTPUnit(QString sunit)
 {

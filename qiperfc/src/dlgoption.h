@@ -28,7 +28,6 @@ public:
     int getFontSize();
     // void setTPsize(int width, int heigth);
 public slots:
-    // void setShowGroup(bool bShow);
     void onSetTPGroupType(int grouptype);
     void onTPUnitChanged(QString sunit);
     void updateFontStyle(QString fontfamily);
@@ -40,7 +39,6 @@ signals:
     // void ipaddressUpdated(QString ipaddress, int port);
     void widthChanged(int width);
     void heigthChanged(int heigth);
-    void showGroup(bool bShow);
     void setTPGroupType(int group);
     void IgnoreWrongInterval(bool ignore);
     void updateTPUnit(QString sunit);
@@ -58,7 +56,6 @@ private slots:
     void onAccept();
     void onWidthChange(int width);
     void onHeigthChange(int heigth);
-    void onStateChanged(int state);
 #if QT_VERSION < QT_VERSION_CHECK(5,15,0)
     void onTPGroupTypeChange(QAbstractButton *button);
 #else

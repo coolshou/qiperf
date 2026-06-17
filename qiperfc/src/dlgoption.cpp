@@ -41,10 +41,8 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     connect(ui->TPGroup, &QButtonGroup::idClicked, this, &dlgOption::onTPGroupTypeChange);
 #endif
 #if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
-    // connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
     connect(ui->cb_IgnoreWrongInterval, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onIgnoreWrongIntervalChanged);
 #else
-    // connect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
     connect(ui->cb_IgnoreWrongInterval, &QCheckBox::checkStateChanged, this, &dlgOption::onIgnoreWrongIntervalChanged);
 #endif
 
@@ -258,22 +256,6 @@ QStringList dlgOption::getFontStyles(QString fontfamily)
 #endif
 }
 
-// void dlgOption::setShowGroup(bool bShow)
-// {
-// #if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
-//     disconnect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
-// #else
-//     disconnect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
-// #endif
-// // #endif
-//     ui->cb_TPGroup->setChecked(bShow);
-// #if QT_VERSION < QT_VERSION_CHECK(6,7,0)  // < 6.7
-//     connect(ui->cb_TPGroup, QOverload<int>::of(&QCheckBox::stateChanged), this, &dlgOption::onStateChanged);
-// #else
-//     connect(ui->cb_TPGroup, &QCheckBox::checkStateChanged, this, &dlgOption::onStateChanged);
-// #endif
-// }
-
 void dlgOption::onSetTPGroupType(int grouptype)
 {
     if (grouptype == static_cast<int>(TPGroup::GroupMode::Total)){
@@ -416,16 +398,6 @@ void dlgOption::onHeigthChange(int heigth)
     emit heigthChanged(heigth);
 }
 
-void dlgOption::onStateChanged(int state)
-{
-    if (state == Qt::Checked){
-        emit showGroup(true);
-        m_cfg->setValue("Iperf/TPGroup", true);
-    }else{
-        emit showGroup(false);
-        m_cfg->setValue("Iperf/TPGroup", false);
-    }
-}
 #if QT_VERSION < QT_VERSION_CHECK(5,15,0)
 void dlgOption::onTPGroupTypeChange(QAbstractButton *button)
 #else

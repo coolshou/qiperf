@@ -183,7 +183,6 @@ private slots:
     void onExport();
     void onWidthChanged(int width);
     void onHeigthChanged(int heigth);
-    void onShowGroup(bool bShow);
     void onSetTPGroupType(int grouptype);
     void onIgnoreWrongInterval(bool bIgnore);
     void onUpdateOpenStreetMapTile(QString tile);
