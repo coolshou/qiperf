@@ -53,6 +53,7 @@ public slots:
     void onDurationValueChanged(int value);
     void onFmtreportChanged(QString text);
     void onShowIperfRestartRule(bool checked);
+    void setBiDirStatus(bool enable);
 
 protected:
     void changeEvent(QEvent *e) override;

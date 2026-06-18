@@ -443,6 +443,7 @@ void DlgIperf::ChangeVersion(const QString ver)
     }
     ui->cb_unit_bitrate->clear();
     ui->cb_unit_bitrate->addItems(unitBW);
+    //TODO: bitrate unit default value?
     // length of buffer
     QStringList unitBuffer;
     if (ver.indexOf("2")==0){
@@ -452,6 +453,8 @@ void DlgIperf::ChangeVersion(const QString ver)
     }
     ui->cb_unit_buffer->clear();
     ui->cb_unit_buffer->addItems(unitBuffer);
+    //TODO: buffer unit default value?
+
     // window size
     QStringList unitWindowSize;
     if (ver.indexOf("2")==0){
@@ -461,6 +464,7 @@ void DlgIperf::ChangeVersion(const QString ver)
     }
     ui->cb_unit_windowsize->clear();
     ui->cb_unit_windowsize->addItems(unitWindowSize);
+    //TODO: windowsize unit default value?
     // format unit
     QStringList unitFormat;
     if (ver.indexOf("2")==0){
@@ -645,4 +649,9 @@ void DlgIperf::onShowIperfRestartRule(bool checked)
     //load setting into dlgrule
     // m_dlgrule->exec();
     m_dlgrule->show();
+}
+
+void DlgIperf::setBiDirStatus(bool enable)
+{
+    ui->chk_bidir->setEnabled(enable);
 }

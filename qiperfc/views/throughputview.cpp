@@ -343,6 +343,11 @@ void ThroughputView::setShowGroupComment(bool bShow)
 void ThroughputView::setTPGroupType(int grouptype)
 {
     m_tpgrouptype = grouptype;
+    if (grouptype == static_cast<int>(TPGroup::GroupMode::Direction)){
+        dlgiperf->setBiDirStatus(false);
+    }else{
+        dlgiperf->setBiDirStatus(true);
+    }
     m_tpmgr->setTPGroupType(grouptype);
     //TODO: m_tpplot->setTPGroupType(grouptype);
 }
