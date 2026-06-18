@@ -17,8 +17,6 @@
 #include "comm.h"
 #include "../src/nmessagebox.h"
 
-
-// ThroughputView::ThroughputView(QIperfC *main, QWidget *parent) : AbstractView(parent)
 ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
                                QAction *aCopyText, QSettings *cfg,
                                int tpgroup, QString sunit,
@@ -27,7 +25,6 @@ ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete
     ui(new Ui::ThroughputView), m_actionCopy(aCopy),m_actionPaste(aPaste),
     m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_tpgrouptype(tpgroup),
     m_tpunit(sunit)
-//, m_main(main)
 {
     m_iperfwrapper = new IperfWrapper();
     connect(m_iperfwrapper, &IperfWrapper::debuginfo, this, &ThroughputView::onDebuginfo);
@@ -114,6 +111,7 @@ bool ThroughputView::getTP(QString &tpvalue, QString &lostrate)
         tpvalue = tp->getThroughput();
         lostrate = tp->getLostRate();
     }else{
+        qDebug() << "ThroughputView::getTP";
         QList<TP*> ds = m_tpmgr->getChilds();
         double dtp=0.0;
         double dlr=-1.0;
@@ -732,12 +730,6 @@ void ThroughputView::onDebuginfo(QString msg)
 {
     qDebug() << "[ThroughputView]" << msg;
 }
-
-// void ThroughputView::onShowGrouptype(int grouptype)
-// {
-//     m_tpmgr->setTPGroupType(grouptype);
-//     //TODO: plot
-// }
 
 void ThroughputView::initThroughputChart()
 {

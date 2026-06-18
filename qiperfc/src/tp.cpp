@@ -704,8 +704,6 @@ QString TP::getLostRate()
 
 void TP::setEnabled()
 {
-    // m_enabled = true;
-    // updateJson("enabled", m_enabled);
     setEnabled(true);
 }
 
@@ -722,8 +720,6 @@ void TP::setEnabled(bool enable)
 
 void TP::setDisabled()
 {
-    // m_enabled = false;
-    // updateJson("enabled", m_enabled);
     setEnabled(false);
 }
 

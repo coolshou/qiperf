@@ -84,6 +84,8 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
     }
     if (role == Qt::DisplayRole){
         if((item->getDataType()==TPMgrData::group)||
+           (item->getDataType()==TPMgrData::direction)||
+           (item->getDataType()==TPMgrData::comment)||
            (item->getDataType()==TPMgrData::config)){
             if (item->childCount()>0) {
                 if (index.column() == TP::throughput){
@@ -334,26 +336,44 @@ int TPMgr::rootChildCount()
 
 QList<TP *> TPMgr::getChilds(bool showAll)
 {
+    // collect all childs
+    // Group: Total+ Iperfs
+    // Detail: Iperfs
+    // Direction: Tx + Rx + iperfs
+    // Comment: x,y,z ... + iperfs
     QList<TP *> tps;
+    QList<TP *> items;
+    TP *itm;
     // m_tps.clear();
-    // TP *itm = getRootItem();
-    TP *itm = rootItem;
-    // TODO: direction, comm may
-    // tps.append(itm);
-    // qDebug() << "root child:" << itm->childCount() << " cuilds: " << itm->getChilds()  ;
-    for(int i = 0; i<itm->childCount();i++){
-        TP *chitm = itm->child(i);
-        if (!showAll){
-            if (!chitm->getEnabled()){
-                continue;
-            }
+    if ((m_tpgrouptype == TPGroup::GroupMode::Total) ||
+        (m_tpgrouptype == TPGroup::GroupMode::Detail)){
+        itm = getRootItem();
+        items.append(itm);
+    }else {
+        //Direction have two item, Comment may have many
+        itm = rootItem;
+        for(int i = 0; i<itm->childCount();i++){
+            items.append(itm->child(i));
         }
-        // m_tps.append(itm->child(i));
-        tps.append(chitm);
-        if (chitm->haveChilds()){
-            for(int j = 0; j<chitm->childCount();j++){
-                TP *ccitm = chitm->child(j);
-                tps.append(ccitm);
+    }
+    if (items.length()>0){
+        for (TP* item : items) {
+            qDebug() << " item:" << item << " child:" << item->childCount();
+            for(int i = 0; i<item->childCount();i++){
+                TP *chitm = item->child(i);
+                if (!showAll){
+                    if (!chitm->getEnabled()){
+                        continue;
+                    }
+                }
+                // m_tps.append(itm->child(i));
+                tps.append(chitm);
+                if (chitm->haveChilds()){
+                    for(int j = 0; j<chitm->childCount();j++){
+                        TP *ccitm = chitm->child(j);
+                        tps.append(ccitm);
+                    }
+                }
             }
         }
     }
@@ -1150,6 +1170,7 @@ void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
 
 void TPMgr::setTPGroupType(int grouptype)
 {
+    qDebug()<< "setTPGroupType:" << grouptype;
     m_tpgrouptype = grouptype;
     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Detail)){
 
@@ -1225,7 +1246,6 @@ void TPMgr::onUpdater()
             g_tpvalue = g_tpvalue + tpvalue;
             g_lostvalue = g_lostvalue + lostvalue;
             g_totalvalue = g_totalvalue + totalvalue;
-            // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
         itm->setThroughput(QString::number(g_tpvalue));
         itm->setLostRate(QString::number(g_lostvalue), QString::number(g_totalvalue));

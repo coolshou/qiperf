@@ -32,8 +32,6 @@ class ThroughputView : public AbstractView
     Q_OBJECT
 
 public:
-    // explicit ThroughputView(QIperfC *main, QWidget *parent = nullptr);
-    //explicit ThroughputView(QWidget *parent = nullptr);
     explicit ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
                             QAction *aCopyText, QSettings *cfg,
                             int tpgroup = TPGroup::GroupMode::Detail, QString sunit="Mbps",
@@ -115,7 +113,6 @@ private slots:
     // void onShowGrouptype(int grouptype);
 private:
     Ui::ThroughputView *ui;
-    // QIperfC *m_main;
     TPPlot *m_tpplot;
     TPMgr *m_tpmgr;
     QClipboard *m_clipboard;
@@ -144,10 +141,6 @@ private:
     TPFoldingDelegate *tpfoldingdelegate;
     NoWrapDelegate *nowrapdelegate;
     QDateTime m_starttime;
-    // bool m_showgroupTotal=false;
-    // bool m_showgroupPair=false;
-    // bool m_showgroupDir=false;
-    // bool m_showgroupComment=false;
     int m_tpgrouptype;
     QString m_tpunit;
     IperfWrapper *m_iperfwrapper;

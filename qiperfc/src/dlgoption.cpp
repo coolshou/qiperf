@@ -76,16 +76,14 @@ void dlgOption::loadcfg(QSettings *cfg)
     ui->sb_WaitServerReady->setValue(cfg->value("WaitServerReady", 10).toInt());
     ui->sb_width_tp->setValue(cfg->value("TPExportWidth", 1280).toInt());
     ui->sb_heigth_tp->setValue(cfg->value("TPExportHeigth", 500).toInt());
-    // ui->cb_TPGroup->setChecked(cfg->value("TPGroup", false).toBool());
-    // ui->gbTPGroup->
     int tpgrouptype = cfg->value("TPGroupType", 0).toInt();
-    if (tpgrouptype== static_cast<int>(TPGroup::GroupMode::Detail)) {
+    if (tpgrouptype == static_cast<int>(TPGroup::GroupMode::Detail)) {
         ui->rbTPGroupEach->setChecked(true);
-    }else if (tpgrouptype== static_cast<int>(TPGroup::GroupMode::Total)) {
+    }else if (tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)) {
         ui->rbTPGroupAll->setChecked(true);
-    }else if (tpgrouptype== static_cast<int>(TPGroup::GroupMode::Direction)) {
+    }else if (tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction)) {
         ui->rbTPGroupDirection->setChecked(true);
-    }else if (tpgrouptype== static_cast<int>(TPGroup::GroupMode::Comment)) {
+    }else if (tpgrouptype == static_cast<int>(TPGroup::GroupMode::Comment)) {
         ui->rbTPGroupComment->setChecked(true);
     }else {
         ui->rbTPGroupEach->setChecked(true);
@@ -152,7 +150,7 @@ void dlgOption::updatecfg()
     m_cfg->setValue("TPExportWidth", ui->sb_width_tp->value());
     m_cfg->setValue("TPExportHeigth", ui->sb_heigth_tp->value());
     // m_cfg->setValue("TPGroup", ui->cb_TPGroup->isChecked());
-    int tpgrouptype = 0;
+    int tpgrouptype = static_cast<int>(TPGroup::GroupMode::Detail);
     if (ui->rbTPGroupAll->isChecked()){
         tpgrouptype = static_cast<int>(TPGroup::GroupMode::Total);
     }
@@ -419,7 +417,9 @@ void dlgOption::onTPGroupTypeChange(int id)
     qDebug() << "onTPGroupTypeChange: "  << QString::number(id);
 #endif
     emit setTPGroupType(id);
-    m_cfg->setValue("Iperf/TPGroupType", id);
+    m_cfg->beginGroup("Iperf");
+    m_cfg->setValue("TPGroupType", id);
+    m_cfg->endGroup();
 }
 
 void dlgOption::onIgnoreWrongIntervalChanged(int state)

@@ -179,6 +179,12 @@ bool TpWorker::waitClientReady(QString skey, TPStatus::Status expectstatus)
 
 void TpWorker::work()
 {
+    if (m_tps.length()<=0){
+        // emit testStoped(-1);
+        emit errorStop(-1, "Not iperf test pair");
+        return;
+    }
+
     initStart();
     m_TestStartTime = QDateTime::currentDateTime();
     // m_throughputview->setStartTime(m_TestStartTime);

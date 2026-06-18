@@ -1593,7 +1593,7 @@ void QIperfC::showView()
 
 void QIperfC::onAutoLoadFile(QString idx, QString filename, QString savepath)
 {
-    // load file
+    //for DlgSimpleMicro load file
     if (load(filename))
     {
         QString testtime = getNowString();
