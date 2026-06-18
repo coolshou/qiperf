@@ -10,7 +10,6 @@ DlgShowLog::DlgShowLog(QWidget *parent):
     QDialog(parent),
     ui(new Ui::DlgShowLog)
 {
-    ui->te_log->document()->setMaximumBlockCount(50000);
     init();
 }
 
@@ -113,6 +112,7 @@ void DlgShowLog::onNext(bool checked)
 void DlgShowLog::init()
 {
     ui->setupUi(this);
+    ui->te_log->document()->setMaximumBlockCount(50000);
     ui->w_find->setVisible(false);
 
     connect(ui->pbClear, &QPushButton::clicked, this, &DlgShowLog::onClear);
