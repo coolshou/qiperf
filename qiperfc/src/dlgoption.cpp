@@ -404,9 +404,17 @@ void dlgOption::onTPGroupTypeChange(QAbstractButton *button)
 void dlgOption::onTPGroupTypeChange(int id)
 #endif
 {
-#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
-    int id = 0;
+#if QT_VERSION < QT_VERSION_CHECK(5,15,0)
+    // id of different button
+    int id = static_cast<int>(TPGroup::GroupMode::Detail);
     qDebug() << "onTPGroupTypeChange: " << button;
+    if (button.text().contain(GRAPH_TOTAL, Qt::CaseInsensitive)){
+        id = static_cast<int>(TPGroup::GroupMode::Total);
+    }else if (button.text().contain(GRAPH_DIR, Qt::CaseInsensitive)){
+        id = static_cast<int>(TPGroup::GroupMode::Direction);
+    }else if (button.text().contain(GRAPH_COMM, Qt::CaseInsensitive)){
+        id = static_cast<int>(TPGroup::GroupMode::Comment);
+    }
 #else
     qDebug() << "onTPGroupTypeChange: "  << QString::number(id);
 #endif
