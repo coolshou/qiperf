@@ -694,7 +694,7 @@ void QIperfC::onNotice(QString send_addr, QString msg)
             }
             break;
         case EndPointAct::Update:
-            qDebug() << "TODO qiperfd Update: from(" << send_addr << ") " << msg;
+            // qDebug() << "TODO qiperfd Update: from(" << send_addr << ") " << msg;
 
             break;
         case EndPointAct::Del:
@@ -1400,6 +1400,7 @@ void QIperfC::onHeigthChanged(int heigth)
 
 void QIperfC::onSetTPGroupType(int grouptype)
 {
+    m_TPGrouptype = grouptype;
     m_throughputview->setTPGroupType(grouptype);
 }
 
