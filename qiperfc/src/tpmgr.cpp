@@ -283,7 +283,8 @@ TP *TPMgr::add(QString strJson, QString note, TPMgrData::DataType datatype,  TP 
         // qInfo() << "TPMgr::add data:" << data;
     }
     QModelIndex midx = indexFromItem(pitm);
-    int idx = getMaxIdx();
+    // int idx = getMaxIdx();
+    int idx = pitm->childCount();
     beginInsertRows(midx, idx, idx);
     TP *tp = new TP(QString::number(idx), strJson, datatype, pitm);
     pitm->appendChild(tp);
@@ -537,6 +538,7 @@ void TPMgr::reset(){
     //         commItem->removeChildren(0, commItem->childCount());
     //     }
     // }
+    delete rootItem;
     rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
     // QModelIndex midx = indexFromItem(rootItem);
     // qDebug() << "rootItem:" << rootItem << " midx:" << midx << " valid:" << midx.isValid();
@@ -654,6 +656,7 @@ TP *TPMgr::getDirectionItem(QString dir)
 TP *TPMgr::getCommentItem(QString comm)
 {
     qDebug() << "TODO: getCommentItem" << comm;
+    return nullptr;
 }
 
 QModelIndex TPMgr::getRootItemIdx()
@@ -803,7 +806,9 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
     TP *c = getItemByIdx(midx+"_"+idx, tp); //iperf pair config item
     if (c==nullptr){
         //New
-        beginInsertRows(indexFromItem(tp), 0, 0);
+        // beginInsertRows(indexFromItem(tp), 0, 0);
+        int iRow = tp->childCount();
+        beginInsertRows(indexFromItem(tp), iRow, iRow);
         c = new TP(midx+"_"+idx, "", TPMgrData::TP, tp);
         c->setThroughput(dir, value);
         c->setDirection(dir);
@@ -1030,7 +1035,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         // TPDataGroup storage;
         // QHash<int, IntervalGroup> storage;
         // array to hold all -P's rfidx , value & lost rate
-        QString dir=nullptr;
+        QString dir= QString();
         QString idx;
         QString unit="";
         QString ssum="";
