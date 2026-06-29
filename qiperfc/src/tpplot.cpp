@@ -424,6 +424,24 @@ void TPPlot::onXAxisRangeChanged(const QCPRange &newRange)
 
 void TPPlot::doReplot()
 {
+    // qDebug() << "TPPlot size        :" << size();
+    // qDebug() << "TPPlot geometry    :" << geometry();
+    // qDebug() << "viewport           :" << viewport();
+    // qDebug() << "axisRect outerRect :" << axisRect()->outerRect();
+
+    // qDebug() << "plotLayout outer:" << plotLayout()->outerRect();
+    // qDebug() << "plotLayout rect :" << plotLayout()->rect();
+
+    // qDebug() << "axisRect minimum:" << axisRect()->minimumOuterSizeHint();
+    // qDebug() << "legend minimum :" << legend->minimumOuterSizeHint();
+
+    // qDebug() << "legend rect:" << legend->rect();
+    // qDebug() << "legend outer:" << legend->outerRect();
+
+    // qDebug() << "plotLayout rowCount =" << plotLayout()->rowCount();
+    // qDebug() << "plotLayout columnCount =" << plotLayout()->columnCount();
+    // qDebug() << legend->outerRect();
+
     // 保護機制：確保 Mutex 鎖定，因為我們在讀取可能被 addTPData 修改的變數
     QMutexLocker<QMutex> locker(&m_mutex);
     // 更新 Y 軸：加上一點緩衝空間 (例如 1.1 倍)，視覺上比較舒服
@@ -900,22 +918,36 @@ void TPPlot::initCustomPlot()
     legend->setSelectedFont(legendFont);
     legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
 
-    if (0){//TODO: not good on layout
+    if (0){
+        plotLayout()->insertColumn(1);
+        plotLayout()->addElement(0, 1, legend);
+
+        plotLayout()->setColumnStretchFactor(0, 1);
+        plotLayout()->setColumnStretchFactor(1, 0);
+    }
+    if (1){//TODO: not good on layout
         // Add the QCustomPlot legend to the container
         QCPLayoutGrid *subLayout = new QCPLayoutGrid();
         //TODO: position the legend outside of the graph!!
-        plotLayout()->addElement(0, 1, subLayout);
+        // plotLayout()->insertColumn(1);
+        bool ok = plotLayout()->addElement(0, 1, subLayout);
+        qDebug() << "addElement subLayout =" << ok;
         plotLayout()->setColumnStretchFactor(0, 1); // col 0
         plotLayout()->setColumnStretchFactor(1, 0.1); // col 1
         plotLayout()->setRowStretchFactor(0, 1); // row 0
 
-        subLayout->addElement(0, 0, legend); // row 0, col 0
+        qDebug() << "legend layout =" << legend->layout();
+        // bool ok = axisRect()->insetLayout()->remove(legend);
+
+        ok =  subLayout->addElement(0, 0, legend); // row 0, col 0
+        qDebug() << "addElement legend =" << ok;
+        qDebug() << "legend layout =" << legend->layout();
         //TODO: set legenditem's mini higth?
         // subLayout->addElement(0, 1, vScrollBar);
         // subLayout->addElement(0, 1, new QCPLayoutElement); // row 0 col 1
         // subLayout->addElement(1, 0, new QCPLayoutElement); // row 1 col 0
         subLayout->setColumnStretchFactor(0, 1);
-        subLayout->setRowStretchFactor(0, 1);
+        subLayout->setRowStretchFactor(0, 0);
 
         calculateLegendItems();
     }
