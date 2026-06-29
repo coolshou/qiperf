@@ -12,6 +12,7 @@
 #include "myqcpgraph.h"
 #include "myqcpbars.h"
 #include "tpdata.h"
+#include "tpgroup.h"
 
 class TPPlot : public QCustomPlot
 {
@@ -47,7 +48,8 @@ public slots:
     void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
                          QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates);
     void setInterval(int interval);
-    void setShowGroup(bool bShow);
+    // void setShowGroup(bool bShow);
+    void setTPGroupType(int grouptype);
     void setTPUint(QString tpunit);
     void onVLegendScrollChanged(int value);
     void onDataAdded(double key, double value);
@@ -82,7 +84,6 @@ private:
     int m_yAxisMaxDefault=10; // 10 Mbps
     int m_xAxisMaxDefault=30; // 30sec
     int m_interval;
-    bool m_showgroup;
     int m_tpgrouptype;
     QString m_tpunit;
     // QCPLayer *m_TotalLayer;
@@ -92,8 +93,22 @@ private:
     QVector<QCPGraphData> mTotalGraphData;
     MyQCPBars *mTotalLostGraph;  //store total lost rate graph
     QCPAbstractLegendItem *mTotalLostLegendItem; //store total lost rate graph legend
-
     QMap<double, double> mTotalData;
+    // Direction - Tx
+    MyQCPGraph *mDirTxGraph;  //store Tx graph
+    QCPAbstractLegendItem *mDirTxLegendItem;//store tx graph legend
+    QVector<QCPGraphData> mDirTxGraphData;
+    MyQCPBars *mDirTxLostGraph;  //store tx lost rate graph
+    QCPAbstractLegendItem *mDirTxLostLegendItem; //store tx lost rate graph legend
+    QMap<double, double> mDirTxData;
+    // Direction - Rx
+    MyQCPGraph *mDirRxGraph;  //store Rx graph
+    QCPAbstractLegendItem *mDirRxLegendItem;//store rx graph legend
+    QVector<QCPGraphData> mDirRxGraphData;
+    MyQCPBars *mDirRxLostGraph;  //store rx lost rate graph
+    QCPAbstractLegendItem *mDirRxLostLegendItem; //store rx lost rate graph legend
+    QMap<double, double> mDirRxData;
+    // Comment
     // Add a mutex as a member variable
     QMutex m_mutex; // Protects access to mTotalGraph and related plot state
     QTimer *m_replottimer;

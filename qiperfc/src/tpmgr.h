@@ -103,7 +103,6 @@ private:
     void log(QString msg, int lv=3);
 private:
     int mDebug;
-    // bool m_showgroup;
     int m_tpgrouptype;
     TPGroup::GroupMode m_groupmode;
     QTreeView *m_treeview; //relative treeview

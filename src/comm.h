@@ -122,7 +122,8 @@
 
 #define LAYER_TOTAL      "Total"
 #define LAYER_TOTALOSTRATE      "TotalLostRate"
-
+#define LAYER_DIR        "Direction"
+#define LAYER_DIRLOSTRATE        "DirectionLostRate"
 #define LAYER_MAIN       "main"
 #define LAYER_LOSTRATE   "LostRate"
 

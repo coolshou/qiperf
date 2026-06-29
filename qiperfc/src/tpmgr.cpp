@@ -1136,42 +1136,7 @@ void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
     addTPdata(midx, sInterval, idx, value, unit, dir, pkt_lost, pkt_total);
 }
 
-// void TPMgr::setShowGroup(bool bShow)
-// {
-//     Q_UNUSED(bShow)
-//     // m_showgroup = bShow;
-//     QModelIndex sourceparentidx;
-//     QModelIndex targetparentidx;
-//     int count =0;
-//     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){  // not Total to show Total
-//         // move root's child to group
-//         count = rootItem->childCount();
-//         if (count>0){
-//             sourceparentidx = indexFromItem(rootItem);
-//             if (groupItem==nullptr){
-//                 newGroupItem();
-//             }else {
-//                 rootItem->appendChild(groupItem);
-//             }
-//             targetparentidx = indexFromItem(groupItem);
-//             if (targetparentidx.isValid()){
-//                 moveRows(sourceparentidx, 0 , count, targetparentidx, 0);
-//             }
-//         }
-//     }else{
-//         // move group's child to root
-//         if (groupItem){
-//             count = groupItem->childCount();
-//             if (count>0){
-//                 sourceparentidx = indexFromItem(groupItem);
-//                 targetparentidx = indexFromItem(rootItem);
-//                 moveRows(sourceparentidx, 0 , count, targetparentidx, 0);
-//                 //remove groupItem
-//                 rootItem->takeAt(groupItem->row());
-//             }
-//         }
-//     }
-// }
+
 
 void TPMgr::setTPGroupType(int grouptype)
 {
