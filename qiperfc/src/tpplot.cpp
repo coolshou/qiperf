@@ -42,11 +42,13 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
         qDebug() << "addLayer " << LAYER_DIRLOSTRATE << " Fail";
     }
     setTPGroupType(m_tpgrouptype);
+    m_replottimer = new QTimer();
+    connect(m_replottimer, &QTimer::timeout, this, &TPPlot::doReplot);
     clear(); // this will let plot layout looks strange!!
     // setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     // TODO: init plot chart size not good to fit parent's rect
-    m_replottimer = new QTimer();
-    connect(m_replottimer, &QTimer::timeout, this, &TPPlot::doReplot);
+
+
     // m_replottimer->start(500);//0.5 sec replot
     // m_replottimer->start(33);// 大約 30 FPS
     m_replottimer->start(100);
@@ -60,9 +62,10 @@ void TPPlot::setStartTime(QDateTime startTime)
 void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
                              QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates)
 {
+    if (timedatas.isEmpty() || valuedatas.isEmpty()) return;
+
     // qDebug() << "onUpdateTPDatas:" << refrow << " times:" << timedatas << " values: " << valuedatas;
     MyQCPGraph *myGraph = getGraph(refrow);
-    connect(myGraph, &MyQCPGraph::datasSetted, this ,&TPPlot::onDatasSetted);
 
     double minT = *std::min_element(timedatas.begin(), timedatas.end());// x: min time
     double maxT = *std::max_element(timedatas.begin(), timedatas.end());// x: max time
@@ -81,7 +84,6 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<
     if (sum>0){
         // int lost = std::accumulate(packetlosts.begin(), packetlosts.end(), 0);
         MyQCPBars *g_lostrate = getLostRateGraph(refrow);
-        connect(g_lostrate, &MyQCPBars::datasSetted, this ,&TPPlot::onLostRateDatasSetted);
         //lostrate
         Q_UNUSED(lostrates)
         // g_lostrate->setData(timedatas, lostrates);
@@ -295,7 +297,7 @@ void TPPlot::onDataAdded(double key, double value)
             QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex, not work
             int rc=mTotalGraph->getValue(key, orgvalue);
             qDebug() << "key:" << QString::number(key)
-                     << " orgvalue:" << QString::number(orgvalue)
+                     << " orgvaluQMutexLockere:" << QString::number(orgvalue)
                      << " new value:" << QString::number(value);
             if (rc>-1){
                 //sum up orgvalue & new value
@@ -443,7 +445,9 @@ void TPPlot::doReplot()
         // updateXAxisRange(0, m_maxX);
     }
 
-    this->replot(QCustomPlot::rpQueuedReplot);
+    // this->replot(QCustomPlot::rpQueuedReplot);
+    this->replot(QCustomPlot::rpImmediateRefresh);
+
     // this->rpQueuedReplot();
 }
 
@@ -465,7 +469,7 @@ void TPPlot::onIperfTPdata(QString sInterval,
 void TPPlot::onIperfTPdatas(QString refrow, QString sInterval, const QJsonArray &dataarray)
 {
     //add data by dataarray
-    QString dir=nullptr;
+    QString dir;
     QString idx;
     bool isAvg=false;
     QString value="";
@@ -616,13 +620,15 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width)
         // qDebug() << "=====idx:" << idx << " legend->itemCount: " << legend->itemCount();
         // qDebug() << legend->elements(false);
         myGraph = static_cast<MyQCPGraph*>(g);
+        // myGraph = new MyQCPGraph(xAxis, yAxis);
+        connect(myGraph, &MyQCPGraph::datasSetted, this ,&TPPlot::onDatasSetted);
         int R =rand()%245+10;
         int G =rand()%245+10;
         int B =rand()%245+10;
         graphPen = newColorPen(R, G, B, width);
         myGraph->setPen(graphPen);
         myGraph->setLineStyle(QCPGraph::lsLine);
-
+        // registerPlottable();
         if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             //total graph
             myGraph->setLayer(LAYER_TOTAL);
@@ -658,9 +664,7 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width)
             // qDebug() << "mTotalLegendItem:" << mTotalLegendItem;
             if (!(m_tpgrouptype == TPGroup::GroupMode::Total)){
                 //when not m_showgroup, the Total graph's legends will take a place in legend
-                if (!legend->take(litm)){
-                    qDebug() <<"remove mTotalLegendItem:" << mTotalLegendItem << " from legend Fail!!";
-                }
+                litm->setVisible(false);
             }
             if (myGraph->dataCount()==0){
                 litm->setVisible(false);
@@ -682,9 +686,7 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width)
             // qDebug() << "============setup normal legend";
             // litm->setLayer(LAYER_MAIN);// DO NOT place Legend in other Layer, it will be Not visible
             if (m_tpgrouptype == TPGroup::GroupMode::Total){
-                if (!legend->take(litm)){
-                    qDebug() <<"remove LegendItem:" << litm << " from legend Fail!!";
-                }
+                litm->setVisible(false);
             }
             litm->setVisible(m_tpgrouptype == TPGroup::GroupMode::Detail); //legend item
             // myGraph->setVisible(!m_showgroup); // graph
@@ -719,9 +721,9 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width)
 MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx)
 {
     QPen graphPen;
-    QCPGraph *g;
     MyQCPBars *g_lostrate;
     if (!m_lostgraphs.contains(refrowidx)){
+        QCPGraph *g;
         //get main graph's color
         if (m_graphs.contains(refrowidx)){
             // use same color as throughput chart
@@ -735,6 +737,7 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx)
         }
         QPen redPen = newColorPen(255, 0, 0, 2);
         g_lostrate = new MyQCPBars(xAxis, yAxis2);
+        connect(g_lostrate, &MyQCPBars::datasSetted, this ,&TPPlot::onLostRateDatasSetted);
         g_lostrate->setName(refrowidx+ " Lost Rate");
         if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
             //total lost rate graph
@@ -771,9 +774,7 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx)
             // litm->setLayer(LAYER_TOTALOSTRATE);// DO NOT place Legend in other Layer, it will be Not visible
             // qDebug() << "mTotalLostLegendItem:" << mTotalLostLegendItem;
             if (!(m_tpgrouptype==TPGroup::GroupMode::Total)){
-                if (!legend->take(litm)){
-                    qDebug() <<"remove mTotalLostLegendItem:" << mTotalLostLegendItem << " from legend Fail!!";
-                }
+                litm->setVisible(false);
             }
             if (g_lostrate->dataCount()==0){
                 litm->setVisible(false);
@@ -807,68 +808,41 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx)
 
 void TPPlot::clear()
 {
-    // clearGraphs(); // this will clean all graphs
-    if (mTotalGraph){
-        mTotalGraph->clear();
-        mTotalGraph=nullptr;
-    }
-    if (mTotalLegendItem){
-        mTotalLegendItem=nullptr;
-    }
-    if (mTotalLostGraph){
-        mTotalLostGraph->clear();
-        mTotalLostGraph=nullptr;
-    }
-    if (mTotalLostLegendItem){
-        mTotalLostLegendItem=nullptr;
-    }
-    if (mDirTxGraph){
-        mDirTxGraph->clear();
-        mDirTxGraph=nullptr;
-    }
-    if (mDirTxLegendItem){
-        mDirTxLegendItem=nullptr;
-    }
-    if (mDirTxLostGraph){
-        mDirTxLostGraph->clear();
-        mDirTxLostGraph=nullptr;
-    }
-    if (mDirTxLostLegendItem){
-        mDirTxLostLegendItem=nullptr;
-    }
-    if (mDirRxGraph){
-        mDirRxGraph->clear();
-        mDirRxGraph=nullptr;
-    }
-    if (mDirRxLegendItem){
-        mDirRxLegendItem=nullptr;
-    }
-    if (mDirRxLostGraph){
-        mDirRxLostGraph->clear();
-        mDirRxLostGraph=nullptr;
-    }
-    if (mDirRxLostLegendItem){
-        mDirRxLostLegendItem=nullptr;
-    }
-    for (auto it = m_graphs.begin(); it != m_graphs.end(); ++it) {
-        // disconnect(static_cast<MyQCPGraph*>(it.value()), &MyQCPGraph::dataAdded, this, &TPPlot::onDataAdded);
-        removePlottable(it.value());
-    }
+    QMutexLocker<QMutex> locker(&m_mutex);
+    if (m_replottimer) m_replottimer->stop(); // 先叫計時器閉嘴
+    setUpdatesEnabled(false);
+
+    int rd = this->clearPlottables();
+
+    // 5. 清空你的自訂圖表快取容器
+    qDebug() << "clear: step 5 - reset pointers";
+    mTotalGraph     = nullptr;
+    mTotalLostGraph = nullptr;
+    mDirTxGraph     = nullptr;
+    mDirTxLostGraph = nullptr;
+    mDirRxGraph     = nullptr;
+    mDirRxLostGraph = nullptr;
+
     m_graphs.clear();
-    m_legends.clear();
-    for (auto it = m_lostgraphs.begin(); it != m_lostgraphs.end(); ++it) {
-        // disconnect(static_cast<MyQCPBars*>(it.value()), &MyQCPBars::dataAdded, this, &TPPlot::onLostRateDataAdded);
-        removePlottable(it.value());
-    }
     m_lostgraphs.clear();
+
+    // 6. 重設 legend pointer 也要清
+    mTotalLegendItem    = nullptr;
+    mTotalLostLegendItem = nullptr;
+    mDirTxLegendItem    = nullptr;
+    mDirRxLegendItem    = nullptr;
+    mDirTxLostLegendItem = nullptr;
+    mDirRxLostLegendItem = nullptr;
+    m_legends.clear();
     m_lostratelegends.clear();
+
     //axis reset
     xAxis->setRange(0, m_xAxisMaxDefault);
     yAxis->setRange(0, m_yAxisMaxDefault);
 
     setStartTime(QDateTime());
 
-    //re-create Total Graph/Total Lost Graph and it's legend
+    // //re-create Total Graph/Total Lost Graph and it's legend
     if (m_tpgrouptype == TPGroup::GroupMode::Total){
         if (!mTotalGraph){
             mTotalGraph = getGraph(GRAPH_TOTAL, GroupWidth::Total);
@@ -877,12 +851,10 @@ void TPPlot::clear()
             mTotalLostGraph = getLostRateGraph(GRAPH_TOTAL);
         }
     }
-    try{
-        //Qt/QCustomPlot 的 crash 通常是 SIGSEGV（segfault），這是 OS-level signal，不是 C++ exception，catch(...) 根本攔不住它。這個 try/catch 只是假安全感
-        replot();// when no graph, replot will cause plot area shrink
-    }catch (...){
-        qDebug() << "TPPlot::clear Unknown ERROR";
-    }
+    //Qt/QCustomPlot 的 crash 通常是 SIGSEGV（segfault），這是 OS-level signal，不是 C++ exception，catch(...) 根本攔不住它。這個 try/catch 只是假安全感
+    setUpdatesEnabled(true);
+    replot(QCustomPlot::rpImmediateRefresh);// when no graph, replot will cause plot area shrink
+    if (m_replottimer) m_replottimer->start(100); // 清理完畢再開啟
 }
 
 void TPPlot::setXRangeUpper(double upper)
@@ -922,7 +894,13 @@ void TPPlot::initCustomPlot()
     // legend
     legend->setVisible(true);
     // connect(legend, &QCPLegend::layerChanged)
-    if (1){//TODO: not good on layout
+    QFont legendFont = font();
+    legendFont.setPointSize(8);
+    legend->setFont(legendFont);
+    legend->setSelectedFont(legendFont);
+    legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
+
+    if (0){//TODO: not good on layout
         // Add the QCustomPlot legend to the container
         QCPLayoutGrid *subLayout = new QCPLayoutGrid();
         //TODO: position the legend outside of the graph!!
@@ -938,12 +916,6 @@ void TPPlot::initCustomPlot()
         // subLayout->addElement(1, 0, new QCPLayoutElement); // row 1 col 0
         subLayout->setColumnStretchFactor(0, 1);
         subLayout->setRowStretchFactor(0, 1);
-
-        QFont legendFont = font();
-        legendFont.setPointSize(8);
-        legend->setFont(legendFont);
-        legend->setSelectedFont(legendFont);
-        legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
 
         calculateLegendItems();
     }
@@ -1020,7 +992,7 @@ QVector<QCPGraphData> TPPlot::convertQMapToQVector(const QMap<double, double> &m
         data.key = it.key();
         data.value = it.value();
         vector.append(data);
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
     return vector;
 }
