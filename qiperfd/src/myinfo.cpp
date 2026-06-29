@@ -13,6 +13,7 @@
 //#include <fstream> //file
 #include <sys/ioctl.h>
 #include <net/if.h>
+#include <QProcess>
 #endif
 #if defined(Q_OS_WIN32)
 #include <Windows.h>
@@ -29,6 +30,7 @@
 // #include "version.h"
 #include "../src/versions.h"
 #if defined(Q_OS_LINUX)
+#include <fcntl.h>
 #include "comm.h"
 #endif
 #include <QDebug>
@@ -39,6 +41,15 @@ MyInfo::MyInfo(QString mgr_ifname, QObject *parent)
 {
     m_ifname = mgr_ifname;
     m_debuglv = 3;
+}
+
+MyInfo::~MyInfo()
+{
+#ifdef Q_OS_LINUX
+    if (m_hostNetnsFd >= 0) {
+        close(m_hostNetnsFd);
+    }
+#endif
 }
 
 QString MyInfo::collectInfo()
@@ -142,6 +153,7 @@ QString MyInfo::collectInfo()
 
 QJsonObject MyInfo::collectNetInfo()
 {
+    //TODO: get netns's interfaces
     QJsonObject netObjects;
     //獲取所有網路介面的列表
     QList<QNetworkInterface> list = QNetworkInterface::allInterfaces();
@@ -366,6 +378,90 @@ void MyInfo::getTTL()
     qDebug() << "getTTL: Not support platform: " << QSysInfo::productType();
 #endif
 }
+
+#ifdef Q_OS_LINUX
+QStringList MyInfo::getNetworkNamespaces()
+{
+    //get all netns by /var/run/netns
+    QStringList nsList;
+    //create by ip netns add
+    QDir netnsDir(NETNS_ROOT);
+
+    // 檢查該目錄是否存在 (有些剛裝好的系統如果沒建立過 netns，這個目錄可能不存在)
+    if (!netnsDir.exists()) {
+        qDebug() << NETNS_ROOT << " 目錄不存在，目前應該沒有自訂的 netns。";
+        return nsList;
+    }
+
+    // 只列出檔案，排除 "." 和 ".."
+    nsList = netnsDir.entryList(QDir::Files | QDir::NoDotAndDotDot);
+    return nsList;
+}
+
+bool MyInfo::createNetworkNamespace(const QString &nsName)
+{
+    // TODO: create NetworkNamespaces "nsName"
+    QProcess process;
+    // 等同於在終端機執行: sudo ip netns add <nsName>
+    // 注意：操控 netns 通常需要 root 權限 (sudo)
+    process.start("sudo", QStringList() << "ip" << "netns" << "add" << nsName);
+
+    if (process.waitForFinished()) {
+        if (process.exitCode() == 0) {
+            qDebug() << "Success create netns:" << nsName;
+            return true;
+        } else {
+            qDebug() << "Fail to create netns:" << process.readAllStandardError();
+            return false;
+        }
+    }
+    return false;
+}
+
+bool MyInfo::backupCurrentNamespace()
+{
+    // /proc/self/ns/net 指向目前執行緒正在使用的網路命名空間
+    m_hostNetnsFd = open("/proc/self/ns/net", O_RDONLY | O_CLOEXEC);
+    if (m_hostNetnsFd < 0) {
+        perror("備份主機 netns 失敗");
+        return false;
+    }
+    return true;
+}
+
+bool MyInfo::switchToNamespace(const QString &nsName)
+{
+    QString nsPath = QString("%1/%2").arg(NETNS_ROOT,nsName);
+    int targetFd = open(nsPath.toUtf8().constData(), O_RDONLY | O_CLOEXEC);
+    if (targetFd < 0) {
+        perror("開啟目標 netns 檔案失敗");
+        return false;
+    }
+    if (setns(targetFd, CLONE_NEWNET) != 0) {
+        perror("切換至目標 netns 失敗");
+        close(targetFd);
+        return false;
+    }
+    close(targetFd); // setns 成功後即可關閉目標 fd
+    return true;
+}
+
+bool MyInfo::restoreNamespace()
+{
+    if (m_hostNetnsFd < 0) {
+        qWarning() << "沒有有效的備份 fd 可供還原 netns";
+        return false;
+    }
+    if (setns(m_hostNetnsFd, CLONE_NEWNET) != 0) {
+        perror("還原回主機 netns 失敗");
+        return false;
+    }
+    // 還原成功後關閉備份的 fd
+    // close(m_hostNetnsFd);
+    // m_hostNetnsFd = -1;
+    return true;
+}
+#endif
 
 QString MyInfo::readSysFile(const QString &path) {
     QFile file(path);

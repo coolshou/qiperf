@@ -17,7 +17,6 @@
 #include <Windows.h>
 #else
 #include <pthread.h>
-#include <fcntl.h>
 #endif
 
 #include <QDebug>
@@ -593,28 +592,3 @@ void IperfWorker::onDebuginfo(QString msg)
 {
     emit debuginfo("[IperfWrapper]" + msg);
 }
-
-#ifdef Q_OS_LINUX
-bool IperfWorker::switchNamespace(const QString &nsName)
-{
-    QString nsPath = QString("/var/run/netns/%1").arg(nsName);
-
-    // 1. 打開 netns 的檔案描述符 (FD)
-    int fd = open(nsPath.toUtf8().constData(), O_RDONLY | O_CLOEXEC);
-    if (fd < 0) {
-        perror("open netns file failed");
-        return false;
-    }
-
-    // 2. 切換目前的「執行緒」到該網路命名空間
-    if (setns(fd, CLONE_NEWNET) != 0) {
-        perror("setns failed");
-        close(fd);
-        return false;
-    }
-
-    close(fd);
-    //remain network operation will run in "nsName"
-    return true;
-}
-#endif

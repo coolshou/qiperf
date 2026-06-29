@@ -153,6 +153,9 @@ enum class BUFFER_SIZES {
 #define IPv4_TTL_PATH "/proc/sys/net/ipv4/ip_default_ttl"
 #define IPv6_TTL_PATH "/proc/sys/net/ipv6/conf/all/hop_limit"
 
+#ifdef Q_OS_LINUX
+#define NETNS_ROOT "/var/run/netns"
+#endif
 // set hop limit // Windows : default 128
 //netsh interface ipv4 set global defaultcurhoplimit=65
 //netsh interface ipv6 set global defaultcurhoplimit=65

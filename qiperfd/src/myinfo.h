@@ -15,7 +15,7 @@ class MyInfo : public QObject
     Q_OBJECT
 public:
     explicit MyInfo(QString mgr_ifname, QObject *parent = nullptr);
-
+    ~MyInfo() override;
     QString collectInfo();
     QJsonObject collectNetInfo();
     QJsonArray collectSerial();
@@ -33,7 +33,13 @@ public:
     quint64 getSysBufferSize();
     void setSysBufferSize(quint64 buff);
     void getTTL();
-
+#ifdef Q_OS_LINUX
+    QStringList getNetworkNamespaces();
+    bool createNetworkNamespace(const QString &nsName);
+    bool backupCurrentNamespace();
+    bool switchToNamespace(const QString &nsName);
+    bool restoreNamespace();
+#endif
 #if defined(Q_OS_WIN32)
     QString getHResultErrorString(HRESULT hr);
     QString getLastErrorAsString();
@@ -72,6 +78,9 @@ private:
     QString m_iperf21ver;
     QString m_iperf22ver;
     QString m_iperf3ver;
+#ifdef Q_OS_LINUX
+    int m_hostNetnsFd = -1;
+#endif
 };
 
 #endif // MYINFO_H

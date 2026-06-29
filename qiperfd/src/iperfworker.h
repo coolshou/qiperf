@@ -78,9 +78,7 @@ private slots:
     void parserStdOut(QString msg);
     void onThroughputData(int refrow, QString sInterval,  QString data);
     void onDebuginfo(QString msg);
-#ifdef Q_OS_LINUX
-    bool switchNamespace(const QString &nsName);
-#endif
+
 private:
     QString mReturnAddress;
     QString m_threadid; // real thread id
