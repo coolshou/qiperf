@@ -704,7 +704,12 @@ void ThroughputView::onTPselectionChanged(const QItemSelection &selected, const 
 void ThroughputView::onVLegendScrollBarRange(int count)
 {
     // m_vLegendScrollBar->setRange(0, count);
-    m_vLegendScrollBar->setRange(0, count-10);
+    //TODO: max range
+    int iMax=0;
+    if (count>10){
+        iMax = count - 10;
+    }
+    m_vLegendScrollBar->setRange(0, iMax);
 }
 
 QString ThroughputView::getGraphDataToJsonStr(QCPGraph *graph)
