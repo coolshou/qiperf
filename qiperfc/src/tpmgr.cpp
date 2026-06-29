@@ -359,7 +359,7 @@ QList<TP *> TPMgr::getChilds(bool showAll)
     }
     if (items.length()>0){
         for (TP* item : items) {
-            qDebug() << " item:" << item << " child:" << item->childCount();
+            // qDebug() << " item:" << item << " child:" << item->childCount();
             for(int i = 0; i<item->childCount();i++){
                 TP *chitm = item->child(i);
                 if (!showAll){
@@ -1028,7 +1028,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
         QJsonArray jArr = doc.array();//.object();
         // qDebug() << "[TPMgr::onIperfTPdata]refrow(" << refrow << ") sInterval:" << sInterval
         //          << " QJsonArray size:" << jArr.size();
-        emit IperfTPdatas(refrow, sInterval, jArr);
+        emit IperfTPdatas(refrow, sInterval, jArr); // for tpplot
 
         //TODO: this only calc same reporter's value, in --bidir it will have two repoter!!
         // QHash<double, TPDataGroup> storage;
@@ -1082,6 +1082,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                     m_intervals[idx] = fInterval;
                 }
             }else {
+                // this is avg value
                 // TODO: this part TP data seems strange??
                 qDebug() << "refrow:" << refrow << " idx:" << idx
                          << " sInterval:" + sInterval <<" Avg:" << value;
