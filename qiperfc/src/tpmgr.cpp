@@ -399,7 +399,8 @@ bool TPMgr::removeRows(int row, int count, const QModelIndex &parent)
     return success;
 }
 
-bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild)
+bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
+                     const QModelIndex &destinationParent, int destinationChild)
 {
     if (sourceRow < 0 || sourceRow + count > rowCount(sourceParent) ||
         destinationChild < 0 || destinationChild > rowCount(destinationParent)){
@@ -415,11 +416,20 @@ bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, 
     if (!destitem){
         destitem = rootItem;
     }
-    for (int i = sourceRow; i < count; i++) {
-        TP *m = sourceitem->takeAt(0); // after take, the idx will change
-        m->setParent(destitem);
-        destitem->insertChild(i, m);
+    // 从后往前取，避免 index 位移问题
+    QList<TP*> moved;
+    for (int i = sourceRow + count - 1; i >= sourceRow; i--) {
+        moved.prepend(sourceitem->takeAt(i));  // 按正序收集
     }
+    for (int i = 0; i < moved.count(); i++) {
+        moved[i]->setParent(destitem);
+        destitem->insertChild(destinationChild + i, moved[i]);
+    }
+    // for (int i = sourceRow; i < count; i++) {
+    //     TP *m = sourceitem->takeAt(0); // after take, the idx will change
+    //     m->setParent(destitem);
+    //     destitem->insertChild(i, m);
+    // }
     endMoveRows();
     return true;
 }
@@ -1141,19 +1151,77 @@ void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
 
 void TPMgr::setTPGroupType(int grouptype)
 {
-    qDebug()<< "setTPGroupType:" << grouptype;
+    qDebug()<< "old:" << m_tpgrouptype << ", setTPGroupType:" << grouptype;
     m_tpgrouptype = grouptype;
+    int count=0;
     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Detail)){
-
+        //total to detail
+        if (groupItem){
+            if (groupItem->haveChilds()){
+                count = groupItem->childCount();
+                moveRows(indexFromItem(groupItem), 0, count,
+                         indexFromItem(rootItem), rootItem->childCount());
+            }
+            //TODO: remove groupItem from rootItem();
+            rootItem->removeChild(groupItem);
+            groupItem = nullptr;
+        }
+        //TODO: direction to detail
+        if (dirTxItem){
+            if (dirTxItem->haveChilds()){
+                count = dirTxItem->childCount();
+                moveRows(indexFromItem(dirTxItem), 0, count,
+                         indexFromItem(rootItem), rootItem->childCount());
+            }
+        }
+        if (dirRxItem){
+            if (groupItem->haveChilds()){
+                count = dirRxItem->childCount();
+                moveRows(indexFromItem(dirRxItem), 0, count,
+                         indexFromItem(rootItem), rootItem->childCount());
+            }
+        }
     }
     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){
-
+        count = rootItem->childCount();
+        getGroupItem(); // when not groupItem, add new groupItem
+        // detail -> total
+        if (rootItem){
+            if (rootItem->haveChilds()){
+                qDebug() << "detail -> total: groupItem:" << groupItem;
+                moveRows(indexFromItem(rootItem), 0, count,
+                         indexFromItem(groupItem), groupItem->childCount());
+            }
+        }
+        //TODO: direction -> total
+        if (dirTxItem){
+            if (dirTxItem->haveChilds()){
+                count = dirTxItem->childCount();
+                moveRows(indexFromItem(dirTxItem), 0, count,
+                         indexFromItem(groupItem), groupItem->childCount());
+            }
+        }
+        if (dirRxItem){
+            if (groupItem->haveChilds()){
+                count = dirRxItem->childCount();
+                moveRows(indexFromItem(dirRxItem), 0, count,
+                         indexFromItem(groupItem), groupItem->childCount());
+            }
+        }
     }
     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction)){
-
+        //total -> direction
+        if (groupItem){
+            if (groupItem->haveChilds()){
+                // TODO: make sure it's direction
+                // moveRows(indexFromItem(groupItem), 0, groupItem->childCount(),
+                //          indexFromItem(rootItem), rootItem->childCount());
+            }
+        }
+        //detail -> direction
     }
     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Comment)){
-
+        // TODO: comment mode
     }
 }
 
