@@ -97,6 +97,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     initStatusbar();
     connect(m_dlgoption, &dlgOption::updateCpuCheckInterval, this, &QIperfC::onUpdateCpuCheckInterval);
     connect(m_dlgoption, &dlgOption::updateMemCheckInterval, this, &QIperfC::onUpdateMemCheckInterval);
+    connect(m_throughputview, &ThroughputView::showGrouptype, m_dlgoption, &dlgOption::onSetTPGroupType);
     // UI actions
     initActions();
     initToolbar();
