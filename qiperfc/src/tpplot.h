@@ -108,7 +108,7 @@ private:
     MyQCPBars *mDirRxLostGraph;  //store rx lost rate graph
     QCPAbstractLegendItem *mDirRxLostLegendItem; //store rx lost rate graph legend
     QMap<double, double> mDirRxData;
-    // Comment
+    // TODO Comment
     // Add a mutex as a member variable
     QMutex m_mutex; // Protects access to mTotalGraph and related plot state
     QTimer *m_replottimer;

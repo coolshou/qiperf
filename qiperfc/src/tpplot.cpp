@@ -24,6 +24,7 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_interval = 1;
     setTPUint(sunit);
+    qDebug() << "parent geometry:" << parent->geometry();
     initCustomPlot();
     QCPLayer *mainlayer = layer(LAYER_MAIN);
     if (!addLayer(LAYER_TOTAL, mainlayer, limAbove)){
@@ -149,6 +150,7 @@ void TPPlot::setTPGroupType(int grouptype)
     }
 
     //for m_legends
+    // QCPAbstractLegendItem inVisible still occupy space in legends
     QMap<QString, QCPAbstractLegendItem*>::const_iterator legenditerator = m_legends.constBegin();
     while (legenditerator != m_legends.constEnd()) {
         if (legenditerator.value() == mTotalLegendItem) {
@@ -161,12 +163,6 @@ void TPPlot::setTPGroupType(int grouptype)
         }else{
             //detail Legend
             legenditerator.value()->setVisible(bshowDetail);
-            // qDebug() << "mTotalGraph->dataCount: " << mTotalGraph->dataCount();
-            // if (mTotalGraph->dataCount()){
-            //     legenditerator.value()->setVisible(bshowTotal);
-            // }else {
-            //     legenditerator.value()->setVisible(false);
-            // }
         }
         ++legenditerator;
     }
@@ -177,26 +173,6 @@ void TPPlot::setTPGroupType(int grouptype)
         if (lostlegenditerator.value() == mTotalLostLegendItem) {
             //total lostlegend
             lostlegenditerator.value()->setVisible(bshowTotal);
-            // if (m_showgroup){
-            //     if(legend->hasItem(lostlegenditerator.value())){
-            //         qDebug() << "remove lostlegend " << lostlegenditerator.value();
-            //         if(!legend->take(lostlegenditerator.value())){
-            //             qDebug() << "remove lostlegend " << lostlegenditerator.value() << " fail";
-            //         }else{
-            //             legend->simplify();
-            //         }
-            //     }
-            // }else{
-            //     // qDebug() << "add lostlegenditerator " << lostlegenditerator.value();
-            //     if(!legend->hasItem(lostlegenditerator.value())){
-            //         qDebug() << "add lostlegend " <<  lostlegenditerator.value();
-            //         if(!legend->addItem(lostlegenditerator.value())){
-            //             qDebug() << "add lostlegend " <<  lostlegenditerator.value() << " fail";
-            //         }else{
-            //             legend->simplify();
-            //         }
-            //     }
-            // }
         }else if ((lostlegenditerator.value() == mDirTxLostLegendItem)||
                    (lostlegenditerator.value() == mDirRxLostLegendItem)){
             // direction lostlegend
@@ -204,46 +180,9 @@ void TPPlot::setTPGroupType(int grouptype)
         }else{
             // detail LostLegend, TODO: check if TotalLostgraph have data?
             lostlegenditerator.value()->setVisible(bshowDetail);
-            // qDebug() << "mTotalLostGraph->dataCount: " << mTotalLostGraph->dataCount();
-            // if (mTotalLostGraph->dataCount()){
-            //     lostlegenditerator.value()->setVisible(m_showgroup);
-            // }else{
-            //     lostlegenditerator.value()->setVisible(false);
-            // }
         }
         ++lostlegenditerator;
     }
-    // if (m_showgroup){
-    //     //Non Total => Total
-    //     // legend->item()
-    //     if(!legend->hasItem(mTotalLegendItem)){
-    //         if(!legend->addItem(mTotalLegendItem)){
-    //             qDebug() << "add  mTotalLegendItem fail";
-    //         }
-    //     }
-    //     if(!legend->hasItem(mTotalLostLegendItem)){
-    //         if (!legend->addItem(mTotalLostLegendItem)){
-    //             qDebug() << "add  mTotalLostLegendItem fail";
-    //         }
-    //     }
-    // }else{
-    //     //Total => Non Total
-    //     // TODO: when no data, the plot area will shrink!!
-    //     if(legend->hasItem(mTotalLegendItem)){
-    //         if (!legend->take(mTotalLegendItem)){
-    //             qDebug() << "remove mTotalLegendItem fail";
-    //         }else {
-    //             legend->simplify();
-    //         }
-    //     }
-    //     if(legend->hasItem(mTotalLostLegendItem)){
-    //         if (!legend->take(mTotalLostLegendItem)){
-    //             qDebug() << "remove mTotalLostLegendItem fail";
-    //         }else {
-    //             legend->simplify();
-    //         }
-    //     }
-    // }
     replot();
 }
 
@@ -317,7 +256,19 @@ void TPPlot::onDataAdded(double key, double value)
 
         }
     }
-    // TODO: direction
+    if (m_tpgrouptype == TPGroup::GroupMode::Direction){
+        // TODO: direction
+        if (mDirTxGraph){
+
+        }
+        if (mDirRxGraph){
+
+        }
+    }
+    if (m_tpgrouptype == TPGroup::GroupMode::Comment){
+        // TODO: Comment
+    }
+
 
 }
 
@@ -405,7 +356,7 @@ void TPPlot::selectionChanged()
             }
             emit selectedTPitem(graph->name());
         }
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
+        // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 }
 
@@ -630,13 +581,13 @@ void TPPlot::del(QString idx)
 
 MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width)
 {
+    // refrowidx:
+    // width: line width, default 1
     QPen graphPen;
     QCPGraph *g;
     MyQCPGraph *myGraph;
     if (!m_graphs.contains(refrowidx)){  // new graphs when not exist
         g = addGraph(xAxis, yAxis);
-        // qDebug() << "=====idx:" << idx << " legend->itemCount: " << legend->itemCount();
-        // qDebug() << legend->elements(false);
         myGraph = static_cast<MyQCPGraph*>(g);
         // myGraph = new MyQCPGraph(xAxis, yAxis);
         connect(myGraph, &MyQCPGraph::datasSetted, this ,&TPPlot::onDatasSetted);
@@ -663,6 +614,7 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width)
             } else {
                 mDirRxGraph = myGraph;
             }
+            //TODO: comment
         }else {
             //normal graph
             myGraph->setLayer(LAYER_MAIN);
@@ -670,7 +622,8 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width)
         }
         // qDebug() << "afer addGraph legend Count:" << QString::number(legend->itemCount());
         // legends item
-        QCPAbstractLegendItem *litm = legend->item(legend->itemCount()-1);
+        // QCPAbstractLegendItem *litm = legend->item(legend->itemCount()-1);
+        QCPPlottableLegendItem *litm = legend->itemWithPlottable(myGraph);
         if (!m_legends.contains(refrowidx)) {
             // qDebug() << "DO not have m_legend:" << litm << " ADD to m_legends" ;
             m_legends.insert(refrowidx, litm);
@@ -918,36 +871,22 @@ void TPPlot::initCustomPlot()
     legend->setSelectedFont(legendFont);
     legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
 
-    if (0){
-        plotLayout()->insertColumn(1);
-        plotLayout()->addElement(0, 1, legend);
-
-        plotLayout()->setColumnStretchFactor(0, 1);
-        plotLayout()->setColumnStretchFactor(1, 0);
-    }
-    if (1){//TODO: not good on layout
+    if (1){
+        //TODO: not good on layout on Detail mode!! small, not extend the row
+        qDebug() << "TPPlot geometry    :" << geometry();
+        qDebug() << "axisRect outerRect :" << axisRect()->outerRect();
+        axisRect()->setMinimumSize(100, 200);
         // Add the QCustomPlot legend to the container
         QCPLayoutGrid *subLayout = new QCPLayoutGrid();
+        subLayout->setMinimumSize(100, 200);
         //TODO: position the legend outside of the graph!!
-        // plotLayout()->insertColumn(1);
         bool ok = plotLayout()->addElement(0, 1, subLayout);
-        qDebug() << "addElement subLayout =" << ok;
         plotLayout()->setColumnStretchFactor(0, 1); // col 0
         plotLayout()->setColumnStretchFactor(1, 0.1); // col 1
         plotLayout()->setRowStretchFactor(0, 1); // row 0
-
-        qDebug() << "legend layout =" << legend->layout();
-        // bool ok = axisRect()->insetLayout()->remove(legend);
-
         ok =  subLayout->addElement(0, 0, legend); // row 0, col 0
-        qDebug() << "addElement legend =" << ok;
-        qDebug() << "legend layout =" << legend->layout();
-        //TODO: set legenditem's mini higth?
-        // subLayout->addElement(0, 1, vScrollBar);
-        // subLayout->addElement(0, 1, new QCPLayoutElement); // row 0 col 1
-        // subLayout->addElement(1, 0, new QCPLayoutElement); // row 1 col 0
         subLayout->setColumnStretchFactor(0, 1);
-        subLayout->setRowStretchFactor(0, 0);
+        subLayout->setRowStretchFactor(0, 1);
 
         calculateLegendItems();
     }

@@ -454,11 +454,13 @@ void ThroughputView::initMenus()
     m_actionGroupPair = new QAction("Iperf Pair");
     m_actionGroupPair->setCheckable(true);
     connect(m_actionGroupPair, &QAction::triggered, this, &ThroughputView::setShowGroupPair);
-    m_actionGroupDir = new QAction("Direction");
+    m_actionGroupDir = new QAction("Direction(TODO)");
     m_actionGroupDir->setCheckable(true);
+    m_actionGroupDir->setEnabled(false);
     connect(m_actionGroupDir, &QAction::triggered, this, &ThroughputView::setShowGroupDir);
     m_actionGroupComment = new QAction("Comment(TODO)");
     m_actionGroupComment->setCheckable(true);
+    m_actionGroupComment->setEnabled(false);
     connect(m_actionGroupComment, &QAction::triggered, this, &ThroughputView::setShowGroupComment);
 
     m_actionRawData = new QAction("Copy plotchart Raw Data");
@@ -741,6 +743,7 @@ void ThroughputView::initThroughputChart()
 {
     // throughput chart
     m_vLegendScrollBar = new QScrollBar(Qt::Vertical, this);
+    // m_tpplot = new TPPlot(m_tpgrouptype, m_tpunit, ui->widget_console);
     m_tpplot = new TPPlot(m_tpgrouptype, m_tpunit, ui->widget_console);
     // m_tpplot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     qDebug() << "enable openGl:" << m_tpplot->openGl();
