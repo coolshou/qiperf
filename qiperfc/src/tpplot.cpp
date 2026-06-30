@@ -284,7 +284,7 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data)
         mTotalGraph->setData(sumdata);
         mTotalGraph->rescaleAxes(true); //TODO: not good to show y Max value
         if (mTotalLegendItem){
-            mTotalLegendItem->setVisible(true);
+            mTotalLegendItem->setVisible((m_tpgrouptype==static_cast<int>(TPGroup::GroupMode::Total)));
         }
     }else{
         qDebug() << "onDatasSetted: ERROR does not have mTotalGraph" ;
@@ -513,17 +513,35 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
             myGraph->addData(xdata, ydata);
         }
     }
-    if (m_tpgrouptype == TPGroup::GroupMode::Total){
-        mTotalLegendItem->setVisible((m_tpgrouptype==TPGroup::GroupMode::Total));
-    } else if (m_tpgrouptype == TPGroup::GroupMode::Direction){
+
+    //this part will keeps update when data come in, should we set visiable at begining?
+    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){
+        if (mTotalLegendItem){
+            bool showtotal = (m_tpgrouptype==static_cast<int>(TPGroup::GroupMode::Total));
+            qDebug() << "show total legenditem:" << showtotal;
+            mTotalLegendItem->setVisible(showtotal);
+        }
+    } else if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction)){
         // TODO: direction
-        mDirTxLegendItem->setVisible((m_tpgrouptype==TPGroup::GroupMode::Direction));
-        mDirRxLegendItem->setVisible((m_tpgrouptype==TPGroup::GroupMode::Direction));
+        if (mDirTxLegendItem){
+            mDirTxLegendItem->setVisible((m_tpgrouptype==static_cast<int>(TPGroup::GroupMode::Direction)));
+        }
+        if (mDirRxLegendItem){
+            mDirRxLegendItem->setVisible((m_tpgrouptype==static_cast<int>(TPGroup::GroupMode::Direction)));
+        }
     } else {
+        // detail
         if (m_legends.contains(refrowidx)){
+            qDebug() << "addTPData refrowidx:" << refrowidx;
             QCPAbstractLegendItem *itm = m_legends.value(refrowidx);
             if (itm){
-                itm->setVisible(true);
+                if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)||
+                    refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)||
+                    refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)){
+                    itm->setVisible(false);
+                }else {
+                    itm->setVisible(true);
+                }
             }
         }
     }
@@ -878,13 +896,20 @@ void TPPlot::initCustomPlot()
         QCPLayoutGrid *subLayout = new QCPLayoutGrid();
         subLayout->setMinimumSize(100, 200);
         //TODO: position the legend outside of the graph!!
-        bool ok = plotLayout()->addElement(0, 1, subLayout);
+        plotLayout()->addElement(0, 1, subLayout);
         plotLayout()->setColumnStretchFactor(0, 1); // col 0
         plotLayout()->setColumnStretchFactor(1, 0.1); // col 1
         plotLayout()->setRowStretchFactor(0, 1); // row 0
-        ok =  subLayout->addElement(0, 0, legend); // row 0, col 0
-        subLayout->setColumnStretchFactor(0, 1);
-        subLayout->setRowStretchFactor(0, 1);
+        // legend->setBorderPen(Qt::NoPen); // no Border line
+        // legend->setBrush(Qt::NoBrush); // no background
+        subLayout->addElement(0, 0, legend); // row 0, col 0
+        // add spacer，let legend align up
+        QCPLayoutElement *spacer = new QCPLayoutElement(this);
+        spacer->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+        subLayout->addElement(1, 0, spacer);
+        // spacer take all rest space，let legend in smallest hight
+        subLayout->setRowStretchFactor(0, 0.001); // legend row as small
+        subLayout->setRowStretchFactor(1, 1.0);   // spacer row take all space
 
         calculateLegendItems();
     }
