@@ -786,7 +786,6 @@ void TPPlot::clear()
     int rd = this->clearPlottables();
 
     // 5. 清空你的自訂圖表快取容器
-    qDebug() << "clear: step 5 - reset pointers";
     mTotalGraph     = nullptr;
     mTotalLostGraph = nullptr;
     mDirTxGraph     = nullptr;
@@ -822,7 +821,6 @@ void TPPlot::clear()
             mTotalLostGraph = getLostRateGraph(GRAPH_TOTAL);
         }
     }
-    //Qt/QCustomPlot 的 crash 通常是 SIGSEGV（segfault），這是 OS-level signal，不是 C++ exception，catch(...) 根本攔不住它。這個 try/catch 只是假安全感
     setUpdatesEnabled(true);
     replot(QCustomPlot::rpImmediateRefresh);// when no graph, replot will cause plot area shrink
     if (m_replottimer) m_replottimer->start(100); // 清理完畢再開啟
@@ -1064,7 +1062,8 @@ void TPPlot::calculateLegendItems()
     } else if (m_tpgrouptype==TPGroup::GroupMode::Direction){
         emit sigLegendCount(2);
     }else{
-        qDebug() << "sigLegendCount:" << itemsFit;
+        qDebug() << "sigLegendCount:" << itemsFit
+                 << ",itemHeight:" << itemHeight << ", legend height" << legendSize.height();
         emit sigLegendCount(itemsFit);
     }
 }
