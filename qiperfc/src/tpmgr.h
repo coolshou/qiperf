@@ -85,6 +85,8 @@ public slots:
                        QString value, QString unit, QString dir,
                        QString pkt_lost, QString pkt_total);
     // void setShowGroup(bool bShow);
+    QList<TP*> takeConfigsFrom(TP *container);
+    void insertConfigsTo(TP *target, QList<TP*> configs);
     void setTPGroupType(int grouptype);
     void onRowsInserted(const QModelIndex &parent, int first, int last);
     void setTPUint(QString tpunit);
@@ -101,6 +103,7 @@ private slots:
     void onUpdater();
 private:
     void log(QString msg, int lv=3);
+    void moveToDirection(TP *tp);
 private:
     int mDebug;
     int m_tpgrouptype;

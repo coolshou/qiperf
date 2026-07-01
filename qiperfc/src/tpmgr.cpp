@@ -402,6 +402,8 @@ bool TPMgr::removeRows(int row, int count, const QModelIndex &parent)
 bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
                      const QModelIndex &destinationParent, int destinationChild)
 {
+    qDebug() << "sourceParent:" << sourceParent << " sourceRow:" <<  sourceRow << " rcount:" << rowCount(sourceParent);
+    qDebug() << "destinationChild:" << destinationChild << " rowCount:" <<  rowCount(destinationParent);
     if (sourceRow < 0 || sourceRow + count > rowCount(sourceParent) ||
         destinationChild < 0 || destinationChild > rowCount(destinationParent)){
         return false;
@@ -417,6 +419,7 @@ bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
         destitem = rootItem;
     }
     // 从后往前取，避免 index 位移问题
+    qDebug() << "sourceitem:" <<sourceitem << " destitem:" << destitem;
     QList<TP*> moved;
     for (int i = sourceRow + count - 1; i >= sourceRow; i--) {
         moved.prepend(sourceitem->takeAt(i));  // 按正序收集
@@ -1002,8 +1005,8 @@ void TPMgr::stopUpdater()
 TP *TPMgr::newGroupItem()
 {   // create new Total/Group item under rootItem
     QModelIndex midx = indexFromItem(rootItem);
-    // qDebug() << " root idx: " << midx;
-    beginInsertRows(midx, 0, 0);
+    int idx = rootItem->childCount();
+    beginInsertRows(midx,  idx, idx);
     groupItem = new TP("0", GRAPH_TOTAL, TPMgrData::group, rootItem);
     rootItem->appendChild(groupItem);
     endInsertRows();
@@ -1013,7 +1016,8 @@ TP *TPMgr::newGroupItem()
 TP *TPMgr::newDirectionItem(QString dir)
 {
     QModelIndex midx = indexFromItem(rootItem);
-    beginInsertRows(midx, 0, 0);
+    int idx = rootItem->childCount();
+    beginInsertRows(midx, idx, idx);
     if (dir.contains(TPDIRTx)){
         dirTxItem = new TP("0", GRAPH_TX, TPMgrData::direction, rootItem);
         rootItem->appendChild(dirTxItem);
@@ -1147,82 +1151,96 @@ void TPMgr::onUpdateTPAvg(QString midx, QString sInterval, QString idx,
     addTPdata(midx, sInterval, idx, value, unit, dir, pkt_lost, pkt_total);
 }
 
+QList<TP*> TPMgr::takeConfigsFrom(TP *container)
+{
+    QList<TP*> configs;
+    if (!container) return configs;
 
+    // 先收集，避免边遍历边修改
+    for (int i = 0; i < container->childCount(); i++) {
+        if (container->child(i)->getDataType() == static_cast<int>(TPMgrData::config)) {
+            configs.append(container->child(i));
+        }
+    }
+    // 从后往前 take，避免 index 位移
+    QModelIndex containerIdx = indexFromItem(container);
+    for (int i = configs.count() - 1; i >= 0; i--) {
+        int row = configs[i]->row();
+        beginRemoveRows(containerIdx, row, row);
+        container->takeAt(row); // take 不 delete
+        endRemoveRows();
+    }
+    return configs;
+}
+
+void TPMgr::insertConfigsTo(TP *target, QList<TP*> configs)
+{
+    if (!target) return;
+    QModelIndex targetIdx = indexFromItem(target);
+    for (TP* config : configs) {
+        int row = target->childCount();
+        beginInsertRows(targetIdx, row, row);
+        config->setParent(target);
+        target->appendChild(config);
+        endInsertRows();
+    }
+}
 
 void TPMgr::setTPGroupType(int grouptype)
 {
-    qDebug()<< "old:" << m_tpgrouptype << ", setTPGroupType:" << grouptype;
+    if (m_tpgrouptype == grouptype) return;
+    qDebug() << "old:" << m_tpgrouptype << ", setTPGroupType:" << grouptype;
+
+    // === 1. 收集所有 config items ===
+    QList<TP*> configs;
+    configs += takeConfigsFrom(rootItem);   // Detail mode
+    configs += takeConfigsFrom(groupItem);  // Total mode
+    configs += takeConfigsFrom(dirTxItem);  // Direction mode
+    configs += takeConfigsFrom(dirRxItem);  // Direction mode
+
+    // === 2. 移除已空的容器 ===
+    auto removeIfEmpty = [&](TP* &container) {
+        if (!container) return;
+        if (!container->haveChilds()) {
+            int row = container->row();
+            QModelIndex rootIdx = indexFromItem(rootItem);
+            beginRemoveRows(rootIdx, row, row);
+            rootItem->removeChild(container);
+            endRemoveRows();
+            container = nullptr;
+        }
+    };
+    removeIfEmpty(groupItem);
+    removeIfEmpty(dirTxItem);
+    removeIfEmpty(dirRxItem);
+
+    // === 3. 更新 grouptype ===
     m_tpgrouptype = grouptype;
-    int count=0;
-    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Detail)){
-        //total to detail
-        if (groupItem){
-            if (groupItem->haveChilds()){
-                count = groupItem->childCount();
-                moveRows(indexFromItem(groupItem), 0, count,
-                         indexFromItem(rootItem), rootItem->childCount());
-            }
-            //TODO: remove groupItem from rootItem();
-            rootItem->removeChild(groupItem);
-            groupItem = nullptr;
+
+    // === 4. 将 config items 分配到新容器 ===
+    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Detail)) {
+        // 直接放 rootItem 下
+        insertConfigsTo(rootItem, configs);
+
+    } else if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)) {
+        // 全部放 groupItem 下
+        getGroupItem(); // 不存在则新建
+        insertConfigsTo(groupItem, configs);
+
+    } else if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction)) {
+        // 按 direction 分配到 Tx / Rx
+        getDirectionItem(TPDIRTx);
+        getDirectionItem(TPDIRRx);
+        for (TP* config : configs) {
+            TP* target = getDirectionItem(config->getDirection());
+            insertConfigsTo(target, {config});
         }
-        //TODO: direction to detail
-        if (dirTxItem){
-            if (dirTxItem->haveChilds()){
-                count = dirTxItem->childCount();
-                moveRows(indexFromItem(dirTxItem), 0, count,
-                         indexFromItem(rootItem), rootItem->childCount());
-            }
-        }
-        if (dirRxItem){
-            if (groupItem->haveChilds()){
-                count = dirRxItem->childCount();
-                moveRows(indexFromItem(dirRxItem), 0, count,
-                         indexFromItem(rootItem), rootItem->childCount());
-            }
-        }
-    }
-    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){
-        count = rootItem->childCount();
-        getGroupItem(); // when not groupItem, add new groupItem
-        // detail -> total
-        if (rootItem){
-            if (rootItem->haveChilds()){
-                qDebug() << "detail -> total: groupItem:" << groupItem;
-                moveRows(indexFromItem(rootItem), 0, count,
-                         indexFromItem(groupItem), groupItem->childCount());
-            }
-        }
-        //TODO: direction -> total
-        if (dirTxItem){
-            if (dirTxItem->haveChilds()){
-                count = dirTxItem->childCount();
-                moveRows(indexFromItem(dirTxItem), 0, count,
-                         indexFromItem(groupItem), groupItem->childCount());
-            }
-        }
-        if (dirRxItem){
-            if (groupItem->haveChilds()){
-                count = dirRxItem->childCount();
-                moveRows(indexFromItem(dirRxItem), 0, count,
-                         indexFromItem(groupItem), groupItem->childCount());
-            }
-        }
-    }
-    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction)){
-        //total -> direction
-        if (groupItem){
-            if (groupItem->haveChilds()){
-                // TODO: make sure it's direction
-                // moveRows(indexFromItem(groupItem), 0, groupItem->childCount(),
-                //          indexFromItem(rootItem), rootItem->childCount());
-            }
-        }
-        //detail -> direction
-    }
-    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Comment)){
+
+    } else if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Comment)) {
         // TODO: comment mode
     }
+
+    emit layoutChanged();
 }
 
 void TPMgr::onRowsInserted(const QModelIndex &parent, int first, int last)
@@ -1296,5 +1314,27 @@ void TPMgr::log(QString msg, int lv)
     if (lv>mDebug){
         // qDebug() << "[TPMgr]" << msg;
         emit debugMsg("[TPMgr]" + msg);
+    }
+}
+
+void TPMgr::moveToDirection(TP *tp)
+{
+    QModelIndex midx = indexFromItem(tp);
+    QString dir = tp->getDirection();
+    qDebug() << tp->row() << " :current parent:" << tp->parentItem() << " , rootItem:" << rootItem
+             << "dir:" << dir << " dirTxItem:" << dirTxItem
+             << " dirRxItem:" << dirRxItem;
+    if (dir == TPDIRTx){
+        // move to Tx Group
+        moveRows(midx, midx.row(), 1, indexFromItem(dirTxItem), dirTxItem->childCount());
+    }else if (dir == TPDIRRx){
+        // move to Rx Group
+        moveRows(midx, midx.row(), 1, indexFromItem(dirRxItem), dirRxItem->childCount());
+    }else {
+        //bidir
+
+        if (tp->parentItem() != rootItem){
+            moveRows(midx, midx.row(), 1, indexFromItem(rootItem), rootItem->childCount());
+        }
     }
 }
