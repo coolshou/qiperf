@@ -311,30 +311,24 @@ void ThroughputView::onGroupCopyItem(bool checked)
 void ThroughputView::setShowGroupTotal(bool bShow)
 {
     Q_UNUSED(bShow)
-    //set show group Total
-    // m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Total);
-    // m_tpplot->setShowGroup(bShow);
     emit showGrouptype(static_cast<int>(TPGroup::GroupMode::Total));
 }
 
 void ThroughputView::setShowGroupPair(bool bShow)
 {
     Q_UNUSED(bShow)
-    // m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Detail);
     emit showGrouptype(static_cast<int>(TPGroup::GroupMode::Detail));
 }
 
 void ThroughputView::setShowGroupDir(bool bShow)
 {
     Q_UNUSED(bShow)
-    // m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Direction);
     emit showGrouptype(static_cast<int>(TPGroup::GroupMode::Direction));
 }
 
 void ThroughputView::setShowGroupComment(bool bShow)
 {
     Q_UNUSED(bShow)
-    // m_tpgrouptype =  static_cast<int>(TPGroup::GroupMode::Comment);
     emit showGrouptype(static_cast<int>(TPGroup::GroupMode::Comment));
 }
 
@@ -454,9 +448,8 @@ void ThroughputView::initMenus()
     m_actionGroupPair = new QAction("Iperf Pair");
     m_actionGroupPair->setCheckable(true);
     connect(m_actionGroupPair, &QAction::triggered, this, &ThroughputView::setShowGroupPair);
-    m_actionGroupDir = new QAction("Direction(TODO)");
+    m_actionGroupDir = new QAction("Direction");
     m_actionGroupDir->setCheckable(true);
-    m_actionGroupDir->setEnabled(false);
     connect(m_actionGroupDir, &QAction::triggered, this, &ThroughputView::setShowGroupDir);
     m_actionGroupComment = new QAction("Comment(TODO)");
     m_actionGroupComment->setCheckable(true);

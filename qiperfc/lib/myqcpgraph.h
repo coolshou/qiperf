@@ -21,11 +21,14 @@ public:
     void setInterval(int interval);
     int getInterval();
     double getMaxXValue();
+    void setDirection(int iDir);
+    int getDirection();
 signals:
     // void dataAdded(double key, double value);
     void datasSetted(QSharedPointer<QCPGraphDataContainer> data);
 private:
     int m_interval;
+    int m_dir; // 0: Tx, 1: Rx
 };
 
 #endif // MYQCPGRAPH_H

@@ -4,6 +4,7 @@ MyQCPGraph::MyQCPGraph(QCPAxis *keyAxis, QCPAxis *valueAxis)
     :QCPGraph(keyAxis, valueAxis)
 {
     m_interval = 1;
+    m_dir = -1;
     setAdaptiveSampling(true);
 }
 
@@ -131,4 +132,14 @@ double MyQCPGraph::getMaxXValue()
     }
     // qDebug() << "Maximum X-value of the graph:" << maxX;
     return maxX;
+}
+
+void MyQCPGraph::setDirection(int iDir)
+{
+    m_dir = iDir;
+}
+
+int MyQCPGraph::getDirection()
+{
+    return m_dir;
 }

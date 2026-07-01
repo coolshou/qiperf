@@ -6,20 +6,13 @@
 TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
     :QCustomPlot(parent), m_tpgrouptype(tpgroup)
 {
-    //FIXME: under 4K monitor, use setOpenGl(true) cause the TPPlot look over the outer widget width&hight
-    // const QList<QScreen*> screens = QGuiApplication::screens();
-    // for (const QScreen* screen : screens) {
-    //     qDebug() << "Screen: " << screen->name() << " " << screen->size()
-    //              << " physicalSize(mm): " << screen->physicalSize()
-    //              << " devicePixelRatio:" << screen->devicePixelRatio();
-    // }
     m_isTestStarted = false;
     m_maxX = 30;
     m_maxY = m_yAxisMaxDefault;
     m_timeWindowThreshold = 30.0; // TODO: when total test time smaller then this, need update?
     m_autoScrollXAxis = true;
-    //setOpenGl(true); // this will cause plot area looks strange??
-    setOpenGl(false);
+    setOpenGl(true);
+    // setOpenGl(false);
     setNoAntialiasingOnDrag(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_interval = 1;
@@ -42,6 +35,14 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
     if (!addLayer(LAYER_DIRLOSTRATE, layer(LAYER_DIR), limBelow)){
         qDebug() << "addLayer " << LAYER_DIRLOSTRATE << " Fail";
     }
+
+    getGraph(GRAPH_TOTAL, GroupWidth::Total);
+    getGraph(GRAPH_TX, GroupWidth::Direction);
+    getGraph(GRAPH_RX, GroupWidth::Direction);
+    qDebug() << "mTotalGraph: " << mTotalGraph
+             << ", mDirTxGraph: " << mDirTxGraph
+             << ", mDirRxGraph: " << mDirRxGraph;
+
     setTPGroupType(m_tpgrouptype);
     m_replottimer = new QTimer();
     connect(m_replottimer, &QTimer::timeout, this, &TPPlot::doReplot);
@@ -514,33 +515,20 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata, double los
         }
     }
 
-    //this part will keeps update when data come in, should we set visiable at begining?
-    if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)){
-        if (mTotalLegendItem){
-            bool showtotal = (m_tpgrouptype==static_cast<int>(TPGroup::GroupMode::Total));
-            qDebug() << "show total legenditem:" << showtotal;
-            mTotalLegendItem->setVisible(showtotal);
-        }
-    } else if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction)){
-        // TODO: direction
-        if (mDirTxLegendItem){
-            mDirTxLegendItem->setVisible((m_tpgrouptype==static_cast<int>(TPGroup::GroupMode::Direction)));
-        }
-        if (mDirRxLegendItem){
-            mDirRxLegendItem->setVisible((m_tpgrouptype==static_cast<int>(TPGroup::GroupMode::Direction)));
-        }
-    } else {
+
+    {
         // detail
         if (m_legends.contains(refrowidx)){
             qDebug() << "addTPData refrowidx:" << refrowidx;
             QCPAbstractLegendItem *itm = m_legends.value(refrowidx);
             if (itm){
-                if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)||
-                    refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)||
+                if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)){
+                    itm->setVisible((m_tpgrouptype==static_cast<int>(TPGroup::GroupMode::Total)));
+                } else if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)||
                     refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)){
-                    itm->setVisible(false);
+                    itm->setVisible((m_tpgrouptype==static_cast<int>(TPGroup::GroupMode::Direction)));
                 }else {
-                    itm->setVisible(true);
+                    itm->setVisible((m_tpgrouptype==static_cast<int>(TPGroup::GroupMode::Detail)));
                 }
             }
         }
@@ -629,8 +617,10 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width)
             //TODO : diection
             if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)){
                 mDirTxGraph = myGraph;
+                mDirTxGraph->setDirection(0);
             } else {
                 mDirRxGraph = myGraph;
+                mDirTxGraph->setDirection(1);
             }
             //TODO: comment
         }else {
