@@ -454,6 +454,7 @@ void ThroughputView::initMenus()
     m_actionGroupComment = new QAction("Comment(TODO)");
     m_actionGroupComment->setCheckable(true);
     m_actionGroupComment->setEnabled(false);
+    m_actionGroupComment->setVisible(false);
     connect(m_actionGroupComment, &QAction::triggered, this, &ThroughputView::setShowGroupComment);
 
     m_actionRawData = new QAction("Copy plotchart Raw Data");

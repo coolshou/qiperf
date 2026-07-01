@@ -18,6 +18,8 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     // hidetab("main");
     // font init
     initFonts();
+    // TODO: temp remove group by comment
+    ui->rbTPGroupComment->setVisible(false);
 
     m_cfg = cfg;
 //    ui->cb_minterfaces->addItems(interfaces);
