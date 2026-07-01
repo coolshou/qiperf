@@ -402,8 +402,6 @@ bool TPMgr::removeRows(int row, int count, const QModelIndex &parent)
 bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
                      const QModelIndex &destinationParent, int destinationChild)
 {
-    qDebug() << "sourceParent:" << sourceParent << " sourceRow:" <<  sourceRow << " rcount:" << rowCount(sourceParent);
-    qDebug() << "destinationChild:" << destinationChild << " rowCount:" <<  rowCount(destinationParent);
     if (sourceRow < 0 || sourceRow + count > rowCount(sourceParent) ||
         destinationChild < 0 || destinationChild > rowCount(destinationParent)){
         return false;
@@ -419,7 +417,6 @@ bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
         destitem = rootItem;
     }
     // 从后往前取，避免 index 位移问题
-    qDebug() << "sourceitem:" <<sourceitem << " destitem:" << destitem;
     QList<TP*> moved;
     for (int i = sourceRow + count - 1; i >= sourceRow; i--) {
         moved.prepend(sourceitem->takeAt(i));  // 按正序收集
@@ -428,11 +425,6 @@ bool TPMgr::moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
         moved[i]->setParent(destitem);
         destitem->insertChild(destinationChild + i, moved[i]);
     }
-    // for (int i = sourceRow; i < count; i++) {
-    //     TP *m = sourceitem->takeAt(0); // after take, the idx will change
-    //     m->setParent(destitem);
-    //     destitem->insertChild(i, m);
-    // }
     endMoveRows();
     return true;
 }
