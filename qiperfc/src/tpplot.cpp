@@ -911,6 +911,7 @@ void TPPlot::initCustomPlot()
     xAxis->setTicker(timeTicker);
     //set axis Label
     xAxis->setLabel("Time(Sec)");
+    // yAxis->setRangeLower(0);        // 下限不能低于 0, Drag still show <0
     yAxis2->setLabel("Lost Rate(%)");
     yAxis2->setTickLabels(true);
 
