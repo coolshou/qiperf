@@ -481,29 +481,34 @@ void QIperfC::onStart(bool showNotice)
         // list of throughput test pair
         QList<TP *> tps = m_throughputview->getChilds();
         qDebug() << "onStart tps:" << tps;
-        m_tpworker = new TpWorker(m_logpath, tps, m_IgnoreWrongInterval);
-        connect(m_tpworker, &TpWorker::testStarted, this, &QIperfC::onTestStarted);
-        connect(m_tpworker, &TpWorker::testStoped, this, &QIperfC::onTestStoped);
-        connect(m_tpworker, &TpWorker::updateDatapath, this, &QIperfC::onUpdateDataPath);
-        connect(m_tpworker, &TpWorker::updateStarttime, this, &QIperfC::onUpdateStarttime);
-        connect(m_tpworker, &TpWorker::updateRunStatus, this, &QIperfC::onUpdateRunStatus);
-        connect(m_tpworker, &TpWorker::updateStatus, this, &QIperfC::onUpdateStatus);
-        connect(m_tpworker, &TpWorker::errorStop, this, &QIperfC::onErrorStop);
-        connect(m_tpworker, &TpWorker::updateComment, m_throughputview, &ThroughputView::addComment);
-        connect(m_tpworker, &TpWorker::iperfTPdata, m_throughputview, &ThroughputView::onIperfTPdata);
-        connect(m_tpworker, &TpWorker::setEndTime, m_throughputview, &ThroughputView::setXRangeUpper);
-        connect(m_tpworker, &TpWorker::debuginfo, this, &QIperfC::onDebuginfo);
-        connect(this, &QIperfC::setTPStop, m_tpworker, &TpWorker::onSetStop);
+        if (tps.length()>0){
+            m_tpworker = new TpWorker(m_logpath, tps, m_IgnoreWrongInterval);
+            connect(m_tpworker, &TpWorker::testStarted, this, &QIperfC::onTestStarted);
+            connect(m_tpworker, &TpWorker::testStoped, this, &QIperfC::onTestStoped);
+            connect(m_tpworker, &TpWorker::updateDatapath, this, &QIperfC::onUpdateDataPath);
+            connect(m_tpworker, &TpWorker::updateStarttime, this, &QIperfC::onUpdateStarttime);
+            connect(m_tpworker, &TpWorker::updateRunStatus, this, &QIperfC::onUpdateRunStatus);
+            connect(m_tpworker, &TpWorker::updateStatus, this, &QIperfC::onUpdateStatus);
+            connect(m_tpworker, &TpWorker::errorStop, this, &QIperfC::onErrorStop);
+            connect(m_tpworker, &TpWorker::updateComment, m_throughputview, &ThroughputView::addComment);
+            connect(m_tpworker, &TpWorker::iperfTPdata, m_throughputview, &ThroughputView::onIperfTPdata);
+            connect(m_tpworker, &TpWorker::setEndTime, m_throughputview, &ThroughputView::setXRangeUpper);
+            connect(m_tpworker, &TpWorker::debuginfo, this, &QIperfC::onDebuginfo);
+            connect(this, &QIperfC::setTPStop, m_tpworker, &TpWorker::onSetStop);
 
-        m_tpthread = new QThread();
-        connect(m_tpthread, &QThread::started, m_tpworker, &TpWorker::work);
-        connect(m_tpthread, &QThread::finished, m_tpthread, &QThread::deleteLater);
-        connect(m_tpthread, &QThread::finished, m_tpworker, &TpWorker::deleteLater);
-        m_tpworker->moveToThread(m_tpthread);
-        m_tpthread->start();
-#ifdef USE_TPPLOT_DATABASE
-        m_dbthread->start();
-#endif
+            m_tpthread = new QThread();
+            connect(m_tpthread, &QThread::started, m_tpworker, &TpWorker::work);
+            connect(m_tpthread, &QThread::finished, m_tpthread, &QThread::deleteLater);
+            connect(m_tpthread, &QThread::finished, m_tpworker, &TpWorker::deleteLater);
+            m_tpworker->moveToThread(m_tpthread);
+            m_tpthread->start();
+    #ifdef USE_TPPLOT_DATABASE
+            m_dbthread->start();
+    #endif
+        }else{
+            QMessageBox::information(this, "NOTICE", "Did not get iperf test pair setting!", QMessageBox::Ok);
+            emit testStoped(-1);
+        }
     }
     else
     {
