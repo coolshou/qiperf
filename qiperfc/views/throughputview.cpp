@@ -761,6 +761,7 @@ void ThroughputView::initThroughputChart()
     connect(m_tpmgr, &TPMgr::debugMsg, this, &ThroughputView::onDebuginfo);
 
     ui->tv_throughput->setModel(m_tpmgr);
+    ui->tv_throughput->setUniformRowHeights(true); //fix row hight
     // ui->tv_throughput->setHeaderHidden(true);// not show header column
 
     /* TODO: set specify column font size,
