@@ -497,6 +497,7 @@ QStringList TPMgr::getPCs()
 
 bool TPMgr::loaddata(QByteArray data)
 {
+    //Load data into treeview
     QJsonParseError error;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(data, &error);
     if (error.error == QJsonParseError::NoError){
@@ -570,33 +571,33 @@ void TPMgr::reset(){
 
 void TPMgr::clear(){
     // clean test record
-    // TODO: when there is child the folding icon will not remove after clear!!
-    TP *itm = getRootItem(); // rootitem or groupitem
-    // qDebug() << "clear:" << itm->getDataType();
-    if (itm){
-        if (itm->haveChilds()){
-            itm->clearThroughput();
-            // itm->resetData();
-            foreach(auto tp, itm->getChilds()){
-                if (tp->haveChilds()){
-                    int childCount = tp->childCount();
-                    // 1. Get the proper index of 'tp' because its children are being removed
-                    QModelIndex tpIndex = indexFromItem(tp);
-                    // 2. Notify the view BEFORE removing data
-                    beginRemoveRows(tpIndex, 0, childCount - 1);
-                    // 3. Delete the actual backend data
-                    tp->removeChildren(0, childCount);
-                    // 4. Notify the view removal is finished
+    // Recursively clear all nodes's throughput data
+    std::function<void(TP*)> clearData = [&](TP *node) {
+        if (!node) return;
+        for (int i = 0; i < node->childCount(); i++) {
+            TP *child = node->child(i);
+            if (child->getDataType() == static_cast<int>(TPMgrData::config)) {
+                // 找到 config item，清除其下所有 throughput items
+                child->clearThroughput();
+                if (child->haveChilds()) {
+                    int count = child->childCount();
+                    QModelIndex configIndex = indexFromItem(child);
+                    beginRemoveRows(configIndex, 0, count - 1);
+                    child->removeChildren(0, count);
                     endRemoveRows();
-                    // 5. CRITICAL: Inform the view that 'tp' has changed (losing children alters its layout/hasChildren state)
-                    emit dataChanged(tpIndex, tpIndex);
+                    emit dataChanged(configIndex, configIndex);
                 }
-                tp->clearThroughput();
+            } else {
+                // group / direction / root ，search in
+                child->clearThroughput();
+                clearData(child);
             }
         }
-    }else {
-        qDebug() << "clear: NO root item";
-    }
+        node->clearThroughput();
+    };
+
+    // 不管 m_tpgrouptype，直接从 rootItem 开始遍历
+    clearData(rootItem);
 
     m_intervals.clear();
     // Optional: If you modified text/values of 'itm' or 'tp' elements,
