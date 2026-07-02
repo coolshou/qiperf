@@ -96,17 +96,17 @@ private:
     QMap<double, double> mTotalData;
     // Direction - Tx
     MyQCPGraph *mDirTxGraph;  //store Tx graph
-    QCPAbstractLegendItem *mDirTxLegendItem;//store tx graph legend
+    QCPAbstractLegendItem *mDirTxLegendItem= nullptr;//store tx graph legend
     QVector<QCPGraphData> mDirTxGraphData;
     MyQCPBars *mDirTxLostGraph;  //store tx lost rate graph
-    QCPAbstractLegendItem *mDirTxLostLegendItem; //store tx lost rate graph legend
+    QCPAbstractLegendItem *mDirTxLostLegendItem= nullptr; //store tx lost rate graph legend
     QMap<double, double> mDirTxData;
     // Direction - Rx
     MyQCPGraph *mDirRxGraph;  //store Rx graph
-    QCPAbstractLegendItem *mDirRxLegendItem;//store rx graph legend
+    QCPAbstractLegendItem *mDirRxLegendItem= nullptr;//store rx graph legend
     QVector<QCPGraphData> mDirRxGraphData;
     MyQCPBars *mDirRxLostGraph;  //store rx lost rate graph
-    QCPAbstractLegendItem *mDirRxLostLegendItem; //store rx lost rate graph legend
+    QCPAbstractLegendItem *mDirRxLostLegendItem= nullptr; //store rx lost rate graph legend
     QMap<double, double> mDirRxData;
     // TODO Comment
     // Add a mutex as a member variable

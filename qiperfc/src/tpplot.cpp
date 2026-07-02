@@ -101,90 +101,143 @@ void TPPlot::setInterval(int interval)
 
 void TPPlot::setTPGroupType(int grouptype)
 {
-    qDebug() << "TODO: setTPGroupType:" << m_tpgrouptype
-             << " new type:" << grouptype;
-    bool bshowTotal=false;
-    bool bshowDetail=false;
-    bool bshowDirection=false;
-    // bool bshowComment=false;
+    qDebug() << "setTPGroupType old:" << m_tpgrouptype << " new:" << grouptype;
     m_tpgrouptype = grouptype;
-    if (m_tpgrouptype == TPGroup::GroupMode::Total){
-        bshowTotal = true;
-    }
-    if (m_tpgrouptype == TPGroup::GroupMode::Detail){
-        bshowDetail = true;
-    }
-    if (m_tpgrouptype == TPGroup::GroupMode::Direction){
-        bshowDirection = true;
-    }
-    if (m_tpgrouptype == TPGroup::GroupMode::Comment){
-        // bshowComment = true;
-    }
-    // for m_graphs
-    QMap<QString, MyQCPGraph*>::const_iterator iterator = m_graphs.constBegin();
-    while (iterator != m_graphs.constEnd()) {
-        if (iterator.value() == mTotalGraph) {
-            // total graph
-            iterator.value()->setVisible(bshowTotal);
-        }else if ((iterator.value() == mDirTxGraph)||
-                  (iterator.value() == mDirRxGraph)){
-            // direction graph
-            iterator.value()->setVisible(bshowDirection);
-        }else{
-            //show detail graph
-            iterator.value()->setVisible(bshowDetail);
-        }
-        ++iterator;
-    }
-    // m_lostgraphs
-    QMap<QString, MyQCPBars*>::const_iterator lostiterator = m_lostgraphs.constBegin();
-    while (lostiterator != m_lostgraphs.constEnd()) {
-        if (lostiterator.value() == mTotalLostGraph) {
-            lostiterator.value()->setVisible(bshowTotal);
-        }else if ((lostiterator.value() == mDirTxLostGraph)||
-                  (lostiterator.value() == mDirRxLostGraph)){
-            lostiterator.value()->setVisible(bshowDirection);
-        }else{
-            lostiterator.value()->setVisible(bshowDetail);
-        }
-        ++lostiterator;
-    }
+    if (0){
+        bool bshowTotal     = (m_tpgrouptype == TPGroup::GroupMode::Total);
+        bool bshowDetail    = (m_tpgrouptype == TPGroup::GroupMode::Detail);
+        bool bshowDirection = (m_tpgrouptype == TPGroup::GroupMode::Direction);
 
-    //for m_legends
-    // QCPAbstractLegendItem inVisible still occupy space in legends
-    QMap<QString, QCPAbstractLegendItem*>::const_iterator legenditerator = m_legends.constBegin();
-    while (legenditerator != m_legends.constEnd()) {
-        if (legenditerator.value() == mTotalLegendItem) {
-            //total Legend
-            legenditerator.value()->setVisible(bshowTotal);
-        } else if ((legenditerator.value() == mDirTxLegendItem)||
-                   (legenditerator.value() == mDirRxLegendItem)) {
-            // Direction
-            legenditerator.value()->setVisible(bshowDirection);
-        }else{
-            //detail Legend
-            legenditerator.value()->setVisible(bshowDetail);
-        }
-        ++legenditerator;
+        auto shouldShow = [&](QCPAbstractPlottable *item) -> bool {
+            if (item == mTotalGraph      || item == mTotalLostGraph){
+                return bshowTotal;
+            }
+            if (item == mDirTxGraph      || item == mDirRxGraph     ||
+                item == mDirTxLostGraph  || item == mDirRxLostGraph){
+                return bshowDirection;
+            }
+            return bshowDetail;
+        };
+
+        // legend 单独处理（QCPAbstractLegendItem 不是 QCPAbstractPlottable）
+        auto shouldShowLegend = [&](QCPAbstractLegendItem *item) -> bool {
+            if (item == mTotalLegendItem || item == mTotalLostLegendItem){
+                return bshowTotal;
+            }
+            // if (item == mDirTxLegendItem     || item == mDirRxLegendItem     ||
+            //     item == mDirTxLostLegendItem || item == mDirRxLostLegendItem){
+            //     return bshowDirection;
+            // }
+            return bshowDetail;
+        };
+
+        // === 统一设置 visible ===
+        for (auto *g : m_graphs)      g->setVisible(shouldShow(g));
+        for (auto *b : m_lostgraphs)  b->setVisible(shouldShow(b));
+        // for (auto *l : m_legends)     l->setVisible(shouldShow(l));
+        // for (auto *l : m_lostratelegends) l->setVisible(shouldShow(l));
+
+        // 3. refreshLegend helper（依赖 shouldShow，所以放在它后面）
+        // refreshLegend 用 shouldShowLegend
+        auto refreshLegend = [&](QCPLegend *legend,
+                                 QMap<QString, QCPAbstractLegendItem*> &legendMap) {
+            legend->clearItems();
+            for (auto *item : legendMap) {
+                if (shouldShowLegend(item)) {
+                    legend->addItem(item);
+                }
+            }
+        };
+        // 4. 刷新 legend
+        refreshLegend(legend,  m_legends);
+        refreshLegend(legend,  m_lostratelegends);
+
+        replot();
     }
-    //for m_lostratelegends
-    QMap<QString, QCPAbstractLegendItem*>::const_iterator lostlegenditerator = m_lostratelegends.constBegin();
-    while (lostlegenditerator != m_lostratelegends.constEnd()) {
-        // qDebug() << "lostlegenditerator:" << lostlegenditerator.key() << "-" << lostlegenditerator.value();
-        if (lostlegenditerator.value() == mTotalLostLegendItem) {
-            //total lostlegend
-            lostlegenditerator.value()->setVisible(bshowTotal);
-        }else if ((lostlegenditerator.value() == mDirTxLostLegendItem)||
-                   (lostlegenditerator.value() == mDirRxLostLegendItem)){
-            // direction lostlegend
-            lostlegenditerator.value()->setVisible(bshowDirection);
-        }else{
-            // detail LostLegend, TODO: check if TotalLostgraph have data?
-            lostlegenditerator.value()->setVisible(bshowDetail);
+    if (1){
+        bool bshowTotal=false;
+        bool bshowDetail=false;
+        bool bshowDirection=false;
+        // bool bshowComment=false;
+        m_tpgrouptype = grouptype;
+        if (m_tpgrouptype == TPGroup::GroupMode::Total){
+            bshowTotal = true;
         }
-        ++lostlegenditerator;
+        if (m_tpgrouptype == TPGroup::GroupMode::Detail){
+            bshowDetail = true;
+        }
+        if (m_tpgrouptype == TPGroup::GroupMode::Direction){
+            bshowDirection = true;
+        }
+        if (m_tpgrouptype == TPGroup::GroupMode::Comment){
+            // bshowComment = true;
+        }
+        // for m_graphs
+        QMap<QString, MyQCPGraph*>::const_iterator iterator = m_graphs.constBegin();
+        while (iterator != m_graphs.constEnd()) {
+            if (iterator.value() == mTotalGraph) {
+                // total graph
+                iterator.value()->setVisible(bshowTotal);
+            }else if ((iterator.value() == mDirTxGraph)||
+                       (iterator.value() == mDirRxGraph)){
+                // direction graph
+                iterator.value()->setVisible(bshowDirection);
+            }else{
+                //show detail graph
+                iterator.value()->setVisible(bshowDetail);
+            }
+            ++iterator;
+        }
+        // m_lostgraphs
+        QMap<QString, MyQCPBars*>::const_iterator lostiterator = m_lostgraphs.constBegin();
+        while (lostiterator != m_lostgraphs.constEnd()) {
+            if (lostiterator.value() == mTotalLostGraph) {
+                lostiterator.value()->setVisible(bshowTotal);
+            }else if ((lostiterator.value() == mDirTxLostGraph)||
+                       (lostiterator.value() == mDirRxLostGraph)){
+                lostiterator.value()->setVisible(bshowDirection);
+            }else{
+                lostiterator.value()->setVisible(bshowDetail);
+            }
+            ++lostiterator;
+        }
+
+        //for m_legends
+        // QCPAbstractLegendItem inVisible still occupy space in legends
+        QMap<QString, QCPAbstractLegendItem*>::const_iterator legenditerator = m_legends.constBegin();
+        while (legenditerator != m_legends.constEnd()) {
+            if (legenditerator.value() == mTotalLegendItem) {
+                //total Legend
+                legenditerator.value()->setVisible(bshowTotal);
+            } else if ((legenditerator.value() == mDirTxLegendItem)||
+                       (legenditerator.value() == mDirRxLegendItem)) {
+                // Direction
+                legenditerator.value()->setVisible(bshowDirection);
+            }else{
+                //detail Legend
+                legenditerator.value()->setVisible(bshowDetail);
+            }
+            ++legenditerator;
+        }
+        //for m_lostratelegends
+        QMap<QString, QCPAbstractLegendItem*>::const_iterator lostlegenditerator = m_lostratelegends.constBegin();
+        while (lostlegenditerator != m_lostratelegends.constEnd()) {
+            // qDebug() << "lostlegenditerator:" << lostlegenditerator.key() << "-" << lostlegenditerator.value();
+            if (lostlegenditerator.value() == mTotalLostLegendItem) {
+                //total lostlegend
+                lostlegenditerator.value()->setVisible(bshowTotal);
+            }else if ((lostlegenditerator.value() == mDirTxLostLegendItem)||
+                       (lostlegenditerator.value() == mDirRxLostLegendItem)){
+                // direction lostlegend
+                lostlegenditerator.value()->setVisible(bshowDirection);
+            }else{
+                // detail LostLegend, TODO: check if TotalLostgraph have data?
+                lostlegenditerator.value()->setVisible(bshowDetail);
+            }
+            ++lostlegenditerator;
+        }
+        replot();
     }
-    replot();
 }
 
 void TPPlot::setTPUint(QString tpunit)
@@ -846,10 +899,10 @@ void TPPlot::initCustomPlot()
     this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                                   QCP::iSelectLegend | QCP::iSelectPlottables);
     this->axisRect()->setupFullAxesBox();
-    // this->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
-    this->axisRect()->setRangeDrag(Qt::Horizontal);
-    // this->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
-    this->axisRect()->setRangeZoom(Qt::Horizontal);
+    this->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
+    // this->axisRect()->setRangeDrag(Qt::Horizontal);
+    this->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
+    // this->axisRect()->setRangeZoom(Qt::Horizontal); //TODO: yAxis can not zoom, bed?
 
     // this->setAutoAddPlottableToLegend(true); // when adding a plottable, automatically adds the QCPAbstractLegendItem to the legend
     //x Axis
