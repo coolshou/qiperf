@@ -1182,7 +1182,7 @@ void TPMgr::insertConfigsTo(TP *target, QList<TP*> configs)
 void TPMgr::setTPGroupType(int grouptype)
 {
     if (m_tpgrouptype == grouptype) return;
-    qDebug() << "old:" << m_tpgrouptype << ", setTPGroupType:" << grouptype;
+    // qDebug() << "old:" << m_tpgrouptype << ", setTPGroupType:" << grouptype;
 
     // === 1. 收集所有 config items ===
     QList<TP*> configs;
