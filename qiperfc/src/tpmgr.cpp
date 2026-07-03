@@ -840,7 +840,7 @@ TP *TPMgr::getItemByIdx(QString midx, TP *item)
 {
     QList<TP*> lst;
     if (item==nullptr){
-        lst = getChilds();
+        lst = getChilds(true);
     }else{
         if (item->haveChilds()){
             if (item->childCount()>0){

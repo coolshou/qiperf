@@ -14,6 +14,7 @@ public:
     QVector<int> packetLost;
     QVector<int> packetTotal;
     QVector<double> lostrate;
+    int direction; //0: Tx, 1: Rx
 };
 
 class IperfFileWorker : public QObject
@@ -34,7 +35,8 @@ public slots:
 signals:
     void onThroughput(int idx, QString sInterval,  QString data); // refrow, sInterval, throughput data
     void updateTPDatas(QString idx, QVector<double> timedatas, QVector<double> valuedatas,
-                        QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
+                       QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate,
+                       int direction);
     void updateTPAvg(QString midx, QString sInterval, QString idx,
                      QString value, QString unit, QString dir,
                      QString pkt_lost, QString pkt_total);

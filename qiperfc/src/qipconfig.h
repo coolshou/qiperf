@@ -52,7 +52,8 @@ signals:
     void onThroughput(QString refrow, QString sInterval, QString datas); // refrow, sInterval, throughput data
     void updateStartDateTime(QDateTime datetime);
     void updateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
-                            QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
+                       QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate,
+                       int direction);
     void updateTPAvg(QString midx, QString sInterval, QString idx,
                      QString value, QString unit, QString dir,
                      QString pkt_lost, QString pkt_total);
@@ -61,7 +62,8 @@ signals:
 private slots:
     void onThroughputData(int idx, QString sInterval,  QString data);
     void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
-                        QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate);
+                        QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate,
+                        int direction);
 private:
     static const QByteArray MAGIC_VALUE;
     static const qint32 VERSION;

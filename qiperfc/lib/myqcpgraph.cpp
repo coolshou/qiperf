@@ -16,7 +16,7 @@ void MyQCPGraph::setData(QSharedPointer<QCPGraphDataContainer> data)
 void MyQCPGraph::setData(const QVector<double> &keys, const QVector<double> &values, bool alreadySorted)
 {
     QCPGraph::setData(keys, values, alreadySorted);
-    emit datasSetted(data());
+    emit datasSetted(data(), m_dir);
 }
 
 void MyQCPGraph::addData(double key, double value)

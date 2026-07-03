@@ -25,7 +25,7 @@ public:
     int getDirection();
 signals:
     // void dataAdded(double key, double value);
-    void datasSetted(QSharedPointer<QCPGraphDataContainer> data);
+    void datasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir=-1);
 private:
     int m_interval;
     int m_dir; // 0: Tx, 1: Rx

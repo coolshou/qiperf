@@ -267,9 +267,11 @@ void ThroughputView::onAddTPdata(QString midx, QString sInterval, QString idx, Q
     m_tpmgr->addTPdata(midx, sInterval, idx, value, unit, dir, pkt_lost, pkt_total);
 }
 
-void ThroughputView::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas, QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates)
+void ThroughputView::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
+                                     QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates,
+                                     int direction)
 {
-    m_tpplot->onUpdateTPDatas(refrow, timedatas, valuedatas, packetlosts, packettotals, lostrates);
+    m_tpplot->onUpdateTPDatas(refrow, timedatas, valuedatas, packetlosts, packettotals, lostrates, direction);
 }
 
 void ThroughputView::onIperfTPdata(QString refrow, QString sInterval, QString datas)

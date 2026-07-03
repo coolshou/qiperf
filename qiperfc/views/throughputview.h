@@ -69,7 +69,8 @@ public slots:
                    QString value, QString unit, QString dir=nullptr,
                    QString pkt_lost="", QString pkt_total="");
     void onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
-                         QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates);
+                         QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrates,
+                         int direction);
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
     void onUpdateTPCfg(QByteArray tpcfg);
     void onUpdateTPUnit(QString suint);

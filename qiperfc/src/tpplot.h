@@ -32,8 +32,7 @@ public:
   void addTPData(QString refrowidx, double xdata, double ydata, double lostrate,
                  QString grouptag = ""); //
   void del(QString idx);
-  // QCPGraph *getGraph(QString idx, int width=1); // get QCPGraph by index
-  MyQCPGraph *getGraph(QString refrowidx,
+  MyQCPGraph *getGraph(QString refrowidx, int dir=-1,
                        int width = GroupWidth::Iperf); // get QCPGraph by index
   MyQCPBars *getLostRateGraph(QString refrowidx);
   void clear();
@@ -49,14 +48,15 @@ public slots:
   void setStartTime(QDateTime startTime);
   void onUpdateTPDatas(QString refrow, QVector<double> timedatas,
                        QVector<double> valuedatas, QVector<int> packetlosts,
-                       QVector<int> packettotals, QVector<double> lostrates);
+                       QVector<int> packettotals, QVector<double> lostrates,
+                       int direction);
   void setInterval(int interval);
   // void setShowGroup(bool bShow);
   void setTPGroupType(int grouptype);
   void setTPUint(QString tpunit);
   void onVLegendScrollChanged(int value);
   void onDataAdded(double key, double value);
-  void onDatasSetted(QSharedPointer<QCPGraphDataContainer> data);
+  void onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir);
   void onLostRateDataAdded(double key, double value);
   void onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data);
   void setTestStarted(bool start);

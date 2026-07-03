@@ -378,9 +378,10 @@ void QIPConfig::onThroughputData(int idx, QString sInterval, QString data)
 }
 
 void QIPConfig::onUpdateTPDatas(QString refrow, QVector<double> timedatas, QVector<double> valuedatas,
-                                QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate)
+                                QVector<int> packetlosts, QVector<int> packettotals, QVector<double> lostrate,
+                                int direction)
 {
-    emit updateTPDatas(refrow, timedatas, valuedatas, packetlosts, packettotals, lostrate);
+    emit updateTPDatas(refrow, timedatas, valuedatas, packetlosts, packettotals, lostrate, direction);
 }
 
 QByteArray QIPConfig::serialize() const {

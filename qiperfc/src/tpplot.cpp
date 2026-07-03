@@ -48,9 +48,9 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
     qDebug() << "addLayer " << LAYER_DIRLOSTRATE << " Fail";
   }
 
-  getGraph(GRAPH_TOTAL, GroupWidth::Total);
-  getGraph(GRAPH_TX, GroupWidth::Direction);
-  getGraph(GRAPH_RX, GroupWidth::Direction);
+  getGraph(GRAPH_TOTAL, -1, GroupWidth::Total);
+  getGraph(GRAPH_TX, 0, GroupWidth::Direction);
+  getGraph(GRAPH_RX, 1, GroupWidth::Direction);
   qDebug() << "mTotalGraph: " << mTotalGraph << ", mDirTxGraph: " << mDirTxGraph
            << ", mDirRxGraph: " << mDirRxGraph;
   qDebug() << "mTotalLegendItem: " << mTotalLegendItem
@@ -77,20 +77,20 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas,
                              QVector<double> valuedatas,
                              QVector<int> packetlosts,
                              QVector<int> packettotals,
-                             QVector<double> lostrates) {
+                             QVector<double> lostrates,
+                             int direction) {
   if (timedatas.isEmpty() || valuedatas.isEmpty())
     return;
 
   // qDebug() << "onUpdateTPDatas:" << refrow << " times:" << timedatas << "
   // values: " << valuedatas;
-  MyQCPGraph *myGraph = getGraph(refrow);
+  MyQCPGraph *myGraph = getGraph(refrow, direction);
 
   double minT =
       *std::min_element(timedatas.begin(), timedatas.end()); // x: min time
   double maxT =
       *std::max_element(timedatas.begin(), timedatas.end()); // x: max time
-  qDebug() << "min:" << QString::number(minT)
-           << " Max:" << QString::number(maxT);
+  // qDebug() << "min:" << QString::number(minT) << " Max:" << QString::number(maxT);
   updateXAxisRange(minT, maxT);
 
   double minV =
@@ -287,13 +287,16 @@ void TPPlot::onDataAdded(double key, double value) {
   }
 }
 
-void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data) {
-  // combine two data in to Total graph
+void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir)
+{
+  // combine two data in to Total/Tx/Rx graph
+  // dir: 0 Tx, 1: Rx
+  QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex
+  QSharedPointer<QCPGraphDataContainer> data2 = data;
+  QSharedPointer<QCPGraphDataContainer> sumdata;
+
   if (mTotalGraph) {
-    QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex
     QSharedPointer<QCPGraphDataContainer> data1 = mTotalGraph->data();
-    QSharedPointer<QCPGraphDataContainer> data2 = data;
-    QSharedPointer<QCPGraphDataContainer> sumdata;
     sumdata = sumGraphData(data1, data2);
     mTotalGraph->setData(sumdata);
     mTotalGraph->rescaleAxes(true); // TODO: not good to show y Max value
@@ -301,8 +304,21 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data) {
     //   mTotalLegendItem->setVisible(
     //       (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total)));
     // }
-  } else {
-    qDebug() << "onDatasSetted: ERROR does not have mTotalGraph";
+  }
+  qDebug() << "onDatasSetted dir:" << dir;
+  if (dir == 0){
+      if (mDirTxGraph){
+          QSharedPointer<QCPGraphDataContainer> data1 = mDirTxGraph->data();
+          sumdata = sumGraphData(data1, data2);
+          mDirTxGraph->setData(sumdata);
+      }
+  }
+  if (dir == 1){
+      if (mDirRxGraph){
+          QSharedPointer<QCPGraphDataContainer> data1 = mDirRxGraph->data();
+          sumdata = sumGraphData(data1, data2);
+          mDirRxGraph->setData(sumdata);
+      }
   }
 }
 
@@ -440,7 +456,7 @@ void TPPlot::onIperfTPdata(QString sInterval, QString refrowidx, QString data,
            << " sInterval:" << sInterval << " x:" << QString::number(x)
            << " TP:" << QString::number(y)
            << " grouptag:" << grouptag;
-  addTPData(refrowidx, x, y, lostrate.toDouble());
+  addTPData(refrowidx, x, y, lostrate.toDouble(), grouptag);
 }
 
 void TPPlot::onIperfTPdatas(QString refrow, QString sInterval,
@@ -496,7 +512,14 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
                        double lostrate, QString grouptag) {
   QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex,
   double sumydata = ydata;
-  MyQCPGraph *myGraph = getGraph(refrowidx);
+  int dir = -1;
+  if (grouptag.contains(GRAPH_TX, Qt::CaseSensitive)){
+      dir =0;
+  }
+  if (grouptag.contains(GRAPH_RX, Qt::CaseSensitive)){
+      dir =1;
+  }
+  MyQCPGraph *myGraph = getGraph(refrowidx, dir);
   // let xAxis range in m_timeWindowThreshold, scroll when xdata >
   // m_timeWindowThreshold
   if (xdata < m_timeWindowThreshold) {
@@ -516,47 +539,29 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
       myGraph->updateValue(xdata, sumydata);
     }
   } else {
-    //
-    bool isDir = refrowidx.contains(GRAPH_TX, Qt::CaseSensitive) ||
-                 refrowidx.contains(GRAPH_RX, Qt::CaseSensitive);
-    if (isDir) {
-      double oldvalue = 0.0;
-      if (myGraph->getValue(xdata, oldvalue) == -1) {
-        myGraph->addData(xdata, ydata);
-      } else {
-        sumydata = sumydata + oldvalue;
-        myGraph->updateValue(xdata, sumydata);
-      }
-    } else {
+    // detail
       qDebug() << "add detail throughput data:" << myGraph
                << " ,refrowidx: " << refrowidx << ", x: " << xdata
                << ", y: " << ydata;
       myGraph->addData(xdata, ydata);
-    }
   }
 
-  {
-    // detail
-    // if (m_legends.contains(refrowidx)) {
-    //   qDebug() << "addTPData refrowidx:" << refrowidx;
-    //   QCPAbstractLegendItem *itm = m_legends.value(refrowidx);
-    //   if (itm) {
-    //     if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)) {
-    //       itm->setVisible(
-    //           (m_tpgrouptype ==
-    //           static_cast<int>(TPGroup::GroupMode::Total)));
-    //     } else if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive) ||
-    //                refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)) {
-    //       itm->setVisible((m_tpgrouptype ==
-    //                        static_cast<int>(TPGroup::GroupMode::Direction)));
-    //     } else {
-    //       itm->setVisible(
-    //           (m_tpgrouptype ==
-    //           static_cast<int>(TPGroup::GroupMode::Detail)));
-    //     }
-    //   }
-    // }
-  }
+  // if (grouptag.contains(GRAPH_TX, Qt::CaseSensitive)||
+  //     grouptag.contains(GRAPH_RX, Qt::CaseSensitive)){
+  //     if (grouptag.contains(GRAPH_TX, Qt::CaseSensitive)){
+  //         myGraph = mDirTxGraph;
+  //     }
+  //     if (grouptag.contains(GRAPH_RX, Qt::CaseSensitive)){
+  //         myGraph = mDirRxGraph;
+  //     }
+  //     double oldvalue = 0.0;
+  //     if (myGraph->getValue(xdata, oldvalue) == -1) {
+  //         myGraph->addData(xdata, ydata);
+  //     } else {
+  //         sumydata = sumydata + oldvalue;
+  //         myGraph->updateValue(xdata, sumydata);
+  //     }
+  // }
 
   // enlarge/shrink y range
   m_maxX = xdata + m_interval;
@@ -609,7 +614,7 @@ void TPPlot::del(QString idx) {
   replot();
 }
 
-MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width) {
+MyQCPGraph *TPPlot::getGraph(QString refrowidx, int dir, int width) {
   // refrowidx:
   // width: line width, default 1
   QPen graphPen;
@@ -632,24 +637,27 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width) {
       myGraph->setLayer(LAYER_TOTAL);
       myGraph->setVisible((m_tpgrouptype == TPGroup::GroupMode::Total));
       mTotalGraph = myGraph;
-    } else if ((refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
+    }
+    else if ((refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
                (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive))) {
 
       myGraph->setLayer(LAYER_DIR);
       myGraph->setVisible((m_tpgrouptype == TPGroup::GroupMode::Direction));
-      // TODO : diection
       if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) {
         mDirTxGraph = myGraph;
-        mDirTxGraph->setDirection(0);
+        mDirTxGraph->setDirection(dir);
       } else {
         mDirRxGraph = myGraph;
-        mDirRxGraph->setDirection(1);
+        mDirRxGraph->setDirection(dir);
       }
       // TODO: comment
-    } else {
+    }
+    else {
       // normal graph
+      qDebug() << myGraph << " detail: " << refrowidx << " ,dir: " << dir;
       myGraph->setLayer(LAYER_MAIN);
       myGraph->setVisible((m_tpgrouptype == TPGroup::GroupMode::Detail));
+      myGraph->setDirection(dir);
     }
     m_graphs.insert(refrowidx, myGraph);
 
@@ -671,12 +679,6 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width) {
           legend->addItem(litm);
         }
       }
-      // else {
-      //   // total legend should not show when not total mode
-      //   if (legend->take(litm)) {
-      //     m_legends.insert(GRAPH_TOTAL, litm);
-      //   }
-      // }
     } else if ((refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
                (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive))) {
       // TODO: direction
@@ -690,30 +692,14 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width) {
           legend->addItem(litm);
         }
       }
-      // else {
-      //   if (legend->take(litm)) {
-      //     m_legends.insert(refrowidx, litm);
-      //   }
-      // }
     } else {
       // all throughput legend except Total/direction
-      // qDebug() << "============setup normal legend";
-      // litm->setLayer(LAYER_MAIN);// DO NOT place Legend in other Layer, it
-      // will be Not visible
       if (m_tpgrouptype == TPGroup::GroupMode::Detail) {
         if (!legend->hasItem(litm)) {
           qDebug() << " Detail add legends:" << refrowidx;
           legend->addItem(litm);
         }
       }
-      //  else {
-      //   if (legend->take(litm)) {
-      //     qDebug() << " add to m_legends:" << refrowidx;
-      //     m_legends.insert(refrowidx, litm);
-      //   }
-      // }
-      // litm->setVisible(m_tpgrouptype == TPGroup::GroupMode::Detail); //legend
-      // item myGraph->setVisible(!m_showgroup); // graph
     }
   } else {
     qDebug() << "//we already have it:" << refrowidx;
@@ -733,7 +719,7 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int width) {
     //     myGraph->setVisible(m_tpgrouptype == TPGroup::GroupMode::Detail);
     // }
   }
-  qDebug() << "myGraph: " << myGraph << " ,refrowidx: " << refrowidx;
+  qDebug() << "myGraph: " << myGraph << " ,refrowidx: " << refrowidx << " ,dir: " << dir;
   myGraph->setName(refrowidx);
   // if ((!m_graphs.contains(refrowidx))){
   //     // m_graphs.insert(idx,g);

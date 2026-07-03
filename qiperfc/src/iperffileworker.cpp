@@ -7,6 +7,8 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
+#include "comm.h"
+
 IperfFileWorker::IperfFileWorker(QString version, QString protocal, uint port,
                                  int idx, bool servermode, int parallel,
                                  bool bidir, QString bidirtag , QString filename,
@@ -79,7 +81,7 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
                 QString idx = QString::number(midx) + "_"+ jObj.value("idx").toString();
                 double tpvalue = jObj.value("value").toString().toDouble(); // jsondata value is string, need toString() then can convert to double!!
                 QString unit = jObj.value("unit").toString();
-                double pkt_lost = jObj.value("packet_lost").toString().toDouble(); // jsondata value is string, need toString() then can convert to int!!
+                int pkt_lost = jObj.value("packet_lost").toString().toInt(); // jsondata value is string, need toString() then can convert to int!!
                 int pkt_total = jObj.value("packet_total").toString().toInt(); // jsondata value is string, need toString() then can convert to int!!
                 QString jitter = jObj.value("jitter").toString();                   //TODO jitter
                 QString jitter_unit = jObj.value("jitter_unit").toString();         //TODO jitter_unit
@@ -108,13 +110,19 @@ void IperfFileWorker::onThroughputData(int midx, QString sInterval, QString data
 
                     // tpdata->timeDatas.append(fInterval+m_delay);
                     // qDebug() << "fInterval: " <<fInterval;
-                    tpdata->timeDatas.append((int)fInterval); // the iperf3 report interval may have .0x Difference, ignore it!!
+                    tpdata->timeDatas.append(static_cast<int>(fInterval)); // the iperf3 report interval may have .0x Difference, ignore it!!
                     // qDebug()<< "m_delay:" << QString::number(m_delay);
                     //tpdata->timeDatas.append(fInterval);
                     tpdata->valueDatas.append(tpvalue);
                     tpdata->packetLost.append(pkt_lost);
                     tpdata->packetTotal.append(pkt_total);
                     tpdata->lostrate.append(lostrate);
+                    if (dir.contains(GRAPH_TX, Qt::CaseSensitive)){
+                        tpdata->direction =0;
+                    }else{
+                        tpdata->direction =1;
+                    }
+
                 }
             }
         }
@@ -133,7 +141,8 @@ void IperfFileWorker::onWorkFinished()
         QString idx = iterator.key();
         // qDebug() << "onWorkFinished: idx:" << idx << " timeDatas:" << m_datas.value(idx)->timeDatas;
         emit updateTPDatas(idx, m_datas.value(idx)->timeDatas, m_datas.value(idx)->valueDatas,
-                          m_datas.value(idx)->packetLost, m_datas.value(idx)->packetTotal, m_datas.value(idx)->lostrate);
+                          m_datas.value(idx)->packetLost, m_datas.value(idx)->packetTotal, m_datas.value(idx)->lostrate,
+                          m_datas.value(idx)->direction);
         ++iterator;
         // QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
