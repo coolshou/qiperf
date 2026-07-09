@@ -107,13 +107,15 @@ private:
 private:
     int mDebug;
     int m_tpgrouptype;
+    int m_highestId;
+    QHash<int, TP *> m_tpcfgitems;
     TPGroup::GroupMode m_groupmode;
     QTreeView *m_treeview; //relative treeview
     QString m_TPUint;
     QList<QString> m_unit_bits;
     QList<QString> m_unit_bytes;
     TP *rootItem;
-    TP *groupItem; //hold total group item
+    TP *groupItem;  // hold total group item
     TP *dirTxItem;  // hold Tx direction group item: Tx, Rx
     TP *dirRxItem;  // hold Rx direction group item: Tx, Rx
     QMap<QString, TP> mCommentItems; // dict of commentItem

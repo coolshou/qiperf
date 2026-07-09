@@ -17,7 +17,7 @@ TP::TP(QString id, QString data,int datatype, TP *parent)
     m_totalpacket = 0;
     clearThroughput();
 
-    m_itemDatas={m_id, "", "", "", // id, server, dir ,client
+    m_itemDatas={getID(), "", "", "", // id, server, dir ,client
                  "", "", "", //throughput, min throughput, max throughput
                  "", ""}; // lost rate, comment
     // qInfo() << "create TP:" << id << " data:" << data << " parent:" << parent;
@@ -225,7 +225,7 @@ void TP::loadData(QString data)
         m_mgrserver = o_server.value("manager").toString();
 
         //m_itemDatas.clear();// this will remove all data => m_itemDatas.length()=0
-        m_itemDatas.replace(int(TP::id) , m_id);
+        m_itemDatas.replace(int(TP::id) , getID());
         m_itemDatas.replace(int(TP::server), server);
         m_itemDatas.replace(int(TP::dir), direction);
         m_itemDatas.replace(int(TP::client), client);

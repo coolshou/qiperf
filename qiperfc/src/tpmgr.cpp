@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QPalette>
 #include <QColor>
+#include <algorithm> // Needed for std::max_element
 
 #include <QDebug>
 
@@ -24,6 +25,7 @@ TPMgr::TPMgr(int grouptype, QTreeView *treeview, QString tpunit, QObject *parent
     connect(this, &QAbstractItemModel::rowsInserted, this, &TPMgr::onRowsInserted);
     m_unit_bits << "Kbits/sec" << "Mbits/sec" << "Gbits/sec" << "Tbits/sec";
     m_unit_bytes << "KBytes/sec" << "MBytes/sec" << "GBytes/sec" << "TBytes/sec";
+    m_highestId = 0;
     rootItem = nullptr;
     groupItem = nullptr;
     dirTxItem = nullptr;
@@ -283,10 +285,11 @@ TP *TPMgr::add(QString strJson, QString note, TPMgrData::DataType datatype,  TP 
         // qInfo() << "TPMgr::add data:" << data;
     }
     QModelIndex midx = indexFromItem(pitm);
-    // int idx = getMaxIdx();
     int idx = pitm->childCount();
     beginInsertRows(midx, idx, idx);
-    TP *tp = new TP(QString::number(idx), strJson, datatype, pitm);
+    m_highestId = getMaxIdx();
+    TP *tp = new TP(QString::number(m_highestId), strJson, datatype, pitm);
+    m_tpcfgitems.insert(m_highestId, tp);
     pitm->appendChild(tp);
     endInsertRows();
     return tp;
@@ -318,6 +321,7 @@ void TPMgr::del(QModelIndex idx)
     stopUpdater();
     int row = idx.row();
     TP *itm = getItem(idx);
+    int id = itm->getID().toInt();
     qDebug() << " itm:" << itm
              << " TxItm:" << dirTxItem
              << " RxItm:" << dirRxItem;
@@ -325,6 +329,10 @@ void TPMgr::del(QModelIndex idx)
     // if (!removeRows(row, 1 , getRootItemIdx())){
     if (!removeRows(row, 1 , pIdx)){
         qDebug() << "del fail("<< QString::number(row) << "): " << idx;
+    }
+    if (m_tpcfgitems.contains(id)){
+        //TODO: should we delete the item?
+        m_tpcfgitems.remove(id);
     }
 
     startUpdater();
@@ -935,18 +943,13 @@ int TPMgr::getMaxPort(QString m_ip, QString targetIP)
 
 int TPMgr::getMaxIdx()
 {
-    TP *itm = getRootItem();
     int maxIdx=0;
-    int idx = 0;
-    foreach(auto tp, itm->getChilds()){
-        idx = tp->getID().toInt();
-        if (idx>maxIdx){
-            maxIdx = idx;
-        }else{
-            maxIdx++;
-        }
+    if (m_tpcfgitems.isEmpty()) {
+        return 0; // Or return -1, depending on your ID logic
     }
-    return maxIdx;
+    // Finds the maximum key in O(N) time without allocating any memory
+    maxIdx = *std::max_element(m_tpcfgitems.keyBegin(), m_tpcfgitems.keyEnd());
+    return maxIdx+1;
 }
 
 void TPMgr::onPaste(QString data)
