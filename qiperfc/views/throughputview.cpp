@@ -665,15 +665,14 @@ void ThroughputView::onItemDClicked(QModelIndex idx)
                 // only iperf pair config can be edit
                 dlgiperf->loadJsonCfg(tp->saveData());
                 dlgiperf->setExcIdx(idx);
-                int rc = dlgiperf->exec();// show dlgiperf
+                int rc = dlgiperf->exec();
                 if (rc == QDialog::Accepted){
                     QString rs= dlgiperf->getJsonCfg();
                     tp->loadData(rs);
+                    qDebug() << "onItemDClicked:" << idx << ",tp: " << tp;
                     m_tpmgr->setItem(idx, tp);
                 }
             }else{
-                qDebug() << "TODO: handle double click on column comment";
-                // QMessageBox::information(this, "comment", tp->data(TP::cols::comment).toString());
                 QVariant d = tp->data(TP::cols::comment);
                 if (d.isValid() && ! d.isNull()) {
                     QString comment = d.toString();
