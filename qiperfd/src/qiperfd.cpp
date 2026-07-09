@@ -400,31 +400,45 @@ qint64 QIperfd::add(QString returnAddress, QString refrow,
 void QIperfd::del(int idx, bool servermode)
 {
     // delete specify m_iperfworkers & m_threads
-    //
+    m_mutex.lock();
+
     if (servermode)
     {
         if (m_thserver.contains(idx))
         {
-            m_thserver.remove(idx);
-        }
-        if (m_iperfwserver.contains(idx))
-        {
+            QThread *thread = m_thserver.take(idx);
             m_iperfwserver.remove(idx);
+            m_mutex.unlock();
+
+            thread->quit();
+            if (!thread->wait(3000))
+                thread->terminate();
+            delete thread;
+
+            m_runstatus[idx] = 0; // ← 也要重置 server 模式狀態
+            return;
         }
     }
     else
     {
         if (m_threads.contains(idx))
         {
-            m_threads.remove(idx);
-        }
-        if (m_iperfworkers.contains(idx))
-        {
-            m_iperfworkers.remove(idx);
-        }
+            QThread *thread = m_threads.take(idx);
+            IperfWorker *worker = m_iperfworkers.take(idx);
+            m_mutex.unlock();
 
-        m_runstatus[idx] = 0;
+            thread->quit();
+            if (!thread->wait(3000))
+                thread->terminate();
+            delete thread;
+            // worker 透過 deleteLater 或 parent 機制處理
+
+            m_runstatus[idx] = 0;
+            return;
+        }
     }
+
+    m_mutex.unlock();
 }
 
 // int QIperfd::addIperfServer(QString refrow, int version, uint port, QString bindHost)

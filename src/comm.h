@@ -101,8 +101,7 @@
 // ping
 #define CMD_PING "PING"
 
-#define CMD_MONITOR "MONITOR
-"
+#define CMD_MONITOR "MONITOR"
 
 #define CMD_NOT_SUPPORT "CMD_NOT_SUPPORT"
 
