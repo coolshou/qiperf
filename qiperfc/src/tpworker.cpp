@@ -309,7 +309,7 @@ void TpWorker::work()
                 break;
             }
             QString skey = tp->getBindKey(true);
-            debug("[TpWorker]m_status_server skey:" + skey);
+            // debug("[TpWorker]m_status_server skey:" + skey);
             m_status_server[skey]=TPStatus::init; // init server of BindKey status 0
             //###### client ######
 
@@ -320,7 +320,7 @@ void TpWorker::work()
             //TODO: detect manager client is pingable
             if (!m_wsc.contains(clientIP)) {
                 s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
-                debug("[TpWorker]client websocket:" + clientIP + " url: " + s + " m_datapath:" + m_datapath);
+                // debug("[TpWorker]client websocket:" + clientIP + " url: " + s + " m_datapath:" + m_datapath);
                 m_wsc[clientIP]=new WSClient(clientIP, QUrl(s), m_datapath);
                 connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &TpWorker::onIperfStarted);
                 connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &TpWorker::onIperfStoped);
