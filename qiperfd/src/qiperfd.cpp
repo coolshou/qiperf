@@ -2060,6 +2060,7 @@ void QIperfd::startNtpServer()
             onLog("stop old Ntp Server");
             m_ntpserver->disconnect();
             delete (m_ntpserver);
+            m_ntpserver = nullptr;
         }
         onLog("start Ntp Server");
         m_ntpserver = new NtpServer(this);
@@ -2072,6 +2073,7 @@ void QIperfd::startNtpServer()
             onLog("stop Ntp Server");
             m_ntpserver->disconnect();
             delete (m_ntpserver);
+            m_ntpserver = nullptr;
         }
     }
 }
@@ -2274,7 +2276,7 @@ void QIperfd::initIperf(QString apppath)
         dir.mkdir(tmp + tmp_path);
     }
 #else
-    QString tmp_path = "";
+    tmp_path = "";
 #endif
 
 #else
@@ -2445,7 +2447,7 @@ void QIperfd::runRequest(QString refid, QString from, QString reqcmd, QString cm
         qDebug() << " No supported reqcmd:" << reqcmd;
         return;
     }
-    if (rpcmd.contains("MONOTOR"))
+    if (rpcmd.contains(CMD_MONITOR))
     {
         //
         processMonitor(from, reqcmd, rpcmd);
