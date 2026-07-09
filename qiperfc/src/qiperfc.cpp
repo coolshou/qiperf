@@ -1156,7 +1156,13 @@ void QIperfC::loadSettings()
                                       QStandardPaths::writableLocation(QStandardPaths::DesktopLocation))
                         .toString();
     mCpuCheckInterval = m_settings->value("CpuCheckInterval", 1).toInt();
+    if (mCpuCheckInterval<=0){
+        mCpuCheckInterval =3; // default 3 sec
+    }
     mMemCheckInterval = m_settings->value("MemCheckInterval", 1).toInt();
+    if (mMemCheckInterval<=0){
+        mMemCheckInterval =3; // default 3 sec
+    }
     m_settings->endGroup();
 
     m_settings->beginGroup("agent");
@@ -1986,6 +1992,7 @@ void QIperfC::initStatusbar()
     m_mem_label->setFrameStyle(static_cast<int>(QFrame::StyledPanel) | static_cast<int>(QFrame::Sunken));
     ui->statusbar->addWidget(m_mem_label, 0);
     connect(m_memmonitor, &MemMonitor::memoryUsageUpdated, this, &QIperfC::onMemoryUsageUpdated);
+    // m_memmonitor->start();
 
     // statusbar of endpints (qiperfd list)
     m_label_qiperfd = new QLabel(this);
