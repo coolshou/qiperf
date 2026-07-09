@@ -12,7 +12,7 @@ class MemMonitor : public QObject {
 public:
     explicit MemMonitor(int interval=1, QObject *parent = nullptr);
     ~MemMonitor();
-    void start(int intervalMs = 1000); // default: 1 second
+    void start(int intervalMs = 3000); // default: 3 second
     void stop();
     void setInterval(int interval);
 signals:
