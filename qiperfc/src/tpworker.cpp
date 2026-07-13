@@ -209,7 +209,8 @@ void TpWorker::work()
     int iomit=0;
     int idelaytime=0;
     int itimeout;
-    int refrow;
+    // int refrow;
+    QString refrow;
     bool isRunforever=false;
     // int iSliceWindowTime=0;
     double totalrecordrate=0.0;
@@ -239,7 +240,8 @@ void TpWorker::work()
             if (testduration> maxtestduration){
                 maxtestduration = testduration;
             }
-            refrow = tp->row();
+            // refrow = tp->row();
+            refrow = tp->getID();
             // err = "=====[TpWorker]refrow:" + QString::number(refrow) + " maxtestduration:" + QString::number(maxtestduration);
 
             QString serverIP = tp->getMgrServer();
@@ -299,7 +301,8 @@ void TpWorker::work()
             }
             //tell server add iperf server
             //CMD_IPERF_ADD:<num>:<ignore>:<iperf args>
-            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow);
+            // cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow);
+            cmd = QString(CMD_IPERF_ADD)+":"+refrow;
             cmd = cmd + ":"+ (m_ignoreWrongInterval?"1":"0");
             cmd = cmd + ":"+ tp->getServerArgs();
             debug("[TpWorker]server cmd:" + serverIP + " => " + cmd, 4);
@@ -367,7 +370,8 @@ void TpWorker::work()
                 return;
             }
             //tell client add iperf client
-            cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow);
+            // cmd = QString(CMD_IPERF_ADD)+":"+QString::number(refrow);
+            cmd = QString(CMD_IPERF_ADD)+":"+refrow;
             cmd = cmd + ":" + (m_ignoreWrongInterval?"1":"0");
             cmd = cmd + ":" +tp->getClientArgs();
             debug("[TpWorker]client cmd:" + clientIP + " => " + cmd, 5);
@@ -633,7 +637,8 @@ void TpWorker::onIperfExtendWait(QString refrow, qint64 iwait, int exitCode)
     // ask iperf server restart
     foreach (TP *tp, m_tps) {
         if (tp->getEnabled()){
-            if (tp->row()==refrow.toInt()){
+            // if (tp->row()==refrow.toInt()){
+            if (tp->getID().compare(refrow)==0){
                 QString key = tp->getServer();
                 binkey = tp->getBindKey();
                 debug(QString("[onIperfExtendWait]ask iperf server restart: %1, binkey: %2").arg(key, binkey),1);
@@ -871,7 +876,8 @@ void TpWorker::onStatusReady(QString refrow, const QString& skey,
     qint64 rs = 0;
     foreach (TP *tp, m_tps) {
         if (tp->getEnabled()){
-            if (tp->row()==refrow.toInt()){
+            // if (tp->row()==refrow.toInt()){
+            if (tp->getID().compare(refrow)==0){
                 QString key = tp->getClient();
                 debug(QString("[onIperfExtendWait]TODO:ask iperf client restart: %1").arg(key),1);
                 if (m_wsc.contains(key)){
