@@ -832,12 +832,12 @@ void TPPlot::clear() {
       if ((it.key().contains(GRAPH_TOTAL))||
           (it.key().contains(GRAPH_TX))||
           (it.key().contains(GRAPH_RX))) {
-          qDebug() << it.key() << " not delete, only clear data";
+          // qDebug() << it.key() << " not delete, only clear data";
           graph->data()->clear(); // clear data
           ++it; // 沒刪除則繼續下一個
       } else {
           if (graph) {
-              qDebug() << it.key() << " removed";
+              // qDebug() << it.key() << " removed";
               removeGraph(graph);
               // delete graph; // 如果是自訂非 QObject 物件才需要
           }
@@ -852,12 +852,12 @@ void TPPlot::clear() {
       if ((itl.key().contains(GRAPH_TOTAL))||
           (itl.key().contains(GRAPH_TX))||
           (itl.key().contains(GRAPH_RX))) {
-          qDebug() << itl.key() << " not delete, only clear data";
+          qDebug() << "lostgraphs:" << itl.key() << " not delete, only clear data";
           graph->data()->clear(); // clear data
           ++itl;
       } else {
           if (graph) {
-              qDebug() << itl.key() << " removed";
+              qDebug() << "lostgraphs:" << itl.key() << " removed";
               removePlottable(graph);
               // delete graph; // 如果是自訂非 QObject 物件才需要
           }
@@ -865,15 +865,15 @@ void TPPlot::clear() {
           itl = m_lostgraphs.erase(itl);
       }
   }
-  if (mTotalGraph){
-      qDebug() << "mTotalGraph->dataCount:" << mTotalGraph->dataCount();
-  }
-  if (mDirTxGraph){
-      qDebug() << "mDirTxGraph->dataCount:" << mDirTxGraph->dataCount();
-  }
-  if (mDirRxGraph){
-      qDebug() << "mDirRxGraph->dataCount:" << mDirRxGraph->dataCount();
-  }
+  // if (mTotalGraph){
+  //     qDebug() << "mTotalGraph->dataCount:" << mTotalGraph->dataCount();
+  // }
+  // if (mDirTxGraph){
+  //     qDebug() << "mDirTxGraph->dataCount:" << mDirTxGraph->dataCount();
+  // }
+  // if (mDirRxGraph){
+  //     qDebug() << "mDirRxGraph->dataCount:" << mDirRxGraph->dataCount();
+  // }
   // axis reset
   xAxis->setRange(0, m_xAxisMaxDefault);
   yAxis->setRange(0, m_yAxisMaxDefault);
