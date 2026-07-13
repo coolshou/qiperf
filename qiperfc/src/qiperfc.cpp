@@ -479,7 +479,7 @@ void QIperfC::onStart(bool showNotice)
         connect(m_dbthread, &QThread::finished, m_dbworker, &QObject::deleteLater);
 #endif
         // list of throughput test pair
-        QList<TP *> tps = m_throughputview->getChilds();
+        QList<TP *> tps = m_throughputview->getChilds(false);
         qDebug() << "onStart tps:" << tps;
         if (tps.length()>0){
             m_tpworker = new TpWorker(m_logpath, tps, m_IgnoreWrongInterval);

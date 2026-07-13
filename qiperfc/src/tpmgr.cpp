@@ -354,10 +354,13 @@ QList<TP *> TPMgr::getChilds(bool showAll)
     QList<TP *> items;
     TP *itm;
     // m_tps.clear();
-    if ((m_tpgrouptype == TPGroup::GroupMode::Total) ||
-        (m_tpgrouptype == TPGroup::GroupMode::Detail)){
-        itm = getRootItem();
-        items.append(itm);
+    if (m_tpgrouptype == TPGroup::GroupMode::Total) {
+        items.append(groupItem);
+    }else if (m_tpgrouptype == TPGroup::GroupMode::Detail){
+        // itm = getRootItem();
+        // items.append(itm);
+        items.append(dirTxItem);
+        items.append(dirRxItem);
     }else {
         //Direction have two item, Comment may have many
         itm = rootItem;
@@ -368,6 +371,10 @@ QList<TP *> TPMgr::getChilds(bool showAll)
     if (items.length()>0){
         for (TP* item : items) {
             // qDebug() << " item:" << item << " child:" << item->childCount();
+            // qDebug() << " item:" << item->getID();
+            if (showAll){
+                tps.append(item);
+            }
             for(int i = 0; i<item->childCount();i++){
                 TP *chitm = item->child(i);
                 if (!showAll){
@@ -376,10 +383,12 @@ QList<TP *> TPMgr::getChilds(bool showAll)
                     }
                 }
                 // m_tps.append(itm->child(i));
+                // qDebug() << " chitm:" << chitm->getID();
                 tps.append(chitm);
                 if (chitm->haveChilds()){
                     for(int j = 0; j<chitm->childCount();j++){
                         TP *ccitm = chitm->child(j);
+                        // qDebug() << " ccitm:" << ccitm->getID();
                         tps.append(ccitm);
                     }
                 }
@@ -1003,7 +1012,7 @@ TP *TPMgr::newGroupItem()
     QModelIndex midx = indexFromItem(rootItem);
     int idx = rootItem->childCount();
     beginInsertRows(midx,  idx, idx);
-    groupItem = new TP("0", GRAPH_TOTAL, TPMgrData::group, rootItem);
+    groupItem = new TP(GRAPH_TOTAL, GRAPH_TOTAL, TPMgrData::group, rootItem);
     rootItem->appendChild(groupItem);
     endInsertRows();
     return groupItem;
@@ -1015,10 +1024,10 @@ TP *TPMgr::newDirectionItem(QString dir)
     int idx = rootItem->childCount();
     beginInsertRows(midx, idx, idx);
     if (dir.contains(TPDIRTx)){
-        dirTxItem = new TP("0", GRAPH_TX, TPMgrData::direction, rootItem);
+        dirTxItem = new TP(GRAPH_TX, GRAPH_TX, TPMgrData::direction, rootItem);
         rootItem->appendChild(dirTxItem);
     }else{
-        dirRxItem = new TP("1", GRAPH_RX, TPMgrData::direction, rootItem);
+        dirRxItem = new TP(GRAPH_RX, GRAPH_RX, TPMgrData::direction, rootItem);
         rootItem->appendChild(dirRxItem);
     }
     endInsertRows();
