@@ -397,27 +397,31 @@ QList<TP *> TPMgr::getChilds(bool showAll)
     // Comment: x,y,z ... + iperfs
     QList<TP *> tps;
     QList<TP *> items;
-    TP *itm;
+    // TP *itm;
+    // TP *citm;
     // m_tps.clear();
     if (m_tpgrouptype == TPGroup::GroupMode::Total)
     {
         items.append(groupItem);
     }
-    else if (m_tpgrouptype == TPGroup::GroupMode::Detail)
+    else if (m_tpgrouptype == TPGroup::GroupMode::Direction)
     {
-        // itm = getRootItem();
-        // items.append(itm);
+        // Direction have two item
         items.append(dirTxItem);
         items.append(dirRxItem);
     }
     else
     {
-        // Direction have two item, Comment may have many
-        itm = rootItem;
-        for (int i = 0; i < itm->childCount(); i++)
-        {
-            items.append(itm->child(i));
-        }
+        //, Comment may have many
+        // itm = rootItem;
+        items.append(rootItem);
+        // for (int i = 0; i < itm->childCount(); i++)
+        // {
+        //     citm = itm->child(i);
+        //     if (citm){
+        //         items.append(citm);
+        //     }
+        // }
     }
     if (items.length() > 0)
     {
@@ -1318,8 +1322,8 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
             {
                 // this is avg value
                 // TODO: this part TP data seems strange??
-                qDebug() << "refrow:" << refrow << " idx:" << idx
-                         << " sInterval:" + sInterval << " Avg:" << value;
+                // qDebug() << "refrow:" << refrow << " idx:" << idx
+                //          << " sInterval:" + sInterval << " Avg:" << value;
                 // << " pkt_lost:" << pkt_lost << " pkt_total:" << pkt_total;
                 addTPdata(refrow, sInterval, idx, value, unit, dir,
                           pkt_lost, pkt_total);
