@@ -2,13 +2,13 @@ Source: qiperf
 Section: network
 Priority: optional
 Maintainer: coolshou <coolshou2060@gmail.com>
-Build-Depends: debhelper-compat (= 13), libsystemd-dev,
-    qt5-qmake | qmake6, qtbase5-dev | qt6-base-dev,
-    libqt5websockets5-dev | libqt6websockets6-dev | qt6-websockets-dev,
-    libqt5serialport5-dev | libqt6serialport6-dev | qt6-serialport-dev,
-    qtwebengine5-dev | qt6-webengine-dev,
-    qtbase5-private-dev | qt6-base-private-dev, qt6-5compat-dev | libqt6core5compat6-dev,
-    qtpositioning5-dev | qt6-positioning-dev,
+Build-Depends: debhelper-compat (= 13) | debhelper, libsystemd-dev,
+    qmake6, qt6-base-dev,
+    libqt6websockets6-dev | qt6-websockets-dev,
+    libqt6serialport6-dev | qt6-serialport-dev,
+    qt6-webengine-dev,
+    qt6-base-private-dev, qt6-5compat-dev | libqt6core5compat6-dev,
+    qt6-positioning-dev,
     freeglut3-dev | libglut-dev
 Standards-Version: 4.6.0
 Homepage: https://github.com/coolshou/qiperf.git
