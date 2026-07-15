@@ -689,8 +689,8 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
   {
     // Total/Tx/Rx sum Throughput graph
     double oldvalue = 0.0;
-    qDebug() << refrowidx << ",xdata:" << QString::number(xdata)
-             << ", count:" << myGraph->dataCount();
+    // qDebug() << refrowidx << ",xdata:" << QString::number(xdata)
+    //          << ", count:" << myGraph->dataCount();
     if (myGraph->getValue(xdata, oldvalue) == -1)
     {
       // auto it = myGraph->data()->find(xdata);
