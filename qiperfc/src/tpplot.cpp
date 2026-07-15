@@ -338,7 +338,7 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir)
 {
   // combine two data in to Total/Tx/Rx graph
   // dir: 0 Tx, 1: Rx
-  QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex
+  QMutexLocker locker(&m_mutex); // Locks m_mutex
   QSharedPointer<QCPGraphDataContainer> data2 = data;
   QSharedPointer<QCPGraphDataContainer> sumdata;
 
@@ -396,7 +396,7 @@ void TPPlot::onLostRateDataAdded(double key, double value)
     {
       // add all value to Total graph's value
       double orgvalue = -1;
-      QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex
+      QMutexLocker locker(&m_mutex); // Locks m_mutex
       int rc = mTotalLostGraph->getValue(key, orgvalue);
       if (rc > -1)
       {
@@ -418,7 +418,7 @@ void TPPlot::onLostRateDataAdded(double key, double value)
 
 void TPPlot::onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data)
 {
-  QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex
+  QMutexLocker locker(&m_mutex); // Locks m_mutex
   if (mTotalLostGraph)
   {
     QSharedPointer<QCPBarsDataContainer> data1 = mTotalLostGraph->data();
@@ -504,7 +504,7 @@ void TPPlot::doReplot()
   // qDebug() << legend->outerRect();
 
   // 保護機制：確保 Mutex 鎖定，因為我們在讀取可能被 addTPData 修改的變數
-  QMutexLocker<QMutex> locker(&m_mutex);
+  QMutexLocker locker(&m_mutex);
   // 更新 Y 軸：加上一點緩衝空間 (例如 1.1 倍)，視覺上比較舒服
   // if (m_maxY > 0) {
   //     this->yAxis->setRange(0, m_maxY * 1.1);
@@ -658,7 +658,7 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval,
 void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
                        double lostrate, QString grouptag)
 {
-  QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex,
+  QMutexLocker locker(&m_mutex); // Locks m_mutex,
   double sumydata = ydata;
   int dir = -1;
   // qDebug() << "grouptag:" << grouptag;
@@ -741,7 +741,7 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
 
 void TPPlot::del(QString idx)
 {
-  QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex,
+  QMutexLocker locker(&m_mutex); // Locks m_mutex,
   if (m_lostgraphs.contains(idx))
   {
     QCPBars *b = m_lostgraphs.take(idx);
@@ -1000,7 +1000,7 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx)
 
 void TPPlot::clear()
 {
-  QMutexLocker<QMutex> locker(&m_mutex);
+  QMutexLocker locker(&m_mutex);
   if (m_replottimer)
     m_replottimer->stop(); // 先叫計時器閉嘴
   setUpdatesEnabled(false);

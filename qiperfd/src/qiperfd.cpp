@@ -1841,7 +1841,7 @@ void QIperfd::onDebuginfo(QString msg)
 
 void QIperfd::handleWorkerFinished(qint64 id, bool servermode)
 {
-    QMutexLocker<QMutex> locker(&m_mutex);
+    QMutexLocker locker(&m_mutex);
     if (servermode)
     {
         if (m_iperfwserver.contains(id))

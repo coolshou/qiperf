@@ -538,7 +538,7 @@ void TpWorker::debug(QString msg, int debuglv)
 
 void TpWorker::onIperfStarted(QString smode, QString ipport)
 {
-    QMutexLocker<QMutex> locker(&m_mutex);
+    QMutexLocker locker(&m_mutex);
     debug("[TpWorker]onIperfStarted:" + smode + " : " + ipport, 4);
     if (smode.contains("S", Qt::CaseSensitive)){
         m_status_server[ipport] = TPStatus::started;
@@ -549,7 +549,7 @@ void TpWorker::onIperfStarted(QString smode, QString ipport)
 
 void TpWorker::onIperfReStarted(QString smode, QString ipport)
 {
-    QMutexLocker<QMutex> locker(&m_mutex);
+    QMutexLocker locker(&m_mutex);
     // debug("onIperfReStarted:" + smode + " : " + ipport, 3);
     if (smode.contains("S", Qt::CaseSensitive)){
         m_status_server[ipport] = TPStatus::restarted;
