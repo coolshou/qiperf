@@ -386,6 +386,15 @@ void ThroughputView::onSaveImg(bool checked)
     }
 }
 
+void ThroughputView::onSetOpenGL(bool checked)
+{
+    if (m_tpplot){
+        m_tpplot->setOpenGl(checked);
+    }
+}
+
+
+
 void ThroughputView::setXRangeUpper(double upper)
 {
     if (m_tpplot){
@@ -463,6 +472,12 @@ void ThroughputView::initMenus()
     connect(m_actionRawData, &QAction::triggered, this, &ThroughputView::getRawData);
     m_actionSaveImg = new QAction("Save to Image");
     connect(m_actionSaveImg, &QAction::triggered, this, &ThroughputView::onSaveImg);
+    m_actionSetOpenGL = new QAction("OpenGL(experimental)");
+    m_actionSetOpenGL->setCheckable(true);
+    if (m_tpplot){
+        m_actionSetOpenGL->setChecked(m_tpplot->openGl());
+    }
+    connect(m_actionSetOpenGL, &QAction::triggered, this, &ThroughputView::onSetOpenGL);
     m_actionAbout = new QAction("About");
     connect(m_actionAbout, &QAction::triggered, this, &ThroughputView::aboutQCustomPlot);
 
@@ -472,6 +487,7 @@ void ThroughputView::initMenus()
     m_menuGroup->addAction(m_actionGroupComment);
     m_rightmenu->addSeparator();
     m_rightmenu->addAction(m_actionSaveImg);
+    m_rightmenu->addAction(m_actionSetOpenGL);
     m_rightmenu->addAction(m_actionAbout);
 }
 

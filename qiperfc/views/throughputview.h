@@ -82,6 +82,7 @@ public slots:
     void setTPGroupType(int grouptype);
     void getRawData(bool checked);
     void onSaveImg(bool checked);
+    void onSetOpenGL(bool checked);
     void setXRangeUpper(double upper);
     void setInterval(int interval);
     void onTestStarted();
@@ -135,6 +136,7 @@ private:
     QAction *m_actionGroupDir; // group by direction
     QAction *m_actionGroupComment; // group by comment
     QAction *m_actionSaveImg;
+    QAction *m_actionSetOpenGL;
     QAction *m_actionRawData;
     QAction *m_actionAbout;
     DlgIperf * dlgiperf;  // dialog of iperf config
