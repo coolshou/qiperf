@@ -55,7 +55,7 @@ public slots:
   void setTPGroupType(int grouptype);
   void setTPUint(QString tpunit);
   void onVLegendScrollChanged(int value);
-  void onDataAdded(double key, double value);
+  // void onDataAdded(double key, double value);
   void onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir);
   void onLostRateDataAdded(double key, double value);
   void onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data);

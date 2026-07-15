@@ -6,7 +6,8 @@
 #include "tpmgrdata.h"
 
 TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
-    : QCustomPlot(parent), m_tpgrouptype(tpgroup) {
+    : QCustomPlot(parent), m_tpgrouptype(tpgroup)
+{
   m_isTestStarted = false;
   m_maxX = 30;
   m_maxY = m_yAxisMaxDefault;
@@ -15,14 +16,16 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
   m_autoScrollXAxis = true;
   QScreen *screen = QGuiApplication::primaryScreen();
   bool b4K = false;
-  if (screen) {
+  if (screen)
+  {
     int logicalWidth = screen->geometry().width();
     qreal dpr = screen->devicePixelRatio();
     int physicalWidth = qRound(logicalWidth * dpr);
 
     qDebug() << "Current logicalWidth:" << logicalWidth
              << " physicalWidth:" << physicalWidth;
-    if (physicalWidth >= 3840) {
+    if (physicalWidth >= 3840)
+    {
       b4K = true;
     }
   }
@@ -34,19 +37,24 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
   qDebug() << "parent geometry:" << parent->geometry();
   initCustomPlot();
   QCPLayer *mainlayer = layer(LAYER_MAIN);
-  if (!addLayer(LAYER_TOTAL, mainlayer, limAbove)) {
+  if (!addLayer(LAYER_TOTAL, mainlayer, limAbove))
+  {
     qDebug() << "addLayer " << LAYER_TOTAL << " Fail";
   }
-  if (!addLayer(LAYER_TOTALOSTRATE, mainlayer, limBelow)) {
+  if (!addLayer(LAYER_TOTALOSTRATE, mainlayer, limBelow))
+  {
     qDebug() << "addLayer " << LAYER_TOTALOSTRATE << " Fail";
   }
-  if (!addLayer(LAYER_LOSTRATE, layer(LAYER_TOTALOSTRATE), limBelow)) {
+  if (!addLayer(LAYER_LOSTRATE, layer(LAYER_TOTALOSTRATE), limBelow))
+  {
     qDebug() << "addLayer " << LAYER_LOSTRATE << " Fail";
   }
-  if (!addLayer(LAYER_DIR, layer(LAYER_LOSTRATE), limBelow)) {
+  if (!addLayer(LAYER_DIR, layer(LAYER_LOSTRATE), limBelow))
+  {
     qDebug() << "addLayer " << LAYER_DIR << " Fail";
   }
-  if (!addLayer(LAYER_DIRLOSTRATE, layer(LAYER_DIR), limBelow)) {
+  if (!addLayer(LAYER_DIRLOSTRATE, layer(LAYER_DIR), limBelow))
+  {
     qDebug() << "addLayer " << LAYER_DIRLOSTRATE << " Fail";
   }
 
@@ -80,7 +88,8 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas,
                              QVector<int> packetlosts,
                              QVector<int> packettotals,
                              QVector<double> lostrates,
-                             int direction) {
+                             int direction)
+{
   if (timedatas.isEmpty() || valuedatas.isEmpty())
     return;
 
@@ -101,17 +110,16 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas,
       *std::max_element(valuedatas.begin(), valuedatas.end()); // y: max value
   updateYAxisRange(minV, maxV);
   // qDebug() << "refrow:" << refrow << " timedatas: " << timedatas;
-  // graph->setData(timedatas, valuedatas);
   myGraph->setData(timedatas, valuedatas);
   // Calculate the sum
   //   Q_UNUSED(packetlosts)
   int sum = std::accumulate(packettotals.begin(), packettotals.end(), 0);
-  if (sum > 0) {
+  if (sum > 0)
+  {
     // int lost = std::accumulate(packetlosts.begin(), packetlosts.end(), 0);
     MyQCPBars *g_lostrate = getLostRateGraph(refrow);
     // lostrate
     Q_UNUSED(lostrates)
-    // g_lostrate->setData(timedatas, lostrates);
     g_lostrate->setData(timedatas, packetlosts, packettotals);
   }
   // this->replot();//20260122 tmp remove, use QTimer()
@@ -119,126 +127,166 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas,
 
 void TPPlot::setInterval(int interval) { m_interval = interval; }
 
-void TPPlot::setTPGroupType(int grouptype) {
-    m_tpgrouptype = grouptype;
-    bool bshowTotal = (m_tpgrouptype == TPGroup::GroupMode::Total);
-    bool bshowDetail = (m_tpgrouptype == TPGroup::GroupMode::Detail);
-    bool bshowDirection = (m_tpgrouptype == TPGroup::GroupMode::Direction);
-    // bool bshowComment=(m_tpgrouptype == TPGroup::GroupMode::Comment);
+void TPPlot::setTPGroupType(int grouptype)
+{
+  m_tpgrouptype = grouptype;
+  bool bshowTotal = (m_tpgrouptype == TPGroup::GroupMode::Total);
+  bool bshowDetail = (m_tpgrouptype == TPGroup::GroupMode::Detail);
+  bool bshowDirection = (m_tpgrouptype == TPGroup::GroupMode::Direction);
+  // bool bshowComment=(m_tpgrouptype == TPGroup::GroupMode::Comment);
 
-    auto shouldShow = [&](QCPAbstractPlottable *item) -> bool {
-      if (item == mTotalGraph || item == mTotalLostGraph) {
-        return bshowTotal;
-      }
-      if (item == mDirTxGraph || item == mDirRxGraph ||
-          item == mDirTxLostGraph || item == mDirRxLostGraph) {
-        return bshowDirection;
-      }
-      return bshowDetail;
-    };
-
-    // === 统一设置 visible ===
-    for (auto *g : m_graphs)
-      g->setVisible(shouldShow(g));
-    for (auto *b : m_lostgraphs)
-      b->setVisible(shouldShow(b));
-
-    // store all item in legend
-    // 步驟 1：把目前 legend 裡面的item抽離（不 delete 記憶體）
-    for (int i = legend->itemCount() - 1; i >= 0; --i) {
-        QCPAbstractLegendItem *itm = legend->item(i);
-        if (itm){
-            legend->take(itm);
-            itm->setVisible(false);
-        }
+  auto shouldShow = [&](QCPAbstractPlottable *item) -> bool
+  {
+    if (item == mTotalGraph || item == mTotalLostGraph)
+    {
+      return bshowTotal;
     }
-
-    // 步驟 2：依據目前的模式，重新把符合條件的項目「依序」加回 legend 中
-    // 2.1 處理 Throughput 圖例
-    QMap<QString, QCPAbstractLegendItem *>::const_iterator legenditerator =
-        m_legends.constBegin();
-    while (legenditerator != m_legends.constEnd()) {
-      QCPAbstractLegendItem *item = legenditerator.value();
-      bool shouldShow = false;
-      if (bshowTotal) {
-        if (item == mTotalLegendItem)
-          shouldShow = true;
-      } else if (bshowDirection) {
-        if (item == mDirTxLegendItem || item == mDirRxLegendItem)
-          shouldShow = true;
-      } else if (bshowDetail) {
-        // 排除 Total 與 Direction 的圖例，只顯示 Detail 圖例
-        if (item != mTotalLegendItem && item != mDirTxLegendItem &&
-            item != mDirRxLegendItem) {
-          shouldShow = true;
-        }
-      }
-      if (shouldShow) {
-        legend->addElement(legend->elementCount(), 0, item);
-        item->setVisible(true);
-      }
-      ++legenditerator;
+    if (item == mDirTxGraph || item == mDirRxGraph ||
+        item == mDirTxLostGraph || item == mDirRxLostGraph)
+    {
+      return bshowDirection;
     }
-    // 2.2 處理 Lost Rate 圖例
-    QMap<QString, QCPAbstractLegendItem *>::const_iterator lostlegenditerator =
-        m_lostratelegends.constBegin();
-    while (lostlegenditerator != m_lostratelegends.constEnd()) {
-      QCPAbstractLegendItem *item = lostlegenditerator.value();
-      bool shouldShow = false;
-      if (bshowTotal) {
-        if (item == mTotalLostLegendItem)
-          shouldShow = true;
-      } else if (bshowDirection) {
-        if (item == mDirTxLostLegendItem || item == mDirRxLostLegendItem)
-          shouldShow = true;
-      } else if (bshowDetail) {
-        if (item != mTotalLostLegendItem && item != mDirTxLostLegendItem &&
-            item != mDirRxLostLegendItem) {
-          shouldShow = true;
-        }
-      }
-      if (shouldShow) {
-        legend->addElement(legend->elementCount(), 0, item);
-        item->setVisible(true);
-      }
-      ++lostlegenditerator;
+    return bshowDetail;
+  };
+
+  // === 统一设置 visible ===
+  for (auto *g : m_graphs)
+    g->setVisible(shouldShow(g));
+  for (auto *b : m_lostgraphs)
+    b->setVisible(shouldShow(b));
+
+  // store all item in legend
+  // 步驟 1：把目前 legend 裡面的item抽離（不 delete 記憶體）
+  for (int i = legend->itemCount() - 1; i >= 0; --i)
+  {
+    QCPAbstractLegendItem *itm = legend->item(i);
+    if (itm)
+    {
+      legend->take(itm);
+      itm->setVisible(false);
     }
-    // 簡化排版，移除因為拿掉項目留下的空列
-    legend->simplify();
+  }
 
-    replot();
+  // 步驟 2：依據目前的模式，重新把符合條件的項目「依序」加回 legend 中
+  // 2.1 處理 Throughput 圖例
+  QMap<QString, QCPAbstractLegendItem *>::const_iterator legenditerator =
+      m_legends.constBegin();
+  while (legenditerator != m_legends.constEnd())
+  {
+    QCPAbstractLegendItem *item = legenditerator.value();
+    bool shouldShow = false;
+    if (bshowTotal)
+    {
+      if (item == mTotalLegendItem)
+        shouldShow = true;
+    }
+    else if (bshowDirection)
+    {
+      if (item == mDirTxLegendItem || item == mDirRxLegendItem)
+        shouldShow = true;
+    }
+    else if (bshowDetail)
+    {
+      // 排除 Total 與 Direction 的圖例，只顯示 Detail 圖例
+      if (item != mTotalLegendItem && item != mDirTxLegendItem &&
+          item != mDirRxLegendItem)
+      {
+        shouldShow = true;
+      }
+    }
+    if (shouldShow)
+    {
+      legend->addElement(legend->elementCount(), 0, item);
+      item->setVisible(true);
+    }
+    ++legenditerator;
+  }
+  // 2.2 處理 Lost Rate 圖例
+  QMap<QString, QCPAbstractLegendItem *>::const_iterator lostlegenditerator =
+      m_lostratelegends.constBegin();
+  while (lostlegenditerator != m_lostratelegends.constEnd())
+  {
+    QCPAbstractLegendItem *item = lostlegenditerator.value();
+    bool shouldShow = false;
+    if (bshowTotal)
+    {
+      if (item == mTotalLostLegendItem)
+        shouldShow = true;
+    }
+    else if (bshowDirection)
+    {
+      if (item == mDirTxLostLegendItem || item == mDirRxLostLegendItem)
+        shouldShow = true;
+    }
+    else if (bshowDetail)
+    {
+      if (item != mTotalLostLegendItem && item != mDirTxLostLegendItem &&
+          item != mDirRxLostLegendItem)
+      {
+        shouldShow = true;
+      }
+    }
+    if (shouldShow)
+    {
+      legend->addElement(legend->elementCount(), 0, item);
+      item->setVisible(true);
+    }
+    ++lostlegenditerator;
+  }
+  // 簡化排版，移除因為拿掉項目留下的空列
+  legend->simplify();
 
+  replot();
 }
 
-void TPPlot::setTPUint(QString tpunit) {
+void TPPlot::setTPUint(QString tpunit)
+{
   // conver iperf's unit to display string
   m_TPUint = tpunit;
   QString sunit = "Mbps";
-  if (tpunit.contains("Kbits")) {
+  if (tpunit.contains("Kbits"))
+  {
     sunit = "Kbps";
-  } else if (tpunit.contains("Mbits")) {
+  }
+  else if (tpunit.contains("Mbits"))
+  {
     sunit = "Mbps";
-  } else if (tpunit.contains("Gbits")) {
+  }
+  else if (tpunit.contains("Gbits"))
+  {
     sunit = "Gbps";
-  } else if (tpunit.contains("Tbits")) {
+  }
+  else if (tpunit.contains("Tbits"))
+  {
     sunit = "Tbps";
-  } else if (tpunit.contains("KBytes")) {
+  }
+  else if (tpunit.contains("KBytes"))
+  {
     sunit = "KB/s";
-  } else if (tpunit.contains("MBytes")) {
+  }
+  else if (tpunit.contains("MBytes"))
+  {
     sunit = "MB/s";
-  } else if (tpunit.contains("GBytes")) {
+  }
+  else if (tpunit.contains("GBytes"))
+  {
     sunit = "GB/s";
-  } else if (tpunit.contains("TBytes")) {
+  }
+  else if (tpunit.contains("TBytes"))
+  {
     sunit = "TB/s";
   }
   yAxis->setLabel(sunit);
   replot();
 }
 
-void TPPlot::onVLegendScrollChanged(int value) {
+void TPPlot::onVLegendScrollChanged(int value)
+{
   qDebug() << "onVLegendScrollChanged:" << QString::number(value);
-  if (m_tpgrouptype == TPGroup::GroupMode::Detail) {
-    for (int i = 0; i < legend->itemCount(); ++i) {
+  if (m_tpgrouptype == TPGroup::GroupMode::Detail)
+  {
+    for (int i = 0; i < legend->itemCount(); ++i)
+    {
       QCPAbstractLegendItem *item = legend->item(i);
       item->setVisible(i >= value && i < value + 10); // Show 10 items at a time
     }
@@ -246,45 +294,45 @@ void TPPlot::onVLegendScrollChanged(int value) {
   }
 }
 
-void TPPlot::onDataAdded(double key, double value) {
-  if (m_tpgrouptype == TPGroup::GroupMode::Total) {
-    // try calc Total Graph value form each Graphs
-    if (mTotalGraph) {
-      // add all value to Total graph's value
+// void TPPlot::onDataAdded(double key, double value) {
+//   if (m_tpgrouptype == TPGroup::GroupMode::Total) {
+//     // try calc Total Graph value form each Graphs
+//     if (mTotalGraph) {
+//       // add all value to Total graph's value
 
-      double orgvalue = 0;
-      // TODO : last record will be wrong!!??
-      QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex, not work
-      int rc = mTotalGraph->getValue(key, orgvalue);
-      qDebug() << "key:" << QString::number(key)
-               << " orgvalue:" << QString::number(orgvalue)
-               << " new value:" << QString::number(value);
-      if (rc > -1) {
-        // sum up orgvalue & new value
-        double sumvalue = orgvalue + value;
-        updateYAxisRange(0, sumvalue);
-        qDebug() << "key:" << QString::number(key)
-                 << " sumvalue:" << QString::number(sumvalue);
-        mTotalGraph->updateValue(key, sumvalue);
-        mTotalGraph->rescaleAxes(true);
-      } else {
-        qDebug() << (static_cast<MyQCPGraph *>(sender()))->name() << " (" << key
-                 << ")mTotalGraph Key not found";
-        mTotalGraph->addData(key, value);
-      }
-    }
-  }
-  if (m_tpgrouptype == TPGroup::GroupMode::Direction) {
-    // TODO: direction
-    if (mDirTxGraph) {
-    }
-    if (mDirRxGraph) {
-    }
-  }
-  if (m_tpgrouptype == TPGroup::GroupMode::Comment) {
-    // TODO: Comment
-  }
-}
+//       double orgvalue = 0;
+//       // TODO : last record will be wrong!!??
+//       QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex, not work
+//       int rc = mTotalGraph->getValue(key, orgvalue);
+//       qDebug() << "key:" << QString::number(key)
+//                << " orgvalue:" << QString::number(orgvalue)
+//                << " new value:" << QString::number(value);
+//       if (rc > -1) {
+//         // sum up orgvalue & new value
+//         double sumvalue = orgvalue + value;
+//         updateYAxisRange(0, sumvalue);
+//         qDebug() << "key:" << QString::number(key)
+//                  << " sumvalue:" << QString::number(sumvalue);
+//         mTotalGraph->updateValue(key, sumvalue);
+//         mTotalGraph->rescaleAxes(true);
+//       } else {
+//         qDebug() << (static_cast<MyQCPGraph *>(sender()))->name() << " (" << key
+//                  << ")mTotalGraph Key not found";
+//         mTotalGraph->addData(key, value);
+//       }
+//     }
+//   }
+//   if (m_tpgrouptype == TPGroup::GroupMode::Direction) {
+//     // TODO: direction
+//     if (mDirTxGraph) {
+//     }
+//     if (mDirRxGraph) {
+//     }
+//   }
+//   if (m_tpgrouptype == TPGroup::GroupMode::Comment) {
+//     // TODO: Comment
+//   }
+// }
 
 void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir)
 {
@@ -294,7 +342,8 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir)
   QSharedPointer<QCPGraphDataContainer> data2 = data;
   QSharedPointer<QCPGraphDataContainer> sumdata;
 
-  if (mTotalGraph) {
+  if (mTotalGraph)
+  {
     QSharedPointer<QCPGraphDataContainer> data1 = mTotalGraph->data();
     sumdata = sumGraphData(data1, data2);
     mTotalGraph->setData(sumdata);
@@ -305,43 +354,59 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir)
     // }
   }
   qDebug() << "onDatasSetted dir:" << dir;
-  if (dir == 0){ //Tx
-      if (mDirTxGraph){
-          QSharedPointer<QCPGraphDataContainer> data1 = mDirTxGraph->data();
-          sumdata = sumGraphData(data1, data2);
-          mDirTxGraph->setData(sumdata);
-
-      }else{
-          qDebug() << "No mDirTxGraph";
-      }
-  }else if (dir == 1){ // Rx
-      if (mDirRxGraph){
-          QSharedPointer<QCPGraphDataContainer> data1 = mDirRxGraph->data();
-          sumdata = sumGraphData(data1, data2);
-          mDirRxGraph->setData(sumdata);
-      }else {
-          qDebug() << "No mDirRxGraph";
-      }
-  }else {
-      qDebug() << "onDatasSetted no more calc on dir=" << dir;
+  if (dir == 0)
+  { // Tx
+    if (mDirTxGraph)
+    {
+      QSharedPointer<QCPGraphDataContainer> data1 = mDirTxGraph->data();
+      sumdata = sumGraphData(data1, data2);
+      mDirTxGraph->setData(sumdata);
+    }
+    else
+    {
+      qDebug() << "No mDirTxGraph";
+    }
+  }
+  else if (dir == 1)
+  { // Rx
+    if (mDirRxGraph)
+    {
+      QSharedPointer<QCPGraphDataContainer> data1 = mDirRxGraph->data();
+      sumdata = sumGraphData(data1, data2);
+      mDirRxGraph->setData(sumdata);
+    }
+    else
+    {
+      qDebug() << "No mDirRxGraph";
+    }
+  }
+  else
+  {
+    qDebug() << "onDatasSetted no more calc on dir=" << dir;
   }
 }
 
-void TPPlot::onLostRateDataAdded(double key, double value) {
+void TPPlot::onLostRateDataAdded(double key, double value)
+{
   // LostRate is calc with lost/total packet
   //
-  if (m_tpgrouptype == TPGroup::GroupMode::Total) {
-    if (mTotalLostGraph) {
+  if (m_tpgrouptype == TPGroup::GroupMode::Total)
+  {
+    if (mTotalLostGraph)
+    {
       // add all value to Total graph's value
       double orgvalue = -1;
       QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex
       int rc = mTotalLostGraph->getValue(key, orgvalue);
-      if (rc > -1) {
+      if (rc > -1)
+      {
         double sumvalue = orgvalue + value;
         // updateYAxisRange(0, sumvalue);
         mTotalLostGraph->updateValue(key, sumvalue);
         mTotalLostGraph->rescaleAxes(true);
-      } else {
+      }
+      else
+      {
         qDebug() << (static_cast<MyQCPBars *>(sender()))->name() << " (" << key
                  << ") mTotalLostGraph Key not found";
         mTotalLostGraph->addData(key, value);
@@ -351,39 +416,49 @@ void TPPlot::onLostRateDataAdded(double key, double value) {
   // TODO: Direction
 }
 
-void TPPlot::onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data) {
+void TPPlot::onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data)
+{
   QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex
-  if (mTotalLostGraph) {
+  if (mTotalLostGraph)
+  {
     QSharedPointer<QCPBarsDataContainer> data1 = mTotalLostGraph->data();
     QSharedPointer<QCPBarsDataContainer> data2 = data;
     QSharedPointer<QCPBarsDataContainer> sumdata;
     sumdata = sumLostGraphData(data1, data2);
     mTotalLostGraph->setData(sumdata);
     mTotalLostGraph->rescaleAxes(true); // TODO: not good to show y Max value
-    if (mTotalLostLegendItem) {
+    if (mTotalLostLegendItem)
+    {
       mTotalLostLegendItem->setVisible(true);
     }
-  } else {
+  }
+  else
+  {
     qDebug() << "onLostRateDatasSetted: ERROR does not have mTotalLostGraph";
   }
 }
 
 void TPPlot::setTestStarted(bool start) { m_isTestStarted = start; }
 
-void TPPlot::selectionChanged() {
+void TPPlot::selectionChanged()
+{
   /* synchronize the selection of the graphs with the selection state of the
 respective legend item belonging to that graph. So the user can select a graph
 by either clicking on the graph itself or on its legend item.*/
   // synchronize selection of graphs with selection of corresponding legend
   // items:
-  for (int i = 0; i < this->graphCount(); i++) {
+  for (int i = 0; i < this->graphCount(); i++)
+  {
     QCPGraph *graph = this->graph(i);
     QCPPlottableLegendItem *item = this->legend->itemWithPlottable(graph);
-    if (((item && item->selected()) or graph->selected())) {
-      if (item) {
+    if (((item && item->selected()) or graph->selected()))
+    {
+      if (item)
+      {
         item->setSelected(true);
       }
-      if (graph) {
+      if (graph)
+      {
         graph->setSelection(QCPDataSelection(graph->data()->dataRange()));
       }
       emit selectedTPitem(graph->name());
@@ -392,19 +467,24 @@ by either clicking on the graph itself or on its legend item.*/
   }
 }
 
-void TPPlot::onXAxisRangeChanged(const QCPRange &newRange) {
+void TPPlot::onXAxisRangeChanged(const QCPRange &newRange)
+{
   // TODO: this will trigger on setting XAxis range by program?
 
-  if (newRange.upper < m_maxX - 0.5) {
+  if (newRange.upper < m_maxX - 0.5)
+  {
     // 使用者正在查看過去的數據，我們應該停止「自動捲動」
     m_autoScrollXAxis = false;
-  } else {
+  }
+  else
+  {
     // 使用者拉回到了最右側，恢復自動捲動,
     m_autoScrollXAxis = true & m_isTestStarted;
   }
 }
 
-void TPPlot::doReplot() {
+void TPPlot::doReplot()
+{
   // qDebug() << "TPPlot size        :" << size();
   // qDebug() << "TPPlot geometry    :" << geometry();
   // qDebug() << "viewport           :" << viewport();
@@ -440,7 +520,8 @@ void TPPlot::doReplot() {
   //     minx = m_maxX - 60;
   // }
   // updateXAxisRange(minx, m_maxX);
-  if (m_autoScrollXAxis) {
+  if (m_autoScrollXAxis)
+  {
     // updateXAxisRange(0, m_maxX);
   }
 
@@ -451,7 +532,8 @@ void TPPlot::doReplot() {
 }
 
 void TPPlot::onIperfTPdata(QString sInterval, QString refrowidx, QString data,
-                           QString lostrate, QString grouptag) {
+                           QString lostrate, QString grouptag)
+{
   // double x = sInterval.toDouble();
   int x =
       static_cast<int>(sInterval.toDouble()); // ignore .0x Difference of xdata
@@ -465,7 +547,8 @@ void TPPlot::onIperfTPdata(QString sInterval, QString refrowidx, QString data,
 }
 
 void TPPlot::onIperfTPdatas(QString refrow, QString sInterval,
-                            const QJsonArray &dataarray) {
+                            const QJsonArray &dataarray)
+{
   // add data by dataarray
   QString dir;
   QString idx;
@@ -473,7 +556,7 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval,
   QString value = "";
   QString unit = "";
   QString slost_rate = "0";
-  int iInterval=static_cast<int>(sInterval.toDouble());
+  int iInterval = static_cast<int>(sInterval.toDouble());
   double lost_rate = 0;
   double sumvalue = 0.0;
   double sumTxvalue = 0.0;
@@ -488,22 +571,27 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval,
   double rxpktTotal = 0.0;
   double rxlostrate = 0.0;
   for (QJsonArray::const_iterator it = dataarray.constBegin();
-       it != dataarray.constEnd(); ++it) {
+       it != dataarray.constEnd(); ++it)
+  {
     QJsonObject jObj = it->toObject();
     idx = jObj.value("idx").toString();
     isAvg = jObj.value("AVG").toBool();
     value = jObj.value("value").toString();
-    if (!isAvg) {
-      if (!jObj.value("dir").isUndefined()) {
+    if (!isAvg)
+    {
+      if (!jObj.value("dir").isUndefined())
+      {
         dir = jObj.value("dir").toString();
       }
       unit = jObj.value("unit").toString();
       sumvalue = sumvalue + value.toDouble();
-      if (dir.contains(GRAPH_TX, Qt::CaseInsensitive)){
-          sumTxvalue = sumTxvalue + value.toDouble();
+      if (dir.contains(GRAPH_TX, Qt::CaseInsensitive))
+      {
+        sumTxvalue = sumTxvalue + value.toDouble();
       }
-      if (dir.contains(GRAPH_RX, Qt::CaseInsensitive)){
-          sumRxvalue = sumRxvalue + value.toDouble();
+      if (dir.contains(GRAPH_RX, Qt::CaseInsensitive))
+      {
+        sumRxvalue = sumRxvalue + value.toDouble();
       }
       // if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) !=0){
       //     qDebug() << "//TODO: base on unit, convert the value to correct
@@ -514,17 +602,20 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval,
       // packet lost rate
       QString pkt_lost = jObj.value("packet_lost").toString();
       QString pkt_total = jObj.value("packet_total").toString();
-      if ((pkt_total.toInt() > 0) && (pkt_lost.toInt() > 0)) {
+      if ((pkt_total.toInt() > 0) && (pkt_lost.toInt() > 0))
+      {
         lost_rate = (pkt_lost.toDouble() / pkt_total.toDouble()) * 100;
         sumpktlost = sumpktlost + pkt_lost.toDouble();
         sumpktTotal = sumpktTotal + pkt_total.toDouble();
-        if (dir.contains(GRAPH_TX, Qt::CaseInsensitive)){
-            txpktlost = txpktlost + pkt_lost.toDouble();
-            txpktTotal = txpktTotal + pkt_total.toDouble();
+        if (dir.contains(GRAPH_TX, Qt::CaseInsensitive))
+        {
+          txpktlost = txpktlost + pkt_lost.toDouble();
+          txpktTotal = txpktTotal + pkt_total.toDouble();
         }
-        if (dir.contains(GRAPH_RX, Qt::CaseInsensitive)){
-            rxpktlost = rxpktlost + pkt_lost.toDouble();
-            rxpktTotal = rxpktTotal + pkt_total.toDouble();
+        if (dir.contains(GRAPH_RX, Qt::CaseInsensitive))
+        {
+          rxpktlost = rxpktlost + pkt_lost.toDouble();
+          rxpktTotal = rxpktTotal + pkt_total.toDouble();
         }
         // sumlostrate = sumlostrate + lost_rate;
         qDebug() << "TPPlot::onIperfTPdata: lost_rate:" << lost_rate;
@@ -535,67 +626,95 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval,
     }
   }
   // TOTAL data
-  if (sumpktTotal>0){
-      sumlostrate = (sumpktlost/ sumpktTotal)  * 100;
+  if (sumpktTotal > 0)
+  {
+    sumlostrate = (sumpktlost / sumpktTotal) * 100;
   }
+  qDebug() << "add:" << GRAPH_TOTAL << ", iInterval:" << QString::number(iInterval)
+           << ",sumvalue:" << QString::number(sumvalue)
+           << ",sumlostrate:" << QString::number(sumlostrate)
+           << ",dir:" << dir;
   addTPData(GRAPH_TOTAL, iInterval, sumvalue, sumlostrate, dir);
-  if (dir.contains(GRAPH_TX, Qt::CaseInsensitive)){
-      // Tx data
-      if (txpktTotal>0){
-          txlostrate = (txpktlost/ txpktTotal)  * 100;
-      }
-      addTPData(GRAPH_TX, iInterval, sumTxvalue, txlostrate, dir);
+  if (dir.contains(GRAPH_TX, Qt::CaseInsensitive))
+  {
+    // Tx data
+    if (txpktTotal > 0)
+    {
+      txlostrate = (txpktlost / txpktTotal) * 100;
+    }
+    addTPData(GRAPH_TX, iInterval, sumTxvalue, txlostrate, dir);
   }
-  if (dir.contains(GRAPH_RX, Qt::CaseInsensitive)){
-      // Rx data
-      if (rxpktTotal>0){
-          rxlostrate = (rxpktlost/ rxpktTotal)  * 100;
-      }
-      addTPData(GRAPH_RX, iInterval, sumRxvalue, rxlostrate, dir);
+  if (dir.contains(GRAPH_RX, Qt::CaseInsensitive))
+  {
+    // Rx data
+    if (rxpktTotal > 0)
+    {
+      rxlostrate = (rxpktlost / rxpktTotal) * 100;
+    }
+    addTPData(GRAPH_RX, iInterval, sumRxvalue, rxlostrate, dir);
   }
 }
 
 void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
-                       double lostrate, QString grouptag) {
+                       double lostrate, QString grouptag)
+{
   QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex,
   double sumydata = ydata;
   int dir = -1;
   // qDebug() << "grouptag:" << grouptag;
-  if (grouptag.contains(TPDIRTx, Qt::CaseSensitive)){
-      dir =0;
+  if (grouptag.contains(TPDIRTx, Qt::CaseSensitive))
+  {
+    dir = 0;
   }
-  if (grouptag.contains(TPDIRRx, Qt::CaseSensitive)){
-      dir =1;
+  if (grouptag.contains(TPDIRRx, Qt::CaseSensitive))
+  {
+    dir = 1;
   }
   MyQCPGraph *myGraph = getGraph(refrowidx, dir);
   // let xAxis range in m_timeWindowThreshold, scroll when xdata >
   // m_timeWindowThreshold
-  if (xdata < m_timeWindowThreshold) {
+  if (xdata < m_timeWindowThreshold)
+  {
     xAxis->setRange(0, m_timeWindowThreshold);
-  } else {
+  }
+  else
+  {
     xAxis->setRange(xdata, m_timeWindowThreshold, Qt::AlignRight);
   }
 
   // bool isTotal = refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive);
-  if ((refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))||
-      (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive))||
-      (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive))) {
+  if ((refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)) ||
+      (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
+      (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)))
+  {
     // Total/Tx/Rx sum Throughput graph
     double oldvalue = 0.0;
-    if (myGraph->getValue(xdata, oldvalue) == -1) {
+    qDebug() << refrowidx << ",xdata:" << QString::number(xdata)
+             << ", count:" << myGraph->dataCount();
+    if (myGraph->getValue(xdata, oldvalue) == -1)
+    {
+      // auto it = myGraph->data()->find(xdata);
+      // if (it != myGraph->data()->constEnd() && qAbs(it->key - xdata) < 0.001) {
+      // oldvalue = it->value;
       myGraph->addData(xdata, ydata);
-    } else {
+    }
+    else
+    {
+      qDebug() << refrowidx << ",found old value:" << QString::number(oldvalue);
       sumydata = sumydata + oldvalue;
       myGraph->updateValue(xdata, sumydata);
     }
-  } else {
+  }
+  else
+  {
     // detail
-      myGraph->addData(xdata, ydata);
+    myGraph->addData(xdata, ydata);
   }
 
   // enlarge/shrink y range
   m_maxX = xdata + m_interval;
-  if (sumydata > m_maxY) {
+  if (sumydata > m_maxY)
+  {
     m_maxY = sumydata;
   }
   // TODO: lost rate
@@ -620,37 +739,49 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
   // }
 }
 
-void TPPlot::del(QString idx) {
-  if (m_lostgraphs.contains(idx)) {
+void TPPlot::del(QString idx)
+{
+  QMutexLocker<QMutex> locker(&m_mutex); // Locks m_mutex,
+  if (m_lostgraphs.contains(idx))
+  {
     QCPBars *b = m_lostgraphs.take(idx);
-    if (removePlottable(b)) {
+    if (removePlottable(b))
+    {
       // TODO: why actually del but return false?
       //                qDebug() << "removePlottable QCPBars fail: " << idx;
     }
-  } else {
+  }
+  else
+  {
     // qDebug() << "m_lostgraphs not exist:" << idx;
   }
-  if (m_graphs.contains(idx)) {
+  if (m_graphs.contains(idx))
+  {
     //        QCPGraph *g= m_graphs.value(idx);
     QCPGraph *g = m_graphs.take(idx);
-    if (removeGraph(g)) {
+    if (removeGraph(g))
+    {
       // TODO: why actually del but return false?
       //            qDebug() << "removeGraph fail: " << idx;
     }
-  } else {
+  }
+  else
+  {
     qDebug() << "m_graphs not exist:" << idx;
   }
 
   replot();
 }
 
-MyQCPGraph *TPPlot::getGraph(QString refrowidx, int dir, int width) {
+MyQCPGraph *TPPlot::getGraph(QString refrowidx, int dir, int width)
+{
   // refrowidx:
   // width: line width, default 1
   QPen graphPen;
   QCPGraph *g;
   MyQCPGraph *myGraph;
-  if (!m_graphs.contains(refrowidx)) { // new graphs when not exist
+  if (!m_graphs.contains(refrowidx))
+  { // new graphs when not exist
     g = addGraph(xAxis, yAxis);
     myGraph = static_cast<MyQCPGraph *>(g);
     // myGraph = new MyQCPGraph(xAxis, yAxis);
@@ -662,27 +793,33 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int dir, int width) {
     myGraph->setPen(graphPen);
     myGraph->setLineStyle(QCPGraph::lsLine);
     // registerPlottable();
-    if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)) {
+    if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
+    {
       // total graph
       myGraph->setLayer(LAYER_TOTAL);
       myGraph->setVisible((m_tpgrouptype == TPGroup::GroupMode::Total));
       mTotalGraph = myGraph;
     }
     else if ((refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
-               (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive))) {
+             (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)))
+    {
 
       myGraph->setLayer(LAYER_DIR);
       myGraph->setVisible((m_tpgrouptype == TPGroup::GroupMode::Direction));
-      if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) {
+      if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive))
+      {
         mDirTxGraph = myGraph;
         mDirTxGraph->setDirection(dir);
-      } else {
+      }
+      else
+      {
         mDirRxGraph = myGraph;
         mDirRxGraph->setDirection(dir);
       }
       // TODO: comment
     }
-    else {
+    else
+    {
       // normal TP graph
       myGraph->setLayer(LAYER_MAIN);
       myGraph->setVisible((m_tpgrouptype == TPGroup::GroupMode::Detail));
@@ -690,18 +827,26 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int dir, int width) {
     }
     m_graphs.insert(refrowidx, myGraph);
     QCPPlottableLegendItem *litm = legend->itemWithPlottable(myGraph);
-    if (litm && !m_legends.contains(refrowidx)) {
+    if (litm && !m_legends.contains(refrowidx))
+    {
       m_legends.insert(refrowidx, litm);
     }
-    if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)) {
-        mTotalLegendItem = litm;
-    }else if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) {
-        mDirTxLegendItem = litm;
-    }else if (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)) {
-        mDirRxLegendItem = litm;
+    if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
+    {
+      mTotalLegendItem = litm;
+    }
+    else if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive))
+    {
+      mDirTxLegendItem = litm;
+    }
+    else if (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive))
+    {
+      mDirRxLegendItem = litm;
     }
     setTPGroupType(m_tpgrouptype);
-  } else {
+  }
+  else
+  {
     // qDebug() << "//we already have it:" << refrowidx;
     myGraph = m_graphs.value(refrowidx);
   }
@@ -711,17 +856,22 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int dir, int width) {
   return myGraph;
 }
 
-MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx) {
+MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx)
+{
   QPen graphPen;
   MyQCPBars *g_lostrate;
-  if (!m_lostgraphs.contains(refrowidx)) {
+  if (!m_lostgraphs.contains(refrowidx))
+  {
     QCPGraph *g;
     // get main graph's color
-    if (m_graphs.contains(refrowidx)) {
+    if (m_graphs.contains(refrowidx))
+    {
       // use same color as throughput chart
       g = m_graphs.value(refrowidx);
       graphPen = g->pen();
-    } else {
+    }
+    else
+    {
       int R = rand() % 245 + 10;
       int G = rand() % 245 + 10;
       int B = rand() % 245 + 10;
@@ -732,21 +882,29 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx) {
     connect(g_lostrate, &MyQCPBars::datasSetted, this,
             &TPPlot::onLostRateDatasSetted);
     g_lostrate->setName(refrowidx + " Lost Rate");
-    if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)) {
+    if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
+    {
       // total lost rate graph
       g_lostrate->setLayer(LAYER_TOTALOSTRATE);
       g_lostrate->setVisible(m_tpgrouptype == TPGroup::GroupMode::Total);
       mTotalLostGraph = g_lostrate;
-    } else if ((refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
-               (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive))) {
+    }
+    else if ((refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
+             (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)))
+    {
       g_lostrate->setLayer(LAYER_DIRLOSTRATE);
       g_lostrate->setVisible(m_tpgrouptype == TPGroup::GroupMode::Direction);
-      if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) {
+      if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive))
+      {
         mDirTxLostGraph = g_lostrate;
-      } else {
+      }
+      else
+      {
         mDirRxLostGraph = g_lostrate;
       }
-    } else {
+    }
+    else
+    {
       // normal lost rate graph
       g_lostrate->setLayer(LAYER_LOSTRATE);
       // connect(g_lostrate, &MyQCPBars::dataAdded, this
@@ -761,38 +919,55 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx) {
     // qDebug() << "legend->itemCount:" << legend->itemCount();
     // QCPAbstractLegendItem *litm = legend->item(legend->itemCount() - 1);
     QCPAbstractLegendItem *litm = legend->itemWithPlottable(g_lostrate);
-    if (!m_lostratelegends.contains(refrowidx)) {
+    if (!m_lostratelegends.contains(refrowidx))
+    {
       m_lostratelegends.insert(refrowidx, litm);
     }
-    if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)) { // Total legend
+    if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
+    { // Total legend
       mTotalLostLegendItem = litm;
       // litm->setLayer(LAYER_TOTALOSTRATE);// DO NOT place Legend in other
       // Layer, it will be Not visible qDebug() << "mTotalLostLegendItem:" <<
       // mTotalLostLegendItem;
-      if (!(m_tpgrouptype == TPGroup::GroupMode::Total)) {
+      if (!(m_tpgrouptype == TPGroup::GroupMode::Total))
+      {
         litm->setVisible(false);
       }
-      if (g_lostrate->dataCount() == 0) {
+      if (g_lostrate->dataCount() == 0)
+      {
         litm->setVisible(false);
-      } else {
+      }
+      else
+      {
         litm->setVisible((m_tpgrouptype == TPGroup::GroupMode::Total));
       }
-    } else if ((refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
-               (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive))) {
-        if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) {
-            mDirTxLostLegendItem = litm;
-        } else {
-            mDirRxLostLegendItem = litm;
-        }
-        if (!(m_tpgrouptype == TPGroup::GroupMode::Direction)) {
-            litm->setVisible(false);
-        }
-        if (g_lostrate->dataCount() == 0) {
-            litm->setVisible(false);
-        } else {
-            litm->setVisible((m_tpgrouptype == TPGroup::GroupMode::Direction));
-        }
-    } else { // all throughput legend except Total
+    }
+    else if ((refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
+             (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)))
+    {
+      if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive))
+      {
+        mDirTxLostLegendItem = litm;
+      }
+      else
+      {
+        mDirRxLostLegendItem = litm;
+      }
+      if (!(m_tpgrouptype == TPGroup::GroupMode::Direction))
+      {
+        litm->setVisible(false);
+      }
+      if (g_lostrate->dataCount() == 0)
+      {
+        litm->setVisible(false);
+      }
+      else
+      {
+        litm->setVisible((m_tpgrouptype == TPGroup::GroupMode::Direction));
+      }
+    }
+    else
+    { // all throughput legend except Total
       // litm->setLayer(LAYER_LOSTRATE);// DO NOT place Legend in other Layer,
       // it will be Not visible
 
@@ -803,14 +978,18 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx) {
       //     m_legends.insert(idx, litm);
       // }
     }
-  } else {
+  }
+  else
+  {
     g_lostrate = m_lostgraphs.value(refrowidx);
-    if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)) { // Total legend
+    if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
+    { // Total legend
       mTotalLostLegendItem = m_lostratelegends.value(refrowidx);
     }
   }
 
-  if (!m_lostgraphs.contains(refrowidx)) {
+  if (!m_lostgraphs.contains(refrowidx))
+  {
     // qDebug() << "m_lostgraphs does not have " << idx << " add lostrate:" <<
     // g_lostrate;
     m_lostgraphs.insert(refrowidx, g_lostrate);
@@ -819,61 +998,70 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx) {
   return g_lostrate;
 }
 
-void TPPlot::clear() {
+void TPPlot::clear()
+{
   QMutexLocker<QMutex> locker(&m_mutex);
   if (m_replottimer)
     m_replottimer->stop(); // 先叫計時器閉嘴
   setUpdatesEnabled(false);
 
-  //clear tp data
+  // clear tp data
   QMap<QString, MyQCPGraph *>::iterator it = m_graphs.begin();
-  while (it != m_graphs.end()) {
-      MyQCPGraph *graph = it.value();
-      if ((it.key().contains(GRAPH_TOTAL))||
-          (it.key().contains(GRAPH_TX))||
-          (it.key().contains(GRAPH_RX))) {
-          // qDebug() << it.key() << " not delete, only clear data";
-          graph->data()->clear(); // clear data
-          ++it; // 沒刪除則繼續下一個
-      } else {
-          if (graph) {
-              // qDebug() << it.key() << " removed";
-              removeGraph(graph);
-              // delete graph; // 如果是自訂非 QObject 物件才需要
-          }
-          // 使用 erase 刪除當前節點，並回傳下一個有效的迭代器
-          it = m_graphs.erase(it);
+  while (it != m_graphs.end())
+  {
+    MyQCPGraph *graph = it.value();
+    if ((it.key().contains(GRAPH_TOTAL)) ||
+        (it.key().contains(GRAPH_TX)) ||
+        (it.key().contains(GRAPH_RX)))
+    {
+      // qDebug() << it.key() << " not delete, only clear data";
+      graph->data()->clear(); // clear data
+      ++it;                   // 沒刪除則繼續下一個
+    }
+    else
+    {
+      if (graph)
+      {
+        // qDebug() << it.key() << " removed";
+        removeGraph(graph);
+        // delete graph; // 如果是自訂非 QObject 物件才需要
       }
+      // Also remove the corresponding legend item to avoid dangling pointer
+      m_legends.remove(it.key());
+      // 使用 erase 刪除當前節點，並回傳下一個有效的迭代器
+      it = m_graphs.erase(it);
+    }
   }
+  qDebug() << "graphCount:" << QString::number(graphCount());
 
   QMap<QString, MyQCPBars *>::iterator itl = m_lostgraphs.begin();
-  while (itl != m_lostgraphs.end()) {
-      MyQCPBars *graph = itl.value();
-      if ((itl.key().contains(GRAPH_TOTAL))||
-          (itl.key().contains(GRAPH_TX))||
-          (itl.key().contains(GRAPH_RX))) {
-          qDebug() << "lostgraphs:" << itl.key() << " not delete, only clear data";
-          graph->data()->clear(); // clear data
-          ++itl;
-      } else {
-          if (graph) {
-              qDebug() << "lostgraphs:" << itl.key() << " removed";
-              removePlottable(graph);
-              // delete graph; // 如果是自訂非 QObject 物件才需要
-          }
-          // 使用 erase 刪除當前節點，並回傳下一個有效的迭代器
-          itl = m_lostgraphs.erase(itl);
+  while (itl != m_lostgraphs.end())
+  {
+    MyQCPBars *graph = itl.value();
+    if ((itl.key().contains(GRAPH_TOTAL)) ||
+        (itl.key().contains(GRAPH_TX)) ||
+        (itl.key().contains(GRAPH_RX)))
+    {
+      qDebug() << "lostgraphs:" << itl.key() << " not delete, only clear data";
+      graph->data()->clear(); // clear data
+      ++itl;
+    }
+    else
+    {
+      if (graph)
+      {
+        qDebug() << "lostgraphs:" << itl.key() << " removed";
+        removePlottable(graph);
+        // delete graph; // 如果是自訂非 QObject 物件才需要
       }
+      // Also remove the corresponding legend item to avoid dangling pointer
+      m_lostratelegends.remove(itl.key());
+      // 使用 erase 刪除當前節點，並回傳下一個有效的迭代器
+      itl = m_lostgraphs.erase(itl);
+    }
   }
-  // if (mTotalGraph){
-  //     qDebug() << "mTotalGraph->dataCount:" << mTotalGraph->dataCount();
-  // }
-  // if (mDirTxGraph){
-  //     qDebug() << "mDirTxGraph->dataCount:" << mDirTxGraph->dataCount();
-  // }
-  // if (mDirRxGraph){
-  //     qDebug() << "mDirRxGraph->dataCount:" << mDirRxGraph->dataCount();
-  // }
+  qDebug() << "2.graphCount:" << QString::number(graphCount());
+
   // axis reset
   xAxis->setRange(0, m_xAxisMaxDefault);
   yAxis->setRange(0, m_yAxisMaxDefault);
@@ -887,13 +1075,15 @@ void TPPlot::clear() {
     m_replottimer->start(100); // 清理完畢再開啟
 }
 
-void TPPlot::setXRangeUpper(double upper) {
+void TPPlot::setXRangeUpper(double upper)
+{
   // qDebug() << "setXRangeUpper:" << QString::number(upper);
   xAxis->setRangeUpper(upper);
   replot();
 }
 
-void TPPlot::initCustomPlot() {
+void TPPlot::initCustomPlot()
+{
   this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                         QCP::iSelectLegend | QCP::iSelectPlottables);
   this->axisRect()->setupFullAxesBox();
@@ -933,7 +1123,8 @@ void TPPlot::initCustomPlot() {
       QCPLegend::spItems); // legend box shall not be selectable, only legend
                            // items
 
-  if (1) {
+  if (1)
+  {
     // TODO: not good on layout on Detail mode!! small, not extend the row
     axisRect()->setMinimumSize(100, 200);
     // Add the QCustomPlot legend to the container
@@ -968,17 +1159,22 @@ void TPPlot::initCustomPlot() {
           &TPPlot::selectionChanged);
 }
 
-QPen TPPlot::newColorPen(int r, int g, int b, int width) {
+QPen TPPlot::newColorPen(int r, int g, int b, int width)
+{
   QPen graphPen;
   graphPen.setColor(QColor(r, g, b));
   graphPen.setWidthF(width);
   return graphPen;
 }
 
-void TPPlot::updateXAxisRange(double mintime, double maxtime) {
-  if (xAxis->range().lower > mintime) {
+void TPPlot::updateXAxisRange(double mintime, double maxtime)
+{
+  if (xAxis->range().lower > mintime)
+  {
     mintime = xAxis->range().lower;
-  } else {
+  }
+  else
+  {
     mintime = mintime * 0.9;
   }
   // if ((xAxis->range().upper / maxtime)>1.1){
@@ -986,10 +1182,12 @@ void TPPlot::updateXAxisRange(double mintime, double maxtime) {
   // }else{
   //     maxtime = maxtime *1.1;
   // }
-  if (maxtime < 30) {
+  if (maxtime < 30)
+  {
     maxtime = 30;
   }
-  if (maxtime > (xAxis->range().upper + m_interval)) {
+  if (maxtime > (xAxis->range().upper + m_interval))
+  {
     qDebug() << "update xAxis min:" << QString::number(mintime)
              << " ,max:" << QString::number(maxtime);
     xAxis->setRange(mintime, maxtime); // show all data on plot
@@ -999,19 +1197,29 @@ void TPPlot::updateXAxisRange(double mintime, double maxtime) {
   // xAxis->setRange(mintime, maxtime, Qt::AlignCenter);
 }
 
-void TPPlot::updateYAxisRange(double minvalue, double maxvalue) {
-  if (yAxis->range().lower < minvalue) {
+void TPPlot::updateYAxisRange(double minvalue, double maxvalue)
+{
+  if (yAxis->range().lower < minvalue)
+  {
     minvalue = yAxis->range().lower;
-  } else {
+  }
+  else
+  {
     minvalue = minvalue - (0.1 * minvalue);
   }
-  if ((yAxis->range().upper / maxvalue) > 1.1) {
+  if ((yAxis->range().upper / maxvalue) > 1.1)
+  {
     maxvalue = yAxis->range().upper;
-  } else {
-    if (maxvalue < 100) {
+  }
+  else
+  {
+    if (maxvalue < 100)
+    {
       // maxvalue = maxvalue + (0.5*maxvalue);
       maxvalue = maxvalue * 1.5;
-    } else {
+    }
+    else
+    {
       // maxvalue = maxvalue + (0.1*maxvalue);
       maxvalue = maxvalue * 1.1;
     }
@@ -1020,11 +1228,13 @@ void TPPlot::updateYAxisRange(double minvalue, double maxvalue) {
 }
 
 QVector<QCPGraphData>
-TPPlot::convertQMapToQVector(const QMap<double, double> &map) {
+TPPlot::convertQMapToQVector(const QMap<double, double> &map)
+{
   // Not good for many QCPGraph data in!!
   // TODO: when many data, is this good in preformance?
   QVector<QCPGraphData> vector;
-  for (auto it = map.constBegin(); it != map.constEnd(); ++it) {
+  for (auto it = map.constBegin(); it != map.constEnd(); ++it)
+  {
     QCPGraphData data;
     data.key = it.key();
     data.value = it.value();
@@ -1036,31 +1246,40 @@ TPPlot::convertQMapToQVector(const QMap<double, double> &map) {
 
 QSharedPointer<QCPGraphDataContainer>
 TPPlot::sumGraphData(const QSharedPointer<QCPGraphDataContainer> &data1,
-                     const QSharedPointer<QCPGraphDataContainer> &data2) {
+                     const QSharedPointer<QCPGraphDataContainer> &data2)
+{
   QSharedPointer<QCPGraphDataContainer> result(new QCPGraphDataContainer);
   auto it1 = data1->constBegin();
   auto it2 = data2->constBegin();
 
   double sumvalue = 0.0;
-  while (it1 != data1->constEnd() && it2 != data2->constEnd()) {
-    if (it1->key < it2->key) {
+  while (it1 != data1->constEnd() && it2 != data2->constEnd())
+  {
+    if (it1->key < it2->key)
+    {
       result->add(QCPGraphData(it1->key, it1->value));
       ++it1;
-    } else if (it1->key > it2->key) {
+    }
+    else if (it1->key > it2->key)
+    {
       result->add(QCPGraphData(it2->key, it2->value));
       ++it2;
-    } else {
+    }
+    else
+    {
       sumvalue = it1->value + it2->value;
       result->add(QCPGraphData(it1->key, sumvalue));
       ++it1;
       ++it2;
     }
   }
-  while (it1 != data1->constEnd()) {
+  while (it1 != data1->constEnd())
+  {
     result->add(QCPGraphData(it1->key, it1->value));
     ++it1;
   }
-  while (it2 != data2->constEnd()) {
+  while (it2 != data2->constEnd())
+  {
     result->add(QCPGraphData(it2->key, it2->value));
     ++it2;
   }
@@ -1070,29 +1289,38 @@ TPPlot::sumGraphData(const QSharedPointer<QCPGraphDataContainer> &data1,
 
 QSharedPointer<QCPBarsDataContainer>
 TPPlot::sumLostGraphData(const QSharedPointer<QCPBarsDataContainer> &data1,
-                         const QSharedPointer<QCPBarsDataContainer> &data2) {
+                         const QSharedPointer<QCPBarsDataContainer> &data2)
+{
   QSharedPointer<QCPBarsDataContainer> result(new QCPBarsDataContainer);
   auto it1 = data1->constBegin();
   auto it2 = data2->constBegin();
 
-  while (it1 != data1->constEnd() && it2 != data2->constEnd()) {
-    if (it1->key < it2->key) {
+  while (it1 != data1->constEnd() && it2 != data2->constEnd())
+  {
+    if (it1->key < it2->key)
+    {
       result->add(QCPBarsData(it1->key, it1->value));
       ++it1;
-    } else if (it1->key > it2->key) {
+    }
+    else if (it1->key > it2->key)
+    {
       result->add(QCPBarsData(it2->key, it2->value));
       ++it2;
-    } else {
+    }
+    else
+    {
       result->add(QCPBarsData(it1->key, it1->value + it2->value));
       ++it1;
       ++it2;
     }
   }
-  while (it1 != data1->constEnd()) {
+  while (it1 != data1->constEnd())
+  {
     result->add(QCPBarsData(it1->key, it1->value));
     ++it1;
   }
-  while (it2 != data2->constEnd()) {
+  while (it2 != data2->constEnd())
+  {
     result->add(QCPBarsData(it2->key, it2->value));
     ++it2;
   }
@@ -1100,7 +1328,8 @@ TPPlot::sumLostGraphData(const QSharedPointer<QCPBarsDataContainer> &data1,
   return result;
 }
 
-void TPPlot::calculateLegendItems() {
+void TPPlot::calculateLegendItems()
+{
   // get the legend size and calculate the number of items can show
   QSize legendSize = legend->rect().size(); //->minimumOuterSizeHint();
   // calculate Max Legend Items
@@ -1111,11 +1340,16 @@ void TPPlot::calculateLegendItems() {
   // qDebug() << "Legend size:" << legendSize.height() << " itemHeight:" <<
   // itemHeight; qDebug() << "Legend rect:" << legend->rect(); qDebug() <<
   // "Approximate number of items that can fit:" << itemsFit;
-  if (m_tpgrouptype == TPGroup::GroupMode::Total) {
+  if (m_tpgrouptype == TPGroup::GroupMode::Total)
+  {
     emit sigLegendCount(1);
-  } else if (m_tpgrouptype == TPGroup::GroupMode::Direction) {
+  }
+  else if (m_tpgrouptype == TPGroup::GroupMode::Direction)
+  {
     emit sigLegendCount(2);
-  } else {
+  }
+  else
+  {
     // qDebug() << "sigLegendCount:" << itemsFit << ",itemHeight:" << itemHeight
     //          << ", legend height" << legendSize.height();
     emit sigLegendCount(itemsFit);
@@ -1124,13 +1358,16 @@ void TPPlot::calculateLegendItems() {
 
 QCPDataContainer<QCPGraphData>::const_iterator
 TPPlot::findKeyValue(const QCPDataContainer<QCPGraphData> &container,
-                     double key) {
+                     double key)
+{
   // Use findBegin to get an iterator to the data point with the closest key
   auto it = container.findBegin(key, true);
   // if (it != container.constEnd() && it->key == key) {
-  if (it != container.constEnd()) {
+  if (it != container.constEnd())
+  {
     qDebug() << "it->key:" << it->key << " key:" << key;
-    if (qFuzzyCompare(it->key, key)) {
+    if (qFuzzyCompare(it->key, key))
+    {
       return it; // Found the exact key
     }
   }
