@@ -21,6 +21,8 @@
 #include <QMessageLogContext>
 #include <QMessageBox>
 #include <QMutex>
+#include <QMutexLocker>
+
 #include <QDebug>
 
 #include <qlogging.h>
