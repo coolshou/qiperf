@@ -2,7 +2,7 @@ Source: qiperf
 Section: network
 Priority: optional
 Maintainer: coolshou <coolshou2060@gmail.com>
-Build-Depends:debhelper-compat (= 13) | debhelper,
+Build-Depends:
     qt5-qmake | qmake6, qtbase5-dev | qt6-base-dev,
     libqt5websockets5-dev | libqt6websockets6-dev | qt6-websockets-dev,
 Standards-Version: 4.6.0
