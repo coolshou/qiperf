@@ -74,11 +74,11 @@ QList<TP *> TP::getChilds()
 
 int TP::childCount() const
 {
-    // if (m_childItems.length()){
+    if (m_childItems.isEmpty()){
+        return 0;
+    }else {
         return m_childItems.count();
-    // }else {
-        // return 0
-    // }
+    }
 }
 
 bool TP::haveChilds()
