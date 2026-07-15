@@ -21,6 +21,8 @@ else
 export QT_SELECT=qt5
 QMAKE=qmake
 cp -f qiperfc/debian/control.qt5 qiperfc/debian/control
+sed -i 's|--buildsystem=qmake6|--buildsystem=qmake|g' qiperfd/debian/rule
+sed -i 's|--buildsystem=qmake6|--buildsystem=qmake|g' qiperftray/debian/rule
 fi
 
 rm -f *.buildinfo *.changes *.deb
