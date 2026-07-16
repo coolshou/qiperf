@@ -1119,31 +1119,46 @@ bool TPMgr::isBindkeyExist(QString managerIP, QString bindkey, QModelIndex exc_i
 
 int TPMgr::getMaxPort(QString m_ip, QString targetIP)
 {
+    Q_UNUSED(m_ip)
+    Q_UNUSED(targetIP)
+    //get Max port number of current iperf config's
     int maxPort = 0;
     int port;
-    TP *itm = getRootItem();
-    if (itm->haveChilds())
-    {
-        foreach (auto tp, itm->getChilds())
-        {
-            if (m_ip == tp->getMgrServer() && (targetIP == tp->getServer()))
-            {
-                port = tp->getPort();
-                if (tp->getProtocal().contains("UDP", Qt::CaseInsensitive))
-                {
-                    if (tp->getParallel() > 1)
-                    {
-                        port = port + (tp->getParallel() - 1);
-                    }
-                }
-                if (port > maxPort)
-                {
-                    maxPort = port;
-                }
+
+    for (auto [key, tp] : m_tpcfgitems.asKeyValueRange()) {
+        if (tp) {
+            port =  tp->getPort();
+            // qDebug() << "Key:" << key << "TP port:" <<port;
+            if (port > maxPort){
+                maxPort = port;
             }
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
     }
+    // if (0){
+    // TP *itm = getRootItem();
+    // if (itm->haveChilds())
+    // {
+    //     foreach (auto tp, itm->getChilds())
+    //     {
+    //         if (m_ip == tp->getMgrServer() && (targetIP == tp->getServer()))
+    //         {
+    //             port = tp->getPort();
+    //             if (tp->getProtocal().contains("UDP", Qt::CaseInsensitive))
+    //             {
+    //                 if (tp->getParallel() > 1)
+    //                 {
+    //                     port = port + (tp->getParallel() - 1);
+    //                 }
+    //             }
+    //             if (port > maxPort)
+    //             {
+    //                 maxPort = port;
+    //             }
+    //         }
+    //         QCoreApplication::processEvents(QEventLoop::AllEvents);
+    //     }
+    // }
+    // }
     return maxPort;
 }
 
@@ -1177,6 +1192,7 @@ void TPMgr::onPaste(QString data)
             // Get largest iperf port number!!
             int num = getMaxPort(o_server["manager"].toString(),
                                  o_client["target"].toString());
+            qDebug() << "Max Port:" << QString::number(num);
             o_client["port"] = num + 1;
             o_server["port"] = num + 1;
             jsonRoot.remove("client");
