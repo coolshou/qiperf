@@ -456,7 +456,7 @@ void ThroughputView::initMenus()
     m_actionGroupTotal = new QAction("Total");
     m_actionGroupTotal->setCheckable(true);
     connect(m_actionGroupTotal, &QAction::triggered, this, &ThroughputView::setShowGroupTotal);
-    m_actionGroupPair = new QAction("Iperf Pair");
+    m_actionGroupPair = new QAction("Detail");
     m_actionGroupPair->setCheckable(true);
     connect(m_actionGroupPair, &QAction::triggered, this, &ThroughputView::setShowGroupPair);
     m_actionGroupDir = new QAction("Direction");
@@ -555,7 +555,7 @@ void ThroughputView::onTPUTContextMenu(QPoint pos)
                 // (tp->getDataType()!=TPMgrData::TP)){
             if (tp->getDataType()!=TPMgrData::config){
                 //don't show menu on not supported item
-                m_tpgroupmenu->popup(ui->tv_throughput->mapToGlobal(pos));
+                // m_tpgroupmenu->popup(ui->tv_throughput->mapToGlobal(pos));
                 return;
             }
             if (tp->getDataType()!=TPMgrData::config){
