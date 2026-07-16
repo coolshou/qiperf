@@ -38,9 +38,14 @@ int MyQCPGraph::getValueIdx(double key)
 
 int MyQCPGraph::getValue(double key, double &value)
 {
+    // 1. 檢查防禦：如果根本沒資料，直接回傳 -1
+    int count = this->dataCount();
+    if (count == 0) return -1;
+
     //get key's value
-    for (int i=this->dataCount()-1; i>0; i--){
-        if (qFuzzyCompare(this->data()->at(i)->key , key)){
+    for (int i = count - 1; i >= 0; i--){
+        // if (qFuzzyCompare(this->data()->at(i)->key , key)){
+        if (qAbs(this->data()->at(i)->key - key) < 0.0001){
             //found key, store value to value
             value = this->data()->at(i)->value;
             return i;
@@ -51,16 +56,26 @@ int MyQCPGraph::getValue(double key, double &value)
 
 void MyQCPGraph::updateValue(double keyToUpdate, double newvalue)
 {
+    // 取得非 const 的數據容器指標
     QSharedPointer<QCPGraphDataContainer> dataContainer = data();
-    // Iterate over the data points to find the specific key
-    // for (auto it = dataContainer->begin(); it != dataContainer->end(); ++it) {
-    for (auto it = dataContainer->end(); it != dataContainer->begin(); --it) {
-        if (qFuzzyCompare(it->key, keyToUpdate)) { // Check if the key matches
-            it->value = newvalue; // Update the value
+    if (!dataContainer || dataContainer->isEmpty()) return;
+
+    int count = dataContainer->size();
+    // 同樣從最後一個點倒著往前找
+    for (int i = count - 1; i >= 0; i--)
+    {
+        // 使用 dataContainer->data()->投射出可修改的疊代器或直接存取
+        // 注意：QCPGraphDataContainer 內部是用 std::vector 或 QVector 儲存
+        // 我們可以透過 begin() + i 拿到該位置的非 const 疊代器
+        auto it = dataContainer->begin() + i;
+
+        if (qAbs(it->key - keyToUpdate) < 0.0001)
+        {
+            // 透過非 const 疊代器修改數值，這樣就不會報唯讀錯誤了！
+            it->value = newvalue;
             break;
         }
     }
-    // parentPlot()->replot();
 }
 
 double MyQCPGraph::sumValue(double keyToUpdate, double newvalue)
