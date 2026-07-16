@@ -16,10 +16,14 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
   m_autoScrollXAxis = true;
   QScreen *screen = QGuiApplication::primaryScreen();
   bool b4K = false;
+  bool scale = false; //Window scale
   if (screen)
   {
     int logicalWidth = screen->geometry().width();
     qreal dpr = screen->devicePixelRatio();
+    if (dpr > 1) {//NOTE: when scale > 100%, it will cause graph size strange on OpenGL enable!!
+        scale = true;
+    }
     int physicalWidth = qRound(logicalWidth * dpr);
 
     qDebug() << "Current logicalWidth:" << logicalWidth
@@ -29,7 +33,7 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
       b4K = true;
     }
   }
-  setOpenGl(!b4K);
+  setOpenGl(!b4K & scale);
   setNoAntialiasingOnDrag(true);
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   m_interval = 1;
@@ -438,7 +442,47 @@ void TPPlot::onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data)
   }
 }
 
-void TPPlot::setTestStarted(bool start) { m_isTestStarted = start; }
+void TPPlot::setTestStarted(bool start) {
+    m_isTestStarted = start;
+    if (!m_isTestStarted){
+        //throughput running had stop
+        if (graphCount()) {
+            qDebug() << "graphCount:" << QString::number(graphCount());
+            rescaleAxes(true);
+            replot();
+        }
+
+        // if (graphCount()) {
+        //     bool found = false;
+        //     QCPRange xRange;
+        //     double xRangeSize = 0;
+        //     double xMin = 0.0;
+        //     double xMax = 0.0;
+        //     for (int i = 0; i < this->graphCount(); i++)
+        //     {
+        //         QCPGraph *graph = this->graph(i);
+        //         // graph->data().
+        //         xRange = graph->getKeyRange(found);
+        //         if (found){
+        //             if (xRange.lower < xMin){
+        //                 xMin = xRange.lower;
+        //             }
+        //             if (xRange.upper > xMax){
+        //                 xMax = xRange.upper;
+        //             }
+        //             if (xRange.size() > xRangeSize){
+        //                 xRangeSize = xRange.size();
+        //             }
+        //         }
+        //     }
+        //     double padding = xRangeSize * 0.1;
+        //     qDebug() << "xMin:" << QString::number(xMin)
+        //              << ", xMax:" << QString::number(xMax)
+        //              << ", padding:" << QString::number(padding);
+        //     xAxis->setRange(xMin - padding, xMax + padding);
+        // }
+    }
+}
 
 void TPPlot::selectionChanged()
 {
@@ -1032,7 +1076,6 @@ void TPPlot::clear()
       it = m_graphs.erase(it);
     }
   }
-  qDebug() << "graphCount:" << QString::number(graphCount());
 
   QMap<QString, MyQCPBars *>::iterator itl = m_lostgraphs.begin();
   while (itl != m_lostgraphs.end())
@@ -1060,7 +1103,6 @@ void TPPlot::clear()
       itl = m_lostgraphs.erase(itl);
     }
   }
-  qDebug() << "2.graphCount:" << QString::number(graphCount());
 
   // axis reset
   xAxis->setRange(0, m_xAxisMaxDefault);
