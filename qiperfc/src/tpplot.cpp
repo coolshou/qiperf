@@ -106,7 +106,7 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas,
   double maxT =
       *std::max_element(timedatas.begin(), timedatas.end()); // x: max time
   // qDebug() << "min:" << QString::number(minT) << " Max:" << QString::number(maxT);
-  updateXAxisRange(minT, maxT);
+  // updateXAxisRange(minT, maxT);
 
   double minV =
       *std::min_element(valuedatas.begin(), valuedatas.end()); // y: min value
@@ -447,7 +447,8 @@ void TPPlot::setTestStarted(bool start) {
     if (!m_isTestStarted){
         //throughput running had stop
         if (graphCount()) {
-            qDebug() << "graphCount:" << QString::number(graphCount());
+            qDebug() << "graphCount:" << QString::number(graphCount())
+                     << " ,xAxis->range():" << xAxis->range();
             rescaleAxes(true);
             replot();
         }
@@ -581,7 +582,7 @@ void TPPlot::onIperfTPdata(QString sInterval, QString refrowidx, QString data,
   // double x = sInterval.toDouble();
   int x =
       static_cast<int>(sInterval.toDouble()); // ignore .0x Difference of xdata
-  double y = data.toDouble();
+  double y = round(data.toDouble()*100)/100;
 
   // qDebug() << "[TPPlot::onIperfTPdata]:" << refrowidx
   //          << " sInterval:" << sInterval << " x:" << QString::number(x)
@@ -628,14 +629,14 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval,
         dir = jObj.value("dir").toString();
       }
       unit = jObj.value("unit").toString();
-      sumvalue = sumvalue + value.toDouble();
+      sumvalue = round((sumvalue + value.toDouble())*100)/100;
       if (dir.contains(GRAPH_TX, Qt::CaseInsensitive))
       {
-        sumTxvalue = sumTxvalue + value.toDouble();
+        sumTxvalue = round((sumTxvalue + value.toDouble())*100)/100;
       }
       if (dir.contains(GRAPH_RX, Qt::CaseInsensitive))
       {
-        sumRxvalue = sumRxvalue + value.toDouble();
+        sumRxvalue = round((sumRxvalue + value.toDouble())*100)/100;
       }
       // if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) !=0){
       //     qDebug() << "//TODO: base on unit, convert the value to correct
@@ -1161,9 +1162,8 @@ void TPPlot::initCustomPlot()
   legendFont.setPointSize(8);
   legend->setFont(legendFont);
   legend->setSelectedFont(legendFont);
-  legend->setSelectableParts(
-      QCPLegend::spItems); // legend box shall not be selectable, only legend
-                           // items
+  // legend box shall not be selectable, only legend items
+  legend->setSelectableParts(QCPLegend::spItems);
 
   if (1)
   {
