@@ -11,8 +11,8 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
   m_isTestStarted = false;
   m_maxX = 30;
   m_maxY = m_yAxisMaxDefault;
-  m_timeWindowThreshold =
-      30.0; // TODO: when total test time smaller then this, need update?
+  // TODO: when total test time smaller then this, need update?
+  m_timeWindowThreshold = 10 ; //30.0;
   m_autoScrollXAxis = true;
   QScreen *screen = QGuiApplication::primaryScreen();
   bool b4K = false;
@@ -738,15 +738,13 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
     //          << ", count:" << myGraph->dataCount();
     if (myGraph->getValue(xdata, oldvalue) == -1)
     {
-      // auto it = myGraph->data()->find(xdata);
-      // if (it != myGraph->data()->constEnd() && qAbs(it->key - xdata) < 0.001) {
-      // oldvalue = it->value;
       myGraph->addData(xdata, ydata);
     }
     else
     {
-      qDebug() << refrowidx << ",found old value:" << QString::number(oldvalue);
+      // qDebug() << xdata << ",found old value:" << QString::number(oldvalue);
       sumydata = sumydata + oldvalue;
+      // qDebug() << xdata << ",new value:" << QString::number(sumydata);
       myGraph->updateValue(xdata, sumydata);
     }
   }
