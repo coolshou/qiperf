@@ -825,8 +825,8 @@ void ThroughputView::initThroughputChart()
 
     //tpfoldingdelegate = new TPFoldingDelegate(ui->tv_throughput);
     //ui->tv_throughput->setItemDelegateForColumn(TP::cols::id, tpfoldingdelegate);
-    ui->tv_throughput->setSelectionMode(QAbstractItemView::MultiSelection); //multiple selection
-    QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
-    connect(ism, &QItemSelectionModel::selectionChanged, this, &ThroughputView::onTPselectionChanged);
+    // ui->tv_throughput->setSelectionMode(QAbstractItemView::MultiSelection); //multiple selection
+    // QItemSelectionModel *ism = ui->tv_throughput->selectionModel();
+    // connect(ism, &QItemSelectionModel::selectionChanged, this, &ThroughputView::onTPselectionChanged);
 
 }
