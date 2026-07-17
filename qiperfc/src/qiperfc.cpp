@@ -485,6 +485,7 @@ void QIperfC::onStart(bool showNotice)
             m_tpworker = new TpWorker(m_logpath, tps, m_IgnoreWrongInterval);
             connect(m_tpworker, &TpWorker::testStarted, this, &QIperfC::onTestStarted);
             connect(m_tpworker, &TpWorker::testStoped, this, &QIperfC::onTestStoped);
+            connect(m_tpworker, &TpWorker::testStoped, m_throughputview, &ThroughputView::onTestStoped);
             connect(m_tpworker, &TpWorker::updateDatapath, this, &QIperfC::onUpdateDataPath);
             connect(m_tpworker, &TpWorker::updateStarttime, this, &QIperfC::onUpdateStarttime);
             connect(m_tpworker, &TpWorker::updateRunStatus, this, &QIperfC::onUpdateRunStatus);
