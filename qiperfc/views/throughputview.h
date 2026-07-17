@@ -113,6 +113,8 @@ private slots:
     QString getGraphDataToJsonStr(QCPGraph *graph);
     void onDebuginfo(QString msg);
     // void onShowGrouptype(int grouptype);
+    void onAcceptedDlgIperf();
+
 private:
     Ui::ThroughputView *ui;
     TPPlot *m_tpplot;
