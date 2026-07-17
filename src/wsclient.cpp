@@ -351,7 +351,7 @@ void WSClient::onError(QAbstractSocket::SocketError error)
     }else{
         // TODO : handle RemoteHostClosedError
         debug("[" + m_webSocket->peerAddress().toString() +
-              "]WSClient::onError:"+ m_webSocket->errorString());
+              "]WSClient::onError:RemoteHostClosedError:"+ m_webSocket->errorString());
     }
     //TODO: handle websocket not connect issue
 }
