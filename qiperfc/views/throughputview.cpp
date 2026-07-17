@@ -33,6 +33,7 @@ ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete
     m_clipboard = QApplication::clipboard();
 
     dlgiperf = new DlgIperf(m_tpmgr, cfg, this); //add/edit iperf config dialog
+    connect(dlgiperf, &DlgIperf::accepted, this, &ThroughputView::onAcceptedDlgIperf);
     initMenus();
     connect(this, &ThroughputView::showGrouptype, this, &ThroughputView::setTPGroupType);
 }
@@ -206,12 +207,13 @@ void ThroughputView::onAddIperf()
     // add iperf test pair
     dlgiperf->updateUI();
     dlgiperf->setExcIdx(QModelIndex());//new
-    int rc = dlgiperf->exec();// show dlgiperf
-    if (rc == QDialog::Accepted){
-        QString rs= dlgiperf->getJsonCfg();
-        AddIperf(rs);
-        emit updateActionsSave(true);
-    }
+    dlgiperf->open();
+    // int rc = dlgiperf->exec();// show dlgiperf, modal dialog,
+    // if (rc == QDialog::Accepted){
+    //     QString rs= dlgiperf->getJsonCfg();
+    //     AddIperf(rs);
+    //     emit updateActionsSave(true);
+    // }
 }
 
 void ThroughputView::AddIperf(QString cfg)
@@ -748,6 +750,14 @@ QString ThroughputView::getGraphDataToJsonStr(QCPGraph *graph)
 void ThroughputView::onDebuginfo(QString msg)
 {
     qDebug() << "[ThroughputView]" << msg;
+}
+
+void ThroughputView::onAcceptedDlgIperf()
+{
+    //when accept dlgiperf
+    QString rs= dlgiperf->getJsonCfg();
+    AddIperf(rs);
+    emit updateActionsSave(true);
 }
 
 void ThroughputView::initThroughputChart()
