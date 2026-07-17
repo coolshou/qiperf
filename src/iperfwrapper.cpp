@@ -515,11 +515,16 @@ void IperfWrapper::parserIperf3(QString linedata)
             if (data.length()>=6){
                 QString sInterval  = data[0]; // Interval
                 double interval = 0.0;
+                bool bSpecialData = false; // iperf3.21, some client have start with 1.00-1.00
                 if (sInterval.contains("-")){
                     QStringList ds = sInterval.split("-");
                     if (ds.length()==2){
                         // expect as(--interval) -i <num>
                         interval = ds[1].toDouble() - ds[0].toDouble();
+                    }
+                    if ((ds[0].toDouble() == 1.00) && ((ds[1].toDouble() == 1.00))){
+                        qDebug() << "hit special data: " << linedata;
+                        bSpecialData=true;
                     }
                 }
                 // check interval = m_interval, or diff < 0.03
@@ -527,7 +532,10 @@ void IperfWrapper::parserIperf3(QString linedata)
                                        qAbs(m_interval - interval) < 0.03;
                 if (m_ignorewronginterval && !intervalMatches &&
                     !linedata.contains("receiver")) {
-                    return; // Ignore jittery interval reports
+                    if (bSpecialData){
+                    }else{
+                        return; // Ignore jittery interval reports
+                    }
                 }
 
                 // 2. Handle the "SUM" line explicitly
