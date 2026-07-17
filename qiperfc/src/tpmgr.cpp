@@ -199,7 +199,19 @@ Qt::ItemFlags TPMgr::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
-
+    /* // TODO: modify specify row can be selectable or not
+    if (0){
+        Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
+        if (!index.parent().isValid()) {
+            return defaultFlags & ~Qt::ItemIsSelectable;
+        }
+        TP *item = static_cast<TP *>(index.internalPointer());
+        if (!(item->getDataType() == TPMgrData::config)){
+            // only config item can be select, others can not
+            return defaultFlags & ~Qt::ItemIsSelectable;
+        }
+    }
+    */
     return QAbstractItemModel::flags(index);
 }
 QVariant TPMgr::headerData(int section, Qt::Orientation orientation,
@@ -365,9 +377,9 @@ void TPMgr::del(QModelIndex idx)
     int row = idx.row();
     TP *itm = getItem(idx);
     int id = itm->getID().toInt();
-    qDebug() << " itm:" << itm
-             << " TxItm:" << dirTxItem
-             << " RxItm:" << dirRxItem;
+    // qDebug() << " itm:" << itm
+    //          << " TxItm:" << dirTxItem
+    //          << " RxItm:" << dirRxItem;
     QModelIndex pIdx = parent(idx);
     // if (!removeRows(row, 1 , getRootItemIdx())){
     if (!removeRows(row, 1, pIdx))
