@@ -206,14 +206,9 @@ void ThroughputView::onAddIperf()
 {
     // add iperf test pair
     dlgiperf->updateUI();
+    dlgiperf->setEditMode(false);
     dlgiperf->setExcIdx(QModelIndex());//new
     dlgiperf->open();
-    // int rc = dlgiperf->exec();// show dlgiperf, modal dialog,
-    // if (rc == QDialog::Accepted){
-    //     QString rs= dlgiperf->getJsonCfg();
-    //     AddIperf(rs);
-    //     emit updateActionsSave(true);
-    // }
 }
 
 void ThroughputView::AddIperf(QString cfg)
@@ -689,6 +684,7 @@ void ThroughputView::onItemDClicked(QModelIndex idx)
                     tp->loadData(rs);
                     qDebug() << "onItemDClicked:" << idx << ",tp: " << tp;
                     m_tpmgr->setItem(idx, tp);
+                    dlgiperf->setEditMode(false);
                 }
             }else{
                 QVariant d = tp->data(TP::cols::comment);
@@ -755,9 +751,12 @@ void ThroughputView::onDebuginfo(QString msg)
 void ThroughputView::onAcceptedDlgIperf()
 {
     //when accept dlgiperf
-    QString rs= dlgiperf->getJsonCfg();
-    AddIperf(rs);
-    emit updateActionsSave(true);
+    //TODO: edit mode
+    if (!dlgiperf->getEditMode()){
+        QString rs= dlgiperf->getJsonCfg();
+        AddIperf(rs);
+        emit updateActionsSave(true);
+    }
 }
 
 void ThroughputView::initThroughputChart()
