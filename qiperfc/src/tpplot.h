@@ -29,7 +29,8 @@ public:
 public:
   // explicit TPPlot(bool showgroup, QString sunit, QWidget *parent = nullptr);
   explicit TPPlot(int tpgroup, QString sunit, QWidget *parent = nullptr);
-  void addTPData(QString refrowidx, double xdata, double ydata, double lostrate,
+  void addTPData(QString refrowidx, double xdata, double ydata, //double lostrate,
+                 qint64 pktlost, qint64 pkttotal,
                  QString grouptag = ""); //
   void del(QString idx);
   MyQCPGraph *getGraph(QString refrowidx, int dir=-1,
@@ -40,7 +41,8 @@ public:
 
 public slots:
   void onIperfTPdata(QString sInterval, QString refrowidx, QString data,
-                     QString lostrate,
+                     qint64 pktlost, qint64 pkttotal,
+                     // QString lostrate,
                      QString grouptag); //
   void onIperfTPdatas(QString refrow, QString sInterval,
                       const QJsonArray &dataarray);
@@ -133,6 +135,7 @@ private:
   double m_timeWindowThreshold;
   bool m_autoScrollXAxis;
   bool m_isTestStarted;
+  void accumulateData(MyQCPGraph *targetGraph, const QSharedPointer<QCPGraphDataContainer> &newData);
 };
 
 #endif // TPPLOT_H
