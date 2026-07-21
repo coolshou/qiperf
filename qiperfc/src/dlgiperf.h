@@ -31,7 +31,8 @@ public:
     bool add(QString mgr, QString mdata); // mgr: manager ip, mdata: relative data
     void updateUI();
     void setExcIdx(QModelIndex excIdx);
-
+    void setEditMode(bool edit);
+    bool getEditMode();
 public slots:
     void ChangeVersion(const QString ver);
     void onAccepted();
@@ -70,6 +71,7 @@ private:
     int old_mss; // store old mss value
     bool m_enabled=true;
     DlgIperfRestartRule *m_dlgrule;
+    bool bEdit = false;
 };
 
 #endif // DLGIPERF_H

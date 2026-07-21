@@ -165,6 +165,7 @@ QString DlgIperf::getJsonCfg()
 
 void DlgIperf::loadJsonCfg(QString jsoncfg)
 {
+    setEditMode(true);
     QJsonParseError error;
     QJsonDocument doc=QJsonDocument::fromJson(jsoncfg.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError) {
@@ -425,6 +426,16 @@ void DlgIperf::updateUI()
 void DlgIperf::setExcIdx(QModelIndex excIdx)
 {
     m_excIdx = excIdx;
+}
+
+void DlgIperf::setEditMode(bool edit)
+{
+    bEdit = edit;
+}
+
+bool DlgIperf::getEditMode()
+{
+    return bEdit;
 }
 
 void DlgIperf::ChangeVersion(const QString ver)
