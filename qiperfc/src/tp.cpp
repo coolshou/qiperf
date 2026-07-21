@@ -5,27 +5,30 @@
 #include <QVariant>
 #include <QList>
 
-
-TP::TP(QString id, QString data,int datatype, TP *parent)
-    :m_id(id), m_datatype(datatype), m_parentItem(parent)
+TP::TP(QString id, QString data, int datatype, TP *parent)
+    : m_id(id), m_datatype(datatype), m_parentItem(parent)
 {
-    m_childItems = QList<TP *>();
-    m_childItems.clear();
+    // m_childItems = QList<TP *>();
+    // m_childItems.clear();
     m_jsondata = "";
     m_enabled = true;
     m_lostpacket = 0;
     m_totalpacket = 0;
     clearThroughput();
 
-    m_itemDatas={getID(), "", "", "", // id, server, dir ,client
-                 "", "", "", //throughput, min throughput, max throughput
-                 "", ""}; // lost rate, comment
+    m_itemDatas = {getID(), "", "", "", // id, server, dir ,client
+                   "", "", "",          // throughput, min throughput, max throughput
+                   "", ""};             // lost rate, comment
     // qInfo() << "create TP:" << id << " data:" << data << " parent:" << parent;
     // if (data!="" && data !="Root" && data !="Total"){
-    if (data!="" && m_datatype == TPMgrData::config){
+    if (data != "" && m_datatype == TPMgrData::config)
+    {
         loadData(data);
-    }else{
-        if (data!=""){
+    }
+    else
+    {
+        if (data != "")
+        {
             // m_itemDatas[1] = data;
             m_itemDatas[0] = data;
         }
@@ -34,8 +37,8 @@ TP::TP(QString id, QString data,int datatype, TP *parent)
 
 TP::~TP()
 {
-    // qDeleteAll(m_childItems);
-    m_childItems.clear();
+    // m_childItems.clear();
+    qDeleteAll(m_childItems);
 }
 
 void TP::appendChild(TP *item)
@@ -43,21 +46,27 @@ void TP::appendChild(TP *item)
     m_childItems.append(item);
 }
 
-void TP::clear(){
+void TP::clear()
+{
     qDebug() << "//TODO: clear child item ";
-//    qDeleteAll(m_childItems);
-//    m_childItems.clear();
+    //    qDeleteAll(m_childItems);
+    //    m_childItems.clear();
 }
 
 int TP::findChild(TP *child)
 {
-    foreach(auto itm, m_childItems ){
-        if (itm==child){
-            qDebug() << "findChild FOUND:" << child ;
-            break;
-        }
+    // foreach (auto itm, m_childItems)
+    // {
+    //     if (itm == child)
+    //     {
+    //         qDebug() << "findChild FOUND:" << child;
+    //         break;
+    //     }
+    // }
+    for (int i = 0; i < m_childItems.size(); ++i) {
+        if (m_childItems[i] == child) return i;
     }
-    return 0;
+    return -1;
 }
 
 TP *TP::child(int row)
@@ -74,18 +83,24 @@ QList<TP *> TP::getChilds()
 
 int TP::childCount() const
 {
-    if (m_childItems.isEmpty()){
+    if (m_childItems.isEmpty())
+    {
         return 0;
-    }else {
+    }
+    else
+    {
         return m_childItems.count();
     }
 }
 
 bool TP::haveChilds()
 {
-    if (m_childItems.count()>0){
+    if (m_childItems.count() > 0)
+    {
         return true;
-    }else{
+    }
+    else
+    {
         return false;
     }
 }
@@ -97,7 +112,8 @@ int TP::columnCount() const
 
 QVariant TP::data(int column) const
 {
-    if (column < 0 || column >= m_itemDatas.size()){
+    if (column < 0 || column >= m_itemDatas.size())
+    {
         return QVariant();
     }
     return m_itemDatas.at(column);
@@ -105,51 +121,61 @@ QVariant TP::data(int column) const
 
 int TP::setData(int column, QVariant var)
 {
-    if (column < 0 || column >= m_itemDatas.size()){
+    if (column < 0 || column >= m_itemDatas.size())
+    {
         return -1;
     }
-    m_itemDatas[column]=var;
+    m_itemDatas[column] = var;
     return 0;
 }
 
 TP *TP::parentItem()
 {
-    if (m_parentItem){
+    if (m_parentItem)
+    {
         return m_parentItem;
-    }else{
-        //TODO: parentItem
+    }
+    else
+    {
+        // TODO: parentItem
         return nullptr;
     }
 }
 
 bool TP::removeChildren(int position, int count)
 {
-    if (position < 0 || position + count > m_childItems.size()){
+    if (position < 0 || position + count > m_childItems.size())
+    {
         return false;
     }
     // QList<TP *>::ConstIterator begin = m_childItems.begin()+position;
     // QList<TP *>::ConstIterator end = m_childItems.begin()+position+count;
     // m_childItems.erase(begin, end);
-    //TODO: is ths correct way to remove QList item?
-    for (int i = 0; i < count; ++i) {
-        m_childItems.removeAt(position);  // Always remove at 'start'
+    // TODO: is ths correct way to remove QList item?
+    for (int i = 0; i < count; ++i)
+    {
+        m_childItems.removeAt(position); // Always remove at 'start'
     }
     return true;
 }
 
-TP * TP::removeChild(TP *child)
+TP *TP::removeChild(TP *child)
 {
     int idx = m_childItems.indexOf(child);
-    if (idx>=0){
+    if (idx >= 0)
+    {
         return m_childItems.takeAt(idx);
-    }else{
+    }
+    else
+    {
         return nullptr;
     }
 }
 
 void TP::removeChild(int row)
 {
-    if (row >= 0 && row < m_childItems.size()) {
+    if (row >= 0 && row < m_childItems.size())
+    {
         m_childItems.removeAt(row);
     }
 }
@@ -161,7 +187,8 @@ TP *TP::takeAt(int row)
 
 void TP::insertChild(int row, TP *child)
 {
-    if (row >= 0 && row <= m_childItems.size()) {
+    if (row >= 0 && row <= m_childItems.size())
+    {
         m_childItems.insert(row, child);
     }
 }
@@ -173,14 +200,16 @@ void TP::setParent(TP *parent)
 
 int TP::row() const
 {
-    //TODO: after clear, the may cause problem
-    // if (m_parentItem != nullptr){
-    // following must have for switch from No total group => total group setting
-    if (m_parentItem){
-        if (m_parentItem->haveChilds()){
+    // TODO: after clear, the may cause problem
+    //  if (m_parentItem != nullptr){
+    //  following must have for switch from No total group => total group setting
+    if (m_parentItem)
+    {
+        if (m_parentItem->haveChilds())
+        {
             // m_parentItem->m_childItems
 
-            return m_parentItem->m_childItems.indexOf(const_cast<TP*>(this));
+            return m_parentItem->m_childItems.indexOf(const_cast<TP *>(this));
         }
     }
     return 0;
@@ -194,38 +223,42 @@ QString TP::getID()
 void TP::loadData(QString data)
 {
     QJsonParseError error;
-    QJsonDocument doc= QJsonDocument::fromJson(data.toUtf8(), &error);
-    if (error.error == QJsonParseError::NoError){
-        QJsonObject jsonRoot = doc.object();
+    QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError)
+    {
+        jsonRoot = doc.object();
         m_enabled = jsonRoot.value("enabled").toBool(true);
-        //client
+        // client
         QJsonObject o_client = jsonRoot.value("client").toObject();
-        m_version = o_client.value("version").toString().toInt(); //QJsonValue string can not direct conver to Int
+        m_version = o_client.value("version").toString().toInt(); // QJsonValue string can not direct conver to Int
         QString client = o_client.value("bind").toString();
         m_mgrclient = o_client.value("manager").toString();
         m_port = o_client.value("port").toInt();
-        //TODO: duration set to 0 => iperf2/3 -t 0 run forever
+        // TODO: duration set to 0 => iperf2/3 -t 0 run forever
         m_duration = o_client.value("duration").toInt();
         m_omit = o_client.value("omit").toInt();
         m_delaytime = o_client.value("delaytime").toInt();
         m_interval = o_client.value("interval").toInt();
         m_parallel = o_client.value("parallel").toInt();
         m_protocal = o_client.value("protocal").toString();
-    //    QString m_mclient = o_client["manager"].toString();
+        QString server = o_client.value("target").toString();
+        //    QString m_mclient = o_client["manager"].toString();
         QString direction = TPDIRRx;
-        if (o_client.value("bidir").toBool()){
+        if (o_client.value("bidir").toBool())
+        {
             direction = TPDIRTR;
         }
-        if (o_client.value("reverse").toBool()){
-            direction= TPDIRTx;
+        if (o_client.value("reverse").toBool())
+        {
+            direction = TPDIRTx;
         }
         // server
         QJsonObject o_server = jsonRoot.value("server").toObject();
-        QString server = o_client.value("target").toString();
+
         m_mgrserver = o_server.value("manager").toString();
 
-        //m_itemDatas.clear();// this will remove all data => m_itemDatas.length()=0
-        m_itemDatas.replace(int(TP::id) , getID());
+        // m_itemDatas.clear();// this will remove all data => m_itemDatas.length()=0
+        m_itemDatas.replace(int(TP::id), getID());
         m_itemDatas.replace(int(TP::server), server);
         m_itemDatas.replace(int(TP::dir), direction);
         m_itemDatas.replace(int(TP::client), client);
@@ -234,17 +267,21 @@ void TP::loadData(QString data)
         m_itemDatas.replace(int(TP::maxtp), "");
         m_itemDatas.replace(int(TP::lostrate), "");
         m_itemDatas.replace(int(TP::comment), "");
-    }else{
+    }
+    else
+    {
         qDebug() << "TP::loadData wrong format (" << error.errorString() << "\n data:" << data;
     }
     m_jsondata = data;
 }
 
-QString TP::getJsonData(){
+QString TP::getJsonData()
+{
     return m_jsondata;
 }
-void TP::resetData(){
-    //reset (clear) test data
+void TP::resetData()
+{
+    // reset (clear) test data
     QString d = getJsonData();
     loadData(d);
 }
@@ -259,30 +296,36 @@ int TP::getVersion()
 }
 
 QString TP::getServer()
-{   // return Iperf server bind ip address
-    return m_itemDatas[int(TP::server)].toString();
+{ // return Iperf server bind ip address
+    // return m_itemDatas[int(TP::server)].toString();
+    return jsonRoot["client"].toObject()["target"].toString();
 }
 
 void TP::setServer(QString addr)
 {
-    m_itemDatas[int(TP::server)] = addr;
-//    m_server = addr;
+    // m_itemDatas[int(TP::server)] = addr;
+    jsonRoot["client"].toObject()["target"] = QJsonValue(addr);
+    //    m_server = addr;
 }
 
 QString TP::getServerArgs()
-{   // get iperf server command arguments
+{ // get iperf server command arguments
     QJsonParseError error;
-    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
-    if (error.error == QJsonParseError::NoError){
+    QJsonDocument fulldoc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError)
+    {
         QJsonObject jsonRoot = fulldoc.object();
 
         QJsonObject o_server = jsonRoot["server"].toObject();
-        o_server["server"]=true;
+        o_server["server"] = true;
         QJsonDocument doc(o_server);
         QString strJson(doc.toJson(QJsonDocument::Compact));
         return strJson;
-    }else{
-        qDebug() << "getServerArgs wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+    }
+    else
+    {
+        qDebug() << "getServerArgs wrong format m_jsondata(" << error.errorString() << ")\n"
+                 << m_jsondata;
         return "";
     }
 }
@@ -290,55 +333,68 @@ QString TP::getServerArgs()
 QVariantMap TP::getServerArgsMap()
 {
     QJsonParseError error;
-    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
-    if (error.error == QJsonParseError::NoError){
+    QJsonDocument fulldoc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError)
+    {
         QJsonObject jsonRoot = fulldoc.object();
 
         QJsonObject jobj = jsonRoot.value("server").toObject();
-        jobj["server"]=true;
+        jobj["server"] = true;
         QJsonDocument doc(jobj);
         return doc.toVariant().toMap();
-    }else{
-        qDebug() << "getServerArgsMap wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+    }
+    else
+    {
+        qDebug() << "getServerArgsMap wrong format m_jsondata(" << error.errorString() << ")\n"
+                 << m_jsondata;
         return QVariantMap();
     }
 }
 
 QString TP::getBindKey(bool smode)
 {
-    if (smode){
+    if (smode)
+    {
         return m_itemDatas[int(TP::server)].toString() + "_" + QString::number(m_port);
-    }else{
+    }
+    else
+    {
         return m_itemDatas[int(TP::client)].toString() + "-" +
-                m_itemDatas[int(TP::server)].toString() + "_" + QString::number(m_port);;
+               m_itemDatas[int(TP::server)].toString() + "_" + QString::number(m_port);
+        ;
     }
 }
 
 QString TP::getClient()
-{   // return Iperf client bind ip address
+{ // return Iperf client bind ip address
     return m_itemDatas[int(TP::client)].toString();
 }
 
 void TP::setClient(QString addr)
 {
     m_itemDatas[int(TP::client)] = addr;
-//    m_client = addr;
+    //    m_client = addr;
 }
 
 QString TP::getClientArgs()
-{   // get iperf client command arguments
+{ // get iperf client command arguments
     QJsonParseError error;
-    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
-    if (error.error == QJsonParseError::NoError){
+    QJsonDocument fulldoc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError)
+    {
         QJsonObject jsonRoot = fulldoc.object();
 
         QJsonObject o_client = jsonRoot.value("client").toObject();
-        o_client.value("server")=false;
+        // qDebug() << "o_client.value('server')" << o_client.value("server");
+        o_client.value("server") = QJsonValue(false);
         QJsonDocument doc(o_client);
         QString strJson(doc.toJson(QJsonDocument::Compact));
         return strJson;
-    }else{
-        qDebug() << "getClientArgs wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+    }
+    else
+    {
+        qDebug() << "getClientArgs wrong format m_jsondata(" << error.errorString() << ")\n"
+                 << m_jsondata;
         return "";
     }
 }
@@ -346,16 +402,20 @@ QString TP::getClientArgs()
 QVariantMap TP::getClientArgsMap()
 {
     QJsonParseError error;
-    QJsonDocument fulldoc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
-    if (error.error == QJsonParseError::NoError){
+    QJsonDocument fulldoc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError)
+    {
         QJsonObject jsonRoot = fulldoc.object();
 
         QJsonObject o_client = jsonRoot.value("client").toObject();
-        o_client.value("server")=false;
+        o_client.value("server") = false;
         QJsonDocument doc(o_client);
         return doc.toVariant().toMap();
-    }else{
-        qDebug() << "getClientArgsMap wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+    }
+    else
+    {
+        qDebug() << "getClientArgsMap wrong format m_jsondata(" << error.errorString() << ")\n"
+                 << m_jsondata;
         return QVariantMap();
     }
 }
@@ -386,10 +446,11 @@ void TP::setMgrClient(QString addr)
 }
 
 void TP::swapServerClient(QString mgrServer, QString server, QString mgrClient, QString client)
-{   //update server/client ip address in json
+{ // update server/client ip address in json
     QJsonParseError error;
-    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
-    if (error.error == QJsonParseError::NoError){
+    QJsonDocument doc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError)
+    {
         QJsonObject jsonRoot = doc.object();
         QJsonObject o_server = jsonRoot["server"].toObject();
         o_server["manager"] = mgrServer;
@@ -405,9 +466,12 @@ void TP::swapServerClient(QString mgrServer, QString server, QString mgrClient, 
         setClient(client);
         jsonRoot["client"] = o_client;
         doc.setObject(jsonRoot);
-        m_jsondata =doc.toJson(QJsonDocument::Compact);
-    }else{
-        qDebug() << "swapServerClient wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+        m_jsondata = doc.toJson(QJsonDocument::Compact);
+    }
+    else
+    {
+        qDebug() << "swapServerClient wrong format m_jsondata(" << error.errorString() << ")\n"
+                 << m_jsondata;
     }
 }
 
@@ -418,7 +482,7 @@ QString TP::getThroughput()
 
 int TP::getWaitTime()
 {
-    //omit time + test duration
+    // omit time + test duration
     return m_duration;
 }
 
@@ -429,12 +493,14 @@ int TP::getOmitTime()
 
 bool TP::getRunforever()
 {
-    if (m_duration==0){
+    if (m_duration == 0)
+    {
         return true;
-    }else{
+    }
+    else
+    {
         return false;
     }
-
 }
 
 int TP::getDelaytime()
@@ -446,45 +512,63 @@ int TP::setDirection(DirType direction)
 {
     // QString sdirection = QVariant::fromValue(direction).toString();
     QJsonParseError error;
-    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
-    if (error.error == QJsonParseError::NoError){
+    QJsonDocument doc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError)
+    {
         QJsonObject jsonRoot = doc.object();
         QJsonObject o_client = jsonRoot["client"].toObject();
-        if (direction == DirType::Tx){
-            o_client["bidir"]=false;
-            o_client["reverse"]=true;
-        }else if (direction == DirType::Rx){
-            o_client["bidir"]=false;
-            o_client["reverse"]=false;
-        }else if (direction == DirType::TR){
-            o_client["bidir"]=true;
-            o_client["reverse"]=false;
-        }else {
-            o_client["bidir"]=true;
-            o_client["reverse"]=true;
+        if (direction == DirType::Tx)
+        {
+            o_client["bidir"] = false;
+            o_client["reverse"] = true;
         }
-        jsonRoot["client"]=o_client;
+        else if (direction == DirType::Rx)
+        {
+            o_client["bidir"] = false;
+            o_client["reverse"] = false;
+        }
+        else if (direction == DirType::TR)
+        {
+            o_client["bidir"] = true;
+            o_client["reverse"] = false;
+        }
+        else
+        {
+            o_client["bidir"] = true;
+            o_client["reverse"] = true;
+        }
+        jsonRoot["client"] = o_client;
         QJsonObject o_server = jsonRoot["server"].toObject();
-        if (direction == DirType::Tx){
-            o_server["bidir"]=false;
-            o_server["reverse"]=true;
-        }else if (direction == DirType::Rx){
-            o_server["bidir"]=false;
-            o_server["reverse"]=false;
-        }else if (direction == DirType::TR){
-            o_server["bidir"]=true;
-            o_server["reverse"]=false;
-        }else {
-            o_server["bidir"]=true;
-            o_server["reverse"]=true;
+        if (direction == DirType::Tx)
+        {
+            o_server["bidir"] = false;
+            o_server["reverse"] = true;
         }
-        jsonRoot["server"]=o_server;
+        else if (direction == DirType::Rx)
+        {
+            o_server["bidir"] = false;
+            o_server["reverse"] = false;
+        }
+        else if (direction == DirType::TR)
+        {
+            o_server["bidir"] = true;
+            o_server["reverse"] = false;
+        }
+        else
+        {
+            o_server["bidir"] = true;
+            o_server["reverse"] = true;
+        }
+        jsonRoot["server"] = o_server;
         doc.setObject(jsonRoot);
-        m_jsondata =doc.toJson(QJsonDocument::Compact);
+        m_jsondata = doc.toJson(QJsonDocument::Compact);
         // setData(TP::cols::dir, sdirection);
         return 0;
-    }else{
-        qDebug() << "setDirection wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+    }
+    else
+    {
+        qDebug() << "setDirection wrong format m_jsondata(" << error.errorString() << ")\n"
+                 << m_jsondata;
         return 1;
     }
 }
@@ -492,14 +576,22 @@ int TP::setDirection(DirType direction)
 int TP::setDirection(QString direction)
 {
     setData(TP::cols::dir, direction);
-    if (!m_jsondata.isEmpty()){
-        if (direction.contains(TPDIRTx)){
+    if (!m_jsondata.isEmpty())
+    {
+        if (direction.contains(TPDIRTx))
+        {
             setDirection(TP::DirType::Tx);
-        }else if (direction.contains(TPDIRRx)){
+        }
+        else if (direction.contains(TPDIRRx))
+        {
             setDirection(TP::DirType::Rx);
-        }else if (direction.contains(TPDIRTR)){
+        }
+        else if (direction.contains(TPDIRTR))
+        {
             setDirection(TP::DirType::TR);
-        }else {
+        }
+        else
+        {
             setDirection(TP::DirType::RT);
         }
     }
@@ -514,13 +606,19 @@ int TP::getPort()
 void TP::setComment(QString comment)
 {
     QString m;
-    if (m_itemDatas[int(TP::comment)].isValid()){
-        if (m_itemDatas[int(TP::comment)].toString()!=""){
+    if (m_itemDatas[int(TP::comment)].isValid())
+    {
+        if (m_itemDatas[int(TP::comment)].toString() != "")
+        {
             m = m_itemDatas[int(TP::comment)].toString() + "\n" + comment;
-        }else{
+        }
+        else
+        {
             m = comment;
         }
-    }else{
+    }
+    else
+    {
         m = comment;
     }
     m_itemDatas[int(TP::comment)] = m;
@@ -528,20 +626,25 @@ void TP::setComment(QString comment)
 
 void TP::setThroughput(QString value)
 {
-    if (value.isEmpty()){
+    if (value.isEmpty())
+    {
         // qDebug() << "setThroughput isEmpty";
         m_itemDatas[int(TP::mintp)] = "";
         m_itemDatas[int(TP::maxtp)] = "";
         m_itemDatas[int(TP::throughput)] = "";
-    }else{
-        //min value
-        if ((m_itemDatas[int(TP::mintp)].toDouble()<=0 && (value.toDouble()>=0))||
-            (value.toFloat() < m_itemDatas[int(TP::mintp)].toDouble())){
+    }
+    else
+    {
+        // min value
+        if ((m_itemDatas[int(TP::mintp)].toDouble() <= 0 && (value.toDouble() >= 0)) ||
+            (value.toFloat() < m_itemDatas[int(TP::mintp)].toDouble()))
+        {
             m_itemDatas[int(TP::mintp)] = value;
         }
-        //max value
-        if (m_itemDatas[int(TP::maxtp)]==""||
-            (value.toFloat() > m_itemDatas[int(TP::maxtp)].toDouble())){
+        // max value
+        if (m_itemDatas[int(TP::maxtp)] == "" ||
+            (value.toFloat() > m_itemDatas[int(TP::maxtp)].toDouble()))
+        {
             m_itemDatas[int(TP::maxtp)] = value;
         }
         m_itemDatas[int(TP::throughput)] = value;
@@ -550,22 +653,29 @@ void TP::setThroughput(QString value)
 
 void TP::setThroughput(QString dir, QString value)
 {
-    if (dir.contains(TPDIRTx)){
+    if (dir.contains(TPDIRTx))
+    {
         m_Tx = value.toDouble();
         // qDebug() << "setThroughput:m_Tx: " << m_Tx;
-        if (m_minTx==0 || (m_minTx> value.toDouble())){
+        if (m_minTx == 0 || (m_minTx > value.toDouble()))
+        {
             m_minTx = value.toDouble();
         }
-        if (m_maxTx < value.toDouble()){
+        if (m_maxTx < value.toDouble())
+        {
             m_maxTx = value.toDouble();
         }
-    }else{
+    }
+    else
+    {
         m_Rx = value.toDouble();
         // qDebug() << "setThroughput:m_Rx: " << m_Rx;
-        if (m_minRx==0 || (m_minRx> value.toDouble())){
+        if (m_minRx == 0 || (m_minRx > value.toDouble()))
+        {
             m_minRx = value.toDouble();
         }
-        if (m_maxRx < value.toDouble()){
+        if (m_maxRx < value.toDouble())
+        {
             m_maxRx = value.toDouble();
         }
     }
@@ -574,7 +684,7 @@ void TP::setThroughput(QString dir, QString value)
 
 void TP::updateTimeStemp()
 {
-    QDateTime t=QDateTime::currentDateTime();
+    QDateTime t = QDateTime::currentDateTime();
     m_lastnoticetime = t.toString("yyyy.MM.dd.hh:mm:ss.zzz");
 }
 
@@ -595,8 +705,9 @@ int TP::getDataType()
 
 bool TP::isTPDataType()
 {
-    if ((getDataType() == static_cast<int>(TPMgrData::TP))||
-        (getDataType() == static_cast<int>(TPMgrData::config))){
+    if ((getDataType() == static_cast<int>(TPMgrData::TP)) ||
+        (getDataType() == static_cast<int>(TPMgrData::config)))
+    {
         return true;
     }
     return false;
@@ -604,31 +715,40 @@ bool TP::isTPDataType()
 
 QString TP::getTxRxThroughput()
 {
-   double v = m_Tx+m_Rx;
+    double v = m_Tx + m_Rx;
     // qDebug() << "getTxRxThroughput: " << v;
-    if (v>0){
-       return QString::number(v);
-   }else{
-       return "";
-   }
+    if (v > 0)
+    {
+        return QString::number(v);
+    }
+    else
+    {
+        return "";
+    }
 }
 
 QString TP::getMinThroughput()
 {
-    double v = m_minTx+m_minRx;
-    if (v>0){
+    double v = m_minTx + m_minRx;
+    if (v > 0)
+    {
         return QString::number(v);
-    }else{
+    }
+    else
+    {
         return "";
     }
 }
 
 QString TP::getMaxThroughput()
 {
-    double v = m_maxTx+m_maxRx;
-    if (v>0){
+    double v = m_maxTx + m_maxRx;
+    if (v > 0)
+    {
         return QString::number(v);
-    }else{
+    }
+    else
+    {
         return "";
     }
 }
@@ -643,7 +763,8 @@ void TP::clearThroughput()
     m_maxRx = 0;
     m_lostpacket = 0;
     m_totalpacket = 0;
-    if (m_itemDatas.length()>0){
+    if (m_itemDatas.length() > 0)
+    {
         m_itemDatas.replace(int(TP::throughput), "");
         m_itemDatas.replace(int(TP::mintp), "");
         m_itemDatas.replace(int(TP::maxtp), "");
@@ -664,40 +785,53 @@ int TP::getTotalPackets()
 
 void TP::setLostRate(QString pkt_lost, QString pkt_total)
 {
-    if (pkt_lost.toInt()>=0){
+    if (pkt_lost.toInt() >= 0)
+    {
         m_lostpacket = pkt_lost.toInt();
     }
-    if (pkt_total.toInt()>0){
+    if (pkt_total.toInt() > 0)
+    {
         m_totalpacket = pkt_total.toInt();
-    }else{
+    }
+    else
+    {
         m_totalpacket = 0;
     }
-    if (m_totalpacket>0){
-        double lr = static_cast<double>(m_lostpacket)/m_totalpacket;
-        //lost rate % not show in scientific notation eq: 5.83509e-05 (3/5141307)
-        // float , Keep 2 Decimal points
-        QString s= QString::number(lr*100, 'f', 2)+
-                " ("+QString::number(m_lostpacket)+"/"+QString::number(m_totalpacket)+")";
-        //TODO: only show rate, move lost/total to tooltip?
+    if (m_totalpacket > 0)
+    {
+        double lr = static_cast<double>(m_lostpacket) / m_totalpacket;
+        // lost rate % not show in scientific notation eq: 5.83509e-05 (3/5141307)
+        //  float , Keep 2 Decimal points
+        QString s = QString::number(lr * 100, 'f', 2) +
+                    " (" + QString::number(m_lostpacket) + "/" + QString::number(m_totalpacket) + ")";
+        // TODO: only show rate, move lost/total to tooltip?
         m_itemDatas[int(TP::lostrate)] = s;
-    }else {
+    }
+    else
+    {
         m_itemDatas[int(TP::lostrate)] = "";
     }
 }
 
 QString TP::getLostRate()
 {
-    if (m_totalpacket>0){
-        double v = (static_cast<double>(m_lostpacket) / m_totalpacket)*100;
-        if (v>0){
+    if (m_totalpacket > 0)
+    {
+        double v = (static_cast<double>(m_lostpacket) / m_totalpacket) * 100;
+        if (v > 0)
+        {
             return QString::number(v);
             // +"("+ QString::number(m_lostpacket) +"/"+ QString::number(m_totalpacket) +")";
-        }else{
+        }
+        else
+        {
             qDebug() << "lost/total:" << QString::number(m_lostpacket) << " / " << QString::number(m_totalpacket);
             return QString();
         }
-    }else{
-//        qDebug() << "m_totalpacket:" << QString::number(m_totalpacket);
+    }
+    else
+    {
+        //        qDebug() << "m_totalpacket:" << QString::number(m_totalpacket);
         return QString();
     }
 }
@@ -711,8 +845,10 @@ void TP::setEnabled(bool enable)
 {
     m_enabled = enable;
     updateJson("enabled", m_enabled);
-    if (m_childItems.count()>0){
-        foreach(TP *tp, m_childItems){
+    if (m_childItems.count() > 0)
+    {
+        foreach (TP *tp, m_childItems)
+        {
             tp->setEnabled(m_enabled);
         }
     }
@@ -743,26 +879,54 @@ QString TP::getProtocal()
     return m_protocal;
 }
 
-
-void TP::updateJson(QString key, QVariant value){
-    QJsonParseError error;
-    QJsonDocument doc= QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
-    if (error.error == QJsonParseError::NoError){
-        QJsonObject jsonRoot = doc.object();
-        if (value.canConvert<bool>()){
-            jsonRoot[key] = value.toBool();
-        }else if (value.canConvert<QString>()) {
-            jsonRoot[key] = value.toString();
-        }else if (value.canConvert<int>()) {
-            jsonRoot[key] = value.toInt();
-        }else {
-            qDebug() << "not support type of value: " << value << " type: "<< value.typeName();
-        }
-        doc.setObject(jsonRoot);
-    //    qDebug() << "updateJson:jsonRoot" << jsonRoot;
-        m_jsondata =doc.toJson(QJsonDocument::Compact);
-    //    qDebug() << "updateJson:m_jsondata:" << m_jsondata;
-    }else{
-        qDebug() << "updateJson wrong format m_jsondata(" << error.errorString() << ")\n" << m_jsondata;
+void TP::updateJson(QString key, QVariant value)
+{
+    if (value.canConvert<bool>())
+    {
+        jsonRoot[key] = value.toBool();
     }
+    else if (value.canConvert<QString>())
+    {
+        jsonRoot[key] = value.toString();
+    }
+    else if (value.canConvert<int>())
+    {
+        jsonRoot[key] = value.toInt();
+    }
+    else
+    {
+        qDebug() << "not support type of value: " << value << " type: " << value.typeName();
+    }
+    m_jsondata = QJsonDocument(jsonRoot).toJson(QJsonDocument::Compact);
+    // QJsonParseError error;
+    // QJsonDocument doc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
+    // if (error.error == QJsonParseError::NoError)
+    // {
+    //     QJsonObject jsonRoot = doc.object();
+    //     if (value.canConvert<bool>())
+    //     {
+    //         jsonRoot[key] = value.toBool();
+    //     }
+    //     else if (value.canConvert<QString>())
+    //     {
+    //         jsonRoot[key] = value.toString();
+    //     }
+    //     else if (value.canConvert<int>())
+    //     {
+    //         jsonRoot[key] = value.toInt();
+    //     }
+    //     else
+    //     {
+    //         qDebug() << "not support type of value: " << value << " type: " << value.typeName();
+    //     }
+    //     doc.setObject(jsonRoot);
+    //     //    qDebug() << "updateJson:jsonRoot" << jsonRoot;
+    //     m_jsondata = doc.toJson(QJsonDocument::Compact);
+    //     //    qDebug() << "updateJson:m_jsondata:" << m_jsondata;
+    // }
+    // else
+    // {
+    //     qDebug() << "updateJson wrong format m_jsondata(" << error.errorString() << ")\n"
+    //              << m_jsondata;
+    // }
 }

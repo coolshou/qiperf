@@ -119,6 +119,7 @@ private:
     TP *m_parentItem;
 //    EndPointType::Type m_type;
     QString m_jsondata;
+    QJsonObject jsonRoot;
     int m_version; //iperf version
     QString m_mgrserver; // target manger server ip
 //    QString m_direction; //direction: 0,1,2,

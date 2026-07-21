@@ -445,26 +445,28 @@ QList<TP *> TPMgr::getChilds(bool showAll)
             {
                 tps.append(item);
             }
-            for (int i = 0; i < item->childCount(); i++)
-            {
-                TP *chitm = item->child(i);
-                if (!showAll)
+            if (item->haveChilds()){
+                for (int i = 0; i < item->childCount(); i++)
                 {
-                    if (!chitm->getEnabled())
+                    TP *chitm = item->child(i);
+                    if (!showAll)
                     {
-                        continue;
+                        if (!chitm->getEnabled())
+                        {
+                            continue;
+                        }
                     }
-                }
-                // m_tps.append(itm->child(i));
-                // qDebug() << " chitm:" << chitm->getID();
-                tps.append(chitm);
-                if (chitm->haveChilds())
-                {
-                    for (int j = 0; j < chitm->childCount(); j++)
+                    // m_tps.append(itm->child(i));
+                    // qDebug() << " chitm:" << chitm->getID();
+                    tps.append(chitm);
+                    if (chitm->haveChilds())
                     {
-                        TP *ccitm = chitm->child(j);
-                        // qDebug() << " ccitm:" << ccitm->getID();
-                        tps.append(ccitm);
+                        for (int j = 0; j < chitm->childCount(); j++)
+                        {
+                            TP *ccitm = chitm->child(j);
+                            // qDebug() << " ccitm:" << ccitm->getID();
+                            tps.append(ccitm);
+                        }
                     }
                 }
             }
@@ -1331,7 +1333,7 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                 if ((pkt_total.toInt() > 0) && (pkt_lost.toInt() > 0))
                 {
                     lost_rate = (pkt_lost.toDouble() / pkt_total.toDouble()) * 100;
-                    qDebug() << "TPMgr::onIperfTPdata: lost_rate:" << lost_rate;
+                    // qDebug() << "TPMgr::onIperfTPdata: lost_rate:" << lost_rate;
                     slost_rate = QString::number(lost_rate, 'f', 4);
                 }
                 //        qDebug() << "pkt_lost/pkt_total: " << pkt_lost << " / " << pkt_total;
