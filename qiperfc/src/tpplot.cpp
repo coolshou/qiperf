@@ -767,7 +767,7 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
   }
   // TODO: lost rate
   if ((pktlost > 0) && (pkttotal > 0)){
-      double lostrate = (pktlost/pkttotal)*100;
+      double lostrate = (static_cast<double>(pktlost)/pkttotal)*100.0;
       qDebug() << refrowidx << " ,pktlost:" << pktlost << ",pkttotal:" << pkttotal
                << " ,lostrate:" << lostrate;
       MyQCPBars *g_lostrate = getLostRateGraph(refrowidx, dir);
@@ -938,6 +938,8 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx, int dir)
     }
 
     g_lostrate = new MyQCPBars(xAxis, yAxis2);
+    g_lostrate->setWidthType(QCPBars::wtAbsolute);
+    g_lostrate->setWidth(20);
     connect(g_lostrate, &MyQCPBars::datasSetted, this,
             &TPPlot::onLostRateDatasSetted);
     if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
