@@ -618,7 +618,6 @@ void QIperfC::onAbout()
 void QIperfC::onShowDebugLog()
 {
     m_dlgshowlog->show();
-    // m_dlgshowlog->open();
     m_dlgshowlog->raise();
     m_dlgshowlog->activateWindow();
 }

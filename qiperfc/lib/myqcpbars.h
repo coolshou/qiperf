@@ -19,12 +19,15 @@ public:
     void updateValue(double keyToUpdate, double newvalue);
     double sumValue(double keyToUpdate, double newvalue);
     void clear();
+    void setDirection(int iDir);
+    int getDirection();
 signals:
     // void dataAdded(double key, double value);
     void datasSetted(QSharedPointer<QCPBarsDataContainer> data);
 
 private:
     QVector<double> elementWiseDivision(const QVector<int>& vector1, const QVector<int>& vector2);
+    int m_dir; // 0: Tx, 1: Rx
 };
 
 #endif // MYQCPBARS_H
