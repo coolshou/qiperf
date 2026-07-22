@@ -201,7 +201,9 @@ void TP::setParent(TP *parent)
 int TP::row() const
 {
     // TODO: after clear, the may cause problem
-    //  if (m_parentItem != nullptr){
+    if (m_parentItem == nullptr){
+        return 0;
+    }
     //  following must have for switch from No total group => total group setting
     if (m_parentItem)
     {
@@ -257,7 +259,6 @@ void TP::loadData(QString data)
 
         m_mgrserver = o_server.value("manager").toString();
 
-        // m_itemDatas.clear();// this will remove all data => m_itemDatas.length()=0
         m_itemDatas.replace(int(TP::id), getID());
         m_itemDatas.replace(int(TP::server), server);
         m_itemDatas.replace(int(TP::dir), direction);
@@ -297,14 +298,14 @@ int TP::getVersion()
 
 QString TP::getServer()
 { // return Iperf server bind ip address
-    // return m_itemDatas[int(TP::server)].toString();
-    return jsonRoot["client"].toObject()["target"].toString();
+    return m_itemDatas[int(TP::server)].toString();
+    // return jsonRoot["client"].toObject()["target"].toString();
 }
 
 void TP::setServer(QString addr)
 {
-    // m_itemDatas[int(TP::server)] = addr;
-    jsonRoot["client"].toObject()["target"] = QJsonValue(addr);
+    m_itemDatas[int(TP::server)] = addr;
+    // jsonRoot["client"].toObject()["target"] = QJsonValue(addr);
     //    m_server = addr;
 }
 

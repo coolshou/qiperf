@@ -625,14 +625,14 @@ bool TPMgr::loaddata(QByteArray data)
         {
             QJsonObject obj = value.toObject();
             QJsonObject o_client = obj["client"].toObject();
-            QString note = "Rx";
+            QString dir = "Rx";
             if (o_client["reverse"].toBool())
             {
-                note = "Tx";
+                dir = "Tx";
             }
             QJsonDocument doc(obj);
             QString strJson(doc.toJson(QJsonDocument::Compact));
-            add(strJson, note);
+            add(strJson, dir);
         }
         return true;
     }
@@ -654,6 +654,7 @@ void TPMgr::reset()
             groupItem->removeChildren(0, groupItem->childCount());
         }
         // delete groupItem;//direct delete cause app crash??
+        groupItem->setParent(nullptr);
     }
     if (dirTxItem)
     {
@@ -661,6 +662,7 @@ void TPMgr::reset()
         {
             dirTxItem->removeChildren(0, dirTxItem->childCount());
         }
+        dirTxItem->setParent(nullptr);
     }
     if (dirRxItem)
     {
@@ -668,13 +670,20 @@ void TPMgr::reset()
         {
             dirRxItem->removeChildren(0, dirRxItem->childCount());
         }
+        dirRxItem->setParent(nullptr);
     }
     // if (commItem){
     //     if (commItem->childCount()>0){
     //         commItem->removeChildren(0, commItem->childCount());
     //     }
     // }
-    delete rootItem;
+    if (rootItem){
+        if (rootItem->childCount() > 0)
+        {
+            rootItem->removeChildren(0, rootItem->childCount());
+        }
+        delete rootItem;
+    }
     rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
     // QModelIndex midx = indexFromItem(rootItem);
     // qDebug() << "rootItem:" << rootItem << " midx:" << midx << " valid:" << midx.isValid();
@@ -684,6 +693,7 @@ void TPMgr::reset()
         if (groupItem != nullptr)
         {
             rootItem->appendChild(groupItem);
+            groupItem->setParent(rootItem);
         }
     }
     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction))
@@ -691,17 +701,16 @@ void TPMgr::reset()
         if (dirTxItem != nullptr)
         {
             rootItem->appendChild(dirTxItem);
+            dirTxItem->setParent(rootItem);
         }
         if (dirRxItem != nullptr)
         {
             rootItem->appendChild(dirRxItem);
+            dirRxItem->setParent(rootItem);
         }
     }
-    // if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Comment)){
-    //     if (commItem!=nullptr){
-    //         rootItem->appendChild(commItem);
-    //     }
-    // }
+    qDeleteAll(m_tpcfgitems);
+    m_tpcfgitems.clear();
 }
 
 void TPMgr::clear()

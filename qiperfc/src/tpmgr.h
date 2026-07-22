@@ -109,6 +109,7 @@ private:
     int m_tpgrouptype;
     int m_highestId;
     QHash<int, TP *> m_tpcfgitems;
+    // QHash<int, std::unique_ptr<TP>> m_tpcfgitems;
     TPGroup::GroupMode m_groupmode;
     QTreeView *m_treeview; //relative treeview
     QString m_TPUint;
