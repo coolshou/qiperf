@@ -3,7 +3,7 @@
 MyQCPBars::MyQCPBars(QCPAxis *keyAxis, QCPAxis *valueAxis)
     : QCPBars(keyAxis, valueAxis)
 {
-
+    m_dir = -1;
 }
 
 void MyQCPBars::setData(QSharedPointer<QCPBarsDataContainer> data)
@@ -80,6 +80,16 @@ void MyQCPBars::clear()
     // if (data()){
     //     data()->clear();
     // }
+}
+
+void MyQCPBars::setDirection(int iDir)
+{
+    m_dir = iDir;
+}
+
+int MyQCPBars::getDirection()
+{
+    return m_dir;
 }
 
 QVector<double> MyQCPBars::elementWiseDivision(const QVector<int> &vector1, const QVector<int> &vector2)

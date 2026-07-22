@@ -35,7 +35,7 @@ public:
   void del(QString idx);
   MyQCPGraph *getGraph(QString refrowidx, int dir=-1,
                        int width = GroupWidth::Iperf); // get QCPGraph by index
-  MyQCPBars *getLostRateGraph(QString refrowidx);
+  MyQCPBars *getLostRateGraph(QString refrowidx, int dir=-1);
   void clear();
   void setXRangeUpper(double upper);
 

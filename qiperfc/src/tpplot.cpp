@@ -99,8 +99,8 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas,
   if (timedatas.isEmpty() || valuedatas.isEmpty())
     return;
 
-  // qDebug() << "onUpdateTPDatas:" << refrow << " times:" << timedatas << "
-  // values: " << valuedatas;
+  qDebug() << "onUpdateTPDatas:" << refrow << " times:" << timedatas;
+        //   << " values: " << valuedatas;
   MyQCPGraph *myGraph = getGraph(refrow, direction);
 
   double minT =
@@ -123,7 +123,7 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas,
   if (sum > 0)
   {
     // int lost = std::accumulate(packetlosts.begin(), packetlosts.end(), 0);
-    MyQCPBars *g_lostrate = getLostRateGraph(refrow);
+    MyQCPBars *g_lostrate = getLostRateGraph(refrow, direction);
     // lostrate
     Q_UNUSED(lostrates)
     g_lostrate->setData(timedatas, packetlosts, packettotals);
@@ -368,19 +368,12 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir)
   // combine two data in to Total/Tx/Rx graph
   // dir: 0 Tx, 1: Rx
   QMutexLocker locker(&m_mutex); // Locks m_mutex
-  // QSharedPointer<QCPGraphDataContainer> data2 = data;
-  // QSharedPointer<QCPGraphDataContainer> sumdata;
 
   if (mTotalGraph)
   {
     // No more sumGraphData() call! No new allocations.
     accumulateData(mTotalGraph, data);
     mTotalGraph->rescaleAxes(true);
-    // QSharedPointer<QCPGraphDataContainer> data1 = mTotalGraph->data();
-    // sumdata = sumGraphData(data1, data2);
-    // mTotalGraph->setData(sumdata);
-    // mTotalGraph->rescaleAxes(true); // TODO: not good to show y Max value
-
   }
   qDebug() << "onDatasSetted dir:" << dir;
   if (dir == 0)
@@ -388,9 +381,6 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir)
     if (mDirTxGraph)
     {
         accumulateData(mDirTxGraph, data);
-      // QSharedPointer<QCPGraphDataContainer> data1 = mDirTxGraph->data();
-      // sumdata = sumGraphData(data1, data2);
-      // mDirTxGraph->setData(sumdata);
     }
     else
     {
@@ -402,9 +392,6 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir)
     if (mDirRxGraph)
     {
         accumulateData(mDirRxGraph, data);
-      // QSharedPointer<QCPGraphDataContainer> data1 = mDirRxGraph->data();
-      // sumdata = sumGraphData(data1, data2);
-      // mDirRxGraph->setData(sumdata);
     }
     else
     {
@@ -789,7 +776,7 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
   if ((pktlost > 0) && (pkttotal > 0)){
 
       double lostrate = round((pktlost/pkttotal)*100*100)/100;
-      MyQCPBars *g_lostrate = getLostRateGraph(refrowidx);
+      MyQCPBars *g_lostrate = getLostRateGraph(refrowidx, dir);
       if ((refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)) ||
           (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
           (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)))
@@ -832,7 +819,7 @@ void TPPlot::del(QString idx)
   }
   else
   {
-    // qDebug() << "m_lostgraphs not exist:" << idx;
+    qDebug() << "m_lostgraphs not exist:" << idx;
   }
   if (m_graphs.contains(idx))
   {
@@ -935,7 +922,7 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int dir, int width)
   return myGraph;
 }
 
-MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx)
+MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx, int dir)
 {
   QPen graphPen;
   MyQCPBars *g_lostrate;
@@ -956,11 +943,10 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx)
       int B = rand() % 245 + 10;
       graphPen = newColorPen(R, G, B, 1);
     }
-    QPen redPen = newColorPen(255, 0, 0, 2);
+
     g_lostrate = new MyQCPBars(xAxis, yAxis2);
     connect(g_lostrate, &MyQCPBars::datasSetted, this,
             &TPPlot::onLostRateDatasSetted);
-    g_lostrate->setName(refrowidx + " Lost Rate");
     if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
     {
       // total lost rate graph
@@ -975,105 +961,55 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx)
       g_lostrate->setVisible(m_tpgrouptype == TPGroup::GroupMode::Direction);
       if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive))
       {
-        mDirTxLostGraph = g_lostrate;
+          mDirTxLostGraph = g_lostrate;
+          mDirTxLostGraph->setDirection(dir);
       }
       else
       {
-        mDirRxLostGraph = g_lostrate;
+          mDirRxLostGraph = g_lostrate;
+          mDirRxLostGraph->setDirection(dir);
       }
     }
     else
     {
       // normal lost rate graph
       g_lostrate->setLayer(LAYER_LOSTRATE);
-      // connect(g_lostrate, &MyQCPBars::dataAdded, this
-      // ,&TPPlot::onLostRateDataAdded);
       g_lostrate->setVisible(m_tpgrouptype == TPGroup::GroupMode::Detail);
     }
+    QPen redPen = newColorPen(255, 0, 0, 2);
     g_lostrate->setPen(redPen);
     QColor c = graphPen.color();
     c.setAlpha(120); // 0~255, 255 not transparency
     g_lostrate->setBrush(c);
 
+    m_lostgraphs.insert(refrowidx, g_lostrate);
     // qDebug() << "legend->itemCount:" << legend->itemCount();
     // QCPAbstractLegendItem *litm = legend->item(legend->itemCount() - 1);
     QCPAbstractLegendItem *litm = legend->itemWithPlottable(g_lostrate);
-    if (!m_lostratelegends.contains(refrowidx))
+    if (litm && !m_lostratelegends.contains(refrowidx))
     {
       m_lostratelegends.insert(refrowidx, litm);
     }
     if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
     { // Total legend
-      mTotalLostLegendItem = litm;
-      // litm->setLayer(LAYER_TOTALOSTRATE);// DO NOT place Legend in other
-      // Layer, it will be Not visible qDebug() << "mTotalLostLegendItem:" <<
-      // mTotalLostLegendItem;
-      if (!(m_tpgrouptype == TPGroup::GroupMode::Total))
-      {
-        litm->setVisible(false);
-      }
-      if (g_lostrate->dataCount() == 0)
-      {
-        litm->setVisible(false);
-      }
-      else
-      {
-        litm->setVisible((m_tpgrouptype == TPGroup::GroupMode::Total));
-      }
+        mTotalLostLegendItem = litm;
     }
-    else if ((refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
-             (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)))
+    else if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive))
     {
-      if (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive))
-      {
         mDirTxLostLegendItem = litm;
-      }
-      else
-      {
-        mDirRxLostLegendItem = litm;
-      }
-      if (!(m_tpgrouptype == TPGroup::GroupMode::Direction))
-      {
-        litm->setVisible(false);
-      }
-      if (g_lostrate->dataCount() == 0)
-      {
-        litm->setVisible(false);
-      }
-      else
-      {
-        litm->setVisible((m_tpgrouptype == TPGroup::GroupMode::Direction));
-      }
     }
-    else
-    { // all throughput legend except Total
-      // litm->setLayer(LAYER_LOSTRATE);// DO NOT place Legend in other Layer,
-      // it will be Not visible
-
-      litm->setVisible(
-          !(m_tpgrouptype == TPGroup::GroupMode::Total)); // legend item
-      // g_lostrate->setVisible(!m_showgroup); // graph
-      // if (!m_legends.contains(idx)) {
-      //     m_legends.insert(idx, litm);
-      // }
+    else if (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive))
+    {
+        mDirRxLostLegendItem = litm;
     }
   }
   else
   {
     g_lostrate = m_lostgraphs.value(refrowidx);
-    if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
-    { // Total legend
-      mTotalLostLegendItem = m_lostratelegends.value(refrowidx);
-    }
   }
 
-  if (!m_lostgraphs.contains(refrowidx))
-  {
-    // qDebug() << "m_lostgraphs does not have " << idx << " add lostrate:" <<
-    // g_lostrate;
-    m_lostgraphs.insert(refrowidx, g_lostrate);
-    calculateLegendItems();
-  }
+  g_lostrate->setName(refrowidx + " Lost Rate");
+  calculateLegendItems();
   return g_lostrate;
 }
 
