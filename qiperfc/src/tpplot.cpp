@@ -464,7 +464,9 @@ void TPPlot::setTestStarted(bool start) {
             qDebug() << "graphCount:" << QString::number(graphCount())
                      << " ,xAxis->range():" << xAxis->range();
             // xAxis->setRangeUpper();
-            rescaleAxes(true);
+            xAxis->rescale(true);
+            yAxis->rescale(true);
+            // rescaleAxes(true); // all Axis will fit
             replot();
         }
     }
@@ -635,8 +637,8 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval,
       //              unit;
       // }
       // packet lost rate
-      pkt_lost = jObj.value("packet_lost").toInteger();
-      pkt_total = jObj.value("packet_total").toInteger();
+      pkt_lost = jObj.value("packet_lost").toString().toInt();
+      pkt_total = jObj.value("packet_total").toString().toInt();
       if (pkt_lost > 0){
           sumpktlost = sumpktlost + pkt_lost;
           if (dir.contains(GRAPH_TX, Qt::CaseInsensitive)){
@@ -686,25 +688,16 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval,
   // }
   qDebug() << "add:" << GRAPH_TOTAL << ", iInterval:" << QString::number(iInterval)
            << ",sumvalue:" << QString::number(sumvalue)
-           // << ",sumlostrate:" << QString::number(sumlostrate)
+           << ",sumpktlost:" << QString::number(sumpktlost)
+           << ",sumpktTotal:" << QString::number(sumpktTotal)
            << ",dir:" << dir;
   addTPData(GRAPH_TOTAL, iInterval, sumvalue, sumpktlost, sumpktTotal, dir);
   if (dir.contains(GRAPH_TX, Qt::CaseInsensitive))
   {
-    // Tx data
-    // if (txpktTotal > 0)
-    // {
-    //   txlostrate = (txpktlost / txpktTotal) * 100;
-    // }
     addTPData(GRAPH_TX, iInterval, sumTxvalue, txpktlost, txpktTotal, dir);
   }
   if (dir.contains(GRAPH_RX, Qt::CaseInsensitive))
   {
-    // Rx data
-    // if (rxpktTotal > 0)
-    // {
-    //   rxlostrate = (rxpktlost / rxpktTotal) * 100;
-    // }
     addTPData(GRAPH_RX, iInterval, sumRxvalue, rxpktlost, rxpktTotal, dir);
   }
 
@@ -774,33 +767,33 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
   }
   // TODO: lost rate
   if ((pktlost > 0) && (pkttotal > 0)){
-
-      double lostrate = round((pktlost/pkttotal)*100*100)/100;
+      double lostrate = (pktlost/pkttotal)*100;
+      qDebug() << refrowidx << " ,pktlost:" << pktlost << ",pkttotal:" << pkttotal
+               << " ,lostrate:" << lostrate;
       MyQCPBars *g_lostrate = getLostRateGraph(refrowidx, dir);
       if ((refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)) ||
           (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
           (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)))
       {
           //TODO Total/Tx/Rx calc sum of lost rate
-          double oldvalue = 0.0;
-          // qDebug() << refrowidx << ",xdata:" << QString::number(xdata)
-          //          << ", count:" << myGraph->dataCount();
-          if (g_lostrate->getValue(xdata, oldvalue) == -1)
+          PacketBarData olddata;
+          if (!g_lostrate->getPacketData(xdata, olddata))
           {  //not found old value
-              g_lostrate->addData(xdata, lostrate);
+              g_lostrate->addPacketData(xdata, pktlost, pkttotal);
           }
           else
           {
-              qDebug() << "TODO: lostrate can not sum directly, oldvalue:" << oldvalue
-                       << "pktlost:" << pktlost << " ,pkttotal:" << pkttotal;
-              // lostrate = lostrate + oldvalue;
-              // g_lostrate->updateValue(xdata, lostrate);
+              int ipkt = olddata.pktlost + pktlost;
+              int ipktall = olddata.pkttotal + pkttotal;
+              qDebug() << "TODO: lostrate can not sum directly, oldvalue:" << olddata.value
+                       << "sum pktlost:" << ipkt << " ,sum pkttotal:" << ipktall;
+              g_lostrate->addPacketData(xdata, ipkt, ipktall);
           }
       }
       else
       {
           // detail
-          g_lostrate->addData(xdata, lostrate);
+          g_lostrate->addPacketData(xdata, pktlost, pkttotal);
       }
   }
 }
@@ -1002,6 +995,7 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx, int dir)
     {
         mDirRxLostLegendItem = litm;
     }
+    setTPGroupType(m_tpgrouptype);
   }
   else
   {
@@ -1056,7 +1050,7 @@ void TPPlot::clear()
         (itl.key().contains(GRAPH_TX)) ||
         (itl.key().contains(GRAPH_RX)))
     {
-      qDebug() << "lostgraphs:" << itl.key() << " not delete, only clear data";
+      // qDebug() << "lostgraphs:" << itl.key() << " not delete, only clear data";
       graph->data()->clear(); // clear data
       ++itl;
     }
@@ -1064,7 +1058,7 @@ void TPPlot::clear()
     {
       if (graph)
       {
-        qDebug() << "lostgraphs:" << itl.key() << " removed";
+        // qDebug() << "lostgraphs:" << itl.key() << " removed";
         removePlottable(graph);
         // delete graph; // 如果是自訂非 QObject 物件才需要
       }
@@ -1104,7 +1098,8 @@ void TPPlot::initCustomPlot()
   // this->axisRect()->setRangeDrag(Qt::Horizontal);
   this->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
   // this->axisRect()->setRangeZoom(Qt::Horizontal); //TODO: yAxis can not zoom,
-  // bed?
+  axisRect()->setRangeZoomAxes(xAxis, yAxis);
+  axisRect()->setRangeDragAxes(xAxis, yAxis);
 
   // this->setAutoAddPlottableToLegend(true); // when adding a plottable,
   // automatically adds the QCPAbstractLegendItem to the legend

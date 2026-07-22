@@ -6,6 +6,34 @@ MyQCPBars::MyQCPBars(QCPAxis *keyAxis, QCPAxis *valueAxis)
     m_dir = -1;
 }
 
+void MyQCPBars::addPacketData(double key, quint64 pktlost, quint64 pkttotal)
+{
+    // 計算 value (例如：丟包率 %)
+    double lostRate = (pkttotal > 0) ? (static_cast<double>(pktlost) / pkttotal * 100.0) : 0.0;
+
+    // 呼叫 QCPBars 原生的 addData 更新畫面
+    QCPBars::addData(key, lostRate);
+
+    // 記錄額外資訊
+    PacketBarData extraData{key, lostRate, pktlost, pkttotal};
+    m_packetDataMap.insert(key, extraData);
+}
+
+bool MyQCPBars::getPacketData(double key, PacketBarData &outData) const
+{
+    if (m_packetDataMap.contains(key)) {
+        outData = m_packetDataMap.value(key);
+        return true;
+    }
+    return false;
+}
+
+void MyQCPBars::clearPacketData()
+{
+    QCPBars::data()->clear();
+    m_packetDataMap.clear();
+}
+
 void MyQCPBars::setData(QSharedPointer<QCPBarsDataContainer> data)
 {
     QCPBars::setData(data);
@@ -77,9 +105,7 @@ double MyQCPBars::sumValue(double keyToUpdate, double newvalue)
 
 void MyQCPBars::clear()
 {
-    // if (data()){
-    //     data()->clear();
-    // }
+    clearPacketData();
 }
 
 void MyQCPBars::setDirection(int iDir)
