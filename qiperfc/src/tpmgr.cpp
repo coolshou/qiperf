@@ -761,7 +761,7 @@ void TPMgr::clear()
     };
 
     // 不管 m_tpgrouptype，直接从 rootItem 开始遍历
-    // clearData(rootItem);
+    clearData(rootItem);
 
     m_intervals.clear();
     // Optional: If you modified text/values of 'itm' or 'tp' elements,
