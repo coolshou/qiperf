@@ -280,6 +280,11 @@ QString TP::getJsonData()
 {
     return m_jsondata;
 }
+
+QJsonObject TP::getJsonObj()
+{
+    return jsonRoot;
+}
 void TP::resetData()
 {
     // reset (clear) test data

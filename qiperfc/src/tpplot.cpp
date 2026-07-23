@@ -371,7 +371,6 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir)
 
   if (mTotalGraph)
   {
-    // No more sumGraphData() call! No new allocations.
     accumulateData(mTotalGraph, data);
     mTotalGraph->rescaleAxes(true);
   }
@@ -404,35 +403,35 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir)
   }
 }
 
-void TPPlot::onLostRateDataAdded(double key, double value)
-{
-  // LostRate is calc with lost/total packet
-  //
-  if (m_tpgrouptype == TPGroup::GroupMode::Total)
-  {
-    if (mTotalLostGraph)
-    {
-      // add all value to Total graph's value
-      double orgvalue = -1;
-      QMutexLocker locker(&m_mutex); // Locks m_mutex
-      int rc = mTotalLostGraph->getValue(key, orgvalue);
-      if (rc > -1)
-      {
-        double sumvalue = orgvalue + value;
-        // updateYAxisRange(0, sumvalue);
-        mTotalLostGraph->updateValue(key, sumvalue);
-        mTotalLostGraph->rescaleAxes(true);
-      }
-      else
-      {
-        qDebug() << (static_cast<MyQCPBars *>(sender()))->name() << " (" << key
-                 << ") mTotalLostGraph Key not found";
-        mTotalLostGraph->addData(key, value);
-      }
-    }
-  }
-  // TODO: Direction
-}
+// void TPPlot::onLostRateDataAdded(double key, double value)
+// {
+//   // LostRate is calc with lost/total packet
+//   //
+//   if (m_tpgrouptype == TPGroup::GroupMode::Total)
+//   {
+//     if (mTotalLostGraph)
+//     {
+//       // add all value to Total graph's value
+//       double orgvalue = -1;
+//       QMutexLocker locker(&m_mutex); // Locks m_mutex
+//       int rc = mTotalLostGraph->getValue(key, orgvalue);
+//       if (rc > -1)
+//       {
+//         double sumvalue = orgvalue + value;
+//         // updateYAxisRange(0, sumvalue);
+//         mTotalLostGraph->updateValue(key, sumvalue);
+//         mTotalLostGraph->rescaleAxes(true);
+//       }
+//       else
+//       {
+//         qDebug() << (static_cast<MyQCPBars *>(sender()))->name() << " (" << key
+//                  << ") mTotalLostGraph Key not found";
+//         mTotalLostGraph->addData(key, value);
+//       }
+//     }
+//   }
+//   // TODO: Direction
+// }
 
 void TPPlot::onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data)
 {
@@ -657,40 +656,15 @@ void TPPlot::onIperfTPdatas(QString refrow, QString sInterval,
               rxpktTotal = rxpktTotal + pkt_total;
           }
       }
-      // if ((pkt_total > 0) && (pkt_lost > 0))
-      // {
-      //   // lost_rate = (pkt_lost.toDouble() / pkt_total.toDouble()) * 100;
-      //   sumpktlost = sumpktlost + pkt_lost.toDouble();
-      //   sumpktTotal = sumpktTotal + pkt_total.toDouble();
-      //   if (dir.contains(GRAPH_TX, Qt::CaseInsensitive))
-      //   {
-      //     txpktlost = txpktlost + pkt_lost.toDouble();
-      //     txpktTotal = txpktTotal + pkt_total.toDouble();
-      //   }
-      //   if (dir.contains(GRAPH_RX, Qt::CaseInsensitive))
-      //   {
-      //     rxpktlost = rxpktlost + pkt_lost.toDouble();
-      //     rxpktTotal = rxpktTotal + pkt_total.toDouble();
-      //   }
-      //   // sumlostrate = sumlostrate + lost_rate;
-      //   qDebug() << "TPPlot::onIperfTPdata: lost_rate:" << lost_rate;
-      //   // slost_rate = QString::number(lost_rate, 'f', 4);
-      // }
-      // each pair's paraller data
-      // onIperfTPdata(sInterval, refrow + "_" + idx, value, slost_rate, dir);
       onIperfTPdata(sInterval, refrow + "_" + idx, value, pkt_lost, pkt_total, dir);
     }
   }
-  // TOTAL data
-  // if (sumpktTotal > 0)
-  // {
-  //   sumlostrate = (sumpktlost / sumpktTotal) * 100;
-  // }
-  qDebug() << "add:" << GRAPH_TOTAL << ", iInterval:" << QString::number(iInterval)
-           << ",sumvalue:" << QString::number(sumvalue)
-           << ",sumpktlost:" << QString::number(sumpktlost)
-           << ",sumpktTotal:" << QString::number(sumpktTotal)
-           << ",dir:" << dir;
+
+  // qDebug() << "add:" << GRAPH_TOTAL << ", iInterval:" << QString::number(iInterval)
+  //          << ",sumvalue:" << QString::number(sumvalue)
+  //          << ",sumpktlost:" << QString::number(sumpktlost)
+  //          << ",sumpktTotal:" << QString::number(sumpktTotal)
+  //          << ",dir:" << dir;
   addTPData(GRAPH_TOTAL, iInterval, sumvalue, sumpktlost, sumpktTotal, dir);
   if (dir.contains(GRAPH_TX, Qt::CaseInsensitive))
   {
@@ -767,15 +741,14 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
   }
   // TODO: lost rate
   if ((pktlost > 0) && (pkttotal > 0)){
-      double lostrate = (static_cast<double>(pktlost)/pkttotal)*100.0;
-      qDebug() << refrowidx << " ,pktlost:" << pktlost << ",pkttotal:" << pkttotal
-               << " ,lostrate:" << lostrate;
+      // double lostrate = (static_cast<double>(pktlost)/pkttotal)*100.0;
+      // qDebug() << refrowidx << " ,pktlost:" << pktlost << ",pkttotal:" << pkttotal
+      //          << " ,lostrate:" << lostrate;
       MyQCPBars *g_lostrate = getLostRateGraph(refrowidx, dir);
       if ((refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)) ||
           (refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
           (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive)))
       {
-          //TODO Total/Tx/Rx calc sum of lost rate
           PacketBarData olddata;
           if (!g_lostrate->getPacketData(xdata, olddata))
           {  //not found old value
@@ -785,8 +758,8 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
           {
               int ipkt = olddata.pktlost + pktlost;
               int ipktall = olddata.pkttotal + pkttotal;
-              qDebug() << "TODO: lostrate can not sum directly, oldvalue:" << olddata.value
-                       << "sum pktlost:" << ipkt << " ,sum pkttotal:" << ipktall;
+              // qDebug() << "TODO: lostrate can not sum directly, oldvalue:" << olddata.value
+              //          << "sum pktlost:" << ipkt << " ,sum pkttotal:" << ipktall;
               g_lostrate->addPacketData(xdata, ipkt, ipktall);
           }
       }
@@ -1253,48 +1226,48 @@ TPPlot::convertQMapToQVector(const QMap<double, double> &map)
   return vector;
 }
 
-QSharedPointer<QCPGraphDataContainer>
-TPPlot::sumGraphData(const QSharedPointer<QCPGraphDataContainer> &data1,
-                     const QSharedPointer<QCPGraphDataContainer> &data2)
-{
-  QSharedPointer<QCPGraphDataContainer> result(new QCPGraphDataContainer);
-  auto it1 = data1->constBegin();
-  auto it2 = data2->constBegin();
+// QSharedPointer<QCPGraphDataContainer>
+// TPPlot::sumGraphData(const QSharedPointer<QCPGraphDataContainer> &data1,
+//                      const QSharedPointer<QCPGraphDataContainer> &data2)
+// {
+//   QSharedPointer<QCPGraphDataContainer> result(new QCPGraphDataContainer);
+//   auto it1 = data1->constBegin();
+//   auto it2 = data2->constBegin();
 
-  double sumvalue = 0.0;
-  while (it1 != data1->constEnd() && it2 != data2->constEnd())
-  {
-    if (it1->key < it2->key)
-    {
-      result->add(QCPGraphData(it1->key, it1->value));
-      ++it1;
-    }
-    else if (it1->key > it2->key)
-    {
-      result->add(QCPGraphData(it2->key, it2->value));
-      ++it2;
-    }
-    else
-    {
-      sumvalue = it1->value + it2->value;
-      result->add(QCPGraphData(it1->key, sumvalue));
-      ++it1;
-      ++it2;
-    }
-  }
-  while (it1 != data1->constEnd())
-  {
-    result->add(QCPGraphData(it1->key, it1->value));
-    ++it1;
-  }
-  while (it2 != data2->constEnd())
-  {
-    result->add(QCPGraphData(it2->key, it2->value));
-    ++it2;
-  }
+//   double sumvalue = 0.0;
+//   while (it1 != data1->constEnd() && it2 != data2->constEnd())
+//   {
+//     if (it1->key < it2->key)
+//     {
+//       result->add(QCPGraphData(it1->key, it1->value));
+//       ++it1;
+//     }
+//     else if (it1->key > it2->key)
+//     {
+//       result->add(QCPGraphData(it2->key, it2->value));
+//       ++it2;
+//     }
+//     else
+//     {
+//       sumvalue = it1->value + it2->value;
+//       result->add(QCPGraphData(it1->key, sumvalue));
+//       ++it1;
+//       ++it2;
+//     }
+//   }
+//   while (it1 != data1->constEnd())
+//   {
+//     result->add(QCPGraphData(it1->key, it1->value));
+//     ++it1;
+//   }
+//   while (it2 != data2->constEnd())
+//   {
+//     result->add(QCPGraphData(it2->key, it2->value));
+//     ++it2;
+//   }
 
-  return result;
-}
+//   return result;
+// }
 
 QSharedPointer<QCPBarsDataContainer>
 TPPlot::sumLostGraphData(const QSharedPointer<QCPBarsDataContainer> &data1,
@@ -1346,8 +1319,9 @@ void TPPlot::calculateLegendItems()
       legend->font().pointSize() + 9; // approximate height of each item
   int itemsFit = legendSize.height() / itemHeight;
 
-  // qDebug() << "Legend size:" << legendSize.height() << " itemHeight:" <<
-  // itemHeight; qDebug() << "Legend rect:" << legend->rect(); qDebug() <<
+  qDebug() << "Legend size:" << legendSize.height() << " itemHeight:" << itemHeight
+           << " itemsFit:" << itemsFit;
+  // qDebug() << "Legend rect:" << legend->rect(); qDebug() <<
   // "Approximate number of items that can fit:" << itemsFit;
   if (m_tpgrouptype == TPGroup::GroupMode::Total)
   {

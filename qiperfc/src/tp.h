@@ -61,6 +61,7 @@ public:
     QString getID();
     void loadData(QString data);
     QString getJsonData();
+    QJsonObject getJsonObj();
     void resetData();
     QString saveData();
     int getVersion();

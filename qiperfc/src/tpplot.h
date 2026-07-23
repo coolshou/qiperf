@@ -59,7 +59,7 @@ public slots:
   void onVLegendScrollChanged(int value);
   // void onDataAdded(double key, double value);
   void onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir);
-  void onLostRateDataAdded(double key, double value);
+  // void onLostRateDataAdded(double key, double value);
   void onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data);
   void setTestStarted(bool start);
 signals:
@@ -77,9 +77,9 @@ private:
   void updateXAxisRange(double mintime, double maxtime);
   void updateYAxisRange(double minvalue, double maxvalue);
   QVector<QCPGraphData> convertQMapToQVector(const QMap<double, double> &map);
-  QSharedPointer<QCPGraphDataContainer>
-  sumGraphData(const QSharedPointer<QCPGraphDataContainer> &data1,
-               const QSharedPointer<QCPGraphDataContainer> &data2);
+  // QSharedPointer<QCPGraphDataContainer>
+  // sumGraphData(const QSharedPointer<QCPGraphDataContainer> &data1,
+  //              const QSharedPointer<QCPGraphDataContainer> &data2);
   QSharedPointer<QCPBarsDataContainer>
   sumLostGraphData(const QSharedPointer<QCPBarsDataContainer> &data1,
                    const QSharedPointer<QCPBarsDataContainer> &data2);

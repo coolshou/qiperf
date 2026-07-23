@@ -572,22 +572,31 @@ QByteArray TPMgr::savedata()
 {
     QJsonArray jsonarr;
     // save all data in json string
-    if (rootChildCount() > 0)
-    {
-        TP *itm = getRootItem();
-        for (int row = 0; row < itm->childCount(); ++row)
-        {
-            TP *tp = itm->child(row);
-            QJsonDocument jsonDoc = QJsonDocument::fromJson(tp->saveData().toUtf8());
-            QJsonObject jsonObj = jsonDoc.object();
-            jsonarr.append(jsonObj);
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
-        }
+    QList<TP*> tps = getChilds(false);
+    qDebug() << "collect tp:" << tps;
+    foreach (TP *tp, tps) {
+        jsonarr.append(tp->getJsonObj());
     }
-    else
-    {
-        qDebug() << "TPMgr::savedata: No data to save";
-    }
+
+    // if (rootChildCount() > 0)
+    // {
+    //     TP *itm = getRootItem();
+    //     for (int row = 0; row < itm->childCount(); ++row)
+    //     {
+    //         TP *tp = itm->child(row);
+    //         qDebug() << "collect tp:" << tp;
+    //         QJsonDocument jsonDoc = QJsonDocument::fromJson(tp->saveData().toUtf8());
+    //         QJsonObject jsonObj = jsonDoc.object();
+    //         jsonarr.append(jsonObj);
+    //         QCoreApplication::processEvents(QEventLoop::AllEvents);
+    //     }
+    // }
+    // else
+    // {
+    //     qDebug() << "TPMgr::savedata: No data to save";
+    // }
+    qDebug() << "jsonarr count:" << jsonarr.count();
+    qDebug() << "jsonarr:" << jsonarr;
     QJsonDocument doc(jsonarr);
     return doc.toJson(QJsonDocument::Compact);
 }
@@ -620,6 +629,8 @@ bool TPMgr::loaddata(QByteArray data)
     if (error.error == QJsonParseError::NoError)
     {
         QJsonArray jsonarr = jsonDoc.array();
+        qDebug() << "jsonarr count:" << jsonarr.count();
+        qDebug() << "jsonarr:" << jsonarr;
         // foreach (const QJsonValue &value, jsonarr) {
         for (const auto value : jsonarr)
         {
@@ -750,7 +761,7 @@ void TPMgr::clear()
     };
 
     // 不管 m_tpgrouptype，直接从 rootItem 开始遍历
-    clearData(rootItem);
+    // clearData(rootItem);
 
     m_intervals.clear();
     // Optional: If you modified text/values of 'itm' or 'tp' elements,
