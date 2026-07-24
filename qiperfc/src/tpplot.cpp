@@ -1097,6 +1097,10 @@ void TPPlot::initCustomPlot()
   yAxis2->setLabelColor(Qt::blue);
   // legend
   legend->setVisible(true);
+  // legend->setBorderPen(Qt::NoPen); // no Border line
+  // legend->setBrush(Qt::NoBrush); // no background
+  legend->setBorderPen(QPen(Qt::black, 1)); // Black border with 1px width
+  legend->setBrush(QBrush(QColor(255, 255, 255, 200)));
   // connect(legend, &QCPLegend::layerChanged)
   QFont legendFont = font();
   legendFont.setPointSize(8);
@@ -1117,15 +1121,14 @@ void TPPlot::initCustomPlot()
     plotLayout()->setColumnStretchFactor(0, 1);   // col 0
     plotLayout()->setColumnStretchFactor(1, 0.1); // col 1
     plotLayout()->setRowStretchFactor(0, 1);      // row 0
-    // legend->setBorderPen(Qt::NoPen); // no Border line
-    // legend->setBrush(Qt::NoBrush); // no background
+    qDebug() << "plotLayout height: " << plotLayout()->rect().height();
     subLayout->addElement(0, 0, legend); // row 0, col 0
     // add spacer，let legend align up
-    QCPLayoutElement *spacer = new QCPLayoutElement(this);
+    spacer = new QCPLayoutElement(this);
     spacer->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
     subLayout->addElement(1, 0, spacer);
     // spacer take all rest space，let legend in smallest hight
-    subLayout->setRowStretchFactor(0, 0.001); // legend row as small
+    subLayout->setRowStretchFactor(0, 0.001); // legend row as small => all legend item Alignment to top
     subLayout->setRowStretchFactor(1, 1.0);   // spacer row take all space
 
     calculateLegendItems();
@@ -1314,13 +1317,16 @@ void TPPlot::calculateLegendItems()
 {
   // get the legend size and calculate the number of items can show
   QSize legendSize = legend->rect().size(); //->minimumOuterSizeHint();
+  QSize legendSpacerSize = spacer->rect().size();
   // calculate Max Legend Items
   int itemHeight =
       legend->font().pointSize() + 9; // approximate height of each item
   int itemsFit = legendSize.height() / itemHeight;
 
-  qDebug() << "Legend size:" << legendSize.height() << " itemHeight:" << itemHeight
-           << " itemsFit:" << itemsFit;
+  qDebug() << "Legend height:" << legendSize.height() << " itemHeight:" << itemHeight
+           << " itemsFit:" << itemsFit
+           << " legendSpacerSize height:" << legendSpacerSize.height()
+           << " plotLayout height: " << plotLayout()->rect().height();
   // qDebug() << "Legend rect:" << legend->rect(); qDebug() <<
   // "Approximate number of items that can fit:" << itemsFit;
   if (m_tpgrouptype == TPGroup::GroupMode::Total)

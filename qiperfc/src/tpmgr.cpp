@@ -1580,6 +1580,7 @@ void TPMgr::setDebug(int lv)
 
 void TPMgr::onUpdater()
 { // update total throughput/lost rate for each iperf test pair (-P >=1) result
+    if (0){
     TP *itm = rootItem;
     if (itm->haveChilds())
     {
@@ -1606,6 +1607,7 @@ void TPMgr::onUpdater()
         }
         itm->setThroughput(QString::number(g_tpvalue));
         itm->setLostRate(QString::number(g_lostvalue), QString::number(g_totalvalue));
+    }
     }
 }
 

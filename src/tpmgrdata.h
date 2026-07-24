@@ -6,6 +6,7 @@
 #define TPDIRTx "Tx"
 #define TPDIRRx "Rx"
 #define TPDIRTR "TR"
+#define TPDIRRT "RT"
 #define TPDIRNO ""
 
 class TPMgrData: public QObject

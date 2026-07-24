@@ -90,14 +90,14 @@ private:
   // QMap<QString, QCPGraph *> m_graphs; // throughput graphs
   QMap<QString, MyQCPGraph *> m_graphs;    // throughput graphs
   QMap<QString, MyQCPBars *> m_lostgraphs; // lost rate graphs
-  QMap<QString, QCPAbstractLegendItem *>
-      m_legends; // legends to store not visible legend item
+  QMap<QString, QCPAbstractLegendItem *> m_legends; // legends to store not visible legend item
   QMap<QString, QCPAbstractLegendItem *> m_lostratelegends; // lost rate legends
   int m_yAxisMaxDefault = 10;                               // 10 Mbps
   int m_xAxisMaxDefault = 30;                               // 30sec
   int m_interval;
   int m_tpgrouptype;
   QString m_tpunit;
+  QCPLayoutElement *spacer;
   // QCPLayer *m_TotalLayer;
   // QCPLayer *m_LostRateLayer;
   MyQCPGraph *mTotalGraph;                           // store total graph

@@ -6,7 +6,7 @@
 #include <QList>
 
 TP::TP(QString id, QString data, int datatype, TP *parent)
-    : m_id(id), m_datatype(datatype), m_parentItem(parent)
+    :QObject(), m_id(id), m_datatype(datatype), m_parentItem(parent)
 {
     // m_childItems = QList<TP *>();
     // m_childItems.clear();
@@ -37,12 +37,18 @@ TP::TP(QString id, QString data, int datatype, TP *parent)
 
 TP::~TP()
 {
-    // m_childItems.clear();
-    qDeleteAll(m_childItems);
+    // 1. Tell the parent I am dying so it doesn't hold a dangling pointer to me
+    if (m_parentItem) {
+        m_parentItem->removeChild(this);
+    }
+    // 2. Delete my own children
+    // qDeleteAll(m_childItems);
+    m_childItems.clear();
 }
 
 void TP::appendChild(TP *item)
 {
+    item->setParent(this); // Now Qt handles deletion automatically
     m_childItems.append(item);
 }
 
@@ -93,16 +99,17 @@ int TP::childCount() const
     }
 }
 
-bool TP::haveChilds()
+bool TP::haveChilds() const
 {
-    if (m_childItems.count() > 0)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return !m_childItems.isEmpty();
+    // if (m_childItems.count() > 0)
+    // {
+    //     return true;
+    // }
+    // else
+    // {
+    //     return false;
+    // }
 }
 
 int TP::columnCount() const
@@ -154,7 +161,9 @@ bool TP::removeChildren(int position, int count)
     // TODO: is ths correct way to remove QList item?
     for (int i = 0; i < count; ++i)
     {
-        m_childItems.removeAt(position); // Always remove at 'start'
+        // m_childItems.removeAt(position); // Always remove at 'start'
+        TP *item = m_childItems.takeAt(position);
+        delete item; // Actually free the memory!
     }
     return true;
 }
@@ -201,20 +210,21 @@ void TP::setParent(TP *parent)
 int TP::row() const
 {
     // TODO: after clear, the may cause problem
-    if (m_parentItem == nullptr){
+    if (!m_parentItem){
         return 0;
     }
+    return m_parentItem->m_childItems.indexOf(const_cast<TP*>(this));
     //  following must have for switch from No total group => total group setting
-    if (m_parentItem)
-    {
-        if (m_parentItem->haveChilds())
-        {
-            // m_parentItem->m_childItems
+    // if (m_parentItem)
+    // {
+    //     if (m_parentItem->haveChilds())
+    //     {
+    //         // m_parentItem->m_childItems
 
-            return m_parentItem->m_childItems.indexOf(const_cast<TP *>(this));
-        }
-    }
-    return 0;
+    //         return m_parentItem->m_childItems.indexOf(const_cast<TP *>(this));
+    //     }
+    // }
+    // return 0;
 }
 
 QString TP::getID()
@@ -316,6 +326,12 @@ void TP::setServer(QString addr)
 
 QString TP::getServerArgs()
 { // get iperf server command arguments
+    if (jsonRoot.isEmpty()) return "";
+
+    QJsonObject o_server = jsonRoot.value("server").toObject();
+    o_server["server"] = true;
+    return QJsonDocument(o_server).toJson(QJsonDocument::Compact);
+    /*
     QJsonParseError error;
     QJsonDocument fulldoc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError)
@@ -334,10 +350,16 @@ QString TP::getServerArgs()
                  << m_jsondata;
         return "";
     }
+    */
 }
 
 QVariantMap TP::getServerArgsMap()
 {
+    if (jsonRoot.isEmpty()) return QVariantMap();
+    QJsonObject o_server = jsonRoot.value("server").toObject();
+    o_server["server"] = true;
+    return QJsonDocument(o_server).toVariant().toMap();
+    /*
     QJsonParseError error;
     QJsonDocument fulldoc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError)
@@ -355,6 +377,7 @@ QVariantMap TP::getServerArgsMap()
                  << m_jsondata;
         return QVariantMap();
     }
+    */
 }
 
 QString TP::getBindKey(bool smode)
@@ -384,6 +407,13 @@ void TP::setClient(QString addr)
 
 QString TP::getClientArgs()
 { // get iperf client command arguments
+    if (jsonRoot.isEmpty()) return "";
+
+    QJsonObject o_client = jsonRoot.value("client").toObject();
+    o_client["client"] = QJsonValue(false);
+    return QJsonDocument(o_client).toJson(QJsonDocument::Compact);
+
+    /*
     QJsonParseError error;
     QJsonDocument fulldoc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError)
@@ -403,10 +433,17 @@ QString TP::getClientArgs()
                  << m_jsondata;
         return "";
     }
+    */
 }
 
 QVariantMap TP::getClientArgsMap()
 {
+    if (jsonRoot.isEmpty()) return QVariantMap();
+    QJsonObject o_client = jsonRoot.value("client").toObject();
+    o_client["client"] = true;
+    return QJsonDocument(o_client).toVariant().toMap();
+
+    /*
     QJsonParseError error;
     QJsonDocument fulldoc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError)
@@ -424,6 +461,7 @@ QVariantMap TP::getClientArgsMap()
                  << m_jsondata;
         return QVariantMap();
     }
+    */
 }
 
 QString TP::getDirection()
@@ -453,6 +491,29 @@ void TP::setMgrClient(QString addr)
 
 void TP::swapServerClient(QString mgrServer, QString server, QString mgrClient, QString client)
 { // update server/client ip address in json
+    // 1. Operate directly on the cached jsonRoot object
+    // Handle Server section
+    QJsonObject o_server = jsonRoot.value("server").toObject();
+    o_server["manager"] = mgrServer;
+    o_server["bind"] = server;
+    jsonRoot["server"] = o_server;
+
+    // Handle Client section
+    QJsonObject o_client = jsonRoot.value("client").toObject();
+    o_client["manager"] = mgrClient;
+    o_client["bind"] = client;
+    o_client["target"] = server; // Client target must match the server bind IP
+    jsonRoot["client"] = o_client;
+
+    // 2. Update internal member variables and m_itemDatas for immediate access
+    setMgrServer(mgrServer);
+    setServer(server);
+    setMgrClient(mgrClient);
+    setClient(client);
+
+    // 3. Synchronize the string representation once
+    m_jsondata = QJsonDocument(jsonRoot).toJson(QJsonDocument::Compact);
+    /*
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError)
@@ -479,6 +540,7 @@ void TP::swapServerClient(QString mgrServer, QString server, QString mgrClient, 
         qDebug() << "swapServerClient wrong format m_jsondata(" << error.errorString() << ")\n"
                  << m_jsondata;
     }
+*/
 }
 
 QString TP::getThroughput()
@@ -516,7 +578,53 @@ int TP::getDelaytime()
 
 int TP::setDirection(DirType direction)
 {
-    // QString sdirection = QVariant::fromValue(direction).toString();
+    // 1. Determine flag values based on the DirType enum
+    bool bidir = false;
+    bool reverse = false;
+
+    switch (direction) {
+    case DirType::Tx:
+        bidir = false;
+        reverse = true;
+        break;
+    case DirType::Rx:
+        bidir = false;
+        reverse = false;
+        break;
+    case DirType::TR:
+        bidir = true;
+        reverse = false;
+        break;
+    case DirType::RT:
+        bidir = true;
+        reverse = true;
+        break;
+    }
+
+    // 2. Update Server object in jsonRoot
+    QJsonObject o_server = jsonRoot.value("server").toObject();
+    o_server["bidir"] = bidir;
+    o_server["reverse"] = reverse;
+    jsonRoot["server"] = o_server;
+
+    // 3. Update Client object in jsonRoot
+    QJsonObject o_client = jsonRoot.value("client").toObject();
+    o_client["bidir"] = bidir;
+    o_client["reverse"] = reverse;
+    jsonRoot["client"] = o_client;
+
+    // 4. Synchronize internal caches
+    // Update the m_itemDatas list so UI getters stay consistent
+    QString dirStr = (direction == DirType::Tx) ? TPDIRTx :
+                         (direction == DirType::Rx) ? TPDIRRx :
+                         (direction == DirType::TR) ? TPDIRTR : TPDIRRT;
+    setData(TP::cols::dir, dirStr);
+
+    // Update the serialized string once at the end
+    m_jsondata = QJsonDocument(jsonRoot).toJson(QJsonDocument::Compact);
+
+    return 0;
+    /*
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(m_jsondata.toUtf8(), &error);
     if (error.error == QJsonParseError::NoError)
@@ -577,6 +685,7 @@ int TP::setDirection(DirType direction)
                  << m_jsondata;
         return 1;
     }
+    */
 }
 
 int TP::setDirection(QString direction)

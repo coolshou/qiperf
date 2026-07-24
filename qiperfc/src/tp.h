@@ -1,7 +1,8 @@
 #ifndef TP_H
 #define TP_H
 
-// #include <QObject>
+#include <QObject>
+#include <QPointer>
 #include <QVariant>
 #include <QList>
 #include <QJsonObject>
@@ -9,12 +10,13 @@
 #include "../src/tpmgrdata.h"
 
 //TP store each throughput config
-// class TP : public QObject
-class TP
+class TP : public QObject
+// class TP
 {
     // Q_GADGET
 public:
     explicit TP(QString id, QString data, int datatype = TPMgrData::config, TP *parentItem = nullptr);
+    // explicit TP(QString id, QString data, int datatype = TPMgrData::config, std::shared_ptr<TP>parentItem = nullptr);
     // ~TP() override;
     ~TP();
     enum DirType{
@@ -48,7 +50,7 @@ public:
     void clear();
     int findChild(TP *child);
     QList<TP*> getChilds();
-    bool haveChilds();
+    bool haveChilds() const;
     int setData(int column, QVariant var);
     bool removeChildren(int position, int count);
     //explicit EndPoint(QString id, QString data, QObject *parent = nullptr);
@@ -117,7 +119,8 @@ private:
     int m_datatype; // item type, 0: init, 1: for config root item, 2: throughput data
     QList<TP *> m_childItems;
     QList<QVariant> m_itemDatas;// id, server ip, dir, client ip, throughput, min throughput, max throughput, lost rate, comment
-    TP *m_parentItem;
+    // TP *m_parentItem;
+    QPointer<TP> m_parentItem; // Change from TP* to QPointer<TP>
 //    EndPointType::Type m_type;
     QString m_jsondata;
     QJsonObject jsonRoot;
