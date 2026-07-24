@@ -660,73 +660,69 @@ bool TPMgr::loaddata(QByteArray data)
 void TPMgr::reset()
 {
     // reset all data to none
+    int count = -1;
     if (groupItem)
     {
         if (groupItem->childCount() > 0)
         {
-            groupItem->removeChildren(0, groupItem->childCount());
+            count = groupItem->childCount();
+            beginRemoveRows(indexFromItem(groupItem), 0, count - 1);
+            groupItem->removeChildren(0, count);
+            endRemoveRows();
         }
-        // delete groupItem;//direct delete cause app crash??
-        // groupItem->setParent(nullptr);
     }
     if (dirTxItem)
     {
         if (dirTxItem->childCount() > 0)
         {
-            dirTxItem->removeChildren(0, dirTxItem->childCount());
+            count = dirTxItem->childCount();
+            beginRemoveRows(indexFromItem(dirTxItem), 0, count - 1);
+            dirTxItem->removeChildren(0, count);
+            endRemoveRows();
         }
-        // dirTxItem->setParent(nullptr);
     }
     if (dirRxItem)
     {
         if (dirRxItem->childCount() > 0)
         {
-            dirRxItem->removeChildren(0, dirRxItem->childCount());
+            count = dirRxItem->childCount();
+            beginRemoveRows(indexFromItem(dirRxItem), 0, count - 1);
+            dirRxItem->removeChildren(0, count);
+            endRemoveRows();
         }
-        // dirRxItem->setParent(nullptr);
     }
-    // if (commItem){
-    //     if (commItem->childCount()>0){
-    //         commItem->removeChildren(0, commItem->childCount());
-    //     }
-    // }
-    // if (rootItem){
-    //     if (rootItem->childCount() > 0)
-    //     {
-    //         rootItem->removeChildren(0, rootItem->childCount());
-    //     }
-    //     delete rootItem;
-    // }
-    // rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
-    // QModelIndex midx = indexFromItem(rootItem);
-    // qDebug() << "rootItem:" << rootItem << " midx:" << midx << " valid:" << midx.isValid();
     m_intervals.clear();
     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Total))
     {
         if (groupItem != nullptr)
         {
             if (!rootItem->haveChild(groupItem)){
+                count =rootItem->childCount();
+                beginInsertRows(indexFromItem(rootItem), count, count);
                 rootItem->appendChild(groupItem);
+                endInsertRows();
             }
-            // groupItem->setParent(rootItem);
         }
     }
     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction))
     {
         if (dirTxItem != nullptr)
         {
-            // rootItem->haveChilds()
             if (!rootItem->haveChild(dirTxItem)){
+                count =rootItem->childCount();
+                beginInsertRows(indexFromItem(rootItem), count, count);
                 rootItem->appendChild(dirTxItem);
+                endInsertRows();
             }
-            // dirTxItem->setParent(rootItem);
         }
         if (dirRxItem != nullptr)
         {
             if (!rootItem->haveChild(dirRxItem)){
+                count =rootItem->childCount();
+                beginInsertRows(indexFromItem(rootItem), count, count);
                 rootItem->appendChild(dirRxItem);
+                endInsertRows();
             }
-            // dirRxItem->setParent(rootItem);
         }
     }
     // qDeleteAll(m_tpcfgitems);
