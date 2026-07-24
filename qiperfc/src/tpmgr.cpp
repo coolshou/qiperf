@@ -25,10 +25,10 @@ TPMgr::TPMgr(int grouptype, QTreeView *treeview, QString tpunit, QObject *parent
     m_unit_bits << "Kbits/sec" << "Mbits/sec" << "Gbits/sec" << "Tbits/sec";
     m_unit_bytes << "KBytes/sec" << "MBytes/sec" << "GBytes/sec" << "TBytes/sec";
     m_highestId = 0;
-    rootItem = nullptr;
-    groupItem = nullptr;
-    dirTxItem = nullptr;
-    dirRxItem = nullptr;
+    rootItem = new TP(("Root"), ("Root"), TPMgrData::root);
+    groupItem = new TP(GRAPH_TOTAL, GRAPH_TOTAL, TPMgrData::group, rootItem);
+    dirTxItem = new TP(GRAPH_TX, GRAPH_TX, TPMgrData::direction, rootItem);
+    dirRxItem = new TP(GRAPH_RX, GRAPH_RX, TPMgrData::direction, rootItem);
     // commItem = nullptr;
     //    item = invisibleRootItem();
     reset();
@@ -337,6 +337,8 @@ TP *TPMgr::add(QString strJson, QString note, TPMgrData::DataType datatype, TP *
     }
     QModelIndex midx = indexFromItem(pitm);
     int idx = pitm->childCount();
+    qDebug() << "parent:" << midx << " , idx:" << idx;
+    //append to end of row
     beginInsertRows(midx, idx, idx);
     m_highestId = getMaxIdx();
     TP *tp = new TP(QString::number(m_highestId), strJson, datatype, pitm);
@@ -665,7 +667,7 @@ void TPMgr::reset()
             groupItem->removeChildren(0, groupItem->childCount());
         }
         // delete groupItem;//direct delete cause app crash??
-        groupItem->setParent(nullptr);
+        // groupItem->setParent(nullptr);
     }
     if (dirTxItem)
     {
@@ -673,7 +675,7 @@ void TPMgr::reset()
         {
             dirTxItem->removeChildren(0, dirTxItem->childCount());
         }
-        dirTxItem->setParent(nullptr);
+        // dirTxItem->setParent(nullptr);
     }
     if (dirRxItem)
     {
@@ -681,21 +683,21 @@ void TPMgr::reset()
         {
             dirRxItem->removeChildren(0, dirRxItem->childCount());
         }
-        dirRxItem->setParent(nullptr);
+        // dirRxItem->setParent(nullptr);
     }
     // if (commItem){
     //     if (commItem->childCount()>0){
     //         commItem->removeChildren(0, commItem->childCount());
     //     }
     // }
-    if (rootItem){
-        if (rootItem->childCount() > 0)
-        {
-            rootItem->removeChildren(0, rootItem->childCount());
-        }
-        delete rootItem;
-    }
-    rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
+    // if (rootItem){
+    //     if (rootItem->childCount() > 0)
+    //     {
+    //         rootItem->removeChildren(0, rootItem->childCount());
+    //     }
+    //     delete rootItem;
+    // }
+    // rootItem = new TP(("Root"), ("Root"), TPMgrData::root); //
     // QModelIndex midx = indexFromItem(rootItem);
     // qDebug() << "rootItem:" << rootItem << " midx:" << midx << " valid:" << midx.isValid();
     m_intervals.clear();
@@ -703,24 +705,31 @@ void TPMgr::reset()
     {
         if (groupItem != nullptr)
         {
-            rootItem->appendChild(groupItem);
-            groupItem->setParent(rootItem);
+            if (!rootItem->haveChild(groupItem)){
+                rootItem->appendChild(groupItem);
+            }
+            // groupItem->setParent(rootItem);
         }
     }
     if (m_tpgrouptype == static_cast<int>(TPGroup::GroupMode::Direction))
     {
         if (dirTxItem != nullptr)
         {
-            rootItem->appendChild(dirTxItem);
-            dirTxItem->setParent(rootItem);
+            // rootItem->haveChilds()
+            if (!rootItem->haveChild(dirTxItem)){
+                rootItem->appendChild(dirTxItem);
+            }
+            // dirTxItem->setParent(rootItem);
         }
         if (dirRxItem != nullptr)
         {
-            rootItem->appendChild(dirRxItem);
-            dirRxItem->setParent(rootItem);
+            if (!rootItem->haveChild(dirRxItem)){
+                rootItem->appendChild(dirRxItem);
+            }
+            // dirRxItem->setParent(rootItem);
         }
     }
-    qDeleteAll(m_tpcfgitems);
+    // qDeleteAll(m_tpcfgitems);
     m_tpcfgitems.clear();
 }
 
@@ -1280,12 +1289,16 @@ TP *TPMgr::newDirectionItem(QString dir)
     if (dir.contains(TPDIRTx))
     {
         dirTxItem = new TP(GRAPH_TX, GRAPH_TX, TPMgrData::direction, rootItem);
-        rootItem->appendChild(dirTxItem);
+        if (!rootItem->haveChild(dirTxItem)){
+            rootItem->appendChild(dirTxItem);
+        }
     }
     else
     {
         dirRxItem = new TP(GRAPH_RX, GRAPH_RX, TPMgrData::direction, rootItem);
-        rootItem->appendChild(dirRxItem);
+        if (!rootItem->haveChild(dirRxItem)){
+            rootItem->appendChild(dirRxItem);
+        }
     }
     endInsertRows();
     if (dir.contains(TPDIRTx))

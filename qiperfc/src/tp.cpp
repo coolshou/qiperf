@@ -75,6 +75,16 @@ int TP::findChild(TP *child)
     return -1;
 }
 
+bool TP::haveChild(TP *child)
+{
+    for (int i = 0; i < m_childItems.size(); ++i) {
+        if (m_childItems[i] == child) {
+            return true;
+        }
+    }
+    return false;
+}
+
 TP *TP::child(int row)
 {
     if (row < 0 || row >= m_childItems.size())

@@ -49,6 +49,7 @@ public:
     //end basic
     void clear();
     int findChild(TP *child);
+    bool haveChild(TP *child);
     QList<TP*> getChilds();
     bool haveChilds() const;
     int setData(int column, QVariant var);
