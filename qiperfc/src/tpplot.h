@@ -40,8 +40,8 @@ public:
   void setXRangeUpper(double upper);
 
   void clearLegendItems();
-  void addThroughputLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal);
-  void addLostRateLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal);
+  void addThroughputLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal, int startidx=0);
+  void addLostRateLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal, int startidx=0);
 
   public slots:
   void onIperfTPdata(QString sInterval, QString refrowidx, QString data,

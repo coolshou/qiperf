@@ -151,16 +151,25 @@ void TPPlot::clearLegendItems()
     legend->simplify();
 }
 
-void TPPlot::addThroughputLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal)
+void TPPlot::addThroughputLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal, int startidx)
 {
     //依據目前的模式，重新把符合條件的Throughput legend item 項目「依序」加回 legend 中
     if (legend->itemCount() > m_maxLegendItemCount){
         return;
     }
+    if (startidx > m_legends.count()){
+        return;
+    }
+    int idx = 0;
     QHash<QString, QCPAbstractLegendItem *>::const_iterator legenditerator =
         m_legends.constBegin();
     while (legenditerator != m_legends.constEnd())
     {
+        if (idx++ < startidx)
+        {
+            ++legenditerator;
+            continue;
+        }
         QCPAbstractLegendItem *item = legenditerator.value();
         bool shouldShow = false;
         if (bshowTotal)
@@ -191,16 +200,25 @@ void TPPlot::addThroughputLegendItems(bool bshowDetail, bool bshowDirection, boo
     }
 }
 
-void TPPlot::addLostRateLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal)
+void TPPlot::addLostRateLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal, int startidx)
 {
     //依據目前的模式，重新把符合條件的 Lost Rate legends 圖例「依序」加回 legend 中
     if (legend->itemCount() > m_maxLegendItemCount){
         return;
     }
+    if (startidx > m_lostratelegends.count()){
+        return;
+    }
+    int idx = 0;
     QHash<QString, QCPAbstractLegendItem *>::const_iterator lostlegenditerator =
         m_lostratelegends.constBegin();
     while (lostlegenditerator != m_lostratelegends.constEnd())
     {
+        if (idx++ < startidx)
+        {
+            ++lostlegenditerator;
+            continue;
+        }
         QCPAbstractLegendItem *item = lostlegenditerator.value();
         bool shouldShow = false;
         if (bshowTotal)
@@ -260,7 +278,6 @@ void TPPlot::setTPGroupType(int grouptype)
 
   // store all item in legend
   clearLegendItems();
-
   // 處理 Throughput legends 圖例
   addThroughputLegendItems(bshowDetail, bshowDirection, bshowTotal);
   // 處理 Lost Rate legends 圖例
@@ -312,19 +329,23 @@ void TPPlot::setTPUint(QString tpunit)
 
 void TPPlot::onVLegendScrollChanged(int value)
 {
-  qDebug() << "onVLegendScrollChanged:" << QString::number(value);
   if (m_tpgrouptype == TPGroup::GroupMode::Detail)
   {
-      qDebug() << " support max legend items:" << m_maxLegendItemCount
-               << "  m_legends.count:" << m_legends.count()
-               << " ,m_lostratelegends.count" << m_lostratelegends.count();
+      clearLegendItems();
+      // 處理 Throughput legends 圖例
+      addThroughputLegendItems((m_tpgrouptype == TPGroup::GroupMode::Detail),
+                               (m_tpgrouptype == TPGroup::GroupMode::Direction),
+                               (m_tpgrouptype == TPGroup::GroupMode::Total),
+                               value);
+      // qDebug() << "onVLegendScrollChanged:" << QString::number(value)
+      //          << " itemCount:" << legend->itemCount()
+      //          << " Max item: " << m_maxLegendItemCount;
+      // 處理 Lost Rate legends 圖例
+      addLostRateLegendItems((m_tpgrouptype == TPGroup::GroupMode::Detail),
+                             (m_tpgrouptype == TPGroup::GroupMode::Direction),
+                             (m_tpgrouptype == TPGroup::GroupMode::Total));
 
-    // for (int i = 0; i < legend->itemCount(); ++i)
-    // {
-    //   QCPAbstractLegendItem *item = legend->item(i);
-    //   item->setVisible(i >= value && i < value + 10); // Show 10 items at a time
-    // }
-    replot();
+      replot();
   }
 }
 
