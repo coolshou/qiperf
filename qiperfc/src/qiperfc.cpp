@@ -615,6 +615,13 @@ void QIperfC::onAbout()
                                                                                                                                          "\nURL: https://github.com/coolshou/qiperf");
 }
 
+void QIperfC::onTest()
+{
+    //test only
+    m_throughputview->testPlot();
+
+}
+
 void QIperfC::onShowDebugLog()
 {
     m_dlgshowlog->show();
@@ -1953,7 +1960,7 @@ void QIperfC::initActions()
     connect(ui->actionAbout, &QAction::triggered, this, &QIperfC::onAbout);
     connect(ui->actionShowDebugLog, &QAction::triggered, this, &QIperfC::onShowDebugLog);
     // test
-    //  connect(ui->actionTest, &QAction::triggered, this, &QIperfC::onTest);
+    connect(ui->actionTest, &QAction::triggered, this, &QIperfC::onTest);
 }
 
 void QIperfC::initToolbar()

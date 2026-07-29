@@ -51,6 +51,7 @@ public:
     void addComment(QString midx, QString comment);
     QDateTime getStartTime();
     bool getTP(QString &tpvalue, QString &lostrate); //get TP value
+    void testPlot();
 
 public slots:
     void onCopy() override;

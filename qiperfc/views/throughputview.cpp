@@ -10,6 +10,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QDir>
+#include <QRandomGenerator>
 
 #include <QDebug>
 
@@ -126,6 +127,33 @@ bool ThroughputView::getTP(QString &tpvalue, QString &lostrate)
         lostrate = QString::number(dlr);
     }
     return true;
+}
+
+void ThroughputView::testPlot()
+{
+    // add some graph for customplot test
+    // m_tpplot->addGraph()
+    // m_tpplot->addTPData("1", 1.0, 100.0, 10, 100, "Tx");
+    // int idCounter = 1;
+
+    for (int group = 1; group <= 20; ++group) {
+        QString id = QString::number(group);
+        for (int i = 1; i <= 10; ++i) {
+            // QString id = QString::number(idCounter++);
+            // 使用 QRandomGenerator::global() 產生隨機數
+            // bounded(min, max) 會產生包含 min 但不包含 max 的數字
+            // double x = QRandomGenerator::global()->bounded(1.0, 10.0);        // 1.0 ~ 10.0 之間的浮點數
+            double y = QRandomGenerator::global()->bounded(250.0);     // 50.0 ~ 250.0 之間的浮點數
+            int lost = QRandomGenerator::global()->bounded(15);            // 0 ~ 14 之間的整數
+            int total = 100;
+
+            // 隨機選取 "Tx" 或 "Rx"
+            QString type = (QRandomGenerator::global()->bounded(2) == 0) ? "Tx" : "Rx";
+
+            // 呼叫你的介面
+            m_tpplot->addTPData(id, i, y, lost, total, type);
+        }
+    }
 }
 
 void ThroughputView::onCopy()

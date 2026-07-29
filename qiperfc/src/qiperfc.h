@@ -94,6 +94,7 @@ public slots:
     void onConfig();
     void onSimpleMicro();
     void onAbout();
+    void onTest();
     void onShowDebugLog();
     void onShowHttpd();
     void onErrorStop(int err, QString msg);
