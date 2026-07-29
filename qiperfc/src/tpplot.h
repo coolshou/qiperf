@@ -62,6 +62,8 @@ public slots:
   // void onLostRateDataAdded(double key, double value);
   void onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data);
   void setTestStarted(bool start);
+  void calculateLegendItems();
+  void onBeforeReplot();
 signals:
   void selectedTPitem(QString idx);
   void sigLegendCount(int count);
@@ -83,15 +85,17 @@ private:
   QSharedPointer<QCPBarsDataContainer>
   sumLostGraphData(const QSharedPointer<QCPBarsDataContainer> &data1,
                    const QSharedPointer<QCPBarsDataContainer> &data2);
-  void calculateLegendItems();
+
   QCPDataContainer<QCPGraphData>::const_iterator
   findKeyValue(const QCPDataContainer<QCPGraphData> &container, double key);
   QDateTime m_starttime;
   // QMap<QString, QCPGraph *> m_graphs; // throughput graphs
   QMap<QString, MyQCPGraph *> m_graphs;    // throughput graphs
   QMap<QString, MyQCPBars *> m_lostgraphs; // lost rate graphs
-  QMap<QString, QCPAbstractLegendItem *> m_legends; // legends to store not visible legend item
-  QMap<QString, QCPAbstractLegendItem *> m_lostratelegends; // lost rate legends
+  QList<QString> m_legendKeys; // 用來維護插入順序
+  QHash<QString, QCPAbstractLegendItem *> m_legends; // legends to store not visible legend item
+  QList<QString> m_lostratelegendKeys; // 用來維護插入順序
+  QHash<QString, QCPAbstractLegendItem *> m_lostratelegends; // lost rate legends
   int m_yAxisMaxDefault = 10;                               // 10 Mbps
   int m_xAxisMaxDefault = 30;                               // 30sec
   int m_interval;
@@ -136,6 +140,9 @@ private:
   bool m_autoScrollXAxis;
   bool m_isTestStarted;
   void accumulateData(MyQCPGraph *targetGraph, const QSharedPointer<QCPGraphDataContainer> &newData);
+
+  int m_maxLegendItems; // store max legend items can show in legend area
+
 };
 
 #endif // TPPLOT_H

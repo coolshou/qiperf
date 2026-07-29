@@ -13,6 +13,7 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
   m_isTestStarted = false;
   m_maxX = 30;
   m_maxY = m_yAxisMaxDefault;
+  m_maxLegendItems = 0;
   // TODO: when total test time smaller then this, need update?
   m_timeWindowThreshold = 10 ; //30.0;
   m_autoScrollXAxis = true;
@@ -40,7 +41,6 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   m_interval = 1;
   setTPUint(sunit);
-  qDebug() << "parent geometry:" << parent->geometry();
   initCustomPlot();
   QCPLayer *mainlayer = layer(LAYER_MAIN);
   if (!addLayer(LAYER_TOTAL, mainlayer, limAbove))
@@ -76,6 +76,8 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
            << ", mDirRxLegendItem: " << mDirRxLegendItem
            << ", mDirRxLostLegendItem: " << mDirRxLostLegendItem;
   setTPGroupType(m_tpgrouptype);
+  connect(this, &TPPlot::beforeReplot, this, &TPPlot::onBeforeReplot);
+  calculateLegendItems();
   m_replottimer = new QTimer(this);
   connect(m_replottimer, &QTimer::timeout, this, &TPPlot::doReplot);
   // clear(); // this will let plot layout looks strange!!
@@ -172,10 +174,12 @@ void TPPlot::setTPGroupType(int grouptype)
       itm->setVisible(false);
     }
   }
+  // 簡化排版，移除因為拿掉項目留下的空列
+  legend->simplify();
 
   // 步驟 2：依據目前的模式，重新把符合條件的項目「依序」加回 legend 中
   // 2.1 處理 Throughput legends 圖例
-  QMap<QString, QCPAbstractLegendItem *>::const_iterator legenditerator =
+  QHash<QString, QCPAbstractLegendItem *>::const_iterator legenditerator =
       m_legends.constBegin();
   while (legenditerator != m_legends.constEnd())
   {
@@ -200,7 +204,7 @@ void TPPlot::setTPGroupType(int grouptype)
         shouldShow = true;
       }
     }
-    if (shouldShow)
+    if (shouldShow & (legend->itemCount() <= m_maxLegendItems))
     {
       legend->addElement(legend->elementCount(), 0, item);
       item->setVisible(true);
@@ -208,7 +212,7 @@ void TPPlot::setTPGroupType(int grouptype)
     ++legenditerator;
   }
   // 2.2 處理 Lost Rate legends 圖例
-  QMap<QString, QCPAbstractLegendItem *>::const_iterator lostlegenditerator =
+  QHash<QString, QCPAbstractLegendItem *>::const_iterator lostlegenditerator =
       m_lostratelegends.constBegin();
   while (lostlegenditerator != m_lostratelegends.constEnd())
   {
@@ -232,15 +236,13 @@ void TPPlot::setTPGroupType(int grouptype)
         shouldShow = true;
       }
     }
-    if (shouldShow)
+    if (shouldShow & (legend->itemCount() <= m_maxLegendItems))
     {
       legend->addElement(legend->elementCount(), 0, item);
       item->setVisible(true);
     }
     ++lostlegenditerator;
   }
-  // 簡化排版，移除因為拿掉項目留下的空列
-  legend->simplify();
 
   replot();
 }
@@ -291,11 +293,15 @@ void TPPlot::onVLegendScrollChanged(int value)
   qDebug() << "onVLegendScrollChanged:" << QString::number(value);
   if (m_tpgrouptype == TPGroup::GroupMode::Detail)
   {
-    for (int i = 0; i < legend->itemCount(); ++i)
-    {
-      QCPAbstractLegendItem *item = legend->item(i);
-      item->setVisible(i >= value && i < value + 10); // Show 10 items at a time
-    }
+      qDebug() << " support max legend items:" << m_maxLegendItems
+               << "  m_legends.count:" << m_legends.count()
+               << " ,m_lostratelegends.count" << m_lostratelegends.count();
+
+    // for (int i = 0; i < legend->itemCount(); ++i)
+    // {
+    //   QCPAbstractLegendItem *item = legend->item(i);
+    //   item->setVisible(i >= value && i < value + 10); // Show 10 items at a time
+    // }
     replot();
   }
 }
@@ -861,7 +867,8 @@ MyQCPGraph *TPPlot::getGraph(QString refrowidx, int dir, int width)
     QCPPlottableLegendItem *litm = legend->itemWithPlottable(myGraph);
     if (litm && !m_legends.contains(refrowidx))
     {
-      m_legends.insert(refrowidx, litm);
+        m_legendKeys.append(refrowidx);
+        m_legends.insert(refrowidx, litm);
     }
     if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
     {
@@ -956,7 +963,8 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx, int dir)
     QCPAbstractLegendItem *litm = legend->itemWithPlottable(g_lostrate);
     if (litm && !m_lostratelegends.contains(refrowidx))
     {
-      m_lostratelegends.insert(refrowidx, litm);
+        m_lostratelegendKeys.append(refrowidx);
+        m_lostratelegends.insert(refrowidx, litm);
     }
     if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))
     { // Total legend
@@ -1011,6 +1019,8 @@ void TPPlot::clear()
         // delete graph; // 如果是自訂非 QObject 物件才需要
       }
       // Also remove the corresponding legend item to avoid dangling pointer
+
+      m_legendKeys.removeOne(it.key());
       m_legends.remove(it.key());
       // 使用 erase 刪除當前節點，並回傳下一個有效的迭代器
       it = m_graphs.erase(it);
@@ -1038,6 +1048,7 @@ void TPPlot::clear()
         // delete graph; // 如果是自訂非 QObject 物件才需要
       }
       // Also remove the corresponding legend item to avoid dangling pointer
+      m_lostratelegendKeys.removeOne(it.key());
       m_lostratelegends.remove(itl.key());
       // 使用 erase 刪除當前節點，並回傳下一個有效的迭代器
       itl = m_lostgraphs.erase(itl);
@@ -1121,7 +1132,6 @@ void TPPlot::initCustomPlot()
     plotLayout()->setColumnStretchFactor(0, 1);   // col 0
     plotLayout()->setColumnStretchFactor(1, 0.1); // col 1
     plotLayout()->setRowStretchFactor(0, 1);      // row 0
-    qDebug() << "plotLayout height: " << plotLayout()->rect().height();
     subLayout->addElement(0, 0, legend); // row 0, col 0
     // add spacer，let legend align up
     spacer = new QCPLayoutElement(this);
@@ -1316,17 +1326,32 @@ TPPlot::sumLostGraphData(const QSharedPointer<QCPBarsDataContainer> &data1,
 void TPPlot::calculateLegendItems()
 {
   // get the legend size and calculate the number of items can show
-  QSize legendSize = legend->rect().size(); //->minimumOuterSizeHint();
-  QSize legendSpacerSize = spacer->rect().size();
-  // calculate Max Legend Items
-  int itemHeight =
-      legend->font().pointSize() + 9; // approximate height of each item
-  int itemsFit = legendSize.height() / itemHeight;
+    int itemHeight =
+        legend->font().pointSize() + 13; // approximate height of each item
+    int items = plotLayout()->rect().height() / itemHeight;
+    if (items != m_maxLegendItems)
+    {
+        m_maxLegendItems = items;
+        // emit sigLegendCount(m_legends.count() + m_lostratelegends.count());
 
-  qDebug() << "Legend height:" << legendSize.height() << " itemHeight:" << itemHeight
-           << " itemsFit:" << itemsFit
-           << " legendSpacerSize height:" << legendSpacerSize.height()
-           << " plotLayout height: " << plotLayout()->rect().height();
+        if (m_maxLegendItems < legend->itemCount()){
+            int n = legend->itemCount() - m_maxLegendItems;
+            int countToRemove = qMin(n, legend->itemCount());
+            for (int i = 0; i < countToRemove; ++i) {
+                int lastIndex = legend->itemCount() - 1;
+                QCPLayoutElement *itm = legend->takeAt(lastIndex);
+                if (itm){
+                    itm->setVisible(false);
+                }
+            }
+            legend->simplify();
+        }else{
+            //add back
+            qDebug() << "m_legends:" << m_legends.count() << " ,m_lostratelegends:" << m_lostratelegends.count()
+                     << " legend->itemCount:" << legend->itemCount()
+                     << " ,m_maxLegendItems:" << m_maxLegendItems;
+        }
+    }
   // qDebug() << "Legend rect:" << legend->rect(); qDebug() <<
   // "Approximate number of items that can fit:" << itemsFit;
   if (m_tpgrouptype == TPGroup::GroupMode::Total)
@@ -1339,10 +1364,13 @@ void TPPlot::calculateLegendItems()
   }
   else
   {
-    // qDebug() << "sigLegendCount:" << itemsFit << ",itemHeight:" << itemHeight
-    //          << ", legend height" << legendSize.height();
-    emit sigLegendCount(itemsFit);
+    emit sigLegendCount(m_legends.count() + m_lostratelegends.count());
   }
+}
+
+void TPPlot::onBeforeReplot()
+{
+    calculateLegendItems();
 }
 
 QCPDataContainer<QCPGraphData>::const_iterator
