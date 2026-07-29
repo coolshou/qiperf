@@ -1356,9 +1356,11 @@ void TPPlot::calculateLegendItems()
             int countToRemove = qMin(n, legend->itemCount());
             for (int i = 0; i < countToRemove; ++i) {
                 int lastIndex = legend->itemCount() - 1;
-                QCPLayoutElement *itm = legend->takeAt(lastIndex);
-                if (itm){
-                    itm->setVisible(false);
+                if (legend->elementAt(lastIndex)){
+                    QCPLayoutElement *itm = legend->takeAt(lastIndex);
+                    if (itm){
+                        itm->setVisible(false);
+                    }
                 }
             }
             legend->simplify();
