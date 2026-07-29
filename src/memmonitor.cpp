@@ -85,7 +85,9 @@ qint64 MemMonitor::getMemoryUsageKB() {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
                 parts = QString(line).split(QRegExp("\\s+"));
 #else
-                parts = QString(line).split(QRegularExpression("\\s+"));
+                // Declare it once as static
+                static const QRegularExpression re(QStringLiteral("\\s+"));
+                parts = QString(line).split(re);
 #endif
                 if (parts.size() >= 2) {
                     return parts[1].toLongLong(); // in KB
