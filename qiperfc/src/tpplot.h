@@ -39,7 +39,11 @@ public:
   void clear();
   void setXRangeUpper(double upper);
 
-public slots:
+  void clearLegendItems();
+  void addThroughputLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal);
+  void addLostRateLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal);
+
+  public slots:
   void onIperfTPdata(QString sInterval, QString refrowidx, QString data,
                      qint64 pktlost, qint64 pkttotal,
                      // QString lostrate,
@@ -141,7 +145,7 @@ private:
   bool m_isTestStarted;
   void accumulateData(MyQCPGraph *targetGraph, const QSharedPointer<QCPGraphDataContainer> &newData);
 
-  int m_maxLegendItems; // store max legend items can show in legend area
+  int m_maxLegendItemCount; // store max legend items can show in legend area
 
 };
 

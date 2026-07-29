@@ -13,7 +13,7 @@ TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
   m_isTestStarted = false;
   m_maxX = 30;
   m_maxY = m_yAxisMaxDefault;
-  m_maxLegendItems = 0;
+  m_maxLegendItemCount = 0;
   // TODO: when total test time smaller then this, need update?
   m_timeWindowThreshold = 10 ; //30.0;
   m_autoScrollXAxis = true;
@@ -135,6 +135,101 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas,
 
 void TPPlot::setInterval(int interval) { m_interval = interval; }
 
+void TPPlot::clearLegendItems()
+{
+    //把目前 legend 裡面的item抽離（不 delete 記憶體）
+    for (int i = legend->itemCount() - 1; i >= 0; --i)
+    {
+        QCPAbstractLegendItem *itm = legend->item(i);
+        if (itm)
+        {
+            legend->take(itm);
+            itm->setVisible(false);
+        }
+    }
+    // 簡化排版，移除因為拿掉項目留下的空列
+    legend->simplify();
+}
+
+void TPPlot::addThroughputLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal)
+{
+    //依據目前的模式，重新把符合條件的Throughput legend item 項目「依序」加回 legend 中
+    if (legend->itemCount() > m_maxLegendItemCount){
+        return;
+    }
+    QHash<QString, QCPAbstractLegendItem *>::const_iterator legenditerator =
+        m_legends.constBegin();
+    while (legenditerator != m_legends.constEnd())
+    {
+        QCPAbstractLegendItem *item = legenditerator.value();
+        bool shouldShow = false;
+        if (bshowTotal)
+        {
+            if (item == mTotalLegendItem)
+                shouldShow = true;
+        }
+        else if (bshowDirection)
+        {
+            if (item == mDirTxLegendItem || item == mDirRxLegendItem)
+                shouldShow = true;
+        }
+        else if (bshowDetail)
+        {
+            // 排除 Total 與 Direction 的圖例，只顯示 Detail 圖例
+            if (item != mTotalLegendItem && item != mDirTxLegendItem &&
+                item != mDirRxLegendItem)
+            {
+                shouldShow = true;
+            }
+        }
+        if (shouldShow & (legend->itemCount() <= m_maxLegendItemCount))
+        {
+            legend->addElement(legend->elementCount(), 0, item);
+            item->setVisible(true);
+        }
+        ++legenditerator;
+    }
+}
+
+void TPPlot::addLostRateLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal)
+{
+    //依據目前的模式，重新把符合條件的 Lost Rate legends 圖例「依序」加回 legend 中
+    if (legend->itemCount() > m_maxLegendItemCount){
+        return;
+    }
+    QHash<QString, QCPAbstractLegendItem *>::const_iterator lostlegenditerator =
+        m_lostratelegends.constBegin();
+    while (lostlegenditerator != m_lostratelegends.constEnd())
+    {
+        QCPAbstractLegendItem *item = lostlegenditerator.value();
+        bool shouldShow = false;
+        if (bshowTotal)
+        {
+            if (item == mTotalLostLegendItem)
+                shouldShow = true;
+        }
+        else if (bshowDirection)
+        {
+            if (item == mDirTxLostLegendItem || item == mDirRxLostLegendItem)
+                shouldShow = true;
+        }
+        else if (bshowDetail)
+        {
+            if (item != mTotalLostLegendItem && item != mDirTxLostLegendItem &&
+                item != mDirRxLostLegendItem)
+            {
+                shouldShow = true;
+            }
+        }
+        if (shouldShow & (legend->itemCount() <= m_maxLegendItemCount))
+        {
+            legend->addElement(legend->elementCount(), 0, item);
+            item->setVisible(true);
+        }
+        ++lostlegenditerator;
+    }
+}
+
 void TPPlot::setTPGroupType(int grouptype)
 {
   m_tpgrouptype = grouptype;
@@ -164,85 +259,12 @@ void TPPlot::setTPGroupType(int grouptype)
     b->setVisible(shouldShow(b));
 
   // store all item in legend
-  // 步驟 1：把目前 legend 裡面的item抽離（不 delete 記憶體）
-  for (int i = legend->itemCount() - 1; i >= 0; --i)
-  {
-    QCPAbstractLegendItem *itm = legend->item(i);
-    if (itm)
-    {
-      legend->take(itm);
-      itm->setVisible(false);
-    }
-  }
-  // 簡化排版，移除因為拿掉項目留下的空列
-  legend->simplify();
+  clearLegendItems();
 
-  // 步驟 2：依據目前的模式，重新把符合條件的項目「依序」加回 legend 中
-  // 2.1 處理 Throughput legends 圖例
-  QHash<QString, QCPAbstractLegendItem *>::const_iterator legenditerator =
-      m_legends.constBegin();
-  while (legenditerator != m_legends.constEnd())
-  {
-    QCPAbstractLegendItem *item = legenditerator.value();
-    bool shouldShow = false;
-    if (bshowTotal)
-    {
-      if (item == mTotalLegendItem)
-        shouldShow = true;
-    }
-    else if (bshowDirection)
-    {
-      if (item == mDirTxLegendItem || item == mDirRxLegendItem)
-        shouldShow = true;
-    }
-    else if (bshowDetail)
-    {
-      // 排除 Total 與 Direction 的圖例，只顯示 Detail 圖例
-      if (item != mTotalLegendItem && item != mDirTxLegendItem &&
-          item != mDirRxLegendItem)
-      {
-        shouldShow = true;
-      }
-    }
-    if (shouldShow & (legend->itemCount() <= m_maxLegendItems))
-    {
-      legend->addElement(legend->elementCount(), 0, item);
-      item->setVisible(true);
-    }
-    ++legenditerator;
-  }
-  // 2.2 處理 Lost Rate legends 圖例
-  QHash<QString, QCPAbstractLegendItem *>::const_iterator lostlegenditerator =
-      m_lostratelegends.constBegin();
-  while (lostlegenditerator != m_lostratelegends.constEnd())
-  {
-    QCPAbstractLegendItem *item = lostlegenditerator.value();
-    bool shouldShow = false;
-    if (bshowTotal)
-    {
-      if (item == mTotalLostLegendItem)
-        shouldShow = true;
-    }
-    else if (bshowDirection)
-    {
-      if (item == mDirTxLostLegendItem || item == mDirRxLostLegendItem)
-        shouldShow = true;
-    }
-    else if (bshowDetail)
-    {
-      if (item != mTotalLostLegendItem && item != mDirTxLostLegendItem &&
-          item != mDirRxLostLegendItem)
-      {
-        shouldShow = true;
-      }
-    }
-    if (shouldShow & (legend->itemCount() <= m_maxLegendItems))
-    {
-      legend->addElement(legend->elementCount(), 0, item);
-      item->setVisible(true);
-    }
-    ++lostlegenditerator;
-  }
+  // 處理 Throughput legends 圖例
+  addThroughputLegendItems(bshowDetail, bshowDirection, bshowTotal);
+  // 處理 Lost Rate legends 圖例
+  addLostRateLegendItems(bshowTotal, bshowDetail, bshowDirection);
 
   replot();
 }
@@ -293,7 +315,7 @@ void TPPlot::onVLegendScrollChanged(int value)
   qDebug() << "onVLegendScrollChanged:" << QString::number(value);
   if (m_tpgrouptype == TPGroup::GroupMode::Detail)
   {
-      qDebug() << " support max legend items:" << m_maxLegendItems
+      qDebug() << " support max legend items:" << m_maxLegendItemCount
                << "  m_legends.count:" << m_legends.count()
                << " ,m_lostratelegends.count" << m_lostratelegends.count();
 
@@ -531,10 +553,6 @@ void TPPlot::doReplot()
   // qDebug() << "plotLayout rect :" << plotLayout()->rect();
 
   // qDebug() << "axisRect minimum:" << axisRect()->minimumOuterSizeHint();
-  // qDebug() << "legend minimum :" << legend->minimumOuterSizeHint();
-
-  // qDebug() << "legend rect:" << legend->rect();
-  // qDebug() << "legend outer:" << legend->outerRect();
 
   // qDebug() << "plotLayout rowCount =" << plotLayout()->rowCount();
   // qDebug() << "plotLayout columnCount =" << plotLayout()->columnCount();
@@ -1328,14 +1346,13 @@ void TPPlot::calculateLegendItems()
   // get the legend size and calculate the number of items can show
     int itemHeight =
         legend->font().pointSize() + 13; // approximate height of each item
-    int items = plotLayout()->rect().height() / itemHeight;
-    if (items != m_maxLegendItems)
+    int itemcount = plotLayout()->rect().height() / itemHeight;
+    if (itemcount != m_maxLegendItemCount)
     {
-        m_maxLegendItems = items;
+        m_maxLegendItemCount = itemcount;
         // emit sigLegendCount(m_legends.count() + m_lostratelegends.count());
-
-        if (m_maxLegendItems < legend->itemCount()){
-            int n = legend->itemCount() - m_maxLegendItems;
+        if (m_maxLegendItemCount < legend->itemCount()){
+            int n = legend->itemCount() - m_maxLegendItemCount;
             int countToRemove = qMin(n, legend->itemCount());
             for (int i = 0; i < countToRemove; ++i) {
                 int lastIndex = legend->itemCount() - 1;
@@ -1346,10 +1363,17 @@ void TPPlot::calculateLegendItems()
             }
             legend->simplify();
         }else{
-            //add back
-            qDebug() << "m_legends:" << m_legends.count() << " ,m_lostratelegends:" << m_lostratelegends.count()
-                     << " legend->itemCount:" << legend->itemCount()
-                     << " ,m_maxLegendItems:" << m_maxLegendItems;
+            //TODO: any better way? add back , items in legend are not sorted!, add missed?
+            // remove all
+            clearLegendItems();
+            // add back
+            addThroughputLegendItems((m_tpgrouptype == TPGroup::GroupMode::Detail),
+                                     (m_tpgrouptype == TPGroup::GroupMode::Direction),
+                                     (m_tpgrouptype == TPGroup::GroupMode::Total));
+            addLostRateLegendItems((m_tpgrouptype == TPGroup::GroupMode::Detail),
+                                   (m_tpgrouptype == TPGroup::GroupMode::Direction),
+                                   (m_tpgrouptype == TPGroup::GroupMode::Total));
+            replot();
         }
     }
   // qDebug() << "Legend rect:" << legend->rect(); qDebug() <<
