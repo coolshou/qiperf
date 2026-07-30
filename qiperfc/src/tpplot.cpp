@@ -281,7 +281,7 @@ void TPPlot::setTPGroupType(int grouptype)
   // 處理 Throughput legends 圖例
   addThroughputLegendItems(bshowDetail, bshowDirection, bshowTotal);
   // 處理 Lost Rate legends 圖例
-  addLostRateLegendItems(bshowTotal, bshowDetail, bshowDirection);
+  addLostRateLegendItems(bshowDetail, bshowDirection, bshowTotal);
 
   replot();
 }
@@ -332,18 +332,18 @@ void TPPlot::onVLegendScrollChanged(int value)
   if (m_tpgrouptype == TPGroup::GroupMode::Detail)
   {
       clearLegendItems();
+      bool bshowTotal = (m_tpgrouptype == TPGroup::GroupMode::Total);
+      bool bshowDetail = (m_tpgrouptype == TPGroup::GroupMode::Detail);
+      bool bshowDirection = (m_tpgrouptype == TPGroup::GroupMode::Direction);
+
       // 處理 Throughput legends 圖例
-      addThroughputLegendItems((m_tpgrouptype == TPGroup::GroupMode::Detail),
-                               (m_tpgrouptype == TPGroup::GroupMode::Direction),
-                               (m_tpgrouptype == TPGroup::GroupMode::Total),
+      addThroughputLegendItems(bshowDetail, bshowDirection, bshowTotal,
                                value);
       // qDebug() << "onVLegendScrollChanged:" << QString::number(value)
       //          << " itemCount:" << legend->itemCount()
       //          << " Max item: " << m_maxLegendItemCount;
       // 處理 Lost Rate legends 圖例
-      addLostRateLegendItems((m_tpgrouptype == TPGroup::GroupMode::Detail),
-                             (m_tpgrouptype == TPGroup::GroupMode::Direction),
-                             (m_tpgrouptype == TPGroup::GroupMode::Total));
+      addLostRateLegendItems(bshowDetail, bshowDirection, bshowTotal);
 
       replot();
   }
@@ -1389,13 +1389,13 @@ void TPPlot::calculateLegendItems()
             //TODO: any better way? add back , items in legend are not sorted!, add missed?
             // remove all
             clearLegendItems();
+            bool bshowTotal = (m_tpgrouptype == TPGroup::GroupMode::Total);
+            bool bshowDetail = (m_tpgrouptype == TPGroup::GroupMode::Detail);
+            bool bshowDirection = (m_tpgrouptype == TPGroup::GroupMode::Direction);
+
             // add back
-            addThroughputLegendItems((m_tpgrouptype == TPGroup::GroupMode::Detail),
-                                     (m_tpgrouptype == TPGroup::GroupMode::Direction),
-                                     (m_tpgrouptype == TPGroup::GroupMode::Total));
-            addLostRateLegendItems((m_tpgrouptype == TPGroup::GroupMode::Detail),
-                                   (m_tpgrouptype == TPGroup::GroupMode::Direction),
-                                   (m_tpgrouptype == TPGroup::GroupMode::Total));
+            addThroughputLegendItems(bshowDetail, bshowDirection, bshowTotal);
+            addLostRateLegendItems(bshowDetail, bshowDirection, bshowTotal);
             replot();
         }
     }
