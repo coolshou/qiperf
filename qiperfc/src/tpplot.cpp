@@ -7,15 +7,15 @@
 
 #include "tpmgrdata.h"
 
-TPPlot::TPPlot(int tpgroup, QString sunit, QWidget *parent)
-    : QCustomPlot(parent), m_tpgrouptype(tpgroup)
+TPPlot::TPPlot(int tpgroup, QString sunit, int xAxisMaxDefault, QWidget *parent)
+    : QCustomPlot(parent), m_tpgrouptype(tpgroup), m_xAxisMaxDefault(xAxisMaxDefault)
 {
   m_isTestStarted = false;
   m_maxX = 30;
   m_maxY = m_yAxisMaxDefault;
   m_maxLegendItemCount = 0;
   // TODO: when total test time smaller then this, need update?
-  m_timeWindowThreshold = 10 ; //30.0;
+  m_timeWindowThreshold = 60 ; //30.0;
   m_autoScrollXAxis = true;
   QScreen *screen = QGuiApplication::primaryScreen();
   bool b4K = false;

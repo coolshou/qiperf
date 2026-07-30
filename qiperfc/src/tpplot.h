@@ -28,7 +28,7 @@ public:
 
 public:
   // explicit TPPlot(bool showgroup, QString sunit, QWidget *parent = nullptr);
-  explicit TPPlot(int tpgroup, QString sunit, QWidget *parent = nullptr);
+  explicit TPPlot(int tpgroup, QString sunit, int xAxisMaxDefault = 60, QWidget *parent = nullptr);
   void addTPData(QString refrowidx, double xdata, double ydata, //double lostrate,
                  qint64 pktlost, qint64 pkttotal,
                  QString grouptag = ""); //
@@ -101,7 +101,7 @@ private:
   QList<QString> m_lostratelegendKeys; // 用來維護插入順序
   QHash<QString, QCPAbstractLegendItem *> m_lostratelegends; // lost rate legends
   int m_yAxisMaxDefault = 10;                               // 10 Mbps
-  int m_xAxisMaxDefault = 30;                               // 30sec
+  int m_xAxisMaxDefault;                               // default xAxis Max value, 60sec
   int m_interval;
   int m_tpgrouptype;
   QString m_tpunit;
