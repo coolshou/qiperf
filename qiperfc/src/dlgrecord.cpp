@@ -49,9 +49,6 @@ void DlgRecord::setRootPath(QString rootpath)
 {
     m_rootpath = rootpath;
     onRefresh();
-    // QModelIndex rootIndex = m_fileModel->setRootPath(rootpath);
-    // // QModelIndex idx = m_fileModel->index(m_fileModel->rootPath());
-    // ui->tvLogFiles->setRootIndex(rootIndex);
     setWindowTitle(QDir::toNativeSeparators(rootpath));
 }
 
@@ -116,7 +113,6 @@ void DlgRecord::onItemDClicked(QModelIndex idx)
 
 void DlgRecord::onRefresh()
 {
-    qDebug() << "onRefresh(TODO, following did not update file size?why)";
     QModelIndex rootIdx = m_fileModel->setRootPath("");
     rootIdx = m_fileModel->setRootPath(m_rootpath);
     ui->tvLogFiles->setRootIndex(rootIdx);
