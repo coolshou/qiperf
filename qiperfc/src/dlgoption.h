@@ -27,6 +27,7 @@ public:
     QString getFontStyle();
     int getFontSize();
     // void setTPsize(int width, int heigth);
+    int getXAxisMaxDefault();
 public slots:
     void onSetTPGroupType(int grouptype);
     void onTPUnitChanged(QString sunit);

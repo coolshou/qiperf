@@ -35,7 +35,7 @@ public:
     explicit ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
                             QAction *aCopyText, QSettings *cfg,
                             int tpgroup = TPGroup::GroupMode::Detail, QString sunit="Mbps",
-                            QWidget *parent = nullptr);
+                            int xAxisMaxDefault=60, QWidget *parent = nullptr);
     ~ThroughputView() override;
 
     QString title() override { return tr("Throughput"); }
@@ -149,6 +149,7 @@ private:
     QDateTime m_starttime;
     int m_tpgrouptype;
     QString m_tpunit;
+    int m_xAxisMaxDefault;
     IperfWrapper *m_iperfwrapper;
     QScrollBar *m_vLegendScrollBar;
     QString m_oldsavepath;

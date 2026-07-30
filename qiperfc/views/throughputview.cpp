@@ -20,12 +20,12 @@
 
 ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
                                QAction *aCopyText, QSettings *cfg,
-                               int tpgroup, QString sunit,
+                               int tpgroup, QString sunit, int xAxisMaxDefault,
                                QWidget *parent) :
     AbstractView(parent),
     ui(new Ui::ThroughputView), m_actionCopy(aCopy),m_actionPaste(aPaste),
     m_actionDelete(aDelete),m_actionCopyText(aCopyText), m_tpgrouptype(tpgroup),
-    m_tpunit(sunit)
+    m_tpunit(sunit), m_xAxisMaxDefault(xAxisMaxDefault)
 {
     m_iperfwrapper = new IperfWrapper();
     connect(m_iperfwrapper, &IperfWrapper::debuginfo, this, &ThroughputView::onDebuginfo);
@@ -792,7 +792,7 @@ void ThroughputView::initThroughputChart()
     // throughput chart
     m_vLegendScrollBar = new QScrollBar(Qt::Vertical, this);
     // m_tpplot = new TPPlot(m_tpgrouptype, m_tpunit, ui->widget_console);
-    m_tpplot = new TPPlot(m_tpgrouptype, m_tpunit, ui->widget_console);
+    m_tpplot = new TPPlot(m_tpgrouptype, m_tpunit, m_xAxisMaxDefault, ui->widget_console);
     // m_tpplot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     qDebug() << "enable openGl:" << m_tpplot->openGl();
     m_tpplot->setContextMenuPolicy(Qt::CustomContextMenu);

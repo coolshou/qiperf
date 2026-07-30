@@ -265,6 +265,7 @@ private:
     QString m_tpcfgname; // tp config file name
     QIPConfig *m_qipconfig;
     int m_WaitServerReady;
+    int m_XAxisMaxDefault;
     int m_TPExportWidth;
     int m_TPExportHeigth;
     bool m_TPGroup;   // show throughput group

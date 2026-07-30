@@ -598,6 +598,7 @@ void QIperfC::onConfig()
     {
         // update setting
         m_WaitServerReady = m_dlgoption->getWaitServerReady();
+        m_XAxisMaxDefault = m_dlgoption->getXAxisMaxDefault();
     }
 }
 

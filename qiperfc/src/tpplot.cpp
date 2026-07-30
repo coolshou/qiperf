@@ -11,7 +11,7 @@ TPPlot::TPPlot(int tpgroup, QString sunit, int xAxisMaxDefault, QWidget *parent)
     : QCustomPlot(parent), m_tpgrouptype(tpgroup), m_xAxisMaxDefault(xAxisMaxDefault)
 {
   m_isTestStarted = false;
-  m_maxX = 30;
+  m_maxX = xAxisMaxDefault;
   m_maxY = m_yAxisMaxDefault;
   m_maxLegendItemCount = 0;
   // TODO: when total test time smaller then this, need update?
@@ -36,7 +36,8 @@ TPPlot::TPPlot(int tpgroup, QString sunit, int xAxisMaxDefault, QWidget *parent)
       b4K = true;
     }
   }
-  setOpenGl(!b4K & scale);
+  // setOpenGl(!b4K & scale);
+  setOpenGl(false);
   setNoAntialiasingOnDrag(true);
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   m_interval = 1;

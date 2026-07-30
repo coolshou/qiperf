@@ -96,6 +96,7 @@ void dlgOption::loadcfg(QSettings *cfg)
         ui->cb_TPUnit->setCurrentIndex(midx);
     }
     ui->cb_IgnoreWrongInterval->setChecked(cfg->value("IgnoreWrongInterval", true).toBool());
+    ui->sbXAxisMaxDefault->setValue(cfg->value("xAxisMaxDefault", 60).toInt());
     cfg->endGroup();
 
     cfg->beginGroup("agent");
@@ -166,6 +167,7 @@ void dlgOption::updatecfg()
 
     m_cfg->setValue("TPUnit", ui->cb_TPUnit->currentText());
     m_cfg->setValue("IgnoreWrongInterval", ui->cb_IgnoreWrongInterval->isChecked());
+    m_cfg->setValue("xAxisMaxDefault", ui->sbXAxisMaxDefault->value());
     m_cfg->endGroup();
 
     m_cfg->beginGroup("agent");
@@ -229,6 +231,11 @@ QString dlgOption::getFontStyle()
 int dlgOption::getFontSize()
 {
     return ui->sbFontPonitSize->value();
+}
+
+int dlgOption::getXAxisMaxDefault()
+{
+    return ui->sbXAxisMaxDefault->value();
 }
 
 QStringList dlgOption::getSysFontFamilies()
