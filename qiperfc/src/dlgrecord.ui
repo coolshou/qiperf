@@ -17,7 +17,7 @@
    <string>Records</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../qiperf.qrc">
+   <iconset resource="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/qiperf.qrc">
     <normaloff>:/logfile</normaloff>:/logfile</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -37,6 +37,13 @@
    <item>
     <widget class="QWidget" name="widget_2" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QPushButton" name="pbRefresh">
+        <property name="text">
+         <string>Refresh</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
@@ -73,7 +80,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../qiperf.qrc"/>
+  <include location="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/qiperf.qrc"/>
  </resources>
  <connections/>
 </ui>
