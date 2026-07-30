@@ -1,12 +1,13 @@
-qiperf (0.18.11507.24-1) unstable; urgency=medium
+qiperf (0.18.11507.30-1) unstable; urgency=medium
 
   *Fix first record of total graph did not combine each other
   *Work around: when window's scale is not 100% it will cause throughput graph plot area strange
          add a set OpenGL menu item to enable/disable OpenGL
   *Work around: Sometimes iperf client's first throughput data have wrong interval value (with -O 2)
   *Fix UDP packet lost rate calc and show in plot
+  *Fix plot chart legend virtal scroll bar not work
 
- -- coolshou <coolshou2060@gmail.com>  Fri, 24 Jul 2026 11:11:11 +0800
+ -- coolshou <coolshou2060@gmail.com>  Thu, 30 Jul 2026 11:11:11 +0800
 
 qiperf (0.18.11507.15-1) unstable; urgency=medium
 
