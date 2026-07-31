@@ -192,7 +192,12 @@ QVariant TPMgr::data(const QModelIndex &index, int role) const
         //  qDebug() << "data not DisplayRole:" << idx ;
         return QVariant();
     }
-    return item->data(index.column());
+    if ((item->getDataType() == TPMgrData::config) &&
+        (index.column() == TP::server)){
+        return QVariant::fromValue(item->data(index.column()).toString()+":"+QString::number(item->getPort()));
+    }else {
+        return item->data(index.column());
+    }
 }
 
 Qt::ItemFlags TPMgr::flags(const QModelIndex &index) const
