@@ -18,25 +18,25 @@ TPPlot::TPPlot(int tpgroup, QString sunit, int xAxisMaxDefault, QWidget *parent)
   // TODO: when total test time smaller then this, need update?
   m_timeWindowThreshold = 60 ; //30.0;
   m_autoScrollXAxis = true;
-  QScreen *screen = QGuiApplication::primaryScreen();
-  bool b4K = false;
-  bool scale = false; //Window scale
-  if (screen)
-  {
-    int logicalWidth = screen->geometry().width();
-    qreal dpr = screen->devicePixelRatio();
-    if (dpr > 1) {//NOTE: when scale > 100%, it will cause graph size strange on OpenGL enable!!
-        scale = true;
-    }
-    int physicalWidth = qRound(logicalWidth * dpr);
+  // QScreen *screen = QGuiApplication::primaryScreen();
+  // bool b4K = false;
+  // bool scale = false; //Window scale
+  // if (screen)
+  // {
+  //   int logicalWidth = screen->geometry().width();
+  //   qreal dpr = screen->devicePixelRatio();
+  //   if (dpr > 1) {//NOTE: when scale > 100%, it will cause graph size strange on OpenGL enable!!
+  //       scale = true;
+  //   }
+  //   int physicalWidth = qRound(logicalWidth * dpr);
 
-    qDebug() << "Current logicalWidth:" << logicalWidth
-             << " physicalWidth:" << physicalWidth;
-    if (physicalWidth >= 3840)
-    {
-      b4K = true;
-    }
-  }
+  //   qDebug() << "Current logicalWidth:" << logicalWidth
+  //            << " physicalWidth:" << physicalWidth;
+  //   if (physicalWidth >= 3840)
+  //   {
+  //     b4K = true;
+  //   }
+  // }
   // setOpenGl(!b4K & scale);
   setOpenGl(false);
   setNoAntialiasingOnDrag(true);
@@ -69,14 +69,7 @@ TPPlot::TPPlot(int tpgroup, QString sunit, int xAxisMaxDefault, QWidget *parent)
   getGraph(GRAPH_TOTAL, -1, GroupWidth::Total);
   getGraph(GRAPH_TX, 0, GroupWidth::Direction);
   getGraph(GRAPH_RX, 1, GroupWidth::Direction);
-  qDebug() << "mTotalGraph: " << mTotalGraph << ", mDirTxGraph: " << mDirTxGraph
-           << ", mDirRxGraph: " << mDirRxGraph;
-  qDebug() << "mTotalLegendItem: " << mTotalLegendItem
-           << ", mTotalLostLegendItem: " << mTotalLostLegendItem
-           << ", mDirTxLegendItem: " << mDirTxLegendItem
-           << ", mDirTxLostLegendItem: " << mDirTxLostLegendItem
-           << ", mDirRxLegendItem: " << mDirRxLegendItem
-           << ", mDirRxLostLegendItem: " << mDirRxLostLegendItem;
+
   setTPGroupType(m_tpgrouptype);
   connect(this, &TPPlot::beforeReplot, this, &TPPlot::onBeforeReplot);
   calculateLegendItems();
@@ -512,7 +505,10 @@ void TPPlot::setTestStarted(bool start) {
     if (!m_isTestStarted){
         //throughput running had stoped
         if (graphCount()) {
+            qDebug() << "m_maxX:" << m_maxX << ",m_maxY:" << m_maxY;
+            qDebug() << "xAxis->rescale range:" << xAxis->range();
             xAxis->rescale();
+            qDebug() << "yAxis->rescale range:" << yAxis->range();
             yAxis->rescale();
             replot();
         }
@@ -1238,9 +1234,6 @@ void TPPlot::updateXAxisRange(double mintime, double maxtime)
              << " ,max:" << QString::number(maxtime);
     xAxis->setRange(mintime, maxtime); // show all data on plot
   }
-  // xAxis->setRange(maxtime, m_xAxisMaxDefault, Qt::AlignRight);// not good!!
-  // xAxis->setRange(0, maxtime, Qt::AlignRight); // bed, not show the graph
-  // xAxis->setRange(mintime, maxtime, Qt::AlignCenter);
 }
 
 void TPPlot::updateYAxisRange(double minvalue, double maxvalue)
