@@ -92,24 +92,49 @@ void FileClient::onConnected()
 void FileClient::onBytesWritten(qint64 bytes)
 {
     Q_UNUSED(bytes);
-    if (m_currentFile && m_currentFile->isOpen()) {
-        QByteArray buffer = m_currentFile->read(m_chunkSize); // Read in chunks of 64KB
-        if (buffer.isEmpty()) {
-            //no more data to send
-            QString filename = m_currentFile->fileName();
-            m_currentFile->close();
-            //delete file which had finished sending
-            if (!m_currentFile->remove()){
-                debug("Delete file fail:" + filename);
-            }
-            delete m_currentFile;
-            m_currentFile = nullptr;
-            debug("[onBytesWritten]File transfer completed: " + filename);
-            sendNextFile(); // Proceed to the next file in the queue
-        } else {
+    if (!m_currentFile || !m_currentFile->isOpen()) {
+        return;
+    }
+    // 當 Socket 寫入緩衝區中的未傳送資料低於 2 倍 Chunk 大小 (128KB) 時才持續填入資料
+    // 這可以防止寫入速度快於網路傳送速度時造成的記憶體暴漲與排隊異常
+    while (fileSocket->bytesToWrite() < m_chunkSize * 2 && !m_currentFile->atEnd()) {
+        QByteArray buffer = m_currentFile->read(m_chunkSize);
+        if (!buffer.isEmpty()) {
             fileSocket->write(buffer);
         }
     }
+    // 只有當檔案已讀完，且 Socket 緩衝區中的資料也全部發送完畢時，才算真正完成傳輸
+    if (m_currentFile->atEnd() && fileSocket->bytesToWrite() == 0) {
+        QString filename = m_currentFile->fileName();
+        m_currentFile->close();
+
+        if (!m_currentFile->remove()){
+            debug("Delete file fail:" + filename);
+        }
+        delete m_currentFile;
+        m_currentFile = nullptr;
+
+        debug("[onBytesWritten] File transfer completed: " + filename);
+        sendNextFile(); // 繼續傳送佇列中的下一個檔案
+    }
+    // if (m_currentFile && m_currentFile->isOpen()) {
+    //     QByteArray buffer = m_currentFile->read(m_chunkSize); // Read in chunks of 64KB
+    //     if (buffer.isEmpty()) {
+    //         //no more data to send
+    //         QString filename = m_currentFile->fileName();
+    //         m_currentFile->close();
+    //         //delete file which had finished sending
+    //         if (!m_currentFile->remove()){
+    //             debug("Delete file fail:" + filename);
+    //         }
+    //         delete m_currentFile;
+    //         m_currentFile = nullptr;
+    //         debug("[onBytesWritten]File transfer completed: " + filename);
+    //         sendNextFile(); // Proceed to the next file in the queue
+    //     } else {
+    //         fileSocket->write(buffer);
+    //     }
+    // }
 }
 
 void FileClient::onDisconnected()
@@ -140,4 +165,6 @@ void FileClient::sendNextFile()
     QFileInfo fileInfo(*m_currentFile);
     QString header = QString("FILE:%1:%2\n").arg(fileInfo.fileName()).arg(fileInfo.size());
     fileSocket->write(header.toUtf8());
+    // 主動觸發第一次讀取，啟動傳輸迴圈
+    onBytesWritten(0);
 }
