@@ -8,7 +8,8 @@
 class NMessageBox : public QMessageBox
 {
 public:
-    NMessageBox(Icon icon, const QString &title, const QString &text, QWidget *parent=nullptr);
+    NMessageBox(Icon icon, const QString &title, const QString &text,
+                bool bYesNo=false, QWidget *parent=nullptr);
 };
 
 #endif // NMESSAGEBOX_H

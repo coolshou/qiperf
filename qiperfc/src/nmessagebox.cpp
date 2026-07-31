@@ -2,11 +2,16 @@
 #include <QStyle>
 #include <QApplication>
 
-NMessageBox::NMessageBox(Icon icon, const QString &title, const QString &text, QWidget *parent)
+NMessageBox::NMessageBox(Icon icon, const QString &title, const QString &text,
+                         bool bYesNo, QWidget *parent)
     :QMessageBox(parent)
 {
     setAttribute(Qt::WA_DeleteOnClose); //makes sure the msgbox is deleted automatically when closed
-    setStandardButtons(QMessageBox::Ok);
+    if (bYesNo){
+        setStandardButtons(QMessageBox::Yes|QMessageBox::No);
+    }else{
+        setStandardButtons(QMessageBox::Ok);
+    }
     setWindowTitle(title);
     setText(text);
     setIcon(icon);

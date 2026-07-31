@@ -414,6 +414,16 @@ void ThroughputView::onSaveImg(bool checked)
 void ThroughputView::onSetOpenGL(bool checked)
 {
     if (m_tpplot){
+        if (checked){
+            QString txt="Enable OpenGL may cause problem, Use at your own risk!";
+            NMessageBox *msg = new NMessageBox(QMessageBox::Information,
+                                               "WARNING", txt, true);
+            int ret = msg->exec();
+            if (ret != QMessageBox::Yes){
+                m_actionSetOpenGL->setChecked(false);
+                return;
+            }
+        }
         m_tpplot->setOpenGl(checked);
     }
 }
