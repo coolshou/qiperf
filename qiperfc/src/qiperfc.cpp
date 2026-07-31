@@ -764,11 +764,6 @@ void QIperfC::onTestStoped(int err)
     {
         qDebug() << "onTestStoped: no error";
     }
-
-    qDebug() << "Do we need to close m_fileserver?? m_fileserver sockets:" << QString::number(m_fileserver->getSockets());
-    // if (m_fileserver->getSockets()>0){
-    //     m_fileserver->close();
-    // }
 }
 
 void QIperfC::onCopy()
