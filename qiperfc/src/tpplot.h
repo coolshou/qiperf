@@ -100,7 +100,7 @@ private:
   QHash<QString, QCPAbstractLegendItem *> m_legends; // legends to store not visible legend item
   QList<QString> m_lostratelegendKeys; // 用來維護插入順序
   QHash<QString, QCPAbstractLegendItem *> m_lostratelegends; // lost rate legends
-  int m_yAxisMaxDefault = 10;                               // 10 Mbps
+  int m_yAxisMaxDefault;                               // default yAxis Max value, 100
   int m_xAxisMaxDefault;                               // default xAxis Max value, 60sec
   int m_interval;
   int m_tpgrouptype;

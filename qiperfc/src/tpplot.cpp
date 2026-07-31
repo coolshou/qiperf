@@ -11,6 +11,7 @@ TPPlot::TPPlot(int tpgroup, QString sunit, int xAxisMaxDefault, QWidget *parent)
     : QCustomPlot(parent), m_tpgrouptype(tpgroup), m_xAxisMaxDefault(xAxisMaxDefault)
 {
   m_isTestStarted = false;
+  m_yAxisMaxDefault = 100;
   m_maxX = xAxisMaxDefault;
   m_maxY = m_yAxisMaxDefault;
   m_maxLegendItemCount = 0;
@@ -270,12 +271,13 @@ void TPPlot::setTPGroupType(int grouptype)
     }
     return bshowDetail;
   };
-
   // === 统一设置 visible ===
   for (auto *g : m_graphs)
     g->setVisible(shouldShow(g));
   for (auto *b : m_lostgraphs)
     b->setVisible(shouldShow(b));
+
+  yAxis->rescale();
 
   // store all item in legend
   clearLegendItems();
@@ -772,6 +774,7 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
       // qDebug() << xdata << ",new value:" << QString::number(sumydata);
       myGraph->updateValue(xdata, sumydata);
     }
+
   }
   else
   {
@@ -781,9 +784,21 @@ void TPPlot::addTPData(QString refrowidx, double xdata, double ydata,
 
   // enlarge/shrink y range
   m_maxX = xdata + m_interval;
-  if (sumydata > m_maxY)
+  if (((refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive)) &&
+       (m_tpgrouptype == TPGroup::GroupMode::Total)) ||
+      (((refrowidx.contains(GRAPH_TX, Qt::CaseSensitive)) ||
+        (refrowidx.contains(GRAPH_RX, Qt::CaseSensitive))) &&
+          (m_tpgrouptype == TPGroup::GroupMode::Direction))
+      )
   {
-    m_maxY = sumydata;
+      if (sumydata > m_maxY)
+      {
+          m_maxY = sumydata;
+      }
+  }
+  if (ydata > m_maxY)
+  {
+      m_maxY = ydata;
   }
   // TODO: lost rate
   if ((pktlost > 0) && (pkttotal > 0)){
