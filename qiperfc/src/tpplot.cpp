@@ -510,14 +510,10 @@ void TPPlot::onLostRateDatasSetted(QSharedPointer<QCPBarsDataContainer> data)
 void TPPlot::setTestStarted(bool start) {
     m_isTestStarted = start;
     if (!m_isTestStarted){
-        //throughput running had stop
+        //throughput running had stoped
         if (graphCount()) {
-            qDebug() << "graphCount:" << QString::number(graphCount())
-                     << " ,xAxis->range():" << xAxis->range();
-            // xAxis->setRangeUpper();
-            xAxis->rescale(true);
-            yAxis->rescale(true);
-            // rescaleAxes(true); // all Axis will fit
+            xAxis->rescale();
+            yAxis->rescale();
             replot();
         }
     }
