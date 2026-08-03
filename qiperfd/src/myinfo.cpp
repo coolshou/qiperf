@@ -162,7 +162,7 @@ QJsonObject MyInfo::collectNetInfo()
         if ((niface.type() == QNetworkInterface::Ethernet) ||
             (niface.type() == QNetworkInterface::Wifi)) {
             QJsonObject ifObject;
-            ifObject.insert("HW", niface.hardwareAddress()); //硬體地址
+            ifObject.insert("HW", niface.hardwareAddress()); //硬體地址, MAC address 00:11:22:33:44:55
             QString drivername="";
             QString ver =getDriverVersion(niface.name(), drivername);
 //            qDebug() << interface.name() << " version: " <<ver << " driver: " << drivername;
@@ -173,11 +173,14 @@ QJsonObject MyInfo::collectNetInfo()
             QList<QNetworkAddressEntry> entryList= niface.addressEntries();
             foreach(QNetworkAddressEntry entry,entryList)//遍歷每個IP地址條目
             {
-                QJsonArray addrObject;
-                addrObject.push_back(entry.ip().toString());//IP地址
-                addrObject.push_back(entry.netmask().toString());//子網掩碼
-                addrObject.push_back(entry.broadcast().toString());//廣播地址
-                addrsObject.push_back(addrObject);
+                if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol &&
+                    !entry.ip().isLinkLocal()) {
+                    QJsonArray addrObject;
+                    addrObject.push_back(entry.ip().toString());//IP地址
+                    addrObject.push_back(entry.netmask().toString());//子網掩碼
+                    addrObject.push_back(entry.broadcast().toString());//廣播地址
+                    addrsObject.push_back(addrObject);
+                }
             }
             ifObject.insert("address", addrsObject);
 //            netObjects.insert(interface.name(), ifObject);
@@ -281,6 +284,7 @@ int MyInfo::getEndpointType()
 //    EndPoint::Type rc = EndPoint::Unknown;
     int rc = static_cast<int>(EndPointType::Unknown);
     QStringList myOptions;
+    //                  0    ,   1      ,    2      ,  3    ,   4    ,    5      ,    6
     myOptions << "windows" << "android" << "macos" << "osx" << "ios" << "debian" << "unknown" ;
 
     switch(myOptions.indexOf(QSysInfo::productType())){
