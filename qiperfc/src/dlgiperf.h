@@ -55,7 +55,8 @@ public slots:
     void onFmtreportChanged(QString text);
     void onShowIperfRestartRule(bool checked);
     void setBiDirStatus(bool enable);
-
+signals:
+    void updateNote(QString note); // for group use?
 protected:
     void changeEvent(QEvent *e) override;
 //    void closeEvent(QCloseEvent *event) override;

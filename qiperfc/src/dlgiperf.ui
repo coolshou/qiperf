@@ -23,7 +23,7 @@
    <string>Iperf Pair config</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/qiperf.qrc">
+   <iconset resource="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/qiperf.qrc">
     <normaloff>:/pair-add</normaloff>:/pair-add</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -950,14 +950,14 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QLabel" name="lbComment">
+       <widget class="QLabel" name="lbNote">
         <property name="text">
-         <string>Comment(TODO):</string>
+         <string>Note:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="leComment"/>
+       <widget class="QLineEdit" name="leNote"/>
       </item>
      </layout>
     </widget>
@@ -988,7 +988,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/qiperf.qrc"/>
+  <include location="../../../../../../mnt/SG-1T/myTools/network/throughput/iperf/qiperf/qiperf.qrc"/>
  </resources>
  <connections/>
 </ui>

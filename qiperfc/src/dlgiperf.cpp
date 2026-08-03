@@ -82,6 +82,7 @@ QString DlgIperf::getJsonCfg()
     QJsonObject mainObj;
     mainObj.insert("Action", CMD_IPERF_ADD);
     mainObj.insert("enabled", m_enabled);
+    mainObj.insert("note", ui->leNote->text().trimmed());
 
     //server
     QJsonObject serverObj;
@@ -171,6 +172,8 @@ void DlgIperf::loadJsonCfg(QString jsoncfg)
     if (error.error == QJsonParseError::NoError) {
         QJsonObject mainObj = doc.object();
         m_enabled = mainObj["enabled"].toBool(true);
+        ui->leNote->setText(mainObj["note"].toString(""));
+
         QJsonObject serverObj = mainObj["server"].toObject();
         QJsonObject clientObj = mainObj["client"].toObject();
         bool bRestartonerror = serverObj["restartonerror"].toBool();
@@ -524,6 +527,11 @@ void DlgIperf::ChangeVersion(const QString ver)
 void DlgIperf::onAccepted()
 {
     if (isRequireConfigMeet()){
+        QString note = "Unknown";
+        if (!ui->leNote->text().isEmpty()){
+            note = ui->leNote->text();
+        }
+        emit updateNote(note);
         accept();
     }else{
         return;
