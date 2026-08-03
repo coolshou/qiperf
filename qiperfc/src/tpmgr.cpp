@@ -1358,11 +1358,12 @@ void TPMgr::onIperfTPdata(QString refrow, QString sInterval, QString datas)
                 {
                     dir = jObj.value("dir").toString();
                 }
-                if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) != 0)
-                {
-                    qDebug() << "//TODO: base on unit, convert the value to correct value"
-                             << " display unit:" << m_TPUint << " tp data unit:" << unit;
-                }
+                // TODO: do it on qiperfd when collecting data
+                // if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) != 0)
+                // {
+                //     qDebug() << "//TODO: base on unit, convert the value to correct value"
+                //              << " display unit:" << m_TPUint << " tp data unit:" << unit;
+                // }
 
                 if ((pkt_total.toInt() > 0) && (pkt_lost.toInt() > 0))
                 {
