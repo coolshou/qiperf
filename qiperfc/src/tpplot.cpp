@@ -96,8 +96,8 @@ void TPPlot::onUpdateTPDatas(QString refrow, QVector<double> timedatas,
   if (timedatas.isEmpty() || valuedatas.isEmpty())
     return;
 
-  qDebug() << "onUpdateTPDatas:" << refrow << " times:" << timedatas;
-        //   << " values: " << valuedatas;
+  // qDebug() << "onUpdateTPDatas:" << refrow << " times:" << timedatas;
+  //       //   << " values: " << valuedatas;
   MyQCPGraph *myGraph = getGraph(refrow, direction);
 
   double minT =
@@ -419,7 +419,6 @@ void TPPlot::onDatasSetted(QSharedPointer<QCPGraphDataContainer> data, int dir)
     accumulateData(mTotalGraph, data);
     mTotalGraph->rescaleAxes(true);
   }
-  qDebug() << "onDatasSetted dir:" << dir;
   if (dir == 0)
   { // Tx
     if (mDirTxGraph)
@@ -1126,11 +1125,11 @@ void TPPlot::initCustomPlot()
 {
   this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                         QCP::iSelectLegend | QCP::iSelectPlottables);
-  this->axisRect()->setupFullAxesBox();
-  this->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
+  axisRect()->setupFullAxesBox();
+  axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
   // this->axisRect()->setRangeDrag(Qt::Horizontal);
-  this->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
-  // this->axisRect()->setRangeZoom(Qt::Horizontal); //TODO: yAxis can not zoom,
+  axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
+  // this->axisRect()->setRangeZoom(Qt::Horizontal);
   axisRect()->setRangeZoomAxes(xAxis, yAxis);
   axisRect()->setRangeDragAxes(xAxis, yAxis);
 
