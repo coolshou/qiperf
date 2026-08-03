@@ -803,7 +803,10 @@ void IperfWrapper::work()
                 {
                     QString line = in.readLine();
                     lineNumber++;
-                    emit progress(m_filename, lineNumber);
+                    if (updatetimer.elapsed() > 1000) {
+                        emit progress(m_filename, lineNumber);
+                        updatetimer.restart();
+                    }
                     if (m_version=="3"){
                         if (line!=""){
                             parserIperf3(line);
@@ -816,8 +819,9 @@ void IperfWrapper::work()
                         debug("[IperfWrapper::work]: Not support iperf version:" +m_version, 3);
                         break;
                     }
+                    //use updatetimer
                     //without this, GUI will freeze
-                    QThread::usleep(1); // 0.000001 , GUI still can work
+                    // QThread::usleep(0.0001); // 0.0001 , GUI still can work
                 }
                 file.close();
             }
