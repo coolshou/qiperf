@@ -1023,10 +1023,11 @@ void TPMgr::addTPdata(QString midx, QString sInterval, QString idx,
     // add throughput item
     Q_UNUSED(sInterval)
     // Q_UNUSED(unit) // TODO: check unit
-    if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) != 0)
-    {
-        qDebug() << "addTPdata Expect unit:" << m_TPUint << " TP unit:" << unit;
-    }
+    // TODO: move to qiperfd to convert it
+    // if (QString::compare(unit, m_TPUint, Qt::CaseInsensitive) != 0)
+    // {
+    //     qDebug() << "addTPdata Expect unit:" << m_TPUint << " TP unit:" << unit;
+    // }
     TP *tp = getItemByIdx(midx); // parent item
     if (tp == nullptr)
     {
