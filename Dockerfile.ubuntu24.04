@@ -1,5 +1,10 @@
 FROM ubuntu:24.04
 
+# Prevent interactive prompts during apt install
+ENV DEBIAN_FRONTEND=noninteractive
+# Optional: Pre-set timezone to avoid tzdata prompts completely
+ENV TZ=Asia/Taipei
+
 # 更新套件列表並安裝編譯所需的基礎工具
 RUN apt-get update && apt-get install -y --no-install-recommends \
     iputils-ping net-tools iproute2 \
