@@ -10,6 +10,8 @@ QT += sql # for QSqlDatabase
 #CONFIG += release
 #CONFIG += debug
 
+# template-id-cdtor errors suppress the warning completely
+QMAKE_CXXFLAGS += -Wno-template-id-cdtor
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 # greaterThan(QT_MAJOR_VERSION, 4): CONFIG += c++11
