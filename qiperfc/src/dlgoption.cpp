@@ -142,6 +142,7 @@ void dlgOption::loadcfg(QSettings *cfg)
 #endif
     }
     int idx = ui->cbFontFamily->findText(fontfamily);
+    qDebug() << "idx:" << idx << ", fontfamily:" << fontfamily;
     if (idx){
         ui->cbFontFamily->setCurrentIndex(idx);
     }
