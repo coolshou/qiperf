@@ -24,7 +24,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>5</number>
      </property>
      <widget class="QWidget" name="tab_iperf">
       <attribute name="title">
@@ -571,9 +571,6 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="cbFontFamily"/>
-          </item>
           <item row="0" column="3">
            <widget class="QSpinBox" name="sbFontPonitSize">
             <property name="minimum">
@@ -612,6 +609,13 @@
            <widget class="QLabel" name="label_14">
             <property name="text">
              <string>FontStyle:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QFontComboBox" name="cbFontFamily">
+            <property name="fontFilters">
+             <set>QFontComboBox::MonospacedFonts</set>
             </property>
            </widget>
           </item>

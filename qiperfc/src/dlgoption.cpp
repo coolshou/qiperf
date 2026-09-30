@@ -17,7 +17,7 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     ui->setupUi(this);
     // hidetab("main");
     // font init
-    initFonts();
+    // initFonts(); // use QFontComboBox
     // TODO: temp remove group by comment
     ui->rbTPGroupComment->setVisible(false);
 
@@ -142,7 +142,6 @@ void dlgOption::loadcfg(QSettings *cfg)
 #endif
     }
     int idx = ui->cbFontFamily->findText(fontfamily);
-    qDebug() << "idx:" << idx << ", fontfamily:" << fontfamily;
     if (idx){
         ui->cbFontFamily->setCurrentIndex(idx);
     }
