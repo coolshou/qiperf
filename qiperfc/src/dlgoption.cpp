@@ -116,7 +116,7 @@ void dlgOption::loadcfg(QSettings *cfg)
     cfg->endGroup();
 
     cfg->beginGroup("terminal");
-    QString fontname;
+    QString fontname = "";
 #ifdef Q_OS_LINUX
     fontname = "Noto Mono";
 #else
@@ -129,6 +129,18 @@ void dlgOption::loadcfg(QSettings *cfg)
 #endif
 
     QString fontfamily = cfg->value("FontFamily", fontname).toString();
+    if (fontfamily.isEmpty()){
+#ifdef Q_OS_LINUX
+    fontfamily = "Noto Mono";
+#else
+    #ifdef Q_OS_WIN
+        fontfamily = "Consolas";
+    #else
+        //Mac OS?
+        fontfamily = "SF Mono";
+    #endif
+#endif
+    }
     int idx = ui->cbFontFamily->findText(fontfamily);
     if (idx){
         ui->cbFontFamily->setCurrentIndex(idx);
@@ -204,7 +216,20 @@ void dlgOption::updatecfg()
     m_cfg->endGroup();
 
     m_cfg->beginGroup("terminal");
-    m_cfg->value("FontFamily",ui->cbFontFamily->currentText());
+    QString fontfamily = ui->cbFontFamily->currentText();
+    if (fontfamily.isEmpty()){
+#ifdef Q_OS_LINUX
+        fontfamily = "Noto Mono";
+#else
+#ifdef Q_OS_WIN
+        fontfamily = "Consolas";
+#else
+        //Mac OS?
+        fontfamily = "SF Mono";
+#endif
+#endif
+    }
+    m_cfg->value("FontFamily", fontfamily);
     m_cfg->value("FontStyle",ui->cbFontStyle->currentText());
     m_cfg->value("FontSize",ui->sbFontPonitSize->value());
     m_cfg->endGroup();
