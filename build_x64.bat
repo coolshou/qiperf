@@ -59,8 +59,14 @@ if "%BUILDAPP%"=="1" (
     echo nmake...
     nmake clean
     nmake
-    windeployqt6.exe qiperfc_x86_64\qiperfc.exe
-    windeployqt6.exe qiperfd_x86_64\qiperfd.exe
-    windeployqt6.exe qiperftray_x86_64\qiperftray.exe
+    IF EXIST "qiperfc_x86_64\qiperfc.exe" (
+        windeployqt6.exe qiperfc_x86_64\qiperfc.exe
+    )
+    IF EXIST "qiperfd_x86_64\qiperfd.exe" (
+        windeployqt6.exe qiperfd_x86_64\qiperfd.exe
+    )
+    IF EXIST "qiperftray_x86_64\qiperftray.exe" (
+        windeployqt6.exe qiperftray_x86_64\qiperftray.exe
+    )
 
 )
