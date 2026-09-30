@@ -437,7 +437,7 @@ void dlgOption::initFonts()
     QStringList fs = getSysFontFamilies();
     ui->cbFontFamily->addItem("");
     ui->cbFontFamily->addItems(fs);
-    connect(ui->cbFontFamily, &QComboBox::currentTextChanged, this , &dlgOption::updateFontStyle);
+    // connect(ui->cbFontFamily, &QComboBox::currentTextChanged, this , &dlgOption::updateFontStyle);
 }
 
 void dlgOption::onReject()
