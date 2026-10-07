@@ -1,3 +1,9 @@
 [submodule "iperf3/iperf3"]
 	path = iperf3/iperf3
 	url = https://github.com/coolshou/iperf
+[submodule "android_openssl"]
+	path = android_openssl
+	url = https://github.com/KDAB/android_openssl.git
+[submodule "lksctp/sctp"]
+	path = lksctp/sctp
+	url = https://github.com/sctp/lksctp-tools.git
