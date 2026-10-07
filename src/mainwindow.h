@@ -5,7 +5,7 @@
 #include <QThread>
 #include <QProcess>
 
-#include "iperfworker.h"
+// #include "iperfworker.h"
 #include "iperf3wrapper.h"
 
 QT_BEGIN_NAMESPACE
@@ -43,7 +43,7 @@ private:
 
     Ui::MainWindow *ui;
     QThread *iperf_th;
-    IperfWorker *iperfer;
+    // IperfWorker *iperfer;
     QString serverHost;
     int serverPort = 5201;
     int duration = 30;
