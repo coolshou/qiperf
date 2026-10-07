@@ -1,0 +1,3 @@
+[submodule "iperf3/iperf3"]
+	path = iperf3/iperf3
+	url = https://github.com/coolshou/iperf
