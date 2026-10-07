@@ -8,8 +8,14 @@
 #include <mutex>
 #include <thread>
 
+#ifndef atomic_uint_fast64_t
+// Provide C11 atomic type fallback for C++ compiler
+typedef std::atomic<uint_fast64_t> atomic_uint_fast64_t;
+#endif
+
 // --- C API Includes (Requires iperf3 library to be installed and linked) ---
 extern "C" {
+#include "iperf_config.h"
 #include "iperf.h"
 #include "iperf_api.h"
 }

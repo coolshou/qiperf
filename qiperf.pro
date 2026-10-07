@@ -12,16 +12,10 @@ include(lksctp/lksctp.pri)
 include(iperf3/iperf3.pri)
 
 SOURCES += \
-    iperf3/iperf3worker.cpp \
-    iperf3/iperf3wrapper.cpp \
-    src/iperfworker.cpp \
     src/main.cpp \
     src/mainwindow.cpp
 
 HEADERS += \
-    iperf3/iperf3worker.h \
-    iperf3/iperf3wrapper.h \
-    src/iperfworker.h \
     src/mainwindow.h
 
 FORMS += \
@@ -69,9 +63,12 @@ DISTFILES += \
 lksctp.target = compile_lksctp
 lksctp.commands = cd $$PWD/lksctp && $(QMAKE) lksctp.pro && $(MAKE)
 
+iperf3.target = compile_iperf3
+iperf3.commands = cd $$PWD/iperf3 && $(QMAKE) iperf3.pro && $(MAKE)
+
 # 2. 將自訂命令加入 Extra Targets
-QMAKE_EXTRA_TARGETS += lksctp
+QMAKE_EXTRA_TARGETS += lksctp iperf3
 
 # 3. 設定為本專案編譯前的前提依賴 (Pre-target dependency)
-PRE_TARGETDEPS += compile_lksctp
+PRE_TARGETDEPS += compile_lksctp compile_iperf3
 

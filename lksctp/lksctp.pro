@@ -40,10 +40,11 @@ SOURCES += \
 # 5. Header Files
 # List all necessary header files
 HEADERS += \
-    $$PWD/$$SCTP_SOURCE_DIR/config.h \
-    $$PWD/$$SCTP_SOURCE_DIR/src/include/netinet/sctp.h \
+    $$PWD/config.h \
     $$PWD/$$SCTP_SOURCE_DIR/src/apps/sctp_darn.h \
     $$PWD/$$SCTP_SOURCE_DIR/src/withsctp/sctp_socket.h
+    # $$PWD/$$SCTP_SOURCE_DIR/config.h \
+    # $$PWD/$$SCTP_SOURCE_DIR/src/include/netinet/sctp.h \
 
 # 6. Include Paths
 # Where the compiler should look for the header files

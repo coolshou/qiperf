@@ -37,7 +37,11 @@ linux: {
 }
 
 HEADERS += \
-    $$PWD/$$IPERF3_SOURCE_DIR/iperf_config.h
+    $$PWD/iperf_config.h \
+    # $$PWD/$$IPERF3_SOURCE_DIR/src/iperf.h \
+    # $$PWD/$$IPERF3_SOURCE_DIR/src/iperf_api.h \
+    $$PWD/iperf3worker.h \
+    $$PWD/iperf3wrapper.h
 
 SOURCES += \
     $$PWD/$$IPERF3_SOURCE_DIR/src/cjson.c \
@@ -57,7 +61,9 @@ SOURCES += \
     $$PWD/$$IPERF3_SOURCE_DIR/src/net.c \
     $$PWD/$$IPERF3_SOURCE_DIR/src/tcp_info.c \
     $$PWD/$$IPERF3_SOURCE_DIR/src/timer.c \
-    $$PWD/$$IPERF3_SOURCE_DIR/src/units.c
+    $$PWD/$$IPERF3_SOURCE_DIR/src/units.c \
+    $$PWD/iperf3worker.cpp \
+    $$PWD/iperf3wrapper.cpp \
 
 
 win32:{
