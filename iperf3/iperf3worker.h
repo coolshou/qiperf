@@ -1,6 +1,7 @@
 #ifndef IPERF3WORKER_H
 #define IPERF3WORKER_H
 
+#include <atomic>
 #include <QMutex>
 #include <QObject>
 #include <QString>
@@ -59,7 +60,8 @@ signals:
 private:
   // bool running = false;
   bool mIsClient = true;
-  bool bStop;
+  // bool bStop;
+  std::atomic<bool> bStop{false};
   // for callback
   static void onTestStartCallback(struct iperf_test *test);
   // iperf configs values

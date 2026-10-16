@@ -18,7 +18,7 @@
     <normaloff>:/qiperf</normaloff>:/qiperf</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0">
     <property name="spacing">
      <number>2</number>
     </property>
@@ -155,22 +155,6 @@
     </item>
     <item>
      <widget class="QComboBox" name="cb_info"/>
-    </item>
-    <item>
-     <widget class="QLabel" name="lb_info">
-      <property name="font">
-       <font>
-        <pointsize>20</pointsize>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
     </item>
     <item>
      <widget class="QPlainTextEdit" name="te_log"/>

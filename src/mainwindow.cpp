@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     ui->rb_v2->setVisible(false);
+    ui->groupBox->setVisible(false);
     // mThreadId = nullptr;
     // 1. Create the wrapper object
     wrapper= new Iperf3Wrapper(parent);
@@ -28,6 +29,19 @@ MainWindow::MainWindow(QWidget *parent)
     QStringList ipaddres;
     const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
     foreach (const QNetworkInterface &netInterface, QNetworkInterface::allInterfaces()) {
+        QNetworkInterface::InterfaceFlags flags = netInterface.flags();
+        // 1. 過濾未啟用 (IsUp) 或迴路介面 (IsLoopBack)
+        if (!flags.testFlag(QNetworkInterface::IsUp) || flags.testFlag(QNetworkInterface::IsLoopBack)) {
+            continue;
+        }
+        // 2. 判斷網卡類型：僅留 Ethernet 與 Wi-Fi
+        QNetworkInterface::InterfaceType type = netInterface.type();
+        bool isEthernet = (type == QNetworkInterface::Ethernet);
+        bool isWifi = (type == QNetworkInterface::Wifi || type == QNetworkInterface::Ieee80211);
+
+        if (!isEthernet && !isWifi) {
+            continue;
+        }
         QString name = netInterface.name();
         foreach (const QNetworkAddressEntry &address, netInterface.addressEntries()) {
             if (QString::compare(address.ip().toString() , localhost.toString(), Qt::CaseInsensitive)!=0){
@@ -39,12 +53,33 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->pbStart, &QPushButton::clicked, this, &MainWindow::onStart);
     connect(ui->pbStop, &QPushButton::clicked, this, &MainWindow::onStop);
-
+    connect(ui->pb_clear, &QPushButton::clicked, this, &MainWindow::onClearClicked);
+    connect(ui->pb_quit, &QPushButton::clicked, this, &MainWindow::onQuitClicked);
+    connect(ui->pb_copy, &QPushButton::clicked, this, &MainWindow::onCopyClicked);
+    connect(this, &MainWindow::stop, wrapper, &Iperf3Wrapper::stopTest);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::onStart(bool checked)
+{
+    Q_UNUSED(checked)
+    if (wrapper){
+        // ui->cb_ServerMode
+        serverHost = ui->le_target->text();
+        serverPort = ui->sb_port->value();
+        // duration
+        // streams
+        isClient = !ui->cb_ServerMode->isChecked();
+
+        if (!wrapper->startTest(serverHost, serverPort, duration,
+                                streams, isClient)) {
+            onLog("Failed to start test.");
+        }
+    }
 }
 
 void MainWindow::readStdOut(QString text)
@@ -74,20 +109,20 @@ void MainWindow::onLog(const QString &msg)
 }
 
 
-void MainWindow::on_pb_clear_clicked()
+void MainWindow::onClearClicked()
 {
     //clear log
     ui->te_log->clear();
 }
 
 
-void MainWindow::on_pb_quit_clicked()
+void MainWindow::onQuitClicked()
 {
     qApp->exit(0);
 }
 
 
-void MainWindow::on_pb_copy_clicked()
+void MainWindow::onCopyClicked()
 {
     //copy all log to clipboard
     qApp->clipboard()->setText(ui->te_log->toPlainText());
@@ -153,29 +188,14 @@ void MainWindow::onIperfIntervalReport(const QList<StreamMetrics> &streamList)
         onLog(msg);
     }
 }
-void MainWindow::onStart(bool checked)
-{
-    Q_UNUSED(checked)
-    if (wrapper){
-        // ui->cb_ServerMode
-        serverHost = ui->le_target->text();
-        serverPort = ui->sb_port->value();
-        // duration
-        // streams
-        isClient = !ui->cb_ServerMode->isChecked();
 
-        if (!wrapper->startTest(serverHost, serverPort, duration,
-                                streams, isClient)) {
-            onLog("Failed to start test.");
-        }
-    }
-}
 
 void MainWindow::onStop(bool checked)
 {
     Q_UNUSED(checked)
-    if (wrapper){
-        wrapper->stopTest();
-    }
+    emit stop();
+    // if (wrapper){
+    //     wrapper->stopTest();
+    // }
 
 }

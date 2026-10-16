@@ -145,8 +145,12 @@ bool Iperf3Wrapper::startTest(const QString& serverHost, int port,
     {
         //use QThread
         Iperf3Worker *worker = new Iperf3Worker();
+        int omit =2;
+        double interval = 1.0;
+        bool bidir = false;
+        bool reverse = false;
         worker->config(serverHost, port, "TCP", duration, streams,
-                       2, 1.0, false, false, isClient);
+                       omit, interval, bidir, reverse, isClient);
         thread = new QThread;
         worker->moveToThread(thread);
         // Lifecycle management

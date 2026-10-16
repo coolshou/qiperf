@@ -1,26 +1,23 @@
 #include "iperf3worker.h"
 
-#include <QDebug>
 #include <QThread>
 #include <QVariant>
 #include <unistd.h> // close()
 
 #include "../iperf3/iperf3/src/queue.h"
 
+#include <QDebug>
 
 Iperf3Worker::Iperf3Worker(QObject *parent) : QObject{parent} { bStop = false; }
 
 Iperf3Worker::~Iperf3Worker() {
-  // Ensure thread stops
-  stopTest();
-  if (iperfThread.joinable())
-    iperfThread.join();
+    stopTest(); // Joins the thread
 
-  // QMutexLocker locker(&testMutex);
-  // if (test) {
-  //     iperf_free_test(test);
-  //     test = nullptr;
-  // }
+    QMutexLocker locker(&testMutex);
+    if (test) {
+        iperf_free_test(test);
+        test = nullptr;
+    }
 }
 
 int Iperf3Worker::config(const QString &target, int port, QString protocal,
@@ -52,10 +49,11 @@ int Iperf3Worker::applyConfig(iperf_test *test) {
   }
   // emit testOutput("iperf set forceflush");
   iperf_set_test_forceflush(test);
-  // emit testOutput("iperf set server port:"+ QString::number(mPort));
+  emit testOutput("iperf set server port:"+ QString::number(mPort));
   iperf_set_test_server_port(test, mPort);
-  // emit testOutput("iperf set bind address:"+ mBindaddr);
-  iperf_set_test_bind_address(test, mBindaddr.toUtf8().constData());
+  emit testOutput("iperf set bind address:"+ mBindaddr);
+  QByteArray bindBytes = mBindaddr.toUtf8();
+  iperf_set_test_bind_address(test, bindBytes.constData());
 
   iperf_set_test_unit_format(test, 'm'); //Mbits/sec
   dUnit = getUnitFormat('m', unitfmt);
@@ -69,11 +67,25 @@ int Iperf3Worker::applyConfig(iperf_test *test) {
   test->user_data = this; // Pass 'this' Qt instance pointer to the C context
   iperf_set_throughput_report_callback(test,
                                        Iperf3Worker::c_throughputCallback);
+
+  if (mProtocal.compare("UDP", Qt::CaseInsensitive) == 0) {
+      emit testOutput("iperf set protocol UDP");
+      rc = set_protocol(test, Pudp);
+  } else if (mProtocal.compare("SCTP", Qt::CaseInsensitive) == 0) {
+      emit testOutput("iperf set protocol SCTP");
+      rc = set_protocol(test, Psctp);
+  } else {
+      // 預設走 TCP，避免傳入未知字串時誤用 SCTP
+      emit testOutput("iperf set protocol TCP");
+      rc = set_protocol(test, Ptcp);
+  }
+
   if (mIsClient) {
     // emit testOutput("iperf set client mode");
     iperf_set_test_role(test, 'c');
     // emit testOutput("iperf set server hostname:"+ mTarget);
-    iperf_set_test_server_hostname(test, mTarget.toUtf8().constData());
+    QByteArray targetBytes = mTarget.toUtf8();
+    iperf_set_test_server_hostname(test, targetBytes.constData());
     // emit testOutput("iperf set test duration:"+ QString::number(mDuration));
     iperf_set_test_duration(test, mDuration);
     // emit testOutput("iperf set num streams:"+ QString::number(mStreams));
@@ -81,19 +93,6 @@ int Iperf3Worker::applyConfig(iperf_test *test) {
     // emit testOutput("iperf set omit:"+ QString::number(mOmit));
     iperf_set_test_omit(test, mOmit);
 
-    if (mProtocal == "TCP") {
-      rc = set_protocol(test, Ptcp);
-    } else if (mProtocal == "UDP") {
-      rc = set_protocol(test, Pudp);
-    } else {
-      qDebug() << "TODO: check sctp setting??";
-      rc = set_protocol(test, Psctp);
-    }
-    QString result = "Fail";
-    if (rc == 0) {
-      result = "OK";
-    }
-    // emit testOutput("iperf set protocol:"+ mProtocal+ " " + result);
 
     if (mBidir) {
       // emit testOutput("iperf set bidirectiona mode");
@@ -138,15 +137,16 @@ int Iperf3Worker::applyConfig(iperf_test *test) {
 
   // iperf_set_test_json_output(test, 0);  // text output (default)
   // iperf_set_test_json_output(test, 1);  // json output
-  return 0;
+  return rc;
 }
 
 void Iperf3Worker::startTest() {
 
   // if (!test || running.load()) return;
   if (running.load()) {
-    emit testOutput("running.loaded!!");
-    return;
+      running.store(false); // Fix: Reset the running flag
+      emit testOutput("running.loaded!!");
+      return;
   }
   bStop = false;
   running.store(true);
@@ -166,6 +166,9 @@ void Iperf3Worker::startTest() {
         test = local_test;
       }
       applyConfig(local_test);
+      if (local_test->protocol && local_test->protocol->id == Ptcp) {
+          qDebug() << "當前協定已成功設定為 TCP";
+      }
       if (mIsClient) {
         emit testOutput("iperf client connect to " + mTarget);
         rc = iperf_run_client(local_test); // BLOCKING call here
@@ -185,7 +188,11 @@ void Iperf3Worker::startTest() {
         }
         // 正常結束一次連線，釋放本次的資源
         emit testOutput("iperf server stoped");
-        iperf_free_test(local_test);
+        {
+            QMutexLocker locker(&testMutex);
+            iperf_free_test(local_test);
+            test = nullptr; // Prevent stopTest() from accessing freed memory
+        }
         emit testOutput("Connection finished, restarting server...");
       }
     } while (!bStop);
@@ -206,7 +213,7 @@ void Iperf3Worker::stopTest() {
     qDebug() << "stopTest";
     iperf_stop_test(test);
   }
-  qDebug() << "testFinished";
+  // qDebug() << "testFinished";
   // emit testFinished(-1);
   // join the blocking thread (do not block the GUI thread — this is a slot in
   // worker thread, so it's okay to wait here. If you want non-blocking join,
@@ -299,6 +306,7 @@ void Iperf3Worker::handleThroughputReport(struct iperf_test *test) {
                       }else{
                           metrics.interval_packet_count = 0;
                           metrics.interval_cnt_error = 0;
+                          metrics.lost_percent = 0.0;
                       }
                   }else{
                       metrics.bytesTransferred = 0;

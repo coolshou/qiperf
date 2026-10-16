@@ -19,6 +19,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+signals:
+    void stop();
 
 private slots:
     void onStart(bool checked);
@@ -29,9 +31,9 @@ private slots:
     void onStarted();
     void onFinished(int exitCode, int exitStatus);
 
-    void on_pb_clear_clicked();
-    void on_pb_quit_clicked();
-    void on_pb_copy_clicked();
+    void onClearClicked();
+    void onQuitClicked();
+    void onCopyClicked();
     //
     void onTestFinished(const QString &jsonResult);
     void onTestError(const QString& errorMessage);
@@ -39,10 +41,8 @@ private slots:
     void onLog(const QString& msg);
     void onIperfIntervalReport(const QList<StreamMetrics> &streamList);
 private:
-
-
     Ui::MainWindow *ui;
-    QThread *iperf_th;
+    // QThread *iperf_th;
     // IperfWorker *iperfer;
     QString serverHost;
     int serverPort = 5201;
