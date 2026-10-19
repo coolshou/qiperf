@@ -5,26 +5,44 @@ qt base app to lunch iperf2/3 in server mode
 # build apk
 
 ```
+# For Qt 6 Android builds, JDK = 17 or 21?
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 export ANDROID_NDK_ROOT=/home/jimmy/bin/android/ndk/
+export ANDROID_NDK_ROOT="/mnt/data/download/android/sdk/ndk/27.2.12479018"
+export QT_ANDROID_KEYSTORE_PATH="$HOME/android_release.keystore.jks"
+export QT_ANDROID_KEYSTORE_ALIAS="play"
+export QT_ANDROID_KEYSTORE_STORE_PASS="your_store_password"
+
 # 1. 建立並進入編譯資料夾（保持原始碼乾淨）
 mkdir build-android && cd build-android
 # 2. 執行對應 arm64-v8a 的 qmake
-/mnt/SOFT/software/dev/QT/src/6.10.3/android_arm64_v8a/bin/qmake ../qiperf.pro -spec android-clang CONFIG+=release
-# 3. 開始編譯並建構 APK
+/opt/Qt/6.10.3/android_arm64_v8a/bin/qmake ../qiperf.pro -spec android-clang CONFIG+=release
+# 3. 開始編譯
 make -j$(nproc)
-make apk ANDROID_DEPLOYMENT_SETTINGS=android-your_project-deployment-settings.json \
-         ANDROID_KEYSTORE_PATH=/<path_to_keystore>/android_release.keystore.jks \
+
+# build debug apk
+make apk ANDROID_DEPLOYMENT_SETTINGS=android-qiperf-deployment-settings.json \
+         ANDROID_KEYSTORE_PATH==/home/coolshou/android_release.keystore.jks \
          ANDROID_KEYSTORE_ALIAS=play
 
-         ANDROID_KEYSTORE_STORE_PASS=您的金鑰庫密碼 \
-         ANDROID_KEYSTORE_KEY_PASS=您的別名密碼
-# build release apk
-cd android-build
-./gradlew assembleRelease  \
--Pandroid.injected.signing.store.file=/<path_to_keystore>/android_release.keystore.jks \
--Pandroid.injected.signing.key.alias=play \
--Pandroid.injected.signing.store.password=您的金鑰庫密碼 \
--Pandroid.injected.signing.key.password=您的別名密碼
+# install debug apk
+adb install -r android-build/build/outputs/apk/debug/android-build-debug.apk
+
+# uninstall 
+adb uninstall tw.idv.coolshou.qiperf
+
+# 4. build release apk/aab
+/opt/Qt/6.10.3/gcc_64/bin/androiddeployqt6 \
+    --input android-qiperf-deployment-settings.json \
+    --output android-build \
+    --aab \
+    --release \
+    --sign /home/coolshou/android_release.keystore.jks play \
+    --storepass "your_keystore_password"
+
+# install signed apk
+adb install -r android-build/build/outputs/apk/release/android-build-release-signed.apk
+
 ```
 
 
