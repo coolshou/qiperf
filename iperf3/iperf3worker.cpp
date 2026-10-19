@@ -212,21 +212,25 @@ void Iperf3Worker::stopTest() {
   if (!running.load())
     return;
   bStop = true;
+  struct iperf_test *testToStop = nullptr;
+
+  // 2. Safely grab the pointer under lock, then RELEASE the lock immediately
   {
       QMutexLocker<QMutex> locker(&testMutex);
-      if (test) {
-        qDebug() << "stopTest";
-        iperf_stop_test(test);
-      }
+      testToStop = test;
+  } // <-- Lock is released here! Safe from deadlocks.
+
+  // 3. Trigger the stop pipe outside the mutex scope
+  if (testToStop) {
+      qDebug() << "stopTest: signaling iperf stop";
+      iperf_stop_test(testToStop);
   }
-  // qDebug() << "testFinished";
-  // emit testFinished(-1);
-  // join the blocking thread (do not block the GUI thread — this is a slot in
-  // worker thread, so it's okay to wait here. If you want non-blocking join,
-  // emit a signal to cleanup later.)
+
+  // 4. Join the thread *outside* of any locks
   if (iperfThread.joinable()) {
-    qDebug() << "iperfThread join";
-    iperfThread.join();
+      qDebug() << "iperfThread join start";
+      iperfThread.join();
+      qDebug() << "iperfThread joined successfully";
   }
 }
 
