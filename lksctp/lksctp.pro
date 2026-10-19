@@ -29,20 +29,20 @@ SOURCES += \
     $$PWD/$$SCTP_SOURCE_DIR/src/lib/connectx.c \
     $$PWD/$$SCTP_SOURCE_DIR/src/lib/peeloff.c \
     $$PWD/$$SCTP_SOURCE_DIR/src/lib/sendmsg.c \
-    $$PWD/$$SCTP_SOURCE_DIR/src/lib/addrs.c \
-    $$PWD/$$SCTP_SOURCE_DIR/src/testlib/sctputil.c \
-    $$PWD/$$SCTP_SOURCE_DIR/src/withsctp/sctp_load_libs.c \
-    $$PWD/$$SCTP_SOURCE_DIR/src/withsctp/sctp_bind.c \
-    $$PWD/$$SCTP_SOURCE_DIR/src/withsctp/sctp_socket.c \
-    $$PWD/$$SCTP_SOURCE_DIR/src/withsctp/sctp_sockopt.c
+    $$PWD/$$SCTP_SOURCE_DIR/src/lib/addrs.c 
+#    $$PWD/$$SCTP_SOURCE_DIR/src/testlib/sctputil.c \
+#    $$PWD/$$SCTP_SOURCE_DIR/src/withsctp/sctp_load_libs.c \
+#    $$PWD/$$SCTP_SOURCE_DIR/src/withsctp/sctp_bind.c \
+#    $$PWD/$$SCTP_SOURCE_DIR/src/withsctp/sctp_socket.c \
+#    $$PWD/$$SCTP_SOURCE_DIR/src/withsctp/sctp_sockopt.c
 
 
 # 5. Header Files
 # List all necessary header files
 HEADERS += \
-    $$PWD/config.h \
-    $$PWD/$$SCTP_SOURCE_DIR/src/apps/sctp_darn.h \
-    $$PWD/$$SCTP_SOURCE_DIR/src/withsctp/sctp_socket.h
+    $$PWD/config.h 
+    # $$PWD/$$SCTP_SOURCE_DIR/src/apps/sctp_darn.h \
+    # $$PWD/$$SCTP_SOURCE_DIR/src/withsctp/sctp_socket.h
     # $$PWD/$$SCTP_SOURCE_DIR/config.h \
     # $$PWD/$$SCTP_SOURCE_DIR/src/include/netinet/sctp.h \
 
