@@ -42,7 +42,8 @@ HEADERS += \
     # $$PWD/$$IPERF3_SOURCE_DIR/src/iperf.h \
     # $$PWD/$$IPERF3_SOURCE_DIR/src/iperf_api.h \
     $$PWD/iperf3worker.h \
-    $$PWD/iperf3wrapper.h
+    $$PWD/iperf3wrapper.h \
+    $$PWD/iperf_safe_fd.h \
     $$PWD/$$IPERF3_SOURCE_DIR/src/version.h
 
 SOURCES += \
