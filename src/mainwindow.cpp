@@ -138,9 +138,9 @@ void MainWindow::onCopyClicked()
 void MainWindow::onServerModeCheckStateChanged(Qt::CheckState state)
 {
     if (state == Qt::Checked){
-        ui->wTarget->setEnabled(false);
+        ui->wClient->setEnabled(false);
     }else{
-        ui->wTarget->setEnabled(true);
+        ui->wClient->setEnabled(true);
     }
 }
 void MainWindow::onTestFinished(const QString& jsonResult)
