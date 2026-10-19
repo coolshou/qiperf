@@ -187,6 +187,7 @@ void Iperf3Worker::startTest() {
           emit testError("Server Error: " +
                          QString::fromUtf8(iperf_strerror(i_errno)));
           iperf_free_test(local_test);
+          test = nullptr;
           break;
         }
         // 正常結束一次連線，釋放本次的資源
@@ -211,10 +212,12 @@ void Iperf3Worker::stopTest() {
   if (!running.load())
     return;
   bStop = true;
-  QMutexLocker<QMutex> locker(&testMutex);
-  if (test) {
-    qDebug() << "stopTest";
-    iperf_stop_test(test);
+  {
+      QMutexLocker<QMutex> locker(&testMutex);
+      if (test) {
+        qDebug() << "stopTest";
+        iperf_stop_test(test);
+      }
   }
   // qDebug() << "testFinished";
   // emit testFinished(-1);
