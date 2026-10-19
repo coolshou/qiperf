@@ -34,6 +34,7 @@ android {
     DISTFILES += \
         android/AndroidManifest.xml \
         android/build.gradle \
+        android/proguard-rules.pro \
         android/res/values/libs.xml \
         android/gradle/wrapper/gradle-wrapper.properties \
         android/gradle/wrapper/gradle-wrapper.jar \
@@ -43,14 +44,7 @@ android {
         android/res/drawable-xhdpi/icon.png \
         android/res/drawable-xxhdpi/icon.png \
         android/res/drawable-xxxhdpi/icon.png
-        # raw/arm/iperf2 \
-        # raw/arm/iperf3 \
-        # raw/arm64/iperf2 \
-        # raw/arm64/iperf3 \
-        # raw/x86/iperf2 \
-        # raw/x86/iperf3 \
-        # raw/x86_64/iperf2 \
-        # raw/x86_64/iperf3
+
     ANDROID_MIN_SDK_VERSION = 26
     ANDROID_TARGET_SDK_VERSION = 36  # Match your installed Android platform SDK version
 }
