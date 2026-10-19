@@ -192,15 +192,24 @@ void MainWindow::onIperfIntervalReport(const QList<StreamMetrics> &streamList)
 
         // Differentiate between Upload and Download streams
         QString direction = metrics.isSender ? "TX" : "RX";
-        QString omit = metrics.omitted ? "omit": "";
+        QString omit = metrics.omitted ? "(omitted)": "";
         // Example: Print to debug console
-        QString msg = QString("Stream [%1]%2-%3 (%4): %5 %6 (%7/%8 (%9%)) %10")
+        QString msg = QString("Stream [%1]%2-%3 (%4): %5 %6")
                           .arg(id).arg(metrics.start_time, 0, 'f', 1)
                           .arg(metrics.start_time+metrics.end_time, 0, 'f', 1)
-                          .arg(direction).arg(speedMbps, 0, 'f', iDecimal).arg(unitf)
-                          .arg(metrics.interval_cnt_error).arg(metrics.interval_cnt_error)
-                          .arg(metrics.lost_percent, 0, 'f', 0)
-                          .arg(omit);
+                          .arg(direction)
+                          .arg(speedMbps, 0, 'f', iDecimal)
+                          .arg(unitf);
+        if (sProtocal.compare("UDP", Qt::CaseInsensitive)==0){
+            msg = QString("%1 (%2/%3 (%4%))")
+                      .arg(msg)
+                      .arg(metrics.interval_cnt_error).arg(metrics.interval_cnt_error)
+                      .arg(metrics.lost_percent, 0, 'f', 0);
+        }
+        if (!omit.isEmpty()){
+             msg = QString("%1 %2").arg(msg).arg(omit);
+        }
+
         onLog(msg);
     }
 }
