@@ -28,6 +28,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 android {
     ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+    # android 15 (API 35) above require 16KB memory page size
+    QMAKE_LFLAGS += -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384
 
     DISTFILES += \
         android/AndroidManifest.xml \
@@ -62,11 +64,26 @@ DISTFILES += \
 
 # 1. 定義編譯另一個 .pro 的命令
 lksctp.target = compile_lksctp
-lksctp.commands = cd $$PWD/lksctp && $(QMAKE) lksctp.pro && $(MAKE)
+android {
+    lksctp.commands = \
+        cd $$PWD/lksctp && \
+        /opt/Qt/6.10.3/android_arm64_v8a/bin/qmake -spec android-clang lksctp.pro && \
+        $(MAKE) clean && \
+        $(MAKE)
+}else {
+    lksctp.commands = cd $$PWD/lksctp && $(QMAKE) lksctp.pro && $(MAKE)
+}
 
 iperf3.target = compile_iperf3
-iperf3.commands = cd $$PWD/iperf3 && $(QMAKE) iperf3.pro && $(MAKE)
-
+android {
+    iperf3.commands = \
+        cd $$PWD/iperf3 && \
+        /opt/Qt/6.10.3/android_arm64_v8a/bin/qmake -spec android-clang iperf3.pro && \
+        $(MAKE) clean && \
+        $(MAKE)
+} else {
+    iperf3.commands = cd $$PWD/iperf3 && $(QMAKE) iperf3.pro && $(MAKE)
+}
 # 2. 將自訂命令加入 Extra Targets
 QMAKE_EXTRA_TARGETS += lksctp iperf3
 

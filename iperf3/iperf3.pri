@@ -3,6 +3,7 @@ QMAKE_CFLAGS += -std=gnu17
 QMAKE_CXXFLAGS += -std=c++17
 QT += core concurrent network
 
+include($$PWD/../lksctp/lksctp.pri)
 IPERF3_SOURCE_DIR = iperf3
 
 INCLUDEPATH += \
