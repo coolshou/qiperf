@@ -18,10 +18,13 @@ mkdir build-android && cd build-android
 # 2. 執行對應 arm64-v8a 的 qmake
 /opt/Qt/6.10.3/android_arm64_v8a/bin/qmake ../qiperf.pro -spec android-clang CONFIG+=release
 # 3. 開始編譯
-make -j$(nproc)
+cd ../iperf3 ; make clean ; cd ../lksctp ; make clean
+cd ../build-android ; make clean ; make -j$(nproc)
 
-# build debug apk
-make apk ANDROID_DEPLOYMENT_SETTINGS=android-qiperf-deployment-settings.json \
+# build debug apk/aab
+make aab 
+
+ANDROID_DEPLOYMENT_SETTINGS=android-qiperf-deployment-settings.json \
          ANDROID_KEYSTORE_PATH==/home/coolshou/android_release.keystore.jks \
          ANDROID_KEYSTORE_ALIAS=play
 
