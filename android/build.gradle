@@ -28,7 +28,8 @@ android {
      *******************************************************/
 
     namespace = "tw.idv.coolshou.qiperf"
-    compileSdkVersion androidCompileSdkVersion
+//    compileSdkVersion androidCompileSdkVersion
+    compileSdk 36
     buildToolsVersion androidBuildToolsVersion
     ndkVersion = androidNdkVersion
 
@@ -53,8 +54,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
 
     lintOptions {

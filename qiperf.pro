@@ -8,7 +8,7 @@ CONFIG += c++17
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-include(lksctp/lksctp.pri)
+# include(lksctp/lksctp.pri)
 include(iperf3/iperf3.pri)
 
 SOURCES += \
@@ -49,7 +49,8 @@ android {
         # raw/x86/iperf3 \
         # raw/x86_64/iperf2 \
         # raw/x86_64/iperf3
-
+    ANDROID_MIN_SDK_VERSION = 26
+    ANDROID_TARGET_SDK_VERSION = 36  # Match your installed Android platform SDK version
 }
 
 RESOURCES += \

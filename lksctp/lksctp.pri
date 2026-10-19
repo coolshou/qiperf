@@ -9,7 +9,11 @@ INCLUDEPATH += $$PWD/$$SCTP_SOURCE_DIR/src/include/
 SCTP_PATH = $$PWD/../lib
 
 # Link the specific static library
+android {
+LIBS += $$SCTP_PATH/$$QT_ARCH/libsctp_arm64-v8a.a
+} else {
 LIBS += $$SCTP_PATH/$$QT_ARCH/libsctp.a
+}
 
 HEADERS += \
     $$PWD/config.h
