@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->rb_v2->setVisible(false);
     ui->groupBox->setVisible(false);
+    connect(ui->cb_ServerMode, &QCheckBox::checkStateChanged, this, &MainWindow::onServerModeCheckStateChanged);
     // mThreadId = nullptr;
     // 1. Create the wrapper object
     wrapper= new Iperf3Wrapper(parent);
@@ -56,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pb_clear, &QPushButton::clicked, this, &MainWindow::onClearClicked);
     connect(ui->pb_quit, &QPushButton::clicked, this, &MainWindow::onQuitClicked);
     connect(ui->pb_copy, &QPushButton::clicked, this, &MainWindow::onCopyClicked);
+
     connect(this, &MainWindow::stop, wrapper, &Iperf3Wrapper::stopTest);
 }
 
@@ -71,12 +73,17 @@ void MainWindow::onStart(bool checked)
         // ui->cb_ServerMode
         serverHost = ui->le_target->text();
         serverPort = ui->sb_port->value();
-        // duration
-        // streams
+        if (ui->rbTCP->isChecked()){
+            sProtocal = "TCP";
+        }else {
+            sProtocal = "UDP";
+        }
+        duration = ui->sb_duration->value();
+        streams = ui->sb_parallel->value();
         isClient = !ui->cb_ServerMode->isChecked();
 
-        if (!wrapper->startTest(serverHost, serverPort, duration,
-                                streams, isClient)) {
+        if (!wrapper->startTest(serverHost, serverPort, sProtocal,
+                                duration, streams, isClient)) {
             onLog("Failed to start test.");
         }
     }
@@ -126,6 +133,15 @@ void MainWindow::onCopyClicked()
 {
     //copy all log to clipboard
     qApp->clipboard()->setText(ui->te_log->toPlainText());
+}
+
+void MainWindow::onServerModeCheckStateChanged(Qt::CheckState state)
+{
+    if (state == Qt::Checked){
+        ui->wTarget->setEnabled(false);
+    }else{
+        ui->wTarget->setEnabled(true);
+    }
 }
 void MainWindow::onTestFinished(const QString& jsonResult)
 {

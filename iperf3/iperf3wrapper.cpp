@@ -130,7 +130,7 @@ void Iperf3Wrapper::onTestStarted(quintptr threadId)
 {
     emit testStarted(threadId);
 }
-bool Iperf3Wrapper::startTest(const QString& serverHost, int port,
+bool Iperf3Wrapper::startTest(const QString& serverHost, int port, QString sProtocal,
                                     int duration, int streams, bool isClient)
 {
     if (thread) {
@@ -149,7 +149,7 @@ bool Iperf3Wrapper::startTest(const QString& serverHost, int port,
         double interval = 1.0;
         bool bidir = false;
         bool reverse = false;
-        worker->config(serverHost, port, "TCP", duration, streams,
+        worker->config(serverHost, port, sProtocal, duration, streams,
                        omit, interval, bidir, reverse, isClient);
         thread = new QThread;
         worker->moveToThread(thread);

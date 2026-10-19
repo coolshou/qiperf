@@ -13,7 +13,7 @@ Iperf3Worker::Iperf3Worker(QObject *parent) : QObject{parent} { bStop = false; }
 Iperf3Worker::~Iperf3Worker() {
     stopTest(); // Joins the thread
 
-    QMutexLocker locker(&testMutex);
+    QMutexLocker<QMutex> locker(&testMutex);
     if (test) {
         iperf_free_test(test);
         test = nullptr;
@@ -25,7 +25,7 @@ int Iperf3Worker::config(const QString &target, int port, QString protocal,
                          bool bidir, bool reverse, bool isClient,
                          QString bindaddr) {
   emit testOutput("Iperf3Worker::config");
-  QMutexLocker locker(&testMutex);
+  QMutexLocker<QMutex> locker(&testMutex);
   mTarget = target;
   mPort = port;
   mProtocal = protocal;
@@ -78,6 +78,9 @@ int Iperf3Worker::applyConfig(iperf_test *test) {
       // 預設走 TCP，避免傳入未知字串時誤用 SCTP
       emit testOutput("iperf set protocol TCP");
       rc = set_protocol(test, Ptcp);
+  }
+  if (rc != 0) {
+      emit testOutput("ERROR: iperf set protocol Fail:" + mProtocal);
   }
 
   if (mIsClient) {
@@ -162,7 +165,7 @@ void Iperf3Worker::startTest() {
         return;
       }
       { // Use a mutex if 'test' is accessed by other threads
-        QMutexLocker locker(&testMutex);
+        QMutexLocker<QMutex> locker(&testMutex);
         test = local_test;
       }
       applyConfig(local_test);
@@ -189,7 +192,7 @@ void Iperf3Worker::startTest() {
         // 正常結束一次連線，釋放本次的資源
         emit testOutput("iperf server stoped");
         {
-            QMutexLocker locker(&testMutex);
+            QMutexLocker<QMutex> locker(&testMutex);
             iperf_free_test(local_test);
             test = nullptr; // Prevent stopTest() from accessing freed memory
         }
@@ -208,7 +211,7 @@ void Iperf3Worker::stopTest() {
   if (!running.load())
     return;
   bStop = true;
-  QMutexLocker locker(&testMutex);
+  QMutexLocker<QMutex> locker(&testMutex);
   if (test) {
     qDebug() << "stopTest";
     iperf_stop_test(test);

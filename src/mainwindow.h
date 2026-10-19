@@ -34,6 +34,7 @@ private slots:
     void onClearClicked();
     void onQuitClicked();
     void onCopyClicked();
+    void onServerModeCheckStateChanged(Qt::CheckState state);
     //
     void onTestFinished(const QString &jsonResult);
     void onTestError(const QString& errorMessage);
@@ -45,6 +46,7 @@ private:
     // QThread *iperf_th;
     // IperfWorker *iperfer;
     QString serverHost;
+    QString sProtocal;
     int serverPort = 5201;
     int duration = 30;
     int streams = 1;

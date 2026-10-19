@@ -15,7 +15,7 @@ class Iperf3Wrapper : public QObject
     Q_OBJECT
 public:
     explicit Iperf3Wrapper(QObject *parent = nullptr);
-    ~Iperf3Wrapper();
+    ~Iperf3Wrapper() override;
 
     /**
      * @brief Starts an iPerf3 client test in a separate thread.
@@ -26,7 +26,7 @@ public:
      * @param isClient act as client or server
      * @return true if the test was successfully initiated, false otherwise.
      */
-    bool startTest(const QString& serverHost, int port, int duration,
+    bool startTest(const QString& serverHost, int port, QString sProtocal, int duration,
                          int streams, bool isClient);
     void stopTest();
     /**
