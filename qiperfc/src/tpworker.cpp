@@ -43,45 +43,56 @@ TpWorker::~TpWorker()
 
 bool TpWorker::waitAllServerReady()
 {
-    //wait all m_status_server enter TPStatus::started
-    QDateTime sTime = QDateTime::currentDateTime();
-    bool bServerReady=false;
-    // int waitedSecs = 0;
-
-    while (!bServerReady && !bUserStop) {
-        // this is a blocking loop, not good
-        QThread::msleep(100);  // check 5 times per second
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
-
-        int readyCount = 0;
-        for (const auto &skey : m_status_server.keys()) {
-            if (m_status_server.value(skey) == TPStatus::started) {
-                readyCount++;
-            }
-            QCoreApplication::processEvents(QEventLoop::AllEvents);
-
+    if (bUserStop) return false;
+    // 狀態檢查工具（執行緒安全）
+    auto checkReady = [this](int &outReady, int &outTotal) -> bool {
+        QMutexLocker locker(&m_mutex);
+        outTotal = m_status_server.size();
+        outReady = 0;
+        for (auto status : m_status_server) {
+            if (status == TPStatus::started) outReady++;
         }
-
-        if (readyCount >= m_status_server.size()) {
-            bServerReady = true;
-            break;  // all servers ready!
-        }
-
-        qint64 elapsed = sTime.secsTo(QDateTime::currentDateTime());
-        qint64 remaining = m_WaitServerReady - elapsed;
-
-        emit updateStatus(QString("Wait server ready: %1/%2 (%3s left)")
-                              .arg(readyCount)
-                              .arg(m_status_server.size())
-                              .arg(remaining));
-
-        if (remaining <= 0) {
-            debug("[TpWorker]Server ready TIMEOUT",4);
-            break;
-        }
+        return (outTotal > 0 && outReady >= outTotal);
+    };
+    int readyCount = 0, totalCount = 0;
+    if (checkReady(readyCount, totalCount)) {
+        return true; // 進入前已全部就緒，直接返回
     }
-
-    return bServerReady;
+    QEventLoop loop;
+    QElapsedTimer timer;
+    timer.start();
+    auto tryExit = [&]() {
+        int r = 0, t = 0;
+        if (checkReady(r, t) || bUserStop || bErrorStop > 0) {
+            loop.quit();
+        }
+    };
+    // 1. 信號驅動：Server 狀態變更或使用者強制停止時立即響應（0ms 延遲）
+    QMetaObject::Connection c1 = connect(this, &TpWorker::serverStatusChanged, &loop, tryExit);
+    QMetaObject::Connection c2 = connect(this, &TpWorker::requestLoopQuit, &loop, tryExit);
+    // 2. 定時器：每秒更新一次 UI 狀態，並把關總逾時
+    QTimer secondTimer;
+    connect(&secondTimer, &QTimer::timeout, &loop, [&]() {
+        qint64 remaining = m_WaitServerReady - (timer.elapsed() / 1000);
+        int r = 0, t = 0;
+        bool ready = checkReady(r, t);
+        emit updateStatus(QString("Wait server ready: %1/%2 (%3s left)")
+                              .arg(r).arg(t).arg(qMax(0LL, remaining)));
+        if (ready || remaining <= 0 || bUserStop || bErrorStop > 0) {
+            if (remaining <= 0) {
+                debug("[TpWorker]Server ready TIMEOUT", 4);
+            }
+            loop.quit();
+        }
+    });
+    secondTimer.start(1000);
+    // 進入事件迴圈休眠等待（OS 底層 Socket 事件喚醒，0% CPU 空轉）
+    loop.exec();
+    // 清理資源
+    disconnect(c1);
+    disconnect(c2);
+    secondTimer.stop();
+    return checkReady(readyCount, totalCount) && !bUserStop && (bErrorStop == 0);
 }
 
 bool TpWorker::waitServerReady(QString skey, TPStatus::Status expectstatus)
@@ -113,43 +124,65 @@ bool TpWorker::waitServerReady(QString skey, TPStatus::Status expectstatus)
 
 bool TpWorker::waitAllClientReady()
 {
-    //wait all m_status_client enter TPStatus::started
-    QDateTime sTime = QDateTime::currentDateTime();
-    bool bClientReady=false;
-    // int waitedSecs = 0;
+    if (bUserStop) return false;
 
-    while (!bClientReady && !bUserStop) {
-        // this is a blocking loop, not good
-        QThread::msleep(200);  // check 5 times per second
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
-
-        int readyCount = 0;
-        for (const auto &skey : m_status_client.keys()) {
-            if (m_status_client.value(skey) == TPStatus::started) {
-                readyCount++;
-            }
+    // 狀態檢查工具（執行緒安全）
+    auto checkReady = [this](int &outReady, int &outTotal) -> bool {
+        QMutexLocker locker(&m_mutex);
+        outTotal = m_status_client.size();
+        outReady = 0;
+        for (auto status : m_status_client) {
+            if (status == TPStatus::started) outReady++;
         }
+        return (outTotal > 0 && outReady >= outTotal);
+    };
 
-        if (readyCount >= m_status_client.size()) {
-            bClientReady = true;
-            break;  // all Client ready!
-        }
-
-        qint64 elapsed = sTime.secsTo(QDateTime::currentDateTime());
-        qint64 remaining = m_WaitServerReady - elapsed;
-
-        emit updateStatus(QString("Wait Client ready: %1/%2 (%3s left)")
-                              .arg(readyCount)
-                              .arg(m_status_client.size())
-                              .arg(remaining));
-
-        if (remaining <= 0) {
-            debug("[TpWorker]Client ready TIMEOUT",4);
-            break;
-        }
+    int readyCount = 0, totalCount = 0;
+    if (checkReady(readyCount, totalCount)) {
+        return true; // 進入前已全部就緒，直接返回
     }
 
-    return bClientReady;
+    QEventLoop loop;
+    QElapsedTimer timer;
+    timer.start();
+
+    auto tryExit = [&]() {
+        int r = 0, t = 0;
+        if (checkReady(r, t) || bUserStop || bErrorStop > 0) {
+            loop.quit();
+        }
+    };
+
+    // 1. 信號驅動：Client 狀態變更或使用者強制停止時立即響應（0ms 延遲）
+    QMetaObject::Connection c1 = connect(this, &TpWorker::clientStatusChanged, &loop, tryExit);
+    QMetaObject::Connection c2 = connect(this, &TpWorker::requestLoopQuit, &loop, tryExit);
+
+    // 2. 定時器：每秒更新一次 UI 狀態，並把關總逾時
+    QTimer secondTimer;
+    connect(&secondTimer, &QTimer::timeout, &loop, [&]() {
+        qint64 remaining = m_WaitServerReady - (timer.elapsed() / 1000);
+        int r = 0, t = 0;
+        bool ready = checkReady(r, t);
+        emit updateStatus(QString("Wait Client ready: %1/%2 (%3s left)")
+                              .arg(r).arg(t).arg(qMax(0LL, remaining)));
+        if (ready || remaining <= 0 || bUserStop || bErrorStop > 0) {
+            if (remaining <= 0) {
+                debug("[TpWorker]Client ready TIMEOUT", 4);
+            }
+            loop.quit();
+        }
+    });
+    secondTimer.start(1000);
+
+    // 進入事件迴圈休眠等待（OS 底層 Socket 事件喚醒，0% CPU 空轉）
+    loop.exec();
+
+    // 清理資源
+    disconnect(c1);
+    disconnect(c2);
+    secondTimer.stop();
+
+    return checkReady(readyCount, totalCount) && !bUserStop && (bErrorStop == 0);
 }
 
 bool TpWorker::waitClientReady(QString skey, TPStatus::Status expectstatus)
@@ -295,8 +328,9 @@ void TpWorker::work()
                 return;
             }
             if(bUserStop){
-                err = "[TpWorker]User Stop on wait server websocket connected!!";
+                err = "[TpWorker][User Stop] on wait server websocket connected!!";
                 debug(err);
+                emit errorStop(5, err);
                 return;
             }
             //tell server add iperf server
@@ -366,7 +400,8 @@ void TpWorker::work()
                 return;
             }
             if(bUserStop){
-                debug("[TpWorker]User Stop on wait client websocket connected!!");
+                debug("[TpWorker][User Stop] on wait client websocket connected!!");
+                emit errorStop(6, err);
                 return;
             }
             //tell client add iperf client
@@ -391,7 +426,7 @@ void TpWorker::work()
     qDebug() << "totalrecordrate:" << QString::number(totalrecordrate);
     emit updateInterval(maxInterval);
     if(bErrorStop>0){
-        emit errorStop(4, "Unknown error happen!!("+QString::number(bErrorStop)+")");
+        emit errorStop(7, "Unknown error happen!!("+QString::number(bErrorStop)+")");
         return;
     }
     //Start server
@@ -406,7 +441,9 @@ void TpWorker::work()
         }
     }
     if(bErrorStop>0){
-        debug("[TpWorker]Start server error happen!!");
+        err = "[TpWorker]Start server error happen!!";
+        debug(err);
+        emit errorStop(8, err);
         return;
     }
     //###############################
@@ -415,8 +452,9 @@ void TpWorker::work()
     bool bServerReady = waitAllServerReady();
 
     if(bUserStop){
-        err = "User Stop on wait ServerReady!!";
+        err = "[TpWorker][User Stop] on wait ServerReady!!";
         emit updateStatus(err);
+        emit errorStop(9, err);
         return;
     }
     if (!bServerReady){
@@ -428,7 +466,7 @@ void TpWorker::work()
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
         debug("[TpWorker]server not readey: " + ds.join(","),4);
-        emit errorStop(4, "Iperf server not readey:" +  ds.join(","));
+        emit errorStop(10, "Iperf server not readey:" +  ds.join(","));
         return;
     }
     //Start client
@@ -450,11 +488,13 @@ void TpWorker::work()
             // QCoreApplication::processEvents(QEventLoop::AllEvents);
         }
         debug("[TpWorker]client not readey: " + ds.join(","),4);
-        emit errorStop(4, "Iperf client not readey:" +  ds.join(","));
+        emit errorStop(11, "Iperf client not readey:" +  ds.join(","));
         return;
     }
     if(bErrorStop>0){
-        debug("[TpWorker]Start client error happen!!");
+        err = "[TpWorker]Start client error happen!!";
+        debug(err);
+        emit errorStop(12, err);
         return;
     }
     QDateTime waitStartTime = QDateTime::currentDateTime();
@@ -542,8 +582,10 @@ void TpWorker::onIperfStarted(QString smode, QString ipport)
     debug("[TpWorker]onIperfStarted:" + smode + " : " + ipport, 4);
     if (smode.contains("S", Qt::CaseSensitive)){
         m_status_server[ipport] = TPStatus::started;
+        emit serverStatusChanged();
     }else{
         m_status_client[ipport] = TPStatus::started;
+        emit clientStatusChanged();
     }
 }
 
@@ -866,6 +908,8 @@ void TpWorker::onStop(){
 void TpWorker::onSetStop()
 {
     bUserStop = true;
+    emit requestLoopQuit(); // 確保正在 waitAllServerReady 等待的 loop 立即退出
+    onStop();
 }
 
 void TpWorker::onStatusReady(QString refrow, const QString& skey,

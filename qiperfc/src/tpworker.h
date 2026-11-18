@@ -47,6 +47,9 @@ signals:
     void debuginfo(QString msg);
     // Signals to communicate the overall result of the HighLevelWorker's task back to the main thread
     void workFinished(const QString& result); // e.g., "Success", "Timeout", "Error"
+    void serverStatusChanged(); // 狀態改變時通知
+    void clientStatusChanged();
+    void requestLoopQuit();      // 強制退出區域等待迴圈
 
 private slots:
     void onIperfStarted(QString smode, QString ipport);
