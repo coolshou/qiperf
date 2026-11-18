@@ -156,3 +156,11 @@ QStringList EndPoint::getSerials()
     }
     return stringList;
 }
+
+void EndPoint::clearData()
+{
+    if (m_childItems.count()>0){
+        m_childItems.clear(); // after clear, no new data update?!
+    }
+    // m_itemDatas.clear(); // this will clear all data, cause no update
+}

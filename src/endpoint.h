@@ -28,8 +28,6 @@ public:
     int row() const;
     EndPoint *parentItem();
 
-
-
     QString getID();
     void loadData(QString data);
     QString getJsonData();
@@ -38,6 +36,8 @@ public:
     void setEnabled(bool enable);
     bool getEnabled();
     QStringList getSerials();
+
+    void clearData();
 signals:
 
 private:
