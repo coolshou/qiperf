@@ -72,6 +72,12 @@ void FormQIperfds::onContextMenu(QPoint pos)
     m_menu->popup(ui->treeView->mapToGlobal(pos));
 }
 
+void FormQIperfds::onRefresh(bool checked)
+{
+    Q_UNUSED(checked)
+    emit clearData();
+}
+
 void FormQIperfds::onRestart(bool checked)
 {
     Q_UNUSED(checked)
@@ -93,6 +99,15 @@ void FormQIperfds::onResetNtp(bool checked)
         emit clearNtpStatus(target);
     };
 
+}
+
+void FormQIperfds::onRebootOS(bool checked)
+{
+    Q_UNUSED(checked)
+    QModelIndexList idxs = ui->treeView->selectionModel()->selectedRows();
+    if (idxs.length()>0){
+        //TODO: ask selected qiperfd do system reboot
+    }
 }
 
 void FormQIperfds::onSetDebug(bool checked)
@@ -137,15 +152,24 @@ void FormQIperfds::askRestart(QString target)
 void FormQIperfds::initMenu()
 {
     m_menu=new QMenu();
+    m_refreshAction = new QAction("Refresh");
+    connect(m_refreshAction, &QAction::triggered, this, &FormQIperfds::onRefresh);
     m_restartAction = new QAction("Restart qiperfd");
     connect(m_restartAction, &QAction::triggered, this, &FormQIperfds::onRestart);
     m_resetNtpAction = new QAction("Reset NTP");
     connect(m_resetNtpAction, &QAction::triggered, this, &FormQIperfds::onResetNtp);
+    m_rebootAction = new QAction("Reboot System");
+    connect(m_rebootAction, &QAction::triggered, this, &FormQIperfds::onRebootOS);
+
     m_debugAction = new QAction("Set Debug");
     connect(m_debugAction, &QAction::triggered, this, &FormQIperfds::onSetDebug);
 
+    m_menu->addAction(m_refreshAction);
+    m_menu->addSeparator();
     m_menu->addAction(m_restartAction);
     m_menu->addAction(m_resetNtpAction);
+    m_menu->addSeparator();
+    m_menu->addAction(m_rebootAction);
     m_menu->addSeparator();
     m_menu->addAction(m_debugAction);
 }

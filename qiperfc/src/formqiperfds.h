@@ -23,13 +23,15 @@ public:
 signals:
     void clearNtpStatus(QString target);
     void setDebugLv(QString target, int lv);
-
+    void clearData();
 protected:
     void changeEvent(QEvent *e);
 private slots:
     void onContextMenu(QPoint pos);
+    void onRefresh(bool checked);
     void onRestart(bool checked);
     void onResetNtp(bool checked);
+    void onRebootOS(bool checked);
     void onSetDebug(bool checked);
     void askRestart(QString target);
 private:
@@ -37,8 +39,10 @@ private:
     Ui::FormQIperfds *ui;
     QSortFilterProxyModel *proxyModel;
     QMenu *m_menu;
+    QAction *m_refreshAction;
     QAction *m_restartAction;
     QAction *m_resetNtpAction;
+    QAction *m_rebootAction;
     QAction *m_debugAction;
 };
 
