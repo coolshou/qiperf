@@ -90,7 +90,7 @@ sudo apt install libglut-dev libsystemd-dev
 sudo apt install qmake6 qt6-base-dev  qt6-websockets-dev qt6-serialport-dev qt6-webengine-dev qt6-base-private-dev libqt6core5compat6-dev
 ./build_deb.sh
 ```
-## build pdeb ackets for ubuntu 22.04 by Dockerfile.ubuntu22.04:
+## build deb packages for ubuntu 22.04 by Dockerfile.ubuntu22.04:
 ```
 # build ubuntu 22.04 qt5 image
 docker build -t ubuntu-qt5:22.04 -f Dockerfile.ubuntu22.04 .
