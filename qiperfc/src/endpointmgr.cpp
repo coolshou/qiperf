@@ -335,6 +335,20 @@ QMap<QString, QStringList> EndPointMgr::getSerials()
     return ds;
 }
 
+void EndPointMgr::onClearData()
+{
+    if (rootItem->childCount()>0){
+        // beginResetModel();
+        QModelIndex midx = indexFromItem(rootItem);
+        int iend = rootItem->childCount();
+        beginRemoveRows(midx, 0, iend);
+        rootItem->clearData();
+        // endResetModel();
+        endRemoveRows();
+    }
+
+}
+
 EndPoint* EndPointMgr::getEndPoint(QString id)
 {
     foreach(EndPoint *ep, m_endpoints){

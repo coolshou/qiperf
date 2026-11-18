@@ -57,11 +57,13 @@ public:
     QString getPCsInfo(QStringList pcs);
     QJsonArray getPCsInfos(QStringList pcs);
     QMap<QString, QStringList>  getSerials();
-
+public slots:
+    void onClearData();
 private:
     EndPoint* getEndPoint(QString id);
 
 signals:
+
 private:
 //    void setupModelData(const QStringList &lines, EndPoint *parent);
     QStringList _headers;
