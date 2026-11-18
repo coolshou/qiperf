@@ -1,3 +1,12 @@
+qiperf (0.19.11511.18-1) unstable; urgency=medium
+
+  *Fix: Terminal's default font name
+  *Update iperf3 to 3.22
+  *Fix: When User stop test, the Start/Stop button status is wrong
+  *Optimized: test start flow
+
+ -- coolshou <coolshou2060@gmail.com>  Wed, 18 Nov 2026 11:11:11 +0800
+
 qiperf (0.18.11509.11-1) unstable; urgency=medium
 
   *FIX show log, some file's size show 0, but the file do have data in it.
