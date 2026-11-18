@@ -43,7 +43,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     {
         if (!d.mkpath(tmpfilepath))
         {
-            onLog("ERROR: mkdir " + tmpfilepath + " Fail");
+            onLog("ERROR: mkpath " + tmpfilepath + " Fail");
         }
     }
     // onLog("tmpfilepath: "+ tmpfilepath);
@@ -61,7 +61,7 @@ QIperfd::QIperfd(PipeServer *pserver, QObject *parent)
     QFileInfo fi(cfg->fileName());
     if (!QDir(fi.absolutePath()).exists())
     {
-        QDir().mkdir(fi.absolutePath());
+        QDir().mkpath(fi.absolutePath());
     }
     apppath = qApp->applicationDirPath(); // app run time path:/home/coolshou/sdb/download/work/qiperf/Debug
     m_nssm = QDir::toNativeSeparators(apppath + QDir::separator() + "nssm.exe");
