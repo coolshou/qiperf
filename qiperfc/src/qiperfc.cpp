@@ -73,7 +73,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_throughputview = new ThroughputView(ui->actionCopy, ui->actionPaste,
                                           ui->actionDelete, ui->actionCopyText,
                                           m_settings,
-                                          m_TPGrouptype, m_TPUnit);
+                                          m_TPGrouptype, m_TPUnit,
+                                          m_xAxisMaxDefault, m_LostRateBarWidth);
     connect(m_throughputview, &ThroughputView::updateActions, this, &QIperfC::onUpdateActions);
     connect(m_throughputview, &ThroughputView::updateActionsSave, this, &QIperfC::onUpdateActionsSave);
     connect(m_throughputview, &ThroughputView::updateActionsEdit, this, &QIperfC::onUpdateActionsEdit);
@@ -97,6 +98,8 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     initStatusbar();
     connect(m_dlgoption, &dlgOption::updateCpuCheckInterval, this, &QIperfC::onUpdateCpuCheckInterval);
     connect(m_dlgoption, &dlgOption::updateMemCheckInterval, this, &QIperfC::onUpdateMemCheckInterval);
+    connect(m_dlgoption, &dlgOption::updateXAxisMaxDefault, m_throughputview, &ThroughputView::onUpdateXAxisMaxDefault);
+    connect(m_dlgoption, &dlgOption::updateLostRateBarWidth, m_throughputview, &ThroughputView::onUpdateLostRateBarWidth);
     connect(m_throughputview, &ThroughputView::showGrouptype, m_dlgoption, &dlgOption::onSetTPGroupType);
     // UI actions
     initActions();
@@ -127,6 +130,7 @@ QIperfC::QIperfC(QString logpath, QWidget *parent)
     m_frm_qiperfds->setModel(m_endpointmgr);
     connect(m_frm_qiperfds, &FormQIperfds::clearNtpStatus, this, &QIperfC::onClearNtpStatus);
     connect(m_frm_qiperfds, &FormQIperfds::setDebugLv, this, &QIperfC::onSetDebugLv);
+    connect(m_frm_qiperfds, &FormQIperfds::clearData, m_endpointmgr, &EndPointMgr::onClearData);
     //
     m_receiver = new UdpReceiver(QIPERFD_BPORT, this);
     connect(m_receiver, &UdpReceiver::notice, this, &QIperfC::onNotice);
@@ -653,11 +657,11 @@ void QIperfC::onErrorStop(int err, QString msg)
 {
     bErrorStop = err;
     m_ErrorMSG = msg;
-    if (err)
+    if (err != 0)
     {
         qDebug() << "onErrorStop: (" << bErrorStop << ") " << m_ErrorMSG;
         // emit updateStarttime(QDateTime());
-        showTrayMessage("ERROR", m_ErrorMSG, QSystemTrayIcon::Critical);
+        showTrayMessage("ERROR", m_ErrorMSG, QSystemTrayIcon::Critical, 0);
     }
     emit updateStatus(msg);
     updateRunStatus(false);
@@ -1180,6 +1184,8 @@ void QIperfC::loadSettings()
     m_TPGrouptype = m_settings->value("TPGroupType", 0).toInt();
     m_TPUnit = m_settings->value("TPUnit", "Mbits/sec").toString();
     m_IgnoreWrongInterval = m_settings->value("IgnoreWrongInterval", false).toBool();
+    m_xAxisMaxDefault = m_settings->value("xAxisMaxDefault", 60).toInt();
+    m_LostRateBarWidth = m_settings->value("LostRateBarWidth", 20).toInt();
     //    m_frm_option->setWaitServerReady();
     m_settings->endGroup();
 

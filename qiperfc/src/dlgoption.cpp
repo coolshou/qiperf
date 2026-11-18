@@ -52,6 +52,8 @@ dlgOption::dlgOption(QSettings *cfg, QWidget *parent) :
     ui->tabWidget->setCurrentIndex(0);
     connect(ui->cbCpuCheck, &QCheckBox::clicked, this, &dlgOption::onCpuCheckClicked);
     connect(ui->cbMemCheck, &QCheckBox::clicked, this, &dlgOption::onMemCheckClicked);
+    connect(ui->sbXAxisMaxDefault, &QSpinBox::valueChanged, this, &dlgOption::onXAxisMaxDefaultValueChanged);
+    connect(ui->sbLostRateBarWidth, &QSpinBox::valueChanged, this, &dlgOption::onLostRateBarWidthValueChanged);
 }
 
 dlgOption::~dlgOption()
@@ -97,6 +99,7 @@ void dlgOption::loadcfg(QSettings *cfg)
     }
     ui->cb_IgnoreWrongInterval->setChecked(cfg->value("IgnoreWrongInterval", true).toBool());
     ui->sbXAxisMaxDefault->setValue(cfg->value("xAxisMaxDefault", 60).toInt());
+    ui->sbLostRateBarWidth->setValue(cfg->value("LostRateBarWidth", 20).toInt());
     cfg->endGroup();
 
     cfg->beginGroup("agent");
@@ -192,6 +195,7 @@ void dlgOption::updatecfg()
     m_cfg->setValue("TPUnit", ui->cb_TPUnit->currentText());
     m_cfg->setValue("IgnoreWrongInterval", ui->cb_IgnoreWrongInterval->isChecked());
     m_cfg->setValue("xAxisMaxDefault", ui->sbXAxisMaxDefault->value());
+    m_cfg->setValue("LostRateBarWidth", ui->sbLostRateBarWidth->value());
     m_cfg->endGroup();
 
     m_cfg->beginGroup("agent");
@@ -399,6 +403,16 @@ void dlgOption::onMemCheckIntervalValueChanged(int value)
         ui->cbMemCheck->setChecked(true);
         ui->sbMemCheckInterval->setEnabled(true);
     }
+}
+
+void dlgOption::onXAxisMaxDefaultValueChanged(int value)
+{
+    emit updateXAxisMaxDefault(value);
+}
+
+void dlgOption::onLostRateBarWidthValueChanged(int width)
+{
+    emit updateLostRateBarWidth(width);
 }
 
 // void dlgOption::setTPsize(int width, int heigth)

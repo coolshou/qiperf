@@ -36,6 +36,8 @@ public slots:
     void onMemCheckClicked(bool checked);
     void onCpuCheckIntervalValueChanged(int value);
     void onMemCheckIntervalValueChanged(int value);
+    void onXAxisMaxDefaultValueChanged(int value);
+    void onLostRateBarWidthValueChanged(int width);
 signals:
     // void ipaddressUpdated(QString ipaddress, int port);
     void widthChanged(int width);
@@ -46,6 +48,8 @@ signals:
     void updateOpenStreetMapTile(QString tile);
     void updateCpuCheckInterval(int interval);
     void updateMemCheckInterval(int interval);
+    void updateXAxisMaxDefault(int interval);
+    void updateLostRateBarWidth(int width);
 protected:
     void changeEvent(QEvent *e) override;
     void hidetab(QString tabname);

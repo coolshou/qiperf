@@ -28,7 +28,7 @@ public:
 
 public:
   // explicit TPPlot(bool showgroup, QString sunit, QWidget *parent = nullptr);
-  explicit TPPlot(int tpgroup, QString sunit, int xAxisMaxDefault = 60, QWidget *parent = nullptr);
+  explicit TPPlot(int tpgroup, QString sunit, int xAxisMaxDefault = 60, int barWidth=20, QWidget *parent = nullptr);
   void addTPData(QString refrowidx, double xdata, double ydata, //double lostrate,
                  qint64 pktlost, qint64 pkttotal,
                  QString grouptag = ""); //
@@ -43,7 +43,9 @@ public:
   void addThroughputLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal, int startidx=0);
   void addLostRateLegendItems(bool bshowDetail, bool bshowDirection, bool bshowTotal, int startidx=0);
 
-  public slots:
+public slots:
+  void setXAxisMaxDefault(int value);
+  void setLostRateBarWidth(int width);
   void onIperfTPdata(QString sInterval, QString refrowidx, QString data,
                      qint64 pktlost, qint64 pkttotal,
                      // QString lostrate,
@@ -95,6 +97,7 @@ private:
   QDateTime m_starttime;
   // QMap<QString, QCPGraph *> m_graphs; // throughput graphs
   QMap<QString, MyQCPGraph *> m_graphs;    // throughput graphs
+  int m_barwidth;
   QMap<QString, MyQCPBars *> m_lostgraphs; // lost rate graphs
   QList<QString> m_legendKeys; // 用來維護插入順序
   QHash<QString, QCPAbstractLegendItem *> m_legends; // legends to store not visible legend item

@@ -288,6 +288,8 @@ private:
     ThroughputView *m_throughputview;
     ViewManager *m_views;
     bool m_IgnoreWrongInterval;
+    int m_xAxisMaxDefault;
+    int m_LostRateBarWidth;
     QMap<QString, SerialData> *m_serialviews; // store serial view
     QMap<QString, SSHData> *m_sshviews;       // store serial view
     // log info for serial view

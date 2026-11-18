@@ -7,8 +7,9 @@
 
 #include "tpmgrdata.h"
 
-TPPlot::TPPlot(int tpgroup, QString sunit, int xAxisMaxDefault, QWidget *parent)
-    : QCustomPlot(parent), m_tpgrouptype(tpgroup), m_xAxisMaxDefault(xAxisMaxDefault)
+TPPlot::TPPlot(int tpgroup, QString sunit, int xAxisMaxDefault, int barWidth, QWidget *parent)
+    : QCustomPlot(parent), m_tpgrouptype(tpgroup),
+    m_xAxisMaxDefault(xAxisMaxDefault), m_barwidth(barWidth)
 {
   m_isTestStarted = false;
   m_yAxisMaxDefault = 100;
@@ -240,6 +241,24 @@ void TPPlot::addLostRateLegendItems(bool bshowDetail, bool bshowDirection, bool 
             item->setVisible(true);
         }
         ++lostlegenditerator;
+    }
+}
+
+void TPPlot::setXAxisMaxDefault(int value)
+{
+    m_xAxisMaxDefault = value;
+}
+
+void TPPlot::setLostRateBarWidth(int width)
+{
+    m_barwidth = width;
+    if (m_lostgraphs.count()>0){
+        QMap<QString, MyQCPBars *>::iterator itl = m_lostgraphs.begin();
+        while (itl != m_lostgraphs.end())
+        {
+            MyQCPBars *graph = itl.value();
+            graph->setWidth(m_barwidth);
+        }
     }
 }
 
@@ -965,7 +984,7 @@ MyQCPBars *TPPlot::getLostRateGraph(QString refrowidx, int dir)
 
     g_lostrate = new MyQCPBars(xAxis, yAxis2);
     g_lostrate->setWidthType(QCPBars::wtAbsolute);
-    g_lostrate->setWidth(20);
+    g_lostrate->setWidth(m_barwidth);
     connect(g_lostrate, &MyQCPBars::datasSetted, this,
             &TPPlot::onLostRateDatasSetted);
     if (refrowidx.contains(GRAPH_TOTAL, Qt::CaseSensitive))

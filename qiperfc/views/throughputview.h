@@ -35,7 +35,7 @@ public:
     explicit ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
                             QAction *aCopyText, QSettings *cfg,
                             int tpgroup = TPGroup::GroupMode::Detail, QString sunit="Mbps",
-                            int xAxisMaxDefault=60, QWidget *parent = nullptr);
+                            int xAxisMaxDefault=60, int barWidth=20, QWidget *parent = nullptr);
     ~ThroughputView() override;
 
     QString title() override { return tr("Throughput"); }
@@ -75,6 +75,8 @@ public slots:
     void onIperfTPdata(QString refrow, QString sInterval, QString datas);
     void onUpdateTPCfg(QByteArray tpcfg);
     void onUpdateTPUnit(QString suint);
+    void onUpdateXAxisMaxDefault(int value);
+    void onUpdateLostRateBarWidth(int width);
     void onGroupCopyItem(bool checked);
     void setShowGroupTotal(bool bShow);
     void setShowGroupPair(bool bShow);
@@ -150,6 +152,7 @@ private:
     int m_tpgrouptype;
     QString m_tpunit;
     int m_xAxisMaxDefault;
+    int m_barWidth;
     IperfWrapper *m_iperfwrapper;
     QScrollBar *m_vLegendScrollBar;
     QString m_oldsavepath;
