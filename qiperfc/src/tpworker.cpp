@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QEventLoop>
 #include <QMutexLocker>
+#include <QElapsedTimer>
 
 #include "myfunc.h"
 #include "tpstatus.h"
