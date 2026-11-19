@@ -285,7 +285,7 @@ QString QIperfC::getNowString()
 void QIperfC::infoWSServer(QString target, QString cmd)
 {
     QString s = QString("ws://%1:%2").arg(target, QString::number(QIPERFD_WSPORT));
-    WSClient *ws = new WSClient(target, QUrl(s), "", false);
+    WSClient *ws = new WSClient(target, QUrl(s), "", false, this);
     // connect(ws, &WSClient::ntpstarted, this, &QIperfC::onNtpstarted);
     int itimeout = 20;
     bool bConnected = false;
@@ -524,6 +524,8 @@ void QIperfC::onStart(bool showNotice)
 
 void QIperfC::onStop()
 {
+    ui->actionStop->setEnabled(false); // 立即禁用 Stop，防止重複點擊
+    onUpdateStatus("Stopping test, please wait..."); // 立即視覺回饋
     emit setTPStop();
 }
 
@@ -810,7 +812,7 @@ void QIperfC::onRequestExec(QString targetIP, QString idx, QString sCmd)
 {
     //
     QString url = "ws://" + targetIP + ":" + QString::number(QIPERFD_WSPORT);
-    WSClient *wsc = new WSClient(targetIP, QUrl(url), "");
+    WSClient *wsc = new WSClient(targetIP, QUrl(url), "", true, this);
     // TODO: when disconnected do waht?
 #ifdef USE_AAS
     if (dlg_aas)
@@ -1255,7 +1257,7 @@ void QIperfC::AddSSHView(QString mkey, SSHView *sshview, WSClient *wsc)
 void QIperfC::setNtpServer(int enable)
 {
     QString s = "ws://127.0.0.1:" + QString::number(QIPERFD_WSPORT);
-    WSClient *ws = new WSClient("127.0.0.1", QUrl(s), "", false);
+    WSClient *ws = new WSClient("127.0.0.1", QUrl(s), "", false, this);
     connect(ws, &WSClient::ntpstarted, this, &QIperfC::onNtpstarted);
     int itimeout = 20;
     bool bConnected = false;
@@ -1640,7 +1642,7 @@ void QIperfC::onAutoLoadFile(QString idx, QString filename, QString savepath)
 void QIperfC::onDoNtpSync(QString target)
 {
     QString s = "ws://" + target + ":" + QString::number(QIPERFD_WSPORT);
-    WSClient *ws = new WSClient(target, QUrl(s), "", false);
+    WSClient *ws = new WSClient(target, QUrl(s), "", false, this);
     connect(ws, &WSClient::ntpsynced, this, &QIperfC::onNtpsynced);
     int itimeout = 20;
     bool bConnected = false;
@@ -1800,7 +1802,7 @@ void QIperfC::onAddSerial()
             qInfo() << "managerip: " << managerip << " serailport:" << serailport << " serialcfg:" << serialcfg;
             //
             QString url = "ws://" + managerip + ":" + QString::number(QIPERFD_WSPORT);
-            WSClient *wsc = new WSClient(managerip, QUrl(url), "");
+            WSClient *wsc = new WSClient(managerip, QUrl(url), "", true, this);
             // TODO: when disconnected do waht?
             connect(wsc, &WSClient::serialopened, this, &QIperfC::onSerialOpened);
             // wait connect
@@ -1860,7 +1862,7 @@ void QIperfC::onAddSSH()
             //         << " targetport:" << QString::number(targetport);
 
             QString url = "ws://" + managerip + ":" + QString::number(QIPERFD_WSPORT);
-            WSClient *wsc = new WSClient(managerip, QUrl(url), "");
+            WSClient *wsc = new WSClient(managerip, QUrl(url), "", true, this);
             // TODO: when disconnected do waht?
             connect(wsc, &WSClient::sshopened, this, &QIperfC::onSSHOpened);
             // wait connect
