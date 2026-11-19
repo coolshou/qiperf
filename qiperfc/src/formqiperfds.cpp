@@ -133,7 +133,7 @@ void FormQIperfds::askRestart(QString target)
 {
     qInfo() << "Ask qiperfd Restart:" << target;
     QString url = "ws://"+target+":"+QString::number(QIPERFD_WSPORT);
-    WSClient wsc= WSClient(target, QUrl(url), "");
+    WSClient wsc= WSClient(target, QUrl(url), "", false, this);
     int timeout=0;
     while (!wsc.isConnected() && (timeout<30)){
         QThread::msleep(100);

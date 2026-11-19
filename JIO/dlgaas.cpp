@@ -2144,7 +2144,7 @@ void DlgAAS::onInquireTimerTimeout()
                 if (!target.isEmpty()){
                     if (!mWScs.contains(target)){
                         QString s = "ws://"+target+":"+QString::number(QIPERFD_WSPORT);
-                        client = new WSClient(target, QUrl(s), "", true);
+                        client = new WSClient(target, QUrl(s), "", true, this);
                         connect(client, &WSClient::connected, this, &DlgAAS::onConnected);
                         connect(client, &WSClient::disconnected, this, &DlgAAS::onDisconnected);
                         connect(client, &WSClient::requestResult, this, &DlgAAS::onRequestResult);
