@@ -10,7 +10,7 @@
 
 #include <QDebug>
 
-#include "comm.h"
+#include "../src/comm.h"
 #include "tpgroup.h"
 #include "tp.h"
 #include "../src/tpmgrdata.h"
@@ -328,6 +328,12 @@ int TPMgr::rowCount(const QModelIndex &parent) const
 
 TP *TPMgr::add(QString strJson, QString note, TPMgrData::DataType datatype, TP *parent)
 { // add iperf config item
+    /*
+    strJson: iperf json string,
+    note: direction text?
+    datatype:
+
+    */
     TP *pitm = nullptr;
     if (parent)
     {
@@ -336,13 +342,13 @@ TP *TPMgr::add(QString strJson, QString note, TPMgrData::DataType datatype, TP *
     else
     {
         pitm = getRootItem(note);
-        // qInfo() << "No parent, add:getRootItem " << pitm;
+        // qInfo() << "No parent, add:getRootItem: " << pitm << " dir: " << note;
         // qInfo() << "datatype:" << datatype;
         // qInfo() << "TPMgr::add data:" << data;
     }
     QModelIndex midx = indexFromItem(pitm);
     int idx = pitm->childCount();
-    qDebug() << "parent:" << midx << " , idx:" << idx;
+    // qDebug() << "parent:" << midx << " , idx:" << idx;
     //append to end of row
     beginInsertRows(midx, idx, idx);
     m_highestId = getMaxIdx();
@@ -643,10 +649,10 @@ bool TPMgr::loaddata(QByteArray data)
         {
             QJsonObject obj = value.toObject();
             QJsonObject o_client = obj["client"].toObject();
-            QString dir = "Rx";
+            QString dir = TPDIRRx;
             if (o_client["reverse"].toBool())
             {
-                dir = "Tx";
+                dir = TPDIRTx;
             }
             QJsonDocument doc(obj);
             QString strJson(doc.toJson(QJsonDocument::Compact));
@@ -855,6 +861,7 @@ TP *TPMgr::getDirectionItem(QString dir)
     }
     else
     {
+        log("getDirectionItem: when at TPGroup::GroupMode::Direction: Wrong dir value:" + dir, 3);
         return rootItem;
     }
 }
@@ -1228,10 +1235,10 @@ void TPMgr::onPaste(QString data)
         if (jsonRoot.contains("client") && jsonRoot.contains("server"))
         {
             QJsonObject o_client = jsonRoot["client"].toObject();
-            QString note = "Rx";
+            QString note = TPDIRRx;
             if (o_client["reverse"].toBool())
             {
-                note = "Tx";
+                note = TPDIRTx;
             }
             QJsonObject o_server = jsonRoot["server"].toObject();
             // Get largest iperf port number!!

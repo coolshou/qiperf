@@ -16,6 +16,7 @@
 
 #include "../src/tooltipeventfilter.h"
 #include "comm.h"
+#include "../src/tpmgrdata.h"
 #include "../src/nmessagebox.h"
 
 ThroughputView::ThroughputView(QAction *aCopy, QAction *aPaste, QAction *aDelete,
@@ -148,7 +149,7 @@ void ThroughputView::testPlot()
             int total = 100;
 
             // 隨機選取 "Tx" 或 "Rx"
-            QString type = (QRandomGenerator::global()->bounded(2) == 0) ? "Tx" : "Rx";
+            QString type = (QRandomGenerator::global()->bounded(2) == 0) ? TPDIRTx : TPDIRRx;
 
             // 呼叫你的介面
             m_tpplot->addTPData(id, i, y, lost, total, type);
@@ -235,15 +236,18 @@ void ThroughputView::onAddIperf()
     // add iperf test pair
     dlgiperf->updateUI();
     dlgiperf->setEditMode(false);
+    if (m_tpgrouptype == TPGroup::GroupMode::Direction){
+        dlgiperf->setBiDirStatus(false);
+    }
     dlgiperf->setExcIdx(QModelIndex());//new
     dlgiperf->open();
 }
 
-void ThroughputView::AddIperf(QString cfg)
+void ThroughputView::AddIperf(QString cfg, QString dir)
 {
     // cfg is json format in string
-    // qDebug()<< "ThroughputView onAddIperf: \n" << cfg;
-    m_tpmgr->add(cfg);
+    // qDebug()<< "ThroughputView AddIperf: \n" << cfg << "\ndir: " << dir;
+    m_tpmgr->add(cfg, dir);
 }
 
 void ThroughputView::onPairEdit()
@@ -800,7 +804,8 @@ void ThroughputView::onAcceptedDlgIperf()
     //TODO: edit mode
     if (!dlgiperf->getEditMode()){
         QString rs= dlgiperf->getJsonCfg();
-        AddIperf(rs);
+        QString reverse = dlgiperf->getReverseMode()? TPDIRTx:TPDIRRx;
+        AddIperf(rs, reverse);
         emit updateActionsSave(true);
     }
 }

@@ -60,7 +60,7 @@ public slots:
     void onCopyText() override;
 
     void onAddIperf();
-    void AddIperf(QString cfg);
+    void AddIperf(QString cfg, QString dir="");
     void onPairEdit();
     void onPairDelete();
     void onPairSwap();
