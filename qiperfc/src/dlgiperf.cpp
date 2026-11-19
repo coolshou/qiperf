@@ -440,9 +440,14 @@ bool DlgIperf::getEditMode()
 {
     return bEdit;
 }
+bool DlgIperf::getReverseMode()
+{
+    return ui->chk_reverse->isChecked();
+}
 
 void DlgIperf::ChangeVersion(const QString ver)
 {
+    //ver : iperf version: 2, 3
     int port=5201;
     if (ver.indexOf("2")==0){
         port=5001;

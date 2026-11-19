@@ -33,6 +33,7 @@ public:
     void setExcIdx(QModelIndex excIdx);
     void setEditMode(bool edit);
     bool getEditMode();
+    bool getReverseMode();
 public slots:
     void ChangeVersion(const QString ver);
     void onAccepted();
