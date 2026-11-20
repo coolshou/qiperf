@@ -83,22 +83,25 @@ qint64 MemMonitor::getMemoryUsageKB() {
             if (line.startsWith("VmRSS:")) {
                 QStringList parts;
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-                parts = QString(line).split(QRegExp("\\s+"));
+                parts = line.split(QRegExp("\\s+"));
 #else
                 // Declare it once as static
                 static const QRegularExpression re(QStringLiteral("\\s+"));
-                parts = QString(line).split(re);
+                parts = line.split(re);
 #endif
                 if (parts.size() >= 2) {
                     return parts[1].toLongLong(); // in KB
                 }else{
                     qDebug() << "wrong format: " << line;
                 }
+            }else{
+                return -1;
             }
         }
     }else{
-        qWarning() << "Cannot open file" << path << ":" << file.errorString();
-        return file.error();
+        qWarning() << "Cannot open file:" << path
+                   << " ("<< file.error() <<"):" << file.errorString();
+        return -1;
     }
 #endif
     return -1;
