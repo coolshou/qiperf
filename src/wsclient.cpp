@@ -67,8 +67,9 @@ WSClient::WSClient(QString serverip, const QUrl &url, QString datapath,
     idleTimer = new QTimer(this);
     idleTimer->setInterval(30000); //30 sec
     connect(idleTimer,&QTimer::timeout, this, &WSClient::onIdleTimerTimeout);
-
     m_webSocket = new QWebSocket();
+    //  QWebSocket(const QString &url, const QSslConfiguration &ssl, QObject *parent)
+    // m_webSocket = new QWebSocket(QString(), QSslConfiguration(), this);
 
     m_webSocket->setProxy(QNetworkProxy::NoProxy); // avoid to use proxy
     // QNetworkProxy qnp = m_webSocket->proxy();

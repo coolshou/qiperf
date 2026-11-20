@@ -7,7 +7,7 @@ except ImportError as err:
     SystemError(err)
 
 def main(testadd, testdel=False):
-    ws = create_connection("ws://192.168.70.147:47016")
+    ws = create_connection("ws://192.168.70.21:47016")
 
     # print(ws.recv())
     if testadd:

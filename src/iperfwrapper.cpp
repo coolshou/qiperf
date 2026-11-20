@@ -320,6 +320,7 @@ void IperfWrapper::parserIperf2(QString linedata)
         }
         QString sTag = m_servermode ? "s" : "c";
         int iparallel = m_parallel.toInt();
+        //328629.00-328630.00 sec  11.2 MBytes  94.1 Mbits/sec
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList data = linedata.split(" ", Qt::SkipEmptyParts);
 #else
