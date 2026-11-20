@@ -50,13 +50,17 @@ bool TpWorker::waitAllServerReady()
         QMutexLocker locker(&m_mutex);
         outTotal = m_status_server.size();
         outReady = 0;
+        debug("[TpWorker]checkReady "+
+              QString::number(outReady)+"/" + QString::number(outTotal));
         for (auto status : m_status_server) {
+            qDebug() << "status:" << status;
             if (status == TPStatus::started) outReady++;
         }
         return (outTotal > 0 && outReady >= outTotal);
     };
     int readyCount = 0, totalCount = 0;
     if (checkReady(readyCount, totalCount)) {
+        debug("[TpWorker]All server ready!!");
         return true; // 進入前已全部就緒，直接返回
     }
     QEventLoop loop;
@@ -88,6 +92,7 @@ bool TpWorker::waitAllServerReady()
     });
     secondTimer.start(1000);
     // 進入事件迴圈休眠等待（OS 底層 Socket 事件喚醒，0% CPU 空轉）
+    debug("[TpWorker]start wait server loop!!");
     loop.exec();
     // 清理資源
     disconnect(c1);
@@ -287,7 +292,7 @@ void TpWorker::work()
                 s = "ws://"+serverIP+":"+QString::number(QIPERFD_WSPORT);
                 err =  "[TpWorker]server websocket:" + serverIP + " url: " + s + " m_datapath:" + m_datapath;
                 debug(err, 5);
-                m_wss[serverIP]=new WSClient(serverIP, QUrl(s), m_datapath);
+                m_wss[serverIP]=new WSClient(serverIP, QUrl(s), m_datapath, true, this);
                 connect(m_wss[serverIP], &WSClient::iperfStarted, this, &TpWorker::onIperfStarted);
                 connect(m_wss[serverIP], &WSClient::iperfStoped, this, &TpWorker::onIperfStoped);
                 connect(m_wss[serverIP], &WSClient::iperfReStarted, this, &TpWorker::onIperfReStarted);
@@ -359,7 +364,7 @@ void TpWorker::work()
             if (!m_wsc.contains(clientIP)) {
                 s = "ws://"+clientIP+":"+QString::number(QIPERFD_WSPORT);
                 // debug("[TpWorker]client websocket:" + clientIP + " url: " + s + " m_datapath:" + m_datapath);
-                m_wsc[clientIP]=new WSClient(clientIP, QUrl(s), m_datapath);
+                m_wsc[clientIP]=new WSClient(clientIP, QUrl(s), m_datapath, true, this);
                 connect(m_wsc[clientIP], &WSClient::iperfStarted, this, &TpWorker::onIperfStarted);
                 connect(m_wsc[clientIP], &WSClient::iperfStoped, this, &TpWorker::onIperfStoped);
                 connect(m_wsc[clientIP], &WSClient::iperfReStarted, this, &TpWorker::onIperfReStarted);
@@ -374,6 +379,50 @@ void TpWorker::work()
                 m_wsc[clientIP]->setDatapath(m_datapath);
             }
             itimeout = iWSTimeout;
+            // ====== 改用 QEventLoop 等待 Client WebSocket 連線 ======
+            // if (!m_wsc.value(clientIP)->isConnected()) {
+            //     QEventLoop loop;
+            //     QElapsedTimer timer;
+            //     timer.start();
+            //     // 1. 一連上立即退出等待 (0ms 延遲)
+            //     QMetaObject::Connection cConnected = connect(m_wsc.value(clientIP), &WSClient::connected, &loop, [&]() {
+            //         loop.quit();
+            //     });
+            //     QMetaObject::Connection cQuit = connect(this, &TpWorker::requestLoopQuit, &loop, [&]() {
+            //         loop.quit();
+            //     });
+            //     // 2. 定時器負責每秒更新倒數 UI，並把關逾時
+            //     QTimer timerSec;
+            //     connect(&timerSec, &QTimer::timeout, &loop, [&]() {
+            //         qint64 remaining = iWSTimeout - (timer.elapsed() / 1000);
+            //         emit updateStatus(QString(" wait WSClient connect to client: %1 (%2s)").arg(s).arg(qMax(0LL, remaining)));
+            //         if (remaining <= 0 || bUserStop) {
+            //             loop.quit();
+            //         }
+            //     });
+            //     timerSec.start(1000);
+            //     // 立即更新一次初始狀態
+            //     emit updateStatus(QString(" wait WSClient connect to client: %1 (%2s)").arg(s).arg(iWSTimeout));
+            //     // 進入事件迴圈等待連線
+            //     loop.exec();
+            //     disconnect(cConnected);
+            //     disconnect(cQuit);
+            //     timerSec.stop();
+            // }
+            // // 檢查連線結果
+            // if (bUserStop) {
+            //     err = "[TpWorker][User Stop] on wait client websocket connected!!";
+            //     debug(err);
+            //     emit errorStop(6, err);
+            //     return;
+            // }
+            // if (!m_wsc.contains(clientIP) || !m_wsc.value(clientIP)->isConnected()) {
+            //     bErrorStop = 1;
+            //     err = "ERROR: Wait connect to client websocket " + s + " timeout";
+            //     tp->setComment(err);
+            //     emit errorStop(1, err);
+            //     return; // ⚠️ 必須直接 return，不能只是 break！
+            // }
             while (itimeout>0 && (bErrorStop==0) && (bUserStop==false)){
                 QThread::msleep(1000);
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
@@ -424,14 +473,15 @@ void TpWorker::work()
         }
 
     }
-    qDebug() << "totalrecordrate:" << QString::number(totalrecordrate);
+    qDebug() << "totalrecordrate:" << QString::number(totalrecordrate)
+             << ", maxInterval:" << QString::number(maxInterval);
     emit updateInterval(maxInterval);
     if(bErrorStop>0){
         emit errorStop(7, "Unknown error happen!!("+QString::number(bErrorStop)+")");
         return;
     }
     //Start server
-    err = "[TpWorker]server websocket keys:" + m_wss.keys().join(" ");
+    err = "[TpWorker]Start server websocket keys:" + m_wss.keys().join(" ");
     debug(err);
     foreach (QString key, m_wss.keys()){
         debug("[TpWorker]Let Server " + key + " CMD_IPERF_START "+ startTime + ":S");
@@ -451,7 +501,7 @@ void TpWorker::work()
     // QThread::sleep(5); // wait 5 sec
     //TODO: wait server start up and ready
     bool bServerReady = waitAllServerReady();
-
+    debug("[TpWorker]bServerReady:"+ QString::number(bServerReady));
     if(bUserStop){
         err = "[TpWorker][User Stop] on wait ServerReady!!";
         emit updateStatus(err);
@@ -471,6 +521,8 @@ void TpWorker::work()
         return;
     }
     //Start client
+    err = "[TpWorker]Start Client websocket keys:" + m_wsc.keys().join(" ");
+    debug(err);
     foreach (QString key, m_wsc.keys()){
         debug("[TpWorker]Let Client " + key + " CMD_IPERF_START " + startTime + ":C");
         rs = m_wsc[key]->sendText(QString(CMD_IPERF_START)+":"+startTime+":C");
@@ -480,6 +532,7 @@ void TpWorker::work()
         }
     }
     bool bClientReady = waitAllClientReady();
+    debug("[TpWorker]bClientReady:"+ QString::number(bClientReady));
     if (!bClientReady){
         QStringList ds;
         foreach (auto key, m_status_client.keys()){
@@ -503,6 +556,7 @@ void TpWorker::work()
     qint64 iWait = waitStartTime.secsTo(waitEndTime);
     // QStringList dsserver;
     // QStringList dsclient;
+    debug("[TpWorker] Wait Test end");
     while (((iWait < (maxtestduration + m_extendwaittime)) || isRunforever) &&
            (bUserStop==false)){
         // while is a block func,
@@ -620,7 +674,6 @@ void TpWorker::onIperfStoped(QString refrow, QString err_no, QString err, QStrin
         }
         //        emit errorStop(2, "onIperfStoped: ["+ipport+"]("+err_no+"):"+err);
     }else{
-
         // qiperf notify no error end:
         if (m_status_server.contains(ipport)){
             m_status_server[ipport]=TPStatus::init;
@@ -878,13 +931,21 @@ void TpWorker::onStop(){
             debug("[TpWorker]"+ key + " m_ws send cmd: " + cmd);
             wsc->sendText(cmd);
 
-            QThread::sleep(1);
+            // QThread::sleep(1);
             debug("[TpWorker]"+ key + " CMD_IPERF_CLEAR ",4);
             wsc->sendText(CMD_IPERF_CLEAR);
             wsc->close(); //close websocket
         }
     }
-
+    foreach (QString key, m_wsc.keys()){
+        WSClient *wsc = m_wsc[key];
+        if (wsc){
+            cmd = QString(CMD_IPERF_STOP) + ":" + key;
+            wsc->sendText(cmd);
+            wsc->sendText(CMD_IPERF_CLEAR);
+            wsc->close();
+        }
+    }
     bUserStop=true;
     // bStartTest = false;
     // updateRunStatus(false);
@@ -910,7 +971,7 @@ void TpWorker::onSetStop()
 {
     bUserStop = true;
     emit requestLoopQuit(); // 確保正在 waitAllServerReady 等待的 loop 立即退出
-    onStop();
+    // onStop();
 }
 
 void TpWorker::onStatusReady(QString refrow, const QString& skey,
